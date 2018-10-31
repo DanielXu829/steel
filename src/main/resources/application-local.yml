@@ -1,0 +1,29 @@
+#startup
+server:
+  port: 8181
+spring:
+  datasource:
+    url: jdbc:mysql://10.66.3.221:3306/steel1?characterEncoding=utf8&useSSL=true
+    username: root
+    password: p@ssw0rd
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+# 执行定时器相关参数配置
+job:
+  file-path: D:\excel
+  template-Path: D:\template
+  temp-path:  D:\tmp
+
+leaf:
+  swagger-open: true
+
+#log
+logging:
+  config: classpath:config/logback-dev.xml
+
+posyspath: e://lic/
+popassword: 111111

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>ONLYOFFICE</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="/css/editor.css"/>
+
+
+    <script type="text/javascript" language="javascript" th:inline="javascript">
+        var docserviceApiUrl=[[${docserviceApiUrl}]];
+    </script>
+    <script type="text/javascript" th:src="${docserviceApiUrl}"></script>
+    <script type="text/javascript" language="javascript" th:inline="javascript">
+
+        var docEditor;
+        var fileName = [[${fileName}]];
+        var fileType = [[${fileType}]];
+
+        var innerAlert = function (message) {
+            if (console && console.log)
+                console.log(message);
+        };
+
+        var onReady = function () {
+            innerAlert("Document editor ready");
+        };
+
+        var onDocumentStateChange = function (event) {
+            var title = document.title.replace(/\*$/g, "");
+            document.title = title + (event.data ? "*" : "");
+        };
+
+        var onRequestEditRights = function () {
+            location.href = location.href.replace(RegExp("action=view\&?", "i"), "");
+        };
+
+        var onError = function (event) {
+            if (event)
+                innerAlert(event.data);
+        };
+
+        var onOutdatedVersion = function (event) {
+            location.reload(true);
+        };
+
+        var connectEditor = function () {
+
+            docEditor = new DocsAPI.DocEditor("iframeEditor",
+                {
+                    width: "100%",
+                    height: "100%",
+                    type: [[${type}]],
+                    documentType: [[${documentType}]],
+
+                    document: {
+                        title: [[${fileName}]],
+                        url: [[${fileUri}]],
+                        fileType: [[${fileType}]],
+                        key: [[${fileKey}]],
+                        info: {
+                            author: "Me",
+                            created: [[${documentCreated}]],
+                        },
+
+                        permissions: {
+                            edit: [[${permissionsEdit}]],
+                            download: true,
+                            "comment": true,
+                            "modifyFilter": true,
+                            "review": true
+                        }
+                    },
+                    editorConfig: {
+                        mode: [[${editorMode}]],
+                        lang: "en",
+                        callbackUrl: [[${callbackUrl}]],
+
+                        user: {
+                            id: [[${editorUserId}]],
+                            name: "John Smith",
+                        },
+                        embedded: {
+                            saveUrl: [[${fileUri}]],
+                            embedUrl: [[${fileUri}]],
+                            shareUrl: [[${fileUri}]],
+                            toolbarDocked: "top",
+                        },
+                        customization: {
+                            about: true,
+                            feedback: true,
+                            goback: {
+                                url: [[${serverUrl}]] + "/IndexServlet",
+                            },
+                        },
+                    },
+                    events: {
+                        "onReady": onReady,
+                        "onDocumentStateChange": onDocumentStateChange,
+                        'onRequestEditRights': onRequestEditRights,
+                        "onError": onError,
+                        "onOutdatedVersion": onOutdatedVersion,
+                    }
+                });
+        };
+
+        if (window.addEventListener) {
+            window.addEventListener("load", connectEditor);
+        } else if (window.attachEvent) {
+            window.attachEvent("load", connectEditor);
+        }
+
+        function getXmlHttp() {
+            var xmlhttp;
+            try {
+                xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch (e) {
+                try {
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (ex) {
+                    xmlhttp = false;
+                }
+            }
+            if (!xmlhttp && typeof XMLHttpRequest !== "undefined") {
+                xmlhttp = new XMLHttpRequest();
+            }
+            return xmlhttp;
+        }
+
+    </script>
+
+</head>
+<body>
+<div class="form">
+    <div id="iframeEditor"></div>
+</div>
+</body>
+</html>
