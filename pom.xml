@@ -49,6 +49,11 @@
             <name>Nexus aliyun</name>
             <url>http://maven.aliyun.com/nexus/content/groups/public</url>
         </repository>
+        <repository>
+            <id>8081</id>
+            <name>8081</name>
+            <url>http://10.66.3.221:8081/repository/maven-public/</url>
+        </repository>
     </repositories>
     <dependencies>
 
@@ -238,11 +243,11 @@
         </dependency>
 
         <!-- 添加PageOffice依赖（必须） -->
-        <dependency>
-            <groupId>com.zhuozhengsoft</groupId>
-            <artifactId>pageoffice</artifactId>
-            <version>4.3.0.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.zhuozhengsoft</groupId>-->
+            <!--<artifactId>pageoffice</artifactId>-->
+            <!--<version>4.3.0.2</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>com.inversoft</groupId>
