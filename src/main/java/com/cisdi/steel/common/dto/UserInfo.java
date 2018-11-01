@@ -42,10 +42,6 @@ public class UserInfo implements Serializable {
      */
     private Date createTime;
 
-    // TODO: 增加更多需要保存的信息  如 设备号 什么设备 ip 等相关 待定 IOS android 设备号
-    // 推送目标: device:推送给设备; account:推送给指定帐号,tag:推送给自定义标签; all: 推送给全部
-
-
     /**
      * 构建用户信息
      *
