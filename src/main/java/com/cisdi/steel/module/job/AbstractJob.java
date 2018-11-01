@@ -98,9 +98,6 @@ public abstract class AbstractJob implements Job, Serializable {
             if (Objects.isNull(dataHandler)) {
                 handlerException(getJobName() + "-->数据注入失败");
             }
-            for(ReportCategoryTemplate template:templates){
-                String templatePath = template.getTemplatePath();
-            }
             Map<DataCatalog, Map<String, Object>> excelData = dataHandler.getExcelData();
             dataTime = new Date();
             // 4、生成报表文件,并存储 存入数据库
