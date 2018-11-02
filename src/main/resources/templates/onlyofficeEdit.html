@@ -6,11 +6,6 @@
     <title>ONLYOFFICE</title>
     <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
     <link rel="stylesheet" type="text/css" href="/css/editor.css"/>
-
-
-    <script type="text/javascript" language="javascript" th:inline="javascript">
-        var docserviceApiUrl=[[${docserviceApiUrl}]];
-    </script>
     <script type="text/javascript" th:src="${docserviceApiUrl}"></script>
     <script type="text/javascript" language="javascript" th:inline="javascript">
 
@@ -65,16 +60,17 @@
                         },
 
                         permissions: {
-                            edit: [[${permissionsEdit}]],
+                            comment: true,
                             download: true,
-                            "comment": true,
-                            "modifyFilter": true,
-                            "review": true
+                            edit: true,
+                            fillForms: true,
+                            print: true,
+                            review: true
                         }
                     },
                     editorConfig: {
                         mode: [[${editorMode}]],
-                        lang: "en",
+                        lang: "en-US",
                         callbackUrl: [[${callbackUrl}]],
 
                         user: {
@@ -90,8 +86,9 @@
                         customization: {
                             about: true,
                             feedback: true,
+                            forcesave: true,
                             goback: {
-                                url: [[${serverUrl}]] + "/IndexServlet",
+                                url: "https://www.onlyoffice.com/",
                             },
                         },
                     },

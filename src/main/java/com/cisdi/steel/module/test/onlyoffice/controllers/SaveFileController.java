@@ -18,7 +18,6 @@ import java.util.Scanner;
  * 用于保存修改后的文件
  * */
 @RestController
-@RequestMapping("/savefilectrl")
 public class SaveFileController {
 
     /**
@@ -40,7 +39,7 @@ public class SaveFileController {
      *
      * @throws Exception
      */
-    @RequestMapping("/saveeditedfile")
+    @RequestMapping("/onlyoffice/save")
     public void saveFile(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         System.out.println("===saveeditedfile------------");
@@ -59,7 +58,12 @@ public class SaveFileController {
                 6 - document is being edited, but the current document state is saved,
                 7 - error has occurred while force saving the document.
              * */
-            if ((long) jsonObj.get("status") == 2) {
+            String filePath = "";
+            if (request.getParameterMap().containsKey("filePath")) {
+                filePath = request.getParameter("filePath");
+            }
+            Integer status = (Integer) jsonObj.get("status");
+            if (status.intValue() == 2 || status.intValue() == 6) {
                 /*
                  * 当我们关闭编辑窗口后，十秒钟左右onlyoffice会将它存储的我们的编辑后的文件，，此时status = 2，通过request发给我们，我们需要做的就是接收到文件然后回写该文件。
                  * */
@@ -77,7 +81,7 @@ public class SaveFileController {
                 java.net.HttpURLConnection connection = (java.net.HttpURLConnection) url.openConnection();
                 InputStream stream = connection.getInputStream();
 
-                File savedFile = new File("e:\\");
+                File savedFile = new File(filePath);
                 try (FileOutputStream out = new FileOutputStream(savedFile)) {
                     int read;
                     final byte[] bytes = new byte[1024];

@@ -151,7 +151,7 @@ public class DocumentManager {
 
         FileUtil.emptyDirectory(storagePath);
 
-        File file = new File(StoragePath(fileName, null));
+        File file = new File(StoragePath(file1.getName(), null));
 
         try (FileOutputStream out = new FileOutputStream(file)) {
             int read;
@@ -211,9 +211,9 @@ public class DocumentManager {
         String serverPath = GetServerUrl();
         String hostAddress = CurUserHostAddress(null);
         try {
-            String query = "?" + URLEncoder.encode("type=track&fileName=" + fileName + "&userAddress=" + hostAddress, java.nio.charset.StandardCharsets.UTF_8.toString());
+            String query = "?" + URLEncoder.encode("type=track&filePath=" + fileName + "&userAddress=" + hostAddress, java.nio.charset.StandardCharsets.UTF_8.toString());
 
-            return serverPath + "/IndexServlet" + query;
+            return serverPath + "/onlyoffice/save" + query;
         } catch (UnsupportedEncodingException e) {
             return "";
         }
