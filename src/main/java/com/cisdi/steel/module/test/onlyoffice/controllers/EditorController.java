@@ -21,29 +21,24 @@ public class EditorController {
 
     @RequestMapping("/EditorServlet")
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+        String filePath = "";
         String fileName = "";
-        if (request.getParameterMap().containsKey("fileName")) {
-             fileName = request.getParameter("fileName");
+        if (request.getParameterMap().containsKey("filePath")) {
+            filePath = request.getParameter("filePath");
         }
 
-        String fileExt = null;
-        if (request.getParameterMap().containsKey("fileExt")) {
-             fileExt = request.getParameter("fileExt");
-        }
-
-        if (fileExt != null) {
+        if (filePath != null) {
             try {
                 DocumentManager.Init(request, response);
-                fileName = DocumentManager.CreateDemo(fileExt);
+                fileName = DocumentManager.createTempServerFile(filePath);
             } catch (Exception ex) {
-                return new ModelAndView(new FastJsonJsonView(),"Error: " + ex.getMessage(), ex) ;
+                return new ModelAndView(new FastJsonJsonView(), "Error: " + ex.getMessage(), ex);
             }
         }
 
         String mode = "";
-        if (request.getParameterMap().containsKey("mode"))
-        {
-             mode = request.getParameter("mode");
+        if (request.getParameterMap().containsKey("mode")) {
+            mode = request.getParameter("mode");
         }
         Boolean desktopMode = !"embedded".equals(mode);
 
@@ -54,29 +49,29 @@ public class EditorController {
         System.out.println("==========EditorController==========");
         DocumentManager.Init(request, response);
         //要编辑的文件名
-        model.addAttribute("fileName", fileName) ;
+        model.addAttribute("fileName", fileName);
         //要编辑的文件类型
-        model.addAttribute("fileType", FileUtility.GetFileExtension(fileName).replace(".", "")) ;
+        model.addAttribute("fileType", FileUtility.GetFileExtension(filePath).replace(".", ""));
         //要编辑的文档类型
-        model.addAttribute("documentType",FileUtility.GetFileType(fileName).toString().toLowerCase()) ;
+        model.addAttribute("documentType", FileUtility.GetFileType(filePath).toString().toLowerCase());
         //要编辑的文档访问url
-        model.addAttribute("fileUri",DocumentManager.GetFileUri(fileName)) ;
-        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + fileName)) ;
-        model.addAttribute("callbackUrl", DocumentManager.GetCallback(fileName)) ;
-        model.addAttribute("serverUrl", DocumentManager.GetServerUrl()) ;
-        model.addAttribute("editorMode", DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(fileName)) && !"view".equals(request.getAttribute("mode")) ? "edit" : "view") ;
-        model.addAttribute("editorUserId",DocumentManager.CurUserHostAddress(null)) ;
+        model.addAttribute("fileUri", DocumentManager.GetFileUri(fileName));
+        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + fileName));
+        model.addAttribute("callbackUrl", DocumentManager.GetCallback(fileName));
+        model.addAttribute("serverUrl", DocumentManager.GetServerUrl());
+        model.addAttribute("editorMode", DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(filePath)) && !"view".equals(request.getAttribute("mode")) ? "edit" : "view");
+        model.addAttribute("editorUserId", DocumentManager.CurUserHostAddress(null));
 
         model.addAttribute("type", desktopMode ? "desktop" : "embedded");
 
 
         model.addAttribute("docserviceApiUrl", ConfigManager.GetProperty("files.docservice.url.api"));
-        model.addAttribute("docServiceUrlPreloader", ConfigManager.GetProperty("files.docservice.url.preloader")) ;
-        model.addAttribute("currentYear", "2018") ;
-        model.addAttribute("convertExts", String.join(",", DocumentManager.GetConvertExts())) ;
-        model.addAttribute("editedExts", String.join(",", DocumentManager.GetEditedExts())) ;
-        model.addAttribute("documentCreated", new SimpleDateFormat("MM/dd/yyyy").format(new Date())) ;
-        model.addAttribute("permissionsEdit", Boolean.toString(DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(fileName))).toLowerCase()) ;
-        return new ModelAndView("onlyofficeEdit") ;
+        model.addAttribute("docServiceUrlPreloader", ConfigManager.GetProperty("files.docservice.url.preloader"));
+        model.addAttribute("currentYear", "2018");
+        model.addAttribute("convertExts", String.join(",", DocumentManager.GetConvertExts()));
+        model.addAttribute("editedExts", String.join(",", DocumentManager.GetEditedExts()));
+        model.addAttribute("documentCreated", new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
+        model.addAttribute("permissionsEdit", Boolean.toString(DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(filePath))).toLowerCase());
+        return new ModelAndView("onlyofficeEdit");
     }
 }

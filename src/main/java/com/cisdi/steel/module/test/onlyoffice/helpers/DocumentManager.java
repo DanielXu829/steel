@@ -27,6 +27,7 @@
 package com.cisdi.steel.module.test.onlyoffice.helpers;
 
 import com.cisdi.steel.common.util.FileUtil;
+import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.module.test.onlyoffice.entities.FileType;
 import org.primeframework.jwt.Signer;
 import org.primeframework.jwt.Verifier;
@@ -137,6 +138,33 @@ public class DocumentManager {
         return name;
     }
 
+
+    public static String createTempServerFile(String path) throws Exception {
+
+        File file1 = new File(path);
+        String fileName= file1.getName();
+        fileName=fileName.substring(0, fileName.lastIndexOf("."));
+
+        InputStream stream = FileUtils.openInputStream(file1);
+
+        String storagePath = StoragePath(fileName, null).replace(fileName, "");
+
+        FileUtil.emptyDirectory(storagePath);
+
+        File file = new File(StoragePath(fileName, null));
+
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            int read;
+            final byte[] bytes = new byte[1024];
+            while ((read = stream.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
+            }
+            out.flush();
+        }
+
+        return fileName;
+    }
+
     public static String CreateDemo(String fileExt) throws Exception {
         String demoName = "sample." + fileExt;
         String fileName = GetCorrectName(demoName);
@@ -165,7 +193,7 @@ public class DocumentManager {
         try {
             String serverPath = GetServerUrl();
             String storagePath = ConfigManager.GetProperty("storage-folder");
-            String hostAddress = CurUserHostAddress(null);
+//            String hostAddress = CurUserHostAddress(null);
 
             String filePath = serverPath + "/" + storagePath + "/" + URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8.toString()).replace("+", "%20");
 
