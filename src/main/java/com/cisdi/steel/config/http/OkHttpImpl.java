@@ -65,6 +65,11 @@ public class OkHttpImpl implements HttpUtil {
         return responseBody;
     }
 
+    @Override
+    public String get(String url) {
+        return get(url, null);
+    }
+
     /**
      * post
      *

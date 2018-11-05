@@ -2,13 +2,14 @@ package com.cisdi.steel.exportExcel;
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
+import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.resp.ResponseUtil;
 import com.cisdi.steel.common.resp.TestData;
 import com.cisdi.steel.common.util.DateUtil;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.junit.Test;
 
 import java.io.File;
@@ -119,6 +120,68 @@ public class ExportTests extends SteelApplicationTests {
             saveFile.mkdirs();
         }
         FileOutputStream fos = new FileOutputStream("/root/template" + fileName + ".xlsx");
+        workbook.write(fos);
+        fos.close();
+    }
+
+
+    @Test
+    public void exportExcel4() throws Exception {
+        String templatePath = "D:\\demo.xlsx";
+        String savePath = "D:\\1.xlsx";
+        Workbook workbook = WorkbookFactory.create(new File(templatePath));
+        int numberOfSheets = workbook.getNumberOfSheets();
+        Map<Integer, Sheet> sheets = new HashMap<>();
+        for (int i = 0; i < numberOfSheets; i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            String sheetName = sheet.getSheetName();
+            if (sheetName.contains("_")) {
+                sheets.put(i, sheet);
+                workbook.setSheetHidden(i,Workbook.SHEET_STATE_HIDDEN);
+            }
+        }
+        List<CellData> cellDataList = new ArrayList<>();
+        sheets.forEach((index, sheet) -> {
+            int firstRowNum = sheet.getFirstRowNum();
+            int lastRowNum = sheet.getLastRowNum();
+            for (int rowNum = firstRowNum; rowNum < lastRowNum; rowNum++) {
+                Row row = sheet.getRow(rowNum);
+                if (Objects.nonNull(row)) {
+                    short firstCellNum = row.getFirstCellNum();
+                    short lastCellNum = row.getLastCellNum();
+                    for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
+                        Cell cell = row.getCell(cellNum);
+                        String cellValue = PoiCellUtil.getCellValue(cell);
+                        if (!cellValue.isEmpty()) {
+                            cellDataList.add(new CellData(workbook, sheet, cell));
+                        }
+                    }
+                }
+            }
+
+        });
+
+        cellDataList.forEach(cellData -> {
+            String cellValue = PoiCellUtil.getCellValue(cellData.getCell());
+            int i = cellValue.indexOf("/");
+            Sheet sheet = cellData.getSheet();
+            if (i != -1) {
+                String[] split = cellValue.split("/");
+            }
+            int rowIndex = cellData.getCell().getRowIndex() + 1;
+            int rowColumn = cellData.getCell().getColumnIndex();
+            Row row = sheet.getRow(rowIndex);
+            if (Objects.isNull(row)) {
+                row = sheet.createRow(rowIndex);
+            }
+            Cell cell = row.getCell(rowColumn);
+            if (Objects.isNull(cell)) {
+                cell = row.createCell(rowColumn);
+            }
+            cell.setCellStyle(cellData.getCell().getCellStyle());
+            cell.setCellValue(RandomUtils.nextInt(0, 99));
+        });
+        FileOutputStream fos = new FileOutputStream(savePath);
         workbook.write(fos);
         fos.close();
     }

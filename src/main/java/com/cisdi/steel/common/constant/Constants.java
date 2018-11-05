@@ -14,7 +14,7 @@ public final class Constants {
     /**
      * 请求的路径
      */
-    public static final String API_URL = "http://10.66.3.30:9001";
+    public static final String API_URL = "http://10.66.3.202:9001";
     /**
      * 是/否
      */

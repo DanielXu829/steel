@@ -22,6 +22,14 @@ public interface HttpUtil {
     String get(String url, Map<String, String> queries);
 
     /**
+     * get请求
+     *
+     * @param url url
+     * @return 结果
+     */
+    String get(String url);
+
+    /**
      * post
      *
      * @param url    请求的url
