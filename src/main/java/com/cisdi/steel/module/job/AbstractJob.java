@@ -94,7 +94,6 @@ public abstract class AbstractJob implements Job, Serializable {
             if (Objects.isNull(templates) || templates.isEmpty()) {
                 handlerException(getJobName() + "-->数据库中没有对应的模板");
             }
-
             // 3、获取需要生成的数据
             if (Objects.isNull(dataHandler)) {
                 handlerException(getJobName() + "-->数据注入失败");

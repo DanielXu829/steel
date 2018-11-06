@@ -28,6 +28,12 @@ public interface QuartzMapper {
      */
     List<QuartzEntity> selectQuartzList(QuartzEntityQuery query);
 
+    /**
+     * 查询 数量
+     *
+     * @param query 查询条件
+     * @return 结果
+     */
     long selectQuartzCount(QuartzEntityQuery query);
 
 

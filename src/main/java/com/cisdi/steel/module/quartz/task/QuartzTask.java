@@ -7,6 +7,7 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,7 +15,7 @@ import java.util.Objects;
 /**
  * quartz 任务  防止quartz执行变成了错误
  */
-//@Component
+@Component
 @Slf4j
 public class QuartzTask {
 
