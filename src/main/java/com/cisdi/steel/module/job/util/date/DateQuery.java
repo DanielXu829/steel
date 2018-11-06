@@ -1,4 +1,4 @@
-package com.cisdi.steel.common.util.date;
+package com.cisdi.steel.module.job.util.date;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +22,14 @@ import java.util.Objects;
 public class DateQuery {
     private Date startTime;
     private Date endTime;
+
+    private String startTimeKey = "starttime";
+    private String endTimeKey = "endtime";
+
+    public DateQuery(Date startTime, Date endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 
     /**
      * 查询的开始时间
@@ -48,8 +56,8 @@ public class DateQuery {
      */
     public Map<String, String> getQueryParam() {
         Map<String, String> map = new HashMap<>();
-        map.put("starttime", Objects.requireNonNull(getQueryStartTime()).toString());
-        map.put("endtime", Objects.requireNonNull(getQueryEndTime()).toString());
+        map.put(startTimeKey, Objects.requireNonNull(getQueryStartTime()).toString());
+        map.put(endTimeKey, Objects.requireNonNull(getQueryEndTime()).toString());
         return map;
     }
 }

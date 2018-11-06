@@ -60,7 +60,9 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             throw new BusinessException("生成模板编码不能为空");
         }
         LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
-        wrapper.select(ReportCategoryTemplate::getTemplateName,
+        wrapper.select(
+                ReportCategoryTemplate::getReportCategoryCode,
+                ReportCategoryTemplate::getTemplateName,
                 ReportCategoryTemplate::getTemplatePath,
                 ReportCategoryTemplate::getTemplateLang,
                 ReportCategoryTemplate::getTemplateType,

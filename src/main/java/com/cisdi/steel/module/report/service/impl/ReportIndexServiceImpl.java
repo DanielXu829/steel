@@ -103,28 +103,16 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
     }
 
     @Override
-    public void insertReportRecord(String code, List<String> resultPath, List<String> categorys) {
-        if (resultPath.isEmpty()) {
+    public void insertReportRecord(ReportIndex reportIndex) {
+        if (StringUtils.isBlank(reportIndex.getReportCategoryCode())) {
             return;
         }
-        List<ReportIndex> reportIndexList = new ArrayList<>(resultPath.size());
         LocalDateTime now = LocalDateTime.now();
-        int size = resultPath.size();
-        for (int i = 0; i < size; i++) {
-            ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setCreateTime(now);
-            reportIndex.setUpdateTime(now);
-            reportIndex.setReportCategoryCode(code);
-            String item = resultPath.get(i);
-            String fileName = FileUtil.getFileName(item);
-            reportIndex.setName(fileName);
-            reportIndex.setPath(item);
-            String type = categorys.get(i);
-            reportIndex.setSequence(type);
-            reportIndexList.add(reportIndex);
-        }
-        this.saveBatch(reportIndexList);
+        reportIndex.setCreateTime(now);
+        reportIndex.setUpdateTime(now);
+        this.save(reportIndex);
     }
+
 
     @Override
     @Transactional(rollbackFor = LeafException.class)
