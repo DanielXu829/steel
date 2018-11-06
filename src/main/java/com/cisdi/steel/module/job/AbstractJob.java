@@ -4,6 +4,7 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.util.FileUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.data.DataCatalog;
 import com.cisdi.steel.module.data.IDataHandler;
 import com.cisdi.steel.module.job.config.JobProperties;
@@ -141,7 +142,10 @@ public abstract class AbstractJob implements Job, Serializable {
                 // 文件名称
                 String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), templateTypeEnum);
                 // 文件保存路径
-                String saveFilePath = getSaveFilePath(dataCatalog, templateTypeEnum, fileName);
+                String saveFilePath = template.getExcelPath();
+                if (StringUtils.isBlank(saveFilePath)) {
+                    saveFilePath = getSaveFilePath(dataCatalog, templateTypeEnum, fileName);
+                }
 
                 handlerMapData(templateData, fileName, saveFilePath, template, templateTypeEnum);
 
@@ -152,7 +156,7 @@ public abstract class AbstractJob implements Job, Serializable {
                 workbook.write(fos);
 
                 // 添加数据
-                reportIndexService.insertReportRecord(getJobName(), saveFilePath, dataCatalog.getSequenceName(),templateTypeEnum.getCode(),getLanguageEnum().getLang());
+                reportIndexService.insertReportRecord(getJobName(), saveFilePath, dataCatalog.getSequenceName(), templateTypeEnum.getCode(), getLanguageEnum().getLang());
             } catch (IOException e) {
                 log.error(getJobName() + template.getTemplateName() + "生成错误：" + e.getMessage(), e);
             } finally {
@@ -192,8 +196,8 @@ public abstract class AbstractJob implements Job, Serializable {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         map.put("year", cal.get(Calendar.YEAR));
-        map.put("month",cal.get(Calendar.MONTH));
-        map.put("days",cal.get(Calendar.DATE));
+        map.put("month", cal.get(Calendar.MONTH));
+        map.put("days", cal.get(Calendar.DATE));
     }
 
     /**

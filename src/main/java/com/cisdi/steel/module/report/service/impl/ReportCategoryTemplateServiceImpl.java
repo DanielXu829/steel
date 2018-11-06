@@ -64,7 +64,9 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
                 ReportCategoryTemplate::getTemplatePath,
                 ReportCategoryTemplate::getTemplateLang,
                 ReportCategoryTemplate::getTemplateType,
-                ReportCategoryTemplate::getSequence);
+                ReportCategoryTemplate::getSequence,
+                ReportCategoryTemplate::getExcelPath
+        );
         wrapper.eq(ReportCategoryTemplate::getReportCategoryCode, code);
         wrapper.eq(StringUtils.isNotBlank(lang), ReportCategoryTemplate::getTemplateLang, lang);
         // 查询生效的数据

@@ -2,11 +2,13 @@ package com.cisdi.steel.module.quartz.controller;
 
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
+import com.cisdi.steel.module.job.AbstractJob;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.query.CronQuery;
 import com.cisdi.steel.module.quartz.query.QuartzEntityQuery;
 import com.cisdi.steel.module.quartz.service.JobService;
 import com.cisdi.steel.module.quartz.util.QuartzUtil;
+import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
@@ -35,16 +37,17 @@ public class JobController {
 
     private final Scheduler scheduler;
     private final JobService jobService;
+    private final SysConfigService sysConfigService;
 
     @Autowired
-    public JobController(Scheduler scheduler, JobService jobService) {
+    public JobController(Scheduler scheduler, JobService jobService, SysConfigService sysConfigService) {
         this.scheduler = scheduler;
         this.jobService = jobService;
+        this.sysConfigService = sysConfigService;
     }
 
     /**
      * 新建任务或更新任务
-     *
      */
     @PostMapping("/save")
     public ApiResult save(@RequestBody QuartzEntity quartz) {
@@ -56,7 +59,11 @@ public class JobController {
                 // 删除旧的任务
                 scheduler.deleteJob(key);
             }
-            Class cls = Class.forName(quartz.getJobClassName());
+
+            //通过任务编码获取执行类
+            String action = sysConfigService.selectActionByCode(quartz.getJobCode());
+//            Class cls = Class.forName(quartz.getJobClassName());
+            Class cls = Class.forName(action);
             cls.newInstance();
             //构建job信息
             JobDetail job = JobBuilder.newJob(cls).withIdentity(quartz.getJobName(),
@@ -115,7 +122,6 @@ public class JobController {
 
     /**
      * 触发任务（执行对应的任务）
-     *
      */
     @PostMapping("/trigger")
     public ApiResult trigger(@RequestBody QuartzEntity quartz) {
@@ -148,7 +154,6 @@ public class JobController {
 
     /**
      * 恢复任务
-     *
      */
     @PostMapping("/resume")
     public ApiResult resume(@RequestBody QuartzEntity quartz) {

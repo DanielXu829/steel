@@ -65,4 +65,9 @@ public class QuartzEntity {
      * 任务分组 用于修改
      */
     private String oldJobGroup;
+
+    /**
+     * 任务执行编码
+     */
+    private String jobCode;
 }

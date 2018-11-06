@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.report.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import lombok.Data;
@@ -62,6 +63,13 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
      * 是否禁止 1 禁止 0 不禁止
      */
     private String forbid;
+
+    /**
+     * 文件生成的目录
+     */
+    @TableField("excel_path")
+    private String excelPath;
+
 
     /**
      * 备注

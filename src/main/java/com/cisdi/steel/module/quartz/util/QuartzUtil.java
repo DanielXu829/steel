@@ -58,4 +58,21 @@ public class QuartzUtil {
         }
         return result;
     }
+
+
+    /***
+     * 将时间转换为对应的cron表达式
+     * @param date 传入的时间参数
+     * @return cron表达式
+     */
+    public static String getCron(Date date){
+        String dateFormat="ss mm HH dd MM ? yyyy";
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+        String formatTimeStr = null;
+        if (date != null) {
+            formatTimeStr = sdf.format(date);
+        }
+        return formatTimeStr;
+    }
+
 }
