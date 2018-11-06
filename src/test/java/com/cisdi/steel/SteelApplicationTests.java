@@ -1,5 +1,6 @@
 package com.cisdi.steel;
 
+import com.cisdi.steel.config.http.HttpProperties;
 import com.cisdi.steel.config.http.HttpUtil;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,5 +13,8 @@ public class SteelApplicationTests {
 
     @Autowired
     protected HttpUtil httpUtil;
+
+    @Autowired
+    protected HttpProperties httpProperties;
 
 }

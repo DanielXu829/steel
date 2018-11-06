@@ -32,7 +32,7 @@ public class ExportTests extends SteelApplicationTests {
      */
     @Test
     public void exportExcel1() throws Exception {
-        String url = Constants.API_URL + "/tagValues?tagname=tcSkullThickB203&starttime=1519034779&endtime=1529034779060";
+        String url = httpProperties.getUrlApiGLOne() + "/tagValues?tagname=tcSkullThickB203&starttime=1519034779&endtime=1529034779060";
         String s = httpUtil.get(url, null);
         List<TestData> responseArray = ResponseUtil.getResponseArray(s, TestData.class);
         TemplateExportParams params = new TemplateExportParams("excel/demo.xlsx");

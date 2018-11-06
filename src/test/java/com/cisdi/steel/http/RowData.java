@@ -1,5 +1,6 @@
 package com.cisdi.steel.http;
 
+import com.cisdi.steel.module.job.dto.CellData;
 import lombok.Data;
 
 import java.util.HashSet;

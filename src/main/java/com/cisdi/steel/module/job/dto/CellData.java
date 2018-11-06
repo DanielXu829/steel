@@ -1,4 +1,4 @@
-package com.cisdi.steel.http;
+package com.cisdi.steel.module.job.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

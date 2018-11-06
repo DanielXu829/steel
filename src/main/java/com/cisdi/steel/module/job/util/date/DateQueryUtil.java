@@ -1,4 +1,4 @@
-package com.cisdi.steel.common.util.date;
+package com.cisdi.steel.module.job.util.date;
 
 import com.cisdi.steel.common.util.DateUtil;
 
@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * <p>Description:         </p>
+ * 时间构建
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/5 </P>
@@ -14,7 +14,7 @@ import java.util.Date;
  * @author leaf
  * @version 1.0
  */
-public class ExcelDateUtil {
+public class DateQueryUtil {
 
     /**
      * 构建一个当天的 开始 时间---结束时间
@@ -35,10 +35,10 @@ public class ExcelDateUtil {
 //        Date todayBeginTime = DateUtil.getDateBeginTime(date);
 //        Date todayEndTime = DateUtil.getDateEndTime(date);
         Calendar instance = Calendar.getInstance();
-        instance.set(2015,1,1);
+        instance.set(2015, 1, 1);
         Date todayBeginTime = instance.getTime();
-        instance.set(2019,1,1);
-        Date todayEndTime =  instance.getTime();
+        instance.set(2019, 1, 1);
+        Date todayEndTime = instance.getTime();
         return new DateQuery(todayBeginTime, todayEndTime);
     }
 

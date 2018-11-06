@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -99,6 +100,54 @@ public class PoiCustomUtil {
     }
 
     /**
+     * 单元格设置值
+     *
+     * @param cell  单元格
+     * @param value 值
+     */
+    public static void setCellValue(Cell cell, Object value) {
+        if (Objects.isNull(value) || Objects.isNull(cell)) {
+            return;
+        }
+        if (value instanceof Byte) {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(((Byte) value).doubleValue());
+        } else if (value instanceof Short) {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(((Short) value).doubleValue());
+        } else if (value instanceof Integer) {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(((Integer) value).doubleValue());
+        } else if (value instanceof Float) {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(((Float) value).doubleValue());
+        } else if (value instanceof Double) {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(((Double) value));
+        } else if (value instanceof Long) {
+            Long result = (Long) value;
+            try {
+                if (result.toString().length() == 13) {
+                    Date date = new Date(result);
+                    cell.setCellValue(date);
+                } else if (result.toString().length() == 10) {
+                    Date date = new Date(result * 1000);
+                    cell.setCellValue(date);
+                }
+            } catch (Exception e) {
+                cell.setCellType(CellType.NUMERIC);
+                cell.setCellValue(result.doubleValue());
+            }
+        } else if (value instanceof Boolean) {
+            cell.setCellValue((Boolean) value);
+            cell.setCellType(CellType.BOOLEAN);
+        } else {
+            cell.setCellValue(value.toString());
+            cell.setCellType(CellType.STRING);
+        }
+    }
+
+    /**
      * 获取当前文件的workbook
      *
      * @param filePath 文件全路径
@@ -112,4 +161,5 @@ public class PoiCustomUtil {
         }
         return null;
     }
+
 }

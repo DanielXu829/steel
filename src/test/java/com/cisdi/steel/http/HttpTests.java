@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.resp.ResponseUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.common.util.date.DateQuery;
-import com.cisdi.steel.common.util.date.ExcelDateUtil;
+import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.job.dto.CellData;
 import org.apache.poi.ss.usermodel.*;
 import org.junit.Test;
 
@@ -34,14 +34,13 @@ public class HttpTests extends SteelApplicationTests {
     @Test
     public void testApi() {
 
-        String url = Constants.API_URL + "/batchenos/period";
-        DateQuery dateQuery = ExcelDateUtil.buildToday();
+        String url = httpProperties.getUrlApiGLOne() + "/batchenos/period";
+        DateQuery dateQuery = DateQueryUtil.buildToday();
         String s = httpUtil.get(url, dateQuery.getQueryParam());
         List<String> list = ResponseUtil.getResponseArray(s, String.class);
-        List<Map<String, Object>> result = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             String s1 = list.get(i);
-            String detail = Constants.API_URL + "/batch/" + s1;
+            String detail = httpProperties.getUrlApiGLOne() + "/batch/" + s1;
             String detailData = httpUtil.get(detail);
             if (StringUtils.isNotBlank(detailData)) {
                 Map<String, Object> mapType = JSON.parseObject(detailData, Map.class);
@@ -53,14 +52,15 @@ public class HttpTests extends SteelApplicationTests {
 
     @Test
     public void testApi2() throws Exception {
-        String url = Constants.API_URL + "/batchenos/period";
-        DateQuery dateQuery = ExcelDateUtil.buildToday();
+        String url = httpProperties.getUrlApiGLOne() + "/batchenos/period";
+        DateQuery dateQuery = DateQueryUtil.buildToday();
         String s = httpUtil.get(url, dateQuery.getQueryParam());
         List<String> list = ResponseUtil.getResponseArray(s, String.class);
+        Collections.sort(list);
         List<Map<String, Object>> result = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < list.size(); i++) {
             String s1 = list.get(i);
-            String detail = Constants.API_URL + "/batch/" + s1;
+            String detail = httpProperties.getUrlApiGLOne() + "/batch/" + s1;
             String detailData = httpUtil.get(detail);
             if (StringUtils.isNotBlank(detailData)) {
                 Map<String, Object> mapType = JSON.parseObject(detailData, Map.class);
@@ -132,26 +132,7 @@ public class HttpTests extends SteelApplicationTests {
                     if (Objects.isNull(cell)) {
                         cell = row.createCell(column);
                     }
-                    Object value = cellData.getValue();
-                    if (value instanceof Double) {
-                        cell.setCellValue((Double) value);
-                        cell.setCellType(CellType.NUMERIC);
-                    } else if (value instanceof Integer) {
-                        cell.setCellValue(new Double(value.toString()));
-                        cell.setCellType(CellType.NUMERIC);
-                    } else if (value instanceof String) {
-                        cell.setCellValue(value.toString());
-                        cell.setCellType(CellType.STRING);
-                    } else if (value instanceof Date) {
-                        cell.setCellValue((Date) value);
-                    } else if (value instanceof Calendar) {
-                        cell.setCellValue((Calendar) value);
-                    } else if (value instanceof Boolean) {
-                        cell.setCellValue((Boolean) value);
-                        cell.setCellType(CellType.BOOLEAN);
-                    } else if (value instanceof Long){
-                        cell.setCellValue(new Date((Long)value));
-                    }
+                    PoiCustomUtil.setCellValue(cell, cellData.getValue());
                 });
             }
         }

@@ -36,11 +36,9 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
     /**
      * 添加数据
      *
-     * @param code       编码
-     * @param resultPath 多个文件路径
-     * @param categorys  多个分类
+     * @param reportIndex       编码
      */
-    void insertReportRecord(String code, List<String> resultPath, List<String> categorys);
+    void insertReportRecord(ReportIndex reportIndex);
 
     /**
      * 添加数据
