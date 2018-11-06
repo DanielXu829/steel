@@ -26,42 +26,94 @@ import java.util.*;
 public class CommonTests {
 
     @Test
-    public void test(){
+    public void test() {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
-        for(int i=0;i<24;i++){
+        for (int i = 0; i < 24; i++) {
             GregorianCalendar gregorianCalendar = new GregorianCalendar(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), i, 0);
             Date time = gregorianCalendar.getTime();
-            System.err.println(DateUtil.getFormatDateTime(time,DateUtil.hhmmFormat));
+            System.err.println(DateUtil.getFormatDateTime(time, DateUtil.hhmmFormat));
         }
     }
 
     @Test
     public void test2() throws Exception {
-        String fileName = "D:\\template\\出鐵作業日報表.xlsx";
+        String fileName = "C:\\Users\\cj\\Desktop\\Main_Daily-主報表.xlsx";
         String saveFilePath = "D:\\1.xlsx";
 
-        Workbook sheets = WorkbookFactory.create(new File(fileName));
-        Sheet sheet = sheets.getSheet("_tag1");
-        int firstRowNum = sheet.getFirstRowNum();
-        Row row = sheet.getRow(firstRowNum);
-        short firstCellNum = row.getFirstCellNum();
-        short lastCellNum = row.getLastCellNum();
-
-        String sheetName = row.getSheet().getSheetName();
-
-        Row row2 = sheet.createRow(1);
-
-        for (int i = firstCellNum; i < lastCellNum; i++) {
-            Cell cell = row2.createCell(i);
-            cell.setCellValue(RandomUtils.nextInt(0,99));
-//            System.err.println(cell.getStringCellValue());
+        Workbook workbook = WorkbookFactory.create(new File(fileName));
+        int numberOfSheets = workbook.getNumberOfSheets();
+        for (int i = 0; i < numberOfSheets; i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            commonMethod(sheet);
         }
-        System.err.println(1);
         FileOutputStream fos = new FileOutputStream(saveFilePath);
-        sheets.write(fos);
+//        sheets.write(fos);
         fos.close();
     }
+
+    /**
+     * 若是Tag类别的就
+     * @param sheet
+     */
+    public void commonMethod(Sheet sheet) {
+        String sheetName = sheet.getSheetName();
+        String[] s = sheetName.split("_");
+        System.out.println(sheetName);
+        if (s.length > 1) {
+            String mainName = s[1];
+
+            switch (mainName) {
+                case "metadata":
+                    dealMetadata();
+                    break;
+                case "Tag":
+                    dealTag(sheet);
+                    break;
+            }
+        }
+
+    }
+
+    private void dealMetadata() {
+        //查询模版相关信息
+
+    }
+
+    private void dealTag(Sheet sheet) {
+        //1.获取报表名称等，跳转到对应的处理类
+        int lastRowNum = sheet.getLastRowNum();
+        int firstRowNum = sheet.getFirstRowNum();
+        for (int j = firstRowNum; j < lastRowNum; j++) {
+            Row row = sheet.getRow(j);
+            if (null == row) {
+                continue;
+            }
+            short firstCellNum = row.getFirstCellNum();
+            short lastCellNum = row.getLastCellNum();
+            for (int k = firstCellNum; k < lastCellNum; k++) {
+                Cell cell = row.getCell(k);
+                if (null == cell) {
+                    continue;
+                }
+                String cellValue = PoiCellUtil.getCellValue(cell);
+                if (StringUtils.isNotBlank(cellValue)) {
+                    commonDealCol(cellValue);
+                }
+            }
+        }
+    }
+
+    //处理每一个字段
+    private void commonDealCol(String cellValue) {
+        String[] split = cellValue.split("/");
+        if (split.length == 1) {//简单处理查询
+
+        } else if (split.length == 2) {//获取第二个参数 例如：MAX
+
+        }
+    }
+
 
     @Test
     public void test1() throws Exception {

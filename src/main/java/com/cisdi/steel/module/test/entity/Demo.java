@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Date;
 
 /**
  * <p>Description:  文件demo实体类 </p>
@@ -49,21 +50,11 @@ public class Demo extends Model<Demo> {
     public String getPath() {
         String p = "javascript:POBrowser.openWindowModeless('', '')";
         try {
-            System.out.println(path);
-            p = "javascript:POBrowser.openWindowModeless('word?filePath=" + URLEncoder.encode(path.replaceAll("\\\\", "\\\\\\\\"), "UTF-8") + "', 'width=1200px;height=800px;')";
+            p = "javascript:POBrowser.openWindowModeless('/pageoffice/edit?filePath=" + path.replaceAll("\\\\", "\\\\\\\\") + "', 'width=1200px;height=800px;')";
         } catch (Exception e) {
         }
         return p;
     }
 
-    public String getPath2() {
-        return "javascript:doAction('" + this.name + "','" + "http://10.0.75.1:8181/report/" + this.name + "')";
-    }
-
-    public static void main(String[] args) {
-        String path = "e:/root";
-        path = path.replaceAll("\\\\", "//");
-        System.out.println(path);
-    }
 
 }
