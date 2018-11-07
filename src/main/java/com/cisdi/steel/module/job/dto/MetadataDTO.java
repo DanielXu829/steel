@@ -110,7 +110,7 @@ public class MetadataDTO {
 
     public Map<String, Object> buildMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("DateTime", this.dateTime.getTime());
+        result.put("DateTime", this.dateTime);
         result.put("TemplateName", this.templateName);
         result.put("Type", this.type);
         result.put("TemplatePath", this.templatePath);

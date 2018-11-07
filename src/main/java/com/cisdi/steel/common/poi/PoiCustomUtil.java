@@ -176,6 +176,8 @@ public class PoiCustomUtil {
         } else if (value instanceof Boolean) {
             cell.setCellValue((Boolean) value);
             cell.setCellType(CellType.BOOLEAN);
+        } else if (value instanceof Date) {
+            cell.setCellValue((Date) value);
         } else {
             cell.setCellValue(value.toString());
             cell.setCellType(CellType.STRING);
