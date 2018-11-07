@@ -1,7 +1,7 @@
 package com.cisdi.steel.module.job;
 
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.config.http.HttpProperties;
+import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import lombok.extern.slf4j.Slf4j;
