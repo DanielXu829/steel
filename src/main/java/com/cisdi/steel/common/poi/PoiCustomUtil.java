@@ -1,15 +1,15 @@
 package com.cisdi.steel.common.poi;
 
 import cn.afterturn.easypoi.util.PoiCellUtil;
+import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.module.job.dto.MetadataDTO;
+import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * <p>Description:  自定义poi工具类  </p>
@@ -49,6 +49,41 @@ public class PoiCustomUtil {
             if (Objects.isNull(cell)) {
                 continue;
             }
+            result.add(PoiCellUtil.getCellValue(cell));
+        }
+        return result;
+    }
+
+    /**
+     * 获取第一列所有值
+     *
+     * @param sheet 指定sheet
+     * @return 结果
+     */
+    public static List<String> getFirstColumnCellVal(Sheet sheet) {
+        return getColumnCellVal(sheet, 0);
+    }
+
+    /**
+     * 获取某一列的所有值
+     *
+     * @param sheet     当前sheet
+     * @param columnNum 指定列
+     * @return 结果
+     */
+    public static List<String> getColumnCellVal(Sheet sheet, int columnNum) {
+        List<String> result = new ArrayList<>();
+        if (Objects.isNull(sheet)) {
+            return result;
+        }
+        int firstRowNum = sheet.getFirstRowNum();
+        int lastRowNum = sheet.getLastRowNum();
+        for (int rowNum = firstRowNum; rowNum < lastRowNum; rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (Objects.isNull(row)) {
+                continue;
+            }
+            Cell cell = row.getCell(columnNum);
             result.add(PoiCellUtil.getCellValue(cell));
         }
         return result;
@@ -144,6 +179,50 @@ public class PoiCustomUtil {
         } else {
             cell.setCellValue(value.toString());
             cell.setCellType(CellType.STRING);
+        }
+    }
+
+    /**
+     * 构建元数据
+     * 默认取_metadata
+     *
+     * @param workbook 当前文件
+     * @param excelDTO 数据
+     */
+    public static void buildMetadata(Workbook workbook, WriterExcelDTO excelDTO) {
+        Sheet sheet = workbook.getSheet("_metadata");
+        buildMetadata(sheet, excelDTO);
+    }
+
+    /**
+     * 构建元数据
+     *
+     * @param sheet    sheet
+     * @param excelDTO 数据
+     */
+    public static void buildMetadata(Sheet sheet, WriterExcelDTO excelDTO) {
+        if (Objects.isNull(sheet)) {
+            return;
+        }
+        MetadataDTO metadataDTO = new MetadataDTO(excelDTO);
+        int firstRowNum = sheet.getFirstRowNum();
+        int lastRowNum = sheet.getLastRowNum();
+        Map<String, Object> map = metadataDTO.buildMap();
+        for (int rowNum = firstRowNum; rowNum <= lastRowNum; rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (Objects.isNull(row)) {
+                continue;
+            }
+            Cell cell = row.getCell(0);
+            String cellValue = PoiCellUtil.getCellValue(cell);
+            if (StringUtils.isNotBlank(cellValue)) {
+                Object obj = map.get(cellValue);
+                Cell cellTwo = row.getCell(1);
+                if (Objects.isNull(cellTwo)) {
+                    row.createCell(1);
+                }
+                PoiCustomUtil.setCellValue(cellTwo, obj);
+            }
         }
     }
 

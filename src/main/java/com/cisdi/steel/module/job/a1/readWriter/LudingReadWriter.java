@@ -1,15 +1,19 @@
 package com.cisdi.steel.module.job.a1.readWriter;
 
+import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.resp.ResponseUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
+import com.cisdi.steel.module.job.dto.MetadataDTO;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -51,8 +55,8 @@ public class LudingReadWriter extends AbstractExcelReadWriter {
     }
 
     @Override
-    public Workbook writerExcel(WriterExcelDTO excelDTO) {
-        List<Map<String, Object>> dataList = requestApiData(excelDTO.getTemplate(), excelDTO.getDateQuery());
+    public Workbook excelExecute(WriterExcelDTO excelDTO) {
+        List<Map<String, Object>> dataList = this.requestApiData(excelDTO.getTemplate(), excelDTO.getDateQuery());
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         // 第一个sheet值
         Sheet sheet = workbook.getSheet("_charge_day_each");
@@ -60,7 +64,6 @@ public class LudingReadWriter extends AbstractExcelReadWriter {
         List<CellData> cellDataList = ExcelWriterUtil.loopRowData(dataList, columns, 6);
         Collections.sort(cellDataList);
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-
         return workbook;
     }
 }

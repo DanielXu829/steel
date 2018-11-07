@@ -1,12 +1,14 @@
 package com.cisdi.steel.module.job.dto;
 
+import com.cisdi.steel.module.job.enums.JobEnum;
+import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Date;
+
 
 /**
  * <p>email: ypasdf@163.com</p>
@@ -33,4 +35,20 @@ public class WriterExcelDTO {
      * 查询时间段
      */
     private DateQuery dateQuery;
+
+    /**
+     * 当前任务
+     */
+    private JobEnum jobEnum;
+
+    /**
+     * 执行状态
+     */
+    private JobExecuteEnum jobExecuteEnum;
+
+    /**
+     * 记录开始时间
+     */
+    private Date startTime;
+
 }

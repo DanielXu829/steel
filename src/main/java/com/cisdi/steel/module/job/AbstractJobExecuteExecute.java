@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -90,11 +90,14 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
             try {
                 ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template);
                 WriterExcelDTO writerExcelDTO = new WriterExcelDTO();
-                writerExcelDTO.setTemplate(template)
+                writerExcelDTO.setStartTime(new Date())
+                        .setJobEnum(jobEnum)
+                        .setJobExecuteEnum(jobExecuteEnum)
+                        .setTemplate(template)
                         .setExcelPathInfo(excelPathInfo)
                         .setDateQuery(dateQuery);
                 // 填充数据
-                Workbook workbook = excelWriter.writerExcel(writerExcelDTO);
+                Workbook workbook = excelWriter.writerExcelExecute(writerExcelDTO);
                 // 生成文件
                 this.createFile(workbook, excelPathInfo);
 
@@ -153,7 +156,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String fileExtension = FileUtil.getTypePart(templatePath);
         // yyyy-MM-dd_HH
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum);
-        return templateName + datePart + "." + fileExtension;
+        return templateName + "_" + datePart + "." + fileExtension;
     }
 
     /**
@@ -206,7 +209,9 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
             Sheet sheet = workbook.getSheetAt(i);
             String sheetName = sheet.getSheetName();
             if (sheetName.contains("_")) {
-                sheet.setSelected(false);
+                if (sheet.isSelected()) {
+                    sheet.setSelected(false);
+                }
                 workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
             }
         }
