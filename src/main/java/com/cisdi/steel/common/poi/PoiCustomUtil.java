@@ -192,8 +192,10 @@ public class PoiCustomUtil {
      * @param excelDTO 数据
      */
     public static void buildMetadata(Workbook workbook, WriterExcelDTO excelDTO) {
-        Sheet sheet = workbook.getSheet("_metadata");
-        buildMetadata(sheet, excelDTO);
+        if (Objects.nonNull(workbook)) {
+            Sheet sheet = workbook.getSheet("_metadata");
+            buildMetadata(sheet, excelDTO);
+        }
     }
 
     /**
