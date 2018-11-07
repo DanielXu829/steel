@@ -172,7 +172,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), templateTypeEnum);
         String langName = LanguageEnum.getByLang(template.getTemplateLang()).getName();
         // 文件保存路径
-        String saveFilePath = getSaveFilePath(templateTypeEnum, fileName, langName);
+        String saveFilePath = getSaveFilePath(template.getSequence(),templateTypeEnum, fileName, langName);
         return new ExcelPathInfo(fileName, saveFilePath);
     }
 
@@ -182,10 +182,11 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param fileName 文件名
      * @return 文件保存路径
      */
-    protected String getSaveFilePath(ReportTemplateTypeEnum templateTypeEnum, String fileName, String langName) {
+    protected String getSaveFilePath(String sequence,ReportTemplateTypeEnum templateTypeEnum, String fileName, String langName) {
         String partName = templateTypeEnum.getName();
         String resultPath = jobProperties.getFilePath() +
                 File.separator + langName +
+                File.separator + sequence +
                 File.separator + partName;
         File saveFile = new File(resultPath);
         if (!saveFile.exists()) {
