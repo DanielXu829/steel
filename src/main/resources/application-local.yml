@@ -3,7 +3,7 @@ server:
   port: 8181
 spring:
   datasource:
-    url: jdbc:mysql://10.66.3.221:3306/steel?characterEncoding=utf8&useSSL=true
+    url: jdbc:mysql://10.66.3.221:3306/steel1?characterEncoding=utf8&useSSL=true
     username: root
     password: p@ssw0rd
 

@@ -3,6 +3,9 @@ package com.cisdi.steel.module.report.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import com.cisdi.steel.module.report.entity.ReportCategory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Map;
 
 /**
  * <p>Description: 报表分类 Mapper 接口 </p>
@@ -14,4 +17,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 @Mapper
 public interface ReportCategoryMapper extends BaseMapper<ReportCategory> {
 
+    Map queryPerms(@Param("userId") Long userId);
 }

@@ -62,7 +62,7 @@ public class DemoServiceImpl implements DemoService {
     @Override
     public List<Demo> fileListDirectory(String filePath) {
         List<Demo> list = new ArrayList<>();
-        list.add(new Demo("高炉炉顶装料作业 日报12018-10-27_03.xlsx", "/root/reports/cn_zh/bf6/4小时/test.xlsx"));
+        list.add(new Demo("高炉炉顶装料作业 日报12018-10-27_03.xlsx", "D:/1.xlsx"));
         return list;
     }
 }

@@ -37,7 +37,7 @@ public class MpGenerator {
     public static void main(String[] args) {
         GeneratorProperties properties = new GeneratorProperties();
         // 需要生成的表名 不填 默认所有
-        String[] tableNames = {"OPTION_REPORT_TYPE"};
+        String[] tableNames = {"sys_user_token"};
         // 表名前缀
         String[] tablePrefix = {};
         properties
@@ -52,7 +52,7 @@ public class MpGenerator {
                 // 输出路径 默认当前项目的gen文件夹中
 //                .setOutPutDir(new File("").getAbsolutePath() + File.separator + "leaf-generate" + GeneratorProperties.buildSrc())
                 .setOutPutDir(new File("").getAbsolutePath() + GeneratorProperties.buildSrc())
-                .setDbUrl("jdbc:mysql://10.66.3.221:3306/steel?characterEncoding=utf8&useSSL=true")
+                .setDbUrl("jdbc:mysql://10.66.3.221:3306/steel1?characterEncoding=utf8&useSSL=true")
                 .setUsername("root")
                 .setPassword("p@ssw0rd")
                 // 设置是否继承实体

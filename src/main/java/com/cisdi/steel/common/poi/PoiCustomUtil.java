@@ -223,7 +223,7 @@ public class PoiCustomUtil {
                 Object obj = map.get(cellValue);
                 Cell cellTwo = row.getCell(1);
                 if (Objects.isNull(cellTwo)) {
-                    row.createCell(1);
+                    cellTwo = row.createCell(1);
                 }
                 PoiCustomUtil.setCellValue(cellTwo, obj);
             }
