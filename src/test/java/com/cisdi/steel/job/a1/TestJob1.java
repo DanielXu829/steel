@@ -1,11 +1,11 @@
 package com.cisdi.steel.job.a1;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.job.a1.execute.LudingDayExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
+import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,10 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class TestJob1 extends SteelApplicationTests {
 
+    private DateQuery dateQuery = DateQueryUtil.buildToday();
+
+
+    /**
+     * 高炉炉顶装料作业 日报
+     */
     @Autowired
     private LudingDayExecute ludingDayExecute;
-
-    private DateQuery dateQuery = DateQueryUtil.buildToday();
 
     @Test
     public void test1() {

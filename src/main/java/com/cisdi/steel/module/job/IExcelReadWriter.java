@@ -34,5 +34,5 @@ public interface IExcelReadWriter {
      * @param excelDTO 写入的相关信息
      * @return 写入后的数据
      */
-    Workbook writerExcel(WriterExcelDTO excelDTO);
+    Workbook writerExcelExecute(WriterExcelDTO excelDTO);
 }

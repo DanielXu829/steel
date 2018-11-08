@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -90,11 +90,14 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
             try {
                 ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template);
                 WriterExcelDTO writerExcelDTO = new WriterExcelDTO();
-                writerExcelDTO.setTemplate(template)
+                writerExcelDTO.setStartTime(new Date())
+                        .setJobEnum(jobEnum)
+                        .setJobExecuteEnum(jobExecuteEnum)
+                        .setTemplate(template)
                         .setExcelPathInfo(excelPathInfo)
                         .setDateQuery(dateQuery);
                 // 填充数据
-                Workbook workbook = excelWriter.writerExcel(writerExcelDTO);
+                Workbook workbook = excelWriter.writerExcelExecute(writerExcelDTO);
                 // 生成文件
                 this.createFile(workbook, excelPathInfo);
 
@@ -153,7 +156,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String fileExtension = FileUtil.getTypePart(templatePath);
         // yyyy-MM-dd_HH
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum);
-        return templateName + datePart + "." + fileExtension;
+        return templateName + "_" + datePart + "." + fileExtension;
     }
 
     /**
@@ -169,7 +172,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), templateTypeEnum);
         String langName = LanguageEnum.getByLang(template.getTemplateLang()).getName();
         // 文件保存路径
-        String saveFilePath = getSaveFilePath(templateTypeEnum, fileName, langName);
+        String saveFilePath = getSaveFilePath(template.getSequence(),templateTypeEnum, fileName, langName);
         return new ExcelPathInfo(fileName, saveFilePath);
     }
 
@@ -179,10 +182,11 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param fileName 文件名
      * @return 文件保存路径
      */
-    protected String getSaveFilePath(ReportTemplateTypeEnum templateTypeEnum, String fileName, String langName) {
+    protected String getSaveFilePath(String sequence,ReportTemplateTypeEnum templateTypeEnum, String fileName, String langName) {
         String partName = templateTypeEnum.getName();
         String resultPath = jobProperties.getFilePath() +
                 File.separator + langName +
+                File.separator + sequence +
                 File.separator + partName;
         File saveFile = new File(resultPath);
         if (!saveFile.exists()) {
@@ -206,7 +210,9 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
             Sheet sheet = workbook.getSheetAt(i);
             String sheetName = sheet.getSheetName();
             if (sheetName.contains("_")) {
-                sheet.setSelected(false);
+                if (sheet.isSelected()) {
+                    sheet.setSelected(false);
+                }
                 workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
             }
         }

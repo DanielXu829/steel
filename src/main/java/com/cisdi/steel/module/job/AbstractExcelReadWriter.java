@@ -1,7 +1,9 @@
 package com.cisdi.steel.module.job;
 
-import com.cisdi.steel.config.http.HttpProperties;
+import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,6 +29,24 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
 
     @Autowired
     protected HttpProperties httpProperties;
+
+    /**
+     * 所有 子类具体执行的方法
+     *
+     * @param excelDTO 数据
+     * @return 结果
+     */
+    public abstract Workbook excelExecute(WriterExcelDTO excelDTO);
+
+    @Override
+    public Workbook writerExcelExecute(WriterExcelDTO excelDTO) {
+        // 子类执行
+        Workbook workbook = this.excelExecute(excelDTO);
+        // 构建元数据
+        PoiCustomUtil.buildMetadata(workbook, excelDTO);
+        return workbook;
+    }
+
 
     /**
      * 获取操作的文件
