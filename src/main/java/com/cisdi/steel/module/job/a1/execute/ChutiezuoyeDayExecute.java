@@ -1,30 +1,27 @@
 package com.cisdi.steel.module.job.a1.execute;
 
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
-import com.cisdi.steel.module.job.a1.readwriter.LudingReadWriter;
-import lombok.extern.slf4j.Slf4j;
+import com.cisdi.steel.module.job.a1.readwriter.ChutiezuoyeDayReadWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 /**
- * 炉顶作业日报 执行的类
+ * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
- * <P>Date: 2018/11/6 </P>
+ * <P>Date: 2018/11/8 </P>
  *
  * @author leaf
  * @version 1.0
  */
 @Component
-@Slf4j
-public class LudingDayExecute extends AbstractJobExecuteExecute {
+public class ChutiezuoyeDayExecute extends AbstractJobExecuteExecute {
 
     @Autowired
-    private LudingReadWriter writerExcel;
+    private ChutiezuoyeDayReadWriter chutiezuoyeDayReadWriter;
 
     @Override
     public void initConfig() {
-        this.excelWriter = writerExcel;
+        this.excelWriter = chutiezuoyeDayReadWriter;
     }
 }

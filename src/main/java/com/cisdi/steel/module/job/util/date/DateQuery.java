@@ -20,6 +20,9 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 public class DateQuery {
+    /**
+     * 开始时间
+     */
     private Date startTime;
     private Date endTime;
 
