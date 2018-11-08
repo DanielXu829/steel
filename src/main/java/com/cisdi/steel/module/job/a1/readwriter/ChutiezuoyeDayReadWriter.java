@@ -1,9 +1,10 @@
-package com.cisdi.steel.module.job.a1.readwriter;
+package com.cisdi.steel.module.job.a1.readWriter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -76,8 +77,31 @@ public class ChutiezuoyeDayReadWriter extends AbstractExcelReadWriter {
                     Map<String, Object> mapResult = new CaseInsensitiveMap<>();
                     mapResult.put("tapindex", obj);
                     String url2 = httpProperties.getUrlApiGLOne() + "/tap/analysis/" + tapid.toString();
-                    // TODO: 待完成子类
-//                    String childResult = httpUtil.get(url2);
+                    String childResult = httpUtil.get(url2);
+                    JSONObject childObject = JSON.parseObject(childResult);
+                    JSONArray jsonChildArray = childObject.getJSONArray("data");
+                    if (Objects.nonNull(jsonChildArray)) {
+                        int childSize = jsonChildArray.size();
+                        for (int j = 0; j < childSize; j++) {
+                            JSONObject tapAnalysisJSONObject = jsonChildArray.getJSONObject(j);
+                            JSONObject tapAnalysis = tapAnalysisJSONObject.getJSONObject("tapAnalysis");
+                            Object brandcode = tapAnalysis.get("brandcode");
+                            if (Objects.nonNull(brandcode)) {
+                                Map<String, Object> mapResult1 = new CaseInsensitiveMap<>();
+                                JSONObject analysisValue = tapAnalysisJSONObject.getJSONObject("analysisValue");
+                                JSONObject values = analysisValue.getJSONObject("values");
+                                if ("HM".equals(brandcode.toString())) {
+                                    mapResult1.put("HM", values);
+                                } else if ("SLAG".equals(brandcode.toString())) {
+                                    mapResult1.put("SLAG", values);
+                                } else if ("TapValue".equals(brandcode.toString())) {
+                                    mapResult1.put("TapValue", values);
+                                }
+                                resultList.add(mapResult1);
+                            }
+                        }
+
+                    }
                     resultList.add(mapResult);
                 }
             }
