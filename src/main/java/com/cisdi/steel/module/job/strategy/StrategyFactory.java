@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.strategy;
 import com.cisdi.steel.common.util.ApplicationContextHolder;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
+import com.cisdi.steel.module.job.strategy.api.AcsStragegy;
 import com.cisdi.steel.module.job.strategy.api.ApiStrategy;
 import com.cisdi.steel.module.job.strategy.api.TagStrategy;
 import com.cisdi.steel.module.job.strategy.date.DateStragegy;
@@ -74,7 +75,10 @@ public class StrategyFactory {
     private static ApiStrategy getApi(String method) {
         if ("tag".equals(method)) {
             return new TagStrategy(httpUtil, httpProperties);
+        }else if("acsReport".equals(method)){
+            return new AcsStragegy(httpUtil, httpProperties);
         }
+
         return null;
     }
 

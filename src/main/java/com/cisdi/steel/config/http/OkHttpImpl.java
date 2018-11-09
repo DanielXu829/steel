@@ -1,5 +1,6 @@
 package com.cisdi.steel.config.http;
 
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import java.util.Map;
  * @author 95765
  */
 @SuppressWarnings("All")
+@Slf4j
 public class OkHttpImpl implements HttpUtil {
     private static final Logger logger = LoggerFactory.getLogger(OkHttpUtil.class);
 
@@ -45,6 +47,7 @@ public class OkHttpImpl implements HttpUtil {
                 }
             }
         }
+        log.debug("GET请求URL:" + sb.toString());
         Request request = new Request.Builder()
                 .url(sb.toString())
                 .build();

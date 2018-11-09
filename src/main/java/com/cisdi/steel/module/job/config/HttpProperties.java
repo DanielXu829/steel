@@ -22,4 +22,9 @@ public class HttpProperties {
      */
     private String urlApiGLOne;
 
+    /**
+     * 能介的接口地址
+     */
+    private String urlApiNJOne;
+
 }
