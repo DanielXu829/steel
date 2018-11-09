@@ -111,7 +111,6 @@ public class ExcelWriterUtil {
         Objects.requireNonNull(sheet);
         for (CellData cellData : cellDataList) {
             int rowNum = cellData.getRowIndex();
-            rowNum++;
             Row row = getRowOrCreate(sheet, rowNum);
             Integer column = cellData.getColumnIndex();
             Cell cell = getCellOrCreate(row, column);
@@ -190,7 +189,7 @@ public class ExcelWriterUtil {
                         JSONObject item = (JSONObject) obj;
                         CaseInsensitiveMap<String, Object> map = new CaseInsensitiveMap<>(item);
                         Object value = map.get(keyChild);
-                        ExcelWriterUtil.addCellData(resultData, childIndex++, columnIndex, value);
+                        ExcelWriterUtil.addCellData(resultData, ++childIndex, columnIndex, value);
                     }
                 }
             }

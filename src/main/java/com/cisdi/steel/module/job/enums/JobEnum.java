@@ -61,7 +61,13 @@ public enum JobEnum {
     yl_chejianshengchanyunxing("yl_chejianshengchanyunxing", "原料车间生产运行记录表"),
     yl_chejianshengchanjiaoban("yl_chejianshengchanjiaoban", "原料车间生产交班表"),
     yl_shujujilu("yl_shujujilu", "原料数据记录表"),
-    yl_hunyunkuangfenA4ganzhuanshi("yl_hunyunkuangfenA4ganzhuanshi", "原料混匀矿粉A4干转湿配比换算计算表");
+    yl_hunyunkuangfenA4ganzhuanshi("yl_hunyunkuangfenA4ganzhuanshi", "原料混匀矿粉A4干转湿配比换算计算表"),
+
+    // 能介
+    nj_twokong("nj_twokong","二空压站运行记录表",DateQueryUtil.buildHour()),
+    nj_threekong("nj_threekong","三空压站运行记录表",DateQueryUtil.buildHour()),
+    nj_fourkong("nj_fourkong","四空压站运行记录表",DateQueryUtil.buildHour()),
+    nj_xinyikong("nj_xinyikong","新一空压站运行记录表",DateQueryUtil.buildHour());
 
     private String code;
     private String name;
