@@ -384,7 +384,7 @@ public class BaseServiceImpl<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
      *
      * @param cnd 条件
      * @param k   key
-     * @param v   value
+     * @param v   cellValue
      * @return 是否满足格式
      */
     private boolean idLoadCnd(String cnd, String k, Object v) {

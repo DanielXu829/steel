@@ -633,7 +633,7 @@ public final class XSSFCell implements Cell {
     }
 
     private static RuntimeException typeMismatch(CellType expectedType, CellType actualType, boolean isFormulaCell) {
-        String msg = "Cannot get quartz " + expectedType + " value from quartz " + actualType + " " + (isFormulaCell ? "formula " : "") + "cell";
+        String msg = "Cannot get quartz " + expectedType + " cellValue from quartz " + actualType + " " + (isFormulaCell ? "formula " : "") + "cell";
         return new IllegalStateException(msg);
     }
 
@@ -641,7 +641,7 @@ public final class XSSFCell implements Cell {
         SpreadsheetVersion v = SpreadsheetVersion.EXCEL2007;
         int maxcol = SpreadsheetVersion.EXCEL2007.getLastColumnIndex();
         if (cellIndex < 0 || cellIndex > maxcol) {
-            throw new IllegalArgumentException("Invalid column index (" + cellIndex + ").  Allowable column range for " + v.name() + " is (0.." + maxcol + ") or ('A'..'" + v.getLastColumnName() + "')");
+            throw new IllegalArgumentException("Invalid columnIndex index (" + cellIndex + ").  Allowable columnIndex range for " + v.name() + " is (0.." + maxcol + ") or ('A'..'" + v.getLastColumnName() + "')");
         }
     }
 
@@ -751,7 +751,7 @@ public final class XSSFCell implements Cell {
                                 return "FALSE";
                             }
 
-                            throw new IllegalStateException("Unexpected boolean cached formula value '" + textValue + "'.");
+                            throw new IllegalStateException("Unexpected boolean cached formula cellValue '" + textValue + "'.");
                         }
                 }
             case BLANK:

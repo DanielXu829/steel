@@ -4,13 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -22,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/8 </P>
@@ -34,10 +31,10 @@ import java.util.Objects;
 public class ChutiezuoyeDayReadWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
-        List<Map<String, Object>> dataList = this.requestApiData(excelDTO.getTemplate(), excelDTO.getDateQuery());
+        List<Map<String, Object>> dataList = this.requestApiData(excelDTO.getDateQuery());
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         // 第一个sheet值
-        Sheet sheet = workbook.getSheet("_tap_day_each");
+        Sheet sheet = this.getSheet(workbook, "_tap_day_each", excelDTO.getTemplate().getTemplatePath());
         List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
         int starRow = 0;
         List<CellData> resultData = new ArrayList<>();
@@ -50,8 +47,8 @@ public class ChutiezuoyeDayReadWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    @Override
-    public List<Map<String, Object>> requestApiData(ReportCategoryTemplate template, DateQuery dateQuery) {
+
+    private List<Map<String, Object>> requestApiData(DateQuery dateQuery) {
         String url = httpProperties.getUrlApiGLOne() + "/taps/summary/period";
         Map<String, String> queryParam = dateQuery.getQueryParam();
         queryParam.put("pagenum", "1");
@@ -59,9 +56,7 @@ public class ChutiezuoyeDayReadWriter extends AbstractExcelReadWriter {
         String result = httpUtil.get(url, queryParam);
         JSONObject jsonObject = JSON.parseObject(result);
         Object total = jsonObject.get("total");
-        if (Objects.isNull(total)) {
-            throw new NullPointerException("无法获取数据");
-        }
+        this.checkNull(total, "无法获取数据");
         queryParam.put("pagesize", total.toString());
         result = httpUtil.get(url, queryParam);
         JSONObject object = JSONObject.parseObject(result);

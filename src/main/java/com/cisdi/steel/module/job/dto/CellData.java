@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * <p>Description:         </p>
+ * 单个表格值
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/5 </P>
@@ -15,18 +15,18 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CellData implements Comparable<CellData> {
-    private Integer rowNum;
-    private Integer column;
-    private Object value;
+    private Integer rowIndex;
+    private Integer columnIndex;
+    private Object cellValue;
 
     @Override
     public int compareTo(CellData o) {
         if (o == null) {
             return -1;
         }
-        int i = this.rowNum.compareTo(o.rowNum);
+        int i = this.rowIndex.compareTo(o.rowIndex);
         if (i == 0) {
-            return this.column.compareTo(o.column);
+            return this.columnIndex.compareTo(o.columnIndex);
         } else {
             return i;
         }

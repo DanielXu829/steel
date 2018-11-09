@@ -133,7 +133,8 @@ public class DateUtil {
 
     /**
      * 字符串转 日期类型
-     * @param str 需要转换的字符串
+     *
+     * @param str     需要转换的字符串
      * @param pattern 日期格式
      * @return 结果 null 表示格式错误 或者 正确的时间
      */
@@ -564,6 +565,23 @@ public class DateUtil {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.add(Calendar.YEAR, years);
+        time = cal.getTime();
+        return time;
+    }
+
+    /**
+     * 取得在指定时间上
+     * 24 小时
+     *
+     * @param date  指定时间
+     * @param hours 小时，正为加，负为减
+     * @return 在指定时间上加减hour小时
+     */
+    public static Date addHours(Date date, int hours) {
+        Date time = null;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.HOUR_OF_DAY, hours);
         time = cal.getTime();
         return time;
     }

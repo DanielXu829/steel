@@ -102,7 +102,7 @@ public class SysDictServiceImpl extends BaseServiceImpl<SysDictMapper, SysDict> 
 
     /**
      * 通过 父类编码 获取子类所有编码
-     * label value
+     * label cellValue
      *
      * @param parentCode 父类编码
      * @return 结果 集合

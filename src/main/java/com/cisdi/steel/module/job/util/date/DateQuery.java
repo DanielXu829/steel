@@ -3,10 +3,7 @@ package com.cisdi.steel.module.job.util.date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 时间查询
@@ -20,6 +17,11 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 public class DateQuery {
+
+    /**
+     * 记录的时间
+     */
+    private Date recordDate;
     /**
      * 开始时间
      */
@@ -29,9 +31,21 @@ public class DateQuery {
     private String startTimeKey = "starttime";
     private String endTimeKey = "endtime";
 
-    public DateQuery(Date startTime, Date endTime) {
+    public DateQuery(Date startTime, Date endTime, Date recordDate) {
         this.startTime = startTime;
         this.endTime = endTime;
+        this.recordDate = recordDate;
+    }
+
+    /**
+     * 获取当前的小时
+     *
+     * @return 结果
+     */
+    public Integer getHour() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startTime);
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
     /**

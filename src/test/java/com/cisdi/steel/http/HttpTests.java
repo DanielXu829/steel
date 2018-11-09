@@ -121,18 +121,18 @@ public class HttpTests extends SteelApplicationTests {
                 }
                 Collections.sort(resultData);
                 resultData.forEach(cellData -> {
-                    int rowNum = cellData.getRowNum();
+                    int rowNum = cellData.getRowIndex();
                     rowNum++;
                     Row row = sheet.getRow(rowNum);
                     if (Objects.isNull(row)) {
                         row = sheet.createRow(rowNum);
                     }
-                    Integer column = cellData.getColumn();
+                    Integer column = cellData.getColumnIndex();
                     Cell cell = row.getCell(column);
                     if (Objects.isNull(cell)) {
                         cell = row.createCell(column);
                     }
-                    PoiCustomUtil.setCellValue(cell, cellData.getValue());
+                    PoiCustomUtil.setCellValue(cell, cellData.getCellValue());
                 });
             }
         }

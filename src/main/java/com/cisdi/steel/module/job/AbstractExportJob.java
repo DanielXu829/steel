@@ -1,8 +1,8 @@
 package com.cisdi.steel.module.job;
 
-import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -40,7 +40,9 @@ public abstract class AbstractExportJob implements Job, Serializable {
      *
      * @return 时间范围
      */
-    public abstract DateQuery getCurrentDateQuery();
+    public DateQuery getCurrentDateQuery() {
+        return getCurrentJob().getDateQuery();
+    }
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
