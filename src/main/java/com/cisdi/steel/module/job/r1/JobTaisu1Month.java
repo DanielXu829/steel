@@ -25,6 +25,6 @@ public class JobTaisu1Month extends AbstractJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.taisu1_month;
+        return JobEnum.gl_taisu1_month;
     }
 }
