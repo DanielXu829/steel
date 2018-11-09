@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * 高炉冷却壁温度日报表
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/6 </P>
@@ -31,11 +32,6 @@ public class LudingDayJob extends AbstractExportJob {
     @Override
     public IJobExecute getCurrentJobExecute() {
         return ludingDayExecute;
-    }
-
-    @Override
-    public DateQuery getCurrentDateQuery() {
-        return DateQueryUtil.buildToday();
     }
 
 }

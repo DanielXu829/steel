@@ -34,9 +34,4 @@ public class BentiwenduMonthJob extends AbstractExportJob {
     public IJobExecute getCurrentJobExecute() {
         return bentiwenduMonthExecute;
     }
-
-    @Override
-    public DateQuery getCurrentDateQuery() {
-        return DateQueryUtil.buildToday();
-    }
 }

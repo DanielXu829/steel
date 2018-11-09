@@ -1,12 +1,9 @@
 package com.cisdi.steel.module.job.a1;
 
-import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
 import com.cisdi.steel.module.job.a1.execute.LengquebiwenduExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,10 +30,5 @@ public class LengquebiwenduDayJob extends AbstractExportJob {
     @Override
     public IJobExecute getCurrentJobExecute() {
         return lengquebiwenduExecute;
-    }
-
-    @Override
-    public DateQuery getCurrentDateQuery() {
-        return DateQueryUtil.buildHour();
     }
 }

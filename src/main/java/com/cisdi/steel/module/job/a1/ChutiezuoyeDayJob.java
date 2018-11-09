@@ -34,8 +34,4 @@ public class ChutiezuoyeDayJob extends AbstractExportJob {
         return chutiezuoyeDayExecute;
     }
 
-    @Override
-    public DateQuery getCurrentDateQuery() {
-        return DateQueryUtil.buildToday();
-    }
 }

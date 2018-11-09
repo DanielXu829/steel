@@ -4,8 +4,6 @@ import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
 import com.cisdi.steel.module.job.a1.execute.BentiwenduDayExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +30,5 @@ public class BentiwenduDayJob extends AbstractExportJob {
     @Override
     public IJobExecute getCurrentJobExecute() {
         return bentiwenduDayExecute;
-    }
-
-    @Override
-    public DateQuery getCurrentDateQuery() {
-        return DateQueryUtil.buildHour();
     }
 }

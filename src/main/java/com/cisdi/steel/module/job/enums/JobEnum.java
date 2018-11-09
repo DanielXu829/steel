@@ -1,5 +1,8 @@
 package com.cisdi.steel.module.job.enums;
 
+import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+
 /**
  * <p>Description:  所有工作编码      </p>
  * <p>email: ypasdf@163.com</p>
@@ -17,13 +20,13 @@ package com.cisdi.steel.module.job.enums;
  */
 public enum JobEnum {
     // 高炉
-    gl_chutiezuoye_day("gl_chutiezuoye_day", "出铁作业日报表"),
-    gl_chutiezuoye_month("gl_chutiezuoye_month", " 出铁作业月报表"),
+    gl_chutiezuoye_day("gl_chutiezuoye_day", "出铁作业日报表", DateQueryUtil.buildHour()),
+    gl_chutiezuoye_month("gl_chutiezuoye_month", " 出铁作业月报表", DateQueryUtil.buildHour()),
     gl_bentilushenjingya_day("gl_bentilushenjingya_day", " 高炉本体炉身静压 日报"),
     gl_bentilushenjingya_month("gl_bentilushenjingya_month", " 高炉本体炉身静压 月报"),
-    gl_bentiwendu_day("gl_bentiwendu_day", "高炉本体温度日报表"),
-    gl_bentiwendu_month("gl_bentiwendu_month", " 高炉本体温度 月报"),
-    gl_lengquebiwendu_day("gl_lengquebiwendu_day", "高炉冷却壁温度日报表"),
+    gl_bentiwendu_day("gl_bentiwendu_day", "高炉本体温度日报表", DateQueryUtil.buildHour()),
+    gl_bentiwendu_month("gl_bentiwendu_month", " 高炉本体温度 月报", DateQueryUtil.buildToday()),
+    gl_lengquebiwendu_day("gl_lengquebiwendu_day", "高炉冷却壁温度日报表", DateQueryUtil.buildHour()),
     gl_lengquebiwendu_month("gl_lengquebiwendu_month", "高炉冷却壁温度 月报"),
     gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "炉顶装料作业日报表"),
     gl_ludingzhuangliaozuoye_day2("gl_ludingzhuangliaozuoye_day2", "高炉本体温度 日报2"),
@@ -63,9 +66,18 @@ public enum JobEnum {
     private String code;
     private String name;
 
+    private DateQuery dateQuery;
+
+    // TODO: 暂时保留 上面写完后 删除
     JobEnum(String code, String name) {
         this.code = code;
         this.name = name;
+    }
+
+    JobEnum(String code, String name, DateQuery dateQuery) {
+        this.code = code;
+        this.name = name;
+        this.dateQuery = dateQuery;
     }
 
     public String getName() {
@@ -74,5 +86,9 @@ public enum JobEnum {
 
     public String getCode() {
         return code;
+    }
+
+    public DateQuery getDateQuery() {
+        return dateQuery;
     }
 }

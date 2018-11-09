@@ -233,7 +233,7 @@ public class CommonTests {
 
     @Test
     public void test5() {
-        List<DateQuery> dateQueries = DateQueryUtil.buildDayEach(new Date());
+        List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
         if (Objects.nonNull(dateQueries)) {
             dateQueries.forEach(item -> {
                 System.err.println(DateUtil.getFormatDateTime(item.getStartTime(), DateUtil.fullFormat) + "--" + DateUtil.getFormatDateTime(item.getEndTime(), DateUtil.fullFormat));

@@ -70,7 +70,7 @@ public class DateQueryUtil {
      * @param date 指定时间
      * @return 结果
      */
-    public static List<DateQuery> buildHourEach(Date date) {
+    public static List<DateQuery> buildDayHourEach(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -88,7 +88,7 @@ public class DateQueryUtil {
      *
      * @return 结果
      */
-    public static List<DateQuery> buildDayEach(Date date) {
+    public static List<DateQuery> buildMonthDayEach(Date date) {
         DateQuery dateQuery = buildMonth(date);
         Date startTime = dateQuery.getStartTime();
         long betweenDays = DateUtil.getBetweenDays(startTime, date);

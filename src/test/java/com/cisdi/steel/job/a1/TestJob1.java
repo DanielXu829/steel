@@ -57,17 +57,6 @@ public class TestJob1 extends SteelApplicationTests {
         bentiwenduDayExecute.execute(JobEnum.gl_bentiwendu_day, JobExecuteEnum.automatic, dateQuery);
     }
 
-    /**
-     * 高炉冷却壁温度日报表
-     */
-    @Autowired
-    private LengquebiwenduExecute lengquebiwenduExecute;
-
-    @Test
-    public void test4() {
-        lengquebiwenduExecute.execute(JobEnum.gl_lengquebiwendu_day, JobExecuteEnum.automatic, dateQuery);
-    }
-
 
     /**
      * 高炉本体温度月报表
@@ -76,8 +65,19 @@ public class TestJob1 extends SteelApplicationTests {
     private BentiwenduMonthExecute bentiwenduMonthExecute;
 
     @Test
-    public void test5() {
+    public void test4() {
         bentiwenduMonthExecute.execute(JobEnum.gl_bentiwendu_month, JobExecuteEnum.automatic, dateQuery);
+    }
+
+    /**
+     * 高炉冷却壁温度日报表
+     */
+    @Autowired
+    private LengquebiwenduExecute lengquebiwenduExecute;
+
+    @Test
+    public void test5() {
+        lengquebiwenduExecute.execute(JobEnum.gl_lengquebiwendu_day, JobExecuteEnum.automatic, dateQuery);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.cisdi.steel.module.job.strategy;
+package com.cisdi.steel.module.job.strategy.api;
 
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -11,8 +11,8 @@ import com.cisdi.steel.module.job.dto.RowCellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,13 +31,18 @@ import java.util.Map;
  * @author leaf
  * @version 1.0
  */
-@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class TagStrategy implements ApiStrategy {
 
-    private ReportCategoryTemplate template;
     private HttpUtil httpUtil;
     private HttpProperties httpProperties;
+
+
+    public TagStrategy(HttpUtil httpUtil, HttpProperties httpProperties) {
+        this.httpUtil = httpUtil;
+        this.httpProperties = httpProperties;
+    }
 
     @Override
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
