@@ -1,10 +1,7 @@
 package com.cisdi.steel.job.a1;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.module.job.a1.execute.BentiwenduDayExecute;
-import com.cisdi.steel.module.job.a1.execute.ChutiezuoyeDayExecute;
-import com.cisdi.steel.module.job.a1.execute.LudingDayExecute;
+import com.cisdi.steel.module.job.a1.execute.*;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
@@ -42,18 +39,45 @@ public class TestJob1 extends SteelApplicationTests {
      */
     @Autowired
     private ChutiezuoyeDayExecute chutiezuoyeDayExecute;
+
     @Test
-    public void test2(){
-        chutiezuoyeDayExecute.execute(JobEnum.gl_chutiezuoye_day,JobExecuteEnum.automatic,dateQuery);
+    public void test2() {
+        chutiezuoyeDayExecute.execute(JobEnum.gl_chutiezuoye_day, JobExecuteEnum.automatic, dateQuery);
     }
 
+    /**
+     * 高炉本体温度日报表.xlsx
+     */
     @Autowired
     private BentiwenduDayExecute bentiwenduDayExecute;
 
     @Test
-    public void test3(){
+    public void test3() {
         DateQuery dateQuery = DateQueryUtil.buildHour();
         bentiwenduDayExecute.execute(JobEnum.gl_bentiwendu_day, JobExecuteEnum.automatic, dateQuery);
+    }
+
+    /**
+     * 高炉冷却壁温度日报表
+     */
+    @Autowired
+    private LengquebiwenduExecute lengquebiwenduExecute;
+
+    @Test
+    public void test4() {
+        lengquebiwenduExecute.execute(JobEnum.gl_lengquebiwendu_day, JobExecuteEnum.automatic, dateQuery);
+    }
+
+
+    /**
+     * 高炉本体温度月报表
+     */
+    @Autowired
+    private BentiwenduMonthExecute bentiwenduMonthExecute;
+
+    @Test
+    public void test5() {
+        bentiwenduMonthExecute.execute(JobEnum.gl_bentiwendu_month, JobExecuteEnum.automatic, dateQuery);
     }
 
 }

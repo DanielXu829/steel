@@ -17,6 +17,11 @@ import java.util.*;
 @Data
 @AllArgsConstructor
 public class DateQuery {
+
+    /**
+     * 记录的时间
+     */
+    private Date recordDate;
     /**
      * 开始时间
      */
@@ -26,9 +31,10 @@ public class DateQuery {
     private String startTimeKey = "starttime";
     private String endTimeKey = "endtime";
 
-    public DateQuery(Date startTime, Date endTime) {
+    public DateQuery(Date startTime, Date endTime, Date recordDate) {
         this.startTime = startTime;
         this.endTime = endTime;
+        this.recordDate = recordDate;
     }
 
     /**

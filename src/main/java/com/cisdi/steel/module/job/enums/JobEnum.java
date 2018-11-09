@@ -23,7 +23,7 @@ public enum JobEnum {
     gl_bentilushenjingya_month("gl_bentilushenjingya_month", " 高炉本体炉身静压 月报"),
     gl_bentiwendu_day("gl_bentiwendu_day", "高炉本体温度日报表"),
     gl_bentiwendu_month("gl_bentiwendu_month", " 高炉本体温度 月报"),
-    gl_lengquebiwendu_day("gl_lengquebiwendu_day", "高炉冷却壁温度 日报"),
+    gl_lengquebiwendu_day("gl_lengquebiwendu_day", "高炉冷却壁温度日报表"),
     gl_lengquebiwendu_month("gl_lengquebiwendu_month", "高炉冷却壁温度 月报"),
     gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "炉顶装料作业日报表"),
     gl_ludingzhuangliaozuoye_day2("gl_ludingzhuangliaozuoye_day2", "高炉本体温度 日报2"),

@@ -23,7 +23,7 @@ import java.util.List;
  * @version 1.0
  */
 @Component
-public class BentiwenduDayReadWriter extends AbstractExcelReadWriter {
+public class LengquebiwenduReadWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         SheetRowCellData sheetRowCellData = this.requestData(excelDTO.getTemplate(), excelDTO.getDateQuery());
@@ -42,7 +42,7 @@ public class BentiwenduDayReadWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(template.getTemplatePath());
         // 第一个sheet值
         Sheet sheet = this.getSheet(workbook, "_tag_hour_each", template.getTemplatePath());
-        List<DateQuery> queryList = DateQueryUtil.buildHourEach(dateQuery.getStartTime());
+        List<DateQuery> queryList = DateQueryUtil.buildHourEach(dateQuery.getRecordDate());
         TagStrategy tagStrategy = new TagStrategy(template, httpUtil, httpProperties);
         return tagStrategy.execute(workbook, sheet, queryList);
     }

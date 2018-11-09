@@ -202,12 +202,17 @@ public class CommonTests {
     }
 
 
+    /**
+     * 第一行值写入
+     *
+     * @throws Exception
+     */
     @Test
     public void test4() throws Exception {
-        String fileName = "C:\\Users\\yp\\Desktop\\需要做的\\高炉本体温度日报表.xlsx";
+        String fileName = "C:\\Users\\yp\\Desktop\\需要做的\\高炉冷却壁温度日报表.xlsx";
         String saveFilePath = "D:\\1.xlsx";
         Workbook workbook = WorkbookFactory.create(new File(fileName));
-        Sheet sheet = getBySheetName(workbook, "_tag_day_each");
+        Sheet sheet = getBySheetName(workbook, "_tag_hour_each");
         Row row = sheet.getRow(sheet.getFirstRowNum());
         short firstCellNum = row.getFirstCellNum();
         short lastCellNum = row.getLastCellNum();
@@ -231,7 +236,7 @@ public class CommonTests {
         List<DateQuery> dateQueries = DateQueryUtil.buildDayEach(new Date());
         if (Objects.nonNull(dateQueries)) {
             dateQueries.forEach(item -> {
-                System.err.println(DateUtil.getFormatDateTime(item.getStartTime(),DateUtil.fullFormat)+"--"+DateUtil.getFormatDateTime(item.getEndTime(),DateUtil.fullFormat));
+                System.err.println(DateUtil.getFormatDateTime(item.getStartTime(), DateUtil.fullFormat) + "--" + DateUtil.getFormatDateTime(item.getEndTime(), DateUtil.fullFormat));
             });
         }
 

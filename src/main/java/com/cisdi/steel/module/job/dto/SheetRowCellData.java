@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.dto;
 
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -33,4 +34,11 @@ public class SheetRowCellData {
      * 每一行的值
      */
     private List<RowCellData> rowCellDataList;
+
+    /**
+     * 对当前数据 全部填充到文件中
+     */
+    public void allValueWriteExcel() {
+        ExcelWriterUtil.setSheetRowCelData(this);
+    }
 }

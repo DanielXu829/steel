@@ -38,7 +38,7 @@ public class DateQueryUtil {
     public static DateQuery buildToday(Date date) {
         Date todayBeginTime = DateUtil.getDateBeginTime(date);
         Date todayEndTime = DateUtil.getDateEndTime(date);
-        return new DateQuery(todayBeginTime, todayEndTime);
+        return new DateQuery(todayBeginTime, todayEndTime,date);
     }
 
     /**
@@ -57,7 +57,7 @@ public class DateQueryUtil {
         try {
             Date startHour = df.parse(startHourString);
             Date endHour = df.parse(endHourString);
-            return new DateQuery(startHour, endHour);
+            return new DateQuery(startHour, endHour,date);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -132,7 +132,7 @@ public class DateQueryUtil {
 
         Date monthEndTime = getMonthEndTime(date);
         Date endTime = DateUtil.getDateEndTime(monthEndTime);
-        return new DateQuery(beginTime, endTime);
+        return new DateQuery(beginTime, endTime, date);
     }
 
 
