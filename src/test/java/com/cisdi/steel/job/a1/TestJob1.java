@@ -11,7 +11,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * <p>Description:         </p>
+ *
+ * <p>Description:  </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/6 </P>
@@ -37,9 +38,10 @@ public class TestJob1 extends SteelApplicationTests {
 
     @Autowired
     private ChutiezuoyeDayExecute chutiezuoyeDayExecute;
+
     @Test
-    public void test2(){
-        chutiezuoyeDayExecute.execute(JobEnum.gl_chutiezuoye_day,JobExecuteEnum.automatic,dateQuery);
+    public void test2() {
+        chutiezuoyeDayExecute.execute(JobEnum.gl_chutiezuoye_day, JobExecuteEnum.automatic, dateQuery);
     }
 
 }
