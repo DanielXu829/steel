@@ -1,4 +1,4 @@
-package com.cisdi.steel.module.job.a1.readWriter;
+package com.cisdi.steel.module.job.a1.readwriter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
