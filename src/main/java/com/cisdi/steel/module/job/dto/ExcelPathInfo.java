@@ -19,5 +19,8 @@ public class ExcelPathInfo {
      * 文件名称
      */
     private String fileName;
+    /**
+     * 文件保存路径
+     */
     private String saveFilePath;
 }

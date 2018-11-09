@@ -100,6 +100,7 @@ public class ExcelWriterUtil {
 
     /**
      * 处理每一行数据
+     * 列名格式为 aasdf/asdf  下划线分隔
      *
      * @param columns 所有列名
      * @param starRow 开始行

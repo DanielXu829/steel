@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -108,8 +108,14 @@ public class MetadataDTO {
         this.buildEndTime = DateUtil.getFormatDateTime(date, DateUtil.fullFormat);
     }
 
+    /**
+     * 构建需要的数据
+     *
+     * @return 内容
+     */
     public Map<String, Object> buildMap() {
-        Map<String, Object> result = new HashMap<>();
+        // 按照顺序插入
+        Map<String, Object> result = new LinkedHashMap<>();
         result.put("DateTime", this.dateTime);
         result.put("TemplateName", this.templateName);
         result.put("Type", this.type);

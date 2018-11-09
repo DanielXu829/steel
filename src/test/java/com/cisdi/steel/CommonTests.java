@@ -5,6 +5,8 @@ import cn.afterturn.easypoi.util.PoiMergeCellUtil;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtil;
+import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
@@ -199,4 +201,10 @@ public class CommonTests {
         return PoiCellUtil.getCellValue(sheet, rowNum, columnNum);
     }
 
+
+    @Test
+    public void test4(){
+        DateQuery dateQuery = DateQueryUtil.buildHour();
+        System.err.println(dateQuery);
+    }
 }

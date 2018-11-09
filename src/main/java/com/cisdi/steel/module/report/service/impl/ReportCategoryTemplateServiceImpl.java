@@ -101,7 +101,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     @Override
     public ApiResult updateRecord(ReportCategoryTemplate record) {
         File file = new File(record.getTemplatePath());
-        if (Objects.nonNull(file) && file.exists()) {
+        if (file.exists()) {
             LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
             wrapper.select(ReportCategoryTemplate::getTemplatePath);
             wrapper.eq(ReportCategoryTemplate::getId, record.getId());

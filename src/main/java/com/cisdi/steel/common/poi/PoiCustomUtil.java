@@ -194,23 +194,48 @@ public class PoiCustomUtil {
     public static void buildMetadata(Workbook workbook, WriterExcelDTO excelDTO) {
         if (Objects.nonNull(workbook)) {
             Sheet sheet = workbook.getSheet("_metadata");
-            buildMetadata(sheet, excelDTO);
+            MetadataDTO metadataDTO = new MetadataDTO(excelDTO);
+            if (Objects.nonNull(sheet)) {
+                buildMetadata(sheet, metadataDTO);
+            } else {
+                sheet = workbook.createSheet("_metadata");
+                writeAllMetadata(sheet, metadataDTO);
+            }
+        }
+    }
+
+    /**
+     * 完全写入数据
+     *
+     * @param sheet       指定sheet
+     * @param metadataDTO 数据
+     */
+    private static void writeAllMetadata(Sheet sheet, MetadataDTO metadataDTO) {
+        Map<String, Object> map = metadataDTO.buildMap();
+        int index = 0;
+        for (String key : map.keySet()) {
+            Row row = sheet.createRow(index);
+            Cell cellOne = row.createCell(0);
+            Cell cellTwo = row.createCell(1);
+            PoiCustomUtil.setCellValue(cellOne, key);
+            PoiCustomUtil.setCellValue(cellTwo, map.get(key));
+            index++;
         }
     }
 
     /**
      * 构建元数据
      *
-     * @param sheet    sheet
-     * @param excelDTO 数据
+     * @param sheet       sheet
+     * @param metadataDTO 数据
      */
-    public static void buildMetadata(Sheet sheet, WriterExcelDTO excelDTO) {
-        if (Objects.isNull(sheet)) {
-            return;
-        }
-        MetadataDTO metadataDTO = new MetadataDTO(excelDTO);
+    private static void buildMetadata(Sheet sheet, MetadataDTO metadataDTO) {
         int firstRowNum = sheet.getFirstRowNum();
         int lastRowNum = sheet.getLastRowNum();
+        if (firstRowNum == lastRowNum) {
+            writeAllMetadata(sheet, metadataDTO);
+            return;
+        }
         Map<String, Object> map = metadataDTO.buildMap();
         for (int rowNum = firstRowNum; rowNum <= lastRowNum; rowNum++) {
             Row row = sheet.getRow(rowNum);
