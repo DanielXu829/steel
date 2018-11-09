@@ -25,6 +25,6 @@ public class JobGaolubentilushenjingya2 extends AbstractJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.gaolubentilushenjingya_month;
+        return JobEnum.gl_bentilushenjingya_month;
     }
 }

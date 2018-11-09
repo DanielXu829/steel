@@ -25,6 +25,6 @@ public class JobRefenglu2 extends AbstractJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.refenglu_month;
+        return JobEnum.gl_refenglu_month;
     }
 }

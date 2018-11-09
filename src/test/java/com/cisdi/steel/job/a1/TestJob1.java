@@ -32,14 +32,14 @@ public class TestJob1 extends SteelApplicationTests {
 
     @Test
     public void test1() {
-        ludingDayExecute.execute(JobEnum.gaoluludingzhuangliaozuoye_day1, JobExecuteEnum.automatic, dateQuery);
+        ludingDayExecute.execute(JobEnum.gl_ludingzhuangliaozuoye_day1, JobExecuteEnum.automatic, dateQuery);
     }
 
     @Autowired
     private ChutiezuoyeDayExecute chutiezuoyeDayExecute;
     @Test
     public void test2(){
-        chutiezuoyeDayExecute.execute(JobEnum.chutiezuoye_day,JobExecuteEnum.automatic,dateQuery);
+        chutiezuoyeDayExecute.execute(JobEnum.gl_chutiezuoye_day,JobExecuteEnum.automatic,dateQuery);
     }
 
 }

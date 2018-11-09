@@ -25,6 +25,6 @@ public class Gaowenlengquebiwendu2 extends AbstractJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.gaolulengquebiwendu_month;
+        return JobEnum.gl_lengquebiwendu_month;
     }
 }

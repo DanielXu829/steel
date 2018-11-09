@@ -25,6 +25,6 @@ public class Jobjswzhinengpinghengjisuan extends AbstractJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.jswzhinengpinghengjisuan;
+        return JobEnum.gl_jswzhinengpinghengjisuan;
     }
 }

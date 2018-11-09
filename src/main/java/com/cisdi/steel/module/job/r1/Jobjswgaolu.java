@@ -25,6 +25,6 @@ public class Jobjswgaolu extends AbstractJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.jswgaolu_day;
+        return JobEnum.gl_jswgaolu_day;
     }
 }
