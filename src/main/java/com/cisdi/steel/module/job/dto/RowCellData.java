@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * <p>Description:         </p>
+ * 每一行对应的值
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/9 </P>
@@ -25,15 +25,15 @@ public class RowCellData implements Comparable<RowCellData>, Serializable {
     /**
      * 行号
      */
-    private Integer rowNum;
+    private Integer rowIndex;
 
-    private List<CellDataInfo> values;
+    private List<CellValInfo> values;
 
     @Override
     public int compareTo(RowCellData o) {
         if (o == null) {
             return -1;
         }
-        return this.rowNum.compareTo(o.rowNum);
+        return this.rowIndex.compareTo(o.rowIndex);
     }
 }

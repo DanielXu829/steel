@@ -50,7 +50,7 @@ public class ${table.controllerName} {
     /**
      * 列表
      */
-    @PostMapping(value = "/pageList")
+    @PostMapping(cellValue = "/pageList")
     public ApiResult pageList(@RequestBody PageQuery query) {
         return baseService.pageList(query);
     }
@@ -58,7 +58,7 @@ public class ${table.controllerName} {
     /**
      * 插入
      */
-    @PostMapping(value = "/insert")
+    @PostMapping(cellValue = "/insert")
     public ApiResult insertRecord(@RequestBody ${entity} record) {
         return baseService.insertRecord(record);
     }
@@ -66,7 +66,7 @@ public class ${table.controllerName} {
     /**
      * 更新
      */
-    @PostMapping(value = "/update")
+    @PostMapping(cellValue = "/update")
     public ApiResult updateRecord(@RequestBody ${entity} record) {
         return baseService.updateRecord(record);
     }
@@ -74,7 +74,7 @@ public class ${table.controllerName} {
     /**
      * 查询
      */
-    @PostMapping(value = "/get")
+    @PostMapping(cellValue = "/get")
     public ApiResult getRecord(@RequestBody BaseId baseId) {
         return baseService.getById(baseId.getId());
     }
@@ -82,7 +82,7 @@ public class ${table.controllerName} {
     /**
      * 删除
      */
-    @PostMapping(value = "/delete")
+    @PostMapping(cellValue = "/delete")
     public ApiResult deleteById(@RequestBody BaseId baseId) {
         return baseService.deleteRecord(baseId);
     }

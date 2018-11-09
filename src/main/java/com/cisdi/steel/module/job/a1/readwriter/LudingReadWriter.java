@@ -9,7 +9,6 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -27,8 +26,7 @@ import java.util.*;
 @Component
 public class LudingReadWriter extends AbstractExcelReadWriter {
 
-    @Override
-    public List<Map<String, Object>> requestApiData(ReportCategoryTemplate template, DateQuery dateQuery) {
+    private List<Map<String, Object>> requestApiData(DateQuery dateQuery) {
         String url = httpProperties.getUrlApiGLOne() + "/batchenos/period";
         String s = httpUtil.get(url, dateQuery.getQueryParam());
         List<String> list = ResponseUtil.getResponseArray(s, String.class);
@@ -52,10 +50,10 @@ public class LudingReadWriter extends AbstractExcelReadWriter {
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
-        List<Map<String, Object>> dataList = this.requestApiData(excelDTO.getTemplate(), excelDTO.getDateQuery());
+        List<Map<String, Object>> dataList = this.requestApiData(excelDTO.getDateQuery());
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         // 第一个sheet值
-        Sheet sheet = workbook.getSheet("_charge_day_each");
+        Sheet sheet = this.getSheet(workbook, "_charge_day_each", excelDTO.getTemplate().getTemplatePath());
         List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
         List<CellData> cellDataList = ExcelWriterUtil.loopRowData(dataList, columns, 6);
         Collections.sort(cellDataList);

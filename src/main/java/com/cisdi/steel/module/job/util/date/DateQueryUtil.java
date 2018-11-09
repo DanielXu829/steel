@@ -5,8 +5,10 @@ import com.cisdi.steel.common.util.DateUtil;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 时间构建
@@ -34,14 +36,8 @@ public class DateQueryUtil {
      * @return 结果
      */
     public static DateQuery buildToday(Date date) {
-        // TODO: 现在当天没有数据 所以目前扩大时间范围
-//        Date todayBeginTime = DateUtil.getDateBeginTime(date);
-//        Date todayEndTime = DateUtil.getDateEndTime(date);
-        Calendar instance = Calendar.getInstance();
-        instance.set(2015, 1, 1);
-        Date todayBeginTime = instance.getTime();
-        instance.set(2019, 1, 1);
-        Date todayEndTime = instance.getTime();
+        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        Date todayEndTime = DateUtil.getDateEndTime(date);
         return new DateQuery(todayBeginTime, todayEndTime);
     }
 
@@ -66,6 +62,44 @@ public class DateQueryUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 构建每小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildHourEach(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
+        for (int i = hour - 1; i >= 0; i--) {
+            Date nextDate = DateUtil.addHours(date, -i);
+            DateQuery query = DateQueryUtil.buildHour(nextDate);
+            queryList.add(query);
+        }
+        return queryList;
+    }
+
+    /**
+     * 记录每月的每天
+     *
+     * @return 结果
+     */
+    public static List<DateQuery> buildDayEach(Date date) {
+        DateQuery dateQuery = buildMonth(date);
+        Date startTime = dateQuery.getStartTime();
+        long betweenDays = DateUtil.getBetweenDays(startTime, date);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date currentDate = startTime;
+        for (int i = 0; i < betweenDays; i++) {
+            DateQuery query = buildToday(currentDate);
+            queryList.add(query);
+            currentDate = DateUtil.addDays(currentDate, 1);
+        }
+        return queryList;
     }
 
     /**

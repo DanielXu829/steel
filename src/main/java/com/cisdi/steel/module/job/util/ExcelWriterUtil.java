@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.module.job.dto.CellData;
+import com.cisdi.steel.module.job.dto.CellValInfo;
+import com.cisdi.steel.module.job.dto.RowCellData;
+import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -40,6 +43,65 @@ public class ExcelWriterUtil {
     }
 
     /**
+     * 设置数据
+     *
+     * @param sheetRowCelData 数据
+     */
+    public static void setSheetRowCelData(SheetRowCellData sheetRowCelData) {
+        if (Objects.nonNull(sheetRowCelData)) {
+            Sheet sheet = sheetRowCelData.getSheet();
+            List<RowCellData> rowCellDataList = sheetRowCelData.getRowCellDataList();
+            if (Objects.nonNull(rowCellDataList) && !rowCellDataList.isEmpty()) {
+                for (RowCellData rowCellData : rowCellDataList) {
+                    if (Objects.nonNull(rowCellData)) {
+                        // 指定行
+                        Row row = getRowOrCreate(sheet, rowCellData.getRowIndex());
+                        List<CellValInfo> values = rowCellData.getValues();
+                        if (Objects.nonNull(values) && !values.isEmpty()) {
+                            for (CellValInfo value : values) {
+                                // 指定单元格
+                                Cell cell = getCellOrCreate(row, value.getColumnIndex());
+                                PoiCustomUtil.setCellValue(cell, value.getCellValue());
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    /**
+     * 获取某一行 如果不存在就创建
+     *
+     * @param sheet  指定sheet
+     * @param rowNum 指定行
+     * @return 结果
+     */
+    private static Row getRowOrCreate(Sheet sheet, Integer rowNum) {
+        Row row = sheet.getRow(rowNum);
+        if (Objects.isNull(row)) {
+            return sheet.createRow(rowNum);
+        }
+        return row;
+    }
+
+    /**
+     * 获取某一个单元格 如果不存在则创建
+     *
+     * @param row       指定行
+     * @param columnNum 指定列
+     * @return 结果
+     */
+    private static Cell getCellOrCreate(Row row, Integer columnNum) {
+        Cell cell = row.getCell(columnNum);
+        if (Objects.isNull(cell)) {
+            return row.createCell(columnNum);
+        }
+        return cell;
+    }
+
+    /**
      * 对每个单元格写入数据
      *
      * @param sheet        表
@@ -48,18 +110,12 @@ public class ExcelWriterUtil {
     public static void setCellValue(Sheet sheet, List<CellData> cellDataList) {
         Objects.requireNonNull(sheet);
         for (CellData cellData : cellDataList) {
-            int rowNum = cellData.getRowNum();
+            int rowNum = cellData.getRowIndex();
             rowNum++;
-            Row row = sheet.getRow(rowNum);
-            if (Objects.isNull(row)) {
-                row = sheet.createRow(rowNum);
-            }
-            Integer column = cellData.getColumn();
-            Cell cell = row.getCell(column);
-            if (Objects.isNull(cell)) {
-                cell = row.createCell(column);
-            }
-            PoiCustomUtil.setCellValue(cell, cellData.getValue());
+            Row row = getRowOrCreate(sheet, rowNum);
+            Integer column = cellData.getColumnIndex();
+            Cell cell = getCellOrCreate(row, column);
+            PoiCustomUtil.setCellValue(cell, cellData.getCellValue());
         }
     }
 

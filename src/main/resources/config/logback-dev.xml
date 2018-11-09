@@ -18,7 +18,7 @@
 
     <!-- 文件输出格式 带颜色 主要是用于开发阶段颜色-->
     <!--<property name="COLOR_PATTERN"-->
-              <!--value="%d{yyyy-MM-dd HH:mm:ss.SSS} %green([%thread]) %highlight(%-5level) %boldMagenta(%c{36} [%L]) : %cyan(%msg%n)"/>-->
+              <!--cellValue="%d{yyyy-MM-dd HH:mm:ss.SSS} %green([%thread]) %highlight(%-5level) %boldMagenta(%c{36} [%L]) : %cyan(%msg%n)"/>-->
     <property name="COLOR_PATTERN"
     value="%d{HH:mm:ss} %boldMagenta(%c{20} [%L]) : %cyan(%msg%n)"/>
 

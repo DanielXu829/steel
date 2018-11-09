@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,6 @@ import java.util.LinkedList;
 /**
  * 每一行数据
  * 安装顺序排列
- * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/9 </P>
@@ -21,11 +21,12 @@ import java.util.LinkedList;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder(toBuilder = true)
 public class RowData implements Comparable<RowData>, Serializable {
     /**
      * 行号
      */
-    private Integer rowNum;
+    private Integer rowIndex;
 
     /**
      * 结果
@@ -37,6 +38,6 @@ public class RowData implements Comparable<RowData>, Serializable {
         if (o == null) {
             return -1;
         }
-        return this.rowNum.compareTo(o.rowNum);
+        return this.rowIndex.compareTo(o.rowIndex);
     }
 }

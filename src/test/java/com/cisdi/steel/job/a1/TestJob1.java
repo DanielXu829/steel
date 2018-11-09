@@ -1,6 +1,8 @@
 package com.cisdi.steel.job.a1;
 
 import com.cisdi.steel.SteelApplicationTests;
+import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.module.job.a1.execute.BentiwenduDayExecute;
 import com.cisdi.steel.module.job.a1.execute.ChutiezuoyeDayExecute;
 import com.cisdi.steel.module.job.a1.execute.LudingDayExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
@@ -35,11 +37,23 @@ public class TestJob1 extends SteelApplicationTests {
         ludingDayExecute.execute(JobEnum.gl_ludingzhuangliaozuoye_day1, JobExecuteEnum.automatic, dateQuery);
     }
 
+    /**
+     * 出铁作业
+     */
     @Autowired
     private ChutiezuoyeDayExecute chutiezuoyeDayExecute;
     @Test
     public void test2(){
         chutiezuoyeDayExecute.execute(JobEnum.gl_chutiezuoye_day,JobExecuteEnum.automatic,dateQuery);
+    }
+
+    @Autowired
+    private BentiwenduDayExecute bentiwenduDayExecute;
+
+    @Test
+    public void test3(){
+        DateQuery dateQuery = DateQueryUtil.buildHour();
+        bentiwenduDayExecute.execute(JobEnum.gl_bentiwendu_day, JobExecuteEnum.automatic, dateQuery);
     }
 
 }

@@ -17,15 +17,15 @@ package com.cisdi.steel.module.job.enums;
  */
 public enum JobEnum {
     // 高炉
-    gl_chutiezuoye_day("gl_chutiezuoye_day", " 出铁作业日报表"),
+    gl_chutiezuoye_day("gl_chutiezuoye_day", "出铁作业日报表"),
     gl_chutiezuoye_month("gl_chutiezuoye_month", " 出铁作业月报表"),
     gl_bentilushenjingya_day("gl_bentilushenjingya_day", " 高炉本体炉身静压 日报"),
     gl_bentilushenjingya_month("gl_bentilushenjingya_month", " 高炉本体炉身静压 月报"),
-    gl_bentiwendu_day("gl_bentiwendu_day", " 高炉本体温度 日报"),
+    gl_bentiwendu_day("gl_bentiwendu_day", "高炉本体温度日报表"),
     gl_bentiwendu_month("gl_bentiwendu_month", " 高炉本体温度 月报"),
     gl_lengquebiwendu_day("gl_lengquebiwendu_day", "高炉冷却壁温度 日报"),
     gl_lengquebiwendu_month("gl_lengquebiwendu_month", "高炉冷却壁温度 月报"),
-    gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "高炉本体温度 日报1"),
+    gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "炉顶装料作业日报表"),
     gl_ludingzhuangliaozuoye_day2("gl_ludingzhuangliaozuoye_day2", "高炉本体温度 日报2"),
     gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
     gl_refenglu_month("gl_refenglu_month", "热风炉 月报"),

@@ -4,7 +4,6 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import cn.afterturn.easypoi.util.PoiMergeCellUtil;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.commons.lang3.RandomUtils;
@@ -56,6 +55,7 @@ public class CommonTests {
 
     /**
      * 若是Tag类别的就
+     *
      * @param sheet
      */
     public void commonMethod(Sheet sheet) {
@@ -203,8 +203,37 @@ public class CommonTests {
 
 
     @Test
-    public void test4(){
-        DateQuery dateQuery = DateQueryUtil.buildHour();
-        System.err.println(dateQuery);
+    public void test4() throws Exception {
+        String fileName = "C:\\Users\\yp\\Desktop\\需要做的\\高炉本体温度日报表.xlsx";
+        String saveFilePath = "D:\\1.xlsx";
+        Workbook workbook = WorkbookFactory.create(new File(fileName));
+        Sheet sheet = getBySheetName(workbook, "_tag_day_each");
+        Row row = sheet.getRow(sheet.getFirstRowNum());
+        short firstCellNum = row.getFirstCellNum();
+        short lastCellNum = row.getLastCellNum();
+        for (int i = firstCellNum; i < lastCellNum; i++) {
+            Cell cell = row.getCell(i);
+            if (Objects.nonNull(cell)) {
+                String cellValue = PoiCellUtil.getCellValue(cell);
+                if (StringUtils.isNotBlank(cellValue)) {
+                    PoiCustomUtil.setCellValue(cell, cellValue + "/avg");
+                }
+            }
+        }
+        workbook.setForceFormulaRecalculation(true);
+        FileOutputStream fos = new FileOutputStream(saveFilePath);
+        workbook.write(fos);
+        fos.close();
+    }
+
+    @Test
+    public void test5() {
+        List<DateQuery> dateQueries = DateQueryUtil.buildDayEach(new Date());
+        if (Objects.nonNull(dateQueries)) {
+            dateQueries.forEach(item -> {
+                System.err.println(DateUtil.getFormatDateTime(item.getStartTime(),DateUtil.fullFormat)+"--"+DateUtil.getFormatDateTime(item.getEndTime(),DateUtil.fullFormat));
+            });
+        }
+
     }
 }

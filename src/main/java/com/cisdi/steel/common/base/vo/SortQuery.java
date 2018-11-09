@@ -18,7 +18,7 @@ import java.util.Map;
 @Data
 public class SortQuery extends PageQuery {
     /**
-     * 排序 条件 key 字段 value:desc或asc
+     * 排序 条件 key 字段 cellValue:desc或asc
      */
     private Map<String, String> sorts;
 }

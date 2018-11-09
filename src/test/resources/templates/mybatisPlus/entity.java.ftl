@@ -33,7 +33,7 @@ import lombok.experimental.Accessors;
 @TableName("${table.name}")
 </#if>
 <#if swagger2>
-@ApiModel(value="${entity}对象", description="${table.comment!}")
+@ApiModel(cellValue="${entity}对象", description="${table.comment!}")
 </#if>
 <#if superEntityClass??>
 public class ${entity} extends ${superEntityClass}<#if activeRecord><${entity}></#if> {
@@ -52,7 +52,7 @@ public class ${entity} implements Serializable {
 
     <#if field.comment!?length gt 0>
         <#if swagger2>
-    @ApiModelProperty(value = "${field.comment}")
+    @ApiModelProperty(cellValue = "${field.comment}")
         <#else>
     /**
      * ${field.comment}
@@ -62,9 +62,9 @@ public class ${entity} implements Serializable {
     <#if field.keyFlag>
     <#-- 主键 -->
         <#if field.keyIdentityFlag>
-    @TableId(value = "${field.name}", type = IdType.AUTO)
+    @TableId(cellValue = "${field.name}", type = IdType.AUTO)
         <#elseif idType??>
-    @TableId(value = "${field.name}", type = IdType.${idType})
+    @TableId(cellValue = "${field.name}", type = IdType.${idType})
         <#elseif field.convert>
     @TableId("${field.name}")
         </#if>
@@ -72,7 +72,7 @@ public class ${entity} implements Serializable {
     <#elseif field.fill??>
     <#-- -----   存在字段填充设置   ----->
         <#if field.convert>
-    @TableField(value = "${field.name}", fill = FieldFill.${field.fill})
+    @TableField(cellValue = "${field.name}", fill = FieldFill.${field.fill})
         <#else>
     @TableField(fill = FieldFill.${field.fill})
         </#if>

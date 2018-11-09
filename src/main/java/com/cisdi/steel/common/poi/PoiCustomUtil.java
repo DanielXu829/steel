@@ -54,6 +54,30 @@ public class PoiCustomUtil {
         return result;
     }
 
+    public static List<Cell> getFirstRowCel(Sheet sheet) {
+        return getRowCel(sheet, 0);
+    }
+
+    /**
+     * 获取 cell单元格
+     *
+     * @param sheet  表格
+     * @param rowNum 行
+     * @return 结果
+     */
+    public static List<Cell> getRowCel(Sheet sheet, int rowNum) {
+        Row row = sheet.getRow(rowNum);
+        short lastCellNum = row.getLastCellNum();
+        List<Cell> result = new ArrayList<>();
+        for (int index = 0; index < lastCellNum; index++) {
+            Cell cell = row.getCell(index);
+            if (Objects.nonNull(cell)) {
+                result.add(cell);
+            }
+        }
+        return result;
+    }
+
     /**
      * 获取第一列所有值
      *

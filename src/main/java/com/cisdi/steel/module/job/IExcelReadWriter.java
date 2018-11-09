@@ -1,12 +1,7 @@
 package com.cisdi.steel.module.job;
 
-import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 数据 获取  和写入
@@ -18,15 +13,6 @@ import java.util.Map;
  * @version 1.0
  */
 public interface IExcelReadWriter {
-
-    /**
-     * 获取请求数据
-     *
-     * @param template  模板
-     * @param dateQuery 时间段
-     * @return 结果
-     */
-    List<Map<String, Object>> requestApiData(ReportCategoryTemplate template, DateQuery dateQuery);
 
     /**
      * 写入数据

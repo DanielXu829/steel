@@ -74,7 +74,7 @@ public class DefaultFastJsonConfig {
 //        fields.add("password");
 //        fields.add("delFlag");
 //        // 属性过滤
-//        PropertyFilter proFilter = (object, name, value) -> {
+//        PropertyFilter proFilter = (object, name, cellValue) -> {
 //            // 判断是否包含 包含返回false 不包含返回true
 //            return !fields.contains(name);
 //        };

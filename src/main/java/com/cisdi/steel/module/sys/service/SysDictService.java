@@ -21,7 +21,7 @@ public interface SysDictService extends IBaseService<SysDict> {
 
     /**
      * 通过父类编码获取子选项
-     * label - value
+     * label - cellValue
      *
      * @param parentCode 父类编码
      * @return 结果 子类

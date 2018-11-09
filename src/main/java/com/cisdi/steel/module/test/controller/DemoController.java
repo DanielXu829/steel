@@ -100,15 +100,15 @@ public class DemoController {
      *
      * @return
      */
-    @Bean
-    public ServletRegistrationBean servletRegistrationBean() {
-        com.zhuozhengsoft.pageoffice.poserver.Server poserver = new com.zhuozhengsoft.pageoffice.poserver.Server();
-        poserver.setSysPath(poSysPath);//设置PageOffice注册成功后,license.lic文件存放的目录
-        ServletRegistrationBean srb = new ServletRegistrationBean(poserver);
-        srb.addUrlMappings("/poserver.zz");
-        srb.addUrlMappings("/posetup.exe");
-        srb.addUrlMappings("/pageoffice.js");
-        srb.addUrlMappings("/sealsetup.exe");
-        return srb;
-    }
+//    @Bean
+//    public ServletRegistrationBean servletRegistrationBean() {
+//        com.zhuozhengsoft.pageoffice.poserver.Server poserver = new com.zhuozhengsoft.pageoffice.poserver.Server();
+//        poserver.setSysPath(poSysPath);//设置PageOffice注册成功后,license.lic文件存放的目录
+//        ServletRegistrationBean srb = new ServletRegistrationBean(poserver);
+//        srb.addUrlMappings("/poserver.zz");
+//        srb.addUrlMappings("/posetup.exe");
+//        srb.addUrlMappings("/pageoffice.js");
+//        srb.addUrlMappings("/sealsetup.exe");
+//        return srb;
+//    }
 }

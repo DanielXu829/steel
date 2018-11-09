@@ -41,7 +41,7 @@ public class MD5Util {
      * 获取一个文件的md5值(可处理大文件)
      *
      * @param file 文件
-     * @return md5 value
+     * @return md5 cellValue
      */
     public static String MD5(File file) {
         InputStream fileInputStream = null;
