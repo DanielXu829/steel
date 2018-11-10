@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.a1.execute;
 
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
+import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.a1.readwriter.LudingReadWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,10 @@ import org.springframework.stereotype.Component;
 public class LudingDayExecute extends AbstractJobExecuteExecute {
 
     @Autowired
-    private LudingReadWriter writerExcel;
+    private LudingReadWriter ludingReadWriter;
 
     @Override
-    public void initConfig() {
-        this.excelWriter = writerExcel;
+    public IExcelReadWriter getCurrentExcelWriter() {
+        return ludingReadWriter;
     }
 }

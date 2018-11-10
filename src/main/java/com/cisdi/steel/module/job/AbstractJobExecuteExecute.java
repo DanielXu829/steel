@@ -5,10 +5,9 @@ import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.dto.ExcelPathInfo;
+import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.enums.JobEnum;
-import com.cisdi.steel.module.job.enums.JobExecuteEnum;
-import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -57,73 +56,88 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
     @Autowired
     protected ReportIndexService reportIndexService;
 
-    protected IExcelReadWriter excelWriter;
+    /**
+     * 初始化操作
+     */
+    public void initConfig() {
+
+    }
 
     /**
-     * 初始化参数
+     * 获取当前的数据处理
+     *
+     * @return 结果 不能为null
      */
-    public abstract void initConfig();
+    public abstract IExcelReadWriter getCurrentExcelWriter();
 
     @Override
-    public void execute(JobEnum jobEnum, JobExecuteEnum jobExecuteEnum, DateQuery dateQuery) {
-        this.executeDetail(jobEnum, jobExecuteEnum, dateQuery);
+    public void execute(JobExecuteInfo jobExecuteInfo) {
+        this.executeDetail(jobExecuteInfo);
     }
 
     /**
      * 默认的执行
-     * 1、遍历模板
-     * 2、获取数据
-     * 3、处理数据
-     * 4、生成文件
-     * 5、插入索引
+     * 1、初始化数据
+     * 2、参数检查
+     * 3、遍历模板
+     * 4、获取数据
+     * 5、处理数据
+     * 6、生成文件
+     * 7、插入索引
      *
      * @param jobEnum        任务表示
      * @param jobExecuteEnum 状态
      * @param dateQuery      时间段
      */
-    protected void executeDetail(JobEnum jobEnum, JobExecuteEnum jobExecuteEnum, DateQuery dateQuery) {
-        this.initConfig();
-        this.checkParameter(jobEnum, jobExecuteEnum);
-        // 获取模板
-        List<ReportCategoryTemplate> templates = getTemplateInfo(jobEnum);
+    protected void executeDetail(JobExecuteInfo jobExecuteInfo) {
+        // 1
+        initConfig();
+        // 2
+        this.checkParameter(jobExecuteInfo);
+        // 3
+        List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
             try {
                 ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template);
-                WriterExcelDTO writerExcelDTO = new WriterExcelDTO();
-                writerExcelDTO.setStartTime(new Date())
-                        .setJobEnum(jobEnum)
-                        .setJobExecuteEnum(jobExecuteEnum)
-                        .setTemplate(template)
-                        .setExcelPathInfo(excelPathInfo)
-                        .setDateQuery(dateQuery);
-                // 填充数据
-                Workbook workbook = excelWriter.writerExcelExecute(writerExcelDTO);
-                // 生成文件
+                // 参数缺一不可
+                WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
+                        .startTime(new Date())
+                        .jobEnum(jobExecuteInfo.getJobEnum())
+                        .jobExecuteEnum(jobExecuteInfo.getJobExecuteEnum())
+                        .dateQuery(jobExecuteInfo.getDateQuery())
+                        .template(template)
+                        .excelPathInfo(excelPathInfo)
+                        .build();
+                // 4、5填充数据
+                Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
+                // 6、生成文件
                 this.createFile(workbook, excelPathInfo);
 
+                // 7、插入索引
                 ReportIndex reportIndex = new ReportIndex();
-                reportIndex.setSequence(template.getSequence());
-                reportIndex.setReportCategoryCode(template.getReportCategoryCode());
-                reportIndex.setName(excelPathInfo.getFileName());
-                reportIndex.setPath(excelPathInfo.getSaveFilePath());
-                reportIndex.setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName());
-                reportIndex.setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode());
+                reportIndex.setSequence(template.getSequence())
+                        .setReportCategoryCode(template.getReportCategoryCode())
+                        .setName(excelPathInfo.getFileName())
+                        .setPath(excelPathInfo.getSaveFilePath())
+                        .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
+                        .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode());
                 reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
-                this.handlerException(jobEnum + "-->生成模板失败"+e.getMessage());
+                log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage());
             }
         }
     }
 
     /**
-     * 验证参数是否正确
+     * 验证必要参数是否存在
      *
      * @param jobEnum        任务标识
      * @param jobExecuteEnum 任务状态
      */
-    protected final void checkParameter(JobEnum jobEnum, JobExecuteEnum jobExecuteEnum) {
-        Objects.requireNonNull(jobEnum, "任务标识不能为空");
-        Objects.requireNonNull(jobExecuteEnum, "任务状态不能为空");
+    protected final void checkParameter(JobExecuteInfo jobExecuteInfo) {
+        Objects.requireNonNull(jobExecuteInfo, "参数错误" + jobExecuteInfo);
+        Objects.requireNonNull(jobExecuteInfo.getJobEnum(), "任务标识不能为空");
+        Objects.requireNonNull(getCurrentExcelWriter(), "没有对应的数据读取和写入策略");
     }
 
     /**
@@ -172,17 +186,21 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), templateTypeEnum);
         String langName = LanguageEnum.getByLang(template.getTemplateLang()).getName();
         // 文件保存路径
-        String saveFilePath = getSaveFilePath(template.getSequence(),templateTypeEnum, fileName, langName);
+        String saveFilePath = getSaveFilePath(template.getSequence(), templateTypeEnum, fileName, langName);
         return new ExcelPathInfo(fileName, saveFilePath);
     }
 
     /**
      * 多语言版本
+     * 路径 + 语言 + 序号 + 类型 + 文件名
      *
      * @param fileName 文件名
      * @return 文件保存路径
      */
-    protected String getSaveFilePath(String sequence,ReportTemplateTypeEnum templateTypeEnum, String fileName, String langName) {
+    protected String getSaveFilePath(String sequence,
+                                     ReportTemplateTypeEnum templateTypeEnum,
+                                     String fileName,
+                                     String langName) {
         String partName = templateTypeEnum.getName();
         String resultPath = jobProperties.getFilePath() +
                 File.separator + langName +
@@ -196,7 +214,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
     }
 
     /**
-     * 创建晚饭吗
+     * 创建文件
      *
      * @param workbook      文件
      * @param excelPathInfo 文件存储数据
@@ -209,7 +227,8 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             String sheetName = sheet.getSheetName();
-            if (sheetName.contains("_")) {
+            // 以下划线开头的全部隐藏掉
+            if (sheetName.startsWith("_")) {
                 if (sheet.isSelected()) {
                     sheet.setSelected(false);
                 }

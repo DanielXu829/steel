@@ -79,10 +79,10 @@ public class TagStrategy extends AbstractApiStrategy {
                 queryParam.put("method", method);
                 queryParam.put("tagname", tagName);
                 // TODO: 暂时模拟数据
-                String result = httpUtil.get(url, queryParam);
-//                JSONObject mock = new JSONObject();
-//                mock.put("data", RandomUtils.nextInt(1, 999));
-//                String result = mock.toJSONString();
+//                String result = httpUtil.get(url, queryParam);
+                JSONObject mock = new JSONObject();
+                mock.put("data", RandomUtils.nextInt(1, 999));
+                String result = mock.toJSONString();
                 if (StringUtils.isNotBlank(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     CellValInfo cellValInfo = CellValInfo.builder()

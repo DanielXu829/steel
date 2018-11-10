@@ -1,16 +1,11 @@
 package com.cisdi.steel.job.a1;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.module.job.a1.execute.*;
-import com.cisdi.steel.module.job.enums.JobEnum;
-import com.cisdi.steel.module.job.enums.JobExecuteEnum;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.job.a1.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/6 </P>
@@ -20,41 +15,37 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class TestJob1 extends SteelApplicationTests {
 
-    private DateQuery dateQuery = DateQueryUtil.buildToday();
-
-
     /**
      * 高炉炉顶装料作业 日报
      */
     @Autowired
-    private LudingDayExecute ludingDayExecute;
+    private LudingDayJob ludingDayJob;
 
     @Test
     public void test1() {
-        ludingDayExecute.execute(JobEnum.gl_ludingzhuangliaozuoye_day1, JobExecuteEnum.automatic, dateQuery);
+        ludingDayJob.execute(null);
     }
 
     /**
      * 出铁作业
      */
     @Autowired
-    private ChutiezuoyeDayExecute chutiezuoyeDayExecute;
+    private ChutiezuoyeDayJob chutiezuoyeDayJob;
 
     @Test
     public void test2() {
-        chutiezuoyeDayExecute.execute(JobEnum.gl_chutiezuoye_day, JobExecuteEnum.automatic, dateQuery);
+        chutiezuoyeDayJob.execute(null);
     }
 
     /**
      * 高炉本体温度日报表.xlsx
      */
     @Autowired
-    private BentiwenduDayExecute bentiwenduDayExecute;
+    private BentiwenduDayJob bentiwenduDayJob;
 
     @Test
     public void test3() {
-        DateQuery dateQuery = DateQueryUtil.buildHour();
-        bentiwenduDayExecute.execute(JobEnum.gl_bentiwendu_day, JobExecuteEnum.automatic, dateQuery);
+        bentiwenduDayJob.execute(null);
     }
 
 
@@ -62,22 +53,22 @@ public class TestJob1 extends SteelApplicationTests {
      * 高炉本体温度月报表
      */
     @Autowired
-    private BentiwenduMonthExecute bentiwenduMonthExecute;
+    private BentiwenduMonthJob bentiwenduMonthJob;
 
     @Test
     public void test4() {
-        bentiwenduMonthExecute.execute(JobEnum.gl_bentiwendu_month, JobExecuteEnum.automatic, dateQuery);
+        bentiwenduMonthJob.execute(null);
     }
 
     /**
      * 高炉冷却壁温度日报表
      */
     @Autowired
-    private LengquebiwenduDayExecute lengquebiwenduExecute;
+    private LengquebiwenduDayJob lengquebiwenduDayJob;
 
     @Test
     public void test5() {
-        lengquebiwenduExecute.execute(JobEnum.gl_lengquebiwendu_day, JobExecuteEnum.automatic, dateQuery);
+        lengquebiwenduDayJob.execute(null);
     }
 
 
@@ -85,11 +76,11 @@ public class TestJob1 extends SteelApplicationTests {
      * 高炉冷却壁温度月报表
      */
     @Autowired
-    private LengquebiwenduMonthExecute lengquebiwenduMonthExecute;
+    private LengquebiwenduMonthJob lengquebiwenduMonthJob;
 
     @Test
     public void test8() {
-        lengquebiwenduMonthExecute.execute(JobEnum.gl_lengquebiwendu_month, JobExecuteEnum.automatic, dateQuery);
+        lengquebiwenduMonthJob.execute(null);
     }
 
 
@@ -97,11 +88,11 @@ public class TestJob1 extends SteelApplicationTests {
      * 高炉日报表
      */
     @Autowired
-    private GaoLuDayExecute gaoLuDayExecute;
+    private GaoLuDayJob gaoLuDayJob;
 
     @Test
     public void test6() {
-        gaoLuDayExecute.execute(JobEnum.gl_jswgaolu_day, JobExecuteEnum.automatic, dateQuery);
+        gaoLuDayJob.execute(null);
     }
 
 
@@ -109,10 +100,10 @@ public class TestJob1 extends SteelApplicationTests {
      * 高炉月报表
      */
     @Autowired
-    private GaoLuMonthExecute gaoLuMonthExecute;
+    private GaoLuMonthJob gaoLuMonthJob;
 
     @Test
     public void test7() {
-        gaoLuMonthExecute.execute(JobEnum.gl_taisu1_month, JobExecuteEnum.automatic, dateQuery);
+        gaoLuMonthJob.execute(null);
     }
 }

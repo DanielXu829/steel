@@ -2,11 +2,15 @@ package com.cisdi.steel.module.job.util.date;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
- * 时间查询
+ * 时间查询条件
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/5 </P>
@@ -23,29 +27,30 @@ public class DateQuery {
      */
     private Date recordDate;
     /**
-     * 开始时间
+     * 查询的开始时间
      */
     private Date startTime;
+    /**
+     * 查询的结束时间
+     */
     private Date endTime;
-
+    /**
+     * 开始时间key
+     */
     private String startTimeKey = "starttime";
+    /**
+     * 结束时间key
+     */
     private String endTimeKey = "endtime";
+
+    public DateQuery(Date recordDate) {
+        this.recordDate = recordDate;
+    }
 
     public DateQuery(Date startTime, Date endTime, Date recordDate) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.recordDate = recordDate;
-    }
-
-    /**
-     * 获取当前的小时
-     *
-     * @return 结果
-     */
-    public Integer getHour() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startTime);
-        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
     /**
@@ -67,7 +72,7 @@ public class DateQuery {
     }
 
     /**
-     * 获取查询的参数
+     * 构建时间查询参数
      *
      * @return 结果
      */

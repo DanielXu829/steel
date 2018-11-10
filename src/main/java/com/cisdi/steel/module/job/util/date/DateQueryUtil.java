@@ -38,7 +38,7 @@ public class DateQueryUtil {
     public static DateQuery buildToday(Date date) {
         Date todayBeginTime = DateUtil.getDateBeginTime(date);
         Date todayEndTime = DateUtil.getDateEndTime(date);
-        return new DateQuery(todayBeginTime, todayEndTime,date);
+        return new DateQuery(todayBeginTime, todayEndTime, date);
     }
 
     /**
@@ -57,7 +57,7 @@ public class DateQueryUtil {
         try {
             Date startHour = df.parse(startHourString);
             Date endHour = df.parse(endHourString);
-            return new DateQuery(startHour, endHour,date);
+            return new DateQuery(startHour, endHour, date);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -100,6 +100,16 @@ public class DateQueryUtil {
             currentDate = DateUtil.addDays(currentDate, 1);
         }
         return queryList;
+    }
+
+    /**
+     * 每月的数据
+     *
+     * @param date 查询的时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildYearMonthEach(Date date) {
+        return null;
     }
 
     /**

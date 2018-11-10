@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 能介接口
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -29,8 +30,8 @@ import java.util.Objects;
  * @author leaf
  * @version 1.0
  */
-public class AcsStragegy extends AbstractApiStrategy {
-    public AcsStragegy(HttpUtil httpUtil, HttpProperties httpProperties) {
+public class AcsStrategy extends AbstractApiStrategy {
+    public AcsStrategy(HttpUtil httpUtil, HttpProperties httpProperties) {
         super(httpUtil, httpProperties);
     }
 

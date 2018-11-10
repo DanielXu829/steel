@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job;
 
+import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
@@ -35,22 +36,16 @@ public abstract class AbstractExportJob implements Job, Serializable {
      */
     public abstract IJobExecute getCurrentJobExecute();
 
-    /**
-     * 获取当前查询的时间范围
-     *
-     * @return 时间范围
-     */
-    public DateQuery getCurrentDateQuery() {
-        return getCurrentJob().getDateQuery();
-    }
-
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
         IJobExecute jobHandler = getCurrentJobExecute();
         Objects.requireNonNull(jobHandler, "没有执行的类");
         try {
             log.debug(getCurrentJob().getName() + "       开始执行");
-            jobHandler.execute(getCurrentJob(), JobExecuteEnum.automatic, getCurrentDateQuery());
+            JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
+                    .jobEnum(getCurrentJob())
+                    .build();
+            jobHandler.execute(jobExecuteInfo);
             log.debug(getCurrentJob().getName() + "       执行结束");
         } catch (Exception e) {
             log.error(getCurrentJob().getName() + "       执行错误", e.getMessage());

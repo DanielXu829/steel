@@ -1,11 +1,13 @@
 package com.cisdi.steel.module.job.strategy;
 
 import com.cisdi.steel.module.job.strategy.api.ApiStrategy;
-import com.cisdi.steel.module.job.strategy.date.DateStragegy;
+import com.cisdi.steel.module.job.strategy.date.DateStrategy;
+import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
 import lombok.Builder;
 import lombok.Data;
 
 /**
+ *
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/9 </P>
@@ -17,12 +19,17 @@ import lombok.Data;
 @Builder(toBuilder = true)
 public class ExecuteInfo {
     /**
-     * 执行的策略
+     * api处理
      */
     private ApiStrategy apiStrategy;
 
     /**
-     * 时间
+     * 时间处理
      */
-    private DateStragegy dateStragegy;
+    private DateStrategy dateStrategy;
+
+    /**
+     * option处理
+     */
+    private OptionsStrategy optionsStrategy;
 }

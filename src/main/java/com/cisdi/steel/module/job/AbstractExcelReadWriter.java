@@ -4,6 +4,7 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -56,7 +58,7 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
      * @param templatePath 模板路径
      * @return 文件
      */
-    protected Workbook getWorkbook(String templatePath) {
+    protected final Workbook getWorkbook(String templatePath) {
         try {
             return WorkbookFactory.create(new File(templatePath));
         } catch (IOException | InvalidFormatException e) {
@@ -72,10 +74,25 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
      * @param templatePath 模板路径
      * @return 结果
      */
-    protected Sheet getSheet(Workbook workbook, String sheetName, String templatePath) {
+    protected final Sheet getSheet(Workbook workbook, String sheetName, String templatePath) {
         Sheet sheet = workbook.getSheet(sheetName);
         checkNull(sheet, "没有对应的sheetName,请检查模板信息：" + templatePath);
         return sheet;
+    }
+
+    /**
+     * 查询条件
+     * 一定存在 recordDate数据
+     *
+     * @return 结果
+     */
+    protected final DateQuery getDateQuery(WriterExcelDTO excelDTO) {
+        DateQuery dateQuery = excelDTO.getDateQuery();
+        if (Objects.isNull(dateQuery)) {
+            // 默认取当前时间
+            dateQuery = new DateQuery(new Date());
+        }
+        return dateQuery;
     }
 
     /**
@@ -84,7 +101,7 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
      * @param val     检查的值
      * @param message 消息
      */
-    protected void checkNull(Object val, String message) {
+    protected final void checkNull(Object val, String message) {
         if (Objects.isNull(val)) {
             throw new NullPointerException(message);
         }

@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.dto;
 
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -8,6 +9,7 @@ import lombok.experimental.Accessors;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * metadata 存放的数据
@@ -102,7 +104,8 @@ public class MetadataDTO {
 //        this.autoBuildDelayUnit
         this.language = excelDTO.getTemplate().getTemplateLang();
         this.blowingInDate = DateUtil.getFormatDateTime(date, DateUtil.yyyyMMddFormat);
-        this.buildType = excelDTO.getJobExecuteEnum().getName();
+
+        this.buildType =Objects.isNull(excelDTO.getJobExecuteEnum())?JobExecuteEnum.automatic.getName():excelDTO.getJobExecuteEnum().getName();
         this.excelFile = excelDTO.getExcelPathInfo().getSaveFilePath();
         this.buildStartTime = DateUtil.getFormatDateTime(excelDTO.getStartTime(), DateUtil.fullFormat);
         this.buildEndTime = DateUtil.getFormatDateTime(date, DateUtil.fullFormat);

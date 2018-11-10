@@ -4,9 +4,11 @@ import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.util.Date;
 
 
@@ -20,7 +22,8 @@ import java.util.Date;
  */
 @Data
 @Accessors(chain = true)
-public class WriterExcelDTO {
+@Builder(toBuilder = true)
+public class WriterExcelDTO implements Serializable {
     /**
      * 模板
      */

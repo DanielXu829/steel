@@ -5,10 +5,11 @@ import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
 
 /**
- * 构建每天的时间 每小时
+ * 构建当月
+ * <p>
+ * 开始时间和结束时间
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/9 </P>
@@ -17,9 +18,9 @@ import java.util.List;
  * @version 1.0
  */
 @Component
-public class DayHourStragegy implements DateStragegy {
+public class MonthStrategy implements DateStrategy {
     @Override
-    public List<DateQuery> execute(Date date) {
-        return DateQueryUtil.buildDayHourEach(date);
+    public DateQuery handlerDate(Date date) {
+        return DateQueryUtil.buildMonth(date);
     }
 }

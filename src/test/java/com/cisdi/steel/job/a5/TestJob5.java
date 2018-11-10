@@ -1,18 +1,14 @@
 package com.cisdi.steel.job.a5;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.module.job.a5.execute.FourkongDayExecute;
-import com.cisdi.steel.module.job.a5.execute.NewOnekongDayExecute;
-import com.cisdi.steel.module.job.a5.execute.ThreekongDayExecute;
-import com.cisdi.steel.module.job.a5.execute.TwokongDayExecute;
-import com.cisdi.steel.module.job.enums.JobEnum;
-import com.cisdi.steel.module.job.enums.JobExecuteEnum;
+import com.cisdi.steel.module.job.a5.FourkongJob;
+import com.cisdi.steel.module.job.a5.NewOnekongJob;
+import com.cisdi.steel.module.job.a5.ThreekongJob;
+import com.cisdi.steel.module.job.a5.TwokongJob;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Date;
 
 /**
  * <p>Description:         </p>
@@ -28,51 +24,43 @@ public class TestJob5 extends SteelApplicationTests {
     private DateQuery dateQuery = DateQueryUtil.buildToday();
 
     @Autowired
-    private TwokongDayExecute twokongDayExecute;
+    private TwokongJob twokongJob;
 
     @Test
     public void test1() {
-        dateQuery.setStartTime(new Date(1541088000000L));
-        dateQuery.setEndTime(new Date(1541433600000L));
-        twokongDayExecute.execute(JobEnum.nj_twokong, JobExecuteEnum.automatic, dateQuery);
+        twokongJob.execute(null);
     }
 
     /**
      * 三空压站运行记录表.xlsx
      */
     @Autowired
-    private ThreekongDayExecute threekongDayExecute;
+    private ThreekongJob threekongJob;
 
     @Test
     public void test2() {
-        dateQuery.setStartTime(new Date(1541088000000L));
-        dateQuery.setEndTime(new Date(1541433600000L));
-        threekongDayExecute.execute(JobEnum.nj_threekong, JobExecuteEnum.automatic, dateQuery);
+        threekongJob.execute(null);
     }
 
     /**
      * 四空压站运行记录表
      */
     @Autowired
-    private FourkongDayExecute fourkongDayExecute;
+    private FourkongJob fourkongJob;
 
     @Test
     public void test3() {
-        dateQuery.setStartTime(new Date(1541088000000L));
-        dateQuery.setEndTime(new Date(1541433600000L));
-        fourkongDayExecute.execute(JobEnum.nj_fourkong, JobExecuteEnum.automatic, dateQuery);
+        fourkongJob.execute(null);
     }
 
     /**
      * 新一空压站运行记录
      */
     @Autowired
-    private NewOnekongDayExecute newOnekongDayExecute;
+    private NewOnekongJob newOnekongJob;
 
     @Test
     public void test4() {
-        dateQuery.setStartTime(new Date(1541088000000L));
-        dateQuery.setEndTime(new Date(1541433600000L));
-        newOnekongDayExecute.execute(JobEnum.nj_xinyikong, JobExecuteEnum.automatic, dateQuery);
+        newOnekongJob.execute(null);
     }
 }
