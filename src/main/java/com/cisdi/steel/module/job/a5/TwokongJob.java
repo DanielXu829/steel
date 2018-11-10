@@ -6,6 +6,7 @@ import com.cisdi.steel.module.job.a5.execute.TwokongDayExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>email: ypasdf@163.com</p>
@@ -16,10 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @version 1.0
  */
 @Data
+@Component
 public class TwokongJob extends AbstractExportJob {
 
     @Autowired
-    private TwokongDayExecute execute;
+    private TwokongDayExecute twokongDayExecute;
 
     @Override
     public JobEnum getCurrentJob() {
@@ -28,6 +30,6 @@ public class TwokongJob extends AbstractExportJob {
 
     @Override
     public IJobExecute getCurrentJobExecute() {
-        return execute;
+        return twokongDayExecute;
     }
 }
