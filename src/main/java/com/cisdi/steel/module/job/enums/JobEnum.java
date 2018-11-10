@@ -27,13 +27,13 @@ public enum JobEnum {
     gl_bentiwendu_day("gl_bentiwendu_day", "高炉本体温度日报表", DateQueryUtil.buildHour()),
     gl_bentiwendu_month("gl_bentiwendu_month", " 高炉本体温度 月报", DateQueryUtil.buildToday()),
     gl_lengquebiwendu_day("gl_lengquebiwendu_day", "高炉冷却壁温度日报表", DateQueryUtil.buildHour()),
-    gl_lengquebiwendu_month("gl_lengquebiwendu_month", "高炉冷却壁温度 月报"),
-    gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "炉顶装料作业日报表"),
+    gl_lengquebiwendu_month("gl_lengquebiwendu_month", "高炉冷却壁温度 月报", DateQueryUtil.buildToday()),
+    gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "炉顶装料作业日报表", DateQueryUtil.buildHour()),
     gl_ludingzhuangliaozuoye_day2("gl_ludingzhuangliaozuoye_day2", "高炉本体温度 日报2"),
     gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
     gl_refenglu_month("gl_refenglu_month", "热风炉 月报"),
     gl_jswgaolu_day("gl_jswgaolu_day", "JSW高炉 日报", DateQueryUtil.buildHour()),
-    gl_taisu1_month("gl_taisu1_month", "台塑1高炉 月报"),
+    gl_taisu1_month("gl_taisu1_month", "台塑1高炉 月报", DateQueryUtil.buildToday()),
     gl_jswzhinengpinghengjisuan("gl_jswzhinengpinghengjisuan", "JSW质能平衡计算报表"),
 
 
@@ -64,10 +64,10 @@ public enum JobEnum {
     yl_hunyunkuangfenA4ganzhuanshi("yl_hunyunkuangfenA4ganzhuanshi", "原料混匀矿粉A4干转湿配比换算计算表"),
 
     // 能介
-    nj_twokong("nj_twokong","二空压站运行记录表",DateQueryUtil.buildHour()),
-    nj_threekong("nj_threekong","三空压站运行记录表",DateQueryUtil.buildHour()),
-    nj_fourkong("nj_fourkong","四空压站运行记录表",DateQueryUtil.buildHour()),
-    nj_xinyikong("nj_xinyikong","新一空压站运行记录表",DateQueryUtil.buildHour());
+    nj_twokong("nj_twokong", "二空压站运行记录表", DateQueryUtil.buildHour()),
+    nj_threekong("nj_threekong", "三空压站运行记录表", DateQueryUtil.buildHour()),
+    nj_fourkong("nj_fourkong", "四空压站运行记录表", DateQueryUtil.buildHour()),
+    nj_xinyikong("nj_xinyikong", "新一空压站运行记录表", DateQueryUtil.buildHour());
 
     private String code;
     private String name;

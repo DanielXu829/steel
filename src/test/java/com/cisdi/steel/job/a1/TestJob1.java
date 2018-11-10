@@ -73,11 +73,23 @@ public class TestJob1 extends SteelApplicationTests {
      * 高炉冷却壁温度日报表
      */
     @Autowired
-    private LengquebiwenduExecute lengquebiwenduExecute;
+    private LengquebiwenduDayExecute lengquebiwenduExecute;
 
     @Test
     public void test5() {
         lengquebiwenduExecute.execute(JobEnum.gl_lengquebiwendu_day, JobExecuteEnum.automatic, dateQuery);
+    }
+
+
+    /**
+     * 高炉冷却壁温度月报表
+     */
+    @Autowired
+    private LengquebiwenduMonthExecute lengquebiwenduMonthExecute;
+
+    @Test
+    public void test8() {
+        lengquebiwenduMonthExecute.execute(JobEnum.gl_lengquebiwendu_month, JobExecuteEnum.automatic, dateQuery);
     }
 
 
