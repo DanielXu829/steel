@@ -119,41 +119,6 @@ public class ExcelWriterUtil {
     }
 
     /**
-     * 循环遍历数据
-     * 每一个 dataList 对应 一行
-     *
-     * @param dataList 数据
-     * @param columns  对应的列
-     * @return 结果
-     */
-    public static List<CellData> loopRowData(List<Map<String, Object>> dataList, List<String> columns) {
-        return loopRowData(dataList, columns, 1);
-    }
-
-    /**
-     * 循环遍历数据
-     * 每一个 dataList 对应 多行数据
-     *
-     * @param dataList 数据
-     * @param columns  对应的列
-     * @param rowPitch 每一个集合数据占多少行
-     * @return 结果
-     */
-    public static List<CellData> loopRowData(List<Map<String, Object>> dataList, List<String> columns, int rowPitch) {
-        int starRow = 0;
-        List<CellData> resultData = new ArrayList<>();
-        for (Map<String, Object> data : dataList) {
-            // 每一行的数据
-            JSONObject jsonObject = (JSONObject) data.get("data");
-            // 存储每一个
-            List<CellData> rowData = handlerRowData(columns, starRow, jsonObject);
-            resultData.addAll(rowData);
-            starRow += rowPitch;
-        }
-        return resultData;
-    }
-
-    /**
      * 处理每一行数据
      * 列名格式为 aasdf/asdf  下划线分隔
      *
@@ -189,7 +154,7 @@ public class ExcelWriterUtil {
                         JSONObject item = (JSONObject) obj;
                         CaseInsensitiveMap<String, Object> map = new CaseInsensitiveMap<>(item);
                         Object value = map.get(keyChild);
-                        ExcelWriterUtil.addCellData(resultData, ++childIndex, columnIndex, value);
+                        ExcelWriterUtil.addCellData(resultData, childIndex++, columnIndex, value);
                     }
                 }
             }

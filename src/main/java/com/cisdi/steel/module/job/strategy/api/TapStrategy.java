@@ -1,18 +1,18 @@
-package com.cisdi.steel.module.job.a1.readwriter;
+package com.cisdi.steel.module.job.strategy.api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.module.job.AbstractExcelReadWriter;
+import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.dto.CellData;
-import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,33 +20,56 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
- * <P>Date: 2018/11/8 </P>
+ * <P>Date: 2018/11/10 </P>
  *
  * @author leaf
  * @version 1.0
  */
-@Component
-public class ChutiezuoyeDayReadWriter extends AbstractExcelReadWriter {
-    @Override
-    public Workbook excelExecute(WriterExcelDTO excelDTO) {
-        List<Map<String, Object>> dataList = this.requestApiData(excelDTO.getDateQuery());
-        Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        // 第一个sheet值
-        Sheet sheet = this.getSheet(workbook, "_tap_day_each", excelDTO.getTemplate().getTemplatePath());
-        List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-        int starRow = 0;
-        List<CellData> resultData = new ArrayList<>();
-        for (Map<String, Object> rowData : dataList) {
-            List<CellData> cellDataList = ExcelWriterUtil.handlerRowData(columns, starRow, rowData);
-            resultData.addAll(cellDataList);
-            starRow++;
-        }
-        ExcelWriterUtil.setCellValue(sheet, resultData);
-        return workbook;
+public class TapStrategy extends AbstractApiStrategy {
+
+    public TapStrategy(HttpUtil httpUtil, HttpProperties httpProperties) {
+        super(httpUtil, httpProperties);
     }
 
+    @Override
+    public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
+        List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
+        List<CellData> cellDataList = new ArrayList<>();
+        for (DateQuery dateQuery : queryList) {
+            // 理论上来说一次获取了所有，循环只执行一次
+            List<Map<String, Object>> dataList = this.requestApiData(dateQuery);
+            cellDataList.addAll(this.loopRowData(dataList, columns));
+        }
+        return SheetRowCellData.builder()
+                .workbook(workbook)
+                .sheet(sheet)
+                .cellDataList(cellDataList)
+                .build();
+    }
+
+
+    /**
+     * 循环遍历数据
+     * 每一个 dataList 对应 多行数据
+     *
+     * @param dataList 数据
+     * @param columns  对应的列
+     * @return 结果
+     */
+    private List<CellData> loopRowData(List<Map<String, Object>> dataList, List<String> columns) {
+        int starRow = 1;
+        List<CellData> resultData = new ArrayList<>();
+        for (Map<String, Object> data : dataList) {
+            // 存储每一个
+            List<CellData> rowData = ExcelWriterUtil.handlerRowData(columns, starRow, data);
+            resultData.addAll(rowData);
+            starRow++;
+        }
+        return resultData;
+    }
 
     private List<Map<String, Object>> requestApiData(DateQuery dateQuery) {
         String url = httpProperties.getUrlApiGLOne() + "/taps/summary/period";
@@ -56,7 +79,6 @@ public class ChutiezuoyeDayReadWriter extends AbstractExcelReadWriter {
         String result = httpUtil.get(url, queryParam);
         JSONObject jsonObject = JSON.parseObject(result);
         Object total = jsonObject.get("total");
-        this.checkNull(total, "无法获取数据");
         queryParam.put("pagesize", total.toString());
         result = httpUtil.get(url, queryParam);
         JSONObject object = JSONObject.parseObject(result);
@@ -68,7 +90,8 @@ public class ChutiezuoyeDayReadWriter extends AbstractExcelReadWriter {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 Object tapid = obj.get("tapid");
                 if (Objects.nonNull(tapid)) {
-                    obj.put("sequnceno", i);
+                    Integer sequnceno = i + 1;
+                    obj.put("sequnceno", sequnceno);
                     Map<String, Object> mapResult = new CaseInsensitiveMap<>();
                     mapResult.put("tapindex", obj);
                     String url2 = httpProperties.getUrlApiGLOne() + "/tap/analysis/" + tapid.toString();

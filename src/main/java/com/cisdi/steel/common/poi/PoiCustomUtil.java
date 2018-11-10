@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -183,6 +184,9 @@ public class PoiCustomUtil {
         } else if (value instanceof Double) {
             cell.setCellType(CellType.NUMERIC);
             cell.setCellValue(((Double) value));
+        } else if (value instanceof BigDecimal) {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(((BigDecimal) value).doubleValue());
         } else if (value instanceof Long) {
             Long result = (Long) value;
             try {

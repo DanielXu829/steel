@@ -32,7 +32,7 @@ public class SheetRowCellData {
      */
     private Sheet sheet;
     /**
-     * 每一行的值
+     * 每一行的值  和 CellData不能同时有值
      */
     private List<RowCellData> rowCellDataList;
 

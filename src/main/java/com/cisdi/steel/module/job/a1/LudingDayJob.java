@@ -1,12 +1,6 @@
 package com.cisdi.steel.module.job.a1;
 
-import com.cisdi.steel.module.job.a1.execute.LudingDayExecute;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
-import com.cisdi.steel.module.job.AbstractExportJob;
-import com.cisdi.steel.module.job.IJobExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,19 +13,11 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class LudingDayJob extends AbstractExportJob {
-
-    @Autowired
-    private LudingDayExecute ludingDayExecute;
+public class LudingDayJob extends AbstractBaseCommonExportJob1 {
 
     @Override
     public JobEnum getCurrentJob() {
         return JobEnum.gl_ludingzhuangliaozuoye_day1;
-    }
-
-    @Override
-    public IJobExecute getCurrentJobExecute() {
-        return ludingDayExecute;
     }
 
 }

@@ -3,9 +3,7 @@ package com.cisdi.steel.module.job.strategy;
 import com.cisdi.steel.common.util.ApplicationContextHolder;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
-import com.cisdi.steel.module.job.strategy.api.AcsStrategy;
-import com.cisdi.steel.module.job.strategy.api.ApiStrategy;
-import com.cisdi.steel.module.job.strategy.api.TagStrategy;
+import com.cisdi.steel.module.job.strategy.api.*;
 import com.cisdi.steel.module.job.strategy.date.DateStrategy;
 import com.cisdi.steel.module.job.strategy.date.DayStrategy;
 import com.cisdi.steel.module.job.strategy.date.MonthStrategy;
@@ -39,6 +37,7 @@ public class StrategyFactory {
         DATE_STRATEGY_MAP.put("day", ApplicationContextHolder.getBean(DayStrategy.class));
         DATE_STRATEGY_MAP.put("month", ApplicationContextHolder.getBean(MonthStrategy.class));
 
+        OPTIONS_STRATEGY_MAP.put("all", ApplicationContextHolder.getBean(AllOptionStrategy.class));
         OPTIONS_STRATEGY_MAP.put("each", ApplicationContextHolder.getBean(EachOptionStrategy.class));
         OPTIONS_STRATEGY_MAP.put("month", ApplicationContextHolder.getBean(MonthOptionStrategy.class));
         OPTIONS_STRATEGY_MAP.put("day", ApplicationContextHolder.getBean(DayOptionStrategy.class));
@@ -94,7 +93,12 @@ public class StrategyFactory {
             return new TagStrategy(HTTP_UTIL, HTTP_PROPERTIES);
         } else if ("acsReport".equals(method)) {
             return new AcsStrategy(HTTP_UTIL, HTTP_PROPERTIES);
+        } else if ("charge".equals(method)) {
+            return new ChargeStrategy(HTTP_UTIL, HTTP_PROPERTIES);
+        } else if ("tap".equals(method)) {
+            return new TapStrategy(HTTP_UTIL, HTTP_PROPERTIES);
         }
+
         return null;
     }
 
