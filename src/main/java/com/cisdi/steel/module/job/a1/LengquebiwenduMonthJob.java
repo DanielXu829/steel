@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 高炉冷却壁温度日报表
+ * 高炉冷却壁温度月报表
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/9 </P>
@@ -17,14 +17,14 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class LengquebiwenduDayJob extends AbstractExportJob {
+public class LengquebiwenduMonthJob extends AbstractExportJob {
 
     @Autowired
     private LengquebiwenduDayExecute lengquebiwenduExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.gl_lengquebiwendu_day;
+        return JobEnum.gl_lengquebiwendu_month;
     }
 
     @Override

@@ -37,7 +37,7 @@ public class AcsStragegy extends AbstractApiStrategy {
     @Override
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<Cell> columnCells = PoiCustomUtil.getFirstRowCel(sheet);
-        String url = httpProperties.getUrlApiNJOne() + "/tagValues";
+        String url = httpProperties.getUrlApiNJOne() + "/AcsTagValues";
         List<CellData> cellDataList = new ArrayList<>();
         DateQuery query = queryList.get(0);
         if (Objects.nonNull(query)) {

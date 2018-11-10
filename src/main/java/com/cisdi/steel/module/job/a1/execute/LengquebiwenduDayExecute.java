@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class LengquebiwenduExecute extends AbstractJobExecuteExecute {
+public class LengquebiwenduDayExecute extends AbstractJobExecuteExecute {
 
     @Autowired
     private BaseReadWriter baseReadWriter;

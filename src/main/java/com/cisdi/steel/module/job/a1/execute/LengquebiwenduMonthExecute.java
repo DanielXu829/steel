@@ -1,12 +1,12 @@
-package com.cisdi.steel.module.job.a5.execute;
+package com.cisdi.steel.module.job.a1.execute;
 
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
-import com.cisdi.steel.module.job.a5.writer.BaseNjWriter;
+import com.cisdi.steel.module.job.a1.readwriter.BaseReadWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>Description:二空压站运行记录表</p>
+ * <p>Description:   高炉冷却壁温度月报表      </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/9 </P>
@@ -15,13 +15,13 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class TwokongDayExecute extends AbstractJobExecuteExecute {
+public class LengquebiwenduMonthExecute extends AbstractJobExecuteExecute {
 
     @Autowired
-    private BaseNjWriter baseNjWriter;
+    private BaseReadWriter baseReadWriter;
 
     @Override
     public void initConfig() {
-        this.excelWriter = baseNjWriter;
+        this.excelWriter = baseReadWriter;
     }
 }
