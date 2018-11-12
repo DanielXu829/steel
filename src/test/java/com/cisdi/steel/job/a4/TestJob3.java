@@ -45,7 +45,7 @@ public class TestJob3 extends SteelApplicationTests {
     private ZhongjiaowaipaiMonthJob zhongjiaowaipaiMonthJob;
 
     @Test
-    public void test3(){
+    public void test3() {
         zhongjiaowaipaiMonthJob.execute(null);
     }
 
@@ -57,7 +57,7 @@ public class TestJob3 extends SteelApplicationTests {
     private MeitouwaipaiMonthJob meitouwaipaiMonthJob;
 
     @Test
-    public void test4(){
+    public void test4() {
         meitouwaipaiMonthJob.execute(null);
     }
 
@@ -65,7 +65,16 @@ public class TestJob3 extends SteelApplicationTests {
     private GongliaochejianMonthJob gongliaochejianMonthJob;
 
     @Test
-    public void test5(){
+    public void test5() {
         gongliaochejianMonthJob.execute(null);
+    }
+
+
+    @Autowired
+    private LiaojiaomeiDayJob liaojiaomeiDayJob;
+
+    @Test
+    public void test8() {
+        liaojiaomeiDayJob.execute(null);
     }
 }

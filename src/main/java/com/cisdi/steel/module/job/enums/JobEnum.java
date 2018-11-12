@@ -60,6 +60,7 @@ public enum JobEnum {
     ygl_zhongjiaowaipai_month("ygl_zhongjiaowaipai_month","中焦外排记录"),
     ygl_meitouwaipai_month("ygl_meitouwaipai_month","煤头外排记录"),
     ygl_gongliaochejian_month("ygl_gongliaochejian_month","供料车间运输车辆统计_录入"),
+    ygl_Liaojiaomei_day("ygl_Liaojiaomei_day","供料车间运输车辆统计_录入"),
 
     yl_duihunyunkuangfenpeibi("yl_duihunyunkuangfenpeibi", "堆混匀矿粉配比通知单"),
     yl_jinchangwuzijingmeihuayan("yl_jinchangwuzijingmeihuayan", "原料进厂物资精煤化验记录表"),

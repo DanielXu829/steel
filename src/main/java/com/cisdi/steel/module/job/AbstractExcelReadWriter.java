@@ -150,7 +150,6 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 });
             }
-
         }
         return workbook;
     }
@@ -165,8 +164,8 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
      * @param rowBatch  每一个map对应几行数据
      * @return 所有单元格
      */
-    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
-        Map<String, String> queryParam = dateQuery.getQueryParam();
+    private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
+        Map<String, String> queryParam = getQueryParam(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -176,9 +175,32 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
         if (Objects.isNull(data)) {
             return null;
         }
-        int size = data.size();
         int startRow = 1;
+        return handlerJsonArray(columns, rowBatch, data, startRow);
+    }
+
+    /**
+     * 获取默认查询参数
+     *
+     * @param dateQuery 查询时间
+     * @return 结果
+     */
+    protected Map<String, String> getQueryParam(DateQuery dateQuery) {
+        return dateQuery.getQueryParam();
+    }
+
+    /**
+     * 处理返回的 json格式
+     *
+     * @param columns  列名
+     * @param rowBatch 占用多少行
+     * @param data     数据
+     * @param startRow 开始行
+     * @return 结果
+     */
+    protected List<CellData> handlerJsonArray(List<String> columns, int rowBatch, JSONArray data, int startRow) {
         List<CellData> cellDataList = new ArrayList<>();
+        int size = data.size();
         for (int i = 0; i < size; i++) {
             JSONObject map = data.getJSONObject(i);
             if (Objects.nonNull(map)) {
