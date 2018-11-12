@@ -22,7 +22,7 @@ job:
 http:
   url:
    urlApiGLOne: http://10.66.3.202:9001
-   urlApiNJOne: http://10.66.3.220:9004
+   urlApiNJOne: http://10.66.3.220:8080
    urlApiYGLOne: http://10.66.3.210:8181
 
 #log

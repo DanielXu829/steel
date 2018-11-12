@@ -3,11 +3,11 @@ package com.cisdi.steel.module.job.util;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.CellValInfo;
 import com.cisdi.steel.module.job.dto.RowCellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
-import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -137,6 +137,9 @@ public class ExcelWriterUtil {
         CaseInsensitiveMap<String, Object> rowDataMap = new CaseInsensitiveMap<>(rowData);
         for (int columnIndex = 0; columnIndex < size; columnIndex++) {
             String column = columns.get(columnIndex);
+            if (StringUtils.isBlank(column)) {
+                continue;
+            }
             if (!column.contains("/")) {
                 Object value = rowDataMap.get(column);
                 ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);

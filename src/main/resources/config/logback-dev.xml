@@ -83,7 +83,7 @@
     <!--开发环境-->
     <root level="info">
         <appender-ref ref="console"/>
-        <!--<appender-ref ref="normalLog"/>-->
-        <!--<appender-ref ref="errorLog"/>-->
+        <appender-ref ref="normalLog"/>
+        <appender-ref ref="errorLog"/>
     </root>
 </configuration>

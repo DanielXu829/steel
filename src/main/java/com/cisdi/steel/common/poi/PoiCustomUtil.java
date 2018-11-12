@@ -47,9 +47,6 @@ public class PoiCustomUtil {
         List<String> result = new ArrayList<>();
         for (int index = 0; index < lastCellNum; index++) {
             Cell cell = row.getCell(index);
-            if (Objects.isNull(cell)) {
-                continue;
-            }
             result.add(PoiCellUtil.getCellValue(cell));
         }
         return result;

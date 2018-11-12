@@ -17,8 +17,12 @@ logging:
   config: classpath:config/logback-dev.xml
 
 
-leaf:
-  swagger-open: true
+# 请求的根路径
+http:
+  url:
+   urlApiGLOne: http://10.66.3.202:9001
+   urlApiNJOne: http://10.66.3.220:8080
+   urlApiYGLOne: http://10.66.3.210:8181
 
 # 执行定时器相关参数配置
 job:

@@ -54,7 +54,12 @@ public enum JobEnum {
     gl_chejianwuliaowaipai("gl_chejianwuliaowaipai", "供料车间物料外排统计表"),
     gl_chejianjikongzhongxinjioajieban("gl_chejianjikongzhongxinjioajieban", "供料车间物料外排统计表"),
     gl_yichanggenzong("gl_yichanggenzong", "供料异常跟踪表"),
+
+
     ygl_shaixiafentongji_day("ygl_shaixiafentongji_day", "筛下粉统计"),
+    ygl_zhongjiaowaipai_month("ygl_zhongjiaowaipai_month","中焦外排记录"),
+    ygl_meitouwaipai_month("ygl_meitouwaipai_month","煤头外排记录"),
+    ygl_gongliaochejian_month("ygl_gongliaochejian_month","供料车间运输车辆统计_录入"),
 
     yl_duihunyunkuangfenpeibi("yl_duihunyunkuangfenpeibi", "堆混匀矿粉配比通知单"),
     yl_jinchangwuzijingmeihuayan("yl_jinchangwuzijingmeihuayan", "原料进厂物资精煤化验记录表"),

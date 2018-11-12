@@ -1,8 +1,7 @@
-package com.cisdi.steel.job.a3;
+package com.cisdi.steel.job.a4;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.module.job.a4.GongliaochejianJob;
-import com.cisdi.steel.module.job.a4.ShaixiafentongjiDayJob;
+import com.cisdi.steel.module.job.a4.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,4 +38,34 @@ public class TestJob3 extends SteelApplicationTests {
         shaixiafentongjiDayJob.execute(null);
     }
 
+    /**
+     * 3.中焦外排记录
+     */
+    @Autowired
+    private ZhongjiaowaipaiMonthJob zhongjiaowaipaiMonthJob;
+
+    @Test
+    public void test3(){
+        zhongjiaowaipaiMonthJob.execute(null);
+    }
+
+
+    /**
+     * 4.煤头外排记录
+     */
+    @Autowired
+    private MeitouwaipaiMonthJob meitouwaipaiMonthJob;
+
+    @Test
+    public void test4(){
+        meitouwaipaiMonthJob.execute(null);
+    }
+
+    @Autowired
+    private GongliaochejianMonthJob gongliaochejianMonthJob;
+
+    @Test
+    public void test5(){
+        gongliaochejianMonthJob.execute(null);
+    }
 }
