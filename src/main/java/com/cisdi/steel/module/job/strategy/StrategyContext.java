@@ -37,7 +37,7 @@ public class StrategyContext {
 
     /**
      * 获取对应的处理方式
-     * 有一项为空 均不处理：说明不符合规则
+     * 有一项为空 均不处理：说明不符合规则没有对应的处理方式
      *
      * @param sheetName 指定名称
      * @return 结果 返回值为null 表示没有对应的处理 请跳过
@@ -70,5 +70,18 @@ public class StrategyContext {
                     .build();
         }
         return null;
+    }
+
+
+    public ApiStrategy getApi(String api) {
+        return apiStrategyContext.getApiStrategy(api);
+    }
+
+    public DateStrategy getDate(String date) {
+        return dateStrategyContext.getDateStrategy(date);
+    }
+
+    public OptionsStrategy getOption(String option) {
+        return optionsStrategyContext.getOptionStrategy(option);
     }
 }

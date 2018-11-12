@@ -7,6 +7,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.CellValInfo;
 import com.cisdi.steel.module.job.dto.RowCellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -109,12 +110,14 @@ public class ExcelWriterUtil {
      */
     public static void setCellValue(Sheet sheet, List<CellData> cellDataList) {
         Objects.requireNonNull(sheet);
-        for (CellData cellData : cellDataList) {
-            int rowNum = cellData.getRowIndex();
-            Row row = getRowOrCreate(sheet, rowNum);
-            Integer column = cellData.getColumnIndex();
-            Cell cell = getCellOrCreate(row, column);
-            PoiCustomUtil.setCellValue(cell, cellData.getCellValue());
+        if (Objects.nonNull(cellDataList)) {
+            for (CellData cellData : cellDataList) {
+                int rowNum = cellData.getRowIndex();
+                Row row = getRowOrCreate(sheet, rowNum);
+                Integer column = cellData.getColumnIndex();
+                Cell cell = getCellOrCreate(row, column);
+                PoiCustomUtil.setCellValue(cell, cellData.getCellValue());
+            }
         }
     }
 

@@ -72,6 +72,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
 
     @Override
     public void execute(JobExecuteInfo jobExecuteInfo) {
+        // 真正的执行的方法
         this.executeDetail(jobExecuteInfo);
     }
 

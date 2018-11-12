@@ -1,6 +1,5 @@
-package com.cisdi.steel.module.job.a1.readwriter;
+package com.cisdi.steel.module.job;
 
-import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.strategy.ExecuteInfo;
@@ -14,17 +13,16 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 一个通过的 读取和写入方法
- * 规则统一 就可以使用
+ * 默认实现 数据写入
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
- * <P>Date: 2018/11/9 </P>
+ * <P>Date: 2018/11/12 </P>
  *
  * @author leaf
  * @version 1.0
  */
 @Component
-public class BaseGlReadWriter extends AbstractExcelReadWriter {
+public class ExcelReadWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());

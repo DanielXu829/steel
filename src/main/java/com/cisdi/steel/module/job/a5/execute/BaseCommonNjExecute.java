@@ -1,8 +1,8 @@
 package com.cisdi.steel.module.job.a5.execute;
 
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
+import com.cisdi.steel.module.job.ExcelReadWriter;
 import com.cisdi.steel.module.job.IExcelReadWriter;
-import com.cisdi.steel.module.job.a5.writer.BaseNjWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +19,10 @@ import org.springframework.stereotype.Component;
 public class BaseCommonNjExecute extends AbstractJobExecuteExecute {
 
     @Autowired
-    private BaseNjWriter baseNjWriter;
+    private ExcelReadWriter excelReadWriter;
 
     @Override
     public IExcelReadWriter getCurrentExcelWriter() {
-        return baseNjWriter;
+        return excelReadWriter;
     }
 }

@@ -27,4 +27,9 @@ public class HttpProperties {
      */
     private String urlApiNJOne;
 
+    /**
+     * 原供料的接口地址
+     */
+    private String urlApiYGLOne;
+
 }

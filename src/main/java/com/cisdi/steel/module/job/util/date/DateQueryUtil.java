@@ -19,6 +19,7 @@ import java.util.List;
  * @author leaf
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class DateQueryUtil {
 
     /**
@@ -62,6 +63,20 @@ public class DateQueryUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 返回 指定周的开始和结束时间
+     *
+     * @param date 时间
+     * @return 结果
+     */
+    public static DateQuery buildWeek(Date date) {
+        Date weekBeginTime = DateUtil.getWeekBeginTime(date);
+        Date weekEndTime = DateUtil.getWeekEndTime(date);
+        Date dateBeginTime = DateUtil.getDateBeginTime(weekBeginTime);
+        Date dateEndTime = DateUtil.getDateEndTime(weekEndTime);
+        return new DateQuery(dateBeginTime, dateEndTime, date);
     }
 
     /**

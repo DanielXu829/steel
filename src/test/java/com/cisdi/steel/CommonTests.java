@@ -30,11 +30,26 @@ public class CommonTests {
     public void test() {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
-        for (int i = 0; i < 24; i++) {
-            GregorianCalendar gregorianCalendar = new GregorianCalendar(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), i, 0);
-            Date time = gregorianCalendar.getTime();
-            System.err.println(DateUtil.getFormatDateTime(time, DateUtil.hhmmFormat));
+        calendar.setTime(date);
+        int week = calendar.get(Calendar.WEEK_OF_MONTH);
+        List<DateQuery> list = new ArrayList<>();
+        for (int i = week - 1; i >= 0; i--) {
+            Calendar instance = Calendar.getInstance();
+            instance.setTime(date);
+            instance.add(Calendar.DATE, -(i * 7));
+            DateQuery dateQuery = getDateQuery(instance.getTime());
+            list.add(dateQuery);
         }
+        list.forEach(System.out::println);
+    }
+
+    private DateQuery getDateQuery(Date date) {
+        System.err.println(DateUtil.getFormatDateTime(date,DateUtil.fullFormat));
+        Date weekBeginTime = DateUtil.getWeekBeginTime(date);
+        Date weekEndTime = DateUtil.getWeekEndTime(date);
+        Date dateBeginTime = DateUtil.getDateBeginTime(weekBeginTime);
+        Date dateEndTime = DateUtil.getDateEndTime(weekEndTime);
+        return new DateQuery(dateBeginTime, dateEndTime, date);
     }
 
     @Test

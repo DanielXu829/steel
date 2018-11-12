@@ -1,8 +1,8 @@
 package com.cisdi.steel.module.job.util.date;
 
+import com.cisdi.steel.common.util.DateUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -82,4 +82,12 @@ public class DateQuery {
         map.put(endTimeKey, Objects.requireNonNull(getQueryEndTime()).toString());
         return map;
     }
+
+    @Override
+    public String toString() {
+        return "recordDate=" + DateUtil.getFormatDateTime(recordDate, DateUtil.fullFormat)
+                + ",startTime=" + DateUtil.getFormatDateTime(startTime, DateUtil.fullFormat)
+                + ",endTime=" + DateUtil.getFormatDateTime(endTime, DateUtil.fullFormat);
+    }
+
 }
