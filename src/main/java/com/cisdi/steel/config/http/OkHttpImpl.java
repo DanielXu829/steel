@@ -165,6 +165,8 @@ public class OkHttpImpl implements HttpUtil {
     @Override
     public String postJsonParams(String url, String jsonParams) {
         String responseBody = "";
+        log.debug("POST请求URL："+url);
+        log.debug("POST请求参数："+jsonParams);
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParams);
         Request request = new Request.Builder()
                 .url(url)

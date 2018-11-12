@@ -36,4 +36,14 @@ public class HttpProperties {
      */
     private String urlApiYGLOne;
 
+    /**
+     * 5号烧结
+     */
+    private String urlApiSJOne;
+
+    /**
+     * 6号烧结
+     */
+    private String urlApiSJTwo;
+
 }
