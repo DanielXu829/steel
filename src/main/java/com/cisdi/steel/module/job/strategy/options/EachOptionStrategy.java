@@ -25,4 +25,9 @@ public class EachOptionStrategy implements OptionsStrategy {
         dateQueries.add(dateQuery);
         return dateQueries;
     }
+
+    @Override
+    public String getKey() {
+        return "each";
+    }
 }

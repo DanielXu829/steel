@@ -23,4 +23,9 @@ public class AllOptionStrategy implements OptionsStrategy {
         dateQueries.add(dateQuery);
         return dateQueries;
     }
+
+    @Override
+    public String getKey() {
+        return "all";
+    }
 }

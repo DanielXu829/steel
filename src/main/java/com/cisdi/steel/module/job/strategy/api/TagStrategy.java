@@ -4,17 +4,15 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.config.http.HttpUtil;
-import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.dto.CellValInfo;
 import com.cisdi.steel.module.job.dto.RowCellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import lombok.Data;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +27,12 @@ import java.util.Map;
  * @author leaf
  * @version 1.0
  */
+@Component
 public class TagStrategy extends AbstractApiStrategy {
 
-    public TagStrategy(HttpUtil httpUtil, HttpProperties httpProperties) {
-        super(httpUtil, httpProperties);
+    @Override
+    public String getKey() {
+        return "tag";
     }
 
     @Override

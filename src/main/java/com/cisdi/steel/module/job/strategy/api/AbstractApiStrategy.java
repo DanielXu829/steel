@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.strategy.api;
 
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * <p>Description:         </p>
@@ -14,12 +15,10 @@ import com.cisdi.steel.module.job.config.HttpProperties;
  */
 public abstract class AbstractApiStrategy implements ApiStrategy {
 
+    @Autowired
     protected HttpUtil httpUtil;
+
+    @Autowired
     protected HttpProperties httpProperties;
 
-
-    public AbstractApiStrategy(HttpUtil httpUtil, HttpProperties httpProperties) {
-        this.httpUtil = httpUtil;
-        this.httpProperties = httpProperties;
-    }
 }

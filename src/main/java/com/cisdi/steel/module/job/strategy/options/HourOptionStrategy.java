@@ -21,4 +21,9 @@ public class HourOptionStrategy implements OptionsStrategy {
     public List<DateQuery> execute(DateQuery dateQuery) {
         return DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
     }
+
+    @Override
+    public String getKey() {
+        return "hour";
+    }
 }

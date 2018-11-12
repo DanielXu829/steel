@@ -5,8 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.config.http.HttpUtil;
-import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -14,6 +12,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +29,12 @@ import java.util.Objects;
  * @author leaf
  * @version 1.0
  */
+@Component
 public class AcsStrategy extends AbstractApiStrategy {
-    public AcsStrategy(HttpUtil httpUtil, HttpProperties httpProperties) {
-        super(httpUtil, httpProperties);
+
+    @Override
+    public String getKey() {
+        return "acsReport";
     }
 
     @Override

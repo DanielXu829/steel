@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.strategy.options;
 
+import com.cisdi.steel.module.job.strategy.Key;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  * @author leaf
  * @version 1.0
  */
-public interface OptionsStrategy {
+public interface OptionsStrategy extends Key {
 
     /**
      * 把时间处理成对应的 格式

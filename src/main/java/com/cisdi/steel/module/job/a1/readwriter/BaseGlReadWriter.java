@@ -4,7 +4,6 @@ import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.strategy.ExecuteInfo;
-import com.cisdi.steel.module.job.strategy.StrategyFactory;
 import com.cisdi.steel.module.job.strategy.date.DateStrategy;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -36,7 +35,7 @@ public class BaseGlReadWriter extends AbstractExcelReadWriter {
             // 以下划线开头的sheet 表示 隐藏表  待处理
             if (Objects.nonNull(sheet) && sheet.getSheetName().startsWith("_")) {
                 // 获取的对应的策略
-                ExecuteInfo executeInfo = StrategyFactory.getApiBySheetName(sheet.getSheetName());
+                ExecuteInfo executeInfo = strategyContext.getApiBySheetName(sheet.getSheetName());
                 if (Objects.nonNull(executeInfo)) {
                     // 1、时间处理 变成一个时间范围
                     DateStrategy dateStrategy = executeInfo.getDateStrategy();

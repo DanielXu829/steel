@@ -21,4 +21,9 @@ public class MonthOptionStrategy implements OptionsStrategy {
     public List<DateQuery> execute(DateQuery dateQuery) {
         return DateQueryUtil.buildYearMonthEach(dateQuery.getRecordDate());
     }
+
+    @Override
+    public String getKey() {
+        return "month";
+    }
 }

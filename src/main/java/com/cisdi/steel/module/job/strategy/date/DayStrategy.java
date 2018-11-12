@@ -18,6 +18,11 @@ import java.util.Date;
 @Component
 public class DayStrategy implements DateStrategy {
     @Override
+    public String getKey() {
+        return "day";
+    }
+
+    @Override
     public DateQuery handlerDate(Date date) {
         return DateQueryUtil.buildToday(date);
     }

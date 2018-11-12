@@ -5,19 +5,18 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.resp.ResponseUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.config.http.HttpUtil;
-import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 /**
- * <p>Description:         </p>
+ * <p>Description:   charge      </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/10 </P>
@@ -25,9 +24,12 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@Component
 public class ChargeStrategy extends AbstractApiStrategy {
-    public ChargeStrategy(HttpUtil httpUtil, HttpProperties httpProperties) {
-        super(httpUtil, httpProperties);
+
+    @Override
+    public String getKey() {
+        return "charge";
     }
 
     @Override

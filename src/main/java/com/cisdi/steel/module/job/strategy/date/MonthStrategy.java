@@ -20,6 +20,11 @@ import java.util.Date;
 @Component
 public class MonthStrategy implements DateStrategy {
     @Override
+    public String getKey() {
+        return "month";
+    }
+
+    @Override
     public DateQuery handlerDate(Date date) {
         return DateQueryUtil.buildMonth(date);
     }

@@ -4,6 +4,7 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.strategy.StrategyContext;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -33,6 +34,9 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
 
     @Autowired
     protected HttpProperties httpProperties;
+
+    @Autowired
+    protected StrategyContext strategyContext;
 
     /**
      * 所有 子类具体执行的方法

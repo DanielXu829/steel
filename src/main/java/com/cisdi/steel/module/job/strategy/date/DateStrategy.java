@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.strategy.date;
 
+import com.cisdi.steel.module.job.strategy.Key;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 
 import java.util.Date;
@@ -13,7 +14,7 @@ import java.util.Date;
  * @author leaf
  * @version 1.0
  */
-public interface DateStrategy {
+public interface DateStrategy extends Key {
     /**
      * 结果
      *

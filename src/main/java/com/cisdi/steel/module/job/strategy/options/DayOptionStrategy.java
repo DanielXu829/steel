@@ -22,4 +22,9 @@ public class DayOptionStrategy implements OptionsStrategy {
     public List<DateQuery> execute(DateQuery dateQuery) {
         return DateQueryUtil.buildMonthDayEach(dateQuery.getRecordDate());
     }
+
+    @Override
+    public String getKey() {
+        return "day";
+    }
 }
