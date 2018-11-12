@@ -79,7 +79,7 @@ public class ExcelWriterUtil {
      * @param rowNum 指定行
      * @return 结果
      */
-    private static Row getRowOrCreate(Sheet sheet, Integer rowNum) {
+    public static Row getRowOrCreate(Sheet sheet, Integer rowNum) {
         Row row = sheet.getRow(rowNum);
         if (Objects.isNull(row)) {
             return sheet.createRow(rowNum);
@@ -94,7 +94,7 @@ public class ExcelWriterUtil {
      * @param columnNum 指定列
      * @return 结果
      */
-    private static Cell getCellOrCreate(Row row, Integer columnNum) {
+    public static Cell getCellOrCreate(Row row, Integer columnNum) {
         Cell cell = row.getCell(columnNum);
         if (Objects.isNull(cell)) {
             return row.createCell(columnNum);

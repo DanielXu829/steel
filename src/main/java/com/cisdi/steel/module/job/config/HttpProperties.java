@@ -23,6 +23,10 @@ public class HttpProperties {
     private String urlApiGLOne;
 
     /**
+     * 焦化的接口地址
+     */
+    private String urlApiJHOne;
+    /**
      * 能介的接口地址
      */
     private String urlApiNJOne;

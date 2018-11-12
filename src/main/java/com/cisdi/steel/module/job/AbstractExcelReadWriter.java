@@ -164,7 +164,7 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
      * @param rowBatch  每一个map对应几行数据
      * @return 所有单元格
      */
-    private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
         Map<String, String> queryParam = getQueryParam(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
