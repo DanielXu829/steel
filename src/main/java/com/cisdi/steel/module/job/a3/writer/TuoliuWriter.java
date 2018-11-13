@@ -76,12 +76,18 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    /**
+     * 不同的版本获取不同的接口地址
+     *
+     * @param version 版本号
+     * @return 结果
+     */
     private String getUrl(String version) {
         if ("5.0".equals(version)) {
             return httpProperties.getUrlApiSJOne() + "/tagValues/tagNames";
-        } else if ("6.0".equals(version)) {
+        } else {
+            // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/tagValues/tagNames";
         }
-        return null;
     }
 }
