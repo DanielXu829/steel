@@ -106,4 +106,14 @@ public class TestJob1 extends SteelApplicationTests {
     public void test7() {
         gaoLuMonthJob.execute(null);
     }
+
+    /**
+     * 炉顶布料
+     */
+    @Autowired
+    private LudingbuliaoJob ludingbuliaoJob;
+    @Test
+    public void test9(){
+        ludingbuliaoJob.execute(null);
+    }
 }
