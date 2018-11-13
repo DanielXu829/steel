@@ -1,7 +1,6 @@
 package com.cisdi.steel.module.job.enums;
 
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 
 /**
  * <p>Description:  所有工作编码      </p>
@@ -58,10 +57,10 @@ public enum JobEnum {
 
 
     ygl_shaixiafentongji_day("ygl_shaixiafentongji_day", "筛下粉统计"),
-    ygl_zhongjiaowaipai_month("ygl_zhongjiaowaipai_month","中焦外排记录"),
-    ygl_meitouwaipai_month("ygl_meitouwaipai_month","煤头外排记录"),
-    ygl_gongliaochejian_month("ygl_gongliaochejian_month","供料车间运输车辆统计_录入"),
-    ygl_Liaojiaomei_day("ygl_Liaojiaomei_day","供料车间运输车辆统计_录入"),
+    ygl_zhongjiaowaipai_month("ygl_zhongjiaowaipai_month", "中焦外排记录"),
+    ygl_meitouwaipai_month("ygl_meitouwaipai_month", "煤头外排记录"),
+    ygl_gongliaochejian_month("ygl_gongliaochejian_month", "供料车间运输车辆统计_录入"),
+    ygl_Liaojiaomei_day("ygl_Liaojiaomei_day", "供料车间运输车辆统计_录入"),
 
     yl_duihunyunkuangfenpeibi("yl_duihunyunkuangfenpeibi", "堆混匀矿粉配比通知单"),
     yl_jinchangwuzijingmeihuayan("yl_jinchangwuzijingmeihuayan", "原料进厂物资精煤化验记录表"),
@@ -75,7 +74,8 @@ public enum JobEnum {
     nj_twokong("nj_twokong", "二空压站运行记录表"),
     nj_threekong("nj_threekong", "三空压站运行记录表"),
     nj_fourkong("nj_fourkong", "四空压站运行记录表"),
-    nj_xinyikong("nj_xinyikong", "新一空压站运行记录表");
+    nj_xinyikong("nj_xinyikong", "新一空压站运行记录表"),
+    nj_sansigui_day("nj_sansigui_day", "三四柜区运行记录表");
 
     private String code;
     private String name;

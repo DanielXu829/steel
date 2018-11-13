@@ -1,10 +1,7 @@
 package com.cisdi.steel.job.a5;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.module.job.a5.FourkongJob;
-import com.cisdi.steel.module.job.a5.NewOnekongJob;
-import com.cisdi.steel.module.job.a5.ThreekongJob;
-import com.cisdi.steel.module.job.a5.TwokongJob;
+import com.cisdi.steel.module.job.a5.*;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.junit.Test;
@@ -62,5 +59,14 @@ public class TestJob5 extends SteelApplicationTests {
     @Test
     public void test4() {
         newOnekongJob.execute(null);
+    }
+
+
+    @Autowired
+    private ThreeFourKongJob threeFourKongJob;
+
+    @Test
+    public void test5(){
+        threeFourKongJob.execute(null);
     }
 }
