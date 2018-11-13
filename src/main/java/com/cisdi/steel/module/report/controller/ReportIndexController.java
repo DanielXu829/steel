@@ -89,6 +89,7 @@ public class ReportIndexController {
 
     /**
      * 文件上传
+     *
      * @param file 需要上传的文件
      * @return 成功不反回错误信息
      */
@@ -98,6 +99,16 @@ public class ReportIndexController {
             return ApiUtil.fail("文件不能为空");
         }
         return baseService.upload(file);
+    }
+
+    /**
+     * 首页报表数据
+     *
+     * @return 报表首页需要的展示数据封装结果
+     */
+    @RequestMapping(value = "/index")
+    public ApiResult index() {
+        return baseService.reportIndex();
     }
 
 }

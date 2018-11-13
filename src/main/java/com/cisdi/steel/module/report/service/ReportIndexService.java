@@ -36,7 +36,7 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
     /**
      * 添加数据
      *
-     * @param reportIndex       编码
+     * @param reportIndex 编码
      */
     void insertReportRecord(ReportIndex reportIndex);
 
@@ -46,8 +46,15 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
      * @param code       编码
      * @param resultPath 文件存储的路径
      * @param category   分类名
-     * @param indexType   类型
-     * @param indexLang   语言
+     * @param indexType  类型
+     * @param indexLang  语言
      */
     void insertReportRecord(String code, String resultPath, String category, String indexType, String indexLang);
+
+    /**
+     * 报表首页数据
+     *
+     * @return
+     */
+    ApiResult reportIndex();
 }

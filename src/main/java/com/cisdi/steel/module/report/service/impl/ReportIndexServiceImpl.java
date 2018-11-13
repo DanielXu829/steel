@@ -12,6 +12,7 @@ import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.report.dto.ReportIndexDTO;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
@@ -41,6 +42,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
     @Autowired
     private JobProperties jobProperties;
+
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
 
     @Override
     public ApiResult upload(MultipartFile file) {
@@ -116,7 +120,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
     @Override
     @Transactional(rollbackFor = LeafException.class)
-    public void insertReportRecord(String code, String resultPath, String category,String indexType,String indexLang) {
+    public void insertReportRecord(String code, String resultPath, String category, String indexType, String indexLang) {
         if (StringUtils.isBlank(code)) {
             return;
         }
@@ -132,5 +136,27 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         reportIndex.setIndexType(indexType);
         reportIndex.setIndexLang(indexLang);
         this.save(reportIndex);
+    }
+
+
+    @Override
+    public ApiResult reportIndex() {
+        Date today = new Date();
+        //1.昨日日报
+        Date yestarDay = DateUtil.addDays(today, -1);
+        List<ReportIndex> yestarDayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(yestarDay,DateUtil.yyyyMMddFormat));
+        //2.今日日报
+        List<ReportIndex> todayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(today,DateUtil.yyyyMMddFormat));
+        //3.本月月报
+        List<ReportIndex> monthList = reportIndexMapper.queryReportMonth(DateUtil.getFormatDateTime(today,"yyyy-MM"));
+        //4.其他最新报表
+        List<ReportIndex> otherList = reportIndexMapper.queryReportOther(DateUtil.getFormatDateTime(yestarDay,DateUtil.yyyyMMddFormat));
+
+        ReportIndexDTO reportIndexDTO = new ReportIndexDTO();
+        reportIndexDTO.setYestarDayList(yestarDayList);
+        reportIndexDTO.setTodayList(todayList);
+        reportIndexDTO.setMonthList(monthList);
+        reportIndexDTO.setOtherList(otherList);
+        return ApiUtil.success(reportIndexDTO);
     }
 }

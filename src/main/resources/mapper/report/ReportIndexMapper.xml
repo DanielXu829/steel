@@ -1,5 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cisdi.steel.module.report.mapper.ReportIndexMapper">
+    <resultMap id="BaseResultMap" type="com.cisdi.steel.module.report.entity.ReportIndex">
 
+    </resultMap>
+
+    <select id="queryReportToday" resultMap="BaseResultMap">
+        SELECT
+            *
+        FROM
+            `report_index`
+        WHERE
+            index_type IN ( 'report_day' )
+            AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
+    </select>
+    <select id="queryReportMonth" resultMap="BaseResultMap">
+        SELECT
+            *
+        FROM
+            `report_index`
+        WHERE
+            index_type IN ( 'report_month' )
+            AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
+    </select>
+    <select id="queryReportOther" resultMap="BaseResultMap">
+        SELECT
+            *
+        FROM
+            `report_index`
+        WHERE
+            index_type  NOT IN ( 'report_month','4hour_report','report_day' )
+            AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
+        ORDER BY  create_time DESC
+    </select>
 </mapper>
