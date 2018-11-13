@@ -1,20 +1,22 @@
 package com.cisdi.steel.config.fastjson;
 
 import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.serializer.PropertyFilter;
+import com.alibaba.fastjson.parser.deserializer.Jdk8DateCodec;
+import com.alibaba.fastjson.serializer.LongCodec;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.fasterxml.jackson.databind.ser.std.DateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * <p>Description:  fastJson配置 </p>
@@ -45,7 +47,6 @@ public class DefaultFastJsonConfig {
 
 
     /**
-     *
      * @return fastJson的配置
      */
     private FastJsonConfig fastjsonConfig() {
@@ -96,6 +97,7 @@ public class DefaultFastJsonConfig {
 
     /**
      * 支持的mediaType类型
+     *
      * @return 结果
      */
     private List<MediaType> getSupportedMediaType() {

@@ -89,7 +89,7 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
                                     ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val2);
                                     ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val3);
                                     ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val4);
-                                    ExcelWriterUtil.addCellData(cellDataList, row, columnIndex, val5);
+                                    ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val5);
                                     ExcelWriterUtil.addCellData(cellDataList, row, columnIndex, val6);
                                 }
                             }
