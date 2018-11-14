@@ -111,7 +111,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         if (StringUtils.isBlank(reportIndex.getReportCategoryCode())) {
             return;
         }
-        LocalDateTime now = LocalDateTime.now();
+        Date now = new Date();
         reportIndex.setCreateTime(now);
         reportIndex.setUpdateTime(now);
         this.save(reportIndex);
@@ -124,7 +124,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         if (StringUtils.isBlank(code)) {
             return;
         }
-        LocalDateTime now = LocalDateTime.now();
+        Date now = new Date();
         ReportIndex reportIndex = new ReportIndex();
         reportIndex.setCreateTime(now);
         reportIndex.setUpdateTime(now);

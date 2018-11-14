@@ -3,12 +3,15 @@ package com.cisdi.steel.config.fastjson;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -17,17 +20,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * <p>Description:  fastJson配置 </p>
- * <p>email: ypasdf@163.com</p>
- * <p>Copyright: Copyright (c) 2017</p>
- *
- * @author yangpeng
- * @version 1.0
- * @date 2018/1/29
- * @since 1.8
+ * @author 95765
  */
 @Configuration
-public class DefaultFastJsonConfig {
+public class FastJsonConfiguration extends WebMvcConfigurationSupport {
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(fastJsonHttpMessageConverter());
+    }
 
     /**
      * FastJsonHttpMessageConverter
@@ -45,7 +46,6 @@ public class DefaultFastJsonConfig {
 
 
     /**
-     *
      * @return fastJson的配置
      */
     private FastJsonConfig fastjsonConfig() {
@@ -68,17 +68,19 @@ public class DefaultFastJsonConfig {
 //                SerializerFeature.WriteNullBooleanAsFalse
         );
 
-        // 需要过滤的字段 防止被返回
-//        Set<String> fields =new HashSet<>();
-//        fields.add("salt");
-//        fields.add("password");
-//        fields.add("delFlag");
-//        // 属性过滤
-//        PropertyFilter proFilter = (object, name, cellValue) -> {
-//            // 判断是否包含 包含返回false 不包含返回true
-//            return !fields.contains(name);
-//        };
-//        fastJsonConfig.setSerializeFilters(proFilter);
+//         需要过滤的字段 防止被返回
+        Set<String> fields =new HashSet<>();
+
+        fields.add("salt");
+        fields.add("createId");
+        fields.add("password");
+        fields.add("delFlag");
+        // 属性过滤
+        PropertyFilter proFilter = (object, name, cellValue) -> {
+            // 判断是否包含 包含返回false 不包含返回true
+            return !fields.contains(name);
+        };
+        fastJsonConfig.setSerializeFilters(proFilter);
 
         //解决Long转json精度丢失的问题
         SerializeConfig serializeConfig = SerializeConfig.globalInstance;
@@ -96,6 +98,7 @@ public class DefaultFastJsonConfig {
 
     /**
      * 支持的mediaType类型
+     *
      * @return 结果
      */
     private List<MediaType> getSupportedMediaType() {
