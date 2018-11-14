@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
+ * 焦化
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -19,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class TestJob2 extends SteelApplicationTests {
 
+    /**
+     * 干熄焦
+     */
     @Autowired
     private GanxijiaoJob ganxijiaoJob;
 
@@ -27,6 +31,9 @@ public class TestJob2 extends SteelApplicationTests {
         ganxijiaoJob.execute(null);
     }
 
+    /**
+     * 化产
+     */
     @Autowired
     private HuachanJob huachanJob;
 
@@ -35,6 +42,9 @@ public class TestJob2 extends SteelApplicationTests {
         huachanJob.execute(null);
     }
 
+    /**
+     * 炼焦
+     */
     @Autowired
     private LianjiaoJob lianjiaoJob;
 
@@ -43,7 +53,9 @@ public class TestJob2 extends SteelApplicationTests {
         lianjiaoJob.execute(null);
     }
 
-
+    /**
+     * 配煤
+     */
     @Autowired
     private PeimeizuoyequJob peimeizuoyequJob;
 

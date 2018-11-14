@@ -19,7 +19,7 @@ public class TestJob1 extends SteelApplicationTests {
      * 高炉炉顶装料作业 日报
      */
     @Autowired
-    private LudingDayJob ludingDayJob;
+    private LudingzhuangliaoDayJob ludingDayJob;
 
     @Test
     public void test1() {
@@ -112,8 +112,9 @@ public class TestJob1 extends SteelApplicationTests {
      */
     @Autowired
     private LudingbuliaoJob ludingbuliaoJob;
+
     @Test
-    public void test9(){
+    public void test9() {
         ludingbuliaoJob.execute(null);
     }
 }

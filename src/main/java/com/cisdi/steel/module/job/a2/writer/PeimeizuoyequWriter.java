@@ -48,12 +48,9 @@ public class PeimeizuoyequWriter extends AbstractExcelReadWriter {
                 String name = sheetSplit[1];
                 // 粉碎
                 if ("crushing".equals(name)) {
-                    // TODO:待处理
                     List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                    for (DateQuery dateQuery : dateQueries) {
-                        List<CellData> cellDataList = this.mapDataHandler(getUrlTwo(), columns, dateQuery, 1);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    }
+                    List<CellData> cellDataList = this.mapDataHandler(getUrlTwo(), columns, date, 1);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("auto".equals(name)) {
                     for (DateQuery dateQuery : dateQueries) {
                         List<CellData> cellDataList = this.handlerData2(dateQuery, sheet);
@@ -66,7 +63,7 @@ public class PeimeizuoyequWriter extends AbstractExcelReadWriter {
     }
 
     public List<CellData> handlerData2(DateQuery dateQuery, Sheet sheet) {
-        Map<String, String> queryParam = getQueryParam(dateQuery);
+        Map<String, String> queryParam = getQueryParam2(dateQuery);
         int firstRowNum = sheet.getFirstRowNum();
         int lastRowNum = sheet.getLastRowNum();
         List<CellData> cellDataList = new ArrayList<>();
@@ -79,7 +76,7 @@ public class PeimeizuoyequWriter extends AbstractExcelReadWriter {
                     Cell cell = row.getCell(i);
                     String cellValue = PoiCellUtil.getCellValue(cell);
                     if (StringUtils.isNotBlank(cellValue)) {
-                        Map<String, String> map = getQueryParam(dateQuery);
+                        Map<String, String> map = getQueryParam2(dateQuery);
                         map.put("tagName", cellValue);
                         String result = httpUtil.get(getUrl(), map);
                         if (StringUtils.isNotBlank(result)) {
@@ -106,9 +103,46 @@ public class PeimeizuoyequWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    public List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
+        Map<String, String> queryParam = getQueryParam(dateQuery);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        JSONArray r = data.getJSONArray("particleDistribution");
+        if (Objects.isNull(r) || r.size() == 0) {
+            return null;
+        }
+        int startRow = 1;
+        return handlerJsonArray(columns, rowBatch, r, startRow);
+    }
+
 
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        //本月开始
+        Calendar cal = Calendar.getInstance();
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+
+
+        result.put("starttime", cal.getTime().toString());
+        result.put("endtime", calendar.getTime().toString());
+        return result;
+    }
+
+    protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateQuery.getRecordDate());

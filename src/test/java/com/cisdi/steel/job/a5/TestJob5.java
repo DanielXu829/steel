@@ -62,11 +62,14 @@ public class TestJob5 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 三四柜区运行记录表
+     */
     @Autowired
     private ThreeFourKongJob threeFourKongJob;
 
     @Test
-    public void test5(){
+    public void test5() {
         threeFourKongJob.execute(null);
     }
 }
