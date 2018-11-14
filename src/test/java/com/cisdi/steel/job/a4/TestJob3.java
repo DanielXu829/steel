@@ -83,7 +83,16 @@ public class TestJob3 extends SteelApplicationTests {
     private ChengPinCangJob chengPinCangJob;
 
     @Test
-    public void test9(){
+    public void test6() {
         chengPinCangJob.execute(null);
+    }
+
+
+    @Autowired
+    private GongliaochejianyichangJob gongliaochejianyichangJob;
+
+    @Test
+    public void test7() {
+        gongliaochejianyichangJob.execute(null);
     }
 }
