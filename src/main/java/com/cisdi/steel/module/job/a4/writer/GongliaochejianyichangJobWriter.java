@@ -29,7 +29,7 @@ import java.util.Objects;
 public class GongliaochejianyichangJobWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
-        return getMapHandler(getUrl(), 4, excelDTO);
+        return getMapHandler(getUrl(), 2, excelDTO);
     }
 
 
