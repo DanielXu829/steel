@@ -45,7 +45,7 @@ public enum JobEnum {
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫报表"),
-    sj_gengzongbiao("sj_gengzongbiao", "五烧降低主抽电耗跟踪表"),
+    sj_gengzongbiao("sj_gengzongbiao", "五烧六烧主抽电耗跟踪表"),
     sj_rongjiranliao("sj_tuoxiaoyunxingjilu", "熔剂燃料质量管控"),
     sj_tuoliutuoxiaogongyicaiji("sj_tuoliutuoxiaogongyicaiji", "脱硫脱硝工艺参数采集"),
     sj_tuoxiaoyunxingjilu("sj_tuoxiaoyunxingjilu", "脱硝运行记录表"),

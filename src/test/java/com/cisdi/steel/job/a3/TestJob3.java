@@ -3,6 +3,7 @@ package com.cisdi.steel.job.a3;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.a3.TuoliuJob;
 import com.cisdi.steel.module.job.a3.TuoliuTuoxiaoGongyiJob;
+import com.cisdi.steel.module.job.a3.ZhuChouWuAndLiuJob;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,5 +41,16 @@ public class TestJob3 extends SteelApplicationTests {
     @Test
     public void test2() {
         tuoliuTuoxiaoGongyiJob.execute(null);
+    }
+
+    /**
+     * 2018年5烧6烧主抽电耗跟踪表（9月）
+     */
+    @Autowired
+    private ZhuChouWuAndLiuJob zhuChouWuAndLiuJob;
+
+    @Test
+    public void test3() {
+        zhuChouWuAndLiuJob.execute(null);
     }
 }
