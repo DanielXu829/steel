@@ -103,4 +103,12 @@ public class TestJob3 extends SteelApplicationTests {
     public void test10(){
         shengchanxiechedegjiJob.execute(null);
     }
+
+    @Autowired
+    private JinchangwuziJob jinchangwuziJob;
+
+    @Test
+    public void test11(){
+        jinchangwuziJob.execute(null);
+    }
 }

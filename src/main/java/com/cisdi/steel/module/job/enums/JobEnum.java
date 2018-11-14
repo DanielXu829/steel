@@ -64,6 +64,7 @@ public enum JobEnum {
     ygl_chengpincang("ygl_chengpincang", "成品仓出入记录"),
     ygl_yichanggenzong("ygl_yichanggenzong","供料异常跟踪表"),
     ygl_shengchanxiechedegji("ygl_shengchanxiechedegji","生产卸车登记表"),
+    ygl_jinchangwuzi("ygl_jinchangwuzi","进厂物资（精煤）化验记录表"),
 
     yl_duihunyunkuangfenpeibi("yl_duihunyunkuangfenpeibi", "堆混匀矿粉配比通知单"),
     yl_jinchangwuzijingmeihuayan("yl_jinchangwuzijingmeihuayan", "原料进厂物资精煤化验记录表"),
