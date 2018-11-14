@@ -35,7 +35,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         logger.debug("ApplicationContext registed-->{}", applicationContext);
         APPLICATION_CONTEXT = applicationContext;
         defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
-
     }
 
 
