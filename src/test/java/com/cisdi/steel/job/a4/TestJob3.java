@@ -122,4 +122,15 @@ public class TestJob3 extends SteelApplicationTests {
     public void test11(){
         jinchangwuziJob.execute(null);
     }
+
+    /**
+     * 12.原料车间生产运行记录表
+     */
+    @Autowired
+    private YuanliaochejianyunxingjiluJob yuanliaochejianyunxingjiluJob;
+
+    @Test
+    public void test12(){
+        yuanliaochejianyunxingjiluJob.execute(null);
+    }
 }
