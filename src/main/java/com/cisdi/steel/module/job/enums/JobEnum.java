@@ -37,7 +37,7 @@ public enum JobEnum {
     gl_jswzhinengpinghengjisuan("gl_jswzhinengpinghengjisuan", "JSW质能平衡计算报表"),
 
 
-    // 烧结
+    // 焦化
     jh_peimeizuoyequ("jh_peimeizuoyequ", "配煤作业区报表设计"),
     jh_huachan("jh_huachan", "化产报表设计"),
     jh_ganxijiao("jh_ganxijiao", "干熄焦报表设计"),

@@ -1,6 +1,7 @@
 package com.cisdi.steel.job.a3;
 
 import com.cisdi.steel.SteelApplicationTests;
+import com.cisdi.steel.module.job.a3.TuoXiaoJob;
 import com.cisdi.steel.module.job.a3.TuoliuJob;
 import com.cisdi.steel.module.job.a3.TuoliuTuoxiaoGongyiJob;
 import com.cisdi.steel.module.job.a3.ZhuChouWuAndLiuJob;
@@ -52,5 +53,16 @@ public class TestJob3 extends SteelApplicationTests {
     @Test
     public void test3() {
         zhuChouWuAndLiuJob.execute(null);
+    }
+
+    /**
+     * 6#脱销运行记录月报
+     */
+    @Autowired
+    private TuoXiaoJob tuoXiaoJob;
+
+    @Test
+    public void test4() {
+        tuoXiaoJob.execute(null);
     }
 }
