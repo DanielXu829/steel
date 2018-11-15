@@ -79,6 +79,9 @@ public class TestJob3 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 6.成品仓出入记录
+     */
     @Autowired
     private ChengPinCangJob chengPinCangJob;
 
@@ -87,7 +90,9 @@ public class TestJob3 extends SteelApplicationTests {
         chengPinCangJob.execute(null);
     }
 
-
+    /**
+     * 7.供料车间异常用仓信息记录_录入
+     */
     @Autowired
     private GongliaochejianyichangJob gongliaochejianyichangJob;
 
@@ -96,6 +101,9 @@ public class TestJob3 extends SteelApplicationTests {
         gongliaochejianyichangJob.execute(null);
     }
 
+    /**
+     * 10.各作业班生产卸车登记表
+     */
     @Autowired
     private ShengchanxiechedegjiJob shengchanxiechedegjiJob;
 
@@ -104,6 +112,9 @@ public class TestJob3 extends SteelApplicationTests {
         shengchanxiechedegjiJob.execute(null);
     }
 
+    /**
+     * 11.进厂物资（精煤）化验记录表
+     */
     @Autowired
     private JinchangwuziJob jinchangwuziJob;
 
