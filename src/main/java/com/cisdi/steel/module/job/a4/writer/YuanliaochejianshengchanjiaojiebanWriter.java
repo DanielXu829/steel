@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * 原料车间生产运行记录
+ * 9.原料车间生产交班表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -27,7 +27,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
-public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
+public class YuanliaochejianshengchanjiaojiebanWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         return this.getMapHandler2(getUrl(), 1, excelDTO);
@@ -44,7 +44,6 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
                 DateQuery item = new DateQuery(new Date());
-                item.setStartTime(DateUtil.getTodayBeginTime());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 List<CellData> cellDataList = this.mapDataHandler(url, sheetName, columns, item, rowBatch);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -66,15 +65,49 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
             return null;
         }
 
-        if ("yglmain_day_shift".equals(sheetName)) {
+        if ("_ygl1_day_shift".equals(sheetName)) {
             data.remove("a2");
             data.remove("a3");
-        } else if ("_ygl1_day_shift".equals(sheetName)) {
-            data.remove("a1");
-            data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
         } else if ("_ygl2_day_shift".equals(sheetName)) {
             data.remove("a1");
+            data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
+        } else if ("_ygl3_day_shift".equals(sheetName)) {
+            data.remove("a1");
             data.remove("a2");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
+        } else if ("_ygl4_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a5");
+            data.remove("a6");
+        } else if ("_ygl5_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a4");
+            data.remove("a6");
+        } else if ("_ygl6_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+        } else if ("_yglmain_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
         }
 
         int startRow = 1;
@@ -85,13 +118,22 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
         List<CellData> cellDataList = new ArrayList<>();
         Set<String> keySet = data.keySet();
         for (String k : keySet) {
-            JSONArray map = data.getJSONArray(k);
-            for (int i = 0; i < map.size(); i++) {
-                if (Objects.nonNull(map)) {
-                    List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, startRow, map.getJSONObject(i));
-                    cellDataList.addAll(cellDataList1);
+            if (data.get(k) instanceof JSONObject) {
+                JSONObject jsonObject = data.getJSONObject(k);
+                List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, startRow, jsonObject);
+                cellDataList.addAll(cellData);
+            } else if (data.get(k) instanceof JSONArray) {
+                JSONArray map = data.getJSONArray(k);
+                for (int i = 0; i < map.size(); i++) {
+                    if (Objects.nonNull(map)) {
+                        List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, startRow, map.getJSONObject(i));
+                        cellDataList.addAll(cellDataList1);
+                    }
+                    startRow += rowBatch;
                 }
-                startRow += rowBatch;
+            } else {
+                List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, startRow, data);
+                cellDataList.addAll(cellData);
             }
         }
 
@@ -100,11 +142,11 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
 
     public Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> map = new HashMap<>();
-        map.put("shiftday", String.valueOf(Objects.requireNonNull(dateQuery.getStartTime()).getTime()));
+        map.put("shiftday", String.valueOf(Objects.requireNonNull(dateQuery.getRecordDate().getTime())));
         return map;
     }
 
     private String getUrl() {
-        return httpProperties.getUrlApiYGLOne() + "/reportManager/getReport12Data";
+        return httpProperties.getUrlApiYGLOne()+ "/reportManager/getReport9Data";
     }
 }

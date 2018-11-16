@@ -108,7 +108,7 @@ public class TestJob3 extends SteelApplicationTests {
     private ShengchanxiechedegjiJob shengchanxiechedegjiJob;
 
     @Test
-    public void test10(){
+    public void test10() {
         shengchanxiechedegjiJob.execute(null);
     }
 
@@ -119,7 +119,7 @@ public class TestJob3 extends SteelApplicationTests {
     private JinchangwuziJob jinchangwuziJob;
 
     @Test
-    public void test11(){
+    public void test11() {
         jinchangwuziJob.execute(null);
     }
 
@@ -130,7 +130,18 @@ public class TestJob3 extends SteelApplicationTests {
     private YuanliaochejianyunxingjiluJob yuanliaochejianyunxingjiluJob;
 
     @Test
-    public void test12(){
+    public void test12() {
         yuanliaochejianyunxingjiluJob.execute(null);
+    }
+
+    /**
+     * 9.原料车间生产交接班
+     */
+    @Autowired
+    private YuanliaochejianshenchanjiaojiebanJob yuanliaochejianshenchanjiaojiebanJob;
+
+    @Test
+    public void test13() {
+        yuanliaochejianshenchanjiaojiebanJob.execute(null);
     }
 }
