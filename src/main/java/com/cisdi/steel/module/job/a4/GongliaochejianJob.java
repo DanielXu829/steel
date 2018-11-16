@@ -20,12 +20,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class GongliaochejianJob extends AbstractExportJob {
 
-    private final GongliaochejianExecute gongliaochejianExecute;
-
     @Autowired
-    public GongliaochejianJob(GongliaochejianExecute gongliaochejianExecute) {
-        this.gongliaochejianExecute = gongliaochejianExecute;
-    }
+    private GongliaochejianExecute gongliaochejianExecute;
 
     @Override
     public JobEnum getCurrentJob() {

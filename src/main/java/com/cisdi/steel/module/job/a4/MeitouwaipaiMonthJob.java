@@ -18,12 +18,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MeitouwaipaiMonthJob extends AbstractExportJob {
-    private final MeitouwaipaiMonthExecute meitouwaipaiMonthExecute;
-
     @Autowired
-    public MeitouwaipaiMonthJob(MeitouwaipaiMonthExecute meitouwaipaiMonthExecute) {
-        this.meitouwaipaiMonthExecute = meitouwaipaiMonthExecute;
-    }
+    private MeitouwaipaiMonthExecute meitouwaipaiMonthExecute;
 
     @Override
     public JobEnum getCurrentJob() {

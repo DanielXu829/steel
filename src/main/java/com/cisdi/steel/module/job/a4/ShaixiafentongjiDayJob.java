@@ -18,13 +18,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ShaixiafentongjiDayJob extends AbstractExportJob {
-
-    private final ShaixiafentongjiDayExecute shaixiafentongjiDayExecute;
-
     @Autowired
-    public ShaixiafentongjiDayJob(ShaixiafentongjiDayExecute shaixiafentongjiDayExecute) {
-        this.shaixiafentongjiDayExecute = shaixiafentongjiDayExecute;
-    }
+    private ShaixiafentongjiDayExecute shaixiafentongjiDayExecute;
+
 
     @Override
     public JobEnum getCurrentJob() {
