@@ -53,7 +53,7 @@ public class BatchDataTests extends SteelApplicationTests {
     public void test2() {
         List<SysConfig> all = getAll();
         for (SysConfig sysConfig : all) {
-            createTask(sysConfig.getCode(), jobGroup, "0 0/10 * * * ?", "");
+            createTask(sysConfig.getCode(), jobGroup, "0 0/1 * * * ?", "");
         }
     }
 
