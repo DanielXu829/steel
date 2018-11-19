@@ -92,7 +92,7 @@ public class BaseJhWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private String getUrl() {
+    protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 }
