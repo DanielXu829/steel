@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job;
 
+import cn.afterturn.easypoi.cache.manager.POICacheManager;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
@@ -70,7 +71,7 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
      */
     protected final Workbook getWorkbook(String templatePath) {
         try {
-            return WorkbookFactory.create(new File(templatePath));
+            return WorkbookFactory.create(POICacheManager.getFile(templatePath));
         } catch (IOException | InvalidFormatException e) {
             throw new NullPointerException("模板路径不存在" + templatePath);
         }
