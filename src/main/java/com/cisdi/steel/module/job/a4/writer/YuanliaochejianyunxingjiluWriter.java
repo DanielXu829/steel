@@ -140,8 +140,8 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
 
     public Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> map = new HashMap<>();
-//        map.put("shiftday", String.valueOf(Objects.requireNonNull(dateQuery.getStartTime()).getTime()));
-        map.put("shiftday", "1542012527000");
+        map.put("shiftday", String.valueOf(Objects.requireNonNull(dateQuery.getStartTime()).getTime()));
+//        map.put("shiftday", "1542012527000");
         return map;
     }
 
