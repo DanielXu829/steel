@@ -1,5 +1,7 @@
 package com.cisdi.steel.config;
 
+import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -13,6 +15,9 @@ import java.util.List;
 
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurationSupport {
+
+    @Autowired
+    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
 
     @Bean
     public HttpMessageConverter<String> responseBodyConverter() {
@@ -34,6 +39,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(responseBodyConverter());
+        converters.add(fastJsonHttpMessageConverter);
         // 这里必须加上加载默认转换器，不然bug玩死人，并且该bug目前在网络上似乎没有解决方案
         // 百度，谷歌，各大论坛等。你可以试试去掉。
         addDefaultHttpMessageConverters(converters);
