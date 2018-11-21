@@ -23,12 +23,7 @@ import java.util.Set;
  * @author 95765
  */
 @Configuration
-public class FastJsonConfiguration extends WebMvcConfigurationSupport {
-
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(fastJsonHttpMessageConverter());
-    }
+public class FastJsonConfiguration {
 
     /**
      * FastJsonHttpMessageConverter
