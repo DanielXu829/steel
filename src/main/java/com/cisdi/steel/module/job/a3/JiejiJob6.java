@@ -1,14 +1,14 @@
-package com.cisdi.steel.module.job.a2;
+package com.cisdi.steel.module.job.a3;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a2.execute.BaseJhExecute;
-import com.cisdi.steel.module.job.a2.execute.HuachanExecute;
+import com.cisdi.steel.module.job.a3.execute.JiejiExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * 5#、6#烧结机生产日报
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -18,18 +18,18 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class HuachanJob extends AbstractExportJob {
+public class JiejiJob6 extends AbstractExportJob {
 
     @Autowired
-    private HuachanExecute huachanExecute;
+    private JiejiExecute jiejiExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.jh_huachan;
+        return JobEnum.sj_shaojieji6_day;
     }
 
     @Override
     public IJobExecute getCurrentJobExecute() {
-        return huachanExecute;
+        return jiejiExecute;
     }
 }

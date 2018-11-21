@@ -49,6 +49,8 @@ public enum JobEnum {
     sj_rongjiranliao("sj_tuoxiaoyunxingjilu", "熔剂燃料质量管控"),
     sj_tuoliutuoxiaogongyicaiji("sj_tuoliutuoxiaogongyicaiji", "脱硫脱硝工艺参数采集"),
     sj_tuoxiaoyunxingjilu("sj_tuoxiaoyunxingjilu", "脱硝运行记录表"),
+    sj_shaojieji6_day("sj_shaojieji6_day", "6#烧结机生产日报"),
+    sj_shaojieji5_day("sj_shaojieji5_day", "5#烧结机生产日报"),
 
     // 原供料
     gl_chejianwuliaowaipai("gl_chejianwuliaowaipai", "供料车间物料外排统计表"),

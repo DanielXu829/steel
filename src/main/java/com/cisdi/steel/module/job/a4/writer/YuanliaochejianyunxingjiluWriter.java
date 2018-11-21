@@ -66,15 +66,55 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
             return null;
         }
 
-        if ("yglmain_day_shift".equals(sheetName)) {
+        if ("_yglmain_day_shift".equals(sheetName)) {
             data.remove("a2");
             data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
+            data.remove("a7");
         } else if ("_ygl1_day_shift".equals(sheetName)) {
             data.remove("a1");
             data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
+            data.remove("a7");
         } else if ("_ygl2_day_shift".equals(sheetName)) {
             data.remove("a1");
             data.remove("a2");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
+            data.remove("a7");
+        }else if ("_ygl3_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a5");
+            data.remove("a6");
+            data.remove("a7");
+        }else if ("_ygl4_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a4");
+            data.remove("a6");
+            data.remove("a7");
+        }else if ("_ygl5_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a7");
+        }else if ("_ygl6_day_shift".equals(sheetName)) {
+            data.remove("a1");
+            data.remove("a2");
+            data.remove("a3");
+            data.remove("a4");
+            data.remove("a5");
+            data.remove("a6");
         }
 
         int startRow = 1;
@@ -101,6 +141,7 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
     public Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> map = new HashMap<>();
         map.put("shiftday", String.valueOf(Objects.requireNonNull(dateQuery.getStartTime()).getTime()));
+//        map.put("shiftday", "1542012527000");
         return map;
     }
 
