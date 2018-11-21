@@ -69,9 +69,8 @@ public class PoiCustomUtil {
         List<Cell> result = new ArrayList<>();
         for (int index = 0; index < lastCellNum; index++) {
             Cell cell = row.getCell(index);
-            if (Objects.nonNull(cell)) {
-                result.add(cell);
-            }
+            Optional.ofNullable(cell)
+                    .ifPresent(result::add);
         }
         return result;
     }

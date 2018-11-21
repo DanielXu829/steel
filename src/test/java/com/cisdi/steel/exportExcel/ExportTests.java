@@ -4,12 +4,13 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.common.constant.Constants;
+import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.resp.ResponseUtil;
 import com.cisdi.steel.common.resp.TestData;
 import com.cisdi.steel.common.util.DateUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.junit.Test;
 
 import java.io.File;
@@ -135,54 +136,37 @@ public class ExportTests extends SteelApplicationTests {
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             String sheetName = sheet.getSheetName();
-            if (sheetName.contains("_")) {
+            if (sheetName.equals("ACS4_ACM_TAGValue")) {
                 sheets.put(i, sheet);
-                workbook.setSheetHidden(i,Workbook.SHEET_STATE_HIDDEN);
+                workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
             }
         }
-        List<CellData> cellDataList = new ArrayList<>();
         sheets.forEach((index, sheet) -> {
-            int firstRowNum = sheet.getFirstRowNum();
-            int lastRowNum = sheet.getLastRowNum();
-            for (int rowNum = firstRowNum; rowNum < lastRowNum; rowNum++) {
-                Row row = sheet.getRow(rowNum);
-                if (Objects.nonNull(row)) {
-                    short firstCellNum = row.getFirstCellNum();
-                    short lastCellNum = row.getLastCellNum();
-                    for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
-                        Cell cell = row.getCell(cellNum);
-                        String cellValue = PoiCellUtil.getCellValue(cell);
-                        if (!cellValue.isEmpty()) {
-                            cellDataList.add(new CellData(workbook, sheet, cell));
-                        }
-                    }
-                }
-            }
+            List<Cell> firstRowCel = PoiCustomUtil.getFirstRowCel(sheet);
+            firstRowCel.stream()
+                    .forEach(cell -> {
+                        System.err.println(PoiCellUtil.getCellValue(cell));
 
-        });
-
-        cellDataList.forEach(cellData -> {
-            String cellValue = PoiCellUtil.getCellValue(cellData.getCell());
-            int i = cellValue.indexOf("/");
-            Sheet sheet = cellData.getSheet();
-            if (i != -1) {
-                String[] split = cellValue.split("/");
-            }
-            int rowIndex = cellData.getCell().getRowIndex() + 1;
-            int rowColumn = cellData.getCell().getColumnIndex();
-            Row row = sheet.getRow(rowIndex);
-            if (Objects.isNull(row)) {
-                row = sheet.createRow(rowIndex);
-            }
-            Cell cell = row.getCell(rowColumn);
-            if (Objects.isNull(cell)) {
-                cell = row.createCell(rowColumn);
-            }
-            cell.setCellStyle(cellData.getCell().getCellStyle());
-            cell.setCellValue(RandomUtils.nextInt(0, 99));
+                        CellStyle cellStyle = cell.getCellStyle();
+                        Color fore = cellStyle.getFillForegroundColorColor();
+                        Optional.ofNullable(fore).ifPresent(item -> {
+                            XSSFColor a = (XSSFColor) item;
+                            byte[] rgb = a.getRGB();
+                            StringBuilder sb = new StringBuilder();
+                            for(byte c : rgb) {
+                                int i = c & 0xff;
+                                String cs = Integer.toHexString(i);
+                                if(cs.length() == 1) {
+                                    sb.append('0');
+                                }
+                                sb.append(cs);
+                            }
+                            System.err.println(sb.toString());
+                        });
+                    });
         });
         FileOutputStream fos = new FileOutputStream(savePath);
-        workbook.write(fos);
+//        workbook.write(fos);
         fos.close();
     }
 }
