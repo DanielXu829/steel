@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.Random;
 
 @RestController
 public class EditorController {
@@ -57,7 +58,7 @@ public class EditorController {
         model.addAttribute("documentType", FileUtility.GetFileType(filePath).toString().toLowerCase());
         //要编辑的文档访问url
         model.addAttribute("fileUri", DocumentManager.GetFileUri(fileName) + "." + fileType);
-        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + filePath));
+        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + filePath+ new Random().nextInt(100)));
         model.addAttribute("callbackUrl", DocumentManager.GetCallback(filePath));
         model.addAttribute("serverUrl", DocumentManager.GetServerUrl());
         model.addAttribute("editorMode", DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(filePath)) && !"view".equals(request.getAttribute("mode")) ? "edit" : "view");

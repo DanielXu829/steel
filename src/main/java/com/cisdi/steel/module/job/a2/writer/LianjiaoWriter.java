@@ -31,7 +31,6 @@ public class LianjiaoWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        String version = PoiCustomUtil.getSheetCell(workbook, "_dictionary", 0, 1);
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
@@ -44,8 +43,11 @@ public class LianjiaoWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
-                if ("_jhlwjic_day_hour".equals(sheetName)) {
-                    List<CellData> cellData = mapDataHandler2(1, getUrl2(), columns, date, version);
+                if ("_jhlwjic6_day_hour".equals(sheetName)) {
+                    List<CellData> cellData = mapDataHandler2(1, getUrl2(), columns, date, "CO6");
+                    ExcelWriterUtil.setCellValue(sheet, cellData);
+                } else if ("_jhlwjic7_day_hour".equals(sheetName)) {
+                    List<CellData> cellData = mapDataHandler2(1, getUrl2(), columns, date, "CO7");
                     ExcelWriterUtil.setCellValue(sheet, cellData);
                 } else {
                     for (int j = 0; j < size; j++) {
@@ -131,9 +133,14 @@ public class LianjiaoWriter extends AbstractExcelReadWriter {
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        result.put("date", calendar.getTime().getTime() + "");
-//        result.put("date", "1538841600000");
+//        result.put("date", calendar.getTime().getTime() + "");
+        result.put("date", "1540137600000");
         result.put("jlno", version);
+
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.set(Calendar.HOUR, 0);
+        calendar1.set(Calendar.MINUTE, 0);
+        calendar1.set(Calendar.SECOND, 0);
         return result;
     }
 
