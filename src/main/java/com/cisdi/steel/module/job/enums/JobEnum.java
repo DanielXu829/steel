@@ -64,9 +64,9 @@ public enum JobEnum {
     ygl_gongliaochejian_month("ygl_gongliaochejian_month", "供料车间运输车辆统计_录入"),
     ygl_Liaojiaomei_day("ygl_Liaojiaomei_day", "供料车间运输车辆统计_录入"),
     ygl_chengpincang("ygl_chengpincang", "成品仓出入记录"),
-    ygl_yichanggenzong("ygl_yichanggenzong","供料异常跟踪表"),
-    ygl_shengchanxiechedegji("ygl_shengchanxiechedegji","生产卸车登记表"),
-    ygl_jinchangwuzi("ygl_jinchangwuzi","进厂物资（精煤）化验记录表"),
+    ygl_yichanggenzong("ygl_yichanggenzong", "供料异常跟踪表"),
+    ygl_shengchanxiechedegji("ygl_shengchanxiechedegji", "生产卸车登记表"),
+    ygl_jinchangwuzi("ygl_jinchangwuzi", "进厂物资（精煤）化验记录表"),
 
     yl_duihunyunkuangfenpeibi("yl_duihunyunkuangfenpeibi", "堆混匀矿粉配比通知单"),
     yl_jinchangwuzijingmeihuayan("yl_jinchangwuzijingmeihuayan", "原料进厂物资精煤化验记录表"),
@@ -81,7 +81,13 @@ public enum JobEnum {
     nj_threekong("nj_threekong", "三空压站运行记录表"),
     nj_fourkong("nj_fourkong", "四空压站运行记录表"),
     nj_xinyikong("nj_xinyikong", "新一空压站运行记录表"),
-    nj_sansigui_day("nj_sansigui_day", "三四柜区运行记录表");
+    nj_sansigui_day("nj_sansigui_day", "三四柜区运行记录表"),
+
+    nj_onekongcount("nj_onekongcount", "一空压站启停次数表"),
+    nj_twokongcount("nj_twokongcount", "二空压站启停次数表"),
+    nj_threekongcount("nj_threekongcount", "三空压站启停次数表"),
+    nj_fourkongcount("nj_fourkongcount", "四空压站启停次数表")
+    ;
 
     private String code;
     private String name;

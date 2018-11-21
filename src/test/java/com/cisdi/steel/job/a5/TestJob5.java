@@ -72,4 +72,48 @@ public class TestJob5 extends SteelApplicationTests {
     public void test5() {
         threeFourKongJob.execute(null);
     }
+
+    /**
+     * 一空压站启停次数表
+     */
+    @Autowired
+    private OnekongCountJob onekongCountJob;
+
+    @Test
+    public void test6() {
+        onekongCountJob.execute(null);
+    }
+
+    /**
+     * 二空压站启停次数表
+     */
+    @Autowired
+    private TwokongCountJob twokongCountJob;
+
+    @Test
+    public void test7() {
+        twokongCountJob.execute(null);
+    }
+
+    /**
+     * 三空压站启停次数表
+     */
+    @Autowired
+    private ThreekongCountJob threekongCountJob;
+
+    @Test
+    public void test8() {
+        threekongCountJob.execute(null);
+    }
+
+    /**
+     * 四空压站启停次数表
+     */
+    @Autowired
+    private FourkongCountJob fourkongCountJob;
+
+    @Test
+    public void test9() {
+        fourkongCountJob.execute(null);
+    }
 }
