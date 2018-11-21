@@ -10,14 +10,13 @@ import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 能介接口
@@ -32,6 +31,22 @@ import java.util.Objects;
 @Component
 public class AcsStrategy extends AbstractApiStrategy {
 
+    private Map<String, String> maps;
+
+    {
+        maps = new HashMap<>();
+        // 黄色标记部分
+        maps.put("ffff00", "/AcsCurTagValues");
+        // 红色
+        maps.put("ff0000", "/AcsACMRuntimeTagValues");
+        //
+    }
+
+    /**
+     * 默认访问路径
+     */
+    private static final String DEFAULT_URL = "/AcsTagValues";
+
     @Override
     public String getKey() {
         return "acsReport";
@@ -40,12 +55,16 @@ public class AcsStrategy extends AbstractApiStrategy {
     @Override
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<Cell> columnCells = PoiCustomUtil.getFirstRowCel(sheet);
-        String url = httpProperties.getUrlApiNJOne() + "/AcsTagValues";
-        List<CellData> cellDataList = new ArrayList<>();
-        DateQuery query = queryList.get(0);
-        if (Objects.nonNull(query)) {
-            cellDataList = eachData(columnCells, url, query.getQueryParam());
-        }
+
+        Map<String, List<Cell>> listMap = groupByCell(columnCells);
+        final List<CellData> cellDataList = new ArrayList<>();
+        listMap.forEach((k, v) -> {
+            String url = httpProperties.getUrlApiNJOne() + k;
+            DateQuery query = queryList.get(0);
+            if (Objects.nonNull(query)) {
+                cellDataList.addAll(eachData(v, url, query.getQueryParam()));
+            }
+        });
         return SheetRowCellData.builder()
                 .workbook(workbook)
                 .sheet(sheet)
@@ -84,5 +103,51 @@ public class AcsStrategy extends AbstractApiStrategy {
             }
         }
         return results;
+    }
+
+    /**
+     * 对cell进行分组
+     *
+     * @param cellList 单元格
+     * @return 结果
+     */
+    private Map<String, List<Cell>> groupByCell(List<Cell> cellList) {
+        Map<String, List<Cell>> result = new HashMap<>();
+
+        cellList.forEach(item -> {
+            Color fore = item.getCellStyle().getFillForegroundColorColor();
+            String rgbColor = getRgbColor(fore);
+            String url = maps.getOrDefault(rgbColor, DEFAULT_URL);
+            List<Cell> list = result.get(url);
+            if (Objects.isNull(list)) {
+                list = new ArrayList<>();
+                list.add(item);
+                result.put(url, list);
+            } else {
+                list.add(item);
+            }
+        });
+        return result;
+    }
+
+    private String getRgbColor(Color color) {
+        if (Objects.nonNull(color) && (color instanceof XSSFColor)) {
+            XSSFColor a = (XSSFColor) color;
+            return getStringRGB(a.getRGB());
+        }
+        return null;
+    }
+
+    private String getStringRGB(byte[] rgb) {
+        StringBuilder sb = new StringBuilder();
+        for (byte c : rgb) {
+            int i = c & 0xff;
+            String cs = Integer.toHexString(i);
+            if (cs.length() == 1) {
+                sb.append('0');
+            }
+            sb.append(cs);
+        }
+        return sb.toString();
     }
 }
