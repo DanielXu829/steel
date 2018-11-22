@@ -20,6 +20,9 @@ public class TestJob5 extends SteelApplicationTests {
 
     private DateQuery dateQuery = DateQueryUtil.buildToday();
 
+    /**
+     * 二空压站运行记录表.xlsx
+     */
     @Autowired
     private TwokongJob twokongJob;
 

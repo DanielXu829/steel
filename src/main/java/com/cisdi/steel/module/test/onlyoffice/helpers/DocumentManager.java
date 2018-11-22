@@ -142,8 +142,8 @@ public class DocumentManager {
     public static String createTempServerFile(String path) throws Exception {
 
         File file1 = new File(path);
-        String fileName= file1.getName();
-        fileName=fileName.substring(0, fileName.lastIndexOf("."));
+        String fileName = file1.getName();
+        fileName = fileName.substring(0, fileName.lastIndexOf("."));
 
         InputStream stream = FileUtils.openInputStream(file1);
 
@@ -211,8 +211,7 @@ public class DocumentManager {
         String serverPath = GetServerUrl();
         String hostAddress = CurUserHostAddress(null);
         try {
-            String query = "?" + URLEncoder.encode("type=track&filePath=" + fileName + "&userAddress=" + hostAddress, java.nio.charset.StandardCharsets.UTF_8.toString());
-
+            String query = "?type=track&filePath=" + URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8.toString()) + "&userAddress=" + hostAddress;
             return serverPath + "/onlyoffice/save" + query;
         } catch (UnsupportedEncodingException e) {
             return "";
