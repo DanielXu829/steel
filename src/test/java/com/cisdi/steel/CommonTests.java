@@ -4,15 +4,18 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import cn.afterturn.easypoi.util.PoiMergeCellUtil;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -44,7 +47,7 @@ public class CommonTests {
     }
 
     private DateQuery getDateQuery(Date date) {
-        System.err.println(DateUtil.getFormatDateTime(date,DateUtil.fullFormat));
+        System.err.println(DateUtil.getFormatDateTime(date, DateUtil.fullFormat));
         Date weekBeginTime = DateUtil.getWeekBeginTime(date);
         Date weekEndTime = DateUtil.getWeekEndTime(date);
         Date dateBeginTime = DateUtil.getDateBeginTime(weekBeginTime);
@@ -256,4 +259,26 @@ public class CommonTests {
         }
 
     }
+
+    @Test
+    public void excelCopySheetTest() throws IOException, InvalidFormatException {
+        String path = "D:\\test2.xlsx";
+        String path1 = "D:\\test3.xlsx";
+        Workbook workbook = WorkbookFactory.create(new File(path));
+        workbook.cloneSheet(0);
+        int numberOfSheets = workbook.getNumberOfSheets();
+        //workbook.setSheetName(numberOfSheets-1, "踩踩踩" + 1);
+        //  System.err.println(rows);
+        workbook.setForceFormulaRecalculation(true);
+        FileOutputStream fos = new FileOutputStream(path1);
+        workbook.write(fos);
+        fos.close();
+        workbook.close();
+        FileUtils.deleteFile(path);
+        FileUtils.copyFile(path1, path);
+
+
+    }
+
+
 }

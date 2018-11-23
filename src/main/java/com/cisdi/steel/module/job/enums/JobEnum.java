@@ -42,6 +42,7 @@ public enum JobEnum {
     jh_huachan("jh_huachan", "化产报表设计"),
     jh_ganxijiao("jh_ganxijiao", "干熄焦报表设计"),
     jh_shaojiao("jh_shaojiao", "炼焦报表设计"),
+    jh_lianjiaoluwen("jh_lianjiaoluwen", "炼焦炉温报表设计"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫报表"),

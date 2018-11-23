@@ -1,10 +1,7 @@
 package com.cisdi.steel.job.a2;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.module.job.a2.GanxijiaoJob;
-import com.cisdi.steel.module.job.a2.HuachanJob;
-import com.cisdi.steel.module.job.a2.LianjiaoJob;
-import com.cisdi.steel.module.job.a2.PeimeizuoyequJob;
+import com.cisdi.steel.module.job.a2.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -62,5 +59,16 @@ public class TestJob2 extends SteelApplicationTests {
     @Test
     public void test4() {
         peimeizuoyequJob.execute(null);
+    }
+
+    /**
+     * 炼焦炉温
+     */
+    @Autowired
+    private LianjiaoWDJob lianjiaoWDJob;
+
+    @Test
+    public void test5() {
+        lianjiaoWDJob.execute(null);
     }
 }
