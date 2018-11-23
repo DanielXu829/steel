@@ -141,4 +141,15 @@ public class TestJob5 extends SteelApplicationTests {
     public void test11() {
         meiqihunhemeiJob.execute(null);
     }
+
+    /**
+     *  柜区风机煤压机时间统计表
+     */
+    @Autowired
+    private GuifengjimeiyajiJob guifengjimeiyajiJob;
+
+    @Test
+    public void test12() {
+        guifengjimeiyajiJob.execute(null);
+    }
 }

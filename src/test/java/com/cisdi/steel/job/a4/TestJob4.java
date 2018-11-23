@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author leaf
  * @version 1.0
  */
-public class TestJob3 extends SteelApplicationTests {
+public class TestJob4 extends SteelApplicationTests {
 
     /**
      * 1.供料车间集控中心交接班记录
