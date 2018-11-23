@@ -130,4 +130,15 @@ public class TestJob5 extends SteelApplicationTests {
     public void test10() {
         yasuoKongQiJob.execute(null);
     }
+
+    /**
+     *  煤气柜作业区混合煤气情况表
+     */
+    @Autowired
+    private MeiqihunhemeiJob meiqihunhemeiJob;
+
+    @Test
+    public void test11() {
+        meiqihunhemeiJob.execute(null);
+    }
 }
