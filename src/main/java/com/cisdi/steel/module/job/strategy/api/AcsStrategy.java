@@ -7,6 +7,7 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
+import com.cisdi.steel.module.job.util.ExcelCellColorUtil;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Cell;
@@ -56,7 +57,7 @@ public class AcsStrategy extends AbstractApiStrategy {
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<Cell> columnCells = PoiCustomUtil.getFirstRowCel(sheet);
 
-        Map<String, List<Cell>> listMap = groupByCell(columnCells);
+        Map<String, List<Cell>> listMap = ExcelCellColorUtil.groupByCell(columnCells, maps, DEFAULT_URL);
         final List<CellData> cellDataList = new ArrayList<>();
         listMap.forEach((k, v) -> {
             String url = httpProperties.getUrlApiNJOne() + k;
@@ -91,7 +92,7 @@ public class AcsStrategy extends AbstractApiStrategy {
                     JSONObject jsonObject = JSONObject.parseObject(result);
 
                     Object data = jsonObject.get("data");
-                    if(data instanceof JSONArray){
+                    if (data instanceof JSONArray) {
                         JSONArray jsonArray = jsonObject.getJSONArray("data");
                         if (Objects.nonNull(jsonArray)) {
                             int size = jsonArray.size();
@@ -102,7 +103,7 @@ public class AcsStrategy extends AbstractApiStrategy {
                                 ExcelWriterUtil.addCellData(results, ++rowIndex, cell.getColumnIndex(), val);
                             }
                         }
-                    }else{
+                    } else {
                         ExcelWriterUtil.addCellData(results, 1, cell.getColumnIndex(), data);
                     }
 
@@ -110,51 +111,5 @@ public class AcsStrategy extends AbstractApiStrategy {
             }
         }
         return results;
-    }
-
-    /**
-     * 对cell进行分组
-     *
-     * @param cellList 单元格
-     * @return 结果
-     */
-    private Map<String, List<Cell>> groupByCell(List<Cell> cellList) {
-        Map<String, List<Cell>> result = new HashMap<>();
-
-        cellList.forEach(item -> {
-            Color fore = item.getCellStyle().getFillForegroundColorColor();
-            String rgbColor = getRgbColor(fore);
-            String url = maps.getOrDefault(rgbColor, DEFAULT_URL);
-            List<Cell> list = result.get(url);
-            if (Objects.isNull(list)) {
-                list = new ArrayList<>();
-                list.add(item);
-                result.put(url, list);
-            } else {
-                list.add(item);
-            }
-        });
-        return result;
-    }
-
-    private String getRgbColor(Color color) {
-        if (Objects.nonNull(color) && (color instanceof XSSFColor)) {
-            XSSFColor a = (XSSFColor) color;
-            return getStringRGB(a.getRGB());
-        }
-        return null;
-    }
-
-    private String getStringRGB(byte[] rgb) {
-        StringBuilder sb = new StringBuilder();
-        for (byte c : rgb) {
-            int i = c & 0xff;
-            String cs = Integer.toHexString(i);
-            if (cs.length() == 1) {
-                sb.append('0');
-            }
-            sb.append(cs);
-        }
-        return sb.toString();
     }
 }

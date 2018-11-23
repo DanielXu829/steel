@@ -8,6 +8,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.util.ExcelCellColorUtil;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,12 +16,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
+ * 三、四柜区运行记录表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -31,6 +30,22 @@ import java.util.Objects;
  */
 @Component
 public class ThreeFourKongWriter extends AbstractExcelReadWriter {
+    private Map<String, String> maps;
+
+    {
+        maps = new HashMap<>();
+        // 黄色标记部分
+//        maps.put("ffff00", "/AcsCurTagValues");
+        // 红色
+        maps.put("ff0000", "/AreaCurrentTagValues");
+        //
+    }
+
+    /**
+     * 默认访问路径
+     */
+    private static final String DEFAULT_URL = "/AreaTagValues";
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -45,10 +60,14 @@ public class ThreeFourKongWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-                dateQueries.forEach(item -> {
-                    List<CellData> cellDataList = this.eachData(columns, getUrl(), item.getQueryParam());
+                Map<String, List<Cell>> stringListMap = ExcelCellColorUtil.groupByCell(columns, maps, DEFAULT_URL);
+                int index = 1;
+                for (DateQuery item : dateQueries) {
+                    System.out.println(item);
+                    List<CellData> cellDataList = this.eachData(stringListMap, item.getQueryParam(), index);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                });
+                    index += 1;
+                }
             }
         }
         return workbook;
@@ -58,33 +77,36 @@ public class ThreeFourKongWriter extends AbstractExcelReadWriter {
     /**
      * 遍历每个小时的值
      *
-     * @param cellList   列名
-     * @param url        发送请求的地址
-     * @param queryParam 查询参数
-     * @return 结果
+     * @param listMap
+     * @param queryParam
+     * @param indexs
+     * @return
      */
-    private List<CellData> eachData(List<Cell> cellList, String url, Map<String, String> queryParam) {
+    private List<CellData> eachData(Map<String, List<Cell>> listMap, Map<String, String> queryParam, int indexs) {
         List<CellData> results = new ArrayList<>();
-        for (Cell cell : cellList) {
-            String column = PoiCellUtil.getCellValue(cell);
-            if (StringUtils.isNotBlank(column)) {
-                queryParam.put("tagname", column);
-                String result = httpUtil.get(url, queryParam);
-                if (StringUtils.isNotBlank(result)) {
-                    JSONObject jsonObject = JSONObject.parseObject(result);
-                    JSONArray jsonArray = jsonObject.getJSONArray("data");
-                    if (Objects.nonNull(jsonArray)) {
-                        int size = jsonArray.size();
-                        int rowIndex = cell.getRowIndex();
-                        for (int index = 0; index < size; index++) {
-                            JSONObject obj = jsonArray.getJSONObject(index);
-                            Object val = obj.get("val");
-                            ExcelWriterUtil.addCellData(results, ++rowIndex, cell.getColumnIndex(), val);
+
+        listMap.forEach((k, v) -> {
+            String url = httpProperties.getUrlApiNJOne() + k;
+            v.forEach(cell -> {
+                String column = PoiCellUtil.getCellValue(cell);
+                if (StringUtils.isNotBlank(column)) {
+                    queryParam.put("tagname", column);
+                    String result = httpUtil.get(url, queryParam);
+                    if (StringUtils.isNotBlank(result)) {
+                        JSONObject jsonObject = JSONObject.parseObject(result);
+                        JSONArray jsonArray = jsonObject.getJSONArray("data");
+                        if (Objects.nonNull(jsonArray)) {
+                            int size = jsonArray.size();
+                            for (int index = 0; index < size; index++) {
+                                JSONObject obj = jsonArray.getJSONObject(index);
+                                Object val = obj.get("val");
+                                ExcelWriterUtil.addCellData(results, indexs, cell.getColumnIndex(), val);
+                            }
                         }
                     }
                 }
-            }
-        }
+            });
+        });
         return results;
     }
 
