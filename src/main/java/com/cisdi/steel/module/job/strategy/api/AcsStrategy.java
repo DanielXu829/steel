@@ -38,7 +38,7 @@ public class AcsStrategy extends AbstractApiStrategy {
         // 黄色标记部分
         maps.put("ffff00", "/AcsCurTagValues");
         // 红色
-        maps.put("ff0000", "/AcsACMRuntimeTagValues");
+        maps.put("ff0000", "/AcsACMMonthRuntimeTagValues");
         //
     }
 
@@ -89,16 +89,23 @@ public class AcsStrategy extends AbstractApiStrategy {
                 String result = httpUtil.get(url, queryParam);
                 if (StringUtils.isNotBlank(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
-                    JSONArray jsonArray = jsonObject.getJSONArray("data");
-                    if (Objects.nonNull(jsonArray)) {
-                        int size = jsonArray.size();
-                        int rowIndex = cell.getRowIndex();
-                        for (int index = 0; index < size; index++) {
-                            JSONObject obj = jsonArray.getJSONObject(index);
-                            Object val = obj.get("val");
-                            ExcelWriterUtil.addCellData(results, ++rowIndex, cell.getColumnIndex(), val);
+
+                    Object data = jsonObject.get("data");
+                    if(data instanceof JSONArray){
+                        JSONArray jsonArray = jsonObject.getJSONArray("data");
+                        if (Objects.nonNull(jsonArray)) {
+                            int size = jsonArray.size();
+                            int rowIndex = cell.getRowIndex();
+                            for (int index = 0; index < size; index++) {
+                                JSONObject obj = jsonArray.getJSONObject(index);
+                                Object val = obj.get("val");
+                                ExcelWriterUtil.addCellData(results, ++rowIndex, cell.getColumnIndex(), val);
+                            }
                         }
+                    }else{
+                        ExcelWriterUtil.addCellData(results, 1, cell.getColumnIndex(), data);
                     }
+
                 }
             }
         }

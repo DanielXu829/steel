@@ -119,4 +119,15 @@ public class TestJob5 extends SteelApplicationTests {
     public void test9() {
         fourkongCountJob.execute(null);
     }
+
+    /**
+     * 压缩空气生产情况汇总表
+     */
+    @Autowired
+    private YasuoKongQiJob yasuoKongQiJob;
+
+    @Test
+    public void test10() {
+        yasuoKongQiJob.execute(null);
+    }
 }

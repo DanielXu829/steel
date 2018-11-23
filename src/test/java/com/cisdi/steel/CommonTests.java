@@ -4,6 +4,8 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import cn.afterturn.easypoi.util.PoiMergeCellUtil;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.common.util.FileUtils;
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.commons.lang3.RandomUtils;
@@ -27,6 +29,61 @@ import java.util.*;
 public class CommonTests {
 
     @Test
+    public void excelCopySheetTest() throws Exception {
+        String path = "D:\\高炉本体温度月报表_2018-11-22_08.xlsx";
+        String path1 = "D:\\test3.xlsx";
+
+        Workbook workbook = WorkbookFactory.create(new File(path));
+        workbook.cloneSheet(0);
+
+        int numberOfSheets = workbook.getNumberOfSheets();
+        String newSheetName = "踩踩踩" + numberOfSheets;
+        workbook.setSheetName(numberOfSheets - 1, newSheetName);
+
+        workbook.setForceFormulaRecalculation(true);
+        FileOutputStream fos = new FileOutputStream(path1);
+        workbook.write(fos);
+        fos.close();
+        workbook.close();
+
+        del(path);
+    }
+
+
+    public void del(final String path) {
+
+        File file = new File(path);
+        if (file.isFile() && file.exists()) {
+            file.delete();
+        }
+
+        if (file.exists()) {
+            String cmd = "cmd /c del ";
+            String system = System.getProperties().getProperty("os.name");
+            // System.getProperties().getProperty("file.separator");
+            if (!system.toLowerCase().startsWith("win")) {
+                cmd = "rm -rf ";
+            }
+            Runtime run = Runtime.getRuntime();
+            try {
+                cmd = cmd + path;
+                System.out.println(cmd);
+                Process p = run.exec(cmd);
+                p.waitFor();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        del(path);
+                    }
+                }, 10000);
+            }
+        }
+    }
+
+    @Test
     public void test() {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
@@ -44,7 +101,7 @@ public class CommonTests {
     }
 
     private DateQuery getDateQuery(Date date) {
-        System.err.println(DateUtil.getFormatDateTime(date,DateUtil.fullFormat));
+        System.err.println(DateUtil.getFormatDateTime(date, DateUtil.fullFormat));
         Date weekBeginTime = DateUtil.getWeekBeginTime(date);
         Date weekEndTime = DateUtil.getWeekEndTime(date);
         Date dateBeginTime = DateUtil.getDateBeginTime(weekBeginTime);

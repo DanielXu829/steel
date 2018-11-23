@@ -86,7 +86,8 @@ public enum JobEnum {
     nj_onekongcount("nj_onekongcount", "一空压站启停次数表"),
     nj_twokongcount("nj_twokongcount", "二空压站启停次数表"),
     nj_threekongcount("nj_threekongcount", "三空压站启停次数表"),
-    nj_fourkongcount("nj_fourkongcount", "四空压站启停次数表")
+    nj_fourkongcount("nj_fourkongcount", "四空压站启停次数表"),
+    nj_yasuokongqi("nj_yasuokongqi", "压缩空气生产情况汇总表")
     ;
 
     private String code;
