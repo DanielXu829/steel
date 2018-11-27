@@ -17,16 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TestJob3 extends SteelApplicationTests {
 
     @Autowired
-    private TuoliuJob tuoliuJob;
+    private TuoliuJob5 tuoliuJob5;
 
     /**
-     * version 5 6
      * 5#脱硫系统运行日报
-     * 6#脱硫系统运行日报
      */
     @Test
     public void test1() {
-        tuoliuJob.execute(null);
+        tuoliuJob5.execute(null);
+    }
+
+    @Autowired
+    private TuoliuJob6 tuoliuJob6;
+
+    /**
+     * 6#脱硫系统运行日报
+     */
+    @Test
+    public void test12() {
+        tuoliuJob6.execute(null);
     }
 
 

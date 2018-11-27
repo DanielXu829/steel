@@ -44,7 +44,8 @@ public enum JobEnum {
     jh_shaojiao("jh_shaojiao", "炼焦报表设计"),
 
     // 烧结
-    sj_tuoliu("sj_tuoliu", "脱硫报表"),
+    sj_tuoliu5("sj_tuoliu5", "5#脱硫系统运行日报"),
+    sj_tuoliu6("sj_tuoliu6", "6#脱硫系统运行日报"),
     sj_gengzongbiao("sj_gengzongbiao", "五烧六烧主抽电耗跟踪表"),
     sj_rongjiranliao("sj_tuoxiaoyunxingjilu", "熔剂燃料质量管控"),
     sj_tuoliutuoxiaogongyicaiji("sj_tuoliutuoxiaogongyicaiji", "脱硫脱硝工艺参数采集"),

@@ -18,14 +18,14 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class TuoliuJob extends AbstractExportJob {
+public class TuoliuJob6 extends AbstractExportJob {
 
     @Autowired
     private TuoliuExecute tuoliuExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.sj_tuoliu;
+        return JobEnum.sj_tuoliu6;
     }
 
     @Override

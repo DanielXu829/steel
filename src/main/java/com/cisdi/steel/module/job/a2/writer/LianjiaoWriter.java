@@ -133,8 +133,8 @@ public class LianjiaoWriter extends AbstractExcelReadWriter {
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-//        result.put("date", calendar.getTime().getTime() + "");
-        result.put("date", "1540137600000");
+        result.put("date", calendar.getTime().getTime() + "");
+//        result.put("date", "1540137600000");
         result.put("jlno", version);
 
         Calendar calendar1 = Calendar.getInstance();

@@ -113,12 +113,12 @@ public class DocumentManager {
             file.mkdir();
         }
 
-        directory = directory + File.separator;
-        file = new File(directory);
-
-        if (!file.exists()) {
-            file.mkdir();
-        }
+//        directory = directory + File.separator;
+//        file = new File(directory);
+//
+//        if (!file.exists()) {
+//            file.mkdir();
+//        }
 
         return directory + fileName;
     }
@@ -193,8 +193,6 @@ public class DocumentManager {
         try {
             String serverPath = GetServerUrl();
             String storagePath = ConfigManager.GetProperty("storage-folder");
-//            String hostAddress = CurUserHostAddress(null);
-
             String filePath = serverPath + "/" + storagePath + "/" + URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8.toString()).replace("+", "%20");
 
             return filePath;
