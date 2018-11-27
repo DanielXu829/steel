@@ -249,6 +249,21 @@ public class DateUtil {
     }
 
     /**
+     * 判断今天是否是月末
+     * @param date
+     * @return
+     */
+    public static boolean isLastDayOfMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DATE, (calendar.get(Calendar.DATE) + 1));
+        if (calendar.get(Calendar.DAY_OF_MONTH) == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * 取得指定时间离现在是多少时间以前，如：3秒前,2小时前等
      * 注意：此计算方法不是精确的
      *
