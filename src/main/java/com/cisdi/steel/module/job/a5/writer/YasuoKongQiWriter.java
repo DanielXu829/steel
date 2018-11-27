@@ -61,13 +61,25 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
                 } else if ("_acsReportStrtStp_day_all".equals(sheetName) || "_acsReportStrtStp_month_day".equals(sheetName)) {
                     List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                     List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-                    List<CellData> cellDataList = this.eachData(columns, getUrl2(), dateQueries.get(0).getQueryParam());
+                    List<CellData> cellDataList = this.eachData(columns, getUrl2(), getQueryParam2(dateQueries.get(0)));
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
 
             }
         }
         return workbook;
+    }
+
+    protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
+        Map<String, String> map = new HashMap<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        map.put("starttime", calendar.getTime().getTime() + "");
+//        map.put("time", "1541088000000");
+        return map;
     }
 
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {

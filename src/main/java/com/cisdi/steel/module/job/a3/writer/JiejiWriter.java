@@ -10,6 +10,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -45,32 +46,68 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
             String sheetName = sheet.getSheetName();
-            String url=getUrl(version);
+            String url = getUrl(version);
             if ("_sjmain2_day_hour".equals(sheetName)) {
                 url = getUrl2(version);
+            } else if ("_sjmain3_day_shift".equals(sheetName)) {
+                url = getUrl3(version);
+            } else if ("_sjmain4_day_shift".equals(sheetName)) {
+                url = getUrl4(version);
+            } else if ("_lilunshengchan_day_shift".equals(sheetName)) {
+                url = getUrl5(version);
             }
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                for (DateQuery item : dateQueries) {
-                    List<CellData> cellDataList = this.mapDataHandler(url, columns, item, rowBatch, sheetName);
+                int indexRow = 1;
+                if ("_sjmain4_day_shift".equals(sheetName)) {
+                    List<CellData> cellDataList = this.mapDataHandler(url, columns, dateQueries.get(0), rowBatch, sheetName, indexRow);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                } else {
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = this.mapDataHandler(url, columns, item, rowBatch, sheetName, indexRow);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        indexRow++;
+                    }
                 }
             }
         }
         return workbook;
     }
 
-    private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch, String sheetName) {
+    private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch, String sheetName, int idexRow) {
         JSONObject query = new JSONObject();
         query.put("start", dateQuery.getQueryStartTime());
         query.put("end", dateQuery.getQueryEndTime());
-        query.put("tagNames", columns);
-        SerializeConfig serializeConfig = new SerializeConfig();
-        String jsonString = JSONObject.toJSONString(query, serializeConfig);
-        String result = httpUtil.postJsonParams(url, jsonString);
+
+        Map<String, String> map = new HashMap<>();
+
+        if ("_sjmain3_day_shift".equals(sheetName)) {
+            query.put("brandCode", "sinter");
+            query.put("itemNames", columns);
+        } else if ("_sjmain4_day_shift".equals(sheetName)) {
+            map.put("brandCode", "sinter");
+            map.put("timeType", "sampleTime");
+            map.put("pageSize", Integer.MAX_VALUE + "");
+            map.put("startTime", dateQuery.getQueryStartTime().toString());
+            map.put("endTime", new Date().getTime() + "");
+        } else if ("_lilunshengchan_day_shift".equals(sheetName)) {
+            map.put("date", dateQuery.getStartTime().getTime() + "");
+        } else {
+            query.put("tagNames", columns);
+        }
+
+        String result = null;
+        if ("_sjmain4_day_shift".equals(sheetName) || "_lilunshengchan_day_shift".equals(sheetName)) {
+            result = httpUtil.get(url, map);
+        } else {
+            SerializeConfig serializeConfig = new SerializeConfig();
+            String jsonString = JSONObject.toJSONString(query, serializeConfig);
+            result = httpUtil.postJsonParams(url, jsonString);
+        }
+
         if (StringUtils.isBlank(result)) {
             return null;
         }
@@ -81,6 +118,24 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                 return null;
             }
             return this.handlerJsonArray(columns, rowBatch, data2, 1);
+        } else if ("_sjmain3_day_shift".equals(sheetName)) {
+            JSONArray data2 = jsonObject.getJSONArray("data");
+            if (Objects.isNull(data2) || data2.size() == 0) {
+                return null;
+            }
+            return this.handlerJsonArray3(columns, rowBatch, data2, idexRow);
+        } else if ("_sjmain4_day_shift".equals(sheetName)) {
+            JSONArray data2 = jsonObject.getJSONArray("data");
+            if (Objects.isNull(data2) || data2.size() == 0) {
+                return null;
+            }
+            return this.handlerJsonArray2(columns, rowBatch, data2, idexRow);
+        } else if ("_lilunshengchan_day_shift".equals(sheetName)) {
+            JSONArray data2 = jsonObject.getJSONArray("data");
+            if (Objects.isNull(data2) || data2.size() == 0) {
+                return null;
+            }
+            return this.handlerJsonArray4(columns, rowBatch, data2, idexRow);
         } else {
             JSONObject data = jsonObject.getJSONObject("data");
             if (Objects.isNull(data)) {
@@ -88,6 +143,69 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             }
             return this.handlerJsonArray(columns, data);
         }
+    }
+
+    protected List<CellData> handlerJsonArray4(List<String> columns, int rowBatch, JSONArray data, int startRow) {
+        List<CellData> cellDataList = new ArrayList<>();
+        for (int j = 0; j < data.size(); j++) {
+            JSONObject o1 = data.getJSONObject(j);
+            if (Objects.nonNull(o1)) {
+                List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, startRow++, o1);
+                cellDataList.addAll(cellDataList1);
+            }
+        }
+
+        return cellDataList;
+    }
+
+    protected List<CellData> handlerJsonArray2(List<String> columns, int rowBatch, JSONArray data, int startRow) {
+        List<CellData> cellDataList = new ArrayList<>();
+        int size = columns.size();
+       /* for (int i = 0; i < size; i++) {
+            String column = columns.get(i);
+            if (StringUtils.isNotBlank(column)) {*/
+        List<JSONObject> list = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            JSONObject o = data.getJSONObject(i);
+            if (Objects.nonNull(o)) {
+                JSONObject analysis = o.getJSONObject("analysis");
+                if ("LC".equals(analysis.get("type")) || "LP".equals(analysis.get("type"))) {
+                    list.add(o);
+                }
+            }
+        }
+
+        for (int j = 0; j < list.size(); j++) {
+            JSONObject o1 = list.get(j);
+            if (Objects.nonNull(o1)) {
+                o1.put("total", list.size());
+                List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, startRow++, o1);
+                cellDataList.addAll(cellDataList1);
+            }
+              /*  }
+            }*/
+        }
+        return cellDataList;
+    }
+
+    protected List<CellData> handlerJsonArray3(List<String> columns, int rowBatch, JSONArray data, int startRow) {
+        List<CellData> cellDataList = new ArrayList<>();
+        int size = columns.size();
+        for (int i = 0; i < size; i++) {
+            String column = columns.get(i);
+            int rowIndex = 1;
+            if (StringUtils.isNotBlank(column)) {
+                for (int j = 0; j < data.size(); j++) {
+                    JSONObject o1 = data.getJSONObject(j);
+                    JSONObject val = o1.getJSONObject("values");
+                    if (Objects.nonNull(o1)) {
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val.get(column));
+                        rowIndex++;
+                    }
+                }
+            }
+        }
+        return cellDataList;
     }
 
     private List<CellData> handlerJsonArray(List<String> columns, JSONObject data) {
@@ -123,8 +241,8 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                 JSONObject o1 = data.getJSONObject(i);
                 Object val = o1.get("val");
                 if (Objects.nonNull(o1)) {
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
-                        rowIndex++;
+                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                    rowIndex++;
                 }
             }
         }
@@ -152,6 +270,33 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/tagValues/latest";
+        }
+    }
+
+    private String getUrl3(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/analysis/anaItemValues2";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemValues2";
+        }
+    }
+
+    private String getUrl4(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/analysisValues/sampleTime";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/analysisValues/sampleTime";
+        }
+    }
+
+    private String getUrl5(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/report/theoryYield";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/report/theoryYield";
         }
     }
 }
