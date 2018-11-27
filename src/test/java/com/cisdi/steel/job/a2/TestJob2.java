@@ -164,7 +164,7 @@ public class TestJob2 extends SteelApplicationTests {
 
 
     /**
-     * 鼓风冷凝
+     * 制冷循环水
      */
     @Autowired
     private ZhilengxunhuanshuiJob zhilengxunhuanshuiJob;

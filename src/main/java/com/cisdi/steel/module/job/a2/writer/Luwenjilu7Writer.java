@@ -33,15 +33,16 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
-        workbook.cloneSheet(0);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd");
         String format = dateFormat.format(new Date());
-        workbook.setSheetName(numberOfSheets,"炉温记录"+format);
-        Sheet sheet = workbook.getSheet("炉温记录" + format);
         int ss=Integer.parseInt(format);
         for(int i=0;i<numberOfSheets;i++){
             Sheet sheetAt = workbook.getSheetAt(i);
             String sheetName = sheetAt.getSheetName();
+            if(("炉温记录"+format).equals(sheetName)){
+                workbook.removeSheetAt(i);
+                numberOfSheets--;
+            }
             if("7#焦侧炉温管控(月)从动态管控系统读取或计算 ".equals(sheetName)){
                 int rowNum=5;
                 for(int j=3;j<59;j++){
@@ -63,13 +64,13 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
                     rowNum++;
                 }
             }
-
         }
+        workbook.cloneSheet(0);
+        workbook.setSheetName(numberOfSheets,"炉温记录"+format);
+        Sheet sheet = workbook.getSheet("炉温记录" + format);
         List<String> rowCelVal1 = getRowCelVal1(sheet, 3);
         List<CellData> cellData1 = mapDataHandler(4,getUrl(),rowCelVal1, date, "CO7");
         ExcelWriterUtil.setCellValue(sheet, cellData1);
-
-
         return workbook;
     }
 
@@ -136,8 +137,8 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-//        result.put("date", calendar.getTime().getTime() + "");
-        result.put("date", "1540137600000");
+        result.put("date", calendar.getTime().getTime() + "");
+        //result.put("date", "1540137600000");
         result.put("jlno", version);
 
         Calendar calendar1 = Calendar.getInstance();
