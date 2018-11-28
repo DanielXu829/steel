@@ -64,6 +64,22 @@ public class DateQueryUtil {
         }
         return null;
     }
+    public static DateQuery build4Hour(Date date) {
+        Date previous = DateUtil.addHours(date, -4);
+        String dateTime = DateUtil.getFormatDateTime(previous, "yyyy-MM-dd HH");
+        String dateTime1 = DateUtil.getFormatDateTime(DateUtil.addHours(date, -1), "yyyy-MM-dd HH");
+        String startHourString = dateTime + ":00:00";
+        String endHourString = dateTime1 + ":59:59";
+        DateFormat df = new SimpleDateFormat(DateUtil.fullFormat);
+        try {
+            Date startHour = df.parse(startHourString);
+            Date endHour = df.parse(endHourString);
+            return new DateQuery(startHour, endHour, date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /**
      * 返回 指定周的开始和结束时间
@@ -93,6 +109,25 @@ public class DateQueryUtil {
         for (int i = hour - 1; i >= 0; i--) {
             Date nextDate = DateUtil.addHours(date, -i);
             DateQuery query = DateQueryUtil.buildHour(nextDate);
+            queryList.add(query);
+        }
+        return queryList;
+    }
+
+    /**
+     * 构建每4小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay4HourEach(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
+        for (int i = hour - 4; i >= 0; i -= 4) {
+            Date nextDate = DateUtil.addHours(date, -i);
+            DateQuery query = DateQueryUtil.build4Hour(nextDate);
             queryList.add(query);
         }
         return queryList;

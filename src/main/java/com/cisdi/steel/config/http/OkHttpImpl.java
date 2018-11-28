@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -34,18 +35,21 @@ public class OkHttpImpl implements HttpUtil {
     public String get(String url, Map<String, String> queries) {
         String responseBody = "";
         StringBuffer sb = new StringBuffer(url);
-        if (queries != null && queries.keySet().size() > 0) {
-            boolean firstFlag = true;
-            Iterator iterator = queries.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry entry = (Map.Entry<String, String>) iterator.next();
-                if (firstFlag) {
-                    sb.append("?" + entry.getKey() + "=" + entry.getValue());
-                    firstFlag = false;
-                } else {
-                    sb.append("&" + entry.getKey() + "=" + entry.getValue());
+        try {
+            if (queries != null && queries.keySet().size() > 0) {
+                boolean firstFlag = true;
+                Iterator iterator = queries.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = (Map.Entry<String, String>) iterator.next();
+                    if (firstFlag) {
+                        sb.append("?" + entry.getKey() + "=" + URLEncoder.encode(entry.getValue().toString(), java.nio.charset.StandardCharsets.UTF_8.toString()));
+                        firstFlag = false;
+                    } else {
+                        sb.append("&" + entry.getKey() + "=" + URLEncoder.encode(entry.getValue().toString(), java.nio.charset.StandardCharsets.UTF_8.toString()));
+                    }
                 }
             }
+        } catch (Exception e) {
         }
         log.debug("GET请求URL:" + sb.toString());
         Request request = new Request.Builder()
@@ -165,8 +169,8 @@ public class OkHttpImpl implements HttpUtil {
     @Override
     public String postJsonParams(String url, String jsonParams) {
         String responseBody = "";
-        log.debug("POST请求URL："+url);
-        log.debug("POST请求参数："+jsonParams);
+        log.debug("POST请求URL：" + url);
+        log.debug("POST请求参数：" + jsonParams);
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParams);
         Request request = new Request.Builder()
                 .url(url)
