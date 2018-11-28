@@ -13,6 +13,7 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -100,35 +101,43 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
                 }
                 workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
             }
-            //月末清除模板数据到最初
-            if(DateUtil.isLastDayOfMonth(new Date())){
-                workbook.removeSheetAt(removeSheetNum);
-                if("6#机侧炉温管控(月)从动态管控系统读取或计算 ".equals(sheetName)){
-                    for(int j=3;i<59;j++){
-                        Row row = sheet.getRow(j);
-                        for(int k=1;k<32;k++){
-                            row.removeCell(row.getCell(k));
-                        }
-                    }
-                }else if("6#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)){
-                    for(int j=3;i<59;j++){
-                        Row row = sheet.getRow(j);
-                        for(int k=1;k<32;k++){
-                            row.removeCell(row.getCell(k));
-                        }
-                    }
-                }
-                removeSheetNum++;
-            }
+
         }
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
-
+        fos.close();
         if(DateUtil.isLastDayOfMonth(new Date())){
-            fos.close();
+            FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
+            for (int i = 0; i < numberOfSheets; i++) {
+                Sheet sheet = workbook.getSheetAt(i);
+                String sheetName = sheet.getSheetName();
+                if ("7#机侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                    for (int j = 3; j < 59; j++) {
+                        Row row = sheet.getRow(j);
+                        for (int k = 1; k < 32; k++) {
+                            row.getCell(k).setCellValue("");
+                            row.getCell(k).setCellType(CellType.STRING);
+                        }
+                    }
+                } else if ("7#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                    for (int j = 3; j < 59; j++) {
+                        Row row = sheet.getRow(j);
+                        for (int k = 1; k < 32; k++) {
+                            row.getCell(k).setCellValue("");
+                            row.getCell(k).setCellType(CellType.STRING);
+                        }
+                    }
+                }
+            }
+            for (int i = 3; i < numberOfSheets; i++) {
+                workbook.removeSheetAt(i);
+                numberOfSheets--;
+            }
+            workbook.setForceFormulaRecalculation(true);
+            workbook.write(modelFos);
+            modelFos.close();
             workbook.close();
         }else {
-            fos.close();
             workbook.close();
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             FileUtils.copyFile(excelPathInfo.getSaveFilePath(),writerExcelDTO.getTemplate().getTemplatePath());
