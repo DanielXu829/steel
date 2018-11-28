@@ -35,10 +35,12 @@ public class ChargeStrategy extends AbstractApiStrategy {
     @Override
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
+        String version = PoiCustomUtil.getSheetCellVersion(workbook);
+        String url = httpProperties.getGlUrlVersion(version);
         List<CellData> cellDataList = new ArrayList<>();
         for (DateQuery dateQuery : queryList) {
             // 理论上来说一次获取了所有，循环只执行一次
-            List<Map<String, Object>> dataList = this.requestApiData(dateQuery);
+            List<Map<String, Object>> dataList = this.requestApiData(url,dateQuery);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }
         return SheetRowCellData.builder()
@@ -77,8 +79,8 @@ public class ChargeStrategy extends AbstractApiStrategy {
      * @param dateQuery 查询时间段
      * @return 结果
      */
-    private List<Map<String, Object>> requestApiData(DateQuery dateQuery) {
-        String url = httpProperties.getUrlApiGLOne() + "/batchenos/period";
+    private List<Map<String, Object>> requestApiData(String urlPre,DateQuery dateQuery) {
+        String url = urlPre + "/batchenos/period";
         String s = httpUtil.get(url, dateQuery.getQueryParam());
         List<String> list = ResponseUtil.getResponseArray(s, String.class);
         List<Map<String, Object>> result = new ArrayList<>();
@@ -87,7 +89,7 @@ public class ChargeStrategy extends AbstractApiStrategy {
         }
         Collections.sort(list);
         for (String batchNo : list) {
-            String detail = httpProperties.getUrlApiGLOne() + "/batch/" + batchNo;
+            String detail = urlPre + "/batch/" + batchNo;
             String detailData = httpUtil.get(detail);
             if (StringUtils.isNotBlank(detailData)) {
                 Map<String, Object> mapType = JSON.parseObject(detailData, Map.class);

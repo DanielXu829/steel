@@ -142,6 +142,17 @@ public class PoiCustomUtil {
     }
 
     /**
+     * 获取version字段
+     *
+     * @param workbook  文件
+     * @param sheetName sheetName
+     * @return 结果
+     */
+    public static String getSheetCellVersion(Workbook workbook) {
+        return getSheetCell(workbook, "_dictionary", 0, 1);
+    }
+
+    /**
      * 获取指定单元格的值
      *
      * @param filePath  文件路径

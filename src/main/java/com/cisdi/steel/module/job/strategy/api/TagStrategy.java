@@ -4,8 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
-import com.cisdi.steel.module.job.dto.CellValInfo;
-import com.cisdi.steel.module.job.dto.RowCellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
@@ -35,8 +33,8 @@ public class TagStrategy extends AbstractApiStrategy {
     @Override
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<String> columnCells = PoiCustomUtil.getFirstRowCelVal(sheet);
-
-        String url = httpProperties.getUrlApiGLOne() + "/getTagValues/tagNamesInRange";
+        String version = PoiCustomUtil.getSheetCellVersion(workbook);
+        String url = httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
         List<CellData> rowCellDataList = new ArrayList<>();
         int size = queryList.size();
         for (int rowNum = 0; rowNum < size; rowNum++) {
@@ -51,7 +49,6 @@ public class TagStrategy extends AbstractApiStrategy {
                 .build();
     }
 
-
     private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("starttime", queryParam.get("starttime"));
@@ -60,13 +57,13 @@ public class TagStrategy extends AbstractApiStrategy {
 
         String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
         JSONObject obj = JSONObject.parseObject(result);
-        obj=obj.getJSONObject("data");
+        obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
         for (int columnIndex = 0; columnIndex < cellList.size(); columnIndex++) {
             String cell = cellList.get(columnIndex);
             if (StringUtils.isNotBlank(cell)) {
                 JSONObject data = obj.getJSONObject(cell);
-                if(Objects.nonNull(data)){
+                if (Objects.nonNull(data)) {
                     Set<String> keySet = data.keySet();
                     int rowIndex = 1;
                     for (String key : keySet) {

@@ -18,9 +18,14 @@ import org.springframework.stereotype.Component;
 @Data
 public class HttpProperties {
     /**
-     * 高炉的接口地址
+     * 高炉 6
      */
     private String urlApiGLOne;
+
+    /**
+     * 高炉 8
+     */
+    private String urlApiGLTwo;
 
     /**
      * 焦化的接口地址
@@ -45,5 +50,15 @@ public class HttpProperties {
      * 6号烧结
      */
     private String urlApiSJTwo;
+
+
+    public String getGlUrlVersion(String version) {
+        if ("6.0".equals(version)) {
+            return urlApiGLOne;
+        } else if ("8.0".equals(version)) {
+            return urlApiGLTwo;
+        }
+        return urlApiGLOne;
+    }
 
 }

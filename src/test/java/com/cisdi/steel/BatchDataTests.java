@@ -2,9 +2,14 @@ package com.cisdi.steel;
 
 import com.cisdi.steel.common.util.ApplicationContextHolder;
 import com.cisdi.steel.module.job.AbstractExportJob;
+import com.cisdi.steel.module.report.entity.ReportCategory;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import com.cisdi.steel.module.report.service.ReportCategoryService;
+import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.sys.entity.SysConfig;
 import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +35,13 @@ public class BatchDataTests extends SteelApplicationTests {
 
 
     @Autowired
+    private ReportCategoryService reportCategoryService;
+
+    @Autowired
+    private ReportCategoryTemplateService reportCategoryTemplateService;
+
+
+    @Autowired
     private Scheduler scheduler;
 
     private static final String jobGroup = "所有";
@@ -48,12 +60,13 @@ public class BatchDataTests extends SteelApplicationTests {
     /**
      * 开启所有任务
      * 0 0/10 * * * ? 每10分钟
+     * 0 0 0/4 * * ?  每4个小时
      */
     @Test
     public void test2() {
         List<SysConfig> all = getAll();
         for (SysConfig sysConfig : all) {
-            createTask(sysConfig.getCode(), jobGroup, "0 0 0/4 * * ?", "");
+            createTask(sysConfig.getCode(), jobGroup, "0 0/10 * * * ?", "");
         }
     }
 
@@ -73,10 +86,50 @@ public class BatchDataTests extends SteelApplicationTests {
         }
     }
 
+
+    /**
+     * 生成所有子类
+     */
+    @Test
+    public void test4() {
+        List<ReportCategoryTemplate> list = reportCategoryTemplateService.list(null);
+        list.forEach(item -> {
+            if (StringUtils.isNotBlank(item.getTemplatePath())) {
+                ReportCategory reportCategory = new ReportCategory();
+                reportCategory.setCode(item.getReportCategoryCode());
+                reportCategory.setLeafNode("1");
+                Long parentId = getParentId(item.getReportCategoryCode());
+                reportCategory.setParentId(parentId);
+                reportCategory.setName(item.getTemplateName());
+                reportCategoryService.save(reportCategory);
+            }
+
+        });
+
+    }
+
+    private Long getParentId(String code) {
+        if (code.startsWith("gl_")) {
+            // 高炉
+            return 1L;
+        } else if (code.startsWith("jh_")) {
+            // 焦化
+            return 2L;
+        } else if (code.startsWith("sj_")) {
+            // 烧结
+            return 3L;
+        } else if (code.startsWith("ygl_")) {
+            // 原供料
+            return 4L;
+        } else if (code.startsWith("nj_")) {
+            // 能介
+            return 5L;
+        }
+        return 1L;
+    }
+
     /**
      * 获取所有的类
-     *
-     * @return
      */
     private List<SysConfig> getAll() {
         Map<String, Job> beansOfType = ApplicationContextHolder.getApplicationContext().getBeansOfType(Job.class);
@@ -96,6 +149,7 @@ public class BatchDataTests extends SteelApplicationTests {
         return sysConfigs;
     }
 
+    // 创建一个任务
     private void createTask(String jobName, String jobGroup, String cronExpression, String desc) {
         try {
             //通过任务编码获取执行类

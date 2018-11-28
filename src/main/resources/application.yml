@@ -58,6 +58,7 @@ spring:
 http:
   url:
    urlApiGLOne: http://10.66.3.202:9001
+   urlApiGLTwo: http://10.66.3.204:9001
    urlApiNJOne: http://10.66.3.220:8080
    urlApiJHOne:  http://10.66.3.201:8099
    urlApiYGLOne: http://10.66.3.210:8181

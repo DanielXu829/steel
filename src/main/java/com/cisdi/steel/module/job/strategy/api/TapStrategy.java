@@ -37,10 +37,13 @@ public class TapStrategy extends AbstractApiStrategy {
     @Override
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
+        String version = PoiCustomUtil.getSheetCellVersion(workbook);
+        String url = httpProperties.getGlUrlVersion(version);
+
         List<CellData> cellDataList = new ArrayList<>();
         for (DateQuery dateQuery : queryList) {
             // 理论上来说一次获取了所有，循环只执行一次
-            List<Map<String, Object>> dataList = this.requestApiData(dateQuery);
+            List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }
         return SheetRowCellData.builder()
@@ -49,7 +52,6 @@ public class TapStrategy extends AbstractApiStrategy {
                 .cellDataList(cellDataList)
                 .build();
     }
-
 
     /**
      * 循环遍历数据
@@ -71,8 +73,8 @@ public class TapStrategy extends AbstractApiStrategy {
         return resultData;
     }
 
-    private List<Map<String, Object>> requestApiData(DateQuery dateQuery) {
-        String url = httpProperties.getUrlApiGLOne() + "/taps/summary/period";
+    private List<Map<String, Object>> requestApiData(String urlPre, DateQuery dateQuery) {
+        String url = urlPre + "/taps/summary/period";
         Map<String, String> queryParam = dateQuery.getQueryParam();
         queryParam.put("pagenum", "1");
         queryParam.put("pagesize", "1");
@@ -94,7 +96,7 @@ public class TapStrategy extends AbstractApiStrategy {
                     obj.put("sequnceno", sequnceno);
                     Map<String, Object> mapResult = new CaseInsensitiveMap<>();
                     mapResult.put("tapindex", obj);
-                    String url2 = httpProperties.getUrlApiGLOne() + "/tap/analysis/" + tapid.toString();
+                    String url2 = urlPre + "/tap/analysis/" + tapid.toString();
                     String childResult = httpUtil.get(url2);
                     JSONObject childObject = JSON.parseObject(childResult);
                     JSONArray jsonChildArray = childObject.getJSONArray("data");
