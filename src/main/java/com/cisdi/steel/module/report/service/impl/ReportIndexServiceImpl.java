@@ -15,6 +15,7 @@ import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import com.cisdi.steel.module.report.service.ReportIndexService;
@@ -71,7 +72,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             if (!one.getPath().equals(record.getPath())) {
                 String fileExtension = FileUtils.getFileExtension(file.getName());
                 String templatePath = jobProperties.getFilePath();
-                String fileName = FileUtils.getFileNameWithoutExtension(one.getName());
+                String fileName = record.getSequence() + File.separator +
+                        ReportTemplateTypeEnum.getType(record.getIndexType()).getName() + File.separator +
+                        FileUtils.getFileNameWithoutExtension(one.getName());
                 String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getIndexLang()) + "." + fileExtension;
 
                 FileUtils.copyFile(record.getPath(), savePath);
