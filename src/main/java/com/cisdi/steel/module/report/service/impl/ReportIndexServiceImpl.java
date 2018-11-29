@@ -79,6 +79,8 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
                 record.setPath(savePath);
             }
+        } else {
+            record.setPath(null);
         }
         return super.updateRecord(record);
     }
