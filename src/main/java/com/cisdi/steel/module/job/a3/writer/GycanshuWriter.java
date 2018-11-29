@@ -130,12 +130,14 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
 
                     }
 
-                    double o = data1.getDouble(column);
-                    val2 = o + "";
-                    if (o < a1) {
-                        val3 = "偏低";
-                    } else if (o > a2) {
-                        val3 = "偏高";
+                    if (data1.containsKey(column)) {
+                        double o = data1.getDouble(column);
+                        val2 = o + "";
+                        if (o < a1) {
+                            val3 = "偏低";
+                        } else if (o > a2) {
+                            val3 = "偏高";
+                        }
                     }
                 }
 
