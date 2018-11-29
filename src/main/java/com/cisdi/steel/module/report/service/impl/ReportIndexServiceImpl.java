@@ -64,21 +64,20 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         File file = new File(record.getPath());
         if (Objects.nonNull(file) && file.exists()) {
             LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
-            wrapper.select(ReportIndex::getPath);
+            wrapper.select(ReportIndex::getPath, ReportIndex::getName);
             wrapper.eq(ReportIndex::getId, record.getId());
             ReportIndex one = this.getOne(wrapper);
 
             if (!one.getPath().equals(record.getPath())) {
                 String fileExtension = FileUtils.getFileExtension(file.getName());
                 String templatePath = jobProperties.getFilePath();
-                String fileName = one.getName() + "." + fileExtension;
-
-                String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getIndexLang());
+                String fileName = FileUtils.getFileNameWithoutExtension(one.getName());
+                String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getIndexLang()) + "." + fileExtension;
 
                 FileUtils.copyFile(record.getPath(), savePath);
                 file.delete();
 
-                record.setPath(null);
+                record.setPath(savePath);
             }
         }
         return super.updateRecord(record);
@@ -144,13 +143,13 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         Date today = new Date();
         //1.昨日日报
         Date yestarDay = DateUtil.addDays(today, -1);
-        List<ReportIndex> yestarDayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(yestarDay,DateUtil.yyyyMMddFormat));
+        List<ReportIndex> yestarDayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(yestarDay, DateUtil.yyyyMMddFormat));
         //2.今日日报
-        List<ReportIndex> todayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(today,DateUtil.yyyyMMddFormat));
+        List<ReportIndex> todayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(today, DateUtil.yyyyMMddFormat));
         //3.本月月报
-        List<ReportIndex> monthList = reportIndexMapper.queryReportMonth(DateUtil.getFormatDateTime(today,"yyyy-MM"));
+        List<ReportIndex> monthList = reportIndexMapper.queryReportMonth(DateUtil.getFormatDateTime(today, "yyyy-MM"));
         //4.其他最新报表
-        List<ReportIndex> otherList = reportIndexMapper.queryReportOther(DateUtil.getFormatDateTime(yestarDay,DateUtil.yyyyMMddFormat));
+        List<ReportIndex> otherList = reportIndexMapper.queryReportOther(DateUtil.getFormatDateTime(yestarDay, DateUtil.yyyyMMddFormat));
 
         ReportIndexDTO reportIndexDTO = new ReportIndexDTO();
         reportIndexDTO.setYestarDayList(yestarDayList);
