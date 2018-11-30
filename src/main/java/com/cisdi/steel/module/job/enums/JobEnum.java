@@ -18,7 +18,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
  * @version 1.0
  */
 public enum JobEnum {
-    // 高炉
+    // 6高炉
     gl_chutiezuoye_day("gl_chutiezuoye_day", "出铁作业日报表"),
     gl_chutiezuoye_month("gl_chutiezuoye_month", " 出铁作业月报表"),
     gl_bentilushenjingya_day("gl_bentilushenjingya_day", " 高炉本体炉身静压 日报"),
@@ -32,8 +32,8 @@ public enum JobEnum {
     gl_ludingzhuangliaozuoye_day2("gl_ludingzhuangliaozuoye_day2", "高炉本体温度 日报2"),
     gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
     gl_refenglu_month("gl_refenglu_month", "热风炉 月报"),
-    gl_jswgaolu_day("gl_jswgaolu_day", "高炉 日报"),
-    gl_taisu1_month("gl_taisu1_month", "高炉 月报"),
+    gl_jswgaolu_day("gl_jswgaolu_day", "6高炉 日报"),
+    gl_taisu1_month("gl_taisu1_month", "6高炉 月报"),
     gl_jswzhinengpinghengjisuan("gl_jswzhinengpinghengjisuan", "JSW质能平衡计算报表"),
 
 

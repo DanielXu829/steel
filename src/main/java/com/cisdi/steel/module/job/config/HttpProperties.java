@@ -18,12 +18,12 @@ import org.springframework.stereotype.Component;
 @Data
 public class HttpProperties {
     /**
-     * 高炉 6
+     * 6高炉 6
      */
     private String urlApiGLOne;
 
     /**
-     * 高炉 8
+     * 6高炉 8
      */
     private String urlApiGLTwo;
 

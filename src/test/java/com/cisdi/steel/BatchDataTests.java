@@ -88,7 +88,7 @@ public class BatchDataTests extends SteelApplicationTests {
 
 
     /**
-     * 生成所有子类
+     * 生成所有子类 更新目录
      */
     @Test
     public void test4() {
@@ -110,7 +110,7 @@ public class BatchDataTests extends SteelApplicationTests {
 
     private Long getParentId(String code) {
         if (code.startsWith("gl_")) {
-            // 高炉
+            // 6高炉
             return 1L;
         } else if (code.startsWith("jh_")) {
             // 焦化
