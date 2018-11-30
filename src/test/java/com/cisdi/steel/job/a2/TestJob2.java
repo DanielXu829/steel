@@ -1,9 +1,12 @@
 package com.cisdi.steel.job.a2;
 
 import com.cisdi.steel.SteelApplicationTests;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.a2.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 /**
  * 焦化
@@ -295,6 +298,8 @@ public class TestJob2 extends SteelApplicationTests {
 
     @Test
     public void test25() {
-        luwenjilu7Job.execute(null);
+       luwenjilu7Job.execute(null);
     }
+
+
 }

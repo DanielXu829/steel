@@ -56,13 +56,13 @@ public enum JobEnum {
     jh_liuan("jh_liuan", "CK67-硫铵（日）报表"),
     jh_chubenzhengliu("jh_chubenzhengliu", "CK67-粗苯蒸馏（日）报表"),
     jh_zhonglengxiben("jh_zhonglengxiben", "CK67-终冷洗苯报表"),
-    jh_tuoliujiexi("jh_tuoliujiexi", "CK67-脱硫解吸（日）4.3m无此表报表"),
-    jh_zhisuancaozuo("jh_zhisuancaozuo", "CK67-制酸操作（日）4.3m无此表报表"),
+    jh_tuoliujiexi("jh_tuoliujiexi", "CK67-脱硫解吸（日）"),
+    jh_zhisuancaozuo("jh_zhisuancaozuo", "CK67-制酸操作（日）"),
     jh_lianjiaoribao("jh_lianjiaoribao", "CK67-炼焦日报表（班日、月）报表"),
     jh_jiaolujiare6("jh_jiaolujiare6", "CK67-6#焦炉加热制度表（日）报表"),
     jh_jiaolujiare7("jh_jiaolujiare7", "CK67-7#焦炉加热制度表（日）报表"),
-    jh_luwenjilu6("jh_luwenjilu6", "CK67-6#炉温记录从动态管控系统读取报表"),
-    jh_luwenjilu7("jh_luwenjilu7", "CK67-7#炉温记录从动态管控系统读取报表"),
+    jh_luwenjilu6("jh_luwenjilu6", "CK67-6#炉温记录报表"),
+    jh_luwenjilu7("jh_luwenjilu7", "CK67-7#炉温记录报表"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫报表"),
