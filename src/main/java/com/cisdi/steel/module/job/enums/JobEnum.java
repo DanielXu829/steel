@@ -73,6 +73,8 @@ public enum JobEnum {
     sj_tuoxiaoyunxingjilu("sj_tuoxiaoyunxingjilu", "脱硝运行记录表"),
     sj_shaojieji6_day("sj_shaojieji6_day", "6#烧结机生产日报"),
     sj_shaojieji5_day("sj_shaojieji5_day", "5#烧结机生产日报"),
+    sj_liushaogycanshu5("sj_liushaogycanshu5", "4小时发布-五烧主要工艺参数及实物质量情况日报"),
+    sj_liushaogycanshu6("sj_liushaogycanshu6", "4小时发布-六烧主要工艺参数及实物质量情况日报"),
 
     // 原供料
     gl_chejianwuliaowaipai("gl_chejianwuliaowaipai", "供料车间物料外排统计表"),
@@ -111,8 +113,7 @@ public enum JobEnum {
     nj_fourkongcount("nj_fourkongcount", "四空压站启停次数表"),
     nj_yasuokongqi("nj_yasuokongqi", "压缩空气生产情况汇总表"),
     nj_meiqihunhemei("nj_meiqihunhemei", "煤气柜作业区混合煤气情况表"),
-    nj_guifengjimeiyaji("nj_guifengjimeiyaji", "柜区风机煤压机时间统计表")
-    ;
+    nj_guifengjimeiyaji("nj_guifengjimeiyaji", "柜区风机煤压机时间统计表");
 
     private String code;
     private String name;

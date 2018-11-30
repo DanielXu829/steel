@@ -67,7 +67,7 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
                 // 4、5填充数据
                 Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
                 // 6、生成文件
-                this.createFile(workbook, excelPathInfo,writerExcelDTO);
+                this.createFile(workbook, excelPathInfo, writerExcelDTO);
 
                 // 7、插入索引
                 ReportIndex reportIndex = new ReportIndex();
@@ -84,11 +84,10 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
         }
     }
 
-    protected void createFile(Workbook workbook, ExcelPathInfo excelPathInfo,WriterExcelDTO writerExcelDTO) throws IOException {
+    protected void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO) throws IOException {
         // 隐藏 下划线的sheet  强制计算
         FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
         int numberOfSheets = workbook.getNumberOfSheets();
-        int removeSheetNum=3;
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             String sheetName = sheet.getSheetName();
@@ -100,37 +99,44 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
                 workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
             }
             //月末清除模板数据到最初
-            if(DateUtil.isLastDayOfMonth(new Date())){
-                workbook.removeSheetAt(removeSheetNum);
-                if("6#机侧炉温管控(月)从动态管控系统读取或计算 ".equals(sheetName)){
-                    for(int j=3;i<59;j++){
-                        Row row = sheet.getRow(j);
-                        for(int k=1;k<32;k++){
-                            row.removeCell(row.getCell(k));
-                        }
-                    }
-                }else if("6#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)){
-                    for(int j=3;i<59;j++){
-                        Row row = sheet.getRow(j);
-                        for(int k=1;k<32;k++){
-                            row.removeCell(row.getCell(k));
-                        }
-                    }
-                }
-                removeSheetNum++;
-            }
         }
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
-
-        if(DateUtil.isLastDayOfMonth(new Date())){
-            fos.close();
-            workbook.close();
-        }else {
-            fos.close();
+        fos.close();
+        if (DateUtil.isLastDayOfMonth(new Date())){
+            FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
+            for (int i = 0; i < numberOfSheets; i++) {
+                Sheet sheet = workbook.getSheetAt(i);
+                String sheetName = sheet.getSheetName();
+                if ("6#机侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                    for (int j = 3; j < 59; j++) {
+                        Row row = sheet.getRow(j);
+                        for (int k = 1; k < 32; k++) {
+                            row.getCell(k).setCellValue("");
+                            row.getCell(k).setCellType(CellType.STRING);
+                        }
+                    }
+                } else if ("6#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                    for (int j = 3; j < 59; j++) {
+                        Row row = sheet.getRow(j);
+                        for (int k = 1; k < 32; k++) {
+                            row.getCell(k).setCellValue("");
+                            row.getCell(k).setCellType(CellType.STRING);
+                        }
+                    }
+                }
+            }
+            for (int i = 3; i < numberOfSheets; i++) {
+                workbook.removeSheetAt(i);
+                numberOfSheets--;
+            }
+            workbook.setForceFormulaRecalculation(true);
+            workbook.write(modelFos);
+            modelFos.close();
+        } else {
             workbook.close();
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
-            FileUtils.copyFile(excelPathInfo.getSaveFilePath(),writerExcelDTO.getTemplate().getTemplatePath());
+            FileUtils.copyFile(excelPathInfo.getSaveFilePath(), writerExcelDTO.getTemplate().getTemplatePath());
         }
     }
 }

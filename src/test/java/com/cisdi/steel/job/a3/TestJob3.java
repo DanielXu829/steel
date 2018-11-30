@@ -93,4 +93,26 @@ public class TestJob3 extends SteelApplicationTests {
     public void test6() {
         jieji5Job.execute(null);
     }
+
+    /**
+     * 4小时发布-五烧主要工艺参数及实物质量情况日报
+     */
+    @Autowired
+    private GycanshuJob5 gycanshuJob5;
+
+    @Test
+    public void test7() {
+        gycanshuJob5.execute(null);
+    }
+
+    /**
+     * 4小时发布-六烧主要工艺参数及实物质量情况日报
+     */
+    @Autowired
+    private GycanshuJob6 gycanshuJob6;
+
+    @Test
+    public void test8() {
+        gycanshuJob6.execute(null);
+    }
 }

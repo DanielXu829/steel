@@ -43,7 +43,7 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
                 workbook.removeSheetAt(i);
                 numberOfSheets--;
             }
-            if("7#焦侧炉温管控(月)从动态管控系统读取或计算 ".equals(sheetName)){
+            if("7#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)){
                 int rowNum=5;
                 for(int j=3;j<59;j++){
                     Row row = sheetAt.getRow(j);
@@ -53,7 +53,7 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
                     cell.setCellType(CellType.FORMULA);
                     rowNum++;
                 }
-            }else if("7#机侧炉温管控(月)从动态管控系统读取或计算 ".equals(sheetName)){
+            }else if("7#机侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)){
                 int rowNum=5;
                 for(int j=3;j<59;j++){
                     Row row = sheetAt.getRow(j);
