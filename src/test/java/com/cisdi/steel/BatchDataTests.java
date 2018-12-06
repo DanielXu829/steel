@@ -1,5 +1,7 @@
 package com.cisdi.steel;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.util.ApplicationContextHolder;
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.report.entity.ReportCategory;
@@ -66,7 +68,7 @@ public class BatchDataTests extends SteelApplicationTests {
     public void test2() {
         List<SysConfig> all = getAll();
         for (SysConfig sysConfig : all) {
-            createTask(sysConfig.getCode(), jobGroup, "0 0/10 * * * ?", "");
+            createTask(sysConfig.getCode(), jobGroup, "0 0 0/4 * * ?", "");
         }
     }
 
@@ -95,13 +97,20 @@ public class BatchDataTests extends SteelApplicationTests {
         List<ReportCategoryTemplate> list = reportCategoryTemplateService.list(null);
         list.forEach(item -> {
             if (StringUtils.isNotBlank(item.getTemplatePath())) {
-                ReportCategory reportCategory = new ReportCategory();
-                reportCategory.setCode(item.getReportCategoryCode());
-                reportCategory.setLeafNode("1");
-                Long parentId = getParentId(item.getReportCategoryCode());
-                reportCategory.setParentId(parentId);
-                reportCategory.setName(item.getTemplateName());
-                reportCategoryService.save(reportCategory);
+                LambdaQueryWrapper<ReportCategory> wrapper =
+                        new QueryWrapper<ReportCategory>().lambda();
+                wrapper.eq(ReportCategory::getCode, item.getReportCategoryCode());
+                int count = reportCategoryService.count(wrapper);
+                if (count == 0) {
+                    ReportCategory reportCategory = new ReportCategory();
+                    reportCategory.setCode(item.getReportCategoryCode());
+                    reportCategory.setLeafNode("1");
+                    Long parentId = getParentId(item.getReportCategoryCode());
+                    reportCategory.setParentId(parentId);
+                    reportCategory.setName(item.getTemplateName());
+                    reportCategoryService.save(reportCategory);
+                }
+
             }
 
         });
