@@ -73,7 +73,7 @@ public class TestJob1 extends SteelApplicationTests {
 
 
     /**
-     * 高炉冷却壁温度月报表
+     * 高炉冷却壁温度月报表,
      */
     @Autowired
     private LengquebiwenduMonthJob lengquebiwenduMonthJob;
@@ -112,7 +112,6 @@ public class TestJob1 extends SteelApplicationTests {
      */
     @Autowired
     private LudingbuliaoJob ludingbuliaoJob;
-
     @Test
     public void test9() {
         ludingbuliaoJob.execute(null);

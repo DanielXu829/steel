@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.a1.writer;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -29,8 +30,9 @@ import java.util.Objects;
 public class LudingbuliaoWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
-
-        return getMapHandler(getUrl(), 6, excelDTO);
+        Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
+        String version = PoiCustomUtil.getSheetCellVersion(workbook);
+        return getMapHandler(getUrl(version), 6, excelDTO);
     }
 
     @Override
@@ -111,7 +113,7 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    private String getUrl() {
-        return httpProperties.getUrlApiGLOne() + "/batches/distribution/period";
+    private String getUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/batches/distribution/period";
     }
 }
