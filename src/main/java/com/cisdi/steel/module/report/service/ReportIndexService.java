@@ -56,5 +56,5 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
      *
      * @return
      */
-    ApiResult reportIndex();
+    ApiResult reportIndex(ReportIndexQuery reportIndexQuery);
 }

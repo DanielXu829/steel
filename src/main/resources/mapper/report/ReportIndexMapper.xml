@@ -1,36 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cisdi.steel.module.report.mapper.ReportIndexMapper">
-    <resultMap id="BaseResultMap" type="com.cisdi.steel.module.report.entity.ReportIndex">
 
+    <resultMap id="BaseResultMap" type="com.cisdi.steel.module.report.entity.ReportIndex">
     </resultMap>
+    <sql id="queryLike">
+        <if test="parentCode!=null and parentCode!=''">
+            AND report_category_code like  concat(#{parentCode},'%')
+        </if>
+        <if test="reportCategoryCode!=null and reportCategoryCode!=''">
+            AND report_category_code=#{reportCategoryCode}
+        </if>
+        <if test="name!=null and name!=''">
+            AND `name`=#{name}
+        </if>
+        <if test="path!=null and path!=''">
+            AND path=#{path}
+        </if>
+        <if test="indexType!=null and indexType!=''">
+            AND index_type=#{indexType}
+        </if>
+        <if test="indexLang!=null and indexLang!=''">
+            AND index_lang=#{indexLang}
+        </if>
+    </sql>
+
 
     <select id="queryReportToday" resultMap="BaseResultMap">
         SELECT
-            *
+        *
         FROM
-            `report_index`
-        WHERE
+        `report_index`
+        <where>
             index_type IN ( 'report_day' )
             AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
+            <include refid="queryLike"/>
+        </where>
     </select>
+
     <select id="queryReportMonth" resultMap="BaseResultMap">
         SELECT
-            *
+        *
         FROM
-            `report_index`
-        WHERE
+        `report_index`
+        <where>
             index_type IN ( 'report_month' )
-            AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
+            AND DATE_FORMAT(create_time,'%Y-%m') = #{toDay}
+            <include refid="queryLike"/>
+        </where>
     </select>
     <select id="queryReportOther" resultMap="BaseResultMap">
         SELECT
-            *
+        *
         FROM
-            `report_index`
-        WHERE
-            index_type  NOT IN ( 'report_month','4hour_report','report_day' )
+        `report_index`
+        <where>
+            index_type NOT IN ( 'report_month','4hour_report','report_day' )
             AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
-        ORDER BY  create_time DESC
+            <include refid="queryLike"/>
+        </where>
+        ORDER BY create_time DESC
     </select>
 </mapper>

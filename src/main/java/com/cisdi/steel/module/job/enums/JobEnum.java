@@ -29,12 +29,8 @@ public enum JobEnum {
     gl_lengquebiwendu_month("gl_lengquebiwendu_month", "高炉冷却壁温度 月报"),
     gl_ludingbuliao_day("gl_ludingbuliao_day", "炉顶装料作业日报表"),
     gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "炉顶装料作业日报表"),
-    gl_ludingzhuangliaozuoye_day2("gl_ludingzhuangliaozuoye_day2", "高炉本体温度 日报2"),
-    gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
-    gl_refenglu_month("gl_refenglu_month", "热风炉 月报"),
     gl_jswgaolu_day("gl_jswgaolu_day", "6高炉 日报"),
     gl_taisu1_month("gl_taisu1_month", "6高炉 月报"),
-    gl_jswzhinengpinghengjisuan("gl_jswzhinengpinghengjisuan", "JSW质能平衡计算报表"),
 
 
     // 焦化
@@ -68,7 +64,6 @@ public enum JobEnum {
     sj_tuoliu5("sj_tuoliu5", "5#脱硫系统运行日报"),
     sj_tuoliu6("sj_tuoliu6", "6#脱硫系统运行日报"),
     sj_gengzongbiao("sj_gengzongbiao", "五烧六烧主抽电耗跟踪表"),
-    sj_rongjiranliao("sj_tuoxiaoyunxingjilu", "熔剂燃料质量管控"),
     sj_tuoliutuoxiaogongyicaiji("sj_tuoliutuoxiaogongyicaiji", "脱硫脱硝工艺参数采集"),
     sj_tuoxiaoyunxingjilu("sj_tuoxiaoyunxingjilu", "脱硝运行记录表"),
     sj_shaojieji6_day("sj_shaojieji6_day", "6#烧结机生产日报"),
@@ -77,9 +72,9 @@ public enum JobEnum {
     sj_liushaogycanshu6("sj_liushaogycanshu6", "4小时发布-六烧主要工艺参数及实物质量情况日报"),
 
     // 原供料
-    gl_chejianwuliaowaipai("gl_chejianwuliaowaipai", "供料车间物料外排统计表"),
-    gl_chejianjikongzhongxinjioajieban("gl_chejianjikongzhongxinjioajieban", "供料车间物料外排统计表"),
-    gl_yichanggenzong("gl_yichanggenzong", ""),
+    gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
+    gl_chejianjikongzhongxinjioajieban("ygl_chejianjikongzhongxinjioajieban", "供料车间物料外排统计表"),
+    gl_yichanggenzong("ygl_yichanggenzong", ""),
 
 
     ygl_shaixiafentongji_day("ygl_shaixiafentongji_day", "筛下粉统计"),
@@ -92,13 +87,8 @@ public enum JobEnum {
     ygl_shengchanxiechedegji("ygl_shengchanxiechedegji", "生产卸车登记表"),
     ygl_jinchangwuzi("ygl_jinchangwuzi", "进厂物资（精煤）化验记录表"),
 
-    yl_duihunyunkuangfenpeibi("yl_duihunyunkuangfenpeibi", "堆混匀矿粉配比通知单"),
-    yl_jinchangwuzijingmeihuayan("yl_jinchangwuzijingmeihuayan", "原料进厂物资精煤化验记录表"),
-    yl_chejianzhongkongshiyuanshijilu("yl_chejianzhongkongshiyuanshijilu", "原料车间中控室原始记录表"),
-    yl_chejianshengchanyunxing("yl_chejianshengchanyunxing", "原料车间生产运行记录表"),
-    yl_chejianshengchanjiaoban("yl_chejianshengchanjiaoban", "原料车间生产交班表"),
-    yl_shujujilu("yl_shujujilu", "原料数据记录表"),
-    yl_hunyunkuangfenA4ganzhuanshi("yl_hunyunkuangfenA4ganzhuanshi", "原料混匀矿粉A4干转湿配比换算计算表"),
+    yl_chejianshengchanyunxing("ygl_chejianshengchanyunxing", "原料车间生产运行记录表"),
+    yl_chejianshengchanjiaoban("ygl_chejianshengchanjiaoban", "原料车间生产交班表"),
 
     // 能介
     nj_twokong("nj_twokong", "二空压站运行记录表"),

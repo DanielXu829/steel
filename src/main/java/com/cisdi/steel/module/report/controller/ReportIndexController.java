@@ -107,8 +107,8 @@ public class ReportIndexController {
      * @return 报表首页需要的展示数据封装结果
      */
     @RequestMapping(value = "/index")
-    public ApiResult index() {
-        return baseService.reportIndex();
+    public ApiResult index(ReportIndexQuery reportIndexQuery) {
+        return baseService.reportIndex(reportIndexQuery);
     }
 
 }

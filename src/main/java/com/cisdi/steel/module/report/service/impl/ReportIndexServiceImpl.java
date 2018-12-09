@@ -144,17 +144,21 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
 
     @Override
-    public ApiResult reportIndex() {
+    public ApiResult reportIndex(ReportIndexQuery reportIndexQuery) {
         Date today = new Date();
         //1.昨日日报
         Date yestarDay = DateUtil.addDays(today, -1);
-        List<ReportIndex> yestarDayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(yestarDay, DateUtil.yyyyMMddFormat));
+        reportIndexQuery.setToDay(DateUtil.getFormatDateTime(yestarDay, DateUtil.yyyyMMddFormat));
+        List<ReportIndex> yestarDayList = reportIndexMapper.queryReportToday(reportIndexQuery);
         //2.今日日报
-        List<ReportIndex> todayList = reportIndexMapper.queryReportToday(DateUtil.getFormatDateTime(today, DateUtil.yyyyMMddFormat));
+        reportIndexQuery.setToDay(DateUtil.getFormatDateTime(today, DateUtil.yyyyMMddFormat));
+        List<ReportIndex> todayList = reportIndexMapper.queryReportToday(reportIndexQuery);
         //3.本月月报
-        List<ReportIndex> monthList = reportIndexMapper.queryReportMonth(DateUtil.getFormatDateTime(today, "yyyy-MM"));
+        reportIndexQuery.setToDay(DateUtil.getFormatDateTime(today, "yyyy-MM"));
+        List<ReportIndex> monthList = reportIndexMapper.queryReportMonth(reportIndexQuery);
         //4.其他最新报表
-        List<ReportIndex> otherList = reportIndexMapper.queryReportOther(DateUtil.getFormatDateTime(yestarDay, DateUtil.yyyyMMddFormat));
+        reportIndexQuery.setToDay(DateUtil.getFormatDateTime(today, DateUtil.yyyyMMddFormat));
+        List<ReportIndex> otherList = reportIndexMapper.queryReportOther(reportIndexQuery);
 
         ReportIndexDTO reportIndexDTO = new ReportIndexDTO();
         reportIndexDTO.setYestarDayList(yestarDayList);

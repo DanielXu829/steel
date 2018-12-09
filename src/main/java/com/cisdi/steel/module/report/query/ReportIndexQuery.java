@@ -56,4 +56,13 @@ public class ReportIndexQuery extends PageQuery implements Serializable {
      */
     private String indexLang;
 
+    /**
+     * 报表时间（今天 昨天 本月等）
+     */
+    private String  toDay;
+
+    /**
+     * 目录父类编码
+     */
+    private String parentCode;
 }

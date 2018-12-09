@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.report.mapper;
 
+import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import org.apache.ibatis.annotations.Mapper;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -20,25 +21,25 @@ public interface ReportIndexMapper extends BaseMapper<ReportIndex> {
     /**
      * 查询今天、昨天报表
      *
-     * @param toDay
+     * @param reportIndexQuery
      * @return
      */
-    List<ReportIndex> queryReportToday(@Param("toDay") String toDay);
+    List<ReportIndex> queryReportToday(ReportIndexQuery reportIndexQuery);
 
     /**
      * 查询本月报表
      *
-     * @param toDay
+     * @param reportIndexQuery
      * @return
      */
-    List<ReportIndex> queryReportMonth(@Param("toDay") String toDay);
+    List<ReportIndex> queryReportMonth(ReportIndexQuery reportIndexQuery);
 
     /**
      * 查询其他报表
      *
-     * @param toDay
+     * @param reportIndexQuery
      * @return
      */
-    List<ReportIndex> queryReportOther(@Param("toDay") String toDay);
+    List<ReportIndex> queryReportOther(ReportIndexQuery reportIndexQuery);
 
 }
