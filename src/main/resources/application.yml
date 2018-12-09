@@ -4,7 +4,7 @@ spring:
         name: steel
 #profile
     profiles:
-        active: prod
+        active: local
 #datasource
     datasource:
         # druid
@@ -55,15 +55,24 @@ spring:
         org.quartz.plugin.shutdownhook.cleanShutdown: true
 
 # 请求的根路径
+#http:
+#  url:
+#   urlApiGLOne: http://10.66.3.202:9001
+#   urlApiGLTwo: http://10.66.3.204:9001
+#   urlApiNJOne: http://10.66.3.220:8080
+#   urlApiJHOne:  http://10.66.3.201:8099
+#   urlApiYGLOne: http://10.66.3.210:8181
+#   urlApiSJOne: http://10.66.3.205:9001
+#   urlApiSJTwo: http://10.66.3.206:9001
 http:
   url:
-   urlApiGLOne: http://10.66.3.202:9001
-   urlApiGLTwo: http://10.66.3.204:9001
-   urlApiNJOne: http://10.66.3.220:8080
-   urlApiJHOne:  http://10.66.3.201:8099
-   urlApiYGLOne: http://10.66.3.210:8181
-   urlApiSJOne: http://10.66.3.205:9001
-   urlApiSJTwo: http://10.66.3.206:9001
+   urlApiGLOne: http://10.11.11.24:9001
+   urlApiGLTwo: http://10.11.11.25:9001
+   urlApiNJOne: http://10.11.11.33:8080
+   urlApiJHOne:  http://10.11.11.31:8080
+   urlApiYGLOne: http://10.11.11.32:8181
+   urlApiSJOne: http://10.11.11.27:9001
+   urlApiSJTwo: http://10.11.11.28:9001
 
 # mybatis-plus
 mybatis-plus:
