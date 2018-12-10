@@ -106,6 +106,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             }
             wrapper.between(ReportIndex::getCreateTime, dateBeginTime, dateEndTime);
         }
+        wrapper.orderBy(true, false, ReportIndex::getCreateTime);
         this.page(page, wrapper);
         return ApiUtil.successPage(page.getTotal(), page.getRecords());
     }
