@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.strategy.date;
 
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class DayStrategy implements DateStrategy {
 
     @Override
     public DateQuery handlerDate(Date date) {
+//        Date da=DateUtil.strToDate("2018-12-10 23:10:00","yyyy-MM-dd HH:mm:ss");
         return DateQueryUtil.buildToday(date);
     }
 }
