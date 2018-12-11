@@ -25,7 +25,7 @@ public class TuoliuJob5 extends AbstractExportJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.sj_tuoliu5;
+        return JobEnum.sj_tuoliu;
     }
 
     @Override

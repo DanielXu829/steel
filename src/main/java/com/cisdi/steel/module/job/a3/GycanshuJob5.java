@@ -25,7 +25,7 @@ public class GycanshuJob5 extends AbstractExportJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.sj_liushaogycanshu5;
+        return JobEnum.sj_liushaogycanshu;
     }
 
     @Override

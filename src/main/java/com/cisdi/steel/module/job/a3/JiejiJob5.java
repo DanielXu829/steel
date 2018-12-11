@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 5#烧结机生产日报
+ * 烧结机生产日报
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -25,7 +25,7 @@ public class JiejiJob5 extends AbstractExportJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.sj_shaojieji5_day;
+        return JobEnum.sj_shaojieji_day;
     }
 
     @Override

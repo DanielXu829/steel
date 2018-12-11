@@ -27,18 +27,6 @@ public class TestJob3 extends SteelApplicationTests {
         tuoliuJob5.execute(null);
     }
 
-    @Autowired
-    private TuoliuJob6 tuoliuJob6;
-
-    /**
-     * 6#脱硫系统运行日报
-     */
-    @Test
-    public void test12() {
-        tuoliuJob6.execute(null);
-    }
-
-
     /**
      * 6#脱硫脱硝工艺参数采集
      */
@@ -72,16 +60,6 @@ public class TestJob3 extends SteelApplicationTests {
         tuoXiaoJob.execute(null);
     }
 
-    /**
-     * 6#烧结机生产日报
-     */
-    @Autowired
-    private JiejiJob6 jieji6Job;
-
-    @Test
-    public void test5() {
-        jieji6Job.execute(null);
-    }
 
     /**
      * 5#烧结机生产日报
@@ -105,14 +83,4 @@ public class TestJob3 extends SteelApplicationTests {
         gycanshuJob5.execute(null);
     }
 
-    /**
-     * 4小时发布-六烧主要工艺参数及实物质量情况日报
-     */
-    @Autowired
-    private GycanshuJob6 gycanshuJob6;
-
-    @Test
-    public void test8() {
-        gycanshuJob6.execute(null);
-    }
 }

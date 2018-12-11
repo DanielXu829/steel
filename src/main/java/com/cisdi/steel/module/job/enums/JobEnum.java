@@ -61,15 +61,12 @@ public enum JobEnum {
     jh_luwenjilu7("jh_luwenjilu7", "CK67-7#炉温记录报表"),
 
     // 烧结
-    sj_tuoliu5("sj_tuoliu5", "5#脱硫系统运行日报"),
-    sj_tuoliu6("sj_tuoliu6", "6#脱硫系统运行日报"),
+    sj_tuoliu("sj_tuoliu", "脱硫系统运行日报"),
     sj_gengzongbiao("sj_gengzongbiao", "五烧六烧主抽电耗跟踪表"),
     sj_tuoliutuoxiaogongyicaiji("sj_tuoliutuoxiaogongyicaiji", "脱硫脱硝工艺参数采集"),
     sj_tuoxiaoyunxingjilu("sj_tuoxiaoyunxingjilu", "脱硝运行记录表"),
-    sj_shaojieji6_day("sj_shaojieji6_day", "6#烧结机生产日报"),
-    sj_shaojieji5_day("sj_shaojieji5_day", "5#烧结机生产日报"),
-    sj_liushaogycanshu5("sj_liushaogycanshu5", "4小时发布-五烧主要工艺参数及实物质量情况日报"),
-    sj_liushaogycanshu6("sj_liushaogycanshu6", "4小时发布-六烧主要工艺参数及实物质量情况日报"),
+    sj_shaojieji_day("sj_shaojieji_day", "烧结机生产日报"),
+    sj_liushaogycanshu("sj_liushaogycanshu", "4小时发布-主要工艺参数及实物质量情况日报"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
