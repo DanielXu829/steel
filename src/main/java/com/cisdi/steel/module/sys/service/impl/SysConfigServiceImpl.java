@@ -24,6 +24,18 @@ import java.util.Objects;
 public class SysConfigServiceImpl extends BaseServiceImpl<SysConfigMapper, SysConfig> implements SysConfigService {
 
     @Override
+    public String selectNameByCode(String code) {
+        LambdaQueryWrapper<SysConfig> wrapper = new QueryWrapper<SysConfig>().lambda();
+        wrapper.select(SysConfig::getName);
+        wrapper.eq(SysConfig::getCode, code);
+        SysConfig one = this.getOne(wrapper);
+        if (Objects.isNull(one)) {
+            return null;
+        }
+        return one.getName();
+    }
+
+    @Override
     public String selectActionByCode(String code) {
         LambdaQueryWrapper<SysConfig> wrapper = new QueryWrapper<SysConfig>().lambda();
         wrapper.select(SysConfig::getAction);

@@ -29,6 +29,10 @@ public class ReportIndexQuery extends PageQuery implements Serializable {
      */
     private String reportCategoryCode;
     /**
+     * 序列
+     */
+    private String sequence;
+    /**
      * 文件名称
      */
     private String name;
@@ -59,7 +63,7 @@ public class ReportIndexQuery extends PageQuery implements Serializable {
     /**
      * 报表时间（今天 昨天 本月等）
      */
-    private String  toDay;
+    private String toDay;
 
     /**
      * 目录父类编码

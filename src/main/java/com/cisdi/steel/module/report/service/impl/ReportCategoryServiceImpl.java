@@ -10,9 +10,12 @@ import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportCategory;
+import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportCategoryMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryService;
 import com.cisdi.steel.module.report.util.ReportCategoryUtil;
+import com.cisdi.steel.module.sys.service.SysConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -20,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * <p>Description: 报表分类 服务实现类 </p>
@@ -30,6 +34,7 @@ import java.util.Objects;
  */
 @Service
 public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMapper, ReportCategory> implements ReportCategoryService {
+
 
     @Override
     public ApiResult insertRecord(ReportCategory record) {
@@ -58,8 +63,14 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
     }
 
     @Override
-    public ApiResult<List<ReportCategory>> selectAllCategory() {
-        List<ReportCategory> list = this.list(null);
+    public ApiResult<List<ReportCategory>> selectAllCategory(ReportCategory record) {
+        String name = record.getName();
+        if (StringUtils.isNotBlank(name)) {
+            name = Pattern.compile("[\\d]").matcher(name).replaceAll("");
+        }
+        LambdaQueryWrapper<ReportCategory> wrapper = new QueryWrapper<ReportCategory>().lambda();
+        wrapper.like(StringUtils.isNotBlank(record.getName()), ReportCategory::getName, name);
+        List<ReportCategory> list = this.list(wrapper);
         List<ReportCategory> reportCategories = ReportCategoryUtil.list2TreeConverter(list, Constants.PARENT_ID);
         return ApiUtil.success(reportCategories);
     }
@@ -93,7 +104,7 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < size; i++) {
             builder.append(File.separator)
-            .append(result.peekLast());
+                    .append(result.peekLast());
         }
         ReportPathDTO reportPathDTO = new ReportPathDTO();
         reportPathDTO.setPath(builder.toString());

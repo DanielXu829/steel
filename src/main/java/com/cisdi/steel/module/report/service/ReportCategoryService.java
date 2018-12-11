@@ -21,7 +21,7 @@ public interface ReportCategoryService extends IBaseService<ReportCategory> {
      *
      * @return 所有菜单
      */
-    ApiResult<List<ReportCategory>> selectAllCategory();
+    ApiResult<List<ReportCategory>> selectAllCategory(ReportCategory record);
 
 
     /**

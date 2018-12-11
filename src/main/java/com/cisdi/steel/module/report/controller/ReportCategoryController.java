@@ -32,8 +32,8 @@ public class ReportCategoryController {
     }
 
     @PostMapping(value = "/allCategory")
-    public ApiResult selectAllCategory() {
-        return baseService.selectAllCategory();
+    public ApiResult selectAllCategory(@RequestBody ReportCategory record) {
+        return baseService.selectAllCategory(record);
     }
 
     /**

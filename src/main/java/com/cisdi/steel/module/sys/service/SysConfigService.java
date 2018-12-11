@@ -12,9 +12,17 @@ import com.cisdi.steel.common.base.service.IBaseService;
  * @version 1.0
  */
 public interface SysConfigService extends IBaseService<SysConfig> {
+    /**
+     * 通过编码查询 当前名称
+     *
+     * @param code 编码
+     * @return 结果
+     */
+    String selectNameByCode(String code);
 
     /**
      * 通过编码查询 当前执行的值
+     *
      * @param code 编码
      * @return 结果
      */
