@@ -25,6 +25,17 @@
         </if>
     </sql>
 
+    <select id="queryLastOne" resultType="com.cisdi.steel.module.report.entity.ReportIndex">
+        SELECT
+            *
+        FROM
+            `report_index`
+        WHERE
+            report_category_code = #{code}
+        ORDER BY
+            create_time DESC
+            LIMIT 1
+    </select>
 
     <select id="queryReportToday" resultMap="BaseResultMap">
         SELECT

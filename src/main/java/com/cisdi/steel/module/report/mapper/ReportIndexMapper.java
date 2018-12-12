@@ -19,6 +19,14 @@ import java.util.List;
 @Mapper
 public interface ReportIndexMapper extends BaseMapper<ReportIndex> {
     /**
+     * 通过编码查询最新的一条数据
+     *
+     * @param code
+     * @return
+     */
+    ReportIndex queryLastOne(@Param("code") String code);
+
+    /**
      * 查询今天、昨天报表
      *
      * @param reportIndexQuery

@@ -64,9 +64,13 @@ public class ThreeFourKongWriter extends AbstractExcelReadWriter {
                 int index = 1;
                 for (DateQuery item : dateQueries) {
                     System.out.println(item);
-                    List<CellData> cellDataList = this.eachData(stringListMap, item.getQueryParam(), index);
+                    List<CellData> cellDataList = this.eachData(stringListMap, item.getQueryParam(), index,sheetName);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    index += 1;
+                    if("_Area34_day_shift".equals(sheetName)){
+                        index += 4;
+                    }else{
+                        index += 1;
+                    }
                 }
             }
         }
@@ -82,7 +86,7 @@ public class ThreeFourKongWriter extends AbstractExcelReadWriter {
      * @param indexs
      * @return
      */
-    private List<CellData> eachData(Map<String, List<Cell>> listMap, Map<String, String> queryParam, int indexs) {
+    private List<CellData> eachData(Map<String, List<Cell>> listMap, Map<String, String> queryParam, int indexs,String sheetName) {
         List<CellData> results = new ArrayList<>();
 
         listMap.forEach((k, v) -> {
@@ -99,8 +103,13 @@ public class ThreeFourKongWriter extends AbstractExcelReadWriter {
                             int size = jsonArray.size();
                             for (int index = 0; index < size; index++) {
                                 JSONObject obj = jsonArray.getJSONObject(index);
-                                Object val = obj.get("val");
-                                ExcelWriterUtil.addCellData(results, indexs, cell.getColumnIndex(), val);
+                                if("_Area34_day_shift".equals(sheetName)){
+                                    Object val = obj.get("timestamp");
+                                    ExcelWriterUtil.addCellData(results, indexs, cell.getColumnIndex(), val);
+                                }else{
+                                    Object val = obj.get("val");
+                                    ExcelWriterUtil.addCellData(results, indexs, cell.getColumnIndex(), val);
+                                }
                             }
                         }
                     }
