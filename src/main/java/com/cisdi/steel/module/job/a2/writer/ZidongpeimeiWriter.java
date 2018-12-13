@@ -11,10 +11,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -48,10 +45,22 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                 String name = sheetSplit[1];
                 // 自动配煤
                 if ("auto".equals(name)) {
-                    for (DateQuery dateQuery : dateQueries) {
-                        List<CellData> cellDataList = this.handlerData(dateQuery, sheet);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    String shift = "";
+                    if (dateQueries.size() == 1) {
+                        shift = "夜班";
+                    } else if (dateQueries.size() == 2) {
+                        shift = "白班";
+                    } else if (dateQueries.size() == 3) {
+                        shift = "中班";
                     }
+                    Row row = sheet.createRow(29);
+                    row.createCell(0).setCellValue(shift);
+                    row.getCell(0).setCellType(CellType.STRING);
+
+//                    for (int j = 0; j < dateQueries.size(); j++) {
+                    List<CellData> cellDataList = this.handlerData(dateQueries.get(dateQueries.size() - 1), sheet);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+//                    }
                 }
             }
         }

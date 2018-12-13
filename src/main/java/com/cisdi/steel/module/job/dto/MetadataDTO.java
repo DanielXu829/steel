@@ -105,7 +105,7 @@ public class MetadataDTO {
         this.language = excelDTO.getTemplate().getTemplateLang();
         this.blowingInDate = DateUtil.getFormatDateTime(date, DateUtil.yyyyMMddFormat);
 
-        this.buildType =Objects.isNull(excelDTO.getJobExecuteEnum())?JobExecuteEnum.automatic.getName():excelDTO.getJobExecuteEnum().getName();
+        this.buildType = Objects.isNull(excelDTO.getJobExecuteEnum()) ? JobExecuteEnum.automatic.getName() : excelDTO.getJobExecuteEnum().getName();
         this.excelFile = excelDTO.getExcelPathInfo().getSaveFilePath();
         this.buildStartTime = DateUtil.getFormatDateTime(excelDTO.getStartTime(), DateUtil.fullFormat);
         this.buildEndTime = DateUtil.getFormatDateTime(date, DateUtil.fullFormat);
@@ -120,6 +120,10 @@ public class MetadataDTO {
         // 按照顺序插入
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("DateTime", this.dateTime);
+        result.put("DateTime1", DateUtil.getFormatDateTime(this.dateTime, DateUtil.yyyyMMddChineseFormat));
+        result.put("DateTime2", DateUtil.getFormatDateTime(this.dateTime, DateUtil.MMddChineseFormat));
+        result.put("DateTime3", DateUtil.getFormatDateTime(this.dateTime, "yyyy/MM/dd"));
+        result.put("DateTime4", DateUtil.getFormatDateTime(this.dateTime, "MM/dd"));
         result.put("TemplateName", this.templateName);
         result.put("Type", this.type);
         result.put("TemplatePath", this.templatePath);

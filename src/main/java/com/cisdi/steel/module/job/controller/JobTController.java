@@ -34,6 +34,6 @@ public class JobTController {
         if (StringUtils.isNotBlank(path)) {
             FileUtils.downFile(new File(path), request, response, FileUtil.getFileName(path));
         }
-        return ApiUtil.success("");
+        return ApiUtil.fail();
     }
 }
