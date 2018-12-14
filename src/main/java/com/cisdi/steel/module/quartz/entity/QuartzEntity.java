@@ -25,7 +25,7 @@ public class QuartzEntity {
     /**
      * 任务分组
      */
-    private String jobGroup;
+    private String jobGroup="所有";
     /**
      * 任务描述
      */
@@ -64,7 +64,7 @@ public class QuartzEntity {
     /**
      * 任务分组 用于修改
      */
-    private String oldJobGroup;
+    private String oldJobGroup="所有";
 
     /**
      * 任务执行编码

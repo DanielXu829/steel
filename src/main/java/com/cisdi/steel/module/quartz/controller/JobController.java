@@ -51,17 +51,19 @@ public class JobController {
      */
     @PostMapping("/save")
     public ApiResult save(@RequestBody QuartzEntity quartz) {
-        log.info("新增任务");
+        log.info("更新任务");
         try {
             //如果是修改  展示旧的 任务
-            if (quartz.getOldJobGroup() != null) {
-                JobKey key = new JobKey(quartz.getOldJobName(), quartz.getOldJobGroup());
+            if (quartz.getJobName() != null) {
+                JobKey key = new JobKey(quartz.getJobName(), quartz.getJobGroup());
                 // 删除旧的任务
                 scheduler.deleteJob(key);
+            } else {
+                return ApiUtil.fail("编码不能为空");
             }
 
             //通过任务编码获取执行类
-            String action = sysConfigService.selectActionByCode(quartz.getJobCode());
+            String action = sysConfigService.selectActionByCode(quartz.getJobName());
 //            Class cls = Class.forName(quartz.getJobClassName());
             Class cls = Class.forName(action);
             cls.newInstance();
@@ -77,7 +79,7 @@ public class JobController {
             //交由Scheduler安排触发
             scheduler.scheduleJob(job, trigger);
         } catch (Exception e) {
-            log.error("新建任务报错", e);
+            log.error("修改任务报错", e);
             return ApiUtil.fail();
         }
         return ApiUtil.success();
