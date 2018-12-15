@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -70,7 +71,6 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
     @TableField("excel_path")
     private String excelPath;
 
-
     /**
      * 备注
      */
@@ -85,6 +85,12 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
     private String attr4;
 
     private String attr5;
+
+    /**
+     * 任务相关信息
+     */
+    @TableField(exist = false)
+    private QuartzEntity quartzEntity;
 
     @Override
     protected Serializable pkVal() {

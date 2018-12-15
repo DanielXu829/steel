@@ -9,6 +9,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,21 @@ import java.util.*;
 @Component
 public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
 
+    public static void main(String[] args) {
+
+        List<DateQuery> all = new ArrayList<>();
+
+        List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
+        for (DateQuery dateQuery : dateQueries) {
+            List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
+            all.addAll(dateQueries8);
+        }
+        System.out.println(all);
+
+        DateQuery dateQuery = DateQueryUtil.buildMonth(new Date());
+        System.out.println(dateQuery);
+    }
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -42,23 +58,28 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 if (sheetSplit[1].indexOf("5") != -1) {
-                    dateQueries.forEach(item -> {
-                        List<CellData> cellDataList = mapDataHandler(getUrl("5.0"), columns, item, 1);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    });
+                    int rowBaatch = 1;
+
+                    DateQuery dateQuery = DateQueryUtil.buildMonth(new Date());
+                    dateQuery.setEndTime(dateQuery.getRecordDate());
+
+                    List<CellData> cellDataList = this.mapDataHandler(getUrl("5.0"), columns, dateQuery, rowBaatch, sheetName);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else {
-                    dateQueries.forEach(item -> {
-                        List<CellData> cellDataList = mapDataHandler(getUrl("6.0"), columns, item, 1);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    });
+                    int rowBaatch = 1;
+
+                    DateQuery dateQuery = DateQueryUtil.buildMonth(new Date());
+                    dateQuery.setEndTime(dateQuery.getRecordDate());
+
+                    List<CellData> cellDataList = this.mapDataHandler(getUrl("6.0"), columns, dateQuery, rowBaatch, sheetName);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
         }
         return workbook;
     }
 
-    @Override
-    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch, String sheetName) {
         JSONObject query = new JSONObject();
         query.put("start", dateQuery.getQueryStartTime());
         query.put("end", dateQuery.getQueryEndTime());
@@ -74,25 +95,63 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return null;
         }
-        return handlerJsonArray(columns, data);
+        return handlerJsonArray(columns, data, rowBatch, sheetName);
     }
 
-    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data) {
+    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, int rowBatch, String sheetName) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
-            int rowIndex = 1;
+            int rowIndex = rowBatch;
             if (StringUtils.isNotBlank(column)) {
                 JSONObject jsonObject = data.getJSONObject(column);
                 if (Objects.nonNull(jsonObject)) {
                     Map<String, Object> innerMap = jsonObject.getInnerMap();
                     Set<String> keys = innerMap.keySet();
+
+                    Long[] list = new Long[keys.size()];
+                    int k = 0;
                     for (String key : keys) {
-                        Object o = innerMap.get(key);
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, o);
+                        list[k] = Long.valueOf(key);
+                        k++;
+                    }
+                    Arrays.sort(list);
+
+                    List<DateQuery> all = new ArrayList<>();
+                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
+
+                    if ("_cuofeng5_month_day".equals(sheetName)) {
+                        for (DateQuery dateQuery : dateQueries) {
+                            List<DateQuery> dateQueriesOther = DateQueryUtil.buildDayOtherHourEach(dateQuery.getStartTime());
+                            all.addAll(dateQueriesOther);
+                        }
+                    } else {
+                        for (DateQuery dateQuery : dateQueries) {
+                            List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
+                            all.addAll(dateQueries8);
+                        }
+                    }
+
+
+                    for (int j = 0; j < all.size(); j++) {
+                        long time = all.get(j).getStartTime().getTime();
+                        Object v = "";
+                        for (int m = 0; m < list.length; m++) {
+                            if (time == list[m].longValue()) {
+                                Object o = innerMap.get(String.valueOf(list[m]));
+                                v = o;
+                                break;
+                            }
+                        }
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
                         rowIndex++;
                     }
+//                    for (String key : keys) {
+//                        Object o = innerMap.get(key);
+//                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, o);
+//                        rowIndex++;
+//                    }
                 }
             }
         }

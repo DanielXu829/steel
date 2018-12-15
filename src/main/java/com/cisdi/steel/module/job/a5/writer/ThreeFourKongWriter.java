@@ -37,7 +37,8 @@ public class ThreeFourKongWriter extends AbstractExcelReadWriter {
         // 黄色标记部分
 //        maps.put("ffff00", "/AcsCurTagValues");
         // 红色
-        maps.put("ff0000", "/AreaCurrentTagValues");
+//        maps.put("ff0000", "/AreaCurrentTagValues");
+        maps.put("ff0000", "/AreaStrtstpTimeTagValues");
         //
     }
 
