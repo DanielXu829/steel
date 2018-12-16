@@ -65,11 +65,19 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
     @Override
     public ApiResult<List<ReportCategory>> selectAllCategory(ReportCategory record) {
         String name = record.getName();
+        LambdaQueryWrapper<ReportCategory> wrapper = new QueryWrapper<ReportCategory>().lambda();
         if (StringUtils.isNotBlank(name)) {
             name = Pattern.compile("[\\d]").matcher(name).replaceAll("");
+            if (name.startsWith("烧结")) {
+                wrapper.likeRight(true, ReportCategory::getCode, "sj_");
+            } else if (name.startsWith("高炉")) {
+                wrapper.likeRight(true, ReportCategory::getCode, "gl_");
+            } else if (name.startsWith("能介")) {
+                wrapper.likeRight(true, ReportCategory::getCode, "nj_");
+            } else if (name.startsWith("原料")) {
+                wrapper.likeRight(true, ReportCategory::getCode, "ygl_");
+            }
         }
-        LambdaQueryWrapper<ReportCategory> wrapper = new QueryWrapper<ReportCategory>().lambda();
-        wrapper.like(StringUtils.isNotBlank(record.getName()), ReportCategory::getName, name);
         List<ReportCategory> list = this.list(wrapper);
         List<ReportCategory> reportCategories = ReportCategoryUtil.list2TreeConverter(list, Constants.PARENT_ID);
         return ApiUtil.success(reportCategories);
