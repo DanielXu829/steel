@@ -2,7 +2,7 @@ package com.cisdi.steel.module.job.a2;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a2.execute.BaseJhExecute;
+import com.cisdi.steel.module.job.a2.execute.AnalysisBaseExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class ChubenzhengliuJob extends AbstractExportJob {
 
     @Autowired
-    private BaseJhExecute baseJhExecute;
+    private AnalysisBaseExecute analysisBaseExecute;
 
     @Override
     public JobEnum getCurrentJob() {
@@ -29,6 +29,6 @@ public class ChubenzhengliuJob extends AbstractExportJob {
 
     @Override
     public IJobExecute getCurrentJobExecute() {
-        return baseJhExecute;
+        return analysisBaseExecute;
     }
 }
