@@ -3,6 +3,7 @@ package com.cisdi.steel.module.quartz.mapper;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.query.QuartzEntityQuery;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,13 @@ public interface QuartzMapper {
      * @return 集合
      */
     List<QuartzEntity> selectQuartzList(QuartzEntityQuery query);
+
+    /**
+     * 通过任务编码查询
+     * @param code
+     * @return
+     */
+    QuartzEntity selectQuartzByCode(@Param("jobName") String code);
 
     /**
      * 查询 数量

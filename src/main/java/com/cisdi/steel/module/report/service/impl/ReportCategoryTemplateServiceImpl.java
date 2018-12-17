@@ -12,6 +12,8 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.quartz.entity.QuartzEntity;
+import com.cisdi.steel.module.quartz.mapper.QuartzMapper;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -45,12 +47,19 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     @Autowired
     private JobProperties jobProperties;
 
+    @Autowired
+    private QuartzMapper quartzMapper;
+
     @Override
     public ApiResult pageList(ReportCategoryTemplateQuery query) {
         LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
         wrapper.eq(StringUtils.isNotBlank(query.getReportCategoryCode()), ReportCategoryTemplate::getReportCategoryCode, query.getReportCategoryCode());
         wrapper.eq(StringUtils.isNotBlank(query.getForbid()), ReportCategoryTemplate::getForbid, query.getForbid());
         List<ReportCategoryTemplate> list = list(wrapper);
+        list.forEach(reportCategoryTemplate -> {
+            QuartzEntity quartzEntity = quartzMapper.selectQuartzByCode(reportCategoryTemplate.getReportCategoryCode());
+            reportCategoryTemplate.setQuartzEntity(quartzEntity);
+        });
         return ApiUtil.success(list);
     }
 

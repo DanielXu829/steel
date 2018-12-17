@@ -64,8 +64,26 @@ public class DateQueryUtil {
         }
         return null;
     }
+
     public static DateQuery build4Hour(Date date) {
         Date previous = DateUtil.addHours(date, -4);
+        String dateTime = DateUtil.getFormatDateTime(previous, "yyyy-MM-dd HH");
+        String dateTime1 = DateUtil.getFormatDateTime(DateUtil.addHours(date, -1), "yyyy-MM-dd HH");
+        String startHourString = dateTime + ":00:00";
+        String endHourString = dateTime1 + ":59:59";
+        DateFormat df = new SimpleDateFormat(DateUtil.fullFormat);
+        try {
+            Date startHour = df.parse(startHourString);
+            Date endHour = df.parse(endHourString);
+            return new DateQuery(startHour, endHour, date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static DateQuery build8Hour(Date date) {
+        Date previous = DateUtil.addHours(date, -8);
         String dateTime = DateUtil.getFormatDateTime(previous, "yyyy-MM-dd HH");
         String dateTime1 = DateUtil.getFormatDateTime(DateUtil.addHours(date, -1), "yyyy-MM-dd HH");
         String startHourString = dateTime + ":00:00";
@@ -134,6 +152,53 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建每8小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay8HourEach(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
+        for (int i = hour - 8; i >= -1; i -= 8) {
+            Date nextDate = DateUtil.addHours(date, -i);
+            DateQuery query = DateQueryUtil.build8Hour(nextDate);
+            queryList.add(query);
+        }
+        return queryList;
+    }
+
+    /**
+     * 构建不规则时间段
+     *
+     * @param date
+     * @return
+     */
+    public static List<DateQuery> buildDayOtherHourEach(Date date) {
+        List<DateQuery> queryList = new ArrayList<>();
+        queryList.add(buildHour(date, 0, 8));
+        queryList.add(buildHour(date, 8, 6));
+        queryList.add(buildHour(date, 14, 3));
+        queryList.add(buildHour(date, 17, 2));
+        queryList.add(buildHour(date, 19, 3));
+        return queryList;
+    }
+
+    private static DateQuery buildHour(Date date, int hour, int index) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR, hour);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date time = calendar.getTime();
+        Date end = DateUtil.addHours(time, index);
+        DateQuery dateQuery = new DateQuery(time, end, date);
+        return dateQuery;
+    }
+
+    /**
      * 记录每月的每天
      *
      * @return 结果
@@ -144,7 +209,7 @@ public class DateQueryUtil {
         long betweenDays = DateUtil.getBetweenDays(startTime, date);
         List<DateQuery> queryList = new ArrayList<>();
         Date currentDate = startTime;
-        for (int i = 0; i < betweenDays; i++) {
+        for (int i = 0; i <= betweenDays; i++) {
             DateQuery query = buildToday(currentDate);
             queryList.add(query);
             currentDate = DateUtil.addDays(currentDate, 1);
