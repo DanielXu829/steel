@@ -95,11 +95,11 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         wrapper.eq(StringUtils.isNotBlank(query.getReportCategoryCode()), ReportIndex::getReportCategoryCode, query.getReportCategoryCode());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexType()), ReportIndex::getIndexType, query.getIndexType());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexLang()), ReportIndex::getIndexLang, query.getIndexLang());
-        wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
 
         if (StringUtils.isNotBlank(query.getSequence()) && query.getSequence().contains("烧结")) {
-            wrapper.or();
-            wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, "烧结");
+            wrapper.like(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
+        } else {
+            wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
         }
 
 

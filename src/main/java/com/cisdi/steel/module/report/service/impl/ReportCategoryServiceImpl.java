@@ -76,6 +76,8 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
                 wrapper.likeRight(true, ReportCategory::getCode, "nj_");
             } else if (name.startsWith("原料")) {
                 wrapper.likeRight(true, ReportCategory::getCode, "ygl_");
+            } else if (name.startsWith("焦化")) {
+                wrapper.likeRight(true, ReportCategory::getCode, "jh_");
             }
         }
         List<ReportCategory> list = this.list(wrapper);

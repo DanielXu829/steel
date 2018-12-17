@@ -183,6 +183,7 @@ public class DateQueryUtil {
         queryList.add(buildHour(date, 14, 3));
         queryList.add(buildHour(date, 17, 2));
         queryList.add(buildHour(date, 19, 3));
+        queryList.add(buildHour(date, 22, 0));
         return queryList;
     }
 

@@ -10,6 +10,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -47,7 +48,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             // 以下划线开头的sheet 表示 隐藏表  待处理
             String sheetName = sheet.getSheetName();
             String url = getUrl(version);
-            if ("_sjmain2_day_hour".equals(sheetName)) {
+            if ("_sjmain2_day_shift".equals(sheetName)) {
                 url = getUrl2(version);
             } else if ("_sjmain3_day_shift".equals(sheetName)) {
                 url = getUrl3(version);
@@ -64,6 +65,10 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                 int indexRow = 1;
                 if ("_sjmain4_day_shift".equals(sheetName)) {
                     List<CellData> cellDataList = this.mapDataHandler(url, columns, dateQueries.get(0), rowBatch, sheetName, indexRow);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                } else if ("_sjgc_day_hour".equals(sheetName) || "_sjfx_day_hour".equals(sheetName) || "_sjmain1_day_shift".equals(sheetName)) {
+                    DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
+                    List<CellData> cellDataList = this.mapDataHandler(url, columns, dateQuery, rowBatch, sheetName, indexRow);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else {
                     for (DateQuery item : dateQueries) {
@@ -112,12 +117,12 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             return null;
         }
         JSONObject jsonObject = JSONObject.parseObject(result);
-        if ("_sjmain2_day_hour".equals(sheetName)) {
+        if ("_sjmain2_day_shift".equals(sheetName)) {
             JSONArray data2 = jsonObject.getJSONArray("data");
             if (Objects.isNull(data2)) {
                 return null;
             }
-            return this.handlerJsonArray(columns, rowBatch, data2, 1);
+            return this.handlerJsonArray(columns, rowBatch, data2, idexRow);
         } else if ("_sjmain3_day_shift".equals(sheetName)) {
             JSONArray data2 = jsonObject.getJSONArray("data");
             if (Objects.isNull(data2) || data2.size() == 0) {
@@ -141,7 +146,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             if (Objects.isNull(data)) {
                 return null;
             }
-            return this.handlerJsonArray(columns, data);
+            return this.handlerJsonArray(columns, data, sheetName);
         }
     }
 
@@ -208,7 +213,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data) {
+    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, String sheetName) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
         for (int i = 0; i < size; i++) {
@@ -219,11 +224,46 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                 if (Objects.nonNull(jsonObject)) {
                     Map<String, Object> innerMap = jsonObject.getInnerMap();
                     Set<String> keys = innerMap.keySet();
+
+                    Long[] list = new Long[keys.size()];
+                    int k = 0;
                     for (String key : keys) {
-                        Object o = innerMap.get(key);
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, o);
+                        list[k] = Long.valueOf(key);
+                        k++;
+                    }
+                    Arrays.sort(list);
+
+                    List<DateQuery> all = new ArrayList<>();
+
+                    if ("_sjmain1_day_shift".equals(sheetName)) {
+                        DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
+                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
+                        all.addAll(dateQueries8);
+                    } else {
+                        List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(new Date());
+                        all.addAll(dateQueries);
+                    }
+
+                    for (int j = 0; j < all.size(); j++) {
+                        long time = all.get(j).getStartTime().getTime();
+                        Object v = "";
+                        for (int m = 0; m < list.length; m++) {
+                            if (time == list[m].longValue()) {
+                                Object o = innerMap.get(String.valueOf(list[m]));
+                                v = o;
+                                break;
+                            }
+                        }
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
                         rowIndex++;
                     }
+
+
+//                    for (String key : keys) {
+//                        Object o = innerMap.get(key);
+//                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, o);
+//                        rowIndex++;
+//                    }
                 }
             }
         }
@@ -236,7 +276,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         int size = columns.size();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
-            int rowIndex = 1;
+            int rowIndex = startRow;
             if (StringUtils.isNotBlank(column)) {
                 JSONObject o1 = data.getJSONObject(i);
                 Object val = o1.get("val");

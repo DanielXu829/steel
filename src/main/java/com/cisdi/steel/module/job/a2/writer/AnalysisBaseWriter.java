@@ -46,15 +46,17 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
                 if ("analysis".equals(sheetSplit[1])) {
-//                    for (int j = 0; j < size; j++) {
-//                        DateQuery item = dateQueries.get(j);
-//                        for (int k = 0; k < columns.size(); k++) {
-//                            String[] split = columns.get(k).split("/");
-//                            int rowIndex = 1 + j;
-//                            Double cellDataList = mapDataHandler2(getUrl2(), item, split[0], split[1]);
-//                            setSheetValue(sheet, rowIndex, k, cellDataList);
-//                        }
-//                    }
+                    for (int j = 0; j < size; j++) {
+                        DateQuery item = dateQueries.get(j);
+                        for (int k = 0; k < columns.size(); k++) {
+                            if (StringUtils.isNotBlank(columns.get(k))) {
+                                String[] split = columns.get(k).split("/");
+                                int rowIndex = 1 + j;
+                                Double cellDataList = mapDataHandler2(getUrl2(), item, split[0], split[1]);
+                                setSheetValue(sheet, rowIndex, k, cellDataList);
+                            }
+                        }
+                    }
                 } else {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);

@@ -121,7 +121,7 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
                     List<DateQuery> all = new ArrayList<>();
                     List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
 
-                    if ("_cuofeng5_month_day".equals(sheetName)) {
+                    if ("_cuofeng5_month_day".equals(sheetName) || "_cuofeng6_month_day".equals(sheetName)) {
                         for (DateQuery dateQuery : dateQueries) {
                             List<DateQuery> dateQueriesOther = DateQueryUtil.buildDayOtherHourEach(dateQuery.getStartTime());
                             all.addAll(dateQueriesOther);
@@ -132,7 +132,6 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
                             all.addAll(dateQueries8);
                         }
                     }
-
 
                     for (int j = 0; j < all.size(); j++) {
                         long time = all.get(j).getStartTime().getTime();
