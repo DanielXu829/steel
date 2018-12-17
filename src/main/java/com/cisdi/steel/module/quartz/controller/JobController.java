@@ -2,7 +2,6 @@ package com.cisdi.steel.module.quartz.controller;
 
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
-import com.cisdi.steel.module.job.AbstractJob;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.query.CronQuery;
 import com.cisdi.steel.module.quartz.query.QuartzEntityQuery;
