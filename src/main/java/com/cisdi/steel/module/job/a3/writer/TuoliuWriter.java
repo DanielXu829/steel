@@ -48,10 +48,15 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                dateQueries.forEach(item -> {
-                    List<CellData> cellDataList = mapDataHandler(url, columns, item, rowBatch);
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                });
+
+                DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
+                List<CellData> cellDataList = mapDataHandler(url, columns, dateQuery, rowBatch);
+                ExcelWriterUtil.setCellValue(sheet, cellDataList);
+
+
+//                dateQueries.forEach(item -> {
+//
+//                });
             }
         }
         return workbook;
@@ -122,10 +127,6 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
             }
         }
         return cellDataList;
-    }
-
-    private void cul() {
-
     }
 
     /**
