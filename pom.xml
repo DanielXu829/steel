@@ -98,6 +98,13 @@
         </dependency>
         <!--easy POI-->
 
+        <!-- https://mvnrepository.com/artifact/org.jfree/jfreechart -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.19</version>
+        </dependency>
+
         <!--quartz依赖 start -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -246,9 +253,9 @@
 
         <!-- 添加PageOffice依赖（必须） -->
         <!--<dependency>-->
-            <!--<groupId>com.zhuozhengsoft</groupId>-->
-            <!--<artifactId>pageoffice</artifactId>-->
-            <!--<version>4.3.0.2</version>-->
+        <!--<groupId>com.zhuozhengsoft</groupId>-->
+        <!--<artifactId>pageoffice</artifactId>-->
+        <!--<version>4.3.0.2</version>-->
         <!--</dependency>-->
 
         <dependency>
