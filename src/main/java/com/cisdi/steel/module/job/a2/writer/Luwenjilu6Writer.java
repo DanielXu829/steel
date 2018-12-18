@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.a2.writer;
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -35,30 +36,30 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         int numberOfSheets = workbook.getNumberOfSheets();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd");
         String format = dateFormat.format(new Date());
-        int ss=Integer.parseInt(format);
-        for(int i=0;i<numberOfSheets;i++){
+        int ss = Integer.parseInt(format);
+        for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheetAt = workbook.getSheetAt(i);
             String sheetName = sheetAt.getSheetName();
-            if(("炉温记录"+format).equals(sheetName)){
-               workbook.removeSheetAt(i);
+            if (("炉温记录" + format).equals(sheetName)) {
+                workbook.removeSheetAt(i);
                 numberOfSheets--;
             }
-            if("6#机侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)){
-                int rowNum=5;
-                for(int j=3;j<59;j++){
+            if ("6#机侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                int rowNum = 5;
+                for (int j = 3; j < 59; j++) {
                     Row row = sheetAt.getRow(j);
                     Cell cell = row.getCell(ss);
-                    String cellValue="IF(炉温记录"+ss+"!I"+rowNum+"=\"\",\"\",炉温记录"+ss+"!I"+rowNum+")";
+                    String cellValue = "IF(炉温记录" + ss + "!I" + rowNum + "=\"\",\"\",炉温记录" + ss + "!I" + rowNum + ")";
                     cell.setCellFormula(cellValue);
                     cell.setCellType(CellType.FORMULA);
                     rowNum++;
                 }
-            }else if("6#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)){
-                int rowNum=5;
-                for(int j=3;j<59;j++){
+            } else if ("6#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                int rowNum = 5;
+                for (int j = 3; j < 59; j++) {
                     Row row = sheetAt.getRow(j);
                     Cell cell = row.getCell(ss);
-                    String cellValue="IF(炉温记录"+ss+"!Q"+rowNum+"=\"\",\"\",炉温记录"+ss+"!Q"+rowNum+")";
+                    String cellValue = "IF(炉温记录" + ss + "!Q" + rowNum + "=\"\",\"\",炉温记录" + ss + "!Q" + rowNum + ")";
                     cell.setCellFormula(cellValue);
                     cell.setCellType(CellType.FORMULA);
                     rowNum++;
@@ -66,10 +67,10 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
             }
         }
         workbook.cloneSheet(0);
-        workbook.setSheetName(numberOfSheets,"炉温记录"+format);
+        workbook.setSheetName(numberOfSheets, "炉温记录" + format);
         Sheet sheet = workbook.getSheet("炉温记录" + format);
         List<String> rowCelVal1 = getRowCelVal1(sheet, 3);
-        List<CellData> cellData1 = mapDataHandler(4,getUrl(),rowCelVal1, date, "CO6");
+        List<CellData> cellData1 = mapDataHandler(4, getUrl(), rowCelVal1, date, "CO6");
         ExcelWriterUtil.setCellValue(sheet, cellData1);
 
         return workbook;
@@ -87,7 +88,7 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
     }
 
 
-    protected List<CellData> mapDataHandler(int rowIndex,String url,List<String> columns, DateQuery dateQuery, String version) {
+    protected List<CellData> mapDataHandler(int rowIndex, String url, List<String> columns, DateQuery dateQuery, String version) {
         Map<String, String> queryParam = getQueryParam(dateQuery, version);
         List<CellData> cellDataList = new ArrayList<>();
         String result = httpUtil.get(url, queryParam);
@@ -116,15 +117,15 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         int size = columns.size();
         // 忽略大小写
         CaseInsensitiveMap<String, Object> rowDataMap = new CaseInsensitiveMap<>(rowData);
-            for (int columnIndex = 0; columnIndex < size; columnIndex++) {
-                String column = columns.get(columnIndex);
-                if (StringUtils.isBlank(column)) {
-                    continue;
-                }
-                Object value = rowDataMap.get(column);
-                ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
-
+        for (int columnIndex = 0; columnIndex < size; columnIndex++) {
+            String column = columns.get(columnIndex);
+            if (StringUtils.isBlank(column)) {
+                continue;
             }
+            Object value = rowDataMap.get(column);
+            ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
+
+        }
 
 
         return resultData;
@@ -133,19 +134,8 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam(DateQuery dateQuery, String version) {
         Map<String, String> result = new HashMap<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateQuery.getRecordDate());
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        result.put("date", calendar.getTime().getTime() + "");
-       // result.put("date", "1540137600000");
+        result.put("date", DateUtil.getTodayBeginTime().getTime() + "");
         result.put("jlno", version);
-
-        Calendar calendar1 = Calendar.getInstance();
-        calendar1.set(Calendar.HOUR, 0);
-        calendar1.set(Calendar.MINUTE, 0);
-        calendar1.set(Calendar.SECOND, 0);
         return result;
     }
 

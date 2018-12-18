@@ -119,7 +119,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         JSONObject jsonObject = JSONObject.parseObject(result);
         if ("_sjmain2_day_shift".equals(sheetName)) {
             JSONArray data2 = jsonObject.getJSONArray("data");
-            if (Objects.isNull(data2)) {
+            if (Objects.isNull(data2) || data2.size() == 0) {
                 return null;
             }
             return this.handlerJsonArray(columns, rowBatch, data2, idexRow);
