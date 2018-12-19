@@ -132,6 +132,30 @@ public class DateQueryUtil {
         return queryList;
     }
 
+
+    /**
+     * 构建每小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDayHalfHourEach(Date date) {
+        List<DateQuery> result = new ArrayList<>();
+        Date startTime = DateUtil.getDateBeginTime(date);
+
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Calendar endTime = Calendar.getInstance();
+        endTime.setTime(dateBeginTime);
+        endTime.add(Calendar.MINUTE,30);
+        do{
+            result.add(new DateQuery(startTime,endTime.getTime(),date));
+            startTime =endTime.getTime();
+            endTime.add(Calendar.MINUTE,30);
+        }while (endTime.getTime().before(date));
+        result.add(new DateQuery(startTime,new Date(),date));
+        return result;
+    }
+
     /**
      * 构建每4小时时间段
      *
@@ -150,6 +174,8 @@ public class DateQueryUtil {
         }
         return queryList;
     }
+
+
 
     /**
      * 构建每8小时时间段
