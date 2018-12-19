@@ -1,7 +1,9 @@
 package com.cisdi.steel.module.job;
 
 import com.cisdi.steel.common.constant.Constants;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.dto.ExcelPathInfo;
@@ -65,7 +67,8 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
 
     /**
      * 获取当前的数据处理
-     *`
+     * `
+     *
      * @return 结果 不能为null
      */
     public abstract IExcelReadWriter getCurrentExcelWriter();
@@ -166,11 +169,17 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param templatePath 模板的路径
      * @return 文件名
      */
-    protected String handlerFileName(String templateName, String templatePath, ReportTemplateTypeEnum templateTypeEnum) {
+    protected String handlerFileName(String templateName, String templatePath, String code, ReportTemplateTypeEnum templateTypeEnum) {
         // 模板的扩展名 如.xlsx
         String fileExtension = FileUtil.getTypePart(templatePath);
         // yyyy-MM-dd_HH
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum);
+
+        //自动配煤报表 单独特殊处理到分钟
+        if (StringUtils.isNotBlank(code) && "jh_zidongpeimei".equals(code)) {
+            // yyyy-MM-dd_HH_mm
+            datePart = DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd_HH_mm");
+        }
         return templateName + "_" + datePart + "." + fileExtension;
     }
 
@@ -184,7 +193,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 类型
         ReportTemplateTypeEnum templateTypeEnum = ReportTemplateTypeEnum.getType(template.getTemplateType());
         // 文件名称
-        String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), templateTypeEnum);
+        String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), template.getReportCategoryCode(), templateTypeEnum);
         String langName = LanguageEnum.getByLang(template.getTemplateLang()).getName();
         // 文件保存路径
         String saveFilePath = getSaveFilePath(template.getSequence(), templateTypeEnum, fileName, langName);

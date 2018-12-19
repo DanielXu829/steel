@@ -70,15 +70,13 @@ public enum JobEnum {
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
-    gl_chejianjikongzhongxinjioajieban("ygl_chejianjikongzhongxinjioajieban", "供料车间物料外排统计表"),
-    gl_yichanggenzong("ygl_yichanggenzong", ""),
-
+    gl_chejianjikongzhongxinjioajieban("ygl_chejianjikongzhongxinjioajieban", "供料车间集控中心交接班记录"),
 
     ygl_shaixiafentongji_day("ygl_shaixiafentongji_day", "筛下粉统计"),
     ygl_zhongjiaowaipai_month("ygl_zhongjiaowaipai_month", "中焦外排记录"),
     ygl_meitouwaipai_month("ygl_meitouwaipai_month", "煤头外排记录"),
     ygl_gongliaochejian_month("ygl_gongliaochejian_month", "供料车间运输车辆统计_录入"),
-    ygl_Liaojiaomei_day("ygl_Liaojiaomei_day", "供料车间运输车辆统计_录入"),
+    ygl_Liaojiaomei_day("ygl_Liaojiaomei_day", "炼焦煤每日库存动态表"),
     ygl_chengpincang("ygl_chengpincang", "成品仓出入记录"),
     ygl_yichanggenzong("ygl_yichanggenzong", "供料异常跟踪表"),
     ygl_shengchanxiechedegji("ygl_shengchanxiechedegji", "生产卸车登记表"),
