@@ -198,7 +198,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         int size = columns.size();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
-            int rowIndex = 1;
+            int rowIndex = startRow;
             if (StringUtils.isNotBlank(column)) {
                 for (int j = 0; j < data.size(); j++) {
                     JSONObject o1 = data.getJSONObject(j);
