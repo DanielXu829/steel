@@ -18,6 +18,15 @@ import java.util.List;
  */
 @Mapper
 public interface ReportIndexMapper extends BaseMapper<ReportIndex> {
+
+    /**
+     * 通过多参数更新报表
+     *
+     * @param reportIndex
+     * @return
+     */
+    int updateByMoreParamter(ReportIndex reportIndex);
+
     /**
      * 通过编码查询最新的一条数据
      *

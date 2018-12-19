@@ -4,9 +4,29 @@
 
     <resultMap id="BaseResultMap" type="com.cisdi.steel.module.report.entity.ReportIndex">
     </resultMap>
+
+    <update id="updateByMoreParamter">
+        UPDATE report_index
+        SET is_hidden ='1',update_time=#{currDate}
+        <where>
+            report_category_code =#{reportCategoryCode}
+            AND index_lang =#{indexLang}
+            AND is_hidden = '0'
+            AND sequence =#{sequence}
+            <if test="indexType=='report_day' or indexType=='report_class' or indexType=='report_four_hour'  or indexType=='report_hour'">
+                AND DATE_FORMAT(create_time,'%Y-%m-%d')=DATE_FORMAT(#{currDate},'%Y-%m-%d')
+            </if>
+            <if test="indexType=='report_month'">
+                AND DATE_FORMAT(create_time,'%Y-%m')=DATE_FORMAT(#{currDate},'%Y-%m')
+            </if>
+            <if test="indexType=='report_year'">
+                AND DATE_FORMAT(create_time,'%Y')=DATE_FORMAT(#{currDate},'%Y')
+            </if>
+        </where>
+    </update>
     <sql id="queryLike">
         <if test="parentCode!=null and parentCode!=''">
-            AND report_category_code like  concat(#{parentCode},'%')
+            AND report_category_code like concat(#{parentCode},'%')
         </if>
         <if test="reportCategoryCode!=null and reportCategoryCode!=''">
             AND report_category_code=#{reportCategoryCode}
@@ -31,7 +51,8 @@
         FROM
             `report_index`
         WHERE
-            report_category_code = #{code}
+            is_hidden='0'
+            AND report_category_code = #{code}
         ORDER BY
             create_time DESC
             LIMIT 1
@@ -43,7 +64,8 @@
         FROM
         `report_index`
         <where>
-            index_type IN ( 'report_day' )
+            is_hidden='0'
+            AND index_type IN ( 'report_day' )
             AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
             <include refid="queryLike"/>
         </where>
@@ -55,7 +77,8 @@
         FROM
         `report_index`
         <where>
-            index_type IN ( 'report_month' )
+            is_hidden='0'
+            AND index_type IN ( 'report_month' )
             AND DATE_FORMAT(create_time,'%Y-%m') = #{toDay}
             <include refid="queryLike"/>
         </where>
@@ -66,7 +89,8 @@
         FROM
         `report_index`
         <where>
-            index_type NOT IN ( 'report_month','4hour_report','report_day' )
+            is_hidden='0'
+            AND index_type NOT IN ( 'report_month','4hour_report','report_day' )
             AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
             <include refid="queryLike"/>
         </where>

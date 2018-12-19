@@ -32,7 +32,12 @@ public class JobTController {
         }
         String path = exportJobContext.execute(code);
         if (StringUtils.isNotBlank(path)) {
-            FileUtils.downFile(new File(path), request, response, FileUtil.getFileName(path));
+            try {
+                FileUtils.downFile(new File(path), request, response, FileUtil.getFileName(path));
+                return null;
+            } catch (Exception e) {
+                return ApiUtil.fail();
+            }
         }
         return ApiUtil.fail();
     }

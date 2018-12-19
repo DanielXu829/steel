@@ -63,12 +63,13 @@ public class BatchDataTests extends SteelApplicationTests {
      * 开启所有任务
      * 0 0/10 * * * ? 每10分钟
      * 0 0 0/4 * * ?  每4个小时
+     * 0 5 0/1 * * ?  每1小时5分钟
      */
     @Test
     public void test2() {
         List<SysConfig> all = getAll();
         for (SysConfig sysConfig : all) {
-            createTask(sysConfig.getCode(), jobGroup, "0 0 0/8 * * ?", "");
+            createTask(sysConfig.getCode(), jobGroup, "0 5 0/1 * * ?", "");
         }
     }
 

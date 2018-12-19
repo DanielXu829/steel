@@ -80,6 +80,8 @@ public class ReportIndex extends Model<ReportIndex> {
     @TableField("index_lang")
     private String indexLang;
 
+    @TableField("is_hidden")
+    private String hidden;
 
     private String attr1;
 
@@ -89,6 +91,8 @@ public class ReportIndex extends Model<ReportIndex> {
 
     private String attr4;
 
+    @TableField(exist = false)
+    private Date currDate=new Date();
 
     @Override
     protected Serializable pkVal() {

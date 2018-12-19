@@ -1,7 +1,10 @@
 package com.cisdi.steel.module.report.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.exception.LeafException;
@@ -92,6 +95,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
     public ApiResult pageList(ReportIndexQuery query) {
         Page<ReportIndex> page = new Page<>(query.getCurrentPage(), query.getPageSize());
         LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
+        wrapper.eq(true, ReportIndex::getHidden, "0");
         wrapper.eq(StringUtils.isNotBlank(query.getReportCategoryCode()), ReportIndex::getReportCategoryCode, query.getReportCategoryCode());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexType()), ReportIndex::getIndexType, query.getIndexType());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexLang()), ReportIndex::getIndexLang, query.getIndexLang());
@@ -127,9 +131,11 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         Date now = new Date();
         reportIndex.setCreateTime(now);
         reportIndex.setUpdateTime(now);
+        reportIndex.setHidden("0");
+
+        reportIndexMapper.updateByMoreParamter(reportIndex);
         this.save(reportIndex);
     }
-
 
     @Override
     @Transactional(rollbackFor = LeafException.class)
