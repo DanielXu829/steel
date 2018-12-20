@@ -627,7 +627,7 @@ public class ChartCreater {
     /**//* 
          * 雷达图 
          */  
-    private JFreeChart createPolarChart() {  
+    public static JFreeChart createPolarChart() {
     	
     	init();
     	

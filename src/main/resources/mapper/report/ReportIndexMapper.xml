@@ -43,6 +43,9 @@
         <if test="indexLang!=null and indexLang!=''">
             AND index_lang=#{indexLang}
         </if>
+        <if test="sequence!=null and sequence!=''">
+            AND sequence LIKE concat('%',#{sequence},'%')
+        </if>
     </sql>
 
     <select id="queryLastOne" resultType="com.cisdi.steel.module.report.entity.ReportIndex">

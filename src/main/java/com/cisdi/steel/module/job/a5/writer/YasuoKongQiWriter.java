@@ -52,13 +52,13 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
                     /*dateQueries.forEach(item -> {
                     });*/
                     //红色部分
-                } else if ("_acsReportRuntime_day_all".equals(sheetName)) {
+                } else if ("_acsReportStrtStp_day_all".equals(sheetName) || "_acsReportRuntime_day_all".equals(sheetName)) {
                     List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                     List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
                     List<CellData> cellDataList = this.eachData(columns, getUrl1(), getQueryParam(dateQueries.get(0)));
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     //绿色部分
-                } else if ("_acsReportStrtStp_day_all".equals(sheetName) || "_acsReportStrtStp_month_day".equals(sheetName)) {
+                } else if ("_acsReportStrtStp_month_day".equals(sheetName)) {
                     List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                     List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
                     List<CellData> cellDataList = this.eachData(columns, getUrl2(), getQueryParam2(dateQueries.get(0)));
