@@ -125,7 +125,7 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
 
 
                     for (DateQuery dateQuery : dateQueries) {
-                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
+                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getStartTime());
                         all.addAll(dateQueries8);
                     }
 
@@ -167,7 +167,7 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
 
 
                     for (DateQuery dateQuery : dateQueries) {
-                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
+                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getStartTime());
                         all.addAll(dateQueries8);
                     }
 

@@ -27,22 +27,6 @@ import java.util.*;
  */
 @Component
 public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
-
-    public static void main(String[] args) {
-
-        List<DateQuery> all = new ArrayList<>();
-
-        List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
-        for (DateQuery dateQuery : dateQueries) {
-            List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
-            all.addAll(dateQueries8);
-        }
-        System.out.println(all);
-
-        DateQuery dateQuery = DateQueryUtil.buildMonth(new Date());
-        System.out.println(dateQuery);
-    }
-
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -128,7 +112,7 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
                         }
                     } else {
                         for (DateQuery dateQuery : dateQueries) {
-                            List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
+                            List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getStartTime());
                             all.addAll(dateQueries8);
                         }
                     }

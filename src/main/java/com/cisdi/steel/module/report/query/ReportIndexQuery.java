@@ -69,4 +69,10 @@ public class ReportIndexQuery extends PageQuery implements Serializable {
      * 目录父类编码
      */
     private String parentCode;
+
+    /**
+     * 请求编码
+     */
+    private String apiCode;
+
 }

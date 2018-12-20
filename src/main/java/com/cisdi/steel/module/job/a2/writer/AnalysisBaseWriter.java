@@ -136,8 +136,8 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam2(DateQuery dateQuery, String brandcode, String anaitemname) {
         Map<String, String> result = new HashMap<>();
         result.put("brandcode", brandcode);
-        result.put("starttime", dateQuery.getStartTime().toString());
-        result.put("endtime", dateQuery.getEndTime().toString());
+        result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
         return result;
     }

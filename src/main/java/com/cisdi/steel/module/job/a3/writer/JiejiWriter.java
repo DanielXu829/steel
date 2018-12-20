@@ -237,7 +237,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
 
                     if ("_sjmain1_day_shift".equals(sheetName)) {
                         DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
-                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getEndTime());
+                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getStartTime());
                         all.addAll(dateQueries8);
                     } else {
                         List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(new Date());

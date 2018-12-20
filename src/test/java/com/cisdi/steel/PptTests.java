@@ -28,7 +28,8 @@ public class PptTests {
         XMLSlideShow ppt = new XMLSlideShow();
 
 
-        JFreeChart Chart0 = ChartCreater.createCategoryChart();
+//        JFreeChart Chart0 = ChartCreater.createCategoryChart();
+        JFreeChart Chart0 = ChartCreater.createPolarChart();
         JFreeChart Chart00 = ChartCreater.createCategoryChart3D();
         JFreeChart Chart1 = ChartCreater.createBarChart();
         JFreeChart Chart2 = ChartCreater.createBarChart3D();
