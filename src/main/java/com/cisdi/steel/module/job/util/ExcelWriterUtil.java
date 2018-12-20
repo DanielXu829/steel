@@ -162,6 +162,10 @@ public class ExcelWriterUtil {
                         Object value = map.get(keyChild);
                         ExcelWriterUtil.addCellData(resultData, childIndex++, columnIndex, value);
                     }
+                } else if(o instanceof Map){
+                    Map<String,Object> object= (Map<String, Object>) o;
+                    Object value = object.get(keyChild);
+                    ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
                 }
             }
         }

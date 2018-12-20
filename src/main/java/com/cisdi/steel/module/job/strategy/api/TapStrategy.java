@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -13,10 +15,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * <p>email: ypasdf@163.com</p>
@@ -42,7 +42,6 @@ public class TapStrategy extends AbstractApiStrategy {
 
         List<CellData> cellDataList = new ArrayList<>();
         for (DateQuery dateQuery : queryList) {
-            // 理论上来说一次获取了所有，循环只执行一次
             List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }
@@ -98,37 +97,100 @@ public class TapStrategy extends AbstractApiStrategy {
                     Integer sequnceno = i + 1;
                     obj.put("sequnceno", sequnceno);
                     Map<String, Object> mapResult = new CaseInsensitiveMap<>();
-                    mapResult.put("tapindex", obj);
-                    String url2 = urlPre + "/tap/analysis/" + tapid.toString();
-                    String childResult = httpUtil.get(url2);
-                    JSONObject childObject = JSON.parseObject(childResult);
-                    JSONArray jsonChildArray = childObject.getJSONArray("data");
-                    if (Objects.nonNull(jsonChildArray)) {
-                        int childSize = jsonChildArray.size();
-                        for (int j = 0; j < childSize; j++) {
-                            JSONObject tapAnalysisJSONObject = jsonChildArray.getJSONObject(j);
-                            JSONObject tapAnalysis = tapAnalysisJSONObject.getJSONObject("tapAnalysis");
-                            Object brandcode = tapAnalysis.get("brandcode");
-                            if (Objects.nonNull(brandcode)) {
-                                Map<String, Object> mapResult1 = new CaseInsensitiveMap<>();
-                                JSONObject analysisValue = tapAnalysisJSONObject.getJSONObject("analysisValue");
-                                JSONObject values = analysisValue.getJSONObject("values");
-                                if ("HM".equals(brandcode.toString())) {
-                                    mapResult1.put("HM", values);
-                                } else if ("SLAG".equals(brandcode.toString())) {
-                                    mapResult1.put("SLAG", values);
-                                } else if ("TapValue".equals(brandcode.toString())) {
-                                    mapResult1.put("TapValue", values);
-                                }
-                                resultList.add(mapResult1);
-                            }
-                        }
-
+                    String startTime = obj.getString("starttime");
+                    String endTime = obj.getString("endtime");
+                    if (StringUtils.isNotBlank(startTime) && StringUtils.isNotBlank(endTime)) {
+                        Date start = new Date(Long.parseLong(startTime));
+                        Date end = new Date(Long.parseLong(endTime));
+                        Long betweenMin = DateUtil.getBetweenMin(end, start);
+                        obj.put("between", betweenMin + "");
                     }
+                    mapResult.put("tapindex", obj);
+
+                    CaseInsensitiveMap<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", obj);
+                    CaseInsensitiveMap<String, BigDecimal> SLAG = handlerAnalysisValues(urlPre, "SLAG", obj);
+                    mapResult.put("HM",hm);
+                    mapResult.put("SLAG",SLAG);
+
+//                    if (Objects.nonNull(jsonChildArray)) {
+//                        int childSize = jsonChildArray.size();
+//                        List<Map<String, Object>> list = new ArrayList<>();
+//                        Map<String, List<BigDecimal>> resultMap = new CaseInsensitiveMap<>();
+//                        for (int j = 0; j < childSize; j++) {
+//                            JSONObject tapAnalysisJSONObject = jsonChildArray.getJSONObject(j);
+//                            JSONObject tapAnalysis = tapAnalysisJSONObject.getJSONObject("tapAnalysis");
+//                            Object brandcode = tapAnalysis.get("brandcode");
+//                            if (Objects.nonNull(brandcode)) {
+//                                Map<String, Object> mapResult1 = new CaseInsensitiveMap<>();
+//                                JSONObject analysisValue = tapAnalysisJSONObject.getJSONObject("analysisValue");
+//                                JSONObject values = analysisValue.getJSONObject("values");
+//                                if ("HM".equals(brandcode.toString())) {
+//                                    mapResult1.put("HM", values);
+//                                } else if ("SLAG".equals(brandcode.toString())) {
+//                                    mapResult1.put("SLAG", values);
+//                                } else if ("TapValue".equals(brandcode.toString())) {
+//                                    mapResult1.put("TapValue", values);
+//                                }
+//                                list.add(mapResult1);
+//                            }
+//                        }
+////                        Map<String, Object> a = handlerListAvg(list);
+////                        mapResult.putAll(a);
+//                    }
                     resultList.add(mapResult);
                 }
             }
         }
         return resultList;
+    }
+
+    private CaseInsensitiveMap<String, BigDecimal> handlerAnalysisValues(String urlPre, String brandCode, JSONObject obj) {
+        String url2 = urlPre + "/analysisValues/sampletime";
+        Map<String, String> queries = new HashMap<>();
+        queries.put("brandcode", brandCode);
+        queries.put("endtime", obj.getString("endtime"));
+        queries.put("starttime", obj.getString("starttime"));
+//        queries.put("endtime", "1555225550000");
+//        queries.put("starttime", "1545225550000");
+        queries.put("type", "LC");
+        String childResult = httpUtil.get(url2, queries);
+        CaseInsensitiveMap<String, BigDecimal> map = new CaseInsensitiveMap<>();
+        JSONObject childObject = JSON.parseObject(childResult);
+        if(StringUtils.isBlank(childResult)){
+            return map;
+        }
+        JSONArray jsonChildArray = childObject.getJSONArray("data");
+
+        if (Objects.nonNull(jsonChildArray)) {
+            int childSize = jsonChildArray.size();
+            Map<String, List<BigDecimal>> result = new HashMap<>();
+            for (int j = 0; j < childSize; j++) {
+                JSONObject tapAnalysisJSONObject = jsonChildArray.getJSONObject(j);
+                JSONObject values = tapAnalysisJSONObject.getJSONObject("values");
+                if (Objects.nonNull(values)) {
+                    Set<String> keySet = values.keySet();
+                    keySet.forEach(item -> {
+                        List<BigDecimal> value = result.get(item);
+                        if (Objects.isNull(value)) {
+                            value = new ArrayList<>();
+                            value.add(values.getBigDecimal(item));
+                            result.put(item, value);
+                        } else {
+                            value.add(values.getBigDecimal(item));
+                        }
+                    });
+                }
+            }
+
+            result.forEach((k, v) -> {
+                OptionalDouble average = v.stream().mapToDouble(BigDecimal::doubleValue).average();
+                if(average.isPresent()){
+                map.put(k, new BigDecimal(average.getAsDouble()).setScale(5,BigDecimal.ROUND_HALF_UP));
+
+                }
+            });
+        }
+        return map;
+
     }
 }
