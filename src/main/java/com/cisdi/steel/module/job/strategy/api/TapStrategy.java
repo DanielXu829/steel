@@ -109,34 +109,8 @@ public class TapStrategy extends AbstractApiStrategy {
 
                     CaseInsensitiveMap<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", obj);
                     CaseInsensitiveMap<String, BigDecimal> SLAG = handlerAnalysisValues(urlPre, "SLAG", obj);
-                    mapResult.put("HM",hm);
-                    mapResult.put("SLAG",SLAG);
-
-//                    if (Objects.nonNull(jsonChildArray)) {
-//                        int childSize = jsonChildArray.size();
-//                        List<Map<String, Object>> list = new ArrayList<>();
-//                        Map<String, List<BigDecimal>> resultMap = new CaseInsensitiveMap<>();
-//                        for (int j = 0; j < childSize; j++) {
-//                            JSONObject tapAnalysisJSONObject = jsonChildArray.getJSONObject(j);
-//                            JSONObject tapAnalysis = tapAnalysisJSONObject.getJSONObject("tapAnalysis");
-//                            Object brandcode = tapAnalysis.get("brandcode");
-//                            if (Objects.nonNull(brandcode)) {
-//                                Map<String, Object> mapResult1 = new CaseInsensitiveMap<>();
-//                                JSONObject analysisValue = tapAnalysisJSONObject.getJSONObject("analysisValue");
-//                                JSONObject values = analysisValue.getJSONObject("values");
-//                                if ("HM".equals(brandcode.toString())) {
-//                                    mapResult1.put("HM", values);
-//                                } else if ("SLAG".equals(brandcode.toString())) {
-//                                    mapResult1.put("SLAG", values);
-//                                } else if ("TapValue".equals(brandcode.toString())) {
-//                                    mapResult1.put("TapValue", values);
-//                                }
-//                                list.add(mapResult1);
-//                            }
-//                        }
-////                        Map<String, Object> a = handlerListAvg(list);
-////                        mapResult.putAll(a);
-//                    }
+                    mapResult.put("HM", hm);
+                    mapResult.put("SLAG", SLAG);
                     resultList.add(mapResult);
                 }
             }
@@ -156,7 +130,7 @@ public class TapStrategy extends AbstractApiStrategy {
         String childResult = httpUtil.get(url2, queries);
         CaseInsensitiveMap<String, BigDecimal> map = new CaseInsensitiveMap<>();
         JSONObject childObject = JSON.parseObject(childResult);
-        if(StringUtils.isBlank(childResult)){
+        if (StringUtils.isBlank(childResult)) {
             return map;
         }
         JSONArray jsonChildArray = childObject.getJSONArray("data");
@@ -184,9 +158,10 @@ public class TapStrategy extends AbstractApiStrategy {
 
             result.forEach((k, v) -> {
                 OptionalDouble average = v.stream().mapToDouble(BigDecimal::doubleValue).average();
-                if(average.isPresent()){
-                map.put(k, new BigDecimal(average.getAsDouble()).setScale(5,BigDecimal.ROUND_HALF_UP));
-
+                if (average.isPresent()) {
+                    map.put(k, new BigDecimal(average.getAsDouble()).setScale(5, BigDecimal.ROUND_HALF_UP));
+                }else{
+                    map.put(k,new BigDecimal(0));
                 }
             });
         }

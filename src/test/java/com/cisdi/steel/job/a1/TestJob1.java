@@ -27,7 +27,7 @@ public class TestJob1 extends SteelApplicationTests {
     }
 
     /**
-     * 出铁作业
+     * 出铁作业 日
      */
     @Autowired
     private ChutiezuoyeDayJob chutiezuoyeDayJob;
@@ -35,6 +35,17 @@ public class TestJob1 extends SteelApplicationTests {
     @Test
     public void test2() {
         chutiezuoyeDayJob.execute(null);
+    }
+
+    /**
+     * 出铁作业 月
+     */
+    @Autowired
+    private ChutiezuoyeMonthJob chutiezuoyeMonthJob;
+
+    @Test
+    public void testa() {
+        chutiezuoyeMonthJob.execute(null);
     }
 
     /**
@@ -112,6 +123,7 @@ public class TestJob1 extends SteelApplicationTests {
      */
     @Autowired
     private LudingbuliaoJob ludingbuliaoJob;
+
     @Test
     public void test9() {
         ludingbuliaoJob.execute(null);
