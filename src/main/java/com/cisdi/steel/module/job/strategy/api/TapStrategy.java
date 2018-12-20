@@ -81,11 +81,14 @@ public class TapStrategy extends AbstractApiStrategy {
         String result = httpUtil.get(url, queryParam);
         JSONObject jsonObject = JSON.parseObject(result);
         Object total = jsonObject.get("total");
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        if (Objects.isNull(total) || "0".equals(total.toString())) {
+            return resultList;
+        }
         queryParam.put("pagesize", total.toString());
         result = httpUtil.get(url, queryParam);
         JSONObject object = JSONObject.parseObject(result);
         JSONArray jsonArray = object.getJSONArray("data");
-        List<Map<String, Object>> resultList = new ArrayList<>();
         if (Objects.nonNull(jsonArray)) {
             int size = jsonArray.size();
             for (int i = 0; i < size; i++) {
