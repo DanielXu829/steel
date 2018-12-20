@@ -35,7 +35,7 @@ public class HttpTests extends SteelApplicationTests {
     public void testApi() {
 
         String url = httpProperties.getUrlApiGLOne() + "/batchenos/period";
-        DateQuery dateQuery = DateQueryUtil.buildToday();
+        DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
         String s = httpUtil.get(url, dateQuery.getQueryParam());
         List<String> list = ResponseUtil.getResponseArray(s, String.class);
         for (int i = 0; i < 10; i++) {
@@ -53,7 +53,7 @@ public class HttpTests extends SteelApplicationTests {
     @Test
     public void testApi2() throws Exception {
         String url = httpProperties.getUrlApiGLOne() + "/batchenos/period";
-        DateQuery dateQuery = DateQueryUtil.buildToday();
+        DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
         String s = httpUtil.get(url, dateQuery.getQueryParam());
         List<String> list = ResponseUtil.getResponseArray(s, String.class);
         Collections.sort(list);
@@ -145,7 +145,7 @@ public class HttpTests extends SteelApplicationTests {
     @Test
     public void test3() throws Exception{
         String url = httpProperties.getUrlApiGLOne() + "/batchenos/period";
-        DateQuery dateQuery = DateQueryUtil.buildToday();
+        DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
         String s = httpUtil.get(url, dateQuery.getQueryParam());
         List<String> list = ResponseUtil.getResponseArray(s, String.class);
         Collections.sort(list);

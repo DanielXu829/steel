@@ -24,16 +24,8 @@ public class DateQueryUtil {
 
     /**
      * 构建一个当天的 开始 时间---结束时间
-     *
-     * @return 结果
-     */
-    public static DateQuery buildToday() {
-        return buildToday(new Date());
-    }
-
-    /**
-     * 构建一个当天的 开始 时间---结束时间
-     *
+     * 如 时间：2018-12-20 10:32:55
+     * recordDate=2018-12-20 10:32:55,startTime=2018-12-20 00:00:00,endTime=2018-12-21 00:00:00
      * @return 结果
      */
     public static DateQuery buildToday(Date date) {
@@ -44,20 +36,18 @@ public class DateQueryUtil {
 
     /**
      * 返回一小时范围
-     * 前一个小时时间段
+     * 当前一个小时时间段
      *
      * @param date 时间
      * @return 结果
      */
-    public static DateQuery buildHour(Date date) {
-        Date previous = DateUtil.addHours(date, -1);
-        String dateTime = DateUtil.getFormatDateTime(previous, "yyyy-MM-dd HH");
+    private static DateQuery buildHour(Date date) {
+        String dateTime = DateUtil.getFormatDateTime(date, "yyyy-MM-dd HH");
         String startHourString = dateTime + ":00:00";
-        String endHourString = dateTime + ":59:59";
         DateFormat df = new SimpleDateFormat(DateUtil.fullFormat);
         try {
             Date startHour = df.parse(startHourString);
-            Date endHour = df.parse(endHourString);
+            Date endHour = DateUtil.addHours(startHour, 1);
             return new DateQuery(startHour, endHour, date);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -65,39 +55,6 @@ public class DateQueryUtil {
         return null;
     }
 
-    public static DateQuery build4Hour(Date date) {
-        Date previous = DateUtil.addHours(date, -4);
-        String dateTime = DateUtil.getFormatDateTime(previous, "yyyy-MM-dd HH");
-        String dateTime1 = DateUtil.getFormatDateTime(DateUtil.addHours(date, -1), "yyyy-MM-dd HH");
-        String startHourString = dateTime + ":00:00";
-        String endHourString = dateTime1 + ":59:59";
-        DateFormat df = new SimpleDateFormat(DateUtil.fullFormat);
-        try {
-            Date startHour = df.parse(startHourString);
-            Date endHour = df.parse(endHourString);
-            return new DateQuery(startHour, endHour, date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static DateQuery build8Hour(Date date) {
-        Date previous = DateUtil.addHours(date, -8);
-        String dateTime = DateUtil.getFormatDateTime(previous, "yyyy-MM-dd HH");
-        String dateTime1 = DateUtil.getFormatDateTime(DateUtil.addHours(date, -1), "yyyy-MM-dd HH");
-        String startHourString = dateTime + ":00:00";
-        String endHourString = dateTime1 + ":59:59";
-        DateFormat df = new SimpleDateFormat(DateUtil.fullFormat);
-        try {
-            Date startHour = df.parse(startHourString);
-            Date endHour = df.parse(endHourString);
-            return new DateQuery(startHour, endHour, date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * 返回 指定周的开始和结束时间
@@ -115,7 +72,12 @@ public class DateQueryUtil {
 
     /**
      * 构建每小时时间段
-     *
+     * 如传入时间为 04:29:51
+     * recordDate=2018-12-20 01:29:51,startTime=2018-12-20 00:00:00,endTime=2018-12-20 01:00:00
+     * recordDate=2018-12-20 02:29:51,startTime=2018-12-20 01:00:00,endTime=2018-12-20 02:00:00
+     * recordDate=2018-12-20 03:29:51,startTime=2018-12-20 02:00:00,endTime=2018-12-20 03:00:00
+     * recordDate=2018-12-20 04:29:51,startTime=2018-12-20 03:00:00,endTime=2018-12-20 04:00:00
+     * recordDate=2018-12-20 05:29:51,startTime=2018-12-20 04:00:00,endTime=2018-12-20 05:00:00
      * @param date 指定时间
      * @return 结果
      */
@@ -124,7 +86,7 @@ public class DateQueryUtil {
         calendar.setTime(date);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         List<DateQuery> queryList = new ArrayList<>();
-        for (int i = hour - 1; i >= 0; i--) {
+        for (int i = hour; i >= 0; i--) {
             Date nextDate = DateUtil.addHours(date, -i);
             DateQuery query = DateQueryUtil.buildHour(nextDate);
             queryList.add(query);
@@ -146,13 +108,13 @@ public class DateQueryUtil {
         Date dateBeginTime = DateUtil.getDateBeginTime(date);
         Calendar endTime = Calendar.getInstance();
         endTime.setTime(dateBeginTime);
-        endTime.add(Calendar.MINUTE,30);
-        do{
-            result.add(new DateQuery(startTime,endTime.getTime(),date));
-            startTime =endTime.getTime();
-            endTime.add(Calendar.MINUTE,30);
-        }while (endTime.getTime().before(date));
-        result.add(new DateQuery(startTime,new Date(),date));
+        endTime.add(Calendar.MINUTE, 30);
+        do {
+            result.add(new DateQuery(startTime, endTime.getTime(), date));
+            startTime = endTime.getTime();
+            endTime.add(Calendar.MINUTE, 30);
+        } while (endTime.getTime().before(date));
+        result.add(new DateQuery(startTime, new Date(), date));
         return result;
     }
 
@@ -167,14 +129,14 @@ public class DateQueryUtil {
         calendar.setTime(date);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         List<DateQuery> queryList = new ArrayList<>();
-        for (int i = hour - 4; i >= 0; i -= 4) {
-            Date nextDate = DateUtil.addHours(date, -i);
-            DateQuery query = DateQueryUtil.build4Hour(nextDate);
-            queryList.add(query);
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        for (int i = 0; i < 6; i++) {
+            Date previous = DateUtil.addHours(dateBeginTime, 4);
+            queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
+            dateBeginTime = previous;
         }
         return queryList;
     }
-
 
 
     /**
@@ -188,13 +150,15 @@ public class DateQueryUtil {
         calendar.setTime(date);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         List<DateQuery> queryList = new ArrayList<>();
-        for (int i = hour - 8; i >= -1; i -= 8) {
-            Date nextDate = DateUtil.addHours(date, -i);
-            DateQuery query = DateQueryUtil.build8Hour(nextDate);
-            queryList.add(query);
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        for (int i = 0; i < 3; i++) {
+            Date previous = DateUtil.addHours(dateBeginTime, 8);
+            queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
+            dateBeginTime = previous;
         }
         return queryList;
     }
+
 
     /**
      * 构建不规则时间段
@@ -255,24 +219,6 @@ public class DateQueryUtil {
     }
 
     /**
-     * 返回一小时范围
-     *
-     * @return 结果
-     */
-    public static DateQuery buildHour() {
-        return buildHour(new Date());
-    }
-
-    /**
-     * 当月的时间段
-     *
-     * @return 当月时间范围
-     */
-    public static DateQuery buildMonth() {
-        return buildMonth(new Date());
-    }
-
-    /**
      * 指定 月的时间范围
      *
      * @param date 指定月
@@ -281,7 +227,6 @@ public class DateQueryUtil {
     public static DateQuery buildMonth(Date date) {
         Date monthStartTime = getMonthStartTime(date);
         Date beginTime = DateUtil.getDateBeginTime(monthStartTime);
-
         Date monthEndTime = getMonthEndTime(date);
         Date endTime = DateUtil.getDateEndTime(monthEndTime);
         return new DateQuery(beginTime, endTime, date);
@@ -309,4 +254,6 @@ public class DateQueryUtil {
         calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
         return calendar.getTime();
     }
+
+
 }

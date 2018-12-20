@@ -373,7 +373,7 @@ public class DateUtil {
      * @return 指定时间 最后时间 23:59:59
      */
     public static Date getDateEndTime(Date date) {
-        String dateString = DateFormatUtils.format(date, "yyyy-MM-dd 23:59:59");
+        String dateString = DateFormatUtils.format(date, "yyyy-MM-dd 24:00:00");
         Date endTime = null;
         try {
             endTime = DateUtils.parseDate(dateString, new String[]{"yyyy-MM-dd hh:mm:ss"});

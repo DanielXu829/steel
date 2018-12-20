@@ -28,6 +28,10 @@ import java.util.*;
  */
 public class CommonTests {
 
+    public static void main(String[] args) {
+        Date dateEndTime = DateUtil.getDateEndTime(new Date());
+    }
+
     @Test
     public void excelCopySheetTest() throws Exception {
         String path = "D:\\高炉本体温度月报表_2018-11-22_08.xlsx";
