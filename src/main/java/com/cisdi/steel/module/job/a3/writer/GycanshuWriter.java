@@ -171,12 +171,13 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                     }
                     JSONObject jsonObject = data.getJSONObject(column);
                     if (Objects.isNull(jsonObject)) {
-                        continue;
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, "");
+                    } else {
+                        Double min = jsonObject.getDouble("min");
+                        Double max = jsonObject.getDouble("max");
+                        String val = min.doubleValue() + "～" + max.doubleValue();
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, val);
                     }
-                    Double min = jsonObject.getDouble("min");
-                    Double max = jsonObject.getDouble("max");
-                    String val = min.doubleValue() + "～" + max.doubleValue();
-                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, val);
                 }
             }
         } else {
