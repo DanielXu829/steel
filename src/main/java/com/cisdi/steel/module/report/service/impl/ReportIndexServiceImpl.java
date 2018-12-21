@@ -134,7 +134,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         reportIndex.setUpdateTime(now);
         reportIndex.setHidden("0");
 
-        reportIndexMapper.updateByMoreParamter(reportIndex);
+        if (StringUtils.isNotBlank(reportIndex.getReportCategoryCode()) && !"jh_zidongpeimei".equals(reportIndex.getReportCategoryCode())) {
+            reportIndexMapper.updateByMoreParamter(reportIndex);
+        }
         this.save(reportIndex);
     }
 
@@ -170,7 +172,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         reportIndexQuery.setToDay(DateUtil.getFormatDateTime(today, DateUtil.yyyyMMddFormat));
         List<ReportIndex> todayList = reportIndexMapper.queryReportToday(reportIndexQuery);
         //3.本月月报
-        reportIndexQuery.setToDay(DateUtil.getFormatDateTime(today, "yyyy-MM"));
+        reportIndexQuery.setToDay(DateUtil.getFormatDateTime(today, DateUtil.yyyyMMFormat));
         List<ReportIndex> monthList = reportIndexMapper.queryReportMonth(reportIndexQuery);
         //4.其他最新报表
         reportIndexQuery.setToDay(DateUtil.getFormatDateTime(today, DateUtil.yyyyMMddFormat));

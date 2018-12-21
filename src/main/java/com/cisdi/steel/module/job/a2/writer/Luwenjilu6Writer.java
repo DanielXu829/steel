@@ -69,6 +69,9 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         workbook.cloneSheet(0);
         workbook.setSheetName(numberOfSheets, "炉温记录" + format);
         Sheet sheet = workbook.getSheet("炉温记录" + format);
+        Row row = sheet.getRow(0);
+        Cell cell = row.getCell(1);
+        cell.setCellValue(DateUtil.getFormatDateTime(new Date(),"yyyy/MM/dd"));
         List<String> rowCelVal1 = getRowCelVal1(sheet, 3);
         List<CellData> cellData1 = mapDataHandler(4, getUrl(), rowCelVal1, date, "CO6");
         ExcelWriterUtil.setCellValue(sheet, cellData1);
