@@ -4,6 +4,7 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -15,10 +16,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 化产报表
@@ -49,6 +47,7 @@ public class GufenglengningWriter extends BaseJhWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = new ArrayList<>();
+                String no = "";
                 if ("_gfln2_day_hour".equals(sheetName)) {
                     Row row1 = sheet.getRow(0);
                     Row row2 = sheet.getRow(1);
@@ -69,11 +68,15 @@ public class GufenglengningWriter extends BaseJhWriter {
                     max = (max > a3) ? max : a3;
                     if (max == a1) {
                         columns = PoiCustomUtil.getRowCelVal(sheet, 0);
+                        no = "A";
                     } else if (max == a2) {
                         columns = PoiCustomUtil.getRowCelVal(sheet, 1);
+                        no = "B";
                     } else {
                         columns = PoiCustomUtil.getRowCelVal(sheet, 2);
+                        no = "C";
                     }
+
                     k = 3;
                 } else {
                     columns = PoiCustomUtil.getFirstRowCelVal(sheet);
@@ -83,6 +86,17 @@ public class GufenglengningWriter extends BaseJhWriter {
                     DateQuery item = dateQueries.get(j);
                     int rowIndex = j + k;
                     List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
+                    if ("_gfln2_day_hour".equals(sheetName)) {
+                        Row row = sheet.getRow(rowIndex);
+                        if (Objects.isNull(row)) {
+                            row=sheet.createRow(rowIndex);
+                        }
+                        Cell cell = row.getCell(32);
+                        if (Objects.isNull(cell)) {
+                            cell = row.createCell(32);
+                        }
+                        cell.setCellValue(no);
+                    }
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
