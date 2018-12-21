@@ -50,6 +50,7 @@ public class OkHttpImpl implements HttpUtil {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         log.debug("GET请求URL:" + sb.toString());
         Request request = new Request.Builder()

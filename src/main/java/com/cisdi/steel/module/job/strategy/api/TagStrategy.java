@@ -64,10 +64,17 @@ public class TagStrategy extends AbstractApiStrategy {
             if (StringUtils.isNotBlank(cell)) {
                 JSONObject data = obj.getJSONObject(cell);
                 if (Objects.nonNull(data)) {
-                    Set<String> keySet = data.keySet();
+                    Set<String> keys = data.keySet();
+                    Long[] list = new Long[keys.size()];
+                    int k = 0;
+                    for (String key : keys) {
+                        list[k] = Long.valueOf(key);
+                        k++;
+                    }
+                    Arrays.sort(list);
                     int rowIndex = 1;
-                    for (String key : keySet) {
-                        Object o = data.get(key);
+                    for (Long key : list) {
+                        Object o = data.get(key+"");
                         ExcelWriterUtil.addCellData(resultList, rowIndex++, columnIndex, o);
                     }
                 }
@@ -75,42 +82,4 @@ public class TagStrategy extends AbstractApiStrategy {
         }
         return resultList;
     }
-
-//    /**
-//     * 遍历每个小时的值
-//     *
-//     * @param cellList   列名
-//     * @param url        发送请求的地址
-//     * @param queryParam 查询参数
-//     * @return 结果
-//     */
-//    private List<CellValInfo> eachData(List<Cell> cellList, String url, Map<String, String> queryParam) {
-//        List<CellValInfo> results = new ArrayList<>();
-//        for (Cell cell : cellList) {
-//            String column = PoiCellUtil.getCellValue(cell);
-//            if (StringUtils.isNotBlank(column)) {
-//                String[] columnSplit = column.split("/");
-//                String method = "avg";
-//                String tagName = columnSplit[0];
-//                if (columnSplit.length > 2) {
-//                    method = columnSplit[1];
-//                }
-//                queryParam.put("method", method);
-//                queryParam.put("tagname", tagName);
-//                // TODO: 暂时模拟数据
-//                String result = httpUtil.get(url, queryParam);
-////                JSONObject mock = new JSONObject();
-////                mock.put("data", RandomUtils.nextInt(1, 999));
-////                String result = mock.toJSONString();
-//                if (StringUtils.isNotBlank(result)) {
-//                    JSONObject jsonObject = JSONObject.parseObject(result);
-//                    CellValInfo cellValInfo = CellValInfo.builder()
-//                            .columnIndex(cell.getColumnIndex())
-//                            .cellValue(jsonObject.get("data")).build();
-//                    results.add(cellValInfo);
-//                }
-//            }
-//        }
-//        return results;
-//    }
 }

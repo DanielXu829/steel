@@ -231,7 +231,8 @@ public class PoiCustomUtil {
             Sheet sheet = workbook.getSheet("_metadata");
             MetadataDTO metadataDTO = new MetadataDTO(excelDTO);
             if (Objects.nonNull(sheet)) {
-                buildMetadata(sheet, metadataDTO);
+//                buildMetadata(sheet, metadataDTO);
+                writeAllMetadata(sheet, metadataDTO);
             } else {
                 sheet = workbook.createSheet("_metadata");
                 writeAllMetadata(sheet, metadataDTO);

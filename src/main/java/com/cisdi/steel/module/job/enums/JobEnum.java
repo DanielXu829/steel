@@ -31,14 +31,11 @@ public enum JobEnum {
     gl_ludingzhuangliaozuoye_day1("gl_ludingzhuangliaozuoye_day1", "炉顶装料作业日报表"),
     gl_jswgaolu_day("gl_jswgaolu_day", "6高炉 日报"),
     gl_taisu1_month("gl_taisu1_month", "6高炉 月报"),
+    gl_refenglu_month("gl_refenglu_month", "热风炉 月报"),
+    gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
 
 
     // 焦化
-//    jh_peimeizuoyequ("jh_peimeizuoyequ", "配煤作业区报表设计"),
-//    jh_huachan("jh_huachan", "化产报表设计"),
-//    jh_ganxijiao("jh_ganxijiao", "干熄焦报表设计"),
-//    jh_shaojiao("jh_shaojiao", "炼焦报表设计"),
-//    jh_lianjiaoluwen("jh_lianjiaoluwen", "炼焦炉温报表设计"),
     jh_zidongpeimei("jh_zidongpeimei", "CK67-自动配煤（班）报表"),
     jh_fensuixidu("jh_fensuixidu", "CK67-粉碎细度（月）报表"),
     jh_cdqcaozuo("jh_cdqcaozuo", "CK67-CDQ操作运行报表（日）报表"),
@@ -105,7 +102,6 @@ public enum JobEnum {
 
     private DateQuery dateQuery;
 
-    // TODO: 暂时保留 上面写完后 删除
     JobEnum(String code, String name) {
         this.code = code;
         this.name = name;

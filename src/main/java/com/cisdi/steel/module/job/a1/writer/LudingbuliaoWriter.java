@@ -61,7 +61,7 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
         int size = data.size();
         int rowIndex = 1;
         List<CellData> cellDataList = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
+        for (int i = size-1; i >=0; i--) {
             JSONObject map = data.getJSONObject(i);
             int columnIndex=0;
             for (String column : columns) {

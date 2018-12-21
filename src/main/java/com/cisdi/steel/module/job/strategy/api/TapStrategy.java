@@ -107,8 +107,8 @@ public class TapStrategy extends AbstractApiStrategy {
                     }
                     mapResult.put("tapindex", obj);
 
-                    CaseInsensitiveMap<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", obj);
-                    CaseInsensitiveMap<String, BigDecimal> SLAG = handlerAnalysisValues(urlPre, "SLAG", obj);
+                    Map<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", obj);
+                    Map<String, BigDecimal> SLAG = handlerAnalysisValues(urlPre, "SLAG", obj);
                     mapResult.put("HM", hm);
                     mapResult.put("SLAG", SLAG);
                     resultList.add(mapResult);
@@ -118,21 +118,26 @@ public class TapStrategy extends AbstractApiStrategy {
         return resultList;
     }
 
-    private CaseInsensitiveMap<String, BigDecimal> handlerAnalysisValues(String urlPre, String brandCode, JSONObject obj) {
+    private Map<String, BigDecimal> handlerAnalysisValues(String urlPre, String brandCode, JSONObject obj) {
+        Map<String, BigDecimal> map = new CaseInsensitiveMap<>();
         String url2 = urlPre + "/analysisValues/sampletime";
-        Map<String, String> queries = new HashMap<>();
-        queries.put("brandcode", brandCode);
-        queries.put("endtime", obj.getString("endtime"));
-        queries.put("starttime", obj.getString("starttime"));
-//        queries.put("endtime", "1555225550000");
-//        queries.put("starttime", "1545225550000");
-        queries.put("type", "LC");
-        String childResult = httpUtil.get(url2, queries);
-        CaseInsensitiveMap<String, BigDecimal> map = new CaseInsensitiveMap<>();
-        JSONObject childObject = JSON.parseObject(childResult);
-        if (StringUtils.isBlank(childResult)) {
+        String endtime = obj.getString("endtime");
+        String starttime = obj.getString("starttime");
+        if (StringUtils.isBlank(starttime) || StringUtils.isBlank(endtime)) {
             return map;
         }
+
+        Map<String, String> queries = new HashMap<>();
+        queries.put("brandcode", brandCode);
+        queries.put("endtime", endtime);
+        queries.put("starttime", starttime);
+        queries.put("type", "LC");
+
+        String childResult = httpUtil.get(url2, queries);
+        if (StringUtils.isBlank(childResult)) {
+            return getSampletime(urlPre, brandCode, endtime);
+        }
+        JSONObject childObject = JSON.parseObject(childResult);
         JSONArray jsonChildArray = childObject.getJSONArray("data");
 
         if (Objects.nonNull(jsonChildArray)) {
@@ -160,12 +165,41 @@ public class TapStrategy extends AbstractApiStrategy {
                 OptionalDouble average = v.stream().mapToDouble(BigDecimal::doubleValue).average();
                 if (average.isPresent()) {
                     map.put(k, new BigDecimal(average.getAsDouble()).setScale(5, BigDecimal.ROUND_HALF_UP));
-                }else{
-                    map.put(k,new BigDecimal(0));
+                } else {
+                    map.put(k, new BigDecimal(0));
                 }
             });
         }
+        if (map.isEmpty()) {
+            return getSampletime(urlPre, brandCode, endtime);
+        }
         return map;
+    }
 
+    private Map<String, BigDecimal> getSampletime(String urlPre, String brandCode, String endTime) {
+        Map<String, BigDecimal> map = new HashMap<>();
+        String url = urlPre + "/analysisValue/sampletime/" + endTime;
+        Map<String, String> queries = new HashMap<>();
+        queries.put("brandcode", brandCode);
+        queries.put("type", "LC");
+        String s = httpUtil.get(url, queries);
+        if (StringUtils.isBlank(s)) {
+            return map;
+        }
+        JSONObject childObject = JSON.parseObject(s);
+        if (Objects.isNull(childObject)) {
+            return map;
+        }
+        JSONObject data = childObject.getJSONObject("data");
+        if (Objects.isNull(data)) {
+            return map;
+        }
+        JSONObject dataValues = data.getJSONObject("values");
+        if(Objects.isNull(dataValues)){
+            return map;
+        }
+        Set<String> keySet = dataValues.keySet();
+        keySet.forEach(item -> map.put(item, dataValues.getBigDecimal(item)));
+        return map;
     }
 }
