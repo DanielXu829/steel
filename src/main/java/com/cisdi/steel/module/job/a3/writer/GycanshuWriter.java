@@ -171,12 +171,13 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                     }
                     JSONObject jsonObject = data.getJSONObject(column);
                     if (Objects.isNull(jsonObject)) {
-                        continue;
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, "");
+                    } else {
+                        Double min = jsonObject.getDouble("min");
+                        Double max = jsonObject.getDouble("max");
+                        String val = min.doubleValue() + "～" + max.doubleValue();
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, val);
                     }
-                    Double min = jsonObject.getDouble("min");
-                    Double max = jsonObject.getDouble("max");
-                    String val = min.doubleValue() + "～" + max.doubleValue();
-                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, val);
                 }
             }
         } else {
@@ -200,19 +201,29 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                             Double str1 = map.getDouble("low");
                             Double str2 = map.getDouble("up");
 
-                            String val2 = str1 + "～" + str2;
+                            String val2 = "";
+                            if (Objects.isNull(str1) && Objects.nonNull(str2)) {
+                                val2 = "<" + str2;
+                            } else if (Objects.nonNull(str1) && Objects.isNull(str2)) {
+                                val2 = ">" + str1;
+                            } else if (Objects.nonNull(str1) && Objects.nonNull(str2)) {
+                                val2 = str1 + "～" + str2;
+                            }
+
 
                             Double val3 = map.getDouble("val");
 
                             Integer str4 = map.getInteger("status");
                             String val4 = "";
                             //状态评价（-1偏低，0正常，1偏高）
-                            if (str4.intValue() == -1) {
-                                val4 = "偏低";
-                            } else if (str4.intValue() == 0) {
-                                val4 = "正常";
-                            } else if (str4.intValue() == 1) {
-                                val4 = "偏高";
+                            if (Objects.nonNull(str4)) {
+                                if (str4.intValue() == -1) {
+                                    val4 = "偏低";
+                                } else if (str4.intValue() == 0) {
+                                    val4 = "正常";
+                                } else if (str4.intValue() == 1) {
+                                    val4 = "偏高";
+                                }
                             }
                             int row = rowIndex;
                             ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val1);

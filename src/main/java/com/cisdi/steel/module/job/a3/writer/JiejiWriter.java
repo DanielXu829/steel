@@ -70,7 +70,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                     List<CellData> cellDataList = this.mapDataHandler(url, columns, dateQueries.get(0), rowBatch, sheetName, indexRow, version);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("_sjgc_day_hour".equals(sheetName) || "_sjfx_day_hour".equals(sheetName) || "_sjmain1_day_shift".equals(sheetName)) {
-                    DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
+                    DateQuery dateQuery = DateQueryUtil.buildToday(date.getRecordDate());
                     List<CellData> cellDataList = this.mapDataHandler(url, columns, dateQuery, rowBatch, sheetName, indexRow, version);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else {
@@ -100,7 +100,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             map.put("timeType", "sampleTime");
             map.put("pageSize", Integer.MAX_VALUE + "");
             map.put("startTime", dateQuery.getQueryStartTime().toString());
-            map.put("endTime", new Date().getTime() + "");
+            map.put("endTime", DateUtil.getDateEndTime(dateQuery.getRecordDate()).getTime() + "");
         } else if ("_lilunshengchan_day_shift".equals(sheetName)) {
             map.put("date", dateQuery.getStartTime().getTime() + "");
         } else if ("_sjmain5_day_shift".equals(sheetName)) {
@@ -167,7 +167,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             if (Objects.isNull(data)) {
                 return null;
             }
-            return this.handlerJsonArray(columns, data, sheetName);
+            return this.handlerJsonArray(columns, data, sheetName, dateQuery);
         }
     }
 
@@ -199,10 +199,6 @@ public class JiejiWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> handlerJsonArray2(List<String> columns, int rowBatch, JSONArray data, int startRow) {
         List<CellData> cellDataList = new ArrayList<>();
-        int size = columns.size();
-       /* for (int i = 0; i < size; i++) {
-            String column = columns.get(i);
-            if (StringUtils.isNotBlank(column)) {*/
         List<JSONObject> list = new ArrayList<>();
         for (int i = 0; i < data.size(); i++) {
             JSONObject o = data.getJSONObject(i);
@@ -221,8 +217,6 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                 List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, startRow++, o1);
                 cellDataList.addAll(cellDataList1);
             }
-              /*  }
-            }*/
         }
         return cellDataList;
     }
@@ -247,7 +241,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, String sheetName) {
+    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, String sheetName, DateQuery dateQuerys) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
         for (int i = 0; i < size; i++) {
@@ -270,11 +264,11 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                     List<DateQuery> all = new ArrayList<>();
 
                     if ("_sjmain1_day_shift".equals(sheetName)) {
-                        DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
+                        DateQuery dateQuery = DateQueryUtil.buildToday(dateQuerys.getRecordDate());
                         List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getStartTime());
                         all.addAll(dateQueries8);
                     } else {
-                        List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(new Date());
+                        List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(dateQuerys.getRecordDate());
                         all.addAll(dateQueries);
                     }
 
@@ -291,13 +285,6 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
                         rowIndex++;
                     }
-
-
-//                    for (String key : keys) {
-//                        Object o = innerMap.get(key);
-//                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, o);
-//                        rowIndex++;
-//                    }
                 }
             }
         }

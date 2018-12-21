@@ -7,6 +7,7 @@ import org.apache.poi.xslf.usermodel.*;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.junit.Test;
+import org.openxmlformats.schemas.presentationml.x2006.main.CTSlide;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -15,8 +16,48 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class PptTests {
+
+    @Test
+    public void test4() throws Exception {
+        XMLSlideShow ppt = new XMLSlideShow(new FileInputStream("C:\\Users\\cj\\Desktop\\test.pptx"));
+
+
+        List<XSLFSlide> slides = ppt.getSlides();
+        for (XSLFSlide slide : slides) {
+            for (XSLFShape shape : slide.getShapes()) {
+                if (shape instanceof XSLFTable) {
+                    XSLFTable table = (XSLFTable) shape;
+                    List<XSLFTableRow> rows = table.getRows();
+                    StringBuilder tableContent = new StringBuilder();
+
+                    int c = 1;
+                    for (XSLFTableRow row : rows) {
+                        List<XSLFTableCell> cells = row.getCells();
+                        int r = 1;
+                        for (XSLFTableCell cell : cells) {
+                            tableContent.append("|").append(cell.getText());
+                            System.out.println(c + "  " + r);
+
+                            if (c == 1 && r == 1) {
+                                cell.setText("我我我哦我");
+                            }
+                            r++;
+                        }
+                        c++;
+                        tableContent.append("|").append("\n");
+                    }
+                    System.out.println(tableContent.toString());
+                }
+            }
+        }
+
+        FileOutputStream out = new FileOutputStream("C:\\Users\\cj\\Desktop\\test.pptx");
+        ppt.write(out);
+        out.close();
+    }
 
     /**
      * XSLF构建图片
@@ -30,7 +71,8 @@ public class PptTests {
 
 //        JFreeChart Chart0 = ChartCreater.createCategoryChart();
         JFreeChart Chart0 = ChartCreater.createPolarChart();
-        JFreeChart Chart00 = ChartCreater.createCategoryChart3D();
+        JFreeChart Chart00 = ChartCreater.createGanttChart();
+        JFreeChart Chart01 = ChartCreater.createCategoryChart3D();
         JFreeChart Chart1 = ChartCreater.createBarChart();
         JFreeChart Chart2 = ChartCreater.createBarChart3D();
         JFreeChart Chart3 = ChartCreater.createLintChart();
@@ -113,6 +155,7 @@ public class PptTests {
     @Test
     public void test2() throws Exception {
         XMLSlideShow ppt = new XMLSlideShow(new FileInputStream("C:\\Users\\cj\\Desktop\\test.pptx"));
+
         XSLFSlide slideForLine = ppt.createSlide();
         XSLFSlide slideForTextBox = ppt.createSlide();
         XSLFSlide slideForTrapezoid = ppt.createSlide();

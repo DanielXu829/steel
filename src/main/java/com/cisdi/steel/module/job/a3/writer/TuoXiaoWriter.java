@@ -59,7 +59,7 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 List<String> towColumns = PoiCustomUtil.getRowCelVal(sheet, 1);
                 int rowBaatch = 1;
-                DateQuery dateQuery = DateQueryUtil.buildMonth(new Date());
+                DateQuery dateQuery = DateQueryUtil.buildMonth(date.getRecordDate());
                 dateQuery.setEndTime(dateQuery.getRecordDate());
                 List<CellData> cellDataList = mapDataHandler(url, columns, towColumns, dateQuery, rowBaatch);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -93,10 +93,10 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return null;
         }
-        return handlerJsonArray(columns, towColumns, data, data2, rowBatch);
+        return handlerJsonArray(columns, towColumns, data, data2, rowBatch,dateQuery);
     }
 
-    private List<CellData> handlerJsonArray(List<String> columns, List<String> towColumns, JSONObject data, JSONObject data2, int rowBatch) {
+    private List<CellData> handlerJsonArray(List<String> columns, List<String> towColumns, JSONObject data, JSONObject data2, int rowBatch,DateQuery dateQuerys) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
         for (int i = 0; i < size; i++) {
@@ -116,7 +116,7 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                     Arrays.sort(list);
 
                     List<DateQuery> all = new ArrayList<>();
-                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
+                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(dateQuerys.getRecordDate());
 
 
                     for (DateQuery dateQuery : dateQueries) {
@@ -158,7 +158,7 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                     Arrays.sort(list);
 
                     List<DateQuery> all = new ArrayList<>();
-                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
+                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(dateQuerys.getRecordDate());
 
 
                     for (DateQuery dateQuery : dateQueries) {
