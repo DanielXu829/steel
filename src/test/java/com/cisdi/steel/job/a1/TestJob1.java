@@ -128,4 +128,13 @@ public class TestJob1 extends SteelApplicationTests {
     public void test9() {
         ludingbuliaoJob.execute(null);
     }
+
+
+    @Autowired
+    private ReFengluMonthJob reFengluMonthJob;
+
+    @Test
+    public void test10() {
+        reFengluMonthJob.execute(null);
+    }
 }
