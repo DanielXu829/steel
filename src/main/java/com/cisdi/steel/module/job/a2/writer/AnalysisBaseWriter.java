@@ -1,6 +1,5 @@
 package com.cisdi.steel.module.job.a2.writer;
 
-import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
@@ -52,8 +51,13 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
                             if (StringUtils.isNotBlank(columns.get(k))) {
                                 String[] split = columns.get(k).split("/");
                                 int rowIndex = 1 + j;
-                                Double cellDataList = mapDataHandler2(getUrl2(), item, split[0], split[1]);
-                                setSheetValue(sheet, rowIndex, k, cellDataList);
+                                if(split.length==2){
+                                    Double cellDataList = mapDataHandler2(getUrl2(), item, split[0], split[1]);
+                                    setSheetValue(sheet, rowIndex, k, cellDataList);
+                                }else {
+                                    Double cellDataList = mapDataHandler3(getUrl3(), item, split[0], split[1], split[2]);
+                                    setSheetValue(sheet, rowIndex, k, cellDataList);
+                                }
                             }
                         }
                     }
@@ -84,6 +88,17 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
 
     protected Double mapDataHandler2(String url, DateQuery dateQuery, String brandcode, String anaitemname) {
         Map<String, String> queryParam = getQueryParam2(dateQuery, brandcode, anaitemname);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        Double data = jsonObject.getDouble("data");
+        return data;
+    }
+
+    protected Double mapDataHandler3(String url, DateQuery dateQuery, String brandcode, String anaitemname, String source) {
+        Map<String, String> queryParam = getQueryParam3(dateQuery, brandcode, anaitemname,source);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -142,11 +157,25 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam3(DateQuery dateQuery, String brandcode, String anaitemname, String source) {
+        Map<String, String> result = new HashMap<>();
+        result.put("brandcode", brandcode);
+        result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("anaitemname", anaitemname);
+        result.put("source", source);
+        return result;
+    }
+
     protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 
     protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/analyses/analysisValByCode";
+        return httpProperties.getUrlApiJHOne() + "/analyses/getAnaitemValByCode";
+    }
+
+    protected String getUrl3() {
+        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCode";
     }
 }

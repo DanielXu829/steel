@@ -1,6 +1,10 @@
 package com.cisdi.steel.module.job.a5;
 
+import com.cisdi.steel.module.job.AbstractExportJob;
+import com.cisdi.steel.module.job.IJobExecute;
+import com.cisdi.steel.module.job.a5.execute.AcsCountExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,10 +17,18 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class ThreekongCountJob extends AbstractBaseCommonExportJob5 {
+public class ThreekongCountJob extends AbstractExportJob {
+
+    @Autowired
+    private AcsCountExecute acsCountExecute;
 
     @Override
     public JobEnum getCurrentJob() {
         return JobEnum.nj_threekongcount;
+    }
+
+    @Override
+    public IJobExecute getCurrentJobExecute() {
+        return acsCountExecute;
     }
 }

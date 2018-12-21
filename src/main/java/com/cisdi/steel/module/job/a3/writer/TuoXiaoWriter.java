@@ -63,11 +63,6 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                 dateQuery.setEndTime(dateQuery.getRecordDate());
                 List<CellData> cellDataList = mapDataHandler(url, columns, towColumns, dateQuery, rowBaatch);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
-               /* for (DateQuery item : dateQueries) {
-                    List<CellData> cellDataList = mapDataHandler(url, columns, towColumns, item, rowBaatch);
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    rowBaatch++;
-                }*/
             }
         }
         return workbook;

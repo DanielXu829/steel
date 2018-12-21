@@ -53,6 +53,11 @@ public class DateUtil {
      * 年-月-日
      */
     public static final String yyyyMMddFormat = "yyyy-MM-dd";
+
+    /**
+     * 年-月
+     */
+    public static final String yyyyMMFormat = "yyyy-MM";
     /**
      * 年-月-日 小时-分钟-秒数
      */
@@ -250,6 +255,7 @@ public class DateUtil {
 
     /**
      * 判断今天是否是月末
+     *
      * @param date
      * @return
      */
