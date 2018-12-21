@@ -55,7 +55,7 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
                         rowBatch++;
                     }
                 } else {
-                    DateQuery dateQuery = DateQueryUtil.buildToday(new Date());
+                    DateQuery dateQuery = DateQueryUtil.buildToday(date.getRecordDate());
                     List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, dateQuery, rowBatch, sheetName);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }

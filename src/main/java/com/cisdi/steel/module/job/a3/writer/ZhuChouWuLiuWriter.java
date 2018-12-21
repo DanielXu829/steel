@@ -39,12 +39,12 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (null != sheetSplit && sheetSplit.length == 4) {
                 // 获取的对应的策略
-                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+//                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 if (sheetSplit[1].indexOf("5") != -1) {
                     int rowBaatch = 1;
 
-                    DateQuery dateQuery = DateQueryUtil.buildMonth(new Date());
+                    DateQuery dateQuery = DateQueryUtil.buildMonth(date.getRecordDate());
                     dateQuery.setEndTime(dateQuery.getRecordDate());
 
                     List<CellData> cellDataList = this.mapDataHandler(getUrl("5.0"), columns, dateQuery, rowBaatch, sheetName);
@@ -52,7 +52,7 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
                 } else {
                     int rowBaatch = 1;
 
-                    DateQuery dateQuery = DateQueryUtil.buildMonth(new Date());
+                    DateQuery dateQuery = DateQueryUtil.buildMonth(date.getRecordDate());
                     dateQuery.setEndTime(dateQuery.getRecordDate());
 
                     List<CellData> cellDataList = this.mapDataHandler(getUrl("6.0"), columns, dateQuery, rowBaatch, sheetName);
@@ -79,10 +79,10 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return null;
         }
-        return handlerJsonArray(columns, data, rowBatch, sheetName);
+        return handlerJsonArray(columns, data, rowBatch, sheetName, dateQuery);
     }
 
-    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, int rowBatch, String sheetName) {
+    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, int rowBatch, String sheetName, DateQuery dateQuerys) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
         for (int i = 0; i < size; i++) {
@@ -103,7 +103,7 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
                     Arrays.sort(list);
 
                     List<DateQuery> all = new ArrayList<>();
-                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(new Date());
+                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(dateQuerys.getRecordDate());
 
                     if ("_cuofeng5_month_day".equals(sheetName) || "_cuofeng6_month_day".equals(sheetName)) {
                         for (DateQuery dateQuery : dateQueries) {
@@ -130,11 +130,6 @@ public class ZhuChouWuLiuWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
                         rowIndex++;
                     }
-//                    for (String key : keys) {
-//                        Object o = innerMap.get(key);
-//                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, o);
-//                        rowIndex++;
-//                    }
                 }
             }
         }
