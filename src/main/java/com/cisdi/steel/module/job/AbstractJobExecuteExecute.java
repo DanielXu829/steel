@@ -127,7 +127,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                         .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode());
                 reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
-                log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage());
+                log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage(), e);
             }
         }
     }
