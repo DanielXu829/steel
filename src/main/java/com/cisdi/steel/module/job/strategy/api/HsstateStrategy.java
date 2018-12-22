@@ -149,19 +149,21 @@ public class HsstateStrategy extends AbstractApiStrategy {
                     Arrays.sort(list);
 
                     DoubleStream doubleStream = resultData.stream().mapToDouble(Double::doubleValue);
+                    JSONObject object = new JSONObject();
+
                     // 处理后的名称
                     String key = handlerCellName(cell);
+                    resultMap.put(key,object);
                     // 求平均值
                     doubleStream.average().ifPresent(v -> {
-                        resultMap.put(key + "/avg", v);
-                        resultMap.put(key, v);
+                        object.put("avg", v);
                     });
                     // 最大值
-                    doubleStream = resultData.stream().mapToDouble(Double::doubleValue);
-                    doubleStream.max().ifPresent(v -> resultMap.put(cell + "/max", v));
+                    DoubleStream doubleStreamMax = resultData.stream().mapToDouble(Double::doubleValue);
+                    doubleStreamMax.max().ifPresent(v -> object.put("max", v));
                     if (list.length > 0) {
-                        resultMap.put(key + "/start", data.getDouble(list[0] + ""));
-                        resultMap.put(key + "/end", data.getDouble(list[list.length - 1] + ""));
+                        object.put("start", data.getDouble(list[0] + ""));
+                        object.put("end", data.getDouble(list[list.length - 1] + ""));
                     }
                 }
             }
