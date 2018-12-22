@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>[[${fileName}]]</title>
+    <title th:text="${fileName}"></title>
     <link rel="stylesheet" type="text/css" href="/css/editor.css"/>
     <script type="text/javascript" th:src="${docserviceApiUrl}"></script>
     <script type="text/javascript" language="javascript" th:inline="javascript">
