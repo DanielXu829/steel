@@ -42,6 +42,7 @@ public class TapStrategy extends AbstractApiStrategy {
 
         List<CellData> cellDataList = new ArrayList<>();
         for (DateQuery dateQuery : queryList) {
+            dateQuery = new DateQuery(new Date(1545321600000L), new Date(1545494400000L), new Date());
             List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }
@@ -103,7 +104,7 @@ public class TapStrategy extends AbstractApiStrategy {
                         Date start = new Date(Long.parseLong(startTime));
                         Date end = new Date(Long.parseLong(endTime));
                         Long betweenMin = DateUtil.getBetweenMin(end, start);
-                        obj.put("between", betweenMin + "");
+                        obj.put("between", betweenMin.intValue());
                     }
                     mapResult.put("tapindex", obj);
 
