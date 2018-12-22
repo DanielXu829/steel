@@ -114,7 +114,16 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
 
                 String str1 = data.getString("lowerlimit");
                 String str2 = data.getString("upperlimit");
-                String val1 = str1 + "～" + str2;
+
+                String val1 = "";
+                if (Objects.isNull(str1) && Objects.nonNull(str2)) {
+                    val1 = "<" + str2;
+                } else if (Objects.nonNull(str1) && Objects.isNull(str2)) {
+                    val1 = ">" + str1;
+                } else if (Objects.nonNull(str1) && Objects.nonNull(str2)) {
+                    val1 = str1 + "～" + str2;
+                }
+
 
                 String val2 = "";
                 String val3 = "正常";

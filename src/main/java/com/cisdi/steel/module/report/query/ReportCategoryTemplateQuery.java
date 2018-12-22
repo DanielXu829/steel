@@ -31,4 +31,9 @@ public class ReportCategoryTemplateQuery extends PageQuery implements Serializab
      * 状态 1 禁止 0 不禁止 1 失效
      */
     private String forbid;
+
+    /**
+     * 模版序号
+     */
+    private String sequence;
 }

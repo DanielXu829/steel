@@ -72,20 +72,6 @@ public class AcsCountWriter extends AbstractExcelReadWriter {
         return map;
     }
 
-    public static void main(String[] args) {
-
-        DateQuery dateQuery = new DateQuery(DateUtil.getTodayBeginTime(), DateUtil.addDays(DateUtil.getTodayBeginTime(), 8), new Date());
-
-        Map<String, String> map = new HashMap<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateQuery.getEndTime());
-        calendar.add(Calendar.SECOND, -1);
-        map.put("starttime", dateQuery.getStartTime().getTime() + "");
-        map.put("endtime", calendar.getTime().getTime() + "");
-
-        System.out.println(map);
-    }
-
     /**
      * 遍历每个小时的值
      *

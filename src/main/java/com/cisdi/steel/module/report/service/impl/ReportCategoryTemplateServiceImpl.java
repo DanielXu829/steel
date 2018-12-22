@@ -16,6 +16,7 @@ import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.mapper.QuartzMapper;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
@@ -55,6 +56,11 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
         LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
         wrapper.eq(StringUtils.isNotBlank(query.getReportCategoryCode()), ReportCategoryTemplate::getReportCategoryCode, query.getReportCategoryCode());
         wrapper.eq(StringUtils.isNotBlank(query.getForbid()), ReportCategoryTemplate::getForbid, query.getForbid());
+        if (StringUtils.isNotBlank(query.getSequence()) && query.getSequence().contains("烧结")) {
+            wrapper.like(StringUtils.isNotBlank(query.getSequence()), ReportCategoryTemplate::getSequence, query.getSequence());
+        } else {
+            wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportCategoryTemplate::getSequence, query.getSequence());
+        }
         List<ReportCategoryTemplate> list = list(wrapper);
         list.forEach(reportCategoryTemplate -> {
             QuartzEntity quartzEntity = quartzMapper.selectQuartzByCode(reportCategoryTemplate.getReportCategoryCode());

@@ -32,10 +32,10 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        DateQuery dateQuery = this.getDateQuery(excelDTO);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd");
-        String format = dateFormat.format(new Date());
+        String format = dateFormat.format(dateQuery.getRecordDate());
         int ss = Integer.parseInt(format);
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheetAt = workbook.getSheetAt(i);
@@ -71,9 +71,19 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         Sheet sheet = workbook.getSheet("炉温记录" + format);
         Row row = sheet.getRow(0);
         Cell cell = row.getCell(1);
-        cell.setCellValue(DateUtil.getFormatDateTime(new Date(),"yyyy/MM/dd"));
+        cell.setCellValue(DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd"));
+        HashMap<String, Integer> map = mapDataHandler2(getUrl2(), dateQuery);
+        Row row1 = sheet.getRow(66);
+        for (int r = 1; r < 8; r++) {
+            Cell cell1 = row1.getCell(r);
+            cell1.setCellValue(map.get("standardTempMach"));
+        }
+        for (int r = 9; r < 16; r++) {
+            Cell cell1 = row1.getCell(r);
+            cell1.setCellValue(map.get("standardTempCoke"));
+        }
         List<String> rowCelVal1 = getRowCelVal1(sheet, 3);
-        List<CellData> cellData1 = mapDataHandler(4, getUrl(), rowCelVal1, date, "CO6");
+        List<CellData> cellData1 = mapDataHandler(4, getUrl(), rowCelVal1, "CO6", dateQuery);
         ExcelWriterUtil.setCellValue(sheet, cellData1);
 
         return workbook;
@@ -90,9 +100,20 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected HashMap<String, Integer> mapDataHandler2(String url, DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam2(dateQuery);
+        String result = httpUtil.get(url, queryParam);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        Integer standardTempMach = jsonObject.getInteger("standardTempMach");
+        Integer standardTempCoke = jsonObject.getInteger("standardTempCoke");
+        HashMap<String, Integer> map = new HashMap<>();
+        map.put("standardTempMach", standardTempMach);
+        map.put("standardTempCoke", standardTempCoke);
+        return map;
+    }
 
-    protected List<CellData> mapDataHandler(int rowIndex, String url, List<String> columns, DateQuery dateQuery, String version) {
-        Map<String, String> queryParam = getQueryParam(dateQuery, version);
+    protected List<CellData> mapDataHandler(int rowIndex, String url, List<String> columns, String version, DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam(version, dateQuery);
         List<CellData> cellDataList = new ArrayList<>();
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isNotBlank(result)) {
@@ -130,20 +151,29 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
 
         }
 
-
         return resultData;
     }
 
 
-    protected Map<String, String> getQueryParam(DateQuery dateQuery, String version) {
+    protected Map<String, String> getQueryParam(String version, DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("date", DateUtil.getTodayBeginTime().getTime() + "");
+        result.put("date", DateUtil.getDateBeginTime(dateQuery.getRecordDate()).getTime() + "");
         result.put("jlno", version);
         return result;
     }
 
+    protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", dateQuery.getRecordDate().toString());
+        return result;
+    }
 
     protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/tmmirbtmpDataTable/selectByDateAndType";
     }
+
+    protected String getUrl2() {
+        return httpProperties.getUrlApiJHOne() + "/thermalRegulation/getCurrentByDate";
+    }
+
 }
