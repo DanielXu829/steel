@@ -116,8 +116,9 @@ public class TapsPeriodStrategy extends AbstractApiStrategy {
                     Date startTime = new Date(Long.parseLong(starttime));
                     Date endTime = new Date(Long.parseLong(endtime));
                     Long betweenMin = DateUtil.getBetweenMin(endTime, startTime);
-                    resultMap.put("time" + taphole, betweenMin.intValue());
-
+                    if(!"0".equals(betweenMin.toString())){
+                        resultMap.put("time" + taphole, betweenMin.intValue());
+                    }
 
                     // 处理第二部分数据
                     Map<String, Object> stringObjectMap = handlerLuoTie(urlPre, starttime, endtime, bf);

@@ -130,6 +130,20 @@ public class TestJob1 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 热风炉 日报
+     */
+    @Autowired
+    private RefengluDayJob refengluDayJob;
+
+    @Test
+    public void test11() {
+        refengluDayJob.execute(null);
+    }
+
+    /**
+     * 热风炉 月报
+     */
     @Autowired
     private ReFengluMonthJob reFengluMonthJob;
 
