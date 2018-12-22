@@ -42,7 +42,6 @@ public class TapStrategy extends AbstractApiStrategy {
 
         List<CellData> cellDataList = new ArrayList<>();
         for (DateQuery dateQuery : queryList) {
-            dateQuery = new DateQuery(new Date(1545321600000L), new Date(1545494400000L), new Date());
             List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }

@@ -80,6 +80,7 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
                 wrapper.likeRight(true, ReportCategory::getCode, "jh_");
             }
         }
+        wrapper.orderByAsc(ReportCategory::getSort);
         List<ReportCategory> list = this.list(wrapper);
         List<ReportCategory> reportCategories = ReportCategoryUtil.list2TreeConverter(list, Constants.PARENT_ID);
         return ApiUtil.success(reportCategories);

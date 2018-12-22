@@ -52,6 +52,9 @@ public class ReportCategory extends Model<ReportCategory> {
      */
     private String leafNode;
 
+    @TableField(value = "sort")
+    private Integer sort;
+
     /**
      * 备注（预留字段）
      */

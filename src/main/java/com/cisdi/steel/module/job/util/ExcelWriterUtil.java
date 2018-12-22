@@ -166,6 +166,8 @@ public class ExcelWriterUtil {
                     Map<String,Object> object= (Map<String, Object>) o;
                     Object value = object.get(keyChild);
                     ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
+                }else{
+                    ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, o);
                 }
             }
         }

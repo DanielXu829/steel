@@ -6,6 +6,7 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,8 +32,11 @@ public class HsstateStrategy extends AbstractApiStrategy {
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
         String url = httpProperties.getGlUrlVersion(version);
         List<CellData> cellDataList = new ArrayList<>();
+        List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
         for (DateQuery dateQuery : queryList) {
+            dateQuery = new DateQuery(new Date(1545321600000L), new Date(1545494400000L), new Date());
             List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery, sheet);
+            cellDataList.addAll(this.loopRowData(dataList, columns));
         }
         return SheetRowCellData.builder()
                 .workbook(workbook)
@@ -41,14 +45,26 @@ public class HsstateStrategy extends AbstractApiStrategy {
                 .build();
     }
 
+    private List<CellData> loopRowData(List<Map<String, Object>> dataList, List<String> columns) {
+        int starRow = 5;
+        List<CellData> resultData = new ArrayList<>();
+        for (Map<String, Object> data : dataList) {
+            // 存储每一个
+            List<CellData> rowData = ExcelWriterUtil.handlerRowData(columns, starRow, data);
+            resultData.addAll(rowData);
+            starRow++;
+        }
+        return resultData;
+    }
+
     private List<Map<String, Object>> requestApiData(String urlPre, DateQuery dateQuery, Sheet sheet) {
         String url = urlPre + "/hsstate";
         Map<String, String> queries = new HashMap<>();
         queries.put("begintime", dateQuery.getQueryStartTime().toString());
         queries.put("endtime", dateQuery.getQueryEndTime().toString());
-        String s = httpUtil.get(url, queries);
+        String resultData = httpUtil.get(url, queries);
         List<Map<String, Object>> list = new ArrayList<>();
-        if (StringUtils.isBlank(s)) {
+        if (StringUtils.isBlank(resultData)) {
             return list;
         }
         String optionResult = httpUtil.get(urlPre + "/hsstatesteup");
@@ -56,7 +72,7 @@ public class HsstateStrategy extends AbstractApiStrategy {
         JSONArray options = optionObj.getJSONArray("data");
 
 
-        JSONObject jsonObject = JSONObject.parseObject(s);
+        JSONObject jsonObject = JSONObject.parseObject(resultData);
         JSONArray data = jsonObject.getJSONArray("data");
 
         Map<Integer, Set<String>> columns = new HashMap<>();
@@ -66,17 +82,21 @@ public class HsstateStrategy extends AbstractApiStrategy {
                 JSONObject obj = data.getJSONObject(i);
                 // 获取状态
                 Integer state = obj.getInteger("state");
-                Map<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new CaseInsensitiveMap<>();
                 String optionVal = getOptions(options, state);
                 map.put("state", optionVal);
+                Integer hsno = obj.getInteger("hsno");
+                map.put("hsno", hsno);
 
-                Integer no = obj.getInteger("");
-                Long begintime = obj.getLong("begintime");
+                Long starttime = obj.getLong("starttime");
                 Long endtime = obj.getLong("endtime");
+                map.put("starttime", starttime);
+                map.put("endtime", endtime);
 
-                Set<String> tagNames = columns.get(no);
+                // 缓存列名
+                Set<String> tagNames = columns.get(hsno);
                 if (Objects.isNull(tagNames)) {
-                    List<String> rowCelVal = PoiCustomUtil.getRowCelVal(sheet, no);
+                    List<String> rowCelVal = PoiCustomUtil.getRowCelVal(sheet, hsno);
                     tagNames = new HashSet<>();
                     for (String item : rowCelVal) {
                         if (StringUtils.isNotBlank(item)) {
@@ -84,10 +104,16 @@ public class HsstateStrategy extends AbstractApiStrategy {
                             tagNames.add(split[0]);
                         }
                     }
-                    columns.put(no, tagNames);
+                    columns.put(hsno, tagNames);
                 }
-                Map<String, Object> result = handlerDingMing(urlPre, begintime, endtime, tagNames);
-                map.putAll(result);
+
+                if (Objects.nonNull(starttime) && Objects.nonNull(endtime)) {
+                    Map<String, Object> result = handlerDingMing(urlPre, starttime, endtime, tagNames);
+                    long minTime = 60 * 1000;
+                    long min = (endtime - starttime) / minTime;
+                    map.put("intervalTime", min+"");
+                    map.putAll(result);
+                }
                 list.add(map);
             }
 
@@ -123,18 +149,33 @@ public class HsstateStrategy extends AbstractApiStrategy {
                     Arrays.sort(list);
 
                     DoubleStream doubleStream = resultData.stream().mapToDouble(Double::doubleValue);
+                    // 处理后的名称
+                    String key = handlerCellName(cell);
                     // 求平均值
-                    doubleStream.average().ifPresent(v -> resultMap.put(cell + "/AVERAGE", v));
+                    doubleStream.average().ifPresent(v -> {
+                        resultMap.put(key + "/avg", v);
+                        resultMap.put(key, v);
+                    });
                     // 最大值
-                    doubleStream.max().ifPresent(v -> resultMap.put(cell + "/MAX", v));
-                    if (list.length > 1) {
-                        resultMap.put(cell + "/start", data.getDouble(list[0] + ""));
-                        resultMap.put(cell + "/end", data.getDouble(list[list.length - 1] + ""));
+                    doubleStream = resultData.stream().mapToDouble(Double::doubleValue);
+                    doubleStream.max().ifPresent(v -> resultMap.put(cell + "/max", v));
+                    if (list.length > 0) {
+                        resultMap.put(key + "/start", data.getDouble(list[0] + ""));
+                        resultMap.put(key + "/end", data.getDouble(list[list.length - 1] + ""));
                     }
                 }
             }
         }
         return resultMap;
+    }
+
+    private String handlerCellName(String cell) {
+        String[] split = cell.split("_");
+        String key = split[split.length - 3];
+        if (key.startsWith("TI08")) {
+            return key.substring(key.length() - 3);
+        }
+        return key;
     }
 
     /**
