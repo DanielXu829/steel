@@ -2,13 +2,14 @@ package com.cisdi.steel.module.job.a2;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a2.execute.GufenglengningExecute;
-import com.cisdi.steel.module.job.a2.execute.HuachanExecute;
+import com.cisdi.steel.module.job.a2.execute.BaseJhExecute;
+import com.cisdi.steel.module.job.a2.execute.FensuixiduExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * CDQ操作运行报表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -18,18 +19,18 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class GufenglengningJob extends AbstractExportJob {
+public class CDQcaozuoAJob extends AbstractExportJob {
 
     @Autowired
-    private GufenglengningExecute gufenglengningExecute;
+    private BaseJhExecute baseJhExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.jh_gufenglengning;
+        return JobEnum.jh_cdqcaozuoa;
     }
 
     @Override
     public IJobExecute getCurrentJobExecute() {
-        return gufenglengningExecute;
+        return baseJhExecute;
     }
 }

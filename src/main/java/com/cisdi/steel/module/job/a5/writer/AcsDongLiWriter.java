@@ -46,7 +46,7 @@ public class AcsDongLiWriter extends AbstractExcelReadWriter {
                 List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
                 int rowIndex = 1;
                 for (DateQuery dateQuery : dateQueries) {
-                    List<CellData> cellDataList = this.eachData(columns, getUrl(), getQueryParam(dateQuery), rowIndex++);
+                    List<CellData> cellDataList = this.eachData(columns, getUrl(), getQueryParam(dateQuery), rowIndex);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
@@ -88,13 +88,13 @@ public class AcsDongLiWriter extends AbstractExcelReadWriter {
                 if (StringUtils.isNotBlank(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     JSONArray jsonArray = jsonObject.getJSONArray("data");
-                    if (Objects.nonNull(jsonArray)) {
+                    if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
                         int size = jsonArray.size();
                         int rowIndex = rowIndexs;
                         for (int index = 0; index < size; index++) {
                             JSONObject obj = jsonArray.getJSONObject(index);
                             Object val = obj.get("timestamp");
-                            ExcelWriterUtil.addCellData(results, rowIndex, cell.getColumnIndex(), val);
+                            ExcelWriterUtil.addCellData(results, rowIndex++, cell.getColumnIndex(), val);
                         }
                     }
                 }
