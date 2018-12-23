@@ -84,6 +84,9 @@ public class HsstateStrategy extends AbstractApiStrategy {
                 Integer state = obj.getInteger("state");
                 Map<String, Object> map = new CaseInsensitiveMap<>();
                 String optionVal = getOptions(options, state);
+                if ("0".equals(state.toString())) {
+                    continue;
+                }
                 map.put("state", optionVal);
                 Integer hsno = obj.getInteger("hsno");
                 map.put("hsno", hsno);
@@ -111,7 +114,7 @@ public class HsstateStrategy extends AbstractApiStrategy {
                     Map<String, Object> result = handlerDingMing(urlPre, starttime, endtime, tagNames);
                     long minTime = 60 * 1000;
                     long min = (endtime - starttime) / minTime;
-                    map.put("intervalTime", min+"");
+                    map.put("intervalTime", min + "");
                     map.putAll(result);
                 }
                 list.add(map);
@@ -153,7 +156,7 @@ public class HsstateStrategy extends AbstractApiStrategy {
 
                     // 处理后的名称
                     String key = handlerCellName(cell);
-                    resultMap.put(key,object);
+                    resultMap.put(key, object);
                     // 求平均值
                     doubleStream.average().ifPresent(v -> {
                         object.put("avg", v);
