@@ -34,7 +34,7 @@ public class HsstateStrategy extends AbstractApiStrategy {
         List<CellData> cellDataList = new ArrayList<>();
         List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
         for (DateQuery dateQuery : queryList) {
-            dateQuery = new DateQuery(new Date(1545321600000L), new Date(1545494400000L), new Date());
+//            dateQuery = new DateQuery(new Date(1545321600000L), new Date(1545494400000L), new Date());
             List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery, sheet);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }
