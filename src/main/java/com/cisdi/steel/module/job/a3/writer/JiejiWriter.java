@@ -189,8 +189,11 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         for (int j = 0; j < data.size(); j++) {
             JSONObject o1 = data.getJSONObject(j);
             if (Objects.nonNull(o1)) {
-                List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, startRow++, o1);
-                cellDataList.addAll(cellDataList1);
+                Integer ws = Integer.valueOf(o1.getString("WORK_SHIFT"));
+                if (Objects.nonNull(ws) && ws.intValue() == startRow) {
+                    List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, startRow, o1);
+                    cellDataList.addAll(cellDataList1);
+                }
             }
         }
 
