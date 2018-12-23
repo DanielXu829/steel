@@ -62,8 +62,8 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
     protected JSONObject getQueryParam1(DateQuery dateQuery) {
         JSONObject result = new JSONObject();
         result.put("method", "avg");
-        result.put("start", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
-        result.put("end", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
+        result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(),-1), DateUtil.fullFormat));
+        result.put("end", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getEndTime(),-1), DateUtil.fullFormat));
         return result;
     }
 
@@ -79,6 +79,10 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
             queryParam.put("method", "min,max");
             url = getUrl2(version);
         } else if ("_main3_day_4hour".equals(sheetName)) {
+            queryParam.remove("method");
+            queryParam.remove("tagNames");
+            queryParam.put("itemNames", columns);
+            queryParam.put("brandCode", "sinter");
             url = getUrl3(version);
         }
 
@@ -101,8 +105,9 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
 
                 queryParam2.remove("anaItemName");
                 queryParam2.put("type", "ALL");
+
                 String url1 = getUrl4(version);
-                String result1 = httpUtil.get(url1, queryParam2);
+                String result1 = httpUtil.postJsonParams(url1, jsonString);
                 JSONObject obj1 = JSONObject.parseObject(result1);
 
                 JSONObject data = obj.getJSONObject("data");
@@ -277,10 +282,12 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
 
     private String getUrl4(String version) {
         if ("5.0".equals(version)) {
-            return httpProperties.getUrlApiSJOne() + "/analysis/anaItemKeyVal";
+//            return httpProperties.getUrlApiSJOne() + "/analysis/anaItemKeyVal";
+            return httpProperties.getUrlApiSJOne() + "/anaLatestValue/sampleTime";
         } else {
             // "6.0".equals(version) 默认
-            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemKeyVal";
+//            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemKeyVal";
+            return httpProperties.getUrlApiSJTwo() + "/anaLatestValue/sampleTime";
         }
     }
 }

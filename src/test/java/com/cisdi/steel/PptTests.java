@@ -24,40 +24,47 @@ public class PptTests {
     public void test4() throws Exception {
         XMLSlideShow ppt = new XMLSlideShow(new FileInputStream("C:\\Users\\cj\\Desktop\\test.pptx"));
 
-
-        List<XSLFSlide> slides = ppt.getSlides();
-        for (XSLFSlide slide : slides) {
-            for (XSLFShape shape : slide.getShapes()) {
-                if (shape instanceof XSLFTable) {
-                    XSLFTable table = (XSLFTable) shape;
-                    List<XSLFTableRow> rows = table.getRows();
-                    StringBuilder tableContent = new StringBuilder();
-
-                    int c = 1;
-                    for (XSLFTableRow row : rows) {
-                        List<XSLFTableCell> cells = row.getCells();
-                        int r = 1;
-                        for (XSLFTableCell cell : cells) {
-                            tableContent.append("|").append(cell.getText());
-                            System.out.println(c + "  " + r);
-
-                            if (c == 1 && r == 1) {
-                                cell.setText("我我我哦我");
-                            }
-                            r++;
-                        }
-                        c++;
-                        tableContent.append("|").append("\n");
-                    }
-                    System.out.println(tableContent.toString());
-                }
-            }
-        }
+        writeTable(ppt, 1, 5, "测试写入指定位置", 1);
 
         FileOutputStream out = new FileOutputStream("C:\\Users\\cj\\Desktop\\test.pptx");
         ppt.write(out);
         out.close();
     }
+
+    /**
+     * 指定表格 某行某列数据进行写值
+     *
+     * @param ppt     指定的PPT
+     * @param rowSpan 列
+     * @param colSpan 行
+     * @param content 内容
+     */
+    private void writeTable(XMLSlideShow ppt, int rowSpan, int colSpan, String content, int slideIndex) {
+        List<XSLFSlide> slides = ppt.getSlides();
+//        for (XSLFSlide slide : slides) {
+        XSLFSlide slide = slides.get(slideIndex);
+        for (XSLFShape shape : slide.getShapes()) {
+            if (shape instanceof XSLFTable) {
+                XSLFTable table = (XSLFTable) shape;
+                List<XSLFTableRow> rows = table.getRows();
+                int c = 1;
+                for (XSLFTableRow row : rows) {
+                    List<XSLFTableCell> cells = row.getCells();
+                    int r = 1;
+                    for (XSLFTableCell cell : cells) {
+                        if (c == colSpan && r == rowSpan) {
+                            cell.setText(content);
+                        }
+                        r++;
+                    }
+                    c++;
+                }
+            }
+        }
+//        }
+
+    }
+
 
     /**
      * XSLF构建图片
@@ -138,7 +145,7 @@ public class PptTests {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChartUtilities.writeChartAsJPEG(baos, Chart, csize, rsize);
 
-        File image = new File("C:\\Users\\cj\\Desktop\\20181205100950.jpg");
+//        File image = new File("C:\\Users\\cj\\Desktop\\20181205100950.jpg");
 //        byte[] data = FileUtils.getBytes(image);
         byte[] data = baos.toByteArray();
         XSLFPictureData pictureIndex = ppt.addPicture(data, PictureData.PictureType.JPEG);
@@ -213,11 +220,29 @@ public class PptTests {
         XMLSlideShow ppt = new XMLSlideShow(new FileInputStream("C:\\Users\\cj\\Desktop\\test.pptx"));
         XSLFSlide slide = ppt.createSlide();
 
+        //构建一个标题
+        XSLFTextShape title = slide.createTextBox();
+        title.setPlaceholder(Placeholder.TITLE);
+        //如果需要设置样式，使用XSLFTextRun的setTitle方法；使用下面注释的代码，打开生成的ppt时会报错
+//        title.setText("Hello");
+        title.setAnchor(new Rectangle(50, 50, 450, 50));
+
+        //设置标题格式
+        XSLFTextParagraph titleParagraph = title.addNewTextParagraph();
+//        title.setFillColor(new Color(79, 129, 189));
+
+        XSLFTextRun titleStyle = titleParagraph.addNewTextRun();
+        titleStyle.setText("这是一个表格");
+        titleStyle.setFontColor(Color.blue);
+        titleStyle.setFontSize(11.0);
+//        titleStyle.setBold(true);
+
         int COLUMN_NUM = 3;
         int ROW_NUM = 3;
         XSLFTable table = slide.createTable();
-        table.setAnchor(new Rectangle2D.Double(50, 50, 450, 300));
+        table.setAnchor(new Rectangle2D.Double(50, 50 + 50, 450, 300));
 
+        //构建表格
         XSLFTableRow headerRow = table.addRow();
         headerRow.setHeight(50);
 
@@ -228,8 +253,10 @@ public class PptTests {
             textParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
 
             XSLFTextRun textRun = textParagraph.addNewTextRun();
+
             textRun.setText("Header" + (i + 1));
             textRun.setBold(true);
+
 
             th.setFillColor(new Color(79, 129, 189));
             th.setBottomInset(2.00);

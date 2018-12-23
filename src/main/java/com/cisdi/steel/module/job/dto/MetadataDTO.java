@@ -125,6 +125,7 @@ public class MetadataDTO {
         result.put("DateTime3", DateUtil.getFormatDateTime(this.dateTime, "yyyy/MM/dd"));
         result.put("DateTime4", DateUtil.getFormatDateTime(this.dateTime, "MM/dd"));
         result.put("DateTime5", DateUtil.getFormatDateTime(this.dateTime, "MM月"));
+        result.put("DateTime6", DateUtil.getFormatDateTime(this.dateTime, "yyyy年MM月"));
         result.put("TemplateName", this.templateName);
         result.put("Type", this.type);
         result.put("TemplatePath", this.templatePath);

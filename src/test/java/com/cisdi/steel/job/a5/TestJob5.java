@@ -130,7 +130,7 @@ public class TestJob5 extends SteelApplicationTests {
     }
 
     /**
-     *  煤气柜作业区混合煤气情况表
+     * 煤气柜作业区混合煤气情况表
      */
     @Autowired
     private MeiqihunhemeiJob meiqihunhemeiJob;
@@ -141,7 +141,7 @@ public class TestJob5 extends SteelApplicationTests {
     }
 
     /**
-     *  柜区风机煤压机时间统计表
+     * 柜区风机煤压机时间统计表
      */
     @Autowired
     private GuifengjimeiyajiJob guifengjimeiyajiJob;
@@ -149,5 +149,16 @@ public class TestJob5 extends SteelApplicationTests {
     @Test
     public void test12() {
         guifengjimeiyajiJob.execute(null);
+    }
+
+    /**
+     * 动力分厂主要设备开停机信息表
+     */
+    @Autowired
+    private AcsDongLiJob acsDongLiJob;
+
+    @Test
+    public void test13() {
+        acsDongLiJob.execute(null);
     }
 }
