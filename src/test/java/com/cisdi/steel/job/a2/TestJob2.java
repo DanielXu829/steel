@@ -1,12 +1,9 @@
 package com.cisdi.steel.job.a2;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.a2.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Date;
 
 /**
  * 焦化
@@ -19,6 +16,7 @@ import java.util.Date;
  * @version 1.0
  */
 public class TestJob2 extends SteelApplicationTests {
+
     /**
      * 自动配煤
      */
@@ -42,14 +40,25 @@ public class TestJob2 extends SteelApplicationTests {
     }
 
     /**
-     * CDQ操作运行
+     * CDQ操作运行A
      */
     @Autowired
-    private CDQcaozuoJob cdQcaozuoJob;
+    private CDQcaozuoAJob cdQcaozuoAJob;
 
     @Test
     public void test8() {
-        cdQcaozuoJob.execute(null);
+        cdQcaozuoAJob.execute(null);
+    }
+
+    /**
+     * CDQ操作运行b
+     */
+    @Autowired
+    private CDQcaozuoBJob cdQcaozuoBJob;
+
+    @Test
+    public void test82() {
+        cdQcaozuoBJob.execute(null);
     }
 
     /**
@@ -99,16 +108,26 @@ public class TestJob2 extends SteelApplicationTests {
 
 
     /**
-     * 鼓风冷凝
+     * 鼓风冷凝1
      */
     @Autowired
-    private GufenglengningJob gufenglengningJob;
+    private Gufenglengning1Job gufenglengning1Job;
 
     @Test
     public void test13() {
-        gufenglengningJob.execute(null);
+        gufenglengning1Job.execute(null);
     }
 
+    /**
+     * 鼓风冷凝2
+     */
+    @Autowired
+    private Gufenglengning2Job gufenglengning2Job;
+
+    @Test
+    public void test132() {
+        gufenglengning2Job.execute(null);
+    }
 
     /**
      * 制冷循环水
@@ -242,7 +261,7 @@ public class TestJob2 extends SteelApplicationTests {
 
     @Test
     public void test25() {
-        luwenjilu7Job.execute(null);
+       luwenjilu7Job.execute(null);
     }
 
 

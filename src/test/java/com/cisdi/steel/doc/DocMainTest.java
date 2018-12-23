@@ -5,10 +5,20 @@ import com.cisdi.steel.common.util.DateUtil;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import java.io.FileOutputStream;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 public class DocMainTest {
+    private static List list = new ArrayList();
+
+    static {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("attr1", "上料量t/h");
+        map.put("attr2", "730±10");
+        map.put("attr3", "710");
+        map.put("attr4", "-20");
+
+        list.add(map);
+    }
 
     public static void main(String[] args) {
         Date date = new Date();

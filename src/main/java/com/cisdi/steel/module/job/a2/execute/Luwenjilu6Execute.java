@@ -98,11 +98,11 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
                 }
                 workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
             }
-            //月末清除模板数据到最初
         }
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
         fos.close();
+        //月末清除模板数据到最初
         if (DateUtil.isLastDayOfMonth(new Date())){
             FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
             for (int i = 0; i < numberOfSheets; i++) {
