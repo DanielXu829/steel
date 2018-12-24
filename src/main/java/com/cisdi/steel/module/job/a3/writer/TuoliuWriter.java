@@ -86,11 +86,38 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return null;
         }
-        if ("_6tuoliutuoxiaomax_day_hour".equals(sheetName) || "_6tuoliutuoxiaosum_day_hour".equals(sheetName)) {
+        if ("_6tuoliutuoxiaosum_day_hour".equals(sheetName)) {
             return handlerJsonArray1(columns, data, rowBatch, sheetName);
+        } else if ("_6tuoliutuoxiaomax_day_hour".equals(sheetName)) {
+            return handlerJsonArray2(columns, data, rowBatch, sheetName);
         } else {
             return handlerJsonArray(columns, data, rowBatch);
         }
+    }
+
+
+    private List<CellData> handlerJsonArray2(List<String> columns, JSONObject data, int rowBatch, String sheetName) {
+        List<CellData> cellDataList = new ArrayList<>();
+        int size = columns.size();
+        for (int i = 0; i < size; i++) {
+            String column = columns.get(i);
+            int rowIndex = rowBatch;
+            if (StringUtils.isNotBlank(column)) {
+                JSONObject jsonObject = data.getJSONObject(column);
+                Object max = "";
+                Object min = "";
+                if (Objects.nonNull(jsonObject)) {
+                    if ("_6tuoliutuoxiaomax_day_hour".equals(sheetName)) {
+                        max = jsonObject.getDouble("max");
+                        min = jsonObject.getDouble("min");
+                    }
+                }
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, min);
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i + 1, max);
+                rowIndex++;
+            }
+        }
+        return cellDataList;
     }
 
     private List<CellData> handlerJsonArray1(List<String> columns, JSONObject data, int rowBatch, String sheetName) {
@@ -98,7 +125,7 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
         int size = columns.size();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
-            int rowIndex = 1;
+            int rowIndex = rowBatch;
             if (StringUtils.isNotBlank(column)) {
                 JSONObject jsonObject = data.getJSONObject(column);
                 Object v = "";
