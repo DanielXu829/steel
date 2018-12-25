@@ -54,8 +54,11 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
                                 if(split.length==2){
                                     Double cellDataList = mapDataHandler2(getUrl2(), item, split[0], split[1]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
-                                }else {
+                                } else if (split.length == 3) {
                                     Double cellDataList = mapDataHandler3(getUrl3(), item, split[0], split[1], split[2]);
+                                    setSheetValue(sheet, rowIndex, k, cellDataList);
+                                }else {
+                                    Double cellDataList = mapDataHandler4(getUrl4(), item, split[0], split[1]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 }
                             }
@@ -108,6 +111,24 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
         return data;
     }
 
+
+    protected Double mapDataHandler4(String url, DateQuery dateQuery, String code, String flag) {
+        Map<String, String> queryParam = getQueryParam4(dateQuery, code, flag);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONArray row = JSONArray.parseArray(result);
+        if (row.isEmpty()) {
+            return null;
+        }
+        JSONObject data = (JSONObject) row.get(0);
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        Double confirmWgt = data.getDouble("confirmWgt");
+        return confirmWgt;
+    }
 
     protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam(dateQuery);
@@ -167,6 +188,27 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+
+    protected Map<String, String> getQueryParam4(DateQuery dateQuery, String code, String flag) {
+        Map<String, String> result = new HashMap<>();
+        result.put("code", code);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateQuery.getRecordDate());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        result.put("dateTime", DateUtil.getFormatDateTime(calendar.getTime(), "yyyy/MM/dd HH:mm:ss"));
+        if (DateUtil.getFormatDateTime(dateQuery.getEndTime(), "HH").equals("08")) {
+            result.put("shift", "1");
+        } else if (DateUtil.getFormatDateTime(dateQuery.getEndTime(), "HH").equals("16")) {
+            result.put("shift", "2");
+        } else {
+            result.put("shift", "3");
+        }
+        result.put("flag", flag);
+        return result;
+    }
+
     protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
@@ -177,5 +219,9 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
 
     protected String getUrl3() {
         return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCode";
+    }
+
+    protected String getUrl4() {
+        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeYielAndHolesByDateAndShiftAndCode";
     }
 }

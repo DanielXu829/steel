@@ -56,7 +56,7 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
             try {
-                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template);
+                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template,jobExecuteInfo.getDateQuery());
                 // 参数缺一不可
                 WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
                         .startTime(new Date())
