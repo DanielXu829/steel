@@ -21,6 +21,16 @@ import java.util.List;
 public class PptTests {
 
     @Test
+    public void test5() throws Exception{
+        XMLSlideShow ppt = new XMLSlideShow(new FileInputStream("C:\\Users\\cj\\Desktop\\test.pptx"));
+
+        List<XSLFSlide> slides = ppt.getSlides();
+        for(XSLFSlide slide:slides){
+
+        }
+    }
+
+    @Test
     public void test4() throws Exception {
         XMLSlideShow ppt = new XMLSlideShow(new FileInputStream("C:\\Users\\cj\\Desktop\\test.pptx"));
 

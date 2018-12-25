@@ -1,15 +1,13 @@
 package com.cisdi.steel.doc;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
-import cn.afterturn.easypoi.word.entity.MyXWPFDocument;
 import com.cisdi.steel.common.util.DateUtil;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
 
 import java.io.FileOutputStream;
 import java.util.*;
 
-public class DocMainTest {
+public class ShaojieDocMainTest {
     private static List list = new ArrayList();
     private static List list1 = new ArrayList();
     private static List list2 = new ArrayList();

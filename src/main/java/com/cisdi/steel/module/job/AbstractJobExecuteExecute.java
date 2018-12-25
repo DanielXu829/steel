@@ -103,12 +103,12 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
             Date date = new Date();
-            DateQuery dateQuery = new DateQuery(date,date,date);
+            DateQuery dateQuery = new DateQuery(date, date, date);
             try {
-                if(Objects.nonNull(jobExecuteInfo.getDateQuery())){
-                    dateQuery=jobExecuteInfo.getDateQuery();
+                if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
+                    dateQuery = jobExecuteInfo.getDateQuery();
                 }
-                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template,dateQuery);
+                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
                 // 参数缺一不可
                 WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
                         .startTime(new Date())
@@ -175,11 +175,11 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param templatePath 模板的路径
      * @return 文件名
      */
-    protected String handlerFileName(String templateName, String templatePath, String code, ReportTemplateTypeEnum templateTypeEnum,DateQuery dateQuery) {
+    protected String handlerFileName(String templateName, String templatePath, String code, ReportTemplateTypeEnum templateTypeEnum, DateQuery dateQuery) {
         // 模板的扩展名 如.xlsx
         String fileExtension = FileUtil.getTypePart(templatePath);
         // yyyy-MM-dd_HH
-        String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum,dateQuery);
+        String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum, dateQuery);
 
         //自动配煤报表 单独特殊处理到分钟
         if (StringUtils.isNotBlank(code) && "jh_zidongpeimei".equals(code)) {
@@ -199,7 +199,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 类型
         ReportTemplateTypeEnum templateTypeEnum = ReportTemplateTypeEnum.getType(template.getTemplateType());
         // 文件名称
-        String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), template.getReportCategoryCode(), templateTypeEnum,dateQuery);
+        String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), template.getReportCategoryCode(), templateTypeEnum, dateQuery);
         String langName = LanguageEnum.getByLang(template.getTemplateLang()).getName();
         // 文件保存路径
         String saveFilePath = getSaveFilePath(template.getSequence(), templateTypeEnum, fileName, langName);
@@ -264,5 +264,25 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
     protected void handlerException(String msg) {
         log.error(msg);
         throw new NullPointerException(msg);
+    }
+
+    /**
+     * 生成当前时间前几天，后几天的数据
+     *
+     * @param jobExecuteInfo 执行信息
+     * @param dayIndex       当前 前/后 n 天，
+     */
+    protected void executeDateParam(JobExecuteInfo jobExecuteInfo, int dayIndex) {
+        if (Objects.isNull(jobExecuteInfo.getDateQuery())) {
+            Date date = new Date();
+            DateQuery dateQuery = new DateQuery(date, date, date);
+            jobExecuteInfo.setDateQuery(dateQuery);
+        }
+
+        DateQuery dateQuery = jobExecuteInfo.getDateQuery();
+        dateQuery.setRecordDate(DateUtil.addDays(DateUtil.getDateEndTime59(dateQuery.getRecordDate()), dayIndex));
+        jobExecuteInfo.setDateQuery(dateQuery);
+        // 真正的执行的方法
+        this.executeDetail(jobExecuteInfo);
     }
 }

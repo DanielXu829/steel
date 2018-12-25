@@ -124,9 +124,9 @@ public class ChartDataSet {
     public static DefaultTableXYDataset createDefaultTableXYDataset() {
         DefaultTableXYDataset dataset = new DefaultTableXYDataset();
 
-        XYSeries xyseries1 = new XYSeries(series1);
-        XYSeries xyseries2 = new XYSeries(series2);
-        XYSeries xyseries3 = new XYSeries(series3);
+        XYSeries xyseries1 = new XYSeries(series1,false,false);
+        XYSeries xyseries2 = new XYSeries(series2,false,false);
+        XYSeries xyseries3 = new XYSeries(series3,false,false);
 
         xyseries1.add(2.5, 6.0);
         xyseries1.add(4.0, 3.5);
