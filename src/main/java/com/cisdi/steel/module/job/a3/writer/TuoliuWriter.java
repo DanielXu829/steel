@@ -31,10 +31,10 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         String version = PoiCustomUtil.getSheetCell(workbook, "_dictionary", 0, 1);
-        return getMapHandler1(1, excelDTO, version);
+        return getMapHandler1(excelDTO, version);
     }
 
-    private Workbook getMapHandler1(Integer rowBatch, WriterExcelDTO excelDTO, String version) {
+    private Workbook getMapHandler1(WriterExcelDTO excelDTO, String version) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
@@ -49,12 +49,14 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
 
                 if ("_6tuoliutuoxiaomax_day_hour".equals(sheetName) || "_6tuoliutuoxiaosum_day_hour".equals(sheetName)) {
+                    int  rowBatch=1;
                     for (DateQuery dateQuery : dateQueries) {
                         List<CellData> cellDataList = this.mapDataHandler(getUrl1(version), columns, dateQuery, rowBatch, sheetName);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         rowBatch++;
                     }
                 } else {
+                    int  rowBatch=1;
                     DateQuery dateQuery = DateQueryUtil.buildToday(date.getRecordDate());
                     List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, dateQuery, rowBatch, sheetName);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -123,9 +125,9 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
     private List<CellData> handlerJsonArray1(List<String> columns, JSONObject data, int rowBatch, String sheetName) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
+        int rowIndex = rowBatch;
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
-            int rowIndex = rowBatch;
             if (StringUtils.isNotBlank(column)) {
                 JSONObject jsonObject = data.getJSONObject(column);
                 Object v = "";
