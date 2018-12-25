@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.report.util;
 
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 
 import java.util.Date;
@@ -22,22 +23,22 @@ public class FileNameHandlerUtil {
      * @param templateTypeEnum 类型
      * @return 结果
      */
-    public static String handlerName(ReportTemplateTypeEnum templateTypeEnum) {
+    public static String handlerName(ReportTemplateTypeEnum templateTypeEnum, DateQuery dateQuery) {
         switch (templateTypeEnum) {
             case report_hour:
-                return DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd_HH");
+                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
             case report_four_hour:
-                return DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd_HH");
+                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
             case report_class:
-                return DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd_HH");
+                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
             case report_day:
-                return DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd_HH");
+                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
             case report_week:
-                return DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd");
+                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
             case report_month:
-                return DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd");
+                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
             case report_year:
-                return DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd");
+                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
             default:
                 return "";
         }

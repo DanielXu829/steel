@@ -10,6 +10,7 @@ import com.cisdi.steel.module.job.dto.ExcelPathInfo;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -101,8 +102,13 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 3
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
+            Date date = new Date();
+            DateQuery dateQuery = new DateQuery(date,date,date);
             try {
-                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template);
+                if(Objects.nonNull(jobExecuteInfo.getDateQuery())){
+                    dateQuery=jobExecuteInfo.getDateQuery();
+                }
+                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template,dateQuery);
                 // 参数缺一不可
                 WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
                         .startTime(new Date())
@@ -169,16 +175,16 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param templatePath 模板的路径
      * @return 文件名
      */
-    protected String handlerFileName(String templateName, String templatePath, String code, ReportTemplateTypeEnum templateTypeEnum) {
+    protected String handlerFileName(String templateName, String templatePath, String code, ReportTemplateTypeEnum templateTypeEnum,DateQuery dateQuery) {
         // 模板的扩展名 如.xlsx
         String fileExtension = FileUtil.getTypePart(templatePath);
         // yyyy-MM-dd_HH
-        String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum);
+        String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum,dateQuery);
 
         //自动配煤报表 单独特殊处理到分钟
         if (StringUtils.isNotBlank(code) && "jh_zidongpeimei".equals(code)) {
             // yyyy-MM-dd_HH_mm
-            datePart = DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd_HH_mm");
+            datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
         }
         return templateName + "_" + datePart + "." + fileExtension;
     }
@@ -189,11 +195,11 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param template 模板信息
      * @return 结果
      */
-    protected ExcelPathInfo getPathInfoByTemplate(ReportCategoryTemplate template) {
+    protected ExcelPathInfo getPathInfoByTemplate(ReportCategoryTemplate template, DateQuery dateQuery) {
         // 类型
         ReportTemplateTypeEnum templateTypeEnum = ReportTemplateTypeEnum.getType(template.getTemplateType());
         // 文件名称
-        String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), template.getReportCategoryCode(), templateTypeEnum);
+        String fileName = handlerFileName(template.getTemplateName(), template.getTemplatePath(), template.getReportCategoryCode(), templateTypeEnum,dateQuery);
         String langName = LanguageEnum.getByLang(template.getTemplateLang()).getName();
         // 文件保存路径
         String saveFilePath = getSaveFilePath(template.getSequence(), templateTypeEnum, fileName, langName);
