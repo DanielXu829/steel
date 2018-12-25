@@ -1,14 +1,13 @@
 package com.cisdi.steel.module.job;
 
-import com.cisdi.steel.common.util.FileUtil;
-import com.cisdi.steel.common.util.FileUtils;
+import com.cisdi.steel.module.job.dto.JobExecuteInfo;
+import com.cisdi.steel.module.job.enums.JobExecuteEnum;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
-import com.cisdi.steel.module.report.service.ReportIndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +46,24 @@ public class ExportJobContext {
             }
 
         }
-
         return null;
+    }
+
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
+
+    public void execute(Long indexId) throws Exception {
+        ReportIndex reportIndex = reportIndexMapper.selectById(indexId);
+        if (Objects.nonNull(reportIndex)) {
+            AbstractExportJob abstractExportJob = apiJob.get(reportIndex.getReportCategoryCode());
+            if (Objects.nonNull(abstractExportJob)) {
+                JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
+                        .jobEnum(abstractExportJob.getCurrentJob())
+                        .jobExecuteEnum(JobExecuteEnum.manual)
+                        .dateQuery(new DateQuery(reportIndex.getCreateTime()))
+                        .build();
+                abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
+            }
+        }
     }
 }
