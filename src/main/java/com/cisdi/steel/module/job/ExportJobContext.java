@@ -49,8 +49,6 @@ public class ExportJobContext {
         return null;
     }
 
-    @Autowired
-    private ReportIndexMapper reportIndexMapper;
 
     public void execute(Long indexId) throws Exception {
         ReportIndex reportIndex = reportIndexMapper.selectById(indexId);

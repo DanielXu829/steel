@@ -43,7 +43,7 @@ public class AnalysisBaseExecute extends AbstractJobExecuteExecute {
         }
 
         DateQuery dateQuery = jobExecuteInfo.getDateQuery();
-        dateQuery.setRecordDate(DateUtil.addDays(dateQuery.getRecordDate(),-1));
+        dateQuery.setRecordDate(DateUtil.addDays(DateUtil.getDateEndTime59(dateQuery.getRecordDate()),-1));
         jobExecuteInfo.setDateQuery(dateQuery);
         super.execute(jobExecuteInfo);
     }
