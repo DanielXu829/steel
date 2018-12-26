@@ -130,7 +130,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             return;
         }
         Date now = new Date();
-        reportIndex.setCreateTime(now);
+        reportIndex.setCreateTime(Objects.isNull(reportIndex.getCurrDate()) ? now : reportIndex.getCurrDate());
         reportIndex.setUpdateTime(now);
         reportIndex.setHidden("0");
 
