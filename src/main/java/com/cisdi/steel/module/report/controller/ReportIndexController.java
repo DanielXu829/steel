@@ -122,8 +122,8 @@ public class ReportIndexController {
      *
      * @return 报表首页需要的展示数据封装结果
      */
-    @RequestMapping(value = "/reloadIndex")
-    public ApiResult reloadIndex(ReportIndexQuery reportIndexQuery) {
+    @PostMapping(value = "/reloadIndex")
+    public ApiResult reloadIndex(@RequestBody ReportIndexQuery reportIndexQuery) {
         exportJobContext.executeByIndexId(reportIndexQuery.getId());
         return ApiUtil.success();
     }
