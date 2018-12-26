@@ -222,6 +222,6 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
     }
 
     protected String getUrl4() {
-        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeYielAndHolesByDateAndShiftAndCode";
+        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
     }
 }
