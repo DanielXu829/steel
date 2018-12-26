@@ -35,16 +35,9 @@ public class AnalysisBaseExecute extends AbstractJobExecuteExecute {
 
     @Override
     public void execute(JobExecuteInfo jobExecuteInfo) {
+        //生成今天的
         super.execute(jobExecuteInfo);
-        if(Objects.isNull(jobExecuteInfo.getDateQuery())){
-            Date date = new Date();
-            DateQuery dateQuery=new DateQuery(date,date,date);
-            jobExecuteInfo.setDateQuery(dateQuery);
-        }
-
-        DateQuery dateQuery = jobExecuteInfo.getDateQuery();
-        dateQuery.setRecordDate(DateUtil.addDays(dateQuery.getRecordDate(),-1));
-        jobExecuteInfo.setDateQuery(dateQuery);
-        super.execute(jobExecuteInfo);
+        //生成昨天的
+        super.executeDateParam(jobExecuteInfo, -1);
     }
 }

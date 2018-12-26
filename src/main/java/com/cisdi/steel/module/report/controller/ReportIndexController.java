@@ -8,6 +8,7 @@ import com.cisdi.steel.common.util.CookieUtils;
 import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.module.job.ExportJobContext;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
@@ -38,9 +39,12 @@ public class ReportIndexController {
      */
     private final ReportIndexService baseService;
 
+    private final ExportJobContext exportJobContext;
+
     @Autowired
-    public ReportIndexController(ReportIndexService baseService) {
+    public ReportIndexController(ReportIndexService baseService, ExportJobContext exportJobContext) {
         this.baseService = baseService;
+        this.exportJobContext = exportJobContext;
     }
 
     /**
@@ -111,6 +115,17 @@ public class ReportIndexController {
     @RequestMapping(value = "/index")
     public ApiResult index(ReportIndexQuery reportIndexQuery) {
         return baseService.reportIndex(reportIndexQuery);
+    }
+
+    /**
+     * 重新生成指定报表
+     *
+     * @return 报表首页需要的展示数据封装结果
+     */
+    @PostMapping(value = "/reloadIndex")
+    public ApiResult reloadIndex(@RequestBody ReportIndexQuery reportIndexQuery) {
+        exportJobContext.executeByIndexId(reportIndexQuery.getId());
+        return ApiUtil.success();
     }
 
 }

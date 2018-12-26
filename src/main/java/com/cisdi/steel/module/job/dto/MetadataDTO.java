@@ -93,7 +93,7 @@ public class MetadataDTO {
      */
     public MetadataDTO(WriterExcelDTO excelDTO) {
         Date date = new Date();
-        this.dateTime = date;
+        this.dateTime = Objects.isNull(excelDTO.getDateQuery()) ? date : excelDTO.getDateQuery().getRecordDate();
         this.templateName = excelDTO.getTemplate().getTemplateName();
         String templateType = excelDTO.getTemplate().getTemplateType();
         this.type = ReportTemplateTypeEnum.getType(templateType).getName();
