@@ -67,7 +67,7 @@ public class ExportJobContext {
                     JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
                             .jobEnum(abstractExportJob.getCurrentJob())
                             .jobExecuteEnum(JobExecuteEnum.manual)
-                            .dateQuery(new DateQuery(reportIndex.getCreateTime()))
+                            .dateQuery(new DateQuery(reportIndex.getCreateTime(), reportIndex.getCreateTime(), reportIndex.getCreateTime()))
                             .build();
                     abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
                 }
