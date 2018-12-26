@@ -71,11 +71,11 @@ public class GaoluDocMainTest {
                 9000.0, 12100.0, 12300.0, 8500.0,
                 12100.0, 11900.0, 12000.0, 11900.0,
                 11800.0, 12000.0, 11500.0, 11000.0,
-                0.0
+                0.0, 0.0
         }));
         String title = "铁水产量";
-        String categoryAxisLabel = "";
-        String valueAxisLabel = "";
+        String categoryAxisLabel = null;
+        String valueAxisLabel = null;
         JFreeChart Chart = ChartFactory.createLineChart(title,
                 categoryAxisLabel, valueAxisLabel, series, categories);
 
@@ -84,11 +84,11 @@ public class GaoluDocMainTest {
         Chart.getPlot().setBackgroundAlpha(0.1f);
         Chart.getPlot().setNoDataMessage("当前没有有效的数据");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ChartUtilities.writeChartAsJPEG(baos, Chart, 2048, 1024);
+        ChartUtilities.writeChartAsJPEG(baos, Chart, 600, 300);
 
         WordImageEntity image = new WordImageEntity();
-        image.setHeight(200);
-        image.setWidth(500);
+        image.setHeight(350);
+        image.setWidth(650);
         image.setData(baos.toByteArray());
         image.setType(WordImageEntity.Data);
         map.put("jfreechartImg", image);

@@ -4,6 +4,7 @@ import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.a5.writer.MeiqihunhemeiWriter;
 import com.cisdi.steel.module.job.a5.writer.YasuoKongQiWriter;
+import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,5 +27,12 @@ public class MeiqihunhemeiExecute extends AbstractJobExecuteExecute {
     @Override
     public IExcelReadWriter getCurrentExcelWriter() {
         return meiqihunhemeiWriter;
+    }
+
+    @Override
+    public void execute(JobExecuteInfo jobExecuteInfo) {
+        super.execute(jobExecuteInfo);
+        //生成昨天的
+        super.executeDateParam(jobExecuteInfo, -1);
     }
 }

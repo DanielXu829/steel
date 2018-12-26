@@ -98,16 +98,18 @@ public class ChartFactory {
         // 1：创建数据集合
         DefaultCategoryDataset dataset = ChartUtils
                 .createDefaultCategoryDataset(series, categories);
-		JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title,categoryAxisLabel, valueAxisLabel, dataset);
+        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, true);//
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
         ChartUtils.setYAixs(chart.getCategoryPlot());// Y坐标轴渲染
         // 设置标注无边框
-        chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
+//        ChartUtils.setLegendEmptyBorder(chart);
+        //设置标注不显示
+        ChartUtils.setLegendShow(chart, false);
         return chart;
     }
 
