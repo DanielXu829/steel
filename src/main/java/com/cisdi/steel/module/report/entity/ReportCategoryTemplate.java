@@ -72,6 +72,34 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
     private String excelPath;
 
     /**
+     * 周期
+     */
+    @TableField("build")
+    private Integer build;
+    /**
+     * 单位
+     */
+    @TableField("build_unit")
+    private String buildUnit;
+
+    /**
+     * 延迟时间
+     */
+    @TableField("build_delay")
+    private Integer buildDelay;
+    /**
+     * 延迟单位
+     */
+    @TableField("build_delay_unit")
+    private String buildDelayUnit;
+
+    /**
+     * cron表达式
+     */
+    @TableField("cron")
+    private String cron;
+
+    /**
      * 备注
      */
     private String remark;
@@ -91,6 +119,12 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
      */
     @TableField(exist = false)
     private QuartzEntity quartzEntity;
+
+    /**
+     * 任务描述
+     */
+    @TableField(exist = false)
+    private String description;
 
     @Override
     protected Serializable pkVal() {

@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -108,13 +109,16 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                 if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
                     dateQuery = jobExecuteInfo.getDateQuery();
                 }
+                // 处理延迟问题
+                dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
+
                 ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
                 // 参数缺一不可
                 WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
                         .startTime(new Date())
                         .jobEnum(jobExecuteInfo.getJobEnum())
                         .jobExecuteEnum(jobExecuteInfo.getJobExecuteEnum())
-                        .dateQuery(jobExecuteInfo.getDateQuery())
+                        .dateQuery(dateQuery)
                         .template(template)
                         .excelPathInfo(excelPathInfo)
                         .build();
@@ -179,6 +183,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
     protected String handlerFileName(String templateName, String templatePath, String code, ReportTemplateTypeEnum templateTypeEnum, DateQuery dateQuery) {
         // 模板的扩展名 如.xlsx
         String fileExtension = FileUtil.getTypePart(templatePath);
+
         // yyyy-MM-dd_HH
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum, dateQuery);
 

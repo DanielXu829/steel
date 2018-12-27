@@ -1,12 +1,11 @@
 package com.cisdi.steel.module.report.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import org.apache.ibatis.annotations.Mapper;
-import com.cisdi.steel.module.report.entity.ReportIndex;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,6 +25,14 @@ public interface ReportIndexMapper extends BaseMapper<ReportIndex> {
      * @return
      */
     int updateByMoreParamter(ReportIndex reportIndex);
+
+    /**
+     * 通过条件查询id
+     *
+     * @param reportIndex 条件
+     * @return 结果
+     */
+    ReportIndex selectIdByParamter(ReportIndex reportIndex);
 
     /**
      * 通过编码查询最新的一条数据

@@ -1,10 +1,7 @@
 package com.cisdi.steel.module.report.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.exception.LeafException;
@@ -16,9 +13,7 @@ import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
-import com.cisdi.steel.module.report.enums.ApiCodeEnum;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
@@ -29,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -130,14 +123,31 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             return;
         }
         Date now = new Date();
-        reportIndex.setCreateTime(Objects.isNull(reportIndex.getCurrDate()) ? now : reportIndex.getCurrDate());
         reportIndex.setUpdateTime(now);
         reportIndex.setHidden("0");
-
-        if (StringUtils.isNotBlank(reportIndex.getReportCategoryCode()) && !"jh_zidongpeimei".equals(reportIndex.getReportCategoryCode())) {
-            reportIndexMapper.updateByMoreParamter(reportIndex);
+        ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
+        if (Objects.isNull(report)) {
+            reportIndex.setCreateTime(now);
+            this.save(reportIndex);
+        } else {
+            if (!reportIndex.getPath().equals(report.getPath())) {
+                FileUtils.deleteFile(report.getPath());
+            }
+            reportIndex.setId(report.getId());
+            this.updateById(reportIndex);
         }
-        this.save(reportIndex);
+//        if (StringUtils.isBlank(reportIndex.getReportCategoryCode())) {
+//            return;
+//        }
+//        Date now = new Date();
+//        reportIndex.setCreateTime(Objects.isNull(reportIndex.getCurrDate()) ? now : reportIndex.getCurrDate());
+//        reportIndex.setUpdateTime(now);
+//        reportIndex.setHidden("0");
+//
+//        if (StringUtils.isNotBlank(reportIndex.getReportCategoryCode()) && !"jh_zidongpeimei".equals(reportIndex.getReportCategoryCode())) {
+//            reportIndexMapper.updateByMoreParamter(reportIndex);
+//        }
+//        this.save(reportIndex);
     }
 
     @Override

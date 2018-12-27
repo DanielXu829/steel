@@ -5,6 +5,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * <p>Description:  文件名称处理的工作类 </p>
@@ -24,15 +25,23 @@ public class FileNameHandlerUtil {
      * @return 结果
      */
     public static String handlerName(ReportTemplateTypeEnum templateTypeEnum, DateQuery dateQuery) {
+        boolean flag = false;
+        if (Objects.nonNull(dateQuery.getOldDate())) {
+            String dateTime = DateUtil.getFormatDateTime(dateQuery.getOldDate(), "HH");
+            if ("00".equals(dateTime)) {
+                flag = true;
+            }
+        }
+
         switch (templateTypeEnum) {
             case report_hour:
-                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
+                return hourName(dateQuery.getRecordDate(), flag);
             case report_four_hour:
-                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
+                return hourName(dateQuery.getRecordDate(), flag);
             case report_class:
-                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
+                return hourName(dateQuery.getRecordDate(), flag);
             case report_day:
-                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
+                return hourName(dateQuery.getRecordDate(), flag);
             case report_week:
                 return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
             case report_month:
@@ -42,5 +51,15 @@ public class FileNameHandlerUtil {
             default:
                 return "";
         }
+    }
+
+    private static String hourName(Date date, boolean flag) {
+        if (flag) {
+            String time = DateUtil.getFormatDateTime(date, "yyyy-MM-dd");
+            return time + "_24";
+        } else {
+            return DateUtil.getFormatDateTime(date, "yyyy-MM-dd_HH");
+        }
+
     }
 }

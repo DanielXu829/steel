@@ -49,16 +49,15 @@
     </sql>
 
     <select id="queryLastOne" resultType="com.cisdi.steel.module.report.entity.ReportIndex">
-        SELECT
-            *
+        SELECT *
         FROM
             `report_index`
         WHERE
-            is_hidden='0'
+            is_hidden = '0'
             AND report_category_code = #{code}
         ORDER BY
             create_time DESC
-            LIMIT 1
+        LIMIT 1
     </select>
 
     <select id="queryReportToday" resultMap="BaseResultMap">
@@ -98,5 +97,23 @@
             <include refid="queryLike"/>
         </where>
         ORDER BY create_time DESC
+    </select>
+    <select id="selectIdByParamter" resultType="com.cisdi.steel.module.report.entity.ReportIndex">
+        select * from report_index
+        <where>
+            report_category_code =#{reportCategoryCode}
+            AND index_lang =#{indexLang}
+            AND sequence =#{sequence}
+            <if test="indexType=='report_day' or indexType=='report_class' or indexType=='report_four_hour'  or indexType=='report_hour'">
+                AND DATE_FORMAT(create_time,'%Y-%m-%d')=DATE_FORMAT(#{currDate},'%Y-%m-%d')
+            </if>
+            <if test="indexType=='report_month'">
+                AND DATE_FORMAT(create_time,'%Y-%m')=DATE_FORMAT(#{currDate},'%Y-%m')
+            </if>
+            <if test="indexType=='report_year'">
+                AND DATE_FORMAT(create_time,'%Y')=DATE_FORMAT(#{currDate},'%Y')
+            </if>
+        </where>
+        limit 1
     </select>
 </mapper>
