@@ -8,6 +8,7 @@ import com.cisdi.steel.module.job.a2.writer.Luwenjilu7Writer;
 import com.cisdi.steel.module.job.dto.ExcelPathInfo;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -23,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 炼焦
@@ -55,8 +57,14 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         // 3
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
+            Date date = new Date();
+            DateQuery dateQuery = new DateQuery(date, date, date);
             try {
-                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template,jobExecuteInfo.getDateQuery());
+                if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
+                    dateQuery = jobExecuteInfo.getDateQuery();
+                }
+                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
+
                 // 参数缺一不可
                 WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
                         .startTime(new Date())
