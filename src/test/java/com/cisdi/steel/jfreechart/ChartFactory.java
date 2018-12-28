@@ -5,14 +5,23 @@ import java.util.Vector;
 
 import com.cisdi.steel.doc.ChartDataSet;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PolarAxisLocation;
 import org.jfree.chart.plot.PolarPlot;
+import org.jfree.chart.renderer.DefaultPolarItemRenderer;
+import org.jfree.data.Range;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.xy.DefaultTableXYDataset;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.RectangleInsets;
 
 /**
  * 生成JFreeChart图表的工厂类<br/>
@@ -45,7 +54,7 @@ public class ChartFactory {
         ChartUtils.setBarRenderer(chart.getCategoryPlot(), false);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
-        ChartUtils.setYAixs(chart.getCategoryPlot());// Y坐标轴渲染
+        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
         // 设置标注无边框
         chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
         return chart;
@@ -94,38 +103,47 @@ public class ChartFactory {
      */
     public static JFreeChart createLineChart(String title,
                                              String categoryAxisLabel, String valueAxisLabel,
-                                             Vector<Serie> series, String[] categories) {
+                                             Vector<Serie> series, Vector<Serie> series2, String[] categories, CategoryLabelPositions positions, boolean show, int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, boolean y2) {
         // 1：创建数据集合
         DefaultCategoryDataset dataset = ChartUtils
                 .createDefaultCategoryDataset(series, categories);
+        DefaultCategoryDataset dataset2 = null;
+
+        if (y2) {
+            dataset2 = ChartUtils
+                    .createDefaultCategoryDataset(series2, categories);
+        }
+
         JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false);//
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, y2, dataset2);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
-        ChartUtils.setYAixs(chart.getCategoryPlot());// Y坐标轴渲染
+        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
         // 设置标注无边框
 //        ChartUtils.setLegendEmptyBorder(chart);
         //设置标注不显示
-        ChartUtils.setLegendShow(chart, false);
+        ChartUtils.setLegendShow(chart, 0, show);
         return chart;
     }
 
-    public static JFreeChart createPolarChart(String title, Vector<Serie> series, String[] categories) {
-        JFreeChart chart = org.jfree.chart.ChartFactory.createPolarChart(title, ChartDataSet.createXYSeriesCollection(), false, true, false);
+    public static JFreeChart createPolarChart(String title, String xAxisLabel, String yAxisLabel, XYSeriesCollection xySeriesCollection) {
+        JFreeChart chart = org.jfree.chart.ChartFactory.createPolarChart(title, xySeriesCollection, true, false, false);
+        chart.getTitle().setFont(new Font("黑体", 12, 18));
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 设置标注无边框
-//		chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
         PolarPlot pieplot = (PolarPlot) chart.getPlot();
         pieplot.setBackgroundPaint(SystemColor.white);
         pieplot.setAngleGridlinePaint(Color.BLACK);
         pieplot.setRadiusGridlinePaint(Color.black);
 
-
         pieplot.getAxis().setAxisLinePaint(Color.BLACK);// X坐标轴颜色
+        pieplot.setAxisLocation(PolarAxisLocation.NORTH_LEFT);
+        ChartUtils.setLegendShow(chart, 0, true);
+        chart.getLegend().setItemFont(new Font("黑体", 12, 12));
         return chart;
     }
 
@@ -153,7 +171,7 @@ public class ChartFactory {
         ChartUtils.setStackBarRender(chart.getCategoryPlot());
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
-        ChartUtils.setYAixs(chart.getCategoryPlot());// Y坐标轴渲染
+        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
         // 设置标注无边框
         chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
         return chart;

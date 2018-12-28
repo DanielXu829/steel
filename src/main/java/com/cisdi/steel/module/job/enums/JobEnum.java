@@ -33,6 +33,7 @@ public enum JobEnum {
     gl_taisu1_month("gl_taisu1_month", "6高炉 月报"),
     gl_refenglu_month("gl_refenglu_month", "热风炉 月报"),
     gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
+    gl_peiliaodan("gl_peiliaodan", "配料单"),
 
 
     // 焦化

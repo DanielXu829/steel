@@ -25,6 +25,15 @@ public class JobTController {
     ExportJobContext exportJobContext;
 
 
+    @GetMapping(value = "/peiLiaoDan")
+    public ApiResult peiLiaoDan(String code) {
+        if (StringUtils.isBlank(code)) {
+            return ApiUtil.fail("编码不能为空");
+        }
+        String path = exportJobContext.execute(code);
+        return ApiUtil.success(path);
+    }
+
     @GetMapping(value = "/export")
     public ApiResult selectAllCategory(String code, HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.isBlank(code)) {

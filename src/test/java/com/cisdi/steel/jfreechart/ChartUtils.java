@@ -23,12 +23,7 @@ import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.labels.StandardXYItemLabelGenerator;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.DefaultDrawingSupplier;
-import org.jfree.chart.plot.PieLabelLinkStyle;
-import org.jfree.chart.plot.PiePlot;
-import org.jfree.chart.plot.Plot;
-import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.StackedBarRenderer;
@@ -41,6 +36,8 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.TextAnchor;
@@ -149,8 +146,9 @@ public class ChartUtils {
      * @param chart
      * @param show
      */
-    public static void setLegendShow(JFreeChart chart, boolean show) {
-        chart.getLegend().setVisible(show);
+    public static void setLegendShow(JFreeChart chart, int index, boolean show) {
+        chart.getLegend(index).setVisible(show);
+        chart.getLegend(index).setPosition(RectangleEdge.TOP);
     }
 
     /**
@@ -208,7 +206,6 @@ public class ChartUtils {
      *
      * @param category   类别
      * @param dateValues 日期-值 数组
-     * @param xAxisTitle X坐标轴标题
      * @return
      */
     public static TimeSeries createTimeseries(String category,
@@ -236,16 +233,6 @@ public class ChartUtils {
     }
 
     /**
-     * 设置 折线图样式
-     *
-     * @param plot
-     * @param isShowDataLabels 是否显示数据标签 默认不显示节点形状
-     */
-    public static void setLineRender(CategoryPlot plot, boolean isShowDataLabels) {
-        setLineRender(plot, isShowDataLabels, false);
-    }
-
-    /**
      * 设置折线图样式
      *
      * @param plot
@@ -253,15 +240,22 @@ public class ChartUtils {
      */
     @SuppressWarnings("deprecation")
     public static void setLineRender(CategoryPlot plot,
-                                     boolean isShowDataLabels, boolean isShapesVisible) {
+                                     boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions, int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, boolean y2, DefaultCategoryDataset dataset2) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
-        categoryaxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+        categoryaxis.setCategoryLabelPositions(positions);
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
         categoryaxis.setCategoryLabelPositionOffset(20);
 
         ValueAxis rangeAxis = plot.getRangeAxis();
+        rangeAxis.setAxisLineVisible(true);
+        rangeAxis.setTickMarksVisible(true);
+        rangeAxis.setVisible(true);
+        rangeAxis.setMinorTickCount(0);//显示有多少标记段
+        rangeAxis.setMinorTickMarksVisible(true);
+        rangeAxis.setRange(rangIndex, rangEnd); //Y轴取值范围
+
 
         plot.setNoDataMessage(NO_DATA_MSG);
         plot.setInsets(new RectangleInsets(10, 10, 0, 10), false);
@@ -278,8 +272,31 @@ public class ChartUtils {
                     ItemLabelAnchor.OUTSIDE1, TextAnchor.BOTTOM_CENTER));// weizhi
         }
         renderer.setBaseShapesVisible(isShapesVisible);// 数据点绘制形状
+
+
+        if (y2) {
+            // 添加第2个Y轴
+            NumberAxis axis2 = new NumberAxis();
+            // -- 修改第2个Y轴的显示效果
+            axis2.setAxisLinePaint(Color.BLUE);
+            axis2.setLabelPaint(Color.BLUE);
+            axis2.setTickLabelPaint(Color.BLUE);
+            plot.setRangeAxis(1, axis2);
+            plot.setDataset(1, dataset2);
+            plot.mapDatasetToRangeAxis(1, 1);
+            // -- 修改第2条曲线显示效果
+            LineAndShapeRenderer render2 = new LineAndShapeRenderer();
+            render2.setSeriesPaint(0, Color.black);
+            render2.setBaseShapesVisible(isShapesVisible);// 数据点绘制形状
+            plot.setRenderer(1, render2);
+
+            axis2.setRange(rangIndex2, rangEnd2);
+            setYAixs(plot, 1);
+        }
+
+
         setXAixs(plot);
-        setYAixs(plot);
+        setYAixs(plot, 0);
 
     }
 
@@ -391,7 +408,7 @@ public class ChartUtils {
         }
 
         setXAixs(plot);
-        setYAixs(plot);
+        setYAixs(plot, 0);
     }
 
     /**
@@ -407,13 +424,11 @@ public class ChartUtils {
         renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
         plot.setRenderer(renderer);
         setXAixs(plot);
-        setYAixs(plot);
+        setYAixs(plot, 0);
     }
 
     /**
      * 设置类别图表(CategoryPlot) X坐标轴线条颜色和样式
-     *
-     * @param axis
      */
     public static void setXAixs(CategoryPlot plot) {
         Color lineColor = new Color(31, 121, 170);
@@ -424,17 +439,15 @@ public class ChartUtils {
 
     /**
      * 设置类别图表(CategoryPlot) Y坐标轴线条颜色和样式 同时防止数据无法显示
-     *
-     * @param axis
      */
-    public static void setYAixs(CategoryPlot plot) {
-        Color lineColor = new Color(192, 208, 224);
-        ValueAxis axis = plot.getRangeAxis();
+    public static void setYAixs(CategoryPlot plot, int index) {
+        Color lineColor = new Color(31, 121, 170);
+        ValueAxis axis = plot.getRangeAxis(index);
         axis.setAxisLinePaint(lineColor);// Y坐标轴颜色
         axis.setTickMarkPaint(lineColor);// Y坐标轴标记|竖线颜色
         // 隐藏Y刻度
-        axis.setAxisLineVisible(false);
-        axis.setTickMarksVisible(false);
+        axis.setAxisLineVisible(true);
+        axis.setTickMarksVisible(true);
         // Y轴网格线条
         plot.setRangeGridlinePaint(new Color(192, 192, 192));
         plot.setRangeGridlineStroke(new BasicStroke(1));
@@ -446,8 +459,6 @@ public class ChartUtils {
 
     /**
      * 设置XY图表(XYPlot) X坐标轴线条颜色和样式
-     *
-     * @param axis
      */
     public static void setXY_XAixs(XYPlot plot) {
         Color lineColor = new Color(31, 121, 170);
@@ -458,8 +469,6 @@ public class ChartUtils {
 
     /**
      * 设置XY图表(XYPlot) Y坐标轴线条颜色和样式 同时防止数据无法显示
-     *
-     * @param axis
      */
     public static void setXY_YAixs(XYPlot plot) {
         Color lineColor = new Color(192, 208, 224);
