@@ -6,8 +6,11 @@ import com.cisdi.steel.common.util.ApplicationContextHolder;
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.report.entity.ReportCategory;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryService;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.report.service.ReportIndexService;
 import com.cisdi.steel.module.sys.entity.SysConfig;
 import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,21 @@ public class BatchDataTests extends SteelApplicationTests {
     private Scheduler scheduler;
 
     private static final String jobGroup = "所有";
+
+
+    @Autowired
+    private ReportIndexService reportIndexService;
+
+    @Test
+    public void test11() {
+        LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
+        wrapper.eq(true, ReportIndex::getHidden, "1");
+        List<ReportIndex> list = reportIndexService.list(wrapper);
+        for (ReportIndex reportIndex : list) {
+
+        }
+    }
+
 
     /**
      * 批量插入 所有job

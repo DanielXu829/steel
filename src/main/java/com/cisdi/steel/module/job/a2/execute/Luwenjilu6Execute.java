@@ -9,6 +9,7 @@ import com.cisdi.steel.module.job.dto.ExcelPathInfo;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -61,8 +62,11 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
                 if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
                     dateQuery = jobExecuteInfo.getDateQuery();
                 }
+                // 处理延迟问题
+                dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
+
                 ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
-             // 参数缺一不可
+                // 参数缺一不可
                 WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
                         .startTime(new Date())
                         .jobEnum(jobExecuteInfo.getJobEnum())
@@ -110,7 +114,7 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
         workbook.write(fos);
         fos.close();
         //月末清除模板数据到最初
-        if (DateUtil.isLastDayOfMonth(new Date())){
+        if (DateUtil.isLastDayOfMonth(new Date())) {
             FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
             for (int i = 0; i < numberOfSheets; i++) {
                 Sheet sheet = workbook.getSheetAt(i);
