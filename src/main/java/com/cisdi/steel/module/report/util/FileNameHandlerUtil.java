@@ -4,6 +4,7 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
@@ -58,7 +59,10 @@ public class FileNameHandlerUtil {
             String time = DateUtil.getFormatDateTime(date, "yyyy-MM-dd");
             return time + "_24";
         } else {
-            return DateUtil.getFormatDateTime(date, "yyyy-MM-dd_HH");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.add(Calendar.HOUR_OF_DAY, 1);
+            return DateUtil.getFormatDateTime(calendar.getTime(), "yyyy-MM-dd_HH");
         }
 
     }
