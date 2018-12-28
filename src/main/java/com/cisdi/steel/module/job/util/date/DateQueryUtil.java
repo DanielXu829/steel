@@ -274,7 +274,7 @@ public class DateQueryUtil {
                 yield = Calendar.MINUTE;
                 delay += 2;
                 break;
-            case HOUR_OF_DAY:
+            case HOUR:
                 yield = Calendar.HOUR_OF_DAY;
                 break;
             case DATE:

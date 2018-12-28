@@ -15,7 +15,7 @@ public enum TimeUnitEnum {
     // 分钟
     MINUTE("MINUTE"),
     // 小时
-    HOUR_OF_DAY("HOUR_OF_DAY"),
+    HOUR("HOUR"),
     // 天
     DATE("DATE"),
     // 月
