@@ -2,6 +2,8 @@ package com.cisdi.steel.job.a1;
 
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.a1.*;
+import com.cisdi.steel.module.job.a1.writer.PeiLiaoDanWriter;
+import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,6 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @version 1.0
  */
 public class TestJob1 extends SteelApplicationTests {
+
+
+    @Autowired
+    private PeiLiaoDanJob peiLiaoDanJob;
+
+    @Test
+    public void test11111() {
+        peiLiaoDanJob.execute(null);
+    }
 
     /**
      * 高炉炉顶装料作业 日报

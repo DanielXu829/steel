@@ -2,9 +2,9 @@ package com.cisdi.steel.module.report.service;
 
 import com.cisdi.steel.common.base.service.IBaseService;
 import com.cisdi.steel.common.resp.ApiResult;
+import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -49,4 +49,11 @@ public interface ReportCategoryTemplateService extends IBaseService<ReportCatego
      * @return 返回结果
      */
     ApiResult updateRecord(ReportCategoryTemplate record);
+
+    /**
+     * 更新模板运行时间记录
+     *
+     * @param entity
+     */
+    void updateTemplateTask(QuartzEntity entity);
 }

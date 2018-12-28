@@ -9,6 +9,7 @@ import com.cisdi.steel.module.job.dto.ExcelPathInfo;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -63,6 +64,9 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
                 if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
                     dateQuery = jobExecuteInfo.getDateQuery();
                 }
+                // 处理延迟问题
+                dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
+
                 ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
 
                 // 参数缺一不可

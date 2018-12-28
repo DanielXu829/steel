@@ -70,4 +70,27 @@ public class QuartzEntity {
      * 任务执行编码
      */
     private String jobCode;
+
+    /**
+     * 模板id
+     */
+    private Long id;
+
+    /**
+     * 周期
+     */
+    private Integer build;
+    /**
+     * 单位
+     */
+    private String buildUnit;
+
+    /**
+     * 延迟时间
+     */
+    private Integer buildDelay;
+    /**
+     * 延迟单位
+     */
+    private String buildDelayUnit;
 }

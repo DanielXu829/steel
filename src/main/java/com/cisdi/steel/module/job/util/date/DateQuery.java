@@ -42,6 +42,10 @@ public class DateQuery {
      * 结束时间key
      */
     private String endTimeKey = "endtime";
+    /**
+     * 原始时间 未被修改前
+     */
+    private Date oldDate;
 
     public DateQuery(Date recordDate) {
         this.recordDate = recordDate;

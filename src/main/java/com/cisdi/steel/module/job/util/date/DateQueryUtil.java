@@ -1,14 +1,12 @@
 package com.cisdi.steel.module.job.util.date;
 
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.module.job.enums.TimeUnitEnum;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 时间构建
@@ -26,6 +24,7 @@ public class DateQueryUtil {
      * 构建一个当天的 开始 时间---结束时间
      * 如 时间：2018-12-20 10:32:55
      * recordDate=2018-12-20 10:32:55,startTime=2018-12-20 00:00:00,endTime=2018-12-21 00:00:00
+     *
      * @return 结果
      */
     public static DateQuery buildToday(Date date) {
@@ -78,6 +77,7 @@ public class DateQueryUtil {
      * recordDate=2018-12-20 03:29:51,startTime=2018-12-20 02:00:00,endTime=2018-12-20 03:00:00
      * recordDate=2018-12-20 04:29:51,startTime=2018-12-20 03:00:00,endTime=2018-12-20 04:00:00
      * recordDate=2018-12-20 05:29:51,startTime=2018-12-20 04:00:00,endTime=2018-12-20 05:00:00
+     *
      * @param date 指定时间
      * @return 结果
      */
@@ -255,5 +255,41 @@ public class DateQueryUtil {
         return calendar.getTime();
     }
 
+
+    public static DateQuery handlerDelay(DateQuery dateQuery, Integer delay, String delayUnit) {
+        TimeUnitEnum timeUnitEnum = TimeUnitEnum.getValues(delayUnit);
+        if (Objects.isNull(timeUnitEnum)) {
+            return dateQuery;
+        }
+        Date recordDate = dateQuery.getRecordDate();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(recordDate);
+        int yield = Calendar.HOUR_OF_DAY;
+        switch (timeUnitEnum) {
+            case SECOND:
+                yield = Calendar.SECOND;
+                delay += 10;
+                break;
+            case MINUTE:
+                yield = Calendar.MINUTE;
+                delay += 2;
+                break;
+            case HOUR:
+                yield = Calendar.HOUR_OF_DAY;
+                break;
+            case DATE:
+                yield = Calendar.DATE;
+                break;
+            case MONTH:
+                yield = Calendar.MONTH;
+                break;
+            default:
+                yield = Calendar.HOUR_OF_DAY;
+        }
+        calendar.set(yield, -delay);
+        dateQuery.setRecordDate(calendar.getTime());
+        dateQuery.setOldDate(recordDate);
+        return dateQuery;
+    }
 
 }

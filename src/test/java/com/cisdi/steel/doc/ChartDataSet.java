@@ -9,6 +9,7 @@ import org.jfree.data.category.IntervalCategoryDataset;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
+import org.jfree.data.general.DatasetGroup;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.time.SimpleTimePeriod;

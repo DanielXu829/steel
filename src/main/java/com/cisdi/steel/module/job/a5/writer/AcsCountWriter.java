@@ -67,8 +67,12 @@ public class AcsCountWriter extends AbstractExcelReadWriter {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateQuery.getStartTime());
         calendar.add(Calendar.SECOND, 1);
+
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(dateQuery.getEndTime());
+        calendar1.add(Calendar.SECOND, 1);
         map.put("starttime", calendar.getTime().getTime() + "");
-        map.put("endtime", dateQuery.getEndTime().getTime() + "");
+        map.put("endtime", calendar1.getTime().getTime() + "");
         return map;
     }
 

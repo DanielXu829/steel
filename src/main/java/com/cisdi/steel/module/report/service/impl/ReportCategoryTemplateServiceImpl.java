@@ -14,18 +14,14 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.mapper.QuartzMapper;
-import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
-import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
-import com.cisdi.steel.module.report.service.ReportCategoryService;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.Date;
@@ -42,8 +38,6 @@ import java.util.Objects;
 @Service
 public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCategoryTemplateMapper, ReportCategoryTemplate> implements ReportCategoryTemplateService {
 
-    @Autowired
-    private ReportCategoryService reportCategoryService;
 
     @Autowired
     private JobProperties jobProperties;
@@ -75,15 +69,15 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             throw new BusinessException("生成模板编码不能为空");
         }
         LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
-        wrapper.select(
-                ReportCategoryTemplate::getReportCategoryCode,
-                ReportCategoryTemplate::getTemplateName,
-                ReportCategoryTemplate::getTemplatePath,
-                ReportCategoryTemplate::getTemplateLang,
-                ReportCategoryTemplate::getTemplateType,
-                ReportCategoryTemplate::getSequence,
-                ReportCategoryTemplate::getExcelPath
-        );
+//        wrapper.select(
+//                ReportCategoryTemplate::getReportCategoryCode,
+//                ReportCategoryTemplate::getTemplateName,
+//                ReportCategoryTemplate::getTemplatePath,
+//                ReportCategoryTemplate::getTemplateLang,
+//                ReportCategoryTemplate::getTemplateType,
+//                ReportCategoryTemplate::getSequence,
+//                ReportCategoryTemplate::getExcelPath
+//        );
         wrapper.eq(ReportCategoryTemplate::getReportCategoryCode, code);
         wrapper.eq(StringUtils.isNotBlank(lang), ReportCategoryTemplate::getTemplateLang, lang);
         // 查询生效的数据
@@ -138,6 +132,21 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
         }
         this.updateById(record);
         return ApiUtil.success();
+    }
+
+    @Override
+    public void updateTemplateTask(QuartzEntity entity) {
+        if (Objects.isNull(entity.getId())) {
+            return;
+        }
+        ReportCategoryTemplate reportCategoryTemplate = new ReportCategoryTemplate();
+        reportCategoryTemplate.setId(entity.getId())
+                .setBuild(entity.getBuild())
+                .setBuildUnit(entity.getBuildUnit())
+                .setBuildDelay(entity.getBuildDelay())
+                .setBuildDelayUnit(entity.getBuildDelayUnit())
+                .setCron(entity.getCronExpression());
+        this.updateById(reportCategoryTemplate);
     }
 
     /**
