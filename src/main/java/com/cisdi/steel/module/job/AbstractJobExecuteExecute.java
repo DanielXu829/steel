@@ -188,7 +188,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum, dateQuery);
 
         //自动配煤报表 单独特殊处理到分钟
-        if (StringUtils.isNotBlank(code) && "jh_zidongpeimei".equals(code)) {
+        if (StringUtils.isNotBlank(code) && "jh_zidongpeimei".equals(code) || StringUtils.isNotBlank(code) && "gl_peiliaodan".equals(code)) {
             // yyyy-MM-dd_HH_mm
             datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
         }

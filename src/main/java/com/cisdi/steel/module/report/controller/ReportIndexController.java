@@ -1,5 +1,7 @@
 package com.cisdi.steel.module.report.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.base.vo.PageQuery;
 import com.cisdi.steel.common.resp.ApiResult;
@@ -21,6 +23,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -76,9 +79,28 @@ public class ReportIndexController {
      */
     @PostMapping(value = "/delete")
     public ApiResult deleteById(@RequestBody BaseId baseId) {
+        ReportIndex report = baseService.getById(baseId);
+        FileUtils.deleteFile(report.getPath());
         return baseService.deleteRecord(baseId);
     }
 
+    @PostMapping(value = "deleteIndexAndFile")
+    public ApiResult deleteIndexAndFile(@RequestBody BaseId baseIds) {
+        if (Objects.isNull(baseIds) || baseIds.getId() != -1) {
+            return ApiUtil.fail();
+        }
+        LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
+        wrapper.eq(true, ReportIndex::getHidden, "1");
+        List<ReportIndex> list = baseService.list(wrapper);
+        for (ReportIndex reportIndex : list) {
+//            System.out.println(reportIndex.getPath());
+            BaseId baseId = new BaseId();
+            baseId.setId(reportIndex.getId());
+            baseService.deleteRecord(baseId);
+            FileUtils.deleteFile(reportIndex.getPath());
+        }
+        return ApiUtil.success();
+    }
 
     /**
      * 下载

@@ -2,7 +2,10 @@ package com.cisdi.steel;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.util.ApplicationContextHolder;
+import com.cisdi.steel.common.util.FileUtil;
+import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.report.entity.ReportCategory;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
@@ -61,7 +64,11 @@ public class BatchDataTests extends SteelApplicationTests {
         wrapper.eq(true, ReportIndex::getHidden, "1");
         List<ReportIndex> list = reportIndexService.list(wrapper);
         for (ReportIndex reportIndex : list) {
-
+//            System.out.println(reportIndex.getPath());
+            BaseId baseId = new BaseId();
+            baseId.setId(reportIndex.getId());
+            reportIndexService.deleteRecord(baseId);
+            FileUtils.delFile(reportIndex.getPath());
         }
     }
 

@@ -90,7 +90,8 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
                         .setName(excelPathInfo.getFileName())
                         .setPath(excelPathInfo.getSaveFilePath())
                         .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
-                        .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode());
+                        .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
+                        .setCurrDate(dateQuery.getRecordDate());;
                 reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
                 log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage());
