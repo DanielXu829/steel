@@ -1,9 +1,12 @@
 package com.cisdi.steel.jfreechart;
 
+import org.jfree.chart.entity.CategoryItemEntity;
+import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.PlotState;
 import org.jfree.chart.plot.SpiderWebPlot;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.util.TableOrder;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -29,11 +32,72 @@ public class MySpiderWebPlot extends SpiderWebPlot {
     MySpiderWebPlot(CategoryDataset createCategoryDataset) {
         super(createCategoryDataset);
     }
-
-    @Override
-    public void draw(Graphics2D g2, Rectangle2D area, Point2D anchor, PlotState parentState, PlotRenderingInfo info) {
-        super.draw(g2, area, anchor, parentState, info);
-    }
+//
+//    @Override
+//    protected void drawRadarPoly(Graphics2D g2, Rectangle2D plotArea, Point2D centre, PlotRenderingInfo info, int series, int catCount, double headH, double headW) {
+//        Polygon polygon = new Polygon();
+//        EntityCollection entities = null;
+//        if (info != null) {
+//            entities = info.getOwner().getEntityCollection();
+//        }
+//
+//        for (int cat = 0; cat < catCount; ++cat) {
+//            Number dataValue = this.getPlotValue(series, cat);
+//            if (dataValue != null) {
+//                double value = dataValue.doubleValue();
+//                if (value >= 0.0D) {
+//                    double angle = this.getStartAngle() + this.getDirection().getFactor() * (double) cat * 360.0D / (double) catCount;
+//                    Point2D point = this.getWebPoint(plotArea, angle, value / super.getMaxValue());
+//                    polygon.addPoint((int) point.getX(), (int) point.getY());
+//                    Paint paint = this.getSeriesPaint(series);
+//                    Paint outlinePaint = this.getSeriesOutlinePaint(series);
+//                    Stroke outlineStroke = this.getSeriesOutlineStroke(series);
+//                    Ellipse2D head = new java.awt.geom.Ellipse2D.Double(point.getX() - headW / 2.0D, point.getY() - headH / 2.0D, headW, headH);
+//                    g2.setPaint(paint);
+//                    g2.fill(head);
+//                    g2.setStroke(outlineStroke);
+//                    g2.setPaint(outlinePaint);
+//                    g2.draw(head);
+//                    if (entities != null) {
+//                        int row;
+//                        int col;
+//                        if (super.getDataExtractOrder() == TableOrder.BY_ROW) {
+//                            row = series;
+//                            col = cat;
+//                        } else {
+//                            row = cat;
+//                            col = series;
+//                        }
+//
+//                        String tip = null;
+//                        if (super.getToolTipGenerator() != null) {
+//                            tip = super.getToolTipGenerator().generateToolTip(this.dataset, row, col);
+//                        }
+//
+//                        String url = null;
+//                        if (this.urlGenerator != null) {
+//                            url = this.urlGenerator.generateURL(this.dataset, row, col);
+//                        }
+//
+//                        Shape area = new Rectangle((int) (point.getX() - headW), (int) (point.getY() - headH), (int) (headW * 2.0D), (int) (headH * 2.0D));
+//                        CategoryItemEntity entity = new CategoryItemEntity(area, tip, url, this.dataset, this.dataset.getRowKey(row), this.dataset.getColumnKey(col));
+//                        entities.add(entity);
+//                    }
+//                }
+//            }
+//        }
+//
+//        Paint paint = this.getSeriesPaint(series);
+//        g2.setPaint(paint);
+//        g2.setStroke(this.getSeriesOutlineStroke(series));
+//        g2.draw(polygon);
+//        if (this.webFilled) {
+//            g2.setComposite(AlphaComposite.getInstance(3, 0.1F));
+//            g2.fill(polygon);
+//            g2.setComposite(AlphaComposite.getInstance(3, this.getForegroundAlpha()));
+//        }
+//
+//    }
 
     @Override
     protected void drawLabel(final Graphics2D g2, final Rectangle2D plotArea, final double value,

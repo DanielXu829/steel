@@ -80,7 +80,8 @@ public class AcsDongLiWriter extends AbstractExcelReadWriter {
      */
     private List<CellData> eachData(List<Cell> cellList, String url, Map<String, String> queryParam, int rowIndexs) {
         List<CellData> results = new ArrayList<>();
-        for (Cell cell : cellList) {
+        for (int j = 0; j < cellList.size(); j++) {
+            Cell cell = cellList.get(j);
             String column = PoiCellUtil.getCellValue(cell);
             if (StringUtils.isNotBlank(column)) {
                 queryParam.put("tagname", column);
@@ -94,8 +95,11 @@ public class AcsDongLiWriter extends AbstractExcelReadWriter {
                         for (int index = 0; index < size; index++) {
                             JSONObject obj = jsonArray.getJSONObject(index);
                             Object val = obj.get("timestamp");
-                            ExcelWriterUtil.addCellData(results, rowIndex++, cell.getColumnIndex(), val);
+                            if (Objects.nonNull(val)) {
+                                ExcelWriterUtil.addCellData(results, rowIndex++, j, val);
+                            }
                         }
+
                     }
                 }
             }
