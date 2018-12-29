@@ -33,6 +33,6 @@ public class YasuoKongQiExecute extends AbstractJobExecuteExecute {
     public void execute(JobExecuteInfo jobExecuteInfo) {
         super.execute(jobExecuteInfo);
         //生成昨天的
-        super.executeDateParam(jobExecuteInfo, -1);
+//        super.executeDateParam(jobExecuteInfo, -1);
     }
 }

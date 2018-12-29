@@ -278,7 +278,7 @@ public class DateQueryUtil {
                 yield = Calendar.HOUR_OF_DAY;
                 break;
             case DATE:
-                yield = Calendar.DATE;
+                yield = Calendar.DAY_OF_MONTH;
                 break;
             case MONTH:
                 yield = Calendar.MONTH;
@@ -286,10 +286,9 @@ public class DateQueryUtil {
             default:
                 yield = Calendar.HOUR_OF_DAY;
         }
-        calendar.set(yield, -delay);
+        calendar.add(yield, -delay);
         dateQuery.setRecordDate(calendar.getTime());
         dateQuery.setOldDate(recordDate);
         return dateQuery;
     }
-
 }
