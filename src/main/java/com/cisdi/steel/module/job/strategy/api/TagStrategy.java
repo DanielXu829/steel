@@ -76,28 +76,18 @@ public class TagStrategy extends AbstractApiStrategy {
                     }
                     // 按照顺序排序
                     Arrays.sort(list);
-                    boolean flag = true;
-
                     if (StringUtils.isNotBlank(type)) {
                         if ("day".equals(type)) {
                             for (Long key : list) {
-                                if (flag) {
-                                    flag = false;
-                                    continue;
-                                }
                                 Date date = new Date(key);
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTime(date);
-                                int rowIndex = calendar.get(Calendar.HOUR_OF_DAY) + 1;
+                                int rowIndex = calendar.get(Calendar.HOUR_OF_DAY);
                                 Object o = data.get(key + "");
                                 ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
                             }
                         } else if ("month".equals(type)) {
                             for (Long key : list) {
-                                if (flag) {
-                                    flag = false;
-                                    continue;
-                                }
                                 Date date = new Date(key);
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTime(date);
@@ -109,10 +99,6 @@ public class TagStrategy extends AbstractApiStrategy {
                     } else {
                         int rowIndex = 1;
                         for (Long key : list) {
-                            if (flag) {
-                                flag = false;
-                                continue;
-                            }
                             Object o = data.get(key + "");
                             ExcelWriterUtil.addCellData(resultList, rowIndex++, columnIndex, o);
                         }
