@@ -150,4 +150,13 @@ public class ReportIndexController {
         return ApiUtil.success();
     }
 
+    @PostMapping(value = "/reloadIndexAll")
+    public ApiResult reloadIndexAll(@RequestBody ReportIndexQuery reportIndexQuery) {
+        if (reportIndexQuery.getId().intValue() != -2) {
+            return ApiUtil.fail();
+        }
+        exportJobContext.executeByIndexIds(reportIndexQuery.getId());
+        return ApiUtil.success();
+    }
+
 }
