@@ -124,7 +124,7 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
             for (int i = 0; i < numberOfSheets; i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
-                if ("7#机侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                if ("7炉机侧炉温管控".equals(sheetName)) {
                     for (int j = 3; j < 59; j++) {
                         Row row = sheet.getRow(j);
                         for (int k = 1; k < 32; k++) {
@@ -132,7 +132,7 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
                             row.getCell(k).setCellType(CellType.STRING);
                         }
                     }
-                } else if ("7#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+                } else if ("7炉焦侧炉温管控".equals(sheetName)) {
                     for (int j = 3; j < 59; j++) {
                         Row row = sheet.getRow(j);
                         for (int k = 1; k < 32; k++) {

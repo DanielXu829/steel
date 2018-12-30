@@ -34,32 +34,32 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         int numberOfSheets = workbook.getNumberOfSheets();
         DateQuery dateQuery = this.getDateQuery(excelDTO);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd");
-        String format = dateFormat.format(dateQuery.getRecordDate());
-        int ss = Integer.parseInt(format);
+        String dd = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "dd");
+        String format = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "MM.dd");
+        int ss = Integer.parseInt(dd);
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheetAt = workbook.getSheetAt(i);
             String sheetName = sheetAt.getSheetName();
-            if (("炉温记录" + format).equals(sheetName)) {
+            if (format.equals(sheetName)) {
                 workbook.removeSheetAt(i);
                 numberOfSheets--;
             }
-            if ("6#机侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+            if ("6炉机侧炉温管控".equals(sheetName)) {
                 int rowNum = 5;
                 for (int j = 3; j < 59; j++) {
                     Row row = sheetAt.getRow(j);
                     Cell cell = row.getCell(ss);
-                    String cellValue = "IF(炉温记录" + ss + "!I" + rowNum + "=\"\",\"\",炉温记录" + ss + "!I" + rowNum + ")";
+                    String cellValue = "IF('" + format + "'!I" + rowNum + "=\"\",\"\",'" + format + "'!I" + rowNum + ")";
                     cell.setCellFormula(cellValue);
                     cell.setCellType(CellType.FORMULA);
                     rowNum++;
                 }
-            } else if ("6#焦侧炉温管控(月)从动态管控系统读取或计算".equals(sheetName)) {
+            } else if ("6炉焦侧炉温管控".equals(sheetName)) {
                 int rowNum = 5;
                 for (int j = 3; j < 59; j++) {
                     Row row = sheetAt.getRow(j);
                     Cell cell = row.getCell(ss);
-                    String cellValue = "IF(炉温记录" + ss + "!Q" + rowNum + "=\"\",\"\",炉温记录" + ss + "!Q" + rowNum + ")";
+                    String cellValue = "IF('" + format + "'!Q" + rowNum + "=\"\",\"\",'" + format + "'!Q" + rowNum + ")";
                     cell.setCellFormula(cellValue);
                     cell.setCellType(CellType.FORMULA);
                     rowNum++;
@@ -67,8 +67,8 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
             }
         }
         workbook.cloneSheet(0);
-        workbook.setSheetName(numberOfSheets, "炉温记录" + format);
-        Sheet sheet = workbook.getSheet("炉温记录" + format);
+        workbook.setSheetName(numberOfSheets, format);
+        Sheet sheet = workbook.getSheet(format);
         Row row = sheet.getRow(0);
         Cell cell = row.getCell(1);
         cell.setCellValue(DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd"));
