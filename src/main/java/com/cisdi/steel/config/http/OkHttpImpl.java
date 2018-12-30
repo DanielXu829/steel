@@ -64,7 +64,7 @@ public class OkHttpImpl implements HttpUtil {
                 return response.body().string();
             }
         } catch (Exception e) {
-            logger.error("okhttp3 put error >> ex = {}", ExceptionUtils.getStackTrace(e));
+            logger.error("okhttp3 get error >> ex = {}", ExceptionUtils.getStackTrace(e));
         } finally {
             if (response != null) {
                 response.close();
@@ -152,7 +152,7 @@ public class OkHttpImpl implements HttpUtil {
                 return response.body().string();
             }
         } catch (Exception e) {
-            logger.error("okhttp3 put error >> ex = {}", ExceptionUtils.getStackTrace(e));
+            logger.error("okhttp3 get error >> ex = {}", ExceptionUtils.getStackTrace(e));
         } finally {
             if (response != null) {
                 response.close();
