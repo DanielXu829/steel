@@ -7,6 +7,7 @@ import com.cisdi.steel.module.test.onlyoffice.helpers.ConfigManager;
 import com.cisdi.steel.module.test.onlyoffice.helpers.DocumentManager;
 import com.cisdi.steel.module.test.onlyoffice.helpers.FileUtility;
 import com.cisdi.steel.module.test.onlyoffice.helpers.ServiceConverter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,10 +19,11 @@ import java.util.Date;
 import java.util.Random;
 
 @RestController
+@Slf4j
 public class EditorController {
 
     @RequestMapping("/onlyoffice/edit")
-    public ModelAndView index(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+    public ModelAndView index(HttpServletRequest request, HttpServletResponse response, Model model) {
         String filePath = "";
         String fileName = "";
         if (request.getParameterMap().containsKey("filePath")) {
@@ -33,7 +35,8 @@ public class EditorController {
                 DocumentManager.Init(request, response);
                 fileName = DocumentManager.createTempServerFile(filePath);
             } catch (Exception ex) {
-                return new ModelAndView(new FastJsonJsonView(), "Error: " + ex.getMessage(), ex);
+                log.error("文件不存在：" + ex.getMessage());
+                return new ModelAndView(new FastJsonJsonView(), "此文件不存在", null);
             }
         }
 
@@ -58,7 +61,7 @@ public class EditorController {
         model.addAttribute("documentType", FileUtility.GetFileType(filePath).toString().toLowerCase());
         //要编辑的文档访问url
         model.addAttribute("fileUri", DocumentManager.GetFileUri(fileName) + "." + fileType);
-        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + filePath+ new Random().nextInt(100)));
+        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + filePath + new Random().nextInt(100)));
         model.addAttribute("callbackUrl", DocumentManager.GetCallback(filePath));
         model.addAttribute("serverUrl", DocumentManager.GetServerUrl());
         model.addAttribute("editorMode", DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(filePath)) && !"view".equals(request.getAttribute("mode")) ? "edit" : "view");

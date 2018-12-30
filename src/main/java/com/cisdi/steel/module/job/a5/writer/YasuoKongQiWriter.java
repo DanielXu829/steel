@@ -8,6 +8,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.enums.TimeUnitEnum;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Cell;
@@ -47,10 +48,12 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
                     // 获取的对应的策略
                     List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                     List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-                    List<CellData> cellDataList = this.eachData(columns, getUrl(), getQueryParam(dateQueries.get(0)));
+
+                    //不延迟处理
+                    DateQuery dateQuery = dateQueries.get(0);
+                    dateQuery.setStartTime(date.getOldDate());
+                    List<CellData> cellDataList = this.eachData(columns, getUrl(), getQueryParam(dateQuery));
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    /*dateQueries.forEach(item -> {
-                    });*/
                     //红色部分
                 } else if ("_acsReportStrtStp_day_all".equals(sheetName) || "_acsReportRuntime_day_all".equals(sheetName)) {
                     List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
@@ -73,7 +76,7 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> map = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
+        calendar.setTime(dateQuery.getRecordDate());
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
