@@ -62,6 +62,11 @@ public class FileNameHandlerUtil {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             calendar.add(Calendar.HOUR_OF_DAY, 1);
+            String dateTime = DateUtil.getFormatDateTime(calendar.getTime(), "HH");
+            if ("00".equals(dateTime)) {
+                String time = DateUtil.getFormatDateTime(date, "yyyy-MM-dd");
+                return time + "_24";
+            }
             return DateUtil.getFormatDateTime(calendar.getTime(), "yyyy-MM-dd_HH");
         }
 
