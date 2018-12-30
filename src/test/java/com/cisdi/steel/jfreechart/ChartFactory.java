@@ -141,6 +141,7 @@ public class ChartFactory {
         pieplot.setRadiusGridlinePaint(Color.black);
 
         pieplot.getAxis().setAxisLinePaint(Color.BLACK);// X坐标轴颜色
+//        pieplot.getAxis().setRange(0, 120);
         pieplot.setAxisLocation(PolarAxisLocation.NORTH_LEFT);
         ChartUtils.setLegendShow(chart, 0, true);
         chart.getLegend().setItemFont(new Font("黑体", 12, 12));

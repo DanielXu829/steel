@@ -65,6 +65,15 @@ public class MetadataDTO {
     private String blowingInDate;
 
     /**
+     * 构建周期
+     */
+    private Integer build;
+    /**
+     * 周期单位
+     */
+    private String buildUnit;
+
+    /**
      * 构建类型 自动或手动
      */
     private String buildType;
@@ -99,9 +108,10 @@ public class MetadataDTO {
         this.type = ReportTemplateTypeEnum.getType(templateType).getName();
         this.templatePath = excelDTO.getTemplate().getTemplatePath();
         this.autoBuild = "Enable";
-        // TODO: 模板参数
-//        this.autoBuildDelay;
-//        this.autoBuildDelayUnit
+        this.build = excelDTO.getTemplate().getBuild();
+        this.buildUnit = excelDTO.getTemplate().getBuildUnit();
+        this.autoBuildDelay = excelDTO.getTemplate().getBuildDelay();
+        this.autoBuildDelayUnit = excelDTO.getTemplate().getBuildDelayUnit();
         this.language = excelDTO.getTemplate().getTemplateLang();
         this.blowingInDate = DateUtil.getFormatDateTime(date, DateUtil.yyyyMMddFormat);
 
@@ -130,8 +140,10 @@ public class MetadataDTO {
         result.put("Type", this.type);
         result.put("TemplatePath", this.templatePath);
         result.put("AutoBuild", this.autoBuild);
-//        result.put("AutoBuildDelay",this.autoBuildDelay);
-//        result.put("AutoBuildDelayUnit",this.autoBuildDelayUnit);
+        result.put("Build", this.build);
+        result.put("BuildUnit", this.buildUnit);
+        result.put("AutoBuildDelay", this.autoBuildDelay);
+        result.put("AutoBuildDelayUnit", this.autoBuildDelayUnit);
         result.put("Language", this.language);
         result.put("BlowingInDate", this.blowingInDate);
         result.put("Build_Type", this.buildType);

@@ -66,7 +66,7 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
                 // 处理延迟问题
                 dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
 
-                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, jobExecuteInfo.getDateQuery());
+                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
                 // 参数缺一不可
                 WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
                         .startTime(new Date())
@@ -88,7 +88,8 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
                         .setName(excelPathInfo.getFileName())
                         .setPath(excelPathInfo.getSaveFilePath())
                         .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
-                        .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode());
+                        .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
+                        .setCurrDate(dateQuery.getRecordDate());;
                 reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
                 log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage());

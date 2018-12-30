@@ -1,5 +1,7 @@
 package com.cisdi.steel.module.job;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import sun.rmi.runtime.Log;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,6 +75,30 @@ public class ExportJobContext {
                     abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
                 }
             }
+        } catch (Exception e) {
+            log.error("重新生成指定生成的报表时报错：" + e.getMessage());
+        }
+
+    }
+
+    public void executeByIndexIds(Long indexId) {
+        try {
+            LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
+            List<ReportIndex> reportIndex = reportIndexMapper.selectList(wrapper);
+            for(ReportIndex index:reportIndex){
+                if (Objects.nonNull(index)) {
+                    AbstractExportJob abstractExportJob = apiJob.get(index.getReportCategoryCode());
+                    if (Objects.nonNull(abstractExportJob)) {
+                        JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
+                                .jobEnum(abstractExportJob.getCurrentJob())
+                                .jobExecuteEnum(JobExecuteEnum.manual)
+                                .dateQuery(new DateQuery(index.getCreateTime(), index.getCreateTime(), index.getCreateTime()))
+                                .build();
+                        abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
+                    }
+                }
+            }
+
         } catch (Exception e) {
             log.error("重新生成指定生成的报表时报错：" + e.getMessage());
         }

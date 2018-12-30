@@ -2,7 +2,6 @@ package com.cisdi.steel.module.job.strategy.api;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
@@ -40,10 +39,10 @@ public class TagStrategy extends AbstractApiStrategy {
         int size = queryList.size();
         String sheetName = sheet.getSheetName();
         String[] split = sheetName.split("_");
-        String type=split[2];
+        String type = split[2];
         for (int rowNum = 0; rowNum < size; rowNum++) {
             DateQuery eachDate = queryList.get(rowNum);
-            List<CellData> cellValInfoList = eachData(columnCells, url, eachDate.getQueryParam(),type);
+            List<CellData> cellValInfoList = eachData(columnCells, url, eachDate.getQueryParam(), type);
             rowCellDataList.addAll(cellValInfoList);
         }
         return SheetRowCellData.builder()
@@ -53,7 +52,7 @@ public class TagStrategy extends AbstractApiStrategy {
                 .build();
     }
 
-    private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam,String type) {
+    private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam, String type) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("starttime", queryParam.get("starttime"));
         jsonObject.put("endtime", queryParam.get("endtime"));
@@ -77,14 +76,13 @@ public class TagStrategy extends AbstractApiStrategy {
                     }
                     // 按照顺序排序
                     Arrays.sort(list);
-
                     if (StringUtils.isNotBlank(type)) {
                         if ("day".equals(type)) {
                             for (Long key : list) {
                                 Date date = new Date(key);
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTime(date);
-                                int rowIndex = calendar.get(Calendar.HOUR_OF_DAY) + 1;
+                                int rowIndex = calendar.get(Calendar.HOUR_OF_DAY);
                                 Object o = data.get(key + "");
                                 ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
                             }
