@@ -78,11 +78,20 @@ public class TagStrategy extends AbstractApiStrategy {
                     Arrays.sort(list);
                     if (StringUtils.isNotBlank(type)) {
                         if ("day".equals(type)) {
-                            for (Long key : list) {
+                            int size = list.length;
+                            for (int i = 0; i < size; i++) {
+                                Long key = list[i];
                                 Date date = new Date(key);
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTime(date);
                                 int rowIndex = calendar.get(Calendar.HOUR_OF_DAY);
+                                if (rowIndex == 0) {
+                                    if (i == size - 1) {
+                                        rowIndex = 24;
+                                    } else {
+                                        continue;
+                                    }
+                                }
                                 Object o = data.get(key + "");
                                 ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
                             }
