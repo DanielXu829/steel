@@ -12,7 +12,7 @@
 
     <!--参数 start-->
     <!--存放路径-->
-    <property name="LOG_HOME" value="/logs/steel"/>
+    <property name="LOG_HOME" value="/u01/logs/report"/>
 
     <!-- 格式化输出：%d表示日期。%thread表示线程名。%-5level：级别从左显示5个字符宽度。%L行数 %msg：日志消息。%n是换行符 -->
     <!--<property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%thread] %-5level %c{36} [%L] : %msg%n"/>-->
