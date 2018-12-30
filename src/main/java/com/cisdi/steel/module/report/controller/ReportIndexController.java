@@ -84,6 +84,12 @@ public class ReportIndexController {
         return baseService.deleteRecord(baseId);
     }
 
+    /**
+     * 删除隐藏的所有文件
+     *
+     * @param baseIds
+     * @return
+     */
     @PostMapping(value = "deleteIndexAndFile")
     public ApiResult deleteIndexAndFile(@RequestBody BaseId baseIds) {
         if (Objects.isNull(baseIds) || baseIds.getId() != -1) {
@@ -150,6 +156,11 @@ public class ReportIndexController {
         return ApiUtil.success();
     }
 
+    /**
+     * 对已经生成的报表批量生成
+     *
+     * @return 报表首页需要的展示数据封装结果
+     */
     @PostMapping(value = "/reloadIndexAll")
     public ApiResult reloadIndexAll(@RequestBody ReportIndexQuery reportIndexQuery) {
         if (reportIndexQuery.getId().intValue() != -2) {
