@@ -6,7 +6,6 @@ import org.apache.tools.zip.ZipFile;
 import org.apache.tools.zip.ZipOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +19,6 @@ import java.util.Enumeration;
 import java.util.List;
 
 /**
- *
  * @author chen
  * @date 2017/9/26
  * <p>
@@ -29,9 +27,10 @@ import java.util.List;
  * Describe:  文件工具
  */
 @SuppressWarnings("ALL")
-public class FileUtils extends org.apache.commons.io.FileUtils{
+public class FileUtils extends org.apache.commons.io.FileUtils {
 
     private static Logger logger = LoggerFactory.getLogger(FileUtils.class);
+
     /**
      * 获取附件名称 13位时间戳+5位随机数
      *
@@ -56,7 +55,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
     /**
      * 保存文件到磁盘
      *
-     * @param file 上传的文件
+     * @param file     上传的文件
      * @param savePath 保存的路径
      */
     public static File saveFileToDisk(MultipartFile file, String savePath) {
@@ -75,7 +74,8 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 保存文件到磁盘
-     * @param file 保存的数据
+     *
+     * @param file     保存的数据
      * @param filePath 文件路径
      * @param fileName 文件名
      * @throws Exception
@@ -85,12 +85,12 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
         if (!targetFile.exists()) {
             targetFile.mkdirs();
         }
-        FileOutputStream out =null;
+        FileOutputStream out = null;
         try {
             out = new FileOutputStream(filePath + fileName);
             out.write(file);
             out.flush();
-        }finally {
+        } finally {
             out.close();
         }
 
@@ -98,29 +98,31 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 删除文件
+     *
      * @param fileName 被删除的文件名
-     * @return  如果删除成功，则返回true，否则返回false
+     * @return 如果删除成功，则返回true，否则返回false
      */
     public static boolean deleteFile(String fileName) {
         File file = new File(fileName);
         // 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
         if (file.exists() && file.isFile()) {
             if (file.delete()) {
-                logger.error("删除单个文件-> {}成功！",fileName);
+                logger.debug("删除单个文件-> {}成功！", fileName);
                 return true;
             } else {
-                logger.error("删除单个文件-> {}失败！",fileName);
+                logger.debug("删除单个文件-> {}失败！", fileName);
                 return false;
             }
         } else {
-            logger.info("删除单个文件失败-> {}不存在！",fileName);
+            logger.info("删除单个文件失败-> {}不存在！", fileName);
             return false;
         }
     }
 
     /**
      * 复制单个文件，如果目标文件存在，则不覆盖
-     * @param srcFileName 待复制的文件名
+     *
+     * @param srcFileName  待复制的文件名
      * @param descFileName 目标文件名
      * @return 如果复制成功，则返回true，否则返回false
      */
@@ -130,9 +132,10 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 复制单个文件
-     * @param srcFileName 待复制的文件名
+     *
+     * @param srcFileName  待复制的文件名
      * @param descFileName 目标文件名
-     * @param coverlay 如果目标文件已存在，是否覆盖
+     * @param coverlay     如果目标文件已存在，是否覆盖
      * @return 如果复制成功，则返回true，否则返回false
      */
     public static boolean copyFileCover(String srcFileName,
@@ -217,7 +220,8 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 复制整个目录的内容，如果目标目录存在，则不覆盖
-     * @param srcDirName 源目录名
+     *
+     * @param srcDirName  源目录名
      * @param descDirName 目标目录名
      * @return 如果复制成功返回true，否则返回false
      */
@@ -228,9 +232,10 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 复制整个目录的内容
-     * @param srcDirName 源目录名
+     *
+     * @param srcDirName  源目录名
      * @param descDirName 目标目录名
-     * @param coverlay 如果目标目录存在，是否覆盖
+     * @param coverlay    如果目标目录存在，是否覆盖
      * @return 如果复制成功返回true，否则返回false
      */
     public static boolean copyDirectoryCover(String srcDirName,
@@ -309,7 +314,6 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
     }
 
     /**
-     *
      * 删除文件，可以删除单个文件或文件夹
      *
      * @param fileName 被删除的文件名
@@ -331,7 +335,6 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
 
     /**
-     *
      * 删除目录及目录下的文件
      *
      * @param dirName 被删除的目录所在的文件路径
@@ -387,6 +390,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 创建单个文件
+     *
      * @param descFileName 文件名，包含路径
      * @return 如果创建成功，则返回true，否则返回false
      */
@@ -427,6 +431,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 创建目录
+     *
      * @param descDirName 目录名,包含路径
      * @return 如果创建成功，则返回true，否则返回false
      */
@@ -453,9 +458,10 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 写入文件
+     *
      * @param fileName 文件路径
-     * @param content 内容
-     * @param append 是否添加
+     * @param content  内容
+     * @param append   是否添加
      */
     public static void writeToFile(String fileName, String content, boolean append) {
         try {
@@ -468,10 +474,11 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 写入文件
+     *
      * @param fileName 文件路径
-     * @param content 内容
+     * @param content  内容
      * @param encoding 编码
-     * @param append 是否添加
+     * @param append   是否添加
      */
     public static void writeToFile(String fileName, String content, String encoding, boolean append) {
         try {
@@ -484,8 +491,9 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 压缩文件或目录
-     * @param srcDirName 压缩的根目录
-     * @param fileName 根目录下的待压缩的文件名或文件夹名，其中*或""表示跟目录下的全部文件
+     *
+     * @param srcDirName   压缩的根目录
+     * @param fileName     根目录下的待压缩的文件名或文件夹名，其中*或""表示跟目录下的全部文件
      * @param descFileName 目标zip文件
      */
     public static void zipFiles(String srcDirName, String fileName,
@@ -527,7 +535,8 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 解压缩ZIP文件，将ZIP文件里的内容解压到descFileName目录下
-     * @param zipFileName 需要解压的ZIP文件
+     *
+     * @param zipFileName  需要解压的ZIP文件
      * @param descFileName 目标文件
      */
     public static boolean unZipFiles(String zipFileName, String descFileName) {
@@ -582,9 +591,10 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 将目录压缩到ZIP输出流
+     *
      * @param dirPath 目录路径
      * @param fileDir 文件信息
-     * @param zouts 输出流
+     * @param zouts   输出流
      */
     public static void zipDirectoryToZipFile(String dirPath, File fileDir, ZipOutputStream zouts) {
         if (fileDir.isDirectory()) {
@@ -618,9 +628,10 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 将文件压缩到ZIP输出流
+     *
      * @param dirPath 目录路径
-     * @param file 文件
-     * @param zouts 输出流
+     * @param file    文件
+     * @param zouts   输出流
      */
     public static void zipFilesToZipFile(String dirPath, File file, ZipOutputStream zouts) {
         FileInputStream fin = null;
@@ -652,8 +663,9 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 获取待压缩文件在ZIP文件中entry的名字，即相对于跟目录的相对路径名
+     *
      * @param dirPath 目录名
-     * @param file entry文件名
+     * @param file    entry文件名
      * @return
      */
     private static String getEntryName(String dirPath, File file) {
@@ -673,6 +685,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 根据“文件名的后缀”获取文件内容类型（而非根据File.getContentType()读取的文件类型）
+     *
      * @param returnFileName 带验证的文件名
      * @return 返回文件类型
      */
@@ -800,25 +813,27 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 向浏览器发送文件下载，支持断点续传
-     * @param file 要下载的文件
-     * @param request 请求对象
+     *
+     * @param file     要下载的文件
+     * @param request  请求对象
      * @param response 响应对象
      * @return 返回错误信息，无错误信息返回null
      */
-    public static String downFile(File file, HttpServletRequest request, HttpServletResponse response){
+    public static String downFile(File file, HttpServletRequest request, HttpServletResponse response) {
         return downFile(file, request, response, null);
     }
 
     /**
      * 向浏览器发送文件下载，支持断点续传
-     * @param file 要下载的文件
-     * @param request 请求对象
+     *
+     * @param file     要下载的文件
+     * @param request  请求对象
      * @param response 响应对象
      * @param fileName 指定下载的文件名
      * @return 返回错误信息，无错误信息返回null
      */
-    public static String downFile(File file, HttpServletRequest request, HttpServletResponse response, String fileName){
-        String error  = null;
+    public static String downFile(File file, HttpServletRequest request, HttpServletResponse response, String fileName) {
+        String error = null;
         if (file != null && file.exists()) {
             if (file.isFile()) {
                 if (file.length() <= 0) {
@@ -833,21 +848,21 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
         } else {
             error = "文件已丢失或不存在！";
         }
-        if (error != null){
+        if (error != null) {
             logger.debug("---------------" + file + " " + error);
             return error;
         }
 
         long fileLength = file.length(); // 记录文件大小
-        long pastLength = 0; 	// 记录已下载文件大小
-        int rangeSwitch = 0; 	// 0：从头开始的全文下载；1：从某字节开始的下载（bytes=27000-）；2：从某字节开始到某字节结束的下载（bytes=27000-39000）
-        long toLength = 0; 		// 记录客户端需要下载的字节段的最后一个字节偏移量（比如bytes=27000-39000，则这个值是为39000）
+        long pastLength = 0;    // 记录已下载文件大小
+        int rangeSwitch = 0;    // 0：从头开始的全文下载；1：从某字节开始的下载（bytes=27000-）；2：从某字节开始到某字节结束的下载（bytes=27000-39000）
+        long toLength = 0;        // 记录客户端需要下载的字节段的最后一个字节偏移量（比如bytes=27000-39000，则这个值是为39000）
         long contentLength = 0; // 客户端请求的字节总量
         String rangeBytes = ""; // 记录客户端传来的形如“bytes=27000-”或者“bytes=27000-39000”的内容
         RandomAccessFile raf = null; // 负责读取数据
-        OutputStream os = null; 	// 写出数据
-        OutputStream out = null; 	// 缓冲
-        byte b[] = new byte[1024]; 	// 暂存容器
+        OutputStream os = null;    // 写出数据
+        OutputStream out = null;    // 缓冲
+        byte b[] = new byte[1024];    // 暂存容器
 
         if (request.getHeader("Range") != null) { // 客户端请求的下载的文件块的开始字节
             response.setStatus(javax.servlet.http.HttpServletResponse.SC_PARTIAL_CONTENT);
@@ -899,7 +914,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
             logger.debug("---------------是从开始进行下载！");
         }
         try {
-            String f=StringUtils.isBlank(fileName) ? file.getName() : fileName;
+            String f = StringUtils.isBlank(fileName) ? file.getName() : fileName;
             boolean isMSIE = HttpUtils.isMSBrowser(request);
             if (isMSIE) {
                 //IE浏览器的乱码问题解决
@@ -989,19 +1004,20 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 修正路径，将 \\ 或 / 等替换为 File.separator
+     *
      * @param path 待修正的路径
      * @return 修正后的路径
      */
-    public static String path(String path){
+    public static String path(String path) {
         String p = StringUtils.replace(path, "\\", "/");
         p = StringUtils.join(StringUtils.split(p, "/"), "/");
-        if (!StringUtils.startsWithAny(p, "/") && StringUtils.startsWithAny(path, "\\", "/")){
+        if (!StringUtils.startsWithAny(p, "/") && StringUtils.startsWithAny(path, "\\", "/")) {
             p += "/";
         }
-        if (!StringUtils.endsWithAny(p, "/") && StringUtils.endsWithAny(path, "\\", "/")){
+        if (!StringUtils.endsWithAny(p, "/") && StringUtils.endsWithAny(path, "\\", "/")) {
             p = p + "/";
         }
-        if (path != null && path.startsWith("/")){
+        if (path != null && path.startsWith("/")) {
             // linux下路径
             p = "/" + p;
         }
@@ -1010,7 +1026,8 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 获目录下的文件列表
-     * @param dir 搜索目录
+     *
+     * @param dir        搜索目录
      * @param searchDirs 是否是搜索目录
      * @return 文件列表
      */
@@ -1027,6 +1044,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 获取文件扩展名(返回小写)
+     *
      * @param fileName 文件名
      * @return 例如：test.jpg  返回：  jpg
      */
@@ -1039,6 +1057,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 获取文件名，不包含扩展名
+     *
      * @param fileName 文件名
      * @return 例如：d:\files\test.jpg  返回：d:\files\test
      */
@@ -1051,6 +1070,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
 
     /**
      * 封装的获取模板、索引保存路径
+     *
      * @param path
      * @param fileName
      * @param lang

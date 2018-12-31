@@ -258,7 +258,8 @@ public class DateQueryUtil {
 
     public static DateQuery handlerDelay(DateQuery dateQuery, Integer delay, String delayUnit) {
         TimeUnitEnum timeUnitEnum = TimeUnitEnum.getValues(delayUnit);
-        if (Objects.isNull(timeUnitEnum)) {
+        if (Objects.isNull(timeUnitEnum) || Objects.isNull(delay) || 1 == delay) {
+            dateQuery.setOldDate(dateQuery.getRecordDate());
             return dateQuery;
         }
         Date recordDate = dateQuery.getRecordDate();

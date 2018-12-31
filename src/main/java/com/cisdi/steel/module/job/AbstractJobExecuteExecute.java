@@ -181,7 +181,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @return 文件名
      */
     protected String handlerFileName(String templateName, String templatePath, String code, ReportTemplateTypeEnum templateTypeEnum, DateQuery dateQuery) {
-        // 模板的扩展名 如.xlsx
+        // 模板的扩展名 如xlsx
         String fileExtension = FileUtil.getTypePart(templatePath);
 
         // yyyy-MM-dd_HH
