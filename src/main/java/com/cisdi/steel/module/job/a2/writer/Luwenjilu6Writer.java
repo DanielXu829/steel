@@ -10,6 +10,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.sun.org.apache.bcel.internal.generic.DADD;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
@@ -34,8 +35,11 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         int numberOfSheets = workbook.getNumberOfSheets();
         DateQuery dateQuery = this.getDateQuery(excelDTO);
-        String dd = DateUtil.getFormatDateTime(dateQuery.getStartTime(), "dd");
-        String format = DateUtil.getFormatDateTime(dateQuery.getStartTime(), "MM.dd");
+        Calendar calendar=Calendar.getInstance();
+        calendar.setTime(dateQuery.getRecordDate());
+        calendar.set(Calendar.SECOND,-10);
+        String dd = DateUtil.getFormatDateTime(calendar.getTime(), "dd");
+        String format = DateUtil.getFormatDateTime(calendar.getTime(), "MM.dd");
         int ss = Integer.parseInt(dd);
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheetAt = workbook.getSheetAt(i);
