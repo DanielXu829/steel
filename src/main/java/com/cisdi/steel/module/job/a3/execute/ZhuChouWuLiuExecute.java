@@ -117,8 +117,8 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
         workbook.write(fos);
         fos.close();
         //月末清除模板数据到最初
-        String formatDateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), DateUtil.yyyyMMddFormat);
-        String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMddFormat);
+        String formatDateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), DateUtil.yyyyMMFormat);
+        String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMFormat);
         if (!formatDateTime.equals(formatDateTime1)) {
             FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
             for (int i = 0; i < numberOfSheets; i++) {
