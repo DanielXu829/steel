@@ -175,6 +175,7 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
         result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
+        result.put("source", "三回收");
         return result;
     }
 
@@ -214,7 +215,7 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
     }
 
     protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/analyses/getAnaitemValByCode";
+        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCodeOrSource";
     }
 
     protected String getUrl3() {

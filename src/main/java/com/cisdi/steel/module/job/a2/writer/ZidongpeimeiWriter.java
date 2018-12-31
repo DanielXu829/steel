@@ -115,7 +115,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         calendar.setTime(dateQuery.getRecordDate());
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        String dateTime = DateUtil.getFormatDateTime(calendar.getTime(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(new Date(), DateUtil.fullFormat);
         result.put("time", dateTime);
         return result;
     }

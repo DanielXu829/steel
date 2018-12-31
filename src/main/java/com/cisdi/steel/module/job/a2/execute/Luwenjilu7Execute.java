@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -81,7 +82,7 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
                 // 4、5填充数据
                 Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
                 // 6、生成文件
-                this.createFile(workbook, excelPathInfo,writerExcelDTO);
+                this.createFile(workbook, excelPathInfo,writerExcelDTO,dateQuery);
 
                 // 7、插入索引
                 ReportIndex reportIndex = new ReportIndex();
@@ -99,7 +100,7 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         }
     }
 
-    protected void createFile(Workbook workbook, ExcelPathInfo excelPathInfo,WriterExcelDTO writerExcelDTO) throws IOException {
+    protected void createFile(Workbook workbook, ExcelPathInfo excelPathInfo,WriterExcelDTO writerExcelDTO,DateQuery dateQuery) throws IOException {
         // 隐藏 下划线的sheet  强制计算
         FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
         int numberOfSheets = workbook.getNumberOfSheets();
@@ -119,7 +120,9 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
         fos.close();
-        if(DateUtil.isLastDayOfMonth(new Date())){
+        String formatDateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), DateUtil.yyyyMMFormat);
+        String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMFormat);
+        if(!formatDateTime1.equals(formatDateTime)){
             FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
             for (int i = 0; i < numberOfSheets; i++) {
                 Sheet sheet = workbook.getSheetAt(i);
@@ -156,4 +159,5 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
             FileUtils.copyFile(excelPathInfo.getSaveFilePath(),writerExcelDTO.getTemplate().getTemplatePath());
         }
     }
+
 }
