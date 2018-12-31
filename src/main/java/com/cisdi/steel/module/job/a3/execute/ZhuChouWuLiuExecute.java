@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.a3.execute;
 
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
@@ -15,8 +16,7 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,7 +79,7 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
                 // 4、5填充数据
                 Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
                 // 6、生成文件
-                this.createFile(workbook, excelPathInfo, writerExcelDTO);
+                this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
 
                 // 7、插入索引
                 ReportIndex reportIndex = new ReportIndex();
@@ -89,7 +89,8 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
                         .setPath(excelPathInfo.getSaveFilePath())
                         .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
                         .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
-                        .setCurrDate(dateQuery.getRecordDate());;
+                        .setCurrDate(dateQuery.getRecordDate());
+                ;
                 reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
                 log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage());
@@ -97,7 +98,7 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
         }
     }
 
-    protected void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO) throws IOException {
+    protected void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {
         // 隐藏 下划线的sheet  强制计算
         FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
         int numberOfSheets = workbook.getNumberOfSheets();
@@ -115,8 +116,90 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
         fos.close();
-        workbook.close();
-        FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
-        FileUtils.copyFile(excelPathInfo.getSaveFilePath(), writerExcelDTO.getTemplate().getTemplatePath());
+        //月末清除模板数据到最初
+        String formatDateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), DateUtil.yyyyMMddFormat);
+        String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMddFormat);
+        if (!formatDateTime.equals(formatDateTime1)) {
+            FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
+            for (int i = 0; i < numberOfSheets; i++) {
+                Sheet sheet = workbook.getSheetAt(i);
+                String sheetName = sheet.getSheetName();
+                //清楚隐藏表
+                if (sheetName.startsWith("_")) {
+                    for (int j = 1; j < 500; j++) {
+                        Row row = sheet.getRow(j);
+                        if (Objects.nonNull(row)) {
+                            for (int k = 0; k < 300; k++) {
+                                Cell cell = row.getCell(k);
+                                if (Objects.nonNull(cell)) {
+                                    cell.setCellValue("");
+                                    cell.setCellType(CellType.STRING);
+                                }
+                            }
+                        }
+                    }
+                }
+                //清chu主表手输数据
+                if ("主抽数据".equals(sheetName)) {
+                    for (int j = 4; j < 97; j++) {
+                        Row row = sheet.getRow(j);
+                        if (Objects.nonNull(row)) {
+                            //4 5 8 9 14 15 16 17 19 20 23 24 29 30 31 32 33 34 36 37
+                            int[] a = {4, 5, 8, 9, 14, 15, 16, 17, 19, 20, 23, 24, 29, 30, 31, 32, 33, 34, 36, 37};
+                            for (int k = 0; k < a.length; k++) {
+                                Cell cell = row.getCell(a[k]);
+                                if (Objects.nonNull(cell)) {
+                                    cell.setCellValue("");
+                                    cell.setCellType(CellType.STRING);
+                                }
+                            }
+
+                        }
+                    }
+                }
+                if ("错峰用电".equals(sheetName)) {
+                    for (int j = 3; j < 189; j++) {
+                        Row row = sheet.getRow(j);
+                        if (Objects.nonNull(row)) {
+                            //4 5 8 9 14 15 16 17 19 20 23 24 29 30 31 32 33 34 36 37
+                            int[] a = {7, 8, 22, 23};
+                            for (int k = 0; k < a.length; k++) {
+                                Cell cell = row.getCell(a[k]);
+                                if (Objects.nonNull(cell)) {
+                                    cell.setCellValue("");
+                                    cell.setCellType(CellType.STRING);
+                                }
+                            }
+
+                        }
+                    }
+                }
+                if ("5烧主抽电耗".equals(sheetName) || "6烧主抽电耗".equals(sheetName)) {
+                    for (int j = 2; j < 95; j++) {
+                        Row row = sheet.getRow(j);
+                        if (Objects.nonNull(row)) {
+                            //4 5 8 9 14 15 16 17 19 20 23 24 29 30 31 32 33 34 36 37
+                            int[] a = {23, 24, 25};
+                            for (int k = 0; k < a.length; k++) {
+                                Cell cell = row.getCell(a[k]);
+                                if (Objects.nonNull(cell)) {
+                                    cell.setCellValue("");
+                                    cell.setCellType(CellType.STRING);
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+            workbook.setForceFormulaRecalculation(true);
+            workbook.write(modelFos);
+            modelFos.close();
+            workbook.close();
+        } else {
+            workbook.close();
+            FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
+            FileUtils.copyFile(excelPathInfo.getSaveFilePath(), writerExcelDTO.getTemplate().getTemplatePath());
+        }
     }
 }
