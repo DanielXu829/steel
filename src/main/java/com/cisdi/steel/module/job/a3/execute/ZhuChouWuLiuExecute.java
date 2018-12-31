@@ -72,7 +72,7 @@ public class ZhuChouWuLiuExecute extends AbstractJobExecuteExecute {
                         .startTime(new Date())
                         .jobEnum(jobExecuteInfo.getJobEnum())
                         .jobExecuteEnum(jobExecuteInfo.getJobExecuteEnum())
-                        .dateQuery(jobExecuteInfo.getDateQuery())
+                        .dateQuery(dateQuery)
                         .template(template)
                         .excelPathInfo(excelPathInfo)
                         .build();

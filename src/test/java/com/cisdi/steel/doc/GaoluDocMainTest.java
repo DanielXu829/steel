@@ -117,8 +117,8 @@ public class GaoluDocMainTest {
         String title2 = "第6段";
         String categoryAxisLabel2 = "";
         String valueAxisLabel2 = "";
-//        JFreeChart chart2 = ChartFactory.createPolarChart(title2, categoryAxisLabel2, valueAxisLabel2, ChartDataSet.createXYSeriesCollection());
-        JFreeChart chart2 = MySpriderWebPlotTest.createDemoPanel();
+        JFreeChart chart2 = ChartFactory.createPolarChart(title2, categoryAxisLabel2, valueAxisLabel2, ChartDataSet.createXYSeriesCollection());
+//        JFreeChart chart2 = MySpriderWebPlotTest.createDemoPanel();
         WordImageEntity image2 = image(chart2);
         map.put("jfreechartImg2", image2);
         ////////////////////////////////////////////////////
