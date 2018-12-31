@@ -122,6 +122,7 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
         result.put("starttime", dateQuery.getStartTime().toString());
         result.put("endtime", dateQuery.getEndTime().toString());
         result.put("anaitemname", anaitemname);
+        result.put("source", "三回收");
         return result;
     }
 
@@ -278,6 +279,6 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
     }
 
     protected String getUrl5() {
-        return httpProperties.getUrlApiJHOne() + "/analyses/getAnaitemValByCode";
+        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCodeOrSource";
     }
 }
