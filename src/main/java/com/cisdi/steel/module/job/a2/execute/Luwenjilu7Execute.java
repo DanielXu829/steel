@@ -104,7 +104,6 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         // 隐藏 下划线的sheet  强制计算
         FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
         int numberOfSheets = workbook.getNumberOfSheets();
-        int removeSheetNum=3;
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             String sheetName = sheet.getSheetName();
@@ -120,41 +119,15 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
         fos.close();
+        workbook.close();
         String formatDateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), DateUtil.yyyyMMFormat);
         String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMFormat);
         if(!formatDateTime1.equals(formatDateTime)){
-            FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
-            for (int i = 0; i < numberOfSheets; i++) {
-                Sheet sheet = workbook.getSheetAt(i);
-                String sheetName = sheet.getSheetName();
-                if ("7炉机侧炉温管控".equals(sheetName)) {
-                    for (int j = 3; j < 59; j++) {
-                        Row row = sheet.getRow(j);
-                        for (int k = 1; k < 32; k++) {
-                            row.getCell(k).setCellValue("");
-                            row.getCell(k).setCellType(CellType.STRING);
-                        }
-                    }
-                } else if ("7炉焦侧炉温管控".equals(sheetName)) {
-                    for (int j = 3; j < 59; j++) {
-                        Row row = sheet.getRow(j);
-                        for (int k = 1; k < 32; k++) {
-                            row.getCell(k).setCellValue("");
-                            row.getCell(k).setCellType(CellType.STRING);
-                        }
-                    }
-                }
-            }
-            for (int i = 3; i < numberOfSheets; i++) {
-                workbook.removeSheetAt(i);
-                numberOfSheets--;
-            }
-            workbook.setForceFormulaRecalculation(true);
-            workbook.write(modelFos);
-            modelFos.close();
-            workbook.close();
+            FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
+            //FileUtils.copyFile("D:\\template\\焦化\\CK67-炼焦-7#炉温记录报表（日）copy.xlsx",writerExcelDTO.getTemplate().getTemplatePath());
+            FileUtils.copyFile("/u01/template/焦化/CK67-炼焦-7#炉温记录报表（日）copy.xlsx",writerExcelDTO.getTemplate().getTemplatePath());
         }else {
-            workbook.close();
+
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             FileUtils.copyFile(excelPathInfo.getSaveFilePath(),writerExcelDTO.getTemplate().getTemplatePath());
         }

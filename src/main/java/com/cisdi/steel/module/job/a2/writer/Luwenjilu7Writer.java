@@ -153,8 +153,6 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
             ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
 
         }
-
-
         return resultData;
     }
 
