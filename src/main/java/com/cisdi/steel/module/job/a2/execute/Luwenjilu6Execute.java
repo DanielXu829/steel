@@ -114,43 +114,18 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
         fos.close();
+        workbook.close();
         //月末清除模板数据到最初
         String formatDateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), DateUtil.yyyyMMFormat);
         String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMFormat);
         if(!formatDateTime1.equals(formatDateTime)){
-            FileOutputStream modelFos = new FileOutputStream(writerExcelDTO.getTemplate().getTemplatePath());
-            for (int i = 0; i < numberOfSheets; i++) {
-                Sheet sheet = workbook.getSheetAt(i);
-                String sheetName = sheet.getSheetName();
-                if ("6炉机侧炉温管控".equals(sheetName)) {
-                    for (int j = 3; j < 59; j++) {
-                        Row row = sheet.getRow(j);
-                        for (int k = 1; k < 32; k++) {
-                            row.getCell(k).setCellValue("");
-                            row.getCell(k).setCellType(CellType.STRING);
-                        }
-                    }
-                } else if ("6炉焦侧炉温管控".equals(sheetName)) {
-                    for (int j = 3; j < 59; j++) {
-                        Row row = sheet.getRow(j);
-                        for (int k = 1; k < 32; k++) {
-                            row.getCell(k).setCellValue("");
-                            row.getCell(k).setCellType(CellType.STRING);
-                        }
-                    }
-                }
-            }
-            for (int i = 3; i < numberOfSheets; i++) {
-                workbook.removeSheetAt(i);
-                numberOfSheets--;
-            }
-            workbook.setForceFormulaRecalculation(true);
-            workbook.write(modelFos);
-            modelFos.close();
+            FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
+           // FileUtils.copyFile("D:\\template\\焦化\\CK67-炼焦-6#炉温记录报表（日）copy.xlsx",writerExcelDTO.getTemplate().getTemplatePath());
+            FileUtils.copyFile("/u01/template/焦化/CK67-炼焦-6#炉温记录报表（日）copy.xlsx",writerExcelDTO.getTemplate().getTemplatePath());
         } else {
-            workbook.close();
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             FileUtils.copyFile(excelPathInfo.getSaveFilePath(), writerExcelDTO.getTemplate().getTemplatePath());
         }
     }
+
 }

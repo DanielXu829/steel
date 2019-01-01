@@ -61,6 +61,10 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     List<CellData> cellDataList = this.handlerData(dateQueries.get(dateQueries.size() - 1), sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
 //                    }
+                }else{
+                    List<String> firstColumnCellVal = PoiCustomUtil.getFirstRowCelVal(sheet);
+                    List<CellData> cellData = this.mapDataHandler(getUrl2(), firstColumnCellVal, 1);
+                    ExcelWriterUtil.setCellValue(sheet, cellData);
                 }
             }
         }
@@ -109,19 +113,41 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     }
 
 
+    protected List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch) {
+        Map<String, String> queryParam = getQueryParam2();
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        int startRow = 1;
+        return ExcelWriterUtil.handlerRowData(columns, startRow, data);
+    }
+
+
+
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateQuery.getRecordDate());
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
         String dateTime = DateUtil.getFormatDateTime(new Date(), DateUtil.fullFormat);
         result.put("time", dateTime);
         return result;
     }
 
+    protected Map<String, String> getQueryParam2() {
+        Map<String, String> result = new HashMap<>();
+        result.put("dateTime", DateUtil.getFormatDateTime(new Date(),"yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
     private String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
+    }
+    private String getUrl2() {
+        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getCoalSiloName";
     }
 
 }
