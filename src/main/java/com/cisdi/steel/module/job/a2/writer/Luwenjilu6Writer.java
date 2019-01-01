@@ -35,11 +35,8 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         int numberOfSheets = workbook.getNumberOfSheets();
         DateQuery dateQuery = this.getDateQuery(excelDTO);
-        Calendar calendar=Calendar.getInstance();
-        calendar.setTime(dateQuery.getRecordDate());
-        calendar.set(Calendar.SECOND,-10);
-        String dd = DateUtil.getFormatDateTime(calendar.getTime(), "dd");
-        String format = DateUtil.getFormatDateTime(calendar.getTime(), "MM.dd");
+        String dd = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "dd");
+        String format = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "MM.dd");
         int ss = Integer.parseInt(dd);
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheetAt = workbook.getSheetAt(i);

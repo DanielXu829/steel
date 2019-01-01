@@ -80,7 +80,6 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
             //FileUtils.copyFile("D:\\template\\焦化\\CK67-炼焦-7#炉温记录报表（日）copy.xlsx",writerExcelDTO.getTemplate().getTemplatePath());
             FileUtils.copyFile("/u01/templates/焦化/CK67-炼焦-7#炉温记录报表（日）copy.xlsx", writerExcelDTO.getTemplate().getTemplatePath());
         } else {
-
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             FileUtils.copyFile(excelPathInfo.getSaveFilePath(), writerExcelDTO.getTemplate().getTemplatePath());
         }
