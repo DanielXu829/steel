@@ -82,7 +82,7 @@ public class ExportJobContext {
                     ReportCategoryTemplate reportCategoryTemplate = reportCategoryTemplateService.getOne(wrapper);
                     DateQuery dateQuery = new DateQuery(reportIndex.getRecordDate(), reportIndex.getRecordDate(), reportIndex.getRecordDate());
                     dateQuery.setRecordDay(reportIndex.getRecordDate());
-                    DateQuery dateQuery1 = DateQueryUtil.handlerDelay(dateQuery, reportCategoryTemplate.getBuildDelay(), reportCategoryTemplate.getBuildDelayUnit());
+                    DateQuery dateQuery1 = DateQueryUtil.handlerDelay(dateQuery, reportCategoryTemplate.getBuildDelay(), reportCategoryTemplate.getBuildDelayUnit(),false);
                     JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
                             .jobEnum(abstractExportJob.getCurrentJob())
                             .jobExecuteEnum(JobExecuteEnum.manual)
