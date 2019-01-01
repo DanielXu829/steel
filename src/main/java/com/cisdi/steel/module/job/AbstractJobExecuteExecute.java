@@ -103,8 +103,8 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 3
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
-//            Date date = new Date();
-            Date date = DateUtil.strToDate("2019-01-01 00:05:00", DateUtil.fullFormat);
+            Date date = new Date();
+//            Date date = DateUtil.strToDate("2019-01-01 00:05:00", DateUtil.fullFormat);
             DateQuery dateQuery = new DateQuery(date, date, date);
             try {
                 if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
