@@ -74,15 +74,37 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                     List<CellData> cellDataList = this.mapDataHandler(url, columns, dateQuery, rowBatch, sheetName, indexRow, version);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else {
-                    for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = this.mapDataHandler(url, columns, item, rowBatch, sheetName, indexRow, version);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        indexRow++;
+                    if ("_sjmain7_day_shift".equals(sheetName)) {
+                        for (DateQuery item : dateQueries) {
+                            List<CellData> cellDataList = this.mapDataHandler(url, columns, getQueryParam1(item), rowBatch, sheetName, indexRow, version);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            indexRow++;
+                        }
+                    } else {
+                        for (DateQuery item : dateQueries) {
+                            List<CellData> cellDataList = this.mapDataHandler(url, columns, item, rowBatch, sheetName, indexRow, version);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            indexRow++;
+                        }
                     }
                 }
             }
         }
         return workbook;
+    }
+
+    protected DateQuery getQueryParam1(DateQuery dateQuery) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateQuery.getStartTime());
+        calendar.add(Calendar.HOUR, 1);
+        dateQuery.setStartTime(calendar.getTime());
+
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(dateQuery.getEndTime());
+        calendar1.add(Calendar.HOUR, 1);
+        dateQuery.setEndTime(calendar1.getTime());
+        return dateQuery;
+
     }
 
     private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch, String sheetName, int idexRow, String version) {
@@ -167,7 +189,7 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             if (Objects.isNull(data)) {
                 return null;
             }
-            return this.handlerJsonArray(columns, data, sheetName, dateQuery);
+            return this.handlerJsonArray(columns, data, sheetName, dateQuery, idexRow);
         }
     }
 
@@ -244,12 +266,12 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, String sheetName, DateQuery dateQuerys) {
+    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, String sheetName, DateQuery dateQuerys, int idexRow) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
-            int rowIndex = 1;
+            int rowIndex = idexRow;
             if (StringUtils.isNotBlank(column)) {
                 JSONObject jsonObject = data.getJSONObject(column);
                 if (Objects.nonNull(jsonObject)) {
@@ -264,29 +286,8 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                     }
                     Arrays.sort(list);
 
-                    List<DateQuery> all = new ArrayList<>();
-
-                    if ("_sjmain1_day_shift".equals(sheetName)) {
-                        DateQuery dateQuery = DateQueryUtil.buildToday(dateQuerys.getRecordDate());
-                        List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuery.getStartTime());
-                        all.addAll(dateQueries8);
-                    } else {
-                        List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(dateQuerys.getRecordDate());
-                        all.addAll(dateQueries);
-                    }
-
-                    for (int j = 0; j < all.size(); j++) {
-                        long time = all.get(j).getStartTime().getTime();
-                        Object v = "";
-                        for (int m = 0; m < list.length; m++) {
-                            if (time == list[m].longValue()) {
-                                Object o = innerMap.get(String.valueOf(list[m]));
-                                v = o;
-                                break;
-                            }
-                        }
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
-                        rowIndex++;
+                    for (int m = 0; m < list.length; m++) {
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex++, i, innerMap.get(String.valueOf(list[m])));
                     }
                 }
             }

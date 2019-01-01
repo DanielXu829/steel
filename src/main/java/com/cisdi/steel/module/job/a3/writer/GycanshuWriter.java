@@ -83,6 +83,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
             queryParam.remove("tagNames");
             queryParam.put("itemNames", columns);
             queryParam.put("brandCode", "sinter");
+            queryParam.put("type", "LC");
             url = getUrl3(version);
         }
 
@@ -107,6 +108,10 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                 queryParam2.put("type", "ALL");
 
                 String url1 = getUrl4(version);
+                if("RDI+3.15".equals(column)){
+                    queryParam.put("type", "LM");
+                    jsonString = JSONObject.toJSONString(queryParam, serializeConfig);
+                }
                 String result1 = httpUtil.postJsonParams(url1, jsonString);
                 JSONObject obj1 = JSONObject.parseObject(result1);
 
