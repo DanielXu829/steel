@@ -5,8 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
+import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,6 +38,9 @@ public class ExportJobContext {
 
     @Autowired
     private ReportIndexMapper reportIndexMapper;
+
+    @Autowired
+    private ReportCategoryTemplateService reportCategoryTemplateService;
 
     @Autowired
     public ExportJobContext(Map<String, AbstractExportJob> apiJobMap) {
@@ -67,10 +74,19 @@ public class ExportJobContext {
             if (Objects.nonNull(reportIndex)) {
                 AbstractExportJob abstractExportJob = apiJob.get(reportIndex.getReportCategoryCode());
                 if (Objects.nonNull(abstractExportJob)) {
+                    LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
+                    wrapper.eq(ReportCategoryTemplate::getReportCategoryCode, reportIndex.getReportCategoryCode());
+                    wrapper.eq(ReportCategoryTemplate::getSequence, reportIndex.getSequence());
+                    wrapper.eq(ReportCategoryTemplate::getTemplateLang, reportIndex.getIndexLang());
+                    wrapper.eq(ReportCategoryTemplate::getTemplateType, reportIndex.getIndexType());
+                    ReportCategoryTemplate reportCategoryTemplate = reportCategoryTemplateService.getOne(wrapper);
+                    DateQuery dateQuery = new DateQuery(reportIndex.getRecordDate(), reportIndex.getRecordDate(), reportIndex.getRecordDate());
+                    dateQuery.setRecordDay(reportIndex.getRecordDate());
+                    DateQuery dateQuery1 = DateQueryUtil.handlerDelay(dateQuery, reportCategoryTemplate.getBuildDelay(), reportCategoryTemplate.getBuildDelayUnit());
                     JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
                             .jobEnum(abstractExportJob.getCurrentJob())
                             .jobExecuteEnum(JobExecuteEnum.manual)
-                            .dateQuery(new DateQuery(reportIndex.getRecordDate(), reportIndex.getRecordDate(), reportIndex.getRecordDate()))
+                            .dateQuery(dateQuery1)
                             .build();
                     abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
                 }
@@ -85,7 +101,7 @@ public class ExportJobContext {
         try {
             LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
             List<ReportIndex> reportIndex = reportIndexMapper.selectList(wrapper);
-            for(ReportIndex index:reportIndex){
+            for (ReportIndex index : reportIndex) {
                 if (Objects.nonNull(index)) {
                     AbstractExportJob abstractExportJob = apiJob.get(index.getReportCategoryCode());
                     if (Objects.nonNull(abstractExportJob)) {
