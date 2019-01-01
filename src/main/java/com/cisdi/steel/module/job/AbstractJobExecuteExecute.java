@@ -127,7 +127,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                 // 4、5填充数据
                 Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
                 // 6、生成文件
-                this.createFile(workbook, excelPathInfo);
+                this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
 
                 // 7、插入索引
                 ReportIndex reportIndex = new ReportIndex();
@@ -245,7 +245,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param excelPathInfo 文件存储数据
      * @throws IOException 异常
      */
-    protected void createFile(Workbook workbook, ExcelPathInfo excelPathInfo) throws IOException {
+    public void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {
         // 隐藏 下划线的sheet  强制计算
         FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
         int numberOfSheets = workbook.getNumberOfSheets();
