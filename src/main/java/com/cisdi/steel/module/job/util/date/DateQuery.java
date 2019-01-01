@@ -47,6 +47,11 @@ public class DateQuery {
      */
     private Date oldDate;
 
+    /**
+     * 报表时间
+     */
+    private Date recordDay;
+
     public DateQuery(Date recordDate) {
         this.recordDate = recordDate;
     }

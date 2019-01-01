@@ -105,13 +105,13 @@
             AND index_lang =#{indexLang}
             AND sequence =#{sequence}
             <if test="indexType=='report_day' or indexType=='report_class' or indexType=='report_four_hour'  or indexType=='report_hour'">
-                AND DATE_FORMAT(create_time,'%Y-%m-%d')=DATE_FORMAT(#{currDate},'%Y-%m-%d')
+                AND DATE_FORMAT(record_date,'%Y-%m-%d')=DATE_FORMAT(#{currDate},'%Y-%m-%d')
             </if>
             <if test="indexType=='report_month'">
-                AND DATE_FORMAT(create_time,'%Y-%m')=DATE_FORMAT(#{currDate},'%Y-%m')
+                AND DATE_FORMAT(record_date,'%Y-%m')=DATE_FORMAT(#{currDate},'%Y-%m')
             </if>
             <if test="indexType=='report_year'">
-                AND DATE_FORMAT(create_time,'%Y')=DATE_FORMAT(#{currDate},'%Y')
+                AND DATE_FORMAT(record_date,'%Y')=DATE_FORMAT(#{currDate},'%Y')
             </if>
         </where>
         limit 1

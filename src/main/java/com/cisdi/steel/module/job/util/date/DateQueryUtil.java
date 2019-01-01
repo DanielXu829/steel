@@ -257,6 +257,18 @@ public class DateQueryUtil {
 
 
     public static DateQuery handlerDelay(DateQuery dateQuery, Integer delay, String delayUnit) {
+        return handlerDelay(dateQuery, delay, delayUnit, true);
+    }
+
+    /**
+     *
+     * @param dateQuery
+     * @param delay
+     * @param delayUnit
+     * @param flag true延迟 false
+     * @return
+     */
+    public static DateQuery handlerDelay(DateQuery dateQuery, Integer delay, String delayUnit, boolean flag) {
         TimeUnitEnum timeUnitEnum = TimeUnitEnum.getValues(delayUnit);
         if (Objects.isNull(timeUnitEnum) || Objects.isNull(delay) || 1 == delay) {
             dateQuery.setOldDate(dateQuery.getRecordDate());
@@ -287,7 +299,11 @@ public class DateQueryUtil {
             default:
                 yield = Calendar.HOUR_OF_DAY;
         }
-        calendar.add(yield, -delay);
+        if (flag) {
+            calendar.add(yield, -delay);
+        } else {
+            calendar.add(yield, delay);
+        }
         dateQuery.setRecordDate(calendar.getTime());
         dateQuery.setOldDate(recordDate);
         return dateQuery;
