@@ -104,14 +104,15 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
             Date date = new Date();
-//            Date date = DateUtil.strToDate("2019-01-01 00:05:00", DateUtil.fullFormat);
             DateQuery dateQuery = new DateQuery(date, date, date);
             try {
                 if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
                     dateQuery = jobExecuteInfo.getDateQuery();
                 }
-                // 处理延迟问题
-                dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
+                if (Objects.isNull(dateQuery.getDelay()) || dateQuery.getDelay()) {
+                    // 处理延迟问题
+                    dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
+                }
 
                 ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
                 // 参数缺一不可

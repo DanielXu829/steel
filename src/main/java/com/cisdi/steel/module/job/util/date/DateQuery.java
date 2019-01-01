@@ -48,9 +48,9 @@ public class DateQuery {
     private Date oldDate;
 
     /**
-     * 报表时间
+     * 是否延迟
      */
-    private Date recordDay;
+    private Boolean delay;
 
     public DateQuery(Date recordDate) {
         this.recordDate = recordDate;
