@@ -92,7 +92,10 @@ public class ReportIndex extends Model<ReportIndex> {
     private String attr4;
 
     @TableField(exist = false)
-    private Date currDate=new Date();
+    private Date currDate = new Date();
+
+    @TableField("record_date")
+    private Date recordDate;
 
     @Override
     protected Serializable pkVal() {

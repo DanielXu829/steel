@@ -12,6 +12,7 @@ import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
@@ -126,7 +127,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         reportIndex.setUpdateTime(now);
         reportIndex.setHidden("0");
         ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
-        if (Objects.isNull(report)) {
+        if (Objects.isNull(report)
+                || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())) {
             reportIndex.setCreateTime(now);
             this.save(reportIndex);
         } else {

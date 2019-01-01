@@ -103,7 +103,8 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 3
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
         for (ReportCategoryTemplate template : templates) {
-            Date date = new Date();
+//            Date date = new Date();
+            Date date = DateUtil.strToDate("2019-01-01 00:05:00", DateUtil.fullFormat);
             DateQuery dateQuery = new DateQuery(date, date, date);
             try {
                 if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
@@ -135,7 +136,8 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                         .setPath(excelPathInfo.getSaveFilePath())
                         .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
                         .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
-                        .setCurrDate(dateQuery.getOldDate());
+                        .setCurrDate(dateQuery.getRecordDate())
+                        .setRecordDate(dateQuery.getRecordDate());
                 reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
                 log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage(), e);
@@ -188,7 +190,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum, dateQuery);
 
         //自动配煤报表 单独特殊处理到分钟
-        if (StringUtils.isNotBlank(code) && "jh_zidongpeimei".equals(code) || StringUtils.isNotBlank(code) && "gl_peiliaodan".equals(code)) {
+        if (StringUtils.isNotBlank(code) && JobEnum.jh_zidongpeimei.getCode().equals(code) || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan.getCode().equals(code)) {
             // yyyy-MM-dd_HH_mm
             datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
         }

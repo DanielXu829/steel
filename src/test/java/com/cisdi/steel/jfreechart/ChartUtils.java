@@ -257,6 +257,8 @@ public class ChartUtils {
         rangeAxis.setRange(rangIndex, rangEnd); //Y轴取值范围
 
 
+
+
         plot.setNoDataMessage(NO_DATA_MSG);
         plot.setInsets(new RectangleInsets(10, 10, 0, 10), false);
         LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot
@@ -272,6 +274,10 @@ public class ChartUtils {
                     ItemLabelAnchor.OUTSIDE1, TextAnchor.BOTTOM_CENTER));// weizhi
         }
         renderer.setBaseShapesVisible(isShapesVisible);// 数据点绘制形状
+
+        // 设置折线加粗
+        renderer.setSeriesStroke(0, new BasicStroke(3F));
+        renderer.setSeriesOutlineStroke(0, new BasicStroke(2.0F));
 
 
         if (y2) {
@@ -293,6 +299,14 @@ public class ChartUtils {
             axis2.setRange(rangIndex2, rangEnd2);
             setYAixs(plot, 1);
         }
+
+        plot.setBackgroundPaint(Color.white);
+        plot.setDomainGridlinePaint(new Color(112, 128, 144));
+        plot.setRangeGridlinePaint(new Color(112, 128, 144));
+        plot.setAxisOffset(new RectangleInsets(5D, 5D, 5D, 5D));
+        plot.setDomainCrosshairVisible(true);
+        plot.setRangeCrosshairVisible(true);
+        plot.setOutlineVisible(false);
 
 
         setXAixs(plot);

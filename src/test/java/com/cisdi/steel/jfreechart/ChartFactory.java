@@ -115,6 +115,8 @@ public class ChartFactory {
         }
 
         JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
+
+        chart.setBorderVisible(false);
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
@@ -125,6 +127,8 @@ public class ChartFactory {
         // 设置标注无边框
 //        ChartUtils.setLegendEmptyBorder(chart);
         //设置标注不显示
+
+
         ChartUtils.setLegendShow(chart, 0, show);
         return chart;
     }
