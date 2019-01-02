@@ -269,7 +269,7 @@ public class DateQueryUtil {
      */
     public static DateQuery handlerDelay(DateQuery dateQuery, Integer delay, String delayUnit, boolean flag) {
         TimeUnitEnum timeUnitEnum = TimeUnitEnum.getValues(delayUnit);
-        if (Objects.isNull(timeUnitEnum) || Objects.isNull(delay) || 1 == delay) {
+        if (Objects.isNull(timeUnitEnum) || Objects.isNull(delay)) {
             dateQuery.setOldDate(dateQuery.getRecordDate());
             return dateQuery;
         }
@@ -306,5 +306,23 @@ public class DateQueryUtil {
         dateQuery.setRecordDate(calendar.getTime());
         dateQuery.setOldDate(recordDate);
         return dateQuery;
+    }
+
+    public static Map<String, String> getQueryParam(DateQuery dateQuery, int hour, int min, int sec) {
+        Map<String, String> map = new HashMap<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateQuery.getStartTime());
+        calendar.set(Calendar.HOUR, hour);
+        calendar.set(Calendar.MINUTE, min);
+        calendar.set(Calendar.SECOND, sec);
+        map.put("starttime", calendar.getTime().getTime() + "");
+
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(dateQuery.getEndTime());
+        calendar1.set(Calendar.HOUR, hour);
+        calendar1.set(Calendar.MINUTE, min);
+        calendar1.set(Calendar.SECOND, sec);
+        map.put("endtime", calendar1.getTime().getTime() + "");
+        return map;
     }
 }

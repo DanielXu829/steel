@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelCellColorUtil;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -64,7 +65,7 @@ public class MeiqihunhemeiWriter extends AbstractExcelReadWriter {
                 Map<String, List<Cell>> stringListMap = ExcelCellColorUtil.groupByCell(columns, maps, DEFAULT_URL);
                 int index = 1;
 
-                Map<String, String> queryParam = this.getQueryParam(dateQueries.get(0));
+                Map<String, String> queryParam = DateQueryUtil.getQueryParam(dateQueries.get(0), 0, 0, 10);
                 List<CellData> cellDataList = this.eachData(stringListMap, queryParam, index);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
             }
@@ -104,17 +105,4 @@ public class MeiqihunhemeiWriter extends AbstractExcelReadWriter {
         });
         return results;
     }
-
-    protected Map<String, String> getQueryParam(DateQuery dateQuery) {
-        Map<String, String> map = new HashMap<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateQuery.getStartTime());
-        calendar.set(Calendar.HOUR, 8);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        map.put("time", calendar.getTime().getTime() + "");
-//        map.put("time", "1541088000000");
-        return map;
-    }
-
 }

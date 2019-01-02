@@ -145,11 +145,7 @@ public class GuifengjimeiyajiWriter extends AbstractExcelReadWriter {
         Map<String, String> map = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateQuery.getStartTime());
-//        calendar.set(Calendar.HOUR, 0);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
         map.put("time", calendar.getTime().getTime() + "");
-//        map.put("time", "1541088000000");
         return map;
     }
 

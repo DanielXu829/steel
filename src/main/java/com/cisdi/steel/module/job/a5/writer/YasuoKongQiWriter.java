@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.enums.TimeUnitEnum;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -43,53 +44,20 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
 
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
-                //黄色部分
-                if ("_acsReportGas_day_all".equals(sheetName)) {
-                    // 获取的对应的策略
-                    List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                    List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-
-                    //不延迟处理
-                    DateQuery dateQuery = dateQueries.get(0);
-                    dateQuery.setStartTime(date.getOldDate());
-                    List<CellData> cellDataList = this.eachData(columns, getUrl(), getQueryParam(dateQuery));
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    //红色部分
-                } else if ("_acsReportStrtStp_day_all".equals(sheetName) || "_acsReportRuntime_day_all".equals(sheetName)) {
-                    List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                    List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-                    List<CellData> cellDataList = this.eachData(columns, getUrl1(), getQueryParam(dateQueries.get(0)));
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    //绿色部分
-                } else if ("_acsReportStrtStp_month_day".equals(sheetName)) {
-                    List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                    List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-                    List<CellData> cellDataList = this.eachData(columns, getUrl2(), getQueryParam2(dateQueries.get(dateQueries.size() - 1)));
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                String url = getUrl1();
+                if ("_acsReportGas_day_all".equals(sheetName) || "_acsReportStrtStp_day_all".equals(sheetName) || "_acsReportRuntime_day_all".equals(sheetName)) {
+                    url = getUrl1();
+                } else if ("_acsReportStrtStp_month_all".equals(sheetName)) {
+                    url = getUrl2();
                 }
+                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+                List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
+                List<CellData> cellDataList = this.eachData(columns, url, DateQueryUtil.getQueryParam(dateQueries.get(0), 0, 0, 10));
+                ExcelWriterUtil.setCellValue(sheet, cellDataList);
 
             }
         }
         return workbook;
-    }
-
-    protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
-        Map<String, String> map = new HashMap<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateQuery.getRecordDate());
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        map.put("starttime", calendar.getTime().getTime() + "");
-//        map.put("time", "1541088000000");
-        return map;
-    }
-
-    protected Map<String, String> getQueryParam(DateQuery dateQuery) {
-        Map<String, String> map = new HashMap<>();
-        map.put("createDate", String.valueOf(Objects.requireNonNull(dateQuery.getStartTime()).getTime()));
-//        map.put("createDate", "1541088000000");
-        return map;
     }
 
     /**
@@ -124,10 +92,6 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
             }
         }
         return results;
-    }
-
-    private String getUrl() {
-        return httpProperties.getUrlApiNJOne() + "/acsReportDayGasProd";
     }
 
     private String getUrl1() {
