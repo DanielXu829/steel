@@ -11,8 +11,10 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
+import sun.rmi.runtime.Log;
 
 import java.util.*;
 
@@ -27,12 +29,31 @@ import java.util.*;
  */
 @SuppressWarnings("ALL")
 @Component
+@Slf4j
 public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
+
+    public Double compareTagVal(String tagName){
+        HashMap<String, String> map = new HashMap<>();
+        map.put("tagName",tagName);
+        String s = httpUtil.get(getUrl3(), map);
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        JSONObject data = jsonObject.getJSONObject("data");
+        JSONObject tagValue = data.getJSONObject("TagValue");
+        Double val = tagValue.getDouble("val");
+        return val;
+    }
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
+        String[] tagNamesIf={"CK67_L1R_CB_CBAmtTol_1m_max","CK67_L1R_CB_CBAcTol_1m_avg"};
+        Double max = compareTagVal(tagNamesIf[0]);
+        Double avg = compareTagVal(tagNamesIf[1]);
+        if(max<1 && avg==0){
+            log.error("根据条件判断停止执行自动配煤报表");
+            return null;
+        }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
@@ -148,6 +169,9 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     }
     private String getUrl2() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getCoalSiloName";
+    }
+    private String getUrl3() {
+        return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
     }
 
 }
