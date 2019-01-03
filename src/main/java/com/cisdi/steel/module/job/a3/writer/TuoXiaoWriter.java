@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -17,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -66,10 +68,10 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                     dateQuery.setEndTime(dateQuery.getRecordDate());
                     List<CellData> cellDataList = mapDataHandler(getUrl(version), columns, towColumns, dateQuery, rowBaatch, sheetName);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                } else if ("_6tuoxiaogaoliu1_month_day".equals(sheetName)) {
+                } else if ("_6tuoxiaogaoliu1_month_day".equals(sheetName) || "_6tuoxiaogaoliu2_month_day".equals(sheetName)) {
                     int rowBaatch = 1;
                     for (DateQuery dateQuery : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler(getUrl1(version), columns, null, dateQuery, rowBaatch, sheetName);
+                        List<CellData> cellDataList = mapDataHandler(getUrl(version), columns, dateQuery, rowBaatch, sheetName, version);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         rowBaatch += 6;
                     }
@@ -79,15 +81,16 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
+    private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch, String sheetName, String version) {
+        return comm(url, columns, dateQuery, rowBatch, sheetName, version);
+    }
+
     private List<CellData> mapDataHandler(String url, List<String> columns, List<String> towColumns, DateQuery dateQuery, int rowBatch, String sheetName) {
         JSONObject query = new JSONObject();
         query.put("start", dateQuery.getQueryStartTime());
         query.put("end", dateQuery.getQueryEndTime());
         query.put("tagNames", columns);
 
-        if ("_6tuoxiaogaoliu1_month_day".equals(sheetName)) {
-            query.put("method", "sum");
-        }
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String result = httpUtil.postJsonParams(url, jsonString);
@@ -99,24 +102,20 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
         JSONObject jsonObject = JSONObject.parseObject(result);
         JSONObject data = jsonObject.getJSONObject("data");
 
-        if ("_6tuoxiaogaoliu_month_day".equals(sheetName)) {
-            query.put("tagNames", towColumns);
-            jsonString = JSONObject.toJSONString(query, serializeConfig);
-            String result2 = httpUtil.postJsonParams(url, jsonString);
-            JSONObject jsonObject2 = JSONObject.parseObject(result2);
-            JSONObject data2 = jsonObject2.getJSONObject("data");
-            if (Objects.isNull(data)) {
-                return null;
-            }
-            return handlerJsonArray(columns, towColumns, data, data2, rowBatch, dateQuery);
-        } else {
-            return comm(url, columns, dateQuery, rowBatch);
+        query.put("tagNames", towColumns);
+        jsonString = JSONObject.toJSONString(query, serializeConfig);
+        String result2 = httpUtil.postJsonParams(url, jsonString);
+        JSONObject jsonObject2 = JSONObject.parseObject(result2);
+        JSONObject data2 = jsonObject2.getJSONObject("data");
+        if (Objects.isNull(data)) {
+            return null;
         }
+
+        return handlerJsonArray(columns, towColumns, data, data2, rowBatch, dateQuery);
 
     }
 
-
-    private List<CellData> comm(String url, List<String> columns, DateQuery dateQuerys, int rowBatch) {
+    private List<CellData> comm(String url, List<String> columns, DateQuery dateQuerys, int rowBatch, String sheetName, String version) {
         List<CellData> cellDataList = new ArrayList<>();
         List<DateQuery> dateQueries8 = DateQueryUtil.buildDay8HourEach(dateQuerys.getStartTime());
         int rowBatchs = rowBatch;
@@ -125,7 +124,6 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
             query.put("start", dateQuery.getQueryStartTime());
             query.put("end", dateQuery.getQueryEndTime());
             query.put("tagNames", columns);
-            query.put("method", "sum");
             SerializeConfig serializeConfig = new SerializeConfig();
             String jsonString = JSONObject.toJSONString(query, serializeConfig);
             String result = httpUtil.postJsonParams(url, jsonString);
@@ -135,12 +133,39 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
             if (Objects.isNull(data)) {
                 return null;
             }
-            handlerJsonArray1(cellDataList, columns, data, rowBatchs);
+
+            if ("_6tuoxiaogaoliu1_month_day".equals(sheetName)) {
+                handlerJsonArray1(cellDataList, columns, data, rowBatchs);
+            } else {
+                query.put("method", "min");
+                jsonString = JSONObject.toJSONString(query, serializeConfig);
+                result = httpUtil.postJsonParams(getUrl1(version), jsonString);
+                jsonObject = JSONObject.parseObject(result);
+                JSONObject data2 = jsonObject.getJSONObject("data");
+                if (Objects.isNull(data)) {
+                    return null;
+                }
+
+                handlerJsonArray2(cellDataList, columns, data, data2, rowBatchs);
+            }
             rowBatchs += 2;
         }
         return cellDataList;
     }
 
+    private List<CellData> handlerJsonArray2(List<CellData> cellDataList, List<String> columns, JSONObject data, JSONObject data2, int rowBatch) {
+
+        int size = columns.size();
+        int rowIndex = rowBatch;
+        for (int i = 0; i < size; i++) {
+            String column = columns.get(i);
+            if (StringUtils.isNotBlank(column)) {
+                Double v = deal2(column, data, data2);
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
+            }
+        }
+        return cellDataList;
+    }
 
     //
     private List<CellData> handlerJsonArray1(List<CellData> cellDataList, List<String> columns, JSONObject data, int rowBatch) {
@@ -150,15 +175,80 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
             if (StringUtils.isNotBlank(column)) {
-                Object jsonObject = data.get(column);
-                Object v = "";
-                if (Objects.nonNull(jsonObject)) {
-                    v = jsonObject;
-                }
-                ExcelWriterUtil.addCellData(cellDataList, rowIndex++, i, v);
+                Double v = deal(column, data);
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
             }
         }
         return cellDataList;
+    }
+
+    private Double deal2(String column, JSONObject data, JSONObject data2) {
+        BigDecimal result1 = BigDecimal.ZERO;
+        BigDecimal result2 = BigDecimal.ZERO;
+
+        JSONObject jsonObject = data.getJSONObject(column);
+        if (Objects.nonNull(jsonObject)) {
+            Map<String, Object> innerMap = jsonObject.getInnerMap();
+            Set<String> keys = innerMap.keySet();
+
+            Long[] list = new Long[keys.size()];
+            int k = 0;
+            for (String key : keys) {
+                list[k] = Long.valueOf(key);
+                k++;
+            }
+            Arrays.sort(list);
+
+            Object o = null;
+            Object o1 = null;
+            for (int m = 0; m < list.length - 1; m++) {
+                o = innerMap.get(String.valueOf(list[m]));
+            }
+            o1 = data2.get(column);
+
+            if (Objects.nonNull(o)) {
+                result2 = (BigDecimal) o;
+            }
+            if (Objects.nonNull(o1)) {
+                result1 = (BigDecimal) o1;
+            }
+        }
+        return result2.subtract(result1).doubleValue();
+    }
+
+    private Double deal(String column, JSONObject data) {
+        BigDecimal result1 = BigDecimal.ZERO;
+        BigDecimal result2 = BigDecimal.ZERO;
+
+        JSONObject jsonObject = data.getJSONObject(column);
+        if (Objects.nonNull(jsonObject)) {
+            Map<String, Object> innerMap = jsonObject.getInnerMap();
+            Set<String> keys = innerMap.keySet();
+
+            Long[] list = new Long[keys.size()];
+            int k = 0;
+            for (String key : keys) {
+                list[k] = Long.valueOf(key);
+                k++;
+            }
+            Arrays.sort(list);
+
+            Object o = null;
+            Object o1 = null;
+            for (int m = 0; m < list.length - 1; m++) {
+                o = innerMap.get(String.valueOf(list[m]));
+                o1 = innerMap.get(String.valueOf(list[m + 1]));
+            }
+
+
+            if (Objects.nonNull(o)) {
+                result1 = (BigDecimal) o;
+            }
+            if (Objects.nonNull(o1)) {
+                result2 = (BigDecimal) o1;
+            }
+        }
+        return result2.subtract(result1).doubleValue();
     }
 
     private List<CellData> handlerJsonArray(List<String> columns, List<String> towColumns, JSONObject data, JSONObject data2, int rowBatch, DateQuery dateQuerys) {
@@ -190,7 +280,7 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                     }
 
                     for (int j = 0; j < all.size(); j++) {
-                        long time = all.get(j).getStartTime().getTime();
+                        long time = all.get(j).getEndTime().getTime();
                         Object v = "";
                         for (int m = 0; m < list.length; m++) {
                             if (time == list[m].longValue()) {

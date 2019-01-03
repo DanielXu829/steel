@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelCellColorUtil;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -73,7 +74,7 @@ public class GuifengjimeiyajiWriter extends AbstractExcelReadWriter {
                         index++;
                     }
                 } else {
-                    Map<String, String> queryParam = this.getQueryParam(dateQueries.get(0));
+                    Map<String, String> queryParam = DateQueryUtil.getQueryParam(dateQueries.get(0), 0, 0, 10);
                     List<CellData> cellDataList = this.eachData(stringListMap, queryParam, index);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
@@ -132,10 +133,10 @@ public class GuifengjimeiyajiWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> map = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
+        calendar.setTime(dateQuery.getRecordDate());
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.SECOND, 1);
         map.put("time", calendar.getTime().getTime() + "");
 //        map.put("time", "1541088000000");
         return map;
