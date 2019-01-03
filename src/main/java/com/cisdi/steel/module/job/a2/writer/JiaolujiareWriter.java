@@ -42,6 +42,14 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
+                Date date1 = DateUtil.addDays(new Date(), -1);
+                String formatDateTime = DateUtil.getFormatDateTime(date1, DateUtil.yyyyMMddFormat);
+                Date date2 = DateUtil.strToDate(formatDateTime + " 23:30:00", DateUtil.fullFormat);
+                DateQuery dateQuery = new DateQuery(new Date());
+                dateQuery.setRecordDate(new Date());
+                dateQuery.setStartTime(date2);
+                dateQuery.setEndTime(DateUtil.getTodayBeginTime());
+                dateQueries.add(0,dateQuery);
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
                     int rowIndex = j + 1;
