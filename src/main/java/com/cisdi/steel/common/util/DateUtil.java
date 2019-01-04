@@ -618,6 +618,15 @@ public class DateUtil {
         return time;
     }
 
+    public static Date addMinute(Date date, int minute) {
+        Date time = null;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.MINUTE, minute);
+        time = cal.getTime();
+        return time;
+    }
+
     /**
      * 时间毫秒时间轴 转换 long
      *

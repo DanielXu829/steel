@@ -41,11 +41,11 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                Date date1 = DateUtil.addDays(new Date(), -1);
+                Date date1 = DateUtil.addDays(dateQueries.get(0).getRecordDate(), -1);
                 String formatDateTime = DateUtil.getFormatDateTime(date1, DateUtil.yyyyMMddFormat);
                 Date date2 = DateUtil.strToDate(formatDateTime + " 23:30:00", DateUtil.fullFormat);
-                DateQuery dateQuery = new DateQuery(new Date());
-                dateQuery.setRecordDate(new Date());
+                DateQuery dateQuery = new DateQuery(dateQueries.get(0).getRecordDate());
+                dateQuery.setRecordDate(dateQueries.get(0).getRecordDate());
                 dateQuery.setStartTime(date2);
                 dateQuery.setEndTime(DateUtil.getTodayBeginTime());
                 dateQueries.add(0,dateQuery);

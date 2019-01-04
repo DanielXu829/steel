@@ -102,20 +102,17 @@ public class DateQueryUtil {
      * @return 结果
      */
     public static List<DateQuery> buildDayHalfHourEach(Date date) {
-        List<DateQuery> result = new ArrayList<>();
-        Date startTime = DateUtil.getDateBeginTime(date);
-
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
         Date dateBeginTime = DateUtil.getDateBeginTime(date);
-        Calendar endTime = Calendar.getInstance();
-        endTime.setTime(dateBeginTime);
-        endTime.add(Calendar.MINUTE, 30);
-        do {
-            result.add(new DateQuery(startTime, endTime.getTime(), date));
-            startTime = endTime.getTime();
-            endTime.add(Calendar.MINUTE, 30);
-        } while (endTime.getTime().before(date));
-        result.add(new DateQuery(startTime, new Date(), date));
-        return result;
+        for (int i = 0; i < 48; i++) {
+            Date previous = DateUtil.addMinute(dateBeginTime, 30);
+            queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
+            dateBeginTime = previous;
+        }
+        return queryList;
     }
 
     /**
