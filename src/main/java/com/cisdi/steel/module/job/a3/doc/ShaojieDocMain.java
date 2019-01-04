@@ -1,31 +1,54 @@
-package com.cisdi.steel.doc;
+package com.cisdi.steel.module.job.a3.doc;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.module.job.config.HttpProperties;
+import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ShaojieDocMainTest extends SteelApplicationTests {
+@Component
+@Slf4j
+public class ShaojieDocMain {
+
+    @Autowired
+    private HttpUtil httpUtil;
+
+    @Autowired
+    private HttpProperties httpProperties;
+
+    @Autowired
+    private JobProperties jobProperties;
+
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
 
     private String version6 = "6.0";
     private String version5 = "5.0";
 
-    @Test
-    public void test() {
+    @Scheduled(cron = "0 30 6 * * ?")
+    public void mainTask() {
         mainDeal(version5);
         mainDeal(version6);
+        log.error("烧结word生成完毕！");
     }
 
     public void mainDeal(String version) {
@@ -62,9 +85,9 @@ public class ShaojieDocMainTest extends SteelApplicationTests {
 
 
         if ("5.0".equals(version)) {
-            comm("E://五烧每日操业会-设计版v1.docx");
+            comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "五烧每日操业会-设计版v1.docx");
         } else {
-            comm("E://六烧每日操业会-设计版v1.docx");
+            comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "六烧每日操业会-设计版v1.docx");
         }
     }
 
@@ -676,7 +699,7 @@ public class ShaojieDocMainTest extends SteelApplicationTests {
         return data;
     }
 
-    private static void comm(String path) {
+    private void comm(String path) {
         //文档所有日期
         dealDate(result);
 
@@ -733,21 +756,35 @@ public class ShaojieDocMainTest extends SteelApplicationTests {
 
         try {
             String name = "六烧";
+            String sqquence = "6烧结";
             if (path.contains("五烧")) {
                 name = "五烧";
+                sqquence = "5烧结";
             }
 
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
             String fileName = name + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "每日操业会 - 设计版v1.docx";
-            FileOutputStream fos = new FileOutputStream("D://" + fileName);
+            String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
+            FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
+
+            ReportIndex reportIndex = new ReportIndex();
+            reportIndex.setCreateTime(new Date());
+            reportIndex.setUpdateTime(new Date());
+            reportIndex.setSequence(sqquence);
+            reportIndex.setIndexLang("cn_zh");
+            reportIndex.setIndexType("report_day");
+            reportIndex.setRecordDate(new Date());
+            reportIndex.setName(filePath);
+            reportIndex.setReportCategoryCode(JobEnum.sj_caoyehui_day.getCode());
+            reportIndexMapper.insert(reportIndex);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void dealDate(HashMap<String, Object> map) {
+    private static void dealDate(HashMap<String, Object> map) {
         Date date = new Date();
         String date1 = DateUtil.getFormatDateTime(DateUtil.addDays(date, -2), DateUtil.MMddChineseFormat);
         String date2 = DateUtil.getFormatDateTime(DateUtil.addDays(date, -1), DateUtil.MMddChineseFormat);

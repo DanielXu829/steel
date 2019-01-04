@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @SpringBootApplication
 @EnableTransactionManagement
-//@EnableScheduling
+@EnableScheduling
 @EnableAsync
 public class SteelApplication {
 

@@ -67,6 +67,7 @@ public enum JobEnum {
     sj_tuoxiaoyunxingjilu("sj_tuoxiaoyunxingjilu", "脱硝运行记录表"),
     sj_shaojieji_day("sj_shaojieji_day", "烧结机生产日报"),
     sj_liushaogycanshu("sj_liushaogycanshu", "4小时发布-主要工艺参数及实物质量情况日报"),
+    sj_caoyehui_day("sj_caoyehui_day", "烧结每日操业会"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
