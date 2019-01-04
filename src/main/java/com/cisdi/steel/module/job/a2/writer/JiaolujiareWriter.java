@@ -41,7 +41,6 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                int size = dateQueries.size();
                 Date date1 = DateUtil.addDays(new Date(), -1);
                 String formatDateTime = DateUtil.getFormatDateTime(date1, DateUtil.yyyyMMddFormat);
                 Date date2 = DateUtil.strToDate(formatDateTime + " 23:30:00", DateUtil.fullFormat);
@@ -50,6 +49,7 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                 dateQuery.setStartTime(date2);
                 dateQuery.setEndTime(DateUtil.getTodayBeginTime());
                 dateQueries.add(0,dateQuery);
+                int size = dateQueries.size();
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
                     int rowIndex = j + 1;
@@ -91,10 +91,7 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        Calendar calendar=Calendar.getInstance();
-        calendar.setTime(dateQuery.getStartTime());
-        calendar.set(Calendar.SECOND,0);
-        String dateTime = DateUtil.getFormatDateTime(calendar.getTime(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat);
         result.put("time", dateTime);
         return result;
     }
