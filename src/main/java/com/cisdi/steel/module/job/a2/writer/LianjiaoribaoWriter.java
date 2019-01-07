@@ -249,7 +249,7 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParame3(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("date",DateUtil.getFormatDateTime(DateUtil.getTodayBeginTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("date",DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(dateQuery.getRecordDate()),"yyyy/MM/dd HH:mm:ss"));
         if(DateUtil.getFormatDateTime(dateQuery.getEndTime(),"HH").equals("08")){
             result.put("shift","1");
         }else if(DateUtil.getFormatDateTime(dateQuery.getEndTime(),"HH").equals("16")){
