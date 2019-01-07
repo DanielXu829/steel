@@ -1,6 +1,5 @@
 package com.cisdi.steel.module.report.query;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.cisdi.steel.common.base.vo.PageQuery;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -74,5 +73,11 @@ public class ReportIndexQuery extends PageQuery implements Serializable {
      * 请求编码
      */
     private String apiCode;
+
+    /**
+     * 重新生成报表 指定日期的报表
+     * 表报日期
+     */
+    private Date reportDate;
 
 }
