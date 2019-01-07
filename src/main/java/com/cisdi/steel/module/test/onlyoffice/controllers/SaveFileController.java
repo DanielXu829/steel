@@ -80,7 +80,7 @@ public class SaveFileController {
                 filePath = request.getParameter("filePath");
             }
             Integer status = (Integer) jsonObj.get("status");
-            if (status.intValue() == 6) {
+            if (status.intValue() == 6 || status.intValue() == 2) {
                 /*
                  * 当我们关闭编辑窗口后，十秒钟左右onlyoffice会将它存储的我们的编辑后的文件，，此时status = 2，通过request发给我们，我们需要做的就是接收到文件然后回写该文件。
                  * */
@@ -112,15 +112,16 @@ public class SaveFileController {
                 //部分报表修改同时将 模板修改
                 ReportIndex reportIndex = reportIndexService.queryByPath(filePath);
                 if (Objects.nonNull(reportIndex)) {
-                    if (JobEnum.nj_yasuokongqi.equals(reportIndex.getReportCategoryCode())
-                            || JobEnum.nj_sansigui_day.equals((reportIndex.getReportCategoryCode()))
-                            || JobEnum.nj_meiqihunhemei.equals((reportIndex.getReportCategoryCode()))
-                            || JobEnum.nj_guifengjimeiyaji.equals((reportIndex.getReportCategoryCode()))
+                    if (JobEnum.nj_yasuokongqi.getCode().equals(reportIndex.getReportCategoryCode())
+                            || JobEnum.nj_sansigui_day.getCode().equals((reportIndex.getReportCategoryCode()))
+                            || JobEnum.nj_meiqihunhemei.getCode().equals((reportIndex.getReportCategoryCode()))
+                            || JobEnum.nj_guifengjimeiyaji.getCode().equals((reportIndex.getReportCategoryCode()))
                     ) {
                         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(reportIndex.getReportCategoryCode(), reportIndex.getIndexLang());
                         if (Objects.nonNull(reportCategoryTemplates) && reportCategoryTemplates.size() > 0) {
                             ReportCategoryTemplate reportCategoryTemplate = reportCategoryTemplates.get(0);
                             if (Objects.nonNull(reportCategoryTemplate) && StringUtils.isNotBlank(reportCategoryTemplate.getTemplatePath())) {
+                                FileUtils.deleteFile(reportCategoryTemplate.getTemplatePath());
                                 FileUtils.copyFile(filePath, reportCategoryTemplate.getTemplatePath());
                             }
                         }
