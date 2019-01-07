@@ -69,17 +69,7 @@ public class YasuoKongQiExecute extends AbstractJobExecuteExecute {
         workbook.write(fos);
         fos.close();
         workbook.close();
-        //模板清空此操作
-        String formatDateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), DateUtil.yyyyMMddFormat);
-        String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMddFormat);
 
-        String srcUrl = excelPathInfo.getSaveFilePath();
-        if (!formatDateTime.equals(formatDateTime1)) {
-            srcUrl = "/u01/templates/temp/能介/压缩空气生产情况汇总表.xlsx";
-//            srcUrl = "D:\\template\\temp\\压缩空气生产情况汇总表.xlsx";
-        }
-        FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
-        FileUtils.copyFile(srcUrl, writerExcelDTO.getTemplate().getTemplatePath());
-
+        super.clearTemp(dateQuery, excelPathInfo, writerExcelDTO, "/u01/templates/temp/能介/压缩空气生产情况汇总表.xlsx");
     }
 }

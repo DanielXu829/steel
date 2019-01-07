@@ -778,6 +778,7 @@ public class ShaojieDocMain {
             reportIndex.setRecordDate(new Date());
             reportIndex.setName(filePath);
             reportIndex.setReportCategoryCode(JobEnum.sj_caoyehui_day.getCode());
+            reportIndex.setPath(filePath);
             reportIndexMapper.insert(reportIndex);
         } catch (Exception e) {
             e.printStackTrace();

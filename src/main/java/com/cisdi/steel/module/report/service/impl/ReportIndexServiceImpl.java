@@ -16,6 +16,7 @@ import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
+import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import com.cisdi.steel.module.report.service.ReportIndexService;
@@ -60,6 +61,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
     @Override
     public ApiResult updateRecord(ReportIndex record) {
+        String path = record.getPath();
         File file = new File(record.getPath());
         if (Objects.nonNull(file) && file.exists()) {
             LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
@@ -76,12 +78,21 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getIndexLang()) + "." + fileExtension;
 
                 FileUtils.copyFile(record.getPath(), savePath);
+                path = savePath;
                 file.delete();
 
                 record.setPath(savePath);
             }
         } else {
             record.setPath(null);
+        }
+        //部分报表修改时将模板同时修改
+        if (JobEnum.nj_yasuokongqi.equals(record.getReportCategoryCode())
+                || JobEnum.nj_sansigui_day.equals((record.getReportCategoryCode()))
+                || JobEnum.nj_meiqihunhemei.equals((record.getReportCategoryCode()))
+                || JobEnum.nj_guifengjimeiyaji.equals((record.getReportCategoryCode()))
+        ) {
+            FileUtils.copyFile(path, jobProperties.getTemplatePath());
         }
         return super.updateRecord(record);
     }

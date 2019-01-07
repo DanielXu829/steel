@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtil;
+import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.JobProperties;
@@ -293,5 +294,27 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         jobExecuteInfo.setDateQuery(dateQuery);
         // 真正的执行的方法
         this.executeDetail(jobExecuteInfo);
+    }
+
+    /**
+     * 模板通用清空操作
+     *
+     * @param dateQuery      时间参数
+     * @param excelPathInfo  文件输出信息
+     * @param writerExcelDTO 模板信息
+     * @param tempPath       空模板地址
+     */
+    public void clearTemp(DateQuery dateQuery, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, String tempPath) {
+        DateQuery oldDateQuery = DateQueryUtil.handlerDelay(dateQuery, writerExcelDTO.getTemplate().getBuildDelay(), writerExcelDTO.getTemplate().getBuildDelayUnit(), false);
+        //模板清空此操作
+        String formatDateTime = DateUtil.getFormatDateTime(oldDateQuery.getRecordDate(), DateUtil.yyyyMMddFormat);
+        String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMddFormat);
+
+        String srcUrl = excelPathInfo.getSaveFilePath();
+        if (!formatDateTime.equals(formatDateTime1)) {
+            srcUrl = tempPath;
+        }
+        FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
+        FileUtils.copyFile(srcUrl, writerExcelDTO.getTemplate().getTemplatePath());
     }
 }
