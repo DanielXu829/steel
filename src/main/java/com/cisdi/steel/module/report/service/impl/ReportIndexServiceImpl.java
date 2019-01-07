@@ -86,15 +86,15 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         } else {
             record.setPath(null);
         }
-        //部分报表修改时将模板同时修改
-        if (JobEnum.nj_yasuokongqi.equals(record.getReportCategoryCode())
-                || JobEnum.nj_sansigui_day.equals((record.getReportCategoryCode()))
-                || JobEnum.nj_meiqihunhemei.equals((record.getReportCategoryCode()))
-                || JobEnum.nj_guifengjimeiyaji.equals((record.getReportCategoryCode()))
-        ) {
-            FileUtils.copyFile(path, jobProperties.getTemplatePath());
-        }
         return super.updateRecord(record);
+    }
+
+    @Override
+    public ReportIndex queryByPath(String path) {
+        LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
+        wrapper.eq(true, ReportIndex::getHidden, "0");
+        wrapper.eq(ReportIndex::getPath, path);
+        return reportIndexMapper.selectOne(wrapper);
     }
 
     @Override

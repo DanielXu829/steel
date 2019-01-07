@@ -18,6 +18,14 @@ import java.util.List;
 public interface ReportIndexService extends IBaseService<ReportIndex> {
 
     /**
+     * 通过路径查询相关信息
+     *
+     * @param path
+     * @return
+     */
+    ReportIndex queryByPath(String path);
+
+    /**
      * 文件上传
      *
      * @param file 需要上传的文件

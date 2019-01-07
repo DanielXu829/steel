@@ -24,6 +24,7 @@ import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.omg.CORBA.DATA_CONVERSION;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -305,7 +306,8 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param tempPath       空模板地址
      */
     public void clearTemp(DateQuery dateQuery, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, String tempPath) {
-        DateQuery oldDateQuery = DateQueryUtil.handlerDelay(dateQuery, writerExcelDTO.getTemplate().getBuildDelay(), writerExcelDTO.getTemplate().getBuildDelayUnit(), false);
+        DateQuery query=new DateQuery(dateQuery.getStartTime(),dateQuery.getEndTime(),dateQuery.getRecordDate());
+        DateQuery oldDateQuery = DateQueryUtil.handlerDelay(query, writerExcelDTO.getTemplate().getBuildDelay(), writerExcelDTO.getTemplate().getBuildDelayUnit(), false);
         //模板清空此操作
         String formatDateTime = DateUtil.getFormatDateTime(oldDateQuery.getRecordDate(), DateUtil.yyyyMMddFormat);
         String formatDateTime1 = DateUtil.getFormatDateTime(new Date(), DateUtil.yyyyMMddFormat);

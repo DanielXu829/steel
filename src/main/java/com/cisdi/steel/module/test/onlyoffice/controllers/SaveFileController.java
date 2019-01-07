@@ -1,7 +1,16 @@
 package com.cisdi.steel.module.test.onlyoffice.controllers;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.JsonUtil;
+import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.job.enums.JobEnum;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.report.service.ReportIndexService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +21,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 /*
@@ -19,6 +30,11 @@ import java.util.Scanner;
  * */
 @RestController
 public class SaveFileController {
+    @Autowired
+    private ReportIndexService reportIndexService;
+
+    @Autowired
+    private ReportCategoryTemplateService reportCategoryTemplateService;
 
     /**
      * 文档编辑服务使用JavaScript API通知callbackUrl，向文档存储服务通知文档编辑的状态。文档编辑服务使用具有正文中的信息的POST请求。
@@ -40,6 +56,7 @@ public class SaveFileController {
      * @throws Exception
      */
     @RequestMapping("/onlyoffice/save")
+
     public void saveFile(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         System.out.println("===saveeditedfile------------");
@@ -91,9 +108,27 @@ public class SaveFileController {
                     out.flush();
                 }
                 connection.disconnect();
+
+                //部分报表修改同时将 模板修改
+                ReportIndex reportIndex = reportIndexService.queryByPath(filePath);
+                if (Objects.nonNull(reportIndex)) {
+                    if (JobEnum.nj_yasuokongqi.equals(reportIndex.getReportCategoryCode())
+                            || JobEnum.nj_sansigui_day.equals((reportIndex.getReportCategoryCode()))
+                            || JobEnum.nj_meiqihunhemei.equals((reportIndex.getReportCategoryCode()))
+                            || JobEnum.nj_guifengjimeiyaji.equals((reportIndex.getReportCategoryCode()))
+                    ) {
+                        List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(reportIndex.getReportCategoryCode(), reportIndex.getIndexLang());
+                        if (Objects.nonNull(reportCategoryTemplates) && reportCategoryTemplates.size() > 0) {
+                            ReportCategoryTemplate reportCategoryTemplate = reportCategoryTemplates.get(0);
+                            if (Objects.nonNull(reportCategoryTemplate) && StringUtils.isNotBlank(reportCategoryTemplate.getTemplatePath())) {
+                                FileUtils.copyFile(filePath, reportCategoryTemplate.getTemplatePath());
+                            }
+                        }
+                    }
+                }
+
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         /*
