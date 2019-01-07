@@ -52,6 +52,7 @@ public class ShaojieDocMain {
     }
 
     public void mainDeal(String version) {
+        init();
         dealVersion(version);
 
         Date date = new Date();
@@ -202,7 +203,7 @@ public class ShaojieDocMain {
         }
     }
 
-    private static void part1Data() {
+    private void part1Data() {
         //文档第一部分
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("attr1", "上料量t/h");
@@ -303,7 +304,7 @@ public class ShaojieDocMain {
      */
     private String[] L2 = null;
 
-    private static void part2Data() {
+    private void part2Data() {
 
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("attr1", "理论产量t");
@@ -404,7 +405,7 @@ public class ShaojieDocMain {
     }
 
 
-    private static void commPart2(List<Map<String, Object>> listData, String[] point, JSONObject data2_1, JSONObject data2_2, String key3, String key4, String key5) {
+    private void commPart2(List<Map<String, Object>> listData, String[] point, JSONObject data2_1, JSONObject data2_2, String key3, String key4, String key5) {
         for (int i = 0; i < point.length; i++) {
             //昨天数据
             JSONObject o_1 = data2_1.getJSONObject(point[i]);
@@ -470,7 +471,7 @@ public class ShaojieDocMain {
      */
     private String[] L3 = null;
 
-    private static void part3Data() {
+    private void part3Data() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("attr1", "燃料配比%");
         map.put("attr2", "");
@@ -557,7 +558,7 @@ public class ShaojieDocMain {
 
     }
 
-    private static void part4Data() {
+    private void part4Data() {
 
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("attr1", "余热发电（kWh/t）");
@@ -614,21 +615,21 @@ public class ShaojieDocMain {
         list3.add(map);
     }
 
-    private static List<Map<String, Object>> list = new ArrayList();
-    private static List<Map<String, Object>> dataList = new ArrayList();
+    private List<Map<String, Object>> list = new ArrayList();
+    private List<Map<String, Object>> dataList = new ArrayList();
 
-    private static List<Map<String, Object>> list1 = new ArrayList();
-    private static List<Map<String, Object>> list2 = new ArrayList();
-    private static List<Map<String, Object>> list3 = new ArrayList();
-    private static List<Map<String, Object>> list4 = new ArrayList();
-    private static List<Map<String, Object>> list5 = new ArrayList();
+    private List<Map<String, Object>> list1 = new ArrayList();
+    private List<Map<String, Object>> list2 = new ArrayList();
+    private List<Map<String, Object>> list3 = new ArrayList();
+    private List<Map<String, Object>> list4 = new ArrayList();
+    private List<Map<String, Object>> list5 = new ArrayList();
 
     /**
      * doc最后结果
      */
     private static HashMap<String, Object> result = new HashMap<String, Object>();
 
-    static {
+    private void init() {
         part1Data();
         part2Data();
         part3Data();

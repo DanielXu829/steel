@@ -61,7 +61,6 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
     @Override
     public ApiResult updateRecord(ReportIndex record) {
-        String path = record.getPath();
         File file = new File(record.getPath());
         if (Objects.nonNull(file) && file.exists()) {
             LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
@@ -78,7 +77,6 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getIndexLang()) + "." + fileExtension;
 
                 FileUtils.copyFile(record.getPath(), savePath);
-                path = savePath;
                 file.delete();
 
                 record.setPath(savePath);

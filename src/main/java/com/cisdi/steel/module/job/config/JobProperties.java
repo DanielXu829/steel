@@ -32,4 +32,9 @@ public class JobProperties {
      */
     private String tempPath;
 
+    /**
+     * 空模板路径
+     */
+    private String emptyPath;
+
 }
