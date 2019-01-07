@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -80,6 +81,35 @@ public class ExportJobContext {
 //                    dateQuery.setRecordDay(reportIndex.getRecordDate());
 //                    DateQuery dateQuery1 = DateQueryUtil.handlerDelay(dateQuery, reportCategoryTemplate.getBuildDelay(), reportCategoryTemplate.getBuildDelayUnit(),false);
                     DateQuery dateQuery = new DateQuery(reportIndex.getRecordDate(), reportIndex.getRecordDate(), reportIndex.getRecordDate());
+                    dateQuery.setDelay(false);
+                    JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
+                            .jobEnum(abstractExportJob.getCurrentJob())
+                            .jobExecuteEnum(JobExecuteEnum.manual)
+                            .dateQuery(dateQuery)
+                            .build();
+                    abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
+                }
+            }
+        } catch (Exception e) {
+            log.error("重新生成指定生成的报表时报错：" + e.getMessage());
+        }
+
+    }
+
+
+    /**
+     * 生成指定日期的报表
+     *
+     * @param indexId    id
+     * @param reportDate 报表时间
+     */
+    public void executeByIndexId(Long indexId, Date reportDate) {
+        try {
+            ReportIndex reportIndex = reportIndexMapper.selectById(indexId);
+            if (Objects.nonNull(reportIndex)) {
+                AbstractExportJob abstractExportJob = apiJob.get(reportIndex.getReportCategoryCode());
+                if (Objects.nonNull(abstractExportJob)) {
+                    DateQuery dateQuery = new DateQuery(reportDate, reportDate, reportDate);
                     dateQuery.setDelay(false);
                     JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
                             .jobEnum(abstractExportJob.getCurrentJob())
