@@ -12,6 +12,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,14 +79,14 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
                         for (int j = 0; j < size1; j++) {
                             JSONObject jsonObject1 = jsonArray.getJSONObject(j);
                             if (Objects.nonNull(jsonObject1)) {
-                                Integer position = jsonObject1.getInteger("position");
+                                BigDecimal position = jsonObject1.getBigDecimal("position");
                                 if (child.equals(position.toString())){
-                                    Integer val1 = jsonObject1.getInteger("angleset");
-                                    Integer val2 = jsonObject1.getInteger("angleact");
-                                    Integer val3 = jsonObject1.getInteger("roundset");
-                                    Integer val4 = jsonObject1.getInteger("roundact");
-                                    Integer val5 = jsonObject1.getInteger("weightset");
-                                    Integer val6 = jsonObject1.getInteger("weightact");
+                                    BigDecimal val1 = jsonObject1.getBigDecimal("angleset");
+                                    BigDecimal val2 = jsonObject1.getBigDecimal("angleact");
+                                    BigDecimal val3 = jsonObject1.getBigDecimal("roundset");
+                                    BigDecimal val4 = jsonObject1.getBigDecimal("roundact");
+                                    BigDecimal val5 = jsonObject1.getBigDecimal("weightset");
+                                    BigDecimal val6 = jsonObject1.getBigDecimal("weightact");
                                     int row = rowIndex;
                                     ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val1);
                                     ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val2);
