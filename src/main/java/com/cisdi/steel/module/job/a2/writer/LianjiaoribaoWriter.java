@@ -128,21 +128,27 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam(dateQuery);
+        Map<String, String> queryParam1 = getQueryParam4(dateQuery);
         int size = columns.size();
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
             if (StringUtils.isNotBlank(column)) {
                 queryParam.put("tagName", column);
+                queryParam1.put("tagName", column);
                 String result = httpUtil.get(url, queryParam);
+                String result1 = httpUtil.get(url, queryParam1);
                 if (StringUtils.isNotBlank(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
+                    JSONObject jsonObject1 = JSONObject.parseObject(result1);
                     if (Objects.nonNull(jsonObject)) {
                         JSONArray rows = jsonObject.getJSONArray("rows");
+                        JSONArray rows1 = jsonObject1.getJSONArray("rows");
                         if (Objects.nonNull(rows)) {
                             JSONObject obj = rows.getJSONObject(0);
+                            JSONObject obj1 = rows1.getJSONObject(0);
                             if (Objects.nonNull(obj)) {
-                                Double val = obj.getDouble("val");
+                                Double val = obj1.getDouble("val")-obj.getDouble("val");
                                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                             }
                         }
@@ -228,15 +234,17 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateQuery.getRecordDate());
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        String dateTime = DateUtil.getFormatDateTime(calendar.getTime(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat);
         result.put("time", dateTime);
         return result;
     }
 
+    protected Map<String, String> getQueryParam4(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        String dateTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat);
+        result.put("time", dateTime);
+        return result;
+    }
 
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();

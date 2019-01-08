@@ -91,7 +91,7 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        String dateTime = DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat);
         result.put("time", dateTime);
         return result;
     }
