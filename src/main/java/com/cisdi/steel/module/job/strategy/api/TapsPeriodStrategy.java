@@ -90,11 +90,15 @@ public class TapsPeriodStrategy extends AbstractApiStrategy {
             return resultMap;
         }
         int size = jsonArray.size();
+        List<Map<String, Object>> results = new ArrayList<>();
+        List<Map<String, BigDecimal>> hmResults = new ArrayList<>();
+        List<Map<String, BigDecimal>> slagResults = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
             if (Objects.isNull(obj)) {
                 continue;
             }
+            resultMap = new HashMap<>();
             Integer taphole = obj.getInteger("taphole");
             // 本次出铁量
             Object actweight = obj.get("actweight");
@@ -116,7 +120,7 @@ public class TapsPeriodStrategy extends AbstractApiStrategy {
                     Date startTime = new Date(Long.parseLong(starttime));
                     Date endTime = new Date(Long.parseLong(endtime));
                     Long betweenMin = DateUtil.getBetweenMin(endTime, startTime);
-                    if(!"0".equals(betweenMin.toString())){
+                    if (!"0".equals(betweenMin.toString())) {
                         resultMap.put("time" + taphole, betweenMin.intValue());
                     }
 
@@ -126,15 +130,129 @@ public class TapsPeriodStrategy extends AbstractApiStrategy {
 
                     Map<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", endtime, starttime);
                     Map<String, BigDecimal> slag = handlerAnalysisValues(urlPre, "SLAG", endtime, starttime);
+                    hmResults.add(hm);
+                    slagResults.add(slag);
+
                     resultMap.put("hm", hm);
                     resultMap.put("slag", slag);
                 } catch (Exception e) {
                     log.error("时间转换错误");
                 }
             }
+            results.add(resultMap);
         }
-        return resultMap;
+        Map<String, Object> resultData = new HashMap<>();
+        for (int i = 1; i < 5; i++) {
+            String actweight = "actweight" + i;
+            double sum = results.stream()
+                    .mapToDouble(v -> {
+                        Object o = v.get(actweight);
+                        if (Objects.isNull(o)) {
+                            return 0;
+                        }
+                        return Double.valueOf(o.toString());
+                    })
+                    .sum();
+            if (sum != 0) {
+                resultData.put(actweight, sum);
+            }
+
+
+            String dephth = "dephth" + i;
+            results.stream()
+                    .mapToDouble(v -> {
+                        Object o = v.get(dephth);
+                        if (Objects.isNull(o)) {
+                            return 0;
+                        }
+                        return Double.valueOf(o.toString());
+                    })
+                    .average()
+                    .ifPresent(value -> {
+                        if (value != 0) {
+                            resultData.put(dephth, value);
+                        }
+                    });
+            String time = "time" + i;
+            double sumTime = results.stream()
+                    .mapToDouble(v -> {
+                        Object o = v.get(time);
+                        if (Objects.isNull(o)) {
+                            return 0;
+                        }
+                        return Double.valueOf(o.toString());
+                    })
+                    .sum();
+            if (sum != 0) {
+                resultData.put(time, sumTime);
+            }
+
+            String temp = "temp" + i;
+            results.stream()
+                    .mapToDouble(v -> {
+                        Object o = v.get(temp);
+                        if (Objects.isNull(o)) {
+                            return 0;
+                        }
+                        return Double.valueOf(o.toString());
+                    })
+                    .average()
+                    .ifPresent(value -> {
+                        if (value != 0) {
+                            resultData.put(temp, value);
+                        }
+                    });
+
+
+        }
+
+        // 第二部分处理
+        for (String col : bf) {
+            results.stream()
+                    .mapToDouble(v -> {
+                        Object o = v.get(col);
+                        if (Objects.isNull(o)) {
+                            return 0;
+                        }
+                        return Double.valueOf(o.toString());
+                    })
+                    .average()
+                    .ifPresent(value -> {
+                        if (value != 0) {
+                            resultData.put(col, value);
+                        }
+                    });
+        }
+
+        // 第三部分处理
+        Set<String> hmKey = new HashSet<>();
+        for (Map<String, BigDecimal> hmResult : hmResults) {
+            hmKey.addAll(hmResult.keySet());
+        }
+        Map<String, BigDecimal> hmData = new CaseInsensitiveMap<>();
+        hmKey.forEach(b -> hmResults.stream()
+                .mapToDouble(item -> item.getOrDefault(b, new BigDecimal(0)).doubleValue())
+                .average()
+                .ifPresent(value -> {
+                    hmData.put(b, new BigDecimal(value));
+                }));
+        resultData.put("hm", hmData);
+
+        Set<String> slagKey = new HashSet<>();
+        for (Map<String, BigDecimal> slagResult : slagResults) {
+            slagKey.addAll(slagResult.keySet());
+        }
+        Map<String, BigDecimal> slagData = new CaseInsensitiveMap<>();
+        slagKey.forEach(b -> slagResults.stream()
+                .mapToDouble(item -> item.getOrDefault(b, new BigDecimal(0)).doubleValue())
+                .average()
+                .ifPresent(value -> {
+                    slagData.put(b, new BigDecimal(value));
+                }));
+        resultData.put("slag", slagData);
+        return resultData;
     }
+
 
     private Map<String, BigDecimal> handlerAnalysisValues(String urlPre, String brandCode, String endTime, String startTime) {
         Map<String, BigDecimal> map = new CaseInsensitiveMap<>();
