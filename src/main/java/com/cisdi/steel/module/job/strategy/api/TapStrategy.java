@@ -91,7 +91,7 @@ public class TapStrategy extends AbstractApiStrategy {
         if (Objects.nonNull(jsonArray)) {
             int size = jsonArray.size();
             for (int i = 0; i < size; i++) {
-                JSONObject obj = jsonArray.getJSONObject(size-1-i);
+                JSONObject obj = jsonArray.getJSONObject(i);
                 Object tapid = obj.get("tapid");
                 if (Objects.nonNull(tapid)) {
                     Integer sequnceno = i + 1;
