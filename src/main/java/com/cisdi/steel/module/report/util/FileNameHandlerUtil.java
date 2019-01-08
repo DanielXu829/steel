@@ -34,6 +34,12 @@ public class FileNameHandlerUtil {
             }
         }
 
+        if (Objects.nonNull(dateQuery.getDelay()) && !dateQuery.getDelay()) {
+            // 延迟时间生成，表明是手动生成
+            String time = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
+            return time + "_24";
+        }
+
         switch (templateTypeEnum) {
             case report_hour:
                 return hourName(dateQuery.getRecordDate(), flag);
