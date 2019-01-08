@@ -777,7 +777,7 @@ public class ShaojieDocMain {
             reportIndex.setIndexLang("cn_zh");
             reportIndex.setIndexType("report_day");
             reportIndex.setRecordDate(new Date());
-            reportIndex.setName(filePath);
+            reportIndex.setName(fileName);
             reportIndex.setReportCategoryCode(JobEnum.sj_caoyehui_day.getCode());
             reportIndex.setPath(filePath);
             reportIndexMapper.insert(reportIndex);

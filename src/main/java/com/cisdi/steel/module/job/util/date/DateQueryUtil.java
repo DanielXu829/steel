@@ -82,19 +82,21 @@ public class DateQueryUtil {
      * @return 结果
      */
     public static List<DateQuery> buildDayHourEach(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        int hour = 23;
         List<DateQuery> queryList = new ArrayList<>();
-        for (int i = hour; i >= 0; i--) {
-            Date nextDate = DateUtil.addHours(date, -i);
+        for (int i = 0; i<=hour; i++) {
+            Date nextDate = DateUtil.addHours(dateBeginTime, i);
             DateQuery query = DateQueryUtil.buildHour(nextDate);
             queryList.add(query);
         }
         return queryList;
     }
 
-
+    public static void main(String[] args) {
+        List<DateQuery> dateQueries = buildDayHourEach(new Date());
+        dateQueries.forEach(System.out::println);
+    }
     /**
      * 构建每小时时间段
      *

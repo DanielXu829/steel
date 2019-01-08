@@ -64,7 +64,7 @@ public class AcsStrategy extends AbstractApiStrategy {
             String url = httpProperties.getUrlApiNJOne() + k;
             DateQuery query = queryList.get(0);
             if (Objects.nonNull(query)) {
-                cellDataList.addAll(eachData(v, url, query.getQueryParam(), query));
+                eachData(v, url, query.getQueryParam(), query, cellDataList);
             }
         });
         return SheetRowCellData.builder()
@@ -82,9 +82,9 @@ public class AcsStrategy extends AbstractApiStrategy {
      * @param queryParam 查询参数
      * @return 结果
      */
-    private List<CellData> eachData(List<Cell> cellList, String url, Map<String, String> queryParam, DateQuery dateQuery) {
-        List<CellData> results = new ArrayList<>();
+    private List<CellData> eachData(List<Cell> cellList, String url, Map<String, String> queryParam, DateQuery dateQuery, List<CellData> cellDataList) {
         for (Cell cell : cellList) {
+            int rowIndex = cell.getRowIndex();
             String column = PoiCellUtil.getCellValue(cell);
             if (StringUtils.isNotBlank(column)) {
                 queryParam.put("tagname", column);
@@ -97,19 +97,24 @@ public class AcsStrategy extends AbstractApiStrategy {
                         JSONArray jsonArray = jsonObject.getJSONArray("data");
                         if (Objects.nonNull(jsonArray)) {
                             int size = jsonArray.size();
-                            int rowIndex = cell.getRowIndex();
                             List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
                             for (DateQuery date : dateQueries) {
                                 Object val = "";
                                 for (int index = 0; index < size; index++) {
                                     JSONObject obj = jsonArray.getJSONObject(index);
                                     Long timestamp = (Long) obj.get("timestamp");
-                                    if (date.getStartTime().getTime() == timestamp.longValue()) {
+                                    Date time = new Date(timestamp);
+                                    Calendar calendar = Calendar.getInstance();
+                                    calendar.setTime(time);
+                                    calendar.set(Calendar.MINUTE, 0);
+                                    calendar.set(Calendar.SECOND, 0);
+
+                                    if (date.getStartTime().getTime() == calendar.getTime().getTime()) {
                                         val = obj.get("val");
                                         break;
                                     }
                                 }
-                                ExcelWriterUtil.addCellData(results, ++rowIndex, cell.getColumnIndex(), val);
+                                ExcelWriterUtil.addCellData(cellDataList, ++rowIndex, cell.getColumnIndex(), val);
                             }
 
 
@@ -120,12 +125,12 @@ public class AcsStrategy extends AbstractApiStrategy {
 //                            }
                         }
                     } else {
-                        ExcelWriterUtil.addCellData(results, 1, cell.getColumnIndex(), data);
+                        ExcelWriterUtil.addCellData(cellDataList, 1, cell.getColumnIndex(), data);
                     }
 
                 }
             }
         }
-        return results;
+        return cellDataList;
     }
 }
