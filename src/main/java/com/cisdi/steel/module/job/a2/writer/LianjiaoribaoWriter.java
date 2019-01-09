@@ -264,24 +264,18 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        String dateTime = DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss");
         result.put("time", dateTime);
         return result;
     }
 
     protected Map<String, String> getQueryParam4(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        String dateTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss");
         result.put("time", dateTime);
         return result;
     }
 
-    protected Map<String, String> getQueryParam5(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        String dateTime = DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -8), DateUtil.fullFormat);
-        result.put("time", dateTime);
-        return result;
-    }
 
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();

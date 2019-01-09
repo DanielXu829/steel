@@ -153,7 +153,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        String dateTime = DateUtil.getFormatDateTime(new Date(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:ss");
         result.put("time", dateTime);
         return result;
     }

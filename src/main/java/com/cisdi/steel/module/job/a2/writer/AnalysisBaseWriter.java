@@ -164,7 +164,7 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
         calendar.setTime(dateQuery.getRecordDate());
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        String dateTime = DateUtil.getFormatDateTime(calendar.getTime(), DateUtil.fullFormat);
+        String dateTime = DateUtil.getFormatDateTime(calendar.getTime(),"yyyy/MM/dd HH:mm:ss");
         result.put("time", dateTime);
         return result;
     }
