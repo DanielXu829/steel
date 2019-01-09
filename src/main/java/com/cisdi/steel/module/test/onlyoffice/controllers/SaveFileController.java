@@ -110,23 +110,23 @@ public class SaveFileController {
                 connection.disconnect();
 
                 //部分报表修改同时将 模板修改
-                ReportIndex reportIndex = reportIndexService.queryByPath(filePath);
-                if (Objects.nonNull(reportIndex)) {
-                    if (JobEnum.nj_yasuokongqi.getCode().equals(reportIndex.getReportCategoryCode())
-                            || JobEnum.nj_sansigui_day.getCode().equals((reportIndex.getReportCategoryCode()))
-                            || JobEnum.nj_meiqihunhemei.getCode().equals((reportIndex.getReportCategoryCode()))
-                            || JobEnum.nj_guifengjimeiyaji.getCode().equals((reportIndex.getReportCategoryCode()))
-                    ) {
-                        List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(reportIndex.getReportCategoryCode(), reportIndex.getIndexLang());
-                        if (Objects.nonNull(reportCategoryTemplates) && reportCategoryTemplates.size() > 0) {
-                            ReportCategoryTemplate reportCategoryTemplate = reportCategoryTemplates.get(0);
-                            if (Objects.nonNull(reportCategoryTemplate) && StringUtils.isNotBlank(reportCategoryTemplate.getTemplatePath())) {
-                                FileUtils.deleteFile(reportCategoryTemplate.getTemplatePath());
-                                FileUtils.copyFile(filePath, reportCategoryTemplate.getTemplatePath());
-                            }
-                        }
-                    }
-                }
+//                ReportIndex reportIndex = reportIndexService.queryByPath(filePath);
+//                if (Objects.nonNull(reportIndex)) {
+//                    if (JobEnum.nj_yasuokongqi.getCode().equals(reportIndex.getReportCategoryCode())
+//                            || JobEnum.nj_sansigui_day.getCode().equals((reportIndex.getReportCategoryCode()))
+//                            || JobEnum.nj_meiqihunhemei.getCode().equals((reportIndex.getReportCategoryCode()))
+//                            || JobEnum.nj_guifengjimeiyaji.getCode().equals((reportIndex.getReportCategoryCode()))
+//                    ) {
+//                        List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(reportIndex.getReportCategoryCode(), reportIndex.getIndexLang());
+//                        if (Objects.nonNull(reportCategoryTemplates) && reportCategoryTemplates.size() > 0) {
+//                            ReportCategoryTemplate reportCategoryTemplate = reportCategoryTemplates.get(0);
+//                            if (Objects.nonNull(reportCategoryTemplate) && StringUtils.isNotBlank(reportCategoryTemplate.getTemplatePath())) {
+//                                FileUtils.deleteFile(reportCategoryTemplate.getTemplatePath());
+//                                FileUtils.copyFile(filePath, reportCategoryTemplate.getTemplatePath());
+//                            }
+//                        }
+//                    }
+//                }
 
             }
         } catch (Exception e) {

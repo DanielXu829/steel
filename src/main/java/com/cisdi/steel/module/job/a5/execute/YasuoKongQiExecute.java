@@ -51,25 +51,6 @@ public class YasuoKongQiExecute extends AbstractJobExecuteExecute {
 
     @Override
     public void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {
-        // 隐藏 下划线的sheet  强制计算
-        FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
-        int numberOfSheets = workbook.getNumberOfSheets();
-        for (int i = 0; i < numberOfSheets; i++) {
-            Sheet sheet = workbook.getSheetAt(i);
-            String sheetName = sheet.getSheetName();
-            // 以下划线开头的全部隐藏掉
-            if (sheetName.startsWith("_")) {
-                if (sheet.isSelected()) {
-                    sheet.setSelected(false);
-                }
-                workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
-            }
-        }
-        workbook.setForceFormulaRecalculation(true);
-        workbook.write(fos);
-        fos.close();
-        workbook.close();
-
-        super.clearTemp(dateQuery, excelPathInfo, writerExcelDTO, "/u01/templates/temp/能介/压缩空气生产情况汇总表.xlsx");
+        super.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
     }
 }
