@@ -200,15 +200,19 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
     public String existTemplate(ReportIndex reportIndex) {
         ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
         // 判断数据库是否存在报表
-        if (Objects.isNull(report)
+        if (Objects.isNull(report)||Objects.isNull(report.getPath())
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())) {
             // 不存在，直接返回null
             return null;
         } else {
             // 存在
-            return reportIndex.getPath();
+            File file = new File(report.getPath());
+            if (file.exists()) {
+                return report.getPath();
+            }
         }
+        return null;
     }
 
 }
