@@ -126,6 +126,31 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Double getQueryBegin(DateQuery dateQuery, String tagName) {
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        queryParam.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        queryParam.put("tagName", tagName);
+        String result = httpUtil.get(getUrl6(), queryParam);
+        Double max = 0.0;
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray rows = jsonObject.getJSONArray("rows");
+                if (Objects.nonNull(rows)) {
+                    for (int i = 0; i < rows.size(); i++) {
+                        JSONObject jsonObject1 = rows.getJSONObject(i);
+                        Double val = jsonObject1.getDouble("val");
+                        if (max < val) {
+                            max = val;
+                        }
+                    }
+                }
+            }
+        }
+        return max;
+    }
+
     protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam(dateQuery);
         Map<String, String> queryParam1 = getQueryParam4(dateQuery);
@@ -138,17 +163,21 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
                 queryParam1.put("tagName", column);
                 String result = httpUtil.get(url, queryParam);
                 String result1 = httpUtil.get(url, queryParam1);
-                if (StringUtils.isNotBlank(result)) {
+                if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     JSONObject jsonObject1 = JSONObject.parseObject(result1);
-                    if (Objects.nonNull(jsonObject)) {
+                    if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject1)) {
                         JSONArray rows = jsonObject.getJSONArray("rows");
                         JSONArray rows1 = jsonObject1.getJSONArray("rows");
-                        if (Objects.nonNull(rows)) {
+                        if (Objects.nonNull(rows) && Objects.nonNull(rows1)) {
                             JSONObject obj = rows.getJSONObject(0);
                             JSONObject obj1 = rows1.getJSONObject(0);
-                            if (Objects.nonNull(obj)) {
+                            if (Objects.nonNull(obj) && Objects.nonNull(obj1)) {
                                 Double val = obj1.getDouble("val")-obj.getDouble("val");
+                                if (val < 0) {
+                                    Double queryBegin = getQueryBegin(dateQuery, column);
+                                    val = obj1.getDouble("val") - obj.getDouble("val") + queryBegin;
+                                }
                                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                             }
                         }
@@ -158,6 +187,7 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
         }
         return cellDataList;
     }
+
 
     public List<CellData> mapDataHandler2(String url, List<String> columns, int rowBatch,DateQuery item,int startRow) {
         Map<String, String> queryParam = getQueryParam2(item);
@@ -246,6 +276,13 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam5(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        String dateTime = DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -8), DateUtil.fullFormat);
+        result.put("time", dateTime);
+        return result;
+    }
+
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
        // result.put("startDate",DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
@@ -288,5 +325,9 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
 
     protected String getUrl5() {
         return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCodeOrSource";
+    }
+
+    protected String getUrl6() {
+        return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
     }
 }

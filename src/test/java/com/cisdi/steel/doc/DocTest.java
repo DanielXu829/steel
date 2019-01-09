@@ -4,7 +4,6 @@ import cn.afterturn.easypoi.word.WordExportUtil;
 import cn.afterturn.easypoi.word.entity.WordImageEntity;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.module.job.a1.doc.GaoLuDocMain;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.BreakType;
@@ -14,7 +13,6 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
@@ -26,12 +24,12 @@ import java.util.List;
 @Slf4j
 public class DocTest extends SteelApplicationTests {
 
-    @Autowired
-    private GaoLuDocMain gaoLuDocMain;
+//    @Autowired
+//    private GaoLuDocMain gaoLuDocMain;
 
     @Test
     public void test4(){
-        gaoLuDocMain.mainTask();
+//        gaoLuDocMain.mainTask();
     }
 
     @Test
