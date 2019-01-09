@@ -14,9 +14,9 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
-import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import com.cisdi.steel.module.report.service.ReportIndexService;
@@ -148,18 +148,6 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             reportIndex.setId(report.getId());
             this.updateById(reportIndex);
         }
-//        if (StringUtils.isBlank(reportIndex.getReportCategoryCode())) {
-//            return;
-//        }
-//        Date now = new Date();
-//        reportIndex.setCreateTime(Objects.isNull(reportIndex.getCurrDate()) ? now : reportIndex.getCurrDate());
-//        reportIndex.setUpdateTime(now);
-//        reportIndex.setHidden("0");
-//
-//        if (StringUtils.isNotBlank(reportIndex.getReportCategoryCode()) && !"jh_zidongpeimei".equals(reportIndex.getReportCategoryCode())) {
-//            reportIndexMapper.updateByMoreParamter(reportIndex);
-//        }
-//        this.save(reportIndex);
     }
 
     @Override
@@ -207,4 +195,20 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         reportIndexDTO.setOtherList(otherList);
         return ApiUtil.success(reportIndexDTO);
     }
+
+    @Override
+    public String existTemplate(ReportIndex reportIndex) {
+        ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
+        // 判断数据库是否存在报表
+        if (Objects.isNull(report)
+                || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())) {
+            // 不存在，直接返回null
+            return null;
+        } else {
+            // 存在
+            return reportIndex.getPath();
+        }
+    }
+
 }

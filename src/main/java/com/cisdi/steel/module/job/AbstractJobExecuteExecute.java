@@ -24,7 +24,6 @@ import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.omg.CORBA.DATA_CONVERSION;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -126,12 +125,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                         .template(template)
                         .excelPathInfo(excelPathInfo)
                         .build();
-                // 4、5填充数据
-                Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
-                // 6、生成文件
-                this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
 
-                // 7、插入索引
                 ReportIndex reportIndex = new ReportIndex();
                 reportIndex.setSequence(template.getSequence())
                         .setReportCategoryCode(template.getReportCategoryCode())
@@ -141,6 +135,19 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                         .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
                         .setCurrDate(dateQuery.getRecordDate())
                         .setRecordDate(dateQuery.getRecordDate());
+
+                String templatePath = reportIndexService.existTemplate(reportIndex);
+                if (StringUtils.isNotBlank(templatePath)) {
+                    // 修改为生成后文件名称
+                    template.setTemplatePath(templatePath);
+                }
+
+                // 4、5填充数据
+                Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
+                // 6、生成文件
+                this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
+
+                // 7、插入索引
                 reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
                 log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage(), e);
@@ -306,7 +313,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param tempPath       空模板地址
      */
     public void clearTemp(DateQuery dateQuery, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, String tempPath) {
-        DateQuery query=new DateQuery(dateQuery.getStartTime(),dateQuery.getEndTime(),dateQuery.getRecordDate());
+        DateQuery query = new DateQuery(dateQuery.getStartTime(), dateQuery.getEndTime(), dateQuery.getRecordDate());
         DateQuery oldDateQuery = DateQueryUtil.handlerDelay(query, writerExcelDTO.getTemplate().getBuildDelay(), writerExcelDTO.getTemplate().getBuildDelayUnit(), false);
         //模板清空此操作
         String formatDateTime = DateUtil.getFormatDateTime(oldDateQuery.getRecordDate(), DateUtil.yyyyMMddFormat);

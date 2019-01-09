@@ -2,11 +2,10 @@ package com.cisdi.steel.module.report.service;
 
 import com.cisdi.steel.common.base.service.IBaseService;
 import com.cisdi.steel.common.resp.ApiResult;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * <p>Description: 报表文件-索引 服务类 </p>
@@ -65,4 +64,12 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
      * @return
      */
     ApiResult reportIndex(ReportIndexQuery reportIndexQuery);
+
+    /**
+     * 判断当天的模板是否存在
+     *
+     * @param reportIndex 索引数据
+     * @return 生成文件位置 or null
+     */
+    String existTemplate(ReportIndex reportIndex);
 }
