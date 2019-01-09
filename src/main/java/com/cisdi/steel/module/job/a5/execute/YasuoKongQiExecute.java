@@ -48,4 +48,9 @@ public class YasuoKongQiExecute extends AbstractJobExecuteExecute {
         //生成昨天的
 //        super.executeDateParam(jobExecuteInfo, -1);
     }
+
+    @Override
+    public void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {
+        super.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
+    }
 }
