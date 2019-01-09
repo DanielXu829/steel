@@ -41,28 +41,4 @@ public class MeiqihunhemeiExecute extends AbstractJobExecuteExecute {
     public void execute(JobExecuteInfo jobExecuteInfo) {
         super.execute(jobExecuteInfo);
     }
-
-    @Override
-    public void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {
-        // 隐藏 下划线的sheet  强制计算
-        FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
-        int numberOfSheets = workbook.getNumberOfSheets();
-        for (int i = 0; i < numberOfSheets; i++) {
-            Sheet sheet = workbook.getSheetAt(i);
-            String sheetName = sheet.getSheetName();
-            // 以下划线开头的全部隐藏掉
-            if (sheetName.startsWith("_")) {
-                if (sheet.isSelected()) {
-                    sheet.setSelected(false);
-                }
-                workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
-            }
-        }
-        workbook.setForceFormulaRecalculation(true);
-        workbook.write(fos);
-        fos.close();
-        workbook.close();
-
-        super.clearTemp(dateQuery, excelPathInfo, writerExcelDTO, "/u01/templates/temp/能介/煤气柜作业区混合煤气情况表.xlsx");
-    }
 }
