@@ -87,6 +87,7 @@ public enum JobEnum {
     yl_chejianshengchanjiaoban("ygl_chejianshengchanjiaoban", "原料车间生产交班表"),
 
     // 能介
+    nj_qiguidianjian("nj_qiguidianjian", "气柜点检表"),
     nj_twokong("nj_twokong", "二空压站运行记录表"),
     nj_threekong("nj_threekong", "三空压站运行记录表"),
     nj_fourkong("nj_fourkong", "四空压站运行记录表"),

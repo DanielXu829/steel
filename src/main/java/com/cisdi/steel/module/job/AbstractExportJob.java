@@ -48,7 +48,7 @@ public abstract class AbstractExportJob implements Job, Serializable {
             jobHandler.execute(jobExecuteInfo);
             log.debug(getCurrentJob().getName() + "       执行结束");
         } catch (Exception e) {
-            log.error(getCurrentJob().getName() + "       执行错误", e.getMessage());
+            log.error(getCurrentJob().getName() + "       执行错误", e);
         }
     }
 }

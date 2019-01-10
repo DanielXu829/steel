@@ -2,8 +2,7 @@ package com.cisdi.steel.job.a5;
 
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.a5.*;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.job.a5.task.QiguidianjianJob;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -161,4 +160,14 @@ public class TestJob5 extends SteelApplicationTests {
     public void test13() {
         acsDongLiJob.execute(null);
     }
+
+
+    @Autowired
+    private QiguidianjianJob qiguidianjianJob;
+
+    @Test
+    public void test14() {
+        qiguidianjianJob.execute(null);
+    }
+
 }
