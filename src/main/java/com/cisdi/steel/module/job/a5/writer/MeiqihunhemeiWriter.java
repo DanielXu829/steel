@@ -62,7 +62,13 @@ public class MeiqihunhemeiWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-                Map<String, List<Cell>> stringListMap = ExcelCellColorUtil.groupByCell(columns, maps, DEFAULT_URL);
+                Map<String, List<Cell>> stringListMap=new HashMap<>();
+                if("_Area3_day_all".equals(sheetName)||"_Area4_day_all".equals(sheetName)){
+                    stringListMap.put("/AreaDayTagValues",columns);
+                }else{
+                    stringListMap.put("/AreaMonthTagValues",columns);
+                }
+//                Map<String, List<Cell>> stringListMap = ExcelCellColorUtil.groupByCell(columns, maps, DEFAULT_URL);
                 int index = 1;
 
                 Map<String, String> queryParam = DateQueryUtil.getQueryParam(dateQueries.get(0), 0, 0, 10);

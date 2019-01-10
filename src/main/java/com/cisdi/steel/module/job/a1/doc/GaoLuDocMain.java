@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.a1.doc;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
+import cn.afterturn.easypoi.word.entity.WordImageEntity;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
@@ -14,14 +15,20 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,26 +45,16 @@ public class GaoLuDocMain {
     @Autowired
     private JobProperties jobProperties;
 
-    @Autowired
-    private ReportIndexMapper reportIndexMapper;
-
     private String version6 = "6.0";
     private String version8 = "8.0";
 
-
-    public static void main(String[] args) {
-        new GaoLuDocMain().mainTask();
-    }
-
     public void mainTask() {
-//        mainDeal(version6);
         mainDeal(version8);
         log.error("高炉word生成完毕！");
     }
 
     public void mainDeal(String version) {
-        //init();
-
+        part1(version);
         if ("6.0".equals(version)) {
 //            comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "五烧每日操业会-设计版v1.docx");
         } else {
@@ -65,282 +62,38 @@ public class GaoLuDocMain {
         }
     }
 
-
     /**
-     * 第一部分点名
+     * doc最后结果
      */
-    private String[] L1 = null;
+    private static HashMap<String, Object> result = new HashMap<String, Object>();
 
-    private void commPart1(JSONObject o, Map<String, Object> map, String key1, String key2, String key3, String key4) {
-        if (Objects.nonNull(o)) {
-            Map<String, Object> innerMap = o.getInnerMap();
-            Set<String> keySet = innerMap.keySet();
-            Object o1 = null;
-            for (String key : keySet) {
-                o1 = innerMap.get(key);
-            }
-            if (Objects.nonNull(o1)) {
-                BigDecimal attr3 = (BigDecimal) o1;
-                String attr2 = (String) map.get(key1);
-                if (attr2.contains("±")) {
-                    matchDeal(map, attr2, attr3, key3, key4, "±");
-                } else if (attr2.contains("-")) {
-                    matchDeal(map, attr2, attr3, key3, key4, "-");
-                }
-                map.put(key2, attr3.doubleValue());
-            }
+
+    private String[] L1 = new String[]{"BF8_L2C_BD_ProductionSum_1d_cur", "BF8_L2C_BD_CokeRate_1d_avg", "BF8_L2M_FuelRate_1d_avg"};
+
+    private void part1(String version) {
+        Date date = new Date();
+        Date beginDate = DateUtil.addDays(date, -30);
+        Date start = beginDate;
+
+        List<List<Double>> doubles = new ArrayList<>();
+        List<String> categoriesList = new ArrayList<>();
+
+        List<String> dateList = new ArrayList<>();
+        while (beginDate.before(date)) {
+            categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
+            dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
+            beginDate = DateUtil.addDays(beginDate, 1);
         }
-    }
-
-    private void matchDeal(Map<String, Object> map, String attr2, BigDecimal attr3, String key3, String key4, String match) {
-        // 去除中文
-        Pattern pat = Pattern.compile("[\u4e00-\u9fa5]");
-        Matcher mat = pat.matcher(attr2);
-        attr2 = mat.replaceAll("");
-        String[] split = attr2.split(match);
-        double can = Double.valueOf(split[0]);
-        double pianc = Double.valueOf(split[1]);
-
-        if ("±".equals(match)) {
-            double attr4 = attr3.doubleValue() - can;
-            String attr5 = "正常";
-            if (attr4 < -pianc) {
-                attr5 = "偏低";
-            } else if (attr4 > pianc) {
-                attr5 = "偏高";
-            }
-            map.put(key3, attr4);
-            map.put(key4, attr5);
-        } else {
-            String attr5 = "正常";
-            double attr4 = attr3.doubleValue();
-            if (attr4 < can) {
-                attr5 = "偏低";
-            } else if (attr4 > pianc) {
-                attr5 = "偏高";
-            }
-            map.put(key3, attr4);
-            map.put(key4, attr5);
-        }
-    }
-
-    private void part1Data() {
-        //文档第一部分
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("attr1", "上料量t/h");
-        map.put("attr2", "730±10");
-        map.put("attr3", "710");
-        map.put("attr4", "-20");
-        map.put("attr5", "正常");
-        list.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "返矿配比%");
-        map.put("attr2", "18±1");
-        map.put("attr3", "18.5");
-        map.put("attr4", "0.5");
-        map.put("attr5", "正常");
-        list.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "粉尘配比t/h");
-        map.put("attr2", "12±2");
-        map.put("attr3", "10.91");
-        map.put("attr4", "-1.09");
-        map.put("attr5", "正常");
-        list.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "混合料水分%");
-        map.put("attr2", "7.2±0.3");
-        map.put("attr3", "7.17");
-        map.put("attr4", "-0.03");
-        map.put("attr5", "正常");
-        list.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "布料参数mm");
-        map.put("attr2", "620±10");
-        map.put("attr3", "620");
-        map.put("attr4", "0");
-        map.put("attr5", "正常");
-        list.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "点火温度℃");
-        map.put("attr2", "1080±30");
-        map.put("attr3", "1096");
-        map.put("attr4", "16");
-        map.put("attr5", "正常");
-        list.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "烧结机速m/min");
-        map.put("attr2", "1.90±0.05");
-        map.put("attr3", "1.94");
-        map.put("attr4", "0.04");
-        map.put("attr5", "正常");
-        list.add(map);
-
-        //文档第一部分 下
-        Map<String, Object> map1 = new HashMap<String, Object>();
-        map1.put("attr1", "大烟道温度℃");
-        map1.put("attr2", "南100±20");
-        map1.put("attr3", "107");
-        map1.put("attr4", "7");
-        map1.put("attr5", "正常");
-
-        map1.put("attr6", "北140±20");
-        map1.put("attr7", "140");
-        map1.put("attr8", "0");
-        map1.put("attr9", "正常");
-
-        map1.put("attr10", "主抽阀门开度%");
-        map1.put("attr11", "南85-97");
-        map1.put("attr12", "97.00");
-        map1.put("attr13", "-");
-        map1.put("attr14", "正常");
-
-        map1.put("attr15", "北85-97");
-        map1.put("attr16", "97.00");
-        map1.put("attr17", "-");
-        map1.put("attr18", "正常");
-
-        map1.put("attr19", "BTP位置");
-        map1.put("attr20", "南23.0±1.0");
-        map1.put("attr21", "22.93");
-        map1.put("attr22", "-0.17");
-        map1.put("attr23", "正常");
-
-        map1.put("attr24", "北23.0±1.0");
-        map1.put("attr25", "23.07");
-        map1.put("attr26", "0.07");
-        map1.put("attr27", "正常");
-
-        result.putAll(map1);
-    }
-
-    /**
-     * 第二部分点名
-     */
-    private String[] L2 = null;
-
-    private void part2Data() {
-
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("attr1", "理论产量t");
-        map.put("attr2", "-");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "R±0.05合格率%");
-        map.put("attr2", "≥93");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "TFe%");
-        map.put("attr2", "-");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "FeO%");
-        map.put("attr2", "-");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "镁铝比");
-        map.put("attr2", "-");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "转鼓%");
-        map.put("attr2", "≥76");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "筛分%");
-        map.put("attr2", "≤6");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "5~10mm比例%");
-        map.put("attr2", "≤20");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "10~40mm比例%");
-        map.put("attr2", "≥58.48");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "＞40mm比例%");
-        map.put("attr2", "-");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "平均粒径mm");
-        map.put("attr2", "≥20.5");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "RDI%");
-        map.put("attr2", "≥60");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        list1.add(map);
-
-    }
 
 
-    private void commPart2(List<Map<String, Object>> listData, String[] point, JSONObject data2_1, JSONObject data2_2, String key3, String key4, String key5) {
-        for (int i = 0; i < point.length; i++) {
-            //昨天数据
-            JSONObject o_1 = data2_1.getJSONObject(point[i]);
-
-            //今天数据
-            JSONObject o_2 = data2_2.getJSONObject(point[i]);
-
-            if (i < listData.size()) {
-                Map<String, Object> map = listData.get(i);
-                if (Objects.nonNull(o_1)) {
-                    Map<String, Object> innerMap = o_1.getInnerMap();
+        JSONObject jsonObject = dataHttp(L1, start, date, version);
+        if (Objects.nonNull(jsonObject)) {
+            for (String tagName : L1) {
+                List<Double> a = new ArrayList<>();
+                JSONObject tagObject = jsonObject.getJSONObject(tagName);
+                if (Objects.nonNull(tagObject)) {
+                    Map<String, Object> innerMap = tagObject.getInnerMap();
                     Set<String> keySet = innerMap.keySet();
-                    Object o1 = null;
-
                     Long[] list = new Long[keySet.size()];
                     int k = 0;
                     for (String key : keySet) {
@@ -348,271 +101,77 @@ public class GaoLuDocMain {
                         k++;
                     }
                     Arrays.sort(list);
-
-                    for (int m = 0; m < list.length; m++) {
-                        o1 = innerMap.get(list[m] + "");
+                    for (String da : dateList) {
+                        Double v = null;
+                        for (Long li : list) {
+                            Date dd = new Date(Long.valueOf(li));
+                            String fomDate = DateUtil.getFormatDateTime(dd, DateUtil.yyyyMMddFormat);
+                            if (fomDate.equals(da)) {
+                                BigDecimal vv = (BigDecimal) innerMap.get(li + "");
+                                v = vv.doubleValue();
+                                break;
+                            }
+                        }
+                        a.add(v);
                     }
-
-                    map.put(key3, o1);
-
-
-                    Map<String, Object> innerMap2 = o_2.getInnerMap();
-                    Set<String> keySet2 = innerMap2.keySet();
-                    Object o2 = null;
-
-                    list = new Long[keySet2.size()];
-                    k = 0;
-                    for (String key : keySet2) {
-                        list[k] = Long.valueOf(key);
-                        k++;
-                    }
-                    Arrays.sort(list);
-
-                    for (int m = 0; m < list.length; m++) {
-                        o2 = innerMap2.get(list[m] + "");
-                    }
-                    map.put(key4, o2);
-
-                    if (Objects.nonNull(o2) && Objects.nonNull(o1)) {
-                        BigDecimal attr5 = BigDecimal.ZERO;
-                        BigDecimal b1 = (BigDecimal) o1;
-                        BigDecimal b2 = (BigDecimal) o2;
-                        attr5 = b2.subtract(b1);
-
-                        map.put(key5, attr5);
-                    }
-
                 }
+                doubles.add(a);
             }
         }
-    }
+        Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
+        Object[] objects3 = doubles.get(2).toArray();
 
-    /**
-     * 第三部分点名
-     */
-    private String[] L3 = null;
+        /**
+         * 产量BF8_L2C_BD_ProductionSum_1d_cur
+         * 焦比BF8_L2C_BD_CokeRate_1d_avg
+         * 燃料比BF8_L2M_FuelRate_1d_avg
+         */
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("产量", objects1));
 
-    private void part3Data() {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("attr1", "燃料配比%");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("焦比", objects2));
 
-        map = new HashMap<String, Object>();
-        map.put("attr1", "返矿配比%");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
+        // 标注类别
+        Vector<Serie> series3 = new Vector<Serie>();
+        series3.add(new Serie("燃料比", objects3));
 
-        map = new HashMap<String, Object>();
-        map.put("attr1", "粉尘配加量t/h");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series2);
+        vectors.add(series3);
 
-        map = new HashMap<String, Object>();
-        map.put("attr1", "混合料水分%");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
+        String title1 = "";
+        String categoryAxisLabel1 = null;
+        String valueAxisLabel1 = null;
 
-        map = new HashMap<String, Object>();
-        map.put("attr1", "布料参数mm");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
 
-        map = new HashMap<String, Object>();
-        map.put("attr1", "点火温度℃");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
+        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
+                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 450, 650, 160, 220, true);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg1", image1);
 
-        map = new HashMap<String, Object>();
-        map.put("attr1", "烧结机速度m/min");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "垂直烧结速度mm/min");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "烟道温度℃（南）");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "烟道温度℃（北）");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "BTP温度℃");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "BTP位置");
-        map.put("attr2", "");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        list2.add(map);
+//        try {
+//            File file = new File("D:\\tetstet.jpeg");
+//            int width = 1024;
+//            int height = 420;
+//            ChartUtilities.saveChartAsJPEG(file, Chart1, width, height);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
     }
 
-    private void part4Data() {
-
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("attr1", "余热发电（kWh/t）");
-        map.put("attr2", "≥14.54");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
-        list3.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "固燃比（kg/t）");
-        map.put("attr2", "≤63.56");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
-        list3.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "电耗(kwh/t)");
-        map.put("attr2", "≤37.77");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
-        list3.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "熔剂成本（元/t）");
-        map.put("attr2", "≤25.30");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
-        list3.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "内返矿率（%）");
-        map.put("attr2", "≤21");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
-        list3.add(map);
-
-        map = new HashMap<String, Object>();
-        map.put("attr1", "主抽电耗（kWh/t）");
-        map.put("attr2", "≤21");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
-        list3.add(map);
-    }
-
-    private List<Map<String, Object>> list = new ArrayList();
-    private List<Map<String, Object>> dataList = new ArrayList();
-
-    private List<Map<String, Object>> list1 = new ArrayList();
-    private List<Map<String, Object>> list2 = new ArrayList();
-    private List<Map<String, Object>> list3 = new ArrayList();
-    private List<Map<String, Object>> list4 = new ArrayList();
-    private List<Map<String, Object>> list5 = new ArrayList();
-
-    /**
-     * doc最后结果
-     */
-    private static HashMap<String, Object> result = new HashMap<String, Object>();
-
-    private void init() {
-        part1Data();
-        part2Data();
-        part3Data();
-        part4Data();
-
-
-        Map<String, Object> map7 = new HashMap<String, Object>();
-        map7.put("attr0", "1");
-        map7.put("attr1", "5#烧结高硫脱硫进口");
-        map7.put("attr2", "≤50");
-        map7.put("attr3", "—");
-        map7.put("attr4", "≤300");
-        map7.put("attr5", "≤75");
-        map7.put("attr6", "—");
-        map7.put("attr7", "—");
-
-        Map<String, Object> map8 = new HashMap<String, Object>();
-        map8.put("attr0", "2");
-        map8.put("attr1", "5#烧结低硫脱硫进口");
-        map8.put("attr2", "≤50");
-        map8.put("attr3", "—");
-        map8.put("attr4", "≤300");
-        map8.put("attr5", "≤75");
-        map8.put("attr6", "—");
-        map8.put("attr7", "—");
-
-
-        list4.add(map7);
-        list4.add(map8);
-
-        Map<String, Object> map9 = new HashMap<String, Object>();
-        map9.put("attr1", "混合料水分率波动范围");
-        map9.put("attr2", "±0.5％");
-
-        Map<String, Object> map10 = new HashMap<String, Object>();
-        map10.put("attr1", "点火温度");
-        map10.put("attr2", "1100±100℃");
-
-        Map<String, Object> map11 = new HashMap<String, Object>();
-        map11.put("attr1", "南大烟道温度");
-        map11.put("attr2", "110±20℃（6号机）\n" +
-                "100±20℃（5号机）");
-
-        Map<String, Object> map12 = new HashMap<String, Object>();
-        map12.put("attr1", "粉尘配比单次调整幅度");
-        map12.put("attr2", "        " + "≤0.5%（6号机）\n" +
-                "        " + "≤1t（5号机）");
-
-        list5.add(map9);
-        list5.add(map10);
-        list5.add(map11);
-        list5.add(map12);
-
-
-    }
-
-    private JSONObject dataHttp(String[] tagNames, Date date, String version) {
-        DateQuery dateQuery = DateQueryUtil.buildToday(date);
+    private JSONObject dataHttp(String[] tagNames, Date beginDate, Date endDate, String version) {
         JSONObject query = new JSONObject();
-        query.put("start", dateQuery.getQueryStartTime());
-        query.put("end", dateQuery.getQueryEndTime());
-        query.put("tagNames", tagNames);
+        query.put("starttime", beginDate.getTime());
+        query.put("endtime", endDate.getTime());
+        query.put("tagnames", tagNames);
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String results = httpUtil.postJsonParams(getUrl(version), jsonString);
@@ -636,10 +195,10 @@ public class GaoLuDocMain {
         }
     }
 
-    private static void dealDate(HashMap<String, Object> map) {
+    private void dealDate(HashMap<String, Object> map) {
         Date date = new Date();
-        String date1 = DateUtil.getFormatDateTime(date,"yyyy年MM月dd日 HH:mm");
-        String date2 = DateUtil.getFormatDateTime(date,"yyyy年MM月dd日");
+        String date1 = DateUtil.getFormatDateTime(date, "yyyy年MM月dd日 HH:mm");
+        String date2 = DateUtil.getFormatDateTime(date, "yyyy年MM月dd日");
 
         //文档所有日期
         map.put("date1", date1);
@@ -647,11 +206,25 @@ public class GaoLuDocMain {
     }
 
     private String getUrl(String version) {
-        if ("5.0".equals(version)) {
-            return httpProperties.getUrlApiSJOne() + "/tagValues/tagNames";
-        } else {
-            // "6.0".equals(version) 默认
-            return httpProperties.getUrlApiSJTwo() + "/tagValues/tagNames";
+        return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
+    }
+
+    private WordImageEntity image(JFreeChart chart) {
+        WordImageEntity image = new WordImageEntity();
+        try {
+            chart.getRenderingHints().put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+            chart.getPlot().setBackgroundAlpha(0.1f);
+            chart.getPlot().setNoDataMessage("当前没有有效的数据");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ChartUtilities.writeChartAsJPEG(baos, chart, 600, 300);
+            image.setHeight(350);
+            image.setWidth(650);
+            image.setData(baos.toByteArray());
+            image.setType(WordImageEntity.Data);
+        } catch (Exception e) {
+            e.printStackTrace();
+
         }
+        return image;
     }
 }

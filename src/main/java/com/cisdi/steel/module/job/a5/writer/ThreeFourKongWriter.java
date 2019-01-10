@@ -61,7 +61,13 @@ public class ThreeFourKongWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
-                Map<String, List<Cell>> stringListMap = ExcelCellColorUtil.groupByCell(columns, maps, DEFAULT_URL);
+                Map<String, List<Cell>> stringListMap=new HashMap<>();
+                if("_Area3_day_hour".equals(sheetName)||"_Area4_day_hour".equals(sheetName)){
+                    stringListMap.put("/AreaTagValues",columns);
+                }else{
+                    stringListMap.put("/AreaStrtstpTimeTagValues",columns);
+                }
+//                Map<String, List<Cell>> stringListMap = ExcelCellColorUtil.groupByCell(columns, maps, DEFAULT_URL);
                 int index = 1;
                 for (DateQuery item : dateQueries) {
                     System.out.println(item);

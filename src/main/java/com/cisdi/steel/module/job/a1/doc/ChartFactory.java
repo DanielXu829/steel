@@ -2,15 +2,13 @@ package com.cisdi.steel.module.job.a1.doc;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
+
 import org.jfree.chart.block.BlockBorder;
-import org.jfree.chart.plot.PolarAxisLocation;
-import org.jfree.chart.plot.PolarPlot;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.RectangleEdge;
+
 
 import java.awt.*;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -22,6 +20,25 @@ import java.util.Vector;
 public class ChartFactory {
 
 
+    public static JFreeChart createBarChart(String title,
+                                            String categoryAxisLabel, String valueAxisLabel,
+                                            Vector<Serie> series, String[] categories) {
+        // 1：创建数据集合
+        DefaultCategoryDataset dataset = ChartUtils
+                .createDefaultCategoryDataset(series, categories);
+        JFreeChart chart = org.jfree.chart.ChartFactory.createBarChart(title,
+                categoryAxisLabel, valueAxisLabel, dataset);
+        // 3:设置抗锯齿，防止字体显示不清楚
+        ChartUtils.setAntiAlias(chart);// 抗锯齿
+        // 4:对柱子进行渲染
+        ChartUtils.setBarRenderer(chart.getCategoryPlot(), false);//
+        // 5:对其他部分进行渲染
+        ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
+        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
+        // 设置标注无边框
+        chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
+        return chart;
+    }
 
 
     /**
@@ -36,24 +53,29 @@ public class ChartFactory {
      */
     public static JFreeChart createLineChart(String title,
                                              String categoryAxisLabel, String valueAxisLabel,
-                                             Vector<Serie> series, Vector<Serie> series2, String[] categories, CategoryLabelPositions positions, boolean show, int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, boolean y2) {
+                                             List<Vector<Serie>> series, Object[] categories, CategoryLabelPositions positions, boolean show, int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, boolean y2) {
         // 1：创建数据集合
         DefaultCategoryDataset dataset = ChartUtils
-                .createDefaultCategoryDataset(series, categories);
+                .createDefaultCategoryDataset(series.get(0), categories);
         DefaultCategoryDataset dataset2 = null;
+        DefaultCategoryDataset dataset3 = null;
 
         if (y2) {
             dataset2 = ChartUtils
-                    .createDefaultCategoryDataset(series2, categories);
+                    .createDefaultCategoryDataset(series.get(1), categories);
+            dataset3 = ChartUtils
+                    .createDefaultCategoryDataset(series.get(2), categories);
         }
 
-        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
+//        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
+        JFreeChart chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, valueAxisLabel, dataset);
+
 
         chart.setBorderVisible(false);
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, y2, dataset2);//
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, y2, dataset2, dataset3);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
         ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
