@@ -140,7 +140,7 @@ public class ChartUtils {
      * 创建类别数据集合
      */
     public static DefaultCategoryDataset createDefaultCategoryDataset(
-            Vector<Serie> series, String[] categories) {
+            Vector<Serie> series, Object[] categories) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
         for (Serie serie : series) {
@@ -152,12 +152,12 @@ public class ChartUtils {
                 if (isPercent(value)) {
                     value = value.substring(0, value.length() - 1);
                     dataset.setValue(Double.parseDouble(value), name,
-                            categories[index]);
+                            (String) categories[index]);
                 } else if (isNumber(value)) {
                     dataset.setValue(Double.parseDouble(value), name,
-                            categories[index]);
+                            (String) categories[index]);
                 } else {
-                    dataset.setValue(null, name, categories[index]);
+                    dataset.setValue(null, name, (String) categories[index]);
                 }
             }
 //            }
@@ -175,7 +175,8 @@ public class ChartUtils {
      */
     @SuppressWarnings("deprecation")
     public static void setLineRender(CategoryPlot plot,
-                                     boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions, int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, boolean y2, DefaultCategoryDataset dataset2) {
+                                     boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions,
+                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, boolean y2, DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
         categoryaxis.setCategoryLabelPositions(positions);
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
@@ -189,12 +190,12 @@ public class ChartUtils {
         rangeAxis.setVisible(true);
         rangeAxis.setMinorTickCount(0);//显示有多少标记段
         rangeAxis.setMinorTickMarksVisible(true);
-        rangeAxis.setRange(rangIndex, rangEnd); //Y轴取值范围
+        //rangeAxis.setRange(rangIndex, rangEnd); //Y轴取值范围
 
 
         plot.setNoDataMessage(NO_DATA_MSG);
         plot.setInsets(new RectangleInsets(10, 10, 0, 10), false);
-        LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot
+        StackedBarRenderer renderer = (StackedBarRenderer) plot
                 .getRenderer();
 
         renderer.setStroke(new BasicStroke(1.5F));
@@ -206,12 +207,12 @@ public class ChartUtils {
             renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(
                     ItemLabelAnchor.OUTSIDE1, TextAnchor.BOTTOM_CENTER));// weizhi
         }
-        renderer.setBaseShapesVisible(isShapesVisible);// 数据点绘制形状
+//        renderer.setBaseShapesVisible(isShapesVisible);// 数据点绘制形状
 
         // 设置折线加粗
         renderer.setSeriesStroke(0, new BasicStroke(3F));
         renderer.setSeriesOutlineStroke(0, new BasicStroke(2.0F));
-
+        plot.setRenderer(2, renderer);
 
         if (y2) {
             // 添加第2个Y轴
@@ -225,18 +226,29 @@ public class ChartUtils {
             plot.mapDatasetToRangeAxis(1, 1);
 
             // -- 修改第2条曲线显示效果
-            StackedBarRenderer rederer = new StackedBarRenderer();
+            LineAndShapeRenderer rederer = new LineAndShapeRenderer();
             plot.setRenderer(1, rederer);
-            rederer.setBaseItemLabelsVisible(true);
+//            rederer.setBaseItemLabelsVisible(true);
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
             rederer.setBaseItemLabelFont(new Font("Calibri", Font.ITALIC, 15));
-            rederer.setMaximumBarWidth(0.07);
-            rederer.setMinimumBarLength(0.1);
-            rederer.setBarPainter(new StandardBarPainter());
+//            rederer.setMaximumBarWidth(0.07);
+//            rederer.setMinimumBarLength(0.1);
+//            rederer.setBarPainter(new StandardBarPainter());
             rederer.setSeriesPaint(0, Color.green);
             rederer.setSeriesPaint(1, Color.yellow);
             rederer.setSeriesPaint(2, Color.red);
         }
+
+        // -- 修改第3条曲线显示效果
+        LineAndShapeRenderer rederer = new LineAndShapeRenderer();
+        plot.setRenderer(2, rederer);
+//        rederer.setBaseItemLabelsVisible(true);
+        rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        rederer.setBaseItemLabelFont(new Font("Calibri", Font.ITALIC, 15));
+        rederer.setSeriesPaint(0, Color.yellow);
+        rederer.setSeriesPaint(1, Color.yellow);
+        rederer.setSeriesPaint(2, Color.red);
+        plot.setDataset(2, dataset3);
 
         plot.setBackgroundPaint(Color.white);
         plot.setDomainGridlinePaint(new Color(112, 128, 144));
