@@ -176,13 +176,14 @@ public class ChartUtils {
     @SuppressWarnings("deprecation")
     public static void setLineRender(CategoryPlot plot,
                                      boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions,
-                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, boolean y2, DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3) {
+                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2,int rangIndex3, int rangEnd3, boolean y2, DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
         categoryaxis.setCategoryLabelPositions(positions);
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
         categoryaxis.setCategoryLabelPositionOffset(20);
+        categoryaxis.setLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
 
         ValueAxis rangeAxis = plot.getRangeAxis();
         rangeAxis.setAxisLineVisible(true);
@@ -190,7 +191,7 @@ public class ChartUtils {
         rangeAxis.setVisible(true);
         rangeAxis.setMinorTickCount(0);//显示有多少标记段
         rangeAxis.setMinorTickMarksVisible(true);
-        //rangeAxis.setRange(rangIndex, rangEnd); //Y轴取值范围
+        rangeAxis.setRange(rangIndex, rangEnd); //Y轴取值范围
 
 
         plot.setNoDataMessage(NO_DATA_MSG);
@@ -212,7 +213,6 @@ public class ChartUtils {
         // 设置折线加粗
         renderer.setSeriesStroke(0, new BasicStroke(3F));
         renderer.setSeriesOutlineStroke(0, new BasicStroke(2.0F));
-        plot.setRenderer(2, renderer);
 
         if (y2) {
             // 添加第2个Y轴
@@ -221,6 +221,7 @@ public class ChartUtils {
             axis2.setAxisLinePaint(Color.BLUE);
             axis2.setLabelPaint(Color.BLUE);
             axis2.setTickLabelPaint(Color.BLUE);
+            axis2.setRange(rangIndex2, rangEnd2);
             plot.setRangeAxis(1, axis2);
             plot.setDataset(1, dataset2);
             plot.mapDatasetToRangeAxis(1, 1);
@@ -237,7 +238,19 @@ public class ChartUtils {
             rederer.setSeriesPaint(0, Color.green);
             rederer.setSeriesPaint(1, Color.yellow);
             rederer.setSeriesPaint(2, Color.red);
+            plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
         }
+
+        // 添加第3个Y轴
+        NumberAxis axis3 = new NumberAxis();
+        // -- 修改第2个Y轴的显示效果
+        axis3.setAxisLinePaint(Color.MAGENTA);
+        axis3.setLabelPaint(Color.BLUE);
+        axis3.setTickLabelPaint(Color.BLUE);
+        axis3.setRange(rangIndex3, rangEnd3);
+        plot.setRangeAxis(2, axis3);
+        plot.mapDatasetToRangeAxis(2, 1);
+
 
         // -- 修改第3条曲线显示效果
         LineAndShapeRenderer rederer = new LineAndShapeRenderer();
@@ -249,6 +262,8 @@ public class ChartUtils {
         rederer.setSeriesPaint(1, Color.yellow);
         rederer.setSeriesPaint(2, Color.red);
         plot.setDataset(2, dataset3);
+        plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+
 
         plot.setBackgroundPaint(Color.white);
         plot.setDomainGridlinePaint(new Color(112, 128, 144));
@@ -257,8 +272,6 @@ public class ChartUtils {
         plot.setDomainCrosshairVisible(true);
         plot.setRangeCrosshairVisible(true);
         plot.setOutlineVisible(false);
-
-
         setXAixs(plot);
         setYAixs(plot, 0);
 
@@ -296,7 +309,6 @@ public class ChartUtils {
         Color lineColor = new Color(31, 121, 170);
         plot.getDomainAxis().setAxisLinePaint(lineColor);// X坐标轴颜色
         plot.getDomainAxis().setTickMarkPaint(lineColor);// X坐标轴标记|竖线颜色
-
     }
 
     /**
