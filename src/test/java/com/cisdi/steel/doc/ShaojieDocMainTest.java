@@ -75,49 +75,49 @@ public class ShaojieDocMainTest extends SteelApplicationTests {
         }
         L1 = new String[]
                 {
-                        ST + "_L1R_SIN_DelAmtUse_1d_avg",
-                        ST + "_L1R_OB_CoReFineUseP_1d_avg",
-                        ST + "_L1R_OB_DustUseP_1d_avg",
-                        ST + "_L1R_SIN_MI202_1d_avg",
-                        ST + "_L1R_SIN_LI3031_1d_avg",
-                        ST + "_L1R_SIN_TIC351PVIN_1d_avg",
-                        ST + "_L1R_SIN_SI301_1d_avg",
-                        ST + "_L1R_SIN_TI300B_1d_avg",
-                        ST + "_L1R_SIN_TI300A_1d_avg",
-                        ST + "_L1R_SIN_DL424B_1d_avg",
-                        ST + "_L1R_SIN_DL424A_1d_avg",
-                        ST + "_L1R_SIN_BtpPoS_1d_avg",
-                        ST + "_L1R_SIN_BtpPoN_1d_avg"
+                        "_L1R_SIN_DelAmtUse_1d_avg",
+                        "_L1R_OB_CoReFineUseP_1d_avg",
+                        "_L1R_OB_DustUseP_1d_avg",
+                        "_L1R_SIN_MI202_1d_avg",
+                        "_L1R_SIN_LI3031_1d_avg",
+                        "_L1R_SIN_TIC351PVIN_1d_avg",
+                        "_L1R_SIN_SI301_1d_avg",
+                        "_L1R_SIN_TI300B_1d_avg",
+                        "_L1R_SIN_TI300A_1d_avg",
+                        "_L1R_SIN_DL424B_1d_avg",
+                        "_L1R_SIN_DL424A_1d_avg",
+                        "_L1R_SIN_BtpPoS_1d_avg",
+                        "_L1R_SIN_BtpPoN_1d_avg"
                 };
         L2 = new String[]
                 {
-                        ST + "_MESR_SIN_SinterDayThY_1d_cur",
+                        "_MESR_SIN_SinterDayThY_1d_cur",
                         "",
-                        ST + "_MESR_SIN_SinterTFe_1d_avg",
-                        ST + "_MESR_SIN_SinterFeO_1d_avg",
-                        ST + "_MESR_SIN_SinterMgAlRatio_1d_avg",
-                        ST + "_MESR_SIN_SinterTumIx_1d_avg",
-                        ST + "_MESR_SIN_SinterScrIx_1d_avg",
-                        ST + "_MESR_SIN_Sinter5to10mm_1d_avg",
-                        ST + "_MESR_SIN_Sinter10to40mm_1d_avg",
-                        ST + "_MESR_SIN_SinterH40mm_1d_avg",
-                        ST + "_MESR_SIN_SinterMeanSize_1d_avg",
-                        ST + "_MESR_SIN_SinterRDIH3p15_1d_avg",
+                        "_MESR_SIN_SinterTFe_1d_avg",
+                        "_MESR_SIN_SinterFeO_1d_avg",
+                        "_MESR_SIN_SinterMgAlRatio_1d_avg",
+                        "_MESR_SIN_SinterTumIx_1d_avg",
+                        "_MESR_SIN_SinterScrIx_1d_avg",
+                        "_MESR_SIN_Sinter5to10mm_1d_avg",
+                        "_MESR_SIN_Sinter10to40mm_1d_avg",
+                        "_MESR_SIN_SinterH40mm_1d_avg",
+                        "_MESR_SIN_SinterMeanSize_1d_avg",
+                        "_MESR_SIN_SinterRDIH3p15_1d_avg",
                 };
         L3 = new String[]
                 {
-                        ST + "_L1R_OB_FuelUseP_1d_avg",
-                        ST + "_L1R_OB_CoReFineUseP_1d_avg",
-                        ST + "_L1R_SIN_13DustInstanAmt_1d_avg",
-                        ST + "_L1R_SIN_MI202_1d_avg",
-                        ST + "_L1R_SIN_LI3031_1d_avg",
-                        ST + "_L1R_SIN_TIC351PVIN_1d_avg",
-                        ST + "_L1R_SIN_SI301_1d_avg",
-                        ST + "_L1R_SIN_SiMaRunVel_1d_avg",
-                        ST + "_L1R_SIN_TI300B_1d_avg",
-                        ST + "_L1R_SIN_TI300A_1d_avg",
-                        ST + "_L1R_SIN_BtpTeNS_1d_avg",
-                        ST + "_L1R_SIN_BtpPoNS_1d_avg"
+                        "_L1R_OB_FuelUseP_1d_avg",
+                        "_L1R_OB_CoReFineUseP_1d_avg",
+                        "_L1R_SIN_13DustInstanAmt_1d_avg",
+                        "_L1R_SIN_MI202_1d_avg",
+                        "_L1R_SIN_LI3031_1d_avg",
+                        "_L1R_SIN_TIC351PVIN_1d_avg",
+                        "_L1R_SIN_SI301_1d_avg",
+                        "_L1R_SIN_SiMaRunVel_1d_avg",
+                        "_L1R_SIN_TI300B_1d_avg",
+                        "_L1R_SIN_TI300A_1d_avg",
+                        "_L1R_SIN_BtpTeNS_1d_avg",
+                        "_L1R_SIN_BtpPoNS_1d_avg"
                 };
     }
 

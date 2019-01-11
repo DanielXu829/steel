@@ -14,6 +14,8 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -45,6 +47,7 @@ public class ShaojieDocMain {
     private String version5 = "5.0";
 
     @Scheduled(cron = "0 30 6 * * ?")
+//    @Scheduled(cron = "0 0/1 * * * ?")
     public void mainTask() {
         mainDeal(version5);
         mainDeal(version6);
@@ -93,56 +96,193 @@ public class ShaojieDocMain {
     }
 
     private void dealVersion(String version) {
-        String ST = "ST6";
+
         if ("5.0".equals(version)) {
-            ST = "ST5";
+            /**
+             ST5_L1R_OB_SetDelAmt_1d_avg
+             ST5_L1R_OB_ColdReturnFineUseP_1d_avg
+             ST5_L1R_OB_DustUseP_1d_avg
+             ST5_L1R_SIN_MI202_1d_avg
+             ST5_L1R_SIN_LI303_1d_avg
+             ST5_L1R_SIN_TI350_1d_avg
+             ST5_L1R_SIN_SiMaRunVel_1d_avg
+             ST5_L1R_SIN_PI300B_1d_avg
+             ST5_L1R_SIN_PI300A_1d_avg
+             ST5_L1R_SIN_OP424B_1d_avg
+             ST5_L1R_SIN_OP424A_1d_avg
+             ST5_L1R_SIN_BtpPoN_1d_avg
+             ST5_L1R_SIN_BtpPoS_1d_avg
+             */
+            L1 = new String[]
+                    {
+                            "ST5_L1R_OB_SetDelAmt_1d_avg",
+                            "ST5_L1R_OB_ColdReturnFineUseP_1d_avg",
+                            "ST5_L1R_OB_DustUseP_1d_avg",
+                            "ST5_L1R_SIN_MI202_1d_avg",
+                            "ST5_L1R_SIN_LI303_1d_avg",
+                            "ST5_L1R_SIN_TI350_1d_avg",
+                            "ST5_L1R_SIN_SiMaRunVel_1d_avg",
+                            "ST5_L1R_SIN_PI300B_1d_avg",
+                            "ST5_L1R_SIN_PI300A_1d_avg",
+                            "ST5_L1R_SIN_OP424B_1d_avg",
+                            "ST5_L1R_SIN_OP424A_1d_avg",
+                            "ST5_L1R_SIN_BtpPoN_1d_avg",
+                            "ST5_L1R_SIN_BtpPoS_1d_avg"
+                    };
+
+            /**
+             * ST5_MESR_SIN_SinterDayThY_1d_cur
+             *
+             * ST5_MESR_SIN_SinterTFe_1d_avg
+             * ST5_MESR_SIN_SinterFeO_1d_avg
+             * ST5_MESR_SIN_SinterMgAlRatio_1d_avg
+             * ST5_MESR_SIN_SinterTumIx_1d_avg
+             * ST5_MESR_SIN_SinterScrIx_1d_avg
+             * ST5_MESR_SIN_Sinter5to10mm_1d_avg
+             * ST5_MESR_SIN_Sinter10to40mm_1d_avg
+             * ST5_MESR_SIN_SinterH40mm_1d_avg
+             * ST5_MESR_SIN_SinterMeanSize_1d_avg
+             * ST5_MESR_SIN_SinterRDIH3p15_1d_avg
+             */
+            L2 = new String[]
+                    {
+                            "ST5_MESR_SIN_SinterDayThY_1d_cur",
+                            "",
+                            "ST5_MESR_SIN_SinterTFe_1d_avg",
+                            "ST5_MESR_SIN_SinterFeO_1d_avg",
+                            "ST5_MESR_SIN_SinterMgAlRatio_1d_avg",
+                            "ST5_MESR_SIN_SinterTumIx_1d_avg",
+                            "ST5_MESR_SIN_SinterScrIx_1d_avg",
+                            "ST5_MESR_SIN_Sinter5to10mm_1d_avg",
+                            "ST5_MESR_SIN_Sinter10to40mm_1d_avg",
+                            "ST5_MESR_SIN_SinterH40mm_1d_avg",
+                            "ST5_MESR_SIN_SinterMeanSize_1d_avg",
+                            "ST5_MESR_SIN_SinterRDIH3p15_1d_avg",
+                    };
+
+
+            /**
+             * ST5_L1R_OB_FuelUseP_1d_avg
+             * ST5_L1R_OB_ColdReturnFineUseP_1d_avg
+             *
+             * ST5_L1R_SIN_MI202_1d_avg
+             * ST5_L1R_SIN_LI303_1d_avg
+             * ST5_L1R_SIN_TI350_1d_avg
+             * ST5_L1R_SIN_SiMaRunVel_1d_avg
+             * ST5_L1R_SIN_VerSinVel_1d_avg
+             * ST5_L1R_SIN_PI300B_1d_avg
+             * ST5_L1R_SIN_PI300A_1d_avg
+             * ST5_L1R_SIN_BtpTeNS_1d_avg
+             * ST5_L1R_SIN_BtpPoNS_1d_avg
+             */
+            L3 = new String[]
+                    {
+                            "ST5_L1R_OB_FuelUseP_1d_avg",
+                            "ST5_L1R_OB_ColdReturnFineUseP_1d_avg",
+                            "",
+                            "ST5_L1R_SIN_MI202_1d_avg",
+                            "ST5_L1R_SIN_LI303_1d_avg",
+                            "ST5_L1R_SIN_TI350_1d_avg",
+                            "ST5_L1R_SIN_SiMaRunVel_1d_avg",
+                            "ST5_L1R_SIN_VerSinVel_1d_avg",
+                            "ST5_L1R_SIN_PI300B_1d_avg",
+                            "ST5_L1R_SIN_PI300A_1d_avg",
+                            "ST5_L1R_SIN_BtpTeNS_1d_avg",
+                            "ST5_L1R_SIN_BtpPoNS_1d_avg"
+                    };
+        } else {
+            /**
+             * ST6_L1R_SIN_DelAmtUse_1d_avg
+             * ST6_L1R_OB_CoReFineUseP_1d_avg
+             * ST6_L1R_OB_DustUseP_1d_avg
+             * ST6_L1R_SIN_MI202_1d_avg
+             * ST6_L1R_SIN_LI3031_1d_avg
+             * ST6_L1R_SIN_TIC351PVIN_1d_avg
+             * ST6_L1R_SIN_SiMaRunVel_1d_avg
+             * ST6_L1R_SIN_TI300B_1d_avg
+             * ST6_L1R_SIN_TI300A_1d_avg
+             * ST6_L1R_SIN_DL424B_1d_avg
+             * ST6_L1R_SIN_DL424A_1d_avg
+             * ST6_L1R_SIN_BtpPoS_1d_avg
+             * ST6_L1R_SIN_BtpPoN_1d_avg
+             */
+            L1 = new String[]
+                    {
+                            "ST6_L1R_SIN_DelAmtUse_1d_avg",
+                            "ST6_L1R_OB_CoReFineUseP_1d_avg",
+                            "ST6_L1R_OB_DustUseP_1d_avg",
+                            "ST6_L1R_SIN_MI202_1d_avg",
+                            "ST6_L1R_SIN_LI3031_1d_avg",
+                            "ST6_L1R_SIN_TIC351PVIN_1d_avg",
+                            "ST6_L1R_SIN_SiMaRunVel_1d_avg",
+                            "ST6_L1R_SIN_TI300B_1d_avg",
+                            "ST6_L1R_SIN_TI300A_1d_avg",
+                            "ST6_L1R_SIN_DL424B_1d_avg",
+                            "ST6_L1R_SIN_DL424A_1d_avg",
+                            "ST6_L1R_SIN_BtpPoS_1d_avg",
+                            "ST6_L1R_SIN_BtpPoN_1d_avg"
+                    };
+            /**
+             * ST6_MESR_SIN_SinterDayThY_1d_cur
+             *
+             * ST6_MESR_SIN_SinterTFe_1d_avg
+             * ST6_MESR_SIN_SinterFeO_1d_avg
+             * ST6_MESR_SIN_SinterMgAlRatio_1d_avg
+             * ST6_MESR_SIN_SinterTumIx_1d_avg
+             * ST6_MESR_SIN_SinterScrIx_1d_avg
+             * ST6_MESR_SIN_Sinter5to10mm_1d_avg
+             * ST6_MESR_SIN_Sinter10to40mm_1d_avg
+             * ST6_MESR_SIN_SinterH40mm_1d_avg
+             * ST6_MESR_SIN_SinterMeanSize_1d_avg
+             * ST6_MESR_SIN_SinterRDIH3p15_1d_avg
+             */
+            L2 = new String[]
+                    {
+                            "ST6_MESR_SIN_SinterDayThY_1d_cur",
+                            "",
+                            "ST6_MESR_SIN_SinterTFe_1d_avg",
+                            "ST6_MESR_SIN_SinterFeO_1d_avg",
+                            "ST6_MESR_SIN_SinterMgAlRatio_1d_avg",
+                            "ST6_MESR_SIN_SinterTumIx_1d_avg",
+                            "ST6_MESR_SIN_SinterScrIx_1d_avg",
+                            "ST6_MESR_SIN_Sinter5to10mm_1d_avg",
+                            "ST6_MESR_SIN_Sinter10to40mm_1d_avg",
+                            "ST6_MESR_SIN_SinterH40mm_1d_avg",
+                            "ST6_MESR_SIN_SinterMeanSize_1d_avg",
+                            "ST6_MESR_SIN_SinterRDIH3p15_1d_avg",
+                    };
+
+            /**
+             * ST6_L1R_OB_FuelUseP_1d_avg
+             * ST6_L1R_OB_CoReFineUseP_1d_avg
+             * ST6_L1R_SIN_13DustInstanAmt_1d_avg
+             * ST6_L1R_SIN_MI202_1d_avg
+             * ST6_L1R_SIN_LI3031_1d_avg
+             * ST6_L1R_SIN_TIC351PVIN_1d_avg
+             ST6_L1R_SIN_SiMaRunVel_1d_avg
+             ST6_L1R_SIN_VerSinVel_1d_avg
+             * ST6_L1R_SIN_TI300B_1d_avg
+             * ST6_L1R_SIN_TI300A_1d_avg
+             * ST6_L1R_SIN_BtpTeNS_1d_avg
+             * ST6_L1R_SIN_BtpPoNS_1d_avg
+             */
+            L3 = new String[]
+                    {
+                            "ST6_L1R_OB_FuelUseP_1d_avg",
+                            "ST6_L1R_OB_CoReFineUseP_1d_avg",
+                            "ST6_L1R_SIN_13DustInstanAmt_1d_avg",
+                            "ST6_L1R_SIN_MI202_1d_avg",
+                            "ST6_L1R_SIN_LI3031_1d_avg",
+                            "ST6_L1R_SIN_TIC351PVIN_1d_avg",
+                            "ST6_L1R_SIN_SiMaRunVel_1d_avg",
+                            "ST6_L1R_SIN_VerSinVel_1d_avg",
+                            "ST6_L1R_SIN_TI300B_1d_avg",
+                            "ST6_L1R_SIN_TI300A_1d_avg",
+                            "ST6_L1R_SIN_BtpTeNS_1d_avg",
+                            "ST6_L1R_SIN_BtpPoNS_1d_avg"
+                    };
         }
-        L1 = new String[]
-                {
-                        ST + "_L1R_SIN_DelAmtUse_1d_avg",
-                        ST + "_L1R_OB_CoReFineUseP_1d_avg",
-                        ST + "_L1R_OB_DustUseP_1d_avg",
-                        ST + "_L1R_SIN_MI202_1d_avg",
-                        ST + "_L1R_SIN_LI3031_1d_avg",
-                        ST + "_L1R_SIN_TIC351PVIN_1d_avg",
-                        ST + "_L1R_SIN_SI301_1d_avg",
-                        ST + "_L1R_SIN_TI300B_1d_avg",
-                        ST + "_L1R_SIN_TI300A_1d_avg",
-                        ST + "_L1R_SIN_DL424B_1d_avg",
-                        ST + "_L1R_SIN_DL424A_1d_avg",
-                        ST + "_L1R_SIN_BtpPoS_1d_avg",
-                        ST + "_L1R_SIN_BtpPoN_1d_avg"
-                };
-        L2 = new String[]
-                {
-                        ST + "_MESR_SIN_SinterDayThY_1d_cur",
-                        "",
-                        ST + "_MESR_SIN_SinterTFe_1d_avg",
-                        ST + "_MESR_SIN_SinterFeO_1d_avg",
-                        ST + "_MESR_SIN_SinterMgAlRatio_1d_avg",
-                        ST + "_MESR_SIN_SinterTumIx_1d_avg",
-                        ST + "_MESR_SIN_SinterScrIx_1d_avg",
-                        ST + "_MESR_SIN_Sinter5to10mm_1d_avg",
-                        ST + "_MESR_SIN_Sinter10to40mm_1d_avg",
-                        ST + "_MESR_SIN_SinterH40mm_1d_avg",
-                        ST + "_MESR_SIN_SinterMeanSize_1d_avg",
-                        ST + "_MESR_SIN_SinterRDIH3p15_1d_avg",
-                };
-        L3 = new String[]
-                {
-                        ST + "_L1R_OB_FuelUseP_1d_avg",
-                        ST + "_L1R_OB_CoReFineUseP_1d_avg",
-                        ST + "_L1R_SIN_13DustInstanAmt_1d_avg",
-                        ST + "_L1R_SIN_MI202_1d_avg",
-                        ST + "_L1R_SIN_LI3031_1d_avg",
-                        ST + "_L1R_SIN_TIC351PVIN_1d_avg",
-                        ST + "_L1R_SIN_SI301_1d_avg",
-                        ST + "_L1R_SIN_SiMaRunVel_1d_avg",
-                        ST + "_L1R_SIN_TI300B_1d_avg",
-                        ST + "_L1R_SIN_TI300A_1d_avg",
-                        ST + "_L1R_SIN_BtpTeNS_1d_avg",
-                        ST + "_L1R_SIN_BtpPoNS_1d_avg"
-                };
+
     }
 
     /**
@@ -166,7 +306,8 @@ public class ShaojieDocMain {
                 } else if (attr2.contains("-")) {
                     matchDeal(map, attr2, attr3, key3, key4, "-");
                 }
-                map.put(key2, attr3.doubleValue());
+                attr3 = attr3.setScale(2, BigDecimal.ROUND_HALF_UP);
+                map.put(key2, attr3);
             }
         }
     }
@@ -181,14 +322,16 @@ public class ShaojieDocMain {
         double pianc = Double.valueOf(split[1]);
 
         if ("±".equals(match)) {
-            double attr4 = attr3.doubleValue() - can;
+            BigDecimal subtract = attr3.subtract(new BigDecimal(can));
+            double attr4 = subtract.doubleValue();
             String attr5 = "正常";
             if (attr4 < -pianc) {
                 attr5 = "偏低";
             } else if (attr4 > pianc) {
                 attr5 = "偏高";
             }
-            map.put(key3, attr4);
+            subtract = subtract.setScale(2, BigDecimal.ROUND_HALF_UP);
+            map.put(key3, subtract);
             map.put(key4, attr5);
         } else {
             String attr5 = "正常";
@@ -198,7 +341,8 @@ public class ShaojieDocMain {
             } else if (attr4 > pianc) {
                 attr5 = "偏高";
             }
-            map.put(key3, attr4);
+            attr3 = attr3.setScale(2, BigDecimal.ROUND_HALF_UP);
+            map.put(key3, attr3);
             map.put(key4, attr5);
         }
     }
@@ -418,7 +562,7 @@ public class ShaojieDocMain {
                 if (Objects.nonNull(o_1)) {
                     Map<String, Object> innerMap = o_1.getInnerMap();
                     Set<String> keySet = innerMap.keySet();
-                    Object o1 = null;
+                    BigDecimal o1 = BigDecimal.ZERO;
 
                     Long[] list = new Long[keySet.size()];
                     int k = 0;
@@ -429,15 +573,16 @@ public class ShaojieDocMain {
                     Arrays.sort(list);
 
                     for (int m = 0; m < list.length; m++) {
-                        o1 = innerMap.get(list[m] + "");
+                        o1 = (BigDecimal) innerMap.get(list[m] + "");
                     }
+                    o1 = o1.setScale(2, BigDecimal.ROUND_HALF_UP);
 
                     map.put(key3, o1);
 
 
                     Map<String, Object> innerMap2 = o_2.getInnerMap();
                     Set<String> keySet2 = innerMap2.keySet();
-                    Object o2 = null;
+                    BigDecimal o2 = BigDecimal.ZERO;
 
                     list = new Long[keySet2.size()];
                     k = 0;
@@ -448,16 +593,14 @@ public class ShaojieDocMain {
                     Arrays.sort(list);
 
                     for (int m = 0; m < list.length; m++) {
-                        o2 = innerMap2.get(list[m] + "");
+                        o2 = (BigDecimal) innerMap2.get(list[m] + "");
                     }
+                    o2 = o2.setScale(2, BigDecimal.ROUND_HALF_UP);
                     map.put(key4, o2);
 
                     if (Objects.nonNull(o2) && Objects.nonNull(o1)) {
-                        BigDecimal attr5 = BigDecimal.ZERO;
-                        BigDecimal b1 = (BigDecimal) o1;
-                        BigDecimal b2 = (BigDecimal) o2;
-                        attr5 = b2.subtract(b1);
-
+                        BigDecimal attr5 = o2.subtract(o1);
+                        attr5 = attr5.setScale(2, BigDecimal.ROUND_HALF_UP);
                         map.put(key5, attr5);
                     }
 
@@ -563,73 +706,82 @@ public class ShaojieDocMain {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("attr1", "余热发电（kWh/t）");
         map.put("attr2", "≥14.54");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
+        map.put("attr3", "12.79");
+        map.put("attr4", "14.15");
+        map.put("attr5", "-1.8");
+        map.put("attr6", "-0.39");
         list3.add(map);
 
         map = new HashMap<String, Object>();
         map.put("attr1", "固燃比（kg/t）");
         map.put("attr2", "≤63.56");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
+        map.put("attr3", "4.2");
+        map.put("attr4", "63.6");
+        map.put("attr5", "0.64");
+        map.put("attr6", "0.04");
         list3.add(map);
 
         map = new HashMap<String, Object>();
         map.put("attr1", "电耗(kwh/t)");
         map.put("attr2", "≤37.77");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
+        map.put("attr3", "38.46");
+        map.put("attr4", "36.74");
+        map.put("attr5", "0.69");
+        map.put("attr6", "-1.03");
         list3.add(map);
 
         map = new HashMap<String, Object>();
         map.put("attr1", "熔剂成本（元/t）");
         map.put("attr2", "≤25.30");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
+        map.put("attr3", "26.41");
+        map.put("attr4", "25.74");
+        map.put("attr5", "1.11");
+        map.put("attr6", "0.44");
         list3.add(map);
 
         map = new HashMap<String, Object>();
         map.put("attr1", "内返矿率（%）");
         map.put("attr2", "≤21");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
+        map.put("attr3", "18.28");
+        map.put("attr4", "17.68");
+        map.put("attr5", "-2.7");
+        map.put("attr6", "-3.32");
         list3.add(map);
 
         map = new HashMap<String, Object>();
         map.put("attr1", "主抽电耗（kWh/t）");
         map.put("attr2", "≤21");
-        map.put("attr3", "");
-        map.put("attr4", "");
-        map.put("attr5", "");
-        map.put("attr6", "");
+        map.put("attr3", "21.40");
+        map.put("attr4", "20.33");
+        map.put("attr5", "0.4");
+        map.put("attr6", "-0.67");
         list3.add(map);
     }
 
-    private List<Map<String, Object>> list = new ArrayList();
-    private List<Map<String, Object>> dataList = new ArrayList();
+    private List<Map<String, Object>> list = null;
+    private List<Map<String, Object>> dataList = null;
 
-    private List<Map<String, Object>> list1 = new ArrayList();
-    private List<Map<String, Object>> list2 = new ArrayList();
-    private List<Map<String, Object>> list3 = new ArrayList();
-    private List<Map<String, Object>> list4 = new ArrayList();
-    private List<Map<String, Object>> list5 = new ArrayList();
+    private List<Map<String, Object>> list1 = null;
+    private List<Map<String, Object>> list2 = null;
+    private List<Map<String, Object>> list3 = null;
+    private List<Map<String, Object>> list4 = null;
+    private List<Map<String, Object>> list5 = null;
 
     /**
      * doc最后结果
      */
-    private static HashMap<String, Object> result = new HashMap<String, Object>();
+    private HashMap<String, Object> result = null;
 
     private void init() {
+        result = new HashMap<String, Object>();
+        list = new ArrayList();
+        dataList = new ArrayList();
+        list1 = new ArrayList();
+        list2 = new ArrayList();
+        list3 = new ArrayList();
+        list4 = new ArrayList();
+        list5 = new ArrayList();
+
         part1Data();
         part2Data();
         part3Data();
@@ -764,6 +916,13 @@ public class ShaojieDocMain {
             }
 
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
+            List<XWPFParagraph> paragraphs = doc.getParagraphs();
+            for (XWPFParagraph paragraph : paragraphs) {
+                List<XWPFRun> runs = paragraph.getRuns();
+                for (XWPFRun run : runs) {
+                    run.setFontFamily("微软雅黑", XWPFRun.FontCharRange.cs);//字体，范围----效果不详
+                }
+            }
             String fileName = name + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "每日操业会 - 设计版v1.docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
@@ -786,7 +945,7 @@ public class ShaojieDocMain {
         }
     }
 
-    private static void dealDate(HashMap<String, Object> map) {
+    private void dealDate(HashMap<String, Object> map) {
         Date date = new Date();
         String date1 = DateUtil.getFormatDateTime(DateUtil.addDays(date, -2), DateUtil.MMddChineseFormat);
         String date2 = DateUtil.getFormatDateTime(DateUtil.addDays(date, -1), DateUtil.MMddChineseFormat);
