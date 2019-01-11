@@ -265,4 +265,17 @@ public class TestJob2 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 关键指标
+     */
+    @Autowired
+    private GuanjianzhibiaoJob guanjianzhibiaoJob;
+
+    @Test
+    public void test26() {
+        guanjianzhibiaoJob.execute(null);
+    }
+
+
+
 }

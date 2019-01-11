@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
@@ -52,7 +53,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         Double avg = compareTagVal(tagNamesIf[1]);
         if(max<1 && avg==0){
             log.error("根据条件判断停止执行自动配煤报表");
-            return null;
+            System.exit(0);
         }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
@@ -67,17 +68,24 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                 // 自动配煤
                 if ("auto".equals(name)) {
                     String shift = "";
-                    if (dateQueries.size() == 1) {
+                    Date todayBeginTime = DateUtil.getTodayBeginTime();
+                    Date date1 = DateUtil.addHours(todayBeginTime, 8);
+                    Date date2 = DateUtil.addHours(date1, 8);
+                    if (DateUtil.isEffectiveDate(new Date(),todayBeginTime,date1)) {
                         shift = "夜班";
-                    } else if (dateQueries.size() == 2) {
+                    } else if (DateUtil.isEffectiveDate(new Date(),date1,date2)) {
                         shift = "白班";
-                    } else if (dateQueries.size() == 3) {
+                    } else{
                         shift = "中班";
                     }
                     Row row = sheet.createRow(29);
                     row.createCell(0).setCellValue(shift);
                     row.getCell(0).setCellType(CellType.STRING);
 
+                    Row row1 = sheet.createRow(33);
+                    Double aDouble = peimeiLeiji(getUrl3());
+                    row1.createCell(0).setCellValue(aDouble);
+                    row1.getCell(0).setCellType(CellType.NUMERIC);
 //                    for (int j = 0; j < dateQueries.size(); j++) {
                     List<CellData> cellDataList = this.handlerData(dateQueries.get(dateQueries.size() - 1), sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -90,6 +98,49 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
             }
         }
         return workbook;
+    }
+
+    public Double peimeiLeiji(String url){
+        Map<String, String> result = new HashMap<>();
+        Map<String, String> result1 = new HashMap<>();
+        Calendar instance = Calendar.getInstance();
+        instance.setTime(new Date());
+        instance.set(Calendar.DAY_OF_MONTH,1);
+        instance.set(Calendar.HOUR_OF_DAY,0);
+        instance.set(Calendar.MINUTE,0);
+        instance.set(Calendar.SECOND,0);
+        result.put("startDate",DateUtil.getFormatDateTime(instance.getTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("tagName","CK67_L1R_CB_CBReset_4_report");
+        String results = httpUtil.get(url, result);
+        Double val1=0.0;
+        if (StringUtils.isNotBlank(results)) {
+            JSONObject jsonObject = JSONObject.parseObject(results);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray rows = jsonObject.getJSONArray("rows");
+                if (Objects.nonNull(rows)) {
+                    for (int i = 0; i < rows.size(); i++) {
+                        JSONObject obj = rows.getJSONObject(i);
+                        if (Objects.nonNull(obj)) {
+                            String clock = obj.getString("clock");
+                            result1.put("tagName", "CK67_L1R_CB_CBAmtTol_1m_max");
+                            Date date = DateUtil.strToDate(clock, DateUtil.fullFormat);
+                            result1.put("time",DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:00"));
+                            String results1 = httpUtil.get(getUrl(), result1);
+                            if (StringUtils.isNotBlank(results1)) {
+                                JSONObject jsonObject1 = JSONObject.parseObject(results1);
+                                JSONArray rows1 = jsonObject1.getJSONArray("rows");
+                                JSONObject obj1 = rows1.getJSONObject(0);
+                                if(Objects.nonNull(obj1)){
+                                    val1 += obj1.getDouble("val");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return val1;
     }
 
     public List<CellData> handlerData(DateQuery dateQuery, Sheet sheet) {
@@ -149,11 +200,9 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return ExcelWriterUtil.handlerRowData(columns, startRow, data);
     }
 
-
-
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        String dateTime = DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:ss");
+        String dateTime = DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:00");
         result.put("time", dateTime);
         return result;
     }
