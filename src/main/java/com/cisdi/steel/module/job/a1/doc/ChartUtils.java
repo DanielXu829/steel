@@ -7,10 +7,7 @@ import org.jfree.chart.axis.*;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.labels.*;
 import org.jfree.chart.plot.*;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.renderer.category.LineAndShapeRenderer;
-import org.jfree.chart.renderer.category.StackedBarRenderer;
-import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.renderer.category.*;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -28,6 +25,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Vector;
 
 /**
@@ -176,7 +174,7 @@ public class ChartUtils {
     @SuppressWarnings("deprecation")
     public static void setLineRender(CategoryPlot plot,
                                      boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions,
-                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2,int rangIndex3, int rangEnd3, boolean y2, DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3) {
+                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, boolean y2, DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
         categoryaxis.setCategoryLabelPositions(positions);
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
@@ -196,8 +194,14 @@ public class ChartUtils {
 
         plot.setNoDataMessage(NO_DATA_MSG);
         plot.setInsets(new RectangleInsets(10, 10, 0, 10), false);
-        StackedBarRenderer renderer = (StackedBarRenderer) plot
-                .getRenderer();
+        CategoryItemRenderer renderer = plot.getRenderer();
+        if (renderer instanceof StackedBarRenderer) {
+            renderer = (StackedBarRenderer) plot
+                    .getRenderer();
+        } else if (renderer instanceof LineAndShapeRenderer) {
+            renderer = (LineAndShapeRenderer) plot
+                    .getRenderer();
+        }
 
         renderer.setStroke(new BasicStroke(1.5F));
         if (isShowDataLabels) {
@@ -254,14 +258,19 @@ public class ChartUtils {
 
         // -- 修改第3条曲线显示效果
         LineAndShapeRenderer rederer = new LineAndShapeRenderer();
-        plot.setRenderer(2, rederer);
 //        rederer.setBaseItemLabelsVisible(true);
         rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
         rederer.setBaseItemLabelFont(new Font("Calibri", Font.ITALIC, 15));
         rederer.setSeriesPaint(0, Color.yellow);
         rederer.setSeriesPaint(1, Color.yellow);
         rederer.setSeriesPaint(2, Color.red);
-        plot.setDataset(2, dataset3);
+        if (Objects.isNull(dataset3)) {
+            plot.setDataset(1, dataset2);
+            plot.setRenderer(1, rederer);
+        } else {
+            plot.setRenderer(2, rederer);
+            plot.setDataset(2, dataset3);
+        }
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 
 

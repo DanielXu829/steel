@@ -51,7 +51,8 @@ public class GaoLuDocMain {
     public void mainTask() {
         dealPart1(version8, L1);
         dealPart2(version8, L2);
-        dealPart3(version8, L3);
+        dealPart8(version8, L8);
+        dealPart9(version8, L9);
         mainDeal(version8);
         log.error("高炉word生成完毕！");
     }
@@ -72,7 +73,8 @@ public class GaoLuDocMain {
 
     private String[] L1 = new String[]{"BF8_L2C_BD_ProductionSum_1d_cur", "BF8_L2C_BD_CokeRate_1d_avg", "BF8_L2M_FuelRate_1d_avg"};
     private String[] L2 = new String[]{"BF8_L2M_SinterRatio_evt", "BF8_L2M_LumporeRatio_1h_avg", "BF8_L2M_PelletsRatio_1h_avg"};
-    private String[] L3 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg"};
+    private String[] L8 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg"};
+    private String[] L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
 
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
@@ -215,7 +217,7 @@ public class GaoLuDocMain {
         result.put("jfreechartImg2", image1);
     }
 
-    private void dealPart3(String version, String[] tagNames) {
+    private void dealPart8(String version, String[] tagNames) {
         List<List<Double>> doubles = part1(version, tagNames);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
@@ -255,7 +257,41 @@ public class GaoLuDocMain {
                 categoryAxisLabel1, valueAxisLabel1, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 5500, 0, 1, 0, 180, true);
         WordImageEntity image1 = image(Chart1);
-        result.put("jfreechartImg3", image1);
+        result.put("jfreechartImg8", image1);
+    }
+
+    private void dealPart9(String version, String[] tagNames) {
+        List<List<Double>> doubles = part1(version, tagNames);
+        Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
+
+        /**
+         * W BF8_L2C_BD_W_1d_avg
+         * Z BF8_L2C_BD_Z_1d_avg
+         */
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("W", objects1));
+
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("Z", objects2));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series2);
+
+        String title1 = "";
+        String categoryAxisLabel1 = null;
+        String valueAxisLabel1 = null;
+
+
+        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
+                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 5500, 0, 1, 0, 180, false);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg9", image1);
     }
 
     private JSONObject dataHttp(String[] tagNames, Date beginDate, Date endDate, String version) {

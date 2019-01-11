@@ -1,77 +1,68 @@
-package com.cisdi.steel.module.job.strategy.api;
+package com.cisdi.steel.module.job.a5.writer;
 
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
-import com.cisdi.steel.module.job.dto.SheetRowCellData;
-import com.cisdi.steel.module.job.util.ExcelCellColorUtil;
+import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 /**
- * 能介接口
+ * 运行记录
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
- * <P>Date: 2018/11/9 </P>
+ * <P>Date: 2018/11/13 </P>
  *
  * @author leaf
  * @version 1.0
  */
 @Component
-public class AcsStrategy extends AbstractApiStrategy {
-
-    private Map<String, String> maps;
-
-    {
-        maps = new HashMap<>();
-        // 黄色标记部分
-        maps.put("ffff00", "/AcsCurTagValues");
-        // 红色
-        maps.put("ff0000", "/AcsACMMonthRuntimeTagValues");
-        //
-    }
-
-    /**
-     * 默认访问路径
-     */
-    private static final String DEFAULT_URL = "/AcsTagValues";
-
+public class AcsWriter extends AbstractExcelReadWriter {
     @Override
-    public String getKey() {
-        return "acsReport";
-    }
-
-    @Override
-    public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
-        List<Cell> columnCells = PoiCustomUtil.getFirstRowCel(sheet);
-
-        Map<String, List<Cell>> listMap = ExcelCellColorUtil.groupByCell(columnCells, maps, DEFAULT_URL);
-        final List<CellData> cellDataList = new ArrayList<>();
-        listMap.forEach((k, v) -> {
-            String url = httpProperties.getUrlApiNJOne() + k;
-            DateQuery query = queryList.get(0);
-            if (Objects.nonNull(query)) {
-                eachData(v, url, query.getQueryParam(), query, cellDataList);
+    public Workbook excelExecute(WriterExcelDTO excelDTO) {
+        Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
+        DateQuery date = this.getDateQuery(excelDTO);
+        int numberOfSheets = workbook.getNumberOfSheets();
+        for (int i = 0; i < numberOfSheets; i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            // 以下划线开头的sheet 表示 隐藏表  待处理
+            String sheetName = sheet.getSheetName();
+            String[] sheetSplit = sheetName.split("_");
+            if (sheetSplit.length == 4) {
+                // 获取的对应的策略
+                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+                List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
+                Map<String, List<Cell>> stringListMap = new HashMap<>();
+                if ("_acsReport_day_each".equals(sheetName)) {
+                    stringListMap.put("/AcsTagValues", columns);
+                } else if ("_acsReport1_day_each".equals(sheetName)) {
+                    stringListMap.put("/AcsCurTagValues", columns);
+                } else {
+                    stringListMap.put("/AcsACMMonthRuntimeTagValues", columns);
+                }
+                for (DateQuery item : dateQueries) {
+                    final List<CellData> cellDataList = new ArrayList<>();
+                    stringListMap.forEach((k, v) -> {
+                        String url = httpProperties.getUrlApiNJOne() + k;
+                        eachData(v, url, item.getQueryParam(), item, cellDataList);
+                    });
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }
             }
-        });
-        return SheetRowCellData.builder()
-                .workbook(workbook)
-                .sheet(sheet)
-                .cellDataList(cellDataList)
-                .build();
+        }
+        return workbook;
     }
 
     /**
@@ -116,13 +107,6 @@ public class AcsStrategy extends AbstractApiStrategy {
                                 }
                                 ExcelWriterUtil.addCellData(cellDataList, ++rowIndex, cell.getColumnIndex(), val);
                             }
-
-
-//                            for (int index = 0; index < size; index++) {
-//                                JSONObject obj = jsonArray.getJSONObject(index);
-//                                Object val = obj.get("val");
-//                                ExcelWriterUtil.addCellData(results, ++rowIndex, cell.getColumnIndex(), val);
-//                            }
                         }
                     } else {
                         ExcelWriterUtil.addCellData(cellDataList, 1, cell.getColumnIndex(), data);

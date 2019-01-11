@@ -54,29 +54,28 @@ public class ChartFactory {
     public static JFreeChart createLineChart(String title,
                                              String categoryAxisLabel, String valueAxisLabel,
                                              List<Vector<Serie>> series, Object[] categories, CategoryLabelPositions positions, boolean show,
-                                             int rangIndex, int rangEnd, int rangIndex2, int rangEnd2,int rangIndex3, int rangEnd3, boolean y2) {
+                                             int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, boolean y2) {
         // 1：创建数据集合
         DefaultCategoryDataset dataset = ChartUtils
                 .createDefaultCategoryDataset(series.get(0), categories);
         DefaultCategoryDataset dataset2 = null;
         DefaultCategoryDataset dataset3 = null;
 
+        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
+        dataset2 = ChartUtils
+                .createDefaultCategoryDataset(series.get(1), categories);
         if (y2) {
-            dataset2 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(1), categories);
             dataset3 = ChartUtils
                     .createDefaultCategoryDataset(series.get(2), categories);
+            chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, valueAxisLabel, dataset);
         }
-
-//        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
-        JFreeChart chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, valueAxisLabel, dataset);
 
 
         chart.setBorderVisible(false);
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2,rangIndex3,rangEnd3, y2, dataset2, dataset3);//
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
         ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
