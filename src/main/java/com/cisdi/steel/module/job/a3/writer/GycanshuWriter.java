@@ -62,8 +62,8 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
     protected JSONObject getQueryParam1(DateQuery dateQuery) {
         JSONObject result = new JSONObject();
         result.put("method", "avg");
-        result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(),-1), DateUtil.fullFormat));
-        result.put("end", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getEndTime(),-1), DateUtil.fullFormat));
+        result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -1), DateUtil.fullFormat));
+        result.put("end", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getEndTime(), -1), DateUtil.fullFormat));
         return result;
     }
 
@@ -108,7 +108,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                 queryParam2.put("type", "ALL");
 
                 String url1 = getUrl4(version);
-                if("RDI+3.15".equals(column)){
+                if ("RDI+3.15".equals(column)) {
                     queryParam.put("type", "LM");
                     jsonString = JSONObject.toJSONString(queryParam, serializeConfig);
                 }

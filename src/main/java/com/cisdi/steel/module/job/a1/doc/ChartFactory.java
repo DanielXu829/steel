@@ -54,7 +54,7 @@ public class ChartFactory {
     public static JFreeChart createLineChart(String title,
                                              String categoryAxisLabel, String valueAxisLabel,
                                              List<Vector<Serie>> series, Object[] categories, CategoryLabelPositions positions, boolean show,
-                                             int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, boolean y2) {
+                                             int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, int y2) {
         // 1：创建数据集合
         DefaultCategoryDataset dataset = ChartUtils
                 .createDefaultCategoryDataset(series.get(0), categories);
@@ -62,9 +62,12 @@ public class ChartFactory {
         DefaultCategoryDataset dataset3 = null;
 
         JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
-        dataset2 = ChartUtils
-                .createDefaultCategoryDataset(series.get(1), categories);
-        if (y2) {
+        if (y2 == 2) {
+            dataset2 = ChartUtils
+                    .createDefaultCategoryDataset(series.get(1), categories);
+        } else if (y2 == 3) {
+            dataset2 = ChartUtils
+                    .createDefaultCategoryDataset(series.get(1), categories);
             dataset3 = ChartUtils
                     .createDefaultCategoryDataset(series.get(2), categories);
             chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, valueAxisLabel, dataset);
