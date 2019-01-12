@@ -2,14 +2,15 @@ package com.cisdi.steel.module.job.a1.writer;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.cisdi.steel.common.dto.Options;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.ExcelReadWriter;
+import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.strategy.date.DateStrategy;
 import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -60,16 +61,40 @@ public class XiaoHaoDayWriter extends ExcelReadWriter {
 
         List<String> firstRowCelVal = PoiCustomUtil.getFirstRowCelVal(sheet);
         Set<String> categorys = firstRowCelVal.stream().filter(StringUtils::isNotBlank).map(v -> v.split("/")[0]).collect(Collectors.toSet());
-        Map<String, Options<Integer>> map = new HashMap<>();
+        Map<Long, Map<String, Object>> result = new HashMap<>();
         for (DateQuery dateQuery : queryList) {
             for (String category : categorys) {
-                requestData(url, category, dateQuery);
+                requestData(url, category, dateQuery, result);
             }
         }
-        return null;
+        List<CellData> resultData = new ArrayList<>();
+
+        Set<Long> set = result.keySet();
+        List<Long> list = new ArrayList<>(set);
+        Collections.sort(list);
+
+        for (int k = 0; k < list.size(); k++) {
+            Long key = list.get(k);
+            Map<String, Object> map = result.get(key);
+            for (int i = 0; i < firstRowCelVal.size(); i++) {
+                String val = firstRowCelVal.get(i);
+                if (StringUtils.isBlank(val)) {
+                    continue;
+                }
+                if (map.containsKey(val)) {
+                    Object o = map.get(val);
+                    ExcelWriterUtil.addCellData(resultData, k+1, i, o);
+                }
+            }
+        }
+        return SheetRowCellData.builder()
+                .sheet(sheet)
+                .workbook(workbook)
+                .cellDataList(resultData)
+                .build();
     }
 
-    private void requestData(String url, String category, DateQuery dateQuery) {
+    private void requestData(String url, String category, DateQuery dateQuery, Map<Long, Map<String, Object>> result) {
         url = url + "/anaChargeValue/range";
         Map<String, String> queryParam = dateQuery.getQueryParam();
         queryParam.put("granularity", "day");
@@ -86,7 +111,6 @@ public class XiaoHaoDayWriter extends ExcelReadWriter {
             return;
         }
         int size = datas.size();
-        List<Map<String, Object>> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             JSONObject jsonObject = datas.getJSONObject(i);
             if (Objects.isNull(jsonObject)) {
@@ -96,10 +120,15 @@ public class XiaoHaoDayWriter extends ExcelReadWriter {
             JSONObject values = jsonObject.getJSONObject("values");
             Long clock = analysisCharge.getLong("clock");
             Set<String> keySet = values.keySet();
-            Map<String, Object> map = new HashMap<>();
-            keySet.forEach(key->{
+            Map<String, Object> mapChild = result.get(clock);
+            if (Objects.isNull(mapChild)) {
+                mapChild = new HashMap<>();
+                result.put(clock, mapChild);
+            }
+            for (String key : keySet) {
                 BigDecimal bigDecimal = values.getBigDecimal(key);
-            });
+                mapChild.put(category + "/" + key, bigDecimal);
+            }
         }
 
     }
