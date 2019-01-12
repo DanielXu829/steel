@@ -148,14 +148,20 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 if (!f) {
                     reportIndex.setCreateTime(now);
                     this.save(reportIndex);
+                } else {
+                    if (!reportIndex.getPath().equals(report.getPath())) {
+                        FileUtils.deleteFile(report.getPath());
+                    }
+                    reportIndex.setId(report.getId());
+                    this.updateById(reportIndex);
                 }
+            } else {
+                if (!reportIndex.getPath().equals(report.getPath())) {
+                    FileUtils.deleteFile(report.getPath());
+                }
+                reportIndex.setId(report.getId());
+                this.updateById(reportIndex);
             }
-            if (!reportIndex.getPath().equals(report.getPath())) {
-                FileUtils.deleteFile(report.getPath());
-            }
-            reportIndex.setId(report.getId());
-            this.updateById(reportIndex);
-
         }
     }
 

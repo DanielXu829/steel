@@ -57,14 +57,12 @@ public class GycanshuExecute extends AbstractJobExecuteExecute {
                 workbook.removeSheetAt(workbook.getSheetIndex("11"));
                 workbook.removeSheetAt(workbook.getSheetIndex("15"));
                 workbook.removeSheetAt(workbook.getSheetIndex("7"));
-                dateQuery.setRecordDate(getDeal(dateQuery.getRecordDate(), 3));
             } else if (dateTime < 7 && dateTime >= 3) {
                 workbook.removeSheetAt(workbook.getSheetIndex("23"));
                 workbook.removeSheetAt(workbook.getSheetIndex("19"));
                 workbook.removeSheetAt(workbook.getSheetIndex("15"));
                 workbook.removeSheetAt(workbook.getSheetIndex("11"));
                 workbook.removeSheetAt(workbook.getSheetIndex("3"));
-                dateQuery.setRecordDate(getDeal(dateQuery.getRecordDate(), 7));
             } else if (dateTime < 11 && dateTime >= 7) {
                 int sheetIndex = workbook.getSheetIndex("23");
                 workbook.removeSheetAt(sheetIndex);
@@ -72,28 +70,24 @@ public class GycanshuExecute extends AbstractJobExecuteExecute {
                 workbook.removeSheetAt(workbook.getSheetIndex("15"));
                 workbook.removeSheetAt(workbook.getSheetIndex("7"));
                 workbook.removeSheetAt(workbook.getSheetIndex("3"));
-                dateQuery.setRecordDate(getDeal(dateQuery.getRecordDate(), 11));
             } else if (dateTime < 15 && dateTime >= 11) {
                 workbook.removeSheetAt(workbook.getSheetIndex("23"));
                 workbook.removeSheetAt(workbook.getSheetIndex("19"));
                 workbook.removeSheetAt(workbook.getSheetIndex("11"));
                 workbook.removeSheetAt(workbook.getSheetIndex("7"));
                 workbook.removeSheetAt(workbook.getSheetIndex("3"));
-                dateQuery.setRecordDate(getDeal(dateQuery.getRecordDate(), 15));
             } else if (dateTime < 19 && dateTime >= 15) {
                 workbook.removeSheetAt(workbook.getSheetIndex("23"));
                 workbook.removeSheetAt(workbook.getSheetIndex("15"));
                 workbook.removeSheetAt(workbook.getSheetIndex("11"));
                 workbook.removeSheetAt(workbook.getSheetIndex("7"));
                 workbook.removeSheetAt(workbook.getSheetIndex("3"));
-                dateQuery.setRecordDate(getDeal(dateQuery.getRecordDate(), 19));
             } else if (dateTime < 23 && dateTime >= 19) {
                 workbook.removeSheetAt(workbook.getSheetIndex("19"));
                 workbook.removeSheetAt(workbook.getSheetIndex("15"));
                 workbook.removeSheetAt(workbook.getSheetIndex("11"));
                 workbook.removeSheetAt(workbook.getSheetIndex("7"));
                 workbook.removeSheetAt(workbook.getSheetIndex("3"));
-                dateQuery.setRecordDate(getDeal(dateQuery.getRecordDate(), 23));
             }
 
         } catch (Exception e) {
