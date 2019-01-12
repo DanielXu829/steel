@@ -91,6 +91,12 @@ public enum JobEnum {
 
     // 能介
     nj_qiguidianjian("nj_qiguidianjian", "气柜点检表"),
+    nj_diaojianoneKong_day("nj_diaojianoneKong_day", "能源环保部一空压站设备日点检表"),
+    nj_diaojiantwoKong_day("nj_diaojiantwoKong_day", "能源环保部二空压站设备日点检表"),
+    nj_diaojianthreeKong_day("nj_diaojianthreeKong_day", "能源环保部三空压站设备日点检表"),
+    nj_diaojianfourKong_day("nj_diaojianfourKong_day", "能源环保部四空压站设备日点检表"),
+    nj_qiguidianjianruihua_month("nj_qiguidianjianruihua_month", "气柜区润滑台帐表格"),
+    nj_kongqiya_month("nj_kongqiya_month", "空压站设备给油脂标准及加油记录"),
     nj_twokong("nj_twokong", "二空压站运行记录表"),
     nj_threekong("nj_threekong", "三空压站运行记录表"),
     nj_fourkong("nj_fourkong", "四空压站运行记录表"),
