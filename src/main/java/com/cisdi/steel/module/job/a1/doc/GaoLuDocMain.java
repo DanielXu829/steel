@@ -52,12 +52,16 @@ public class GaoLuDocMain {
 
     public void mainTask() {
         dealPart1(version8, L1);
-        dealPart2(version8, L2);
-        dealPart8(version8, L8);
-        dealPart9(version8, L9);
-        dealPart11(version8, L11);
-        dealPart13(version8, L13);
-        dealPart17(version8, L17);
+//        dealPart2(version8, L2);
+//        dealPart3(version8, L3);
+//        dealPart6(version8, L6);
+//        dealPart8(version8, L8);
+//        dealPart9(version8, L9);
+//        dealPart11(version8, L11);
+//        dealPart13(version8, L13);
+//        dealPart17(version8, L17);
+
+
         mainDeal(version8);
         log.error("高炉word生成完毕！");
     }
@@ -75,9 +79,10 @@ public class GaoLuDocMain {
      */
     private HashMap<String, Object> result = new HashMap<String, Object>();
 
-
     private String[] L1 = new String[]{"BF8_L2C_BD_ProductionSum_1d_cur", "BF8_L2C_BD_CokeRate_1d_avg", "BF8_L2M_FuelRate_1d_avg"};
     private String[] L2 = new String[]{"BF8_L2M_SinterRatio_evt", "BF8_L2M_LumporeRatio_1h_avg", "BF8_L2M_PelletsRatio_1h_avg"};
+    private String[] L3 = new String[]{"CSR", "M40", "Ad"};
+    private String[] L6 = new String[]{"TFe", "FeO"};
     private String[] L8 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg"};
     private String[] L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
     private String[] L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L1R_TP_StockLineSetL4_evt"};
@@ -195,7 +200,7 @@ public class GaoLuDocMain {
 
     }
 
-    private List<List<Double>> part3(String version, String[] tagNames) {
+    private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type) {
 
         Date date = new Date();
         Date beginDate = DateUtil.addDays(date, -30);
@@ -210,25 +215,20 @@ public class GaoLuDocMain {
             beginDate = DateUtil.addDays(beginDate, 1);
         }
 
-        /**
-         *          CSR
-         *         M40
-         *         Ad
-         */
-        String[] cBrandCodes = {"1_2_LYJJ_COKE", "WGYJJT_COKE", "6_7_LYJJ_COKE"};
+        for (String cBrandCode : cBrandCodes) {
+            List<Double> csrR = new ArrayList<>();
+            List<Double> m40R = new ArrayList<>();
+            List<Double> adR = new ArrayList<>();
 
-        List<BigDecimal> csrR = new ArrayList<>();
-        List<BigDecimal> m40R = new ArrayList<>();
-        List<BigDecimal> adR = new ArrayList<>();
-        for (String da : dateList) {
-            List<BigDecimal> csr = new ArrayList<>();
-            List<BigDecimal> m40 = new ArrayList<>();
-            List<BigDecimal> ad = new ArrayList<>();
-            BigDecimal a = BigDecimal.ZERO;
-            BigDecimal b = BigDecimal.ZERO;
-            BigDecimal c = BigDecimal.ZERO;
-            for (String cBrandCode : cBrandCodes) {
-                JSONArray jsonArray = dataHttp1(cBrandCode, "LG", start, date, version);
+            JSONArray jsonArray = dataHttp1(cBrandCode, type, start, date, version);
+            for (String da : dateList) {
+                List<BigDecimal> csr = new ArrayList<>();
+                List<BigDecimal> m40 = new ArrayList<>();
+                List<BigDecimal> ad = new ArrayList<>();
+
+                BigDecimal a = BigDecimal.ZERO;
+                BigDecimal b = BigDecimal.ZERO;
+                BigDecimal c = BigDecimal.ZERO;
                 for (int i = 0; i < jsonArray.size(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     if (Objects.nonNull(jsonObject)) {
@@ -240,23 +240,88 @@ public class GaoLuDocMain {
                         if (da.equals(fomDate)) {
                             JSONObject object = jsonObject.getJSONObject("values");
                             Map<String, Object> innerMap = object.getInnerMap();
-                            csr.add((BigDecimal) innerMap.get(tagNames[0]));
-                            m40.add((BigDecimal) innerMap.get(tagNames[1]));
-                            ad.add((BigDecimal) innerMap.get(tagNames[2]));
-
-                            a = a.add((BigDecimal) innerMap.get(tagNames[0]));
-                            b = b.add((BigDecimal) innerMap.get(tagNames[1]));
-                            c = c.add((BigDecimal) innerMap.get(tagNames[2]));
+                            Object o = innerMap.get(tagNames[0]);
+                            Object o1 = innerMap.get(tagNames[1]);
+                            Object o2 = null;
+                            if (tagNames.length > 2) {
+                                o2 = innerMap.get(tagNames[2]);
+                            }
+                            if (Objects.nonNull(o)) {
+                                csr.add((BigDecimal) o);
+                                a = a.add((BigDecimal) o);
+                            }
+                            if (Objects.nonNull(o1)) {
+                                m40.add((BigDecimal) o1);
+                                b = b.add((BigDecimal) o1);
+                            }
+                            if (Objects.nonNull(o2)) {
+                                ad.add((BigDecimal) o2);
+                                c = c.add((BigDecimal) o2);
+                            }
                         }
                     }
                 }
+                if (csr.size() != 0) {
+                    a = a.divide(new BigDecimal(csr.size()), 2, BigDecimal.ROUND_HALF_UP);
+                }
+                a.setScale(2, BigDecimal.ROUND_HALF_UP);
+                csrR.add(a.doubleValue());
+
+                if (m40.size() != 0) {
+                    b = b.divide(new BigDecimal(m40.size()), 2, BigDecimal.ROUND_HALF_UP);
+                }
+                b.setScale(2, BigDecimal.ROUND_HALF_UP);
+                m40R.add(b.doubleValue());
+
+                if (ad.size() != 0) {
+                    c = c.divide(new BigDecimal(ad.size()), 2, BigDecimal.ROUND_HALF_UP);
+                }
+                c.setScale(2, BigDecimal.ROUND_HALF_UP);
+                adR.add(c.doubleValue());
             }
-            csrR.add(a.divide(new BigDecimal(csr.size()), 2, BigDecimal.ROUND_HALF_UP));
-            m40.add(a.divide(new BigDecimal(m40.size()), 2, BigDecimal.ROUND_HALF_UP));
-            ad.add(a.divide(new BigDecimal(ad.size()), 2, BigDecimal.ROUND_HALF_UP));
+            doubles.add(csrR);
+            doubles.add(m40R);
+            doubles.add(adR);
+        }
+        List<List<Double>> result = new ArrayList<>();
+
+        List<Double> rd = new ArrayList<>();
+        List<Double> doubles1 = doubles.get(0);
+        for (int i = 0; i < doubles1.size(); i++) {
+            Double aDouble = doubles.get(0).get(i);
+            Double bDouble = doubles.get(3).get(i);
+            Double cDouble = doubles.get(6).get(i);
+
+            Double x = (aDouble + bDouble + cDouble) / cBrandCodes.length;
+            rd.add(x);
         }
 
-        return doubles;
+        List<Double> rd1 = new ArrayList<>();
+        List<Double> doubles2 = doubles.get(1);
+        for (int i = 0; i < doubles2.size(); i++) {
+            Double aDouble = doubles.get(1).get(i);
+            Double bDouble = doubles.get(4).get(i);
+            Double cDouble = doubles.get(7).get(i);
+
+            Double x = (aDouble + bDouble + cDouble) / cBrandCodes.length;
+            rd1.add(x);
+        }
+
+        List<Double> rd2 = new ArrayList<>();
+        List<Double> doubles3 = doubles.get(2);
+        for (int i = 0; i < doubles3.size(); i++) {
+            Double aDouble = doubles.get(2).get(i);
+            Double bDouble = doubles.get(5).get(i);
+            Double cDouble = doubles.get(8).get(i);
+
+            Double x = (aDouble + bDouble + cDouble) / cBrandCodes.length;
+            rd2.add(x);
+        }
+
+        result.add(rd);
+        result.add(rd1);
+        result.add(rd2);
+        return result;
 
     }
 
@@ -354,7 +419,75 @@ public class GaoLuDocMain {
     }
 
     private void dealPart3(String version, String[] tagNames) {
+        String[] cBrandCodes = {"1_2_LYJJ_COKE", "WGYJJT_COKE", "6_7_LYJJ_COKE"};
+        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "LG");
+        Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
+        Object[] objects3 = doubles.get(2).toArray();
+        /**
+         *          CSR
+         *         M40
+         *         Ad
+         */
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("CSR", objects1));
 
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("M40", objects2));
+
+        // 标注类别
+        Vector<Serie> series3 = new Vector<Serie>();
+        series3.add(new Serie("Ad", objects3));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series2);
+        vectors.add(series3);
+
+        String title1 = "";
+        String categoryAxisLabel1 = null;
+        String valueAxisLabel1 = null;
+
+
+        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
+                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, tagNames.length);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg3", image1);
+    }
+
+    private void dealPart6(String version, String[] tagNames) {
+        String[] cBrandCodes = {"6_SJK_SINTER","6_SJK_SINTER","6_SJK_SINTER"};
+        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "LC");
+        Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
+
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("TFe", objects1));
+
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("FeO", objects2));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series2);
+
+        String title1 = "";
+        String categoryAxisLabel1 = null;
+        String valueAxisLabel1 = null;
+
+
+        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
+                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, tagNames.length);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg6", image1);
     }
 
     private void dealPart8(String version, String[] tagNames) {

@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.cisdi.steel.module.job.a3.doc.ShaojieDocMain;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
@@ -96,6 +97,8 @@ public class ExportJobContext {
 
     }
 
+    @Autowired
+    private ShaojieDocMain shaojieDocMain;
 
     /**
      * 生成指定日期的报表
@@ -117,6 +120,8 @@ public class ExportJobContext {
                             .dateQuery(dateQuery)
                             .build();
                     abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
+                } else {
+                    shaojieDocMain.mainTask(reportDate);
                 }
             }
         } catch (Exception e) {
@@ -140,6 +145,8 @@ public class ExportJobContext {
                                 .build();
                         abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
                     }
+                } else {
+
                 }
             }
 

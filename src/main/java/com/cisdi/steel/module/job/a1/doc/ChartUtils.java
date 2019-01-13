@@ -181,7 +181,7 @@ public class ChartUtils {
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
         categoryaxis.setCategoryLabelPositionOffset(20);
-        categoryaxis.setLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
+        categoryaxis.setTickLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
 
         ValueAxis rangeAxis = plot.getRangeAxis();
         rangeAxis.setAxisLineVisible(true);
