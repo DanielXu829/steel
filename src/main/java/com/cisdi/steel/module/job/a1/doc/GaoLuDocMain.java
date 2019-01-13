@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.a1.doc;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
 import cn.afterturn.easypoi.word.entity.WordImageEntity;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
@@ -18,6 +19,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
+import org.quartz.SimpleTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -193,6 +195,71 @@ public class GaoLuDocMain {
 
     }
 
+    private List<List<Double>> part3(String version, String[] tagNames) {
+
+        Date date = new Date();
+        Date beginDate = DateUtil.addDays(date, -30);
+        Date start = beginDate;
+
+        List<List<Double>> doubles = new ArrayList<>();
+
+
+        while (beginDate.before(date)) {
+            categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
+            dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
+            beginDate = DateUtil.addDays(beginDate, 1);
+        }
+
+        /**
+         *          CSR
+         *         M40
+         *         Ad
+         */
+        String[] cBrandCodes = {"1_2_LYJJ_COKE", "WGYJJT_COKE", "6_7_LYJJ_COKE"};
+
+        List<BigDecimal> csrR = new ArrayList<>();
+        List<BigDecimal> m40R = new ArrayList<>();
+        List<BigDecimal> adR = new ArrayList<>();
+        for (String da : dateList) {
+            List<BigDecimal> csr = new ArrayList<>();
+            List<BigDecimal> m40 = new ArrayList<>();
+            List<BigDecimal> ad = new ArrayList<>();
+            BigDecimal a = BigDecimal.ZERO;
+            BigDecimal b = BigDecimal.ZERO;
+            BigDecimal c = BigDecimal.ZERO;
+            for (String cBrandCode : cBrandCodes) {
+                JSONArray jsonArray = dataHttp1(cBrandCode, "LG", start, date, version);
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    if (Objects.nonNull(jsonObject)) {
+                        JSONObject analysis = jsonObject.getJSONObject("analysis");
+                        long sampletime = analysis.getLong("sampletime");
+                        Date dd = new Date(sampletime);
+                        String fomDate = DateUtil.getFormatDateTime(dd, DateUtil.yyyyMMddFormat);
+
+                        if (da.equals(fomDate)) {
+                            JSONObject object = jsonObject.getJSONObject("values");
+                            Map<String, Object> innerMap = object.getInnerMap();
+                            csr.add((BigDecimal) innerMap.get(tagNames[0]));
+                            m40.add((BigDecimal) innerMap.get(tagNames[1]));
+                            ad.add((BigDecimal) innerMap.get(tagNames[2]));
+
+                            a = a.add((BigDecimal) innerMap.get(tagNames[0]));
+                            b = b.add((BigDecimal) innerMap.get(tagNames[1]));
+                            c = c.add((BigDecimal) innerMap.get(tagNames[2]));
+                        }
+                    }
+                }
+            }
+            csrR.add(a.divide(new BigDecimal(csr.size()), 2, BigDecimal.ROUND_HALF_UP));
+            m40.add(a.divide(new BigDecimal(m40.size()), 2, BigDecimal.ROUND_HALF_UP));
+            ad.add(a.divide(new BigDecimal(ad.size()), 2, BigDecimal.ROUND_HALF_UP));
+        }
+
+        return doubles;
+
+    }
+
 
     private void dealPart1(String version, String[] tagNames) {
         List<List<Double>> doubles = part1(version, tagNames);
@@ -284,6 +351,10 @@ public class GaoLuDocMain {
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 2, 0, 2, 0, 2, tagNames.length);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg2", image1);
+    }
+
+    private void dealPart3(String version, String[] tagNames) {
+
     }
 
     private void dealPart8(String version, String[] tagNames) {
@@ -435,23 +506,23 @@ public class GaoLuDocMain {
 
     private void dealPart17(String version, String[] tagNames) {
         Map<String, Double> map = new HashMap();
-        map.put("cz1",5750.00);
-        map.put("cz2",385.00);
-        map.put("cz3",170.00);
-        map.put("cz4",1800.00);
-        map.put("cz5",1180.00);
-        map.put("cz6",10.00);
-        map.put("cz7",220.00);
-        map.put("cz8",520.00);
-        map.put("cz9",20.00);
-        map.put("cz10",5.00);
-        map.put("cz11",75.00);
-        map.put("cz12",4.60);
-        map.put("cz13",90.00);
-        map.put("cz14",20.00);
-        map.put("cz15",240.00);
-        map.put("cz16",115.00);
-        map.put("cz17",2200.00);
+        map.put("cz1", 5750.00);
+        map.put("cz2", 385.00);
+        map.put("cz3", 170.00);
+        map.put("cz4", 1800.00);
+        map.put("cz5", 1180.00);
+        map.put("cz6", 10.00);
+        map.put("cz7", 220.00);
+        map.put("cz8", 520.00);
+        map.put("cz9", 20.00);
+        map.put("cz10", 5.00);
+        map.put("cz11", 75.00);
+        map.put("cz12", 4.60);
+        map.put("cz13", 90.00);
+        map.put("cz14", 20.00);
+        map.put("cz15", 240.00);
+        map.put("cz16", 115.00);
+        map.put("cz17", 2200.00);
         List<List<Double>> doubles2 = part2(version, tagNames);
         for (int i = 0; i < doubles2.size(); i++) {
             Double aDouble = doubles2.get(i).get(0);
@@ -480,6 +551,18 @@ public class GaoLuDocMain {
         return data;
     }
 
+    private JSONArray dataHttp1(String brandCode, String type, Date beginDate, Date endDate, String version) {
+        Map<String, String> map = new HashMap<>();
+        map.put("starttime", beginDate.getTime() + "");
+        map.put("endtime", endDate.getTime() + "");
+        map.put("brandcode", brandCode);
+        map.put("type", type);
+        String results = httpUtil.get(getUrl1(version), map);
+        JSONObject jsonObject = JSONObject.parseObject(results);
+        JSONArray data = jsonObject.getJSONArray("data");
+        return data;
+    }
+
     private void comm(String path) {
         //文档所有日期
         dealDate(result);
@@ -505,8 +588,24 @@ public class GaoLuDocMain {
         map.put("date2", date2);
     }
 
+    /**
+     * tag点名
+     *
+     * @param version
+     * @return
+     */
     private String getUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
+    }
+
+    /**
+     * 检化验
+     *
+     * @param version
+     * @return
+     */
+    private String getUrl1(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/analysisValues/sampletime";
     }
 
     private WordImageEntity image(JFreeChart chart) {
