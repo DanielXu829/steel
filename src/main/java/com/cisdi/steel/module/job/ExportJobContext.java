@@ -120,8 +120,6 @@ public class ExportJobContext {
                             .dateQuery(dateQuery)
                             .build();
                     abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
-                } else {
-                    shaojieDocMain.mainTask(reportDate);
                 }
             }
         } catch (Exception e) {
