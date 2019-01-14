@@ -63,7 +63,7 @@ public enum JobEnum {
     jh_luwenjilu7("jh_luwenjilu7", "CK67-炼焦-7#炉温记录报表（日）"),
     jh_jlguanjianzhibiao("jh_jlguanjianzhibiao", "炼焦-6#-7#焦炉关键指标统计"),
     jh_peimeiliang("jh_peimeiliang", "配煤-配煤量月报表"),
-    jh_zhibiaoguankong("jh_zhibiaoguankong", "炼焦-关键指标管控"),
+    jh_zhibiaoguankong("jh_zhibiaoguankong", "炼焦-6#-7#焦炉关键指标管控"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫系统运行日报"),
