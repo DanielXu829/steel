@@ -114,6 +114,7 @@
                 AND DATE_FORMAT(record_date,'%Y')=DATE_FORMAT(#{currDate},'%Y')
             </if>
         </where>
+        order by update_time desc
         limit 1
     </select>
 </mapper>

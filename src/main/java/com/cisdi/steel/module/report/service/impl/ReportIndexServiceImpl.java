@@ -136,18 +136,63 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         reportIndex.setUpdateTime(now);
         reportIndex.setHidden("0");
         ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
+
         if (Objects.isNull(report)
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())) {
             reportIndex.setCreateTime(now);
             this.save(reportIndex);
         } else {
-            if (!reportIndex.getPath().equals(report.getPath())) {
-                FileUtils.deleteFile(report.getPath());
+            if (JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())) {
+                boolean f = dealGongyi(report.getRecordDate(), reportIndex.getRecordDate());
+                if (!f) {
+                    reportIndex.setCreateTime(now);
+                    this.save(reportIndex);
+                } else {
+                    if (!reportIndex.getPath().equals(report.getPath())) {
+                        FileUtils.deleteFile(report.getPath());
+                    }
+                    reportIndex.setId(report.getId());
+                    this.updateById(reportIndex);
+                }
+            } else {
+                if (!reportIndex.getPath().equals(report.getPath())) {
+                    FileUtils.deleteFile(report.getPath());
+                }
+                reportIndex.setId(report.getId());
+                this.updateById(reportIndex);
             }
-            reportIndex.setId(report.getId());
-            this.updateById(reportIndex);
         }
+    }
+
+    private boolean dealGongyi(Date date, Date date1) {
+        boolean flag = false;
+        try {
+            int dateTime = Integer.valueOf(DateUtil.getFormatDateTime(date, "HH"));
+            int dateTime1 = Integer.valueOf(DateUtil.getFormatDateTime(date1, "HH"));
+            if (((dateTime >= 0 && dateTime < 3) || dateTime >= 23)
+                    && ((dateTime1 >= 0 && dateTime1 < 3) || dateTime1 >= 23)) {
+                flag = true;
+            } else if ((dateTime < 7 && dateTime >= 3)
+                    && (dateTime1 < 7 && dateTime1 >= 3)) {
+                flag = true;
+            } else if ((dateTime < 11 && dateTime >= 7)
+                    && (dateTime1 < 11 && dateTime1 >= 7)) {
+                flag = true;
+            } else if ((dateTime < 15 && dateTime >= 11)
+                    && (dateTime1 < 15 && dateTime1 >= 11)) {
+                flag = true;
+            } else if ((dateTime < 19 && dateTime >= 15)
+                    && (dateTime1 < 19 && dateTime1 >= 15)) {
+                flag = true;
+            } else if ((dateTime < 23 && dateTime >= 19)
+                    && (dateTime1 < 23 && dateTime1 >= 19)) {
+                flag = true;
+            }
+        } catch (Exception e) {
+        }
+
+        return flag;
     }
 
     @Override
@@ -200,9 +245,10 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
     public String existTemplate(ReportIndex reportIndex) {
         ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
         // 判断数据库是否存在报表
-        if (Objects.isNull(report)||Objects.isNull(report.getPath())
+        if (Objects.isNull(report) || Objects.isNull(report.getPath())
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())) {
+                || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())) {
             // 不存在，直接返回null
             return null;
         } else {

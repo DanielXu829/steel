@@ -80,32 +80,10 @@ public class ReportIndexController {
     @PostMapping(value = "/delete")
     public ApiResult deleteById(@RequestBody BaseId baseId) {
         ReportIndex report = baseService.getById(baseId);
-        FileUtils.deleteFile(report.getPath());
+        if(StringUtils.isNotBlank(report.getPath())){
+            FileUtils.deleteFile(report.getPath());
+        }
         return baseService.deleteRecord(baseId);
-    }
-
-    /**
-     * 删除隐藏的所有文件
-     *
-     * @param baseIds
-     * @return
-     */
-    @PostMapping(value = "deleteIndexAndFile")
-    public ApiResult deleteIndexAndFile(@RequestBody BaseId baseIds) {
-        if (Objects.isNull(baseIds) || baseIds.getId() != -1) {
-            return ApiUtil.fail();
-        }
-        LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
-        wrapper.eq(true, ReportIndex::getHidden, "1");
-        List<ReportIndex> list = baseService.list(wrapper);
-        for (ReportIndex reportIndex : list) {
-//            System.out.println(reportIndex.getPath());
-            BaseId baseId = new BaseId();
-            baseId.setId(reportIndex.getId());
-            baseService.deleteRecord(baseId);
-            FileUtils.deleteFile(reportIndex.getPath());
-        }
-        return ApiUtil.success();
     }
 
     /**

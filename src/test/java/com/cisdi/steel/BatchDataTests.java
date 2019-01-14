@@ -7,6 +7,7 @@ import com.cisdi.steel.common.util.ApplicationContextHolder;
 import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.module.job.AbstractExportJob;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.entity.ReportCategory;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
@@ -97,6 +98,11 @@ public class BatchDataTests extends SteelApplicationTests {
         for (SysConfig sysConfig : all) {
             createTask(sysConfig.getCode(), jobGroup, "0 10,59 * * * ?", "");
         }
+    }
+
+    @Test
+    public void test3224() {
+        createTask(JobEnum.gl_xiaohao_day.getCode(),jobGroup,"0 5 0/1 * * ?","");
     }
 
     /**

@@ -47,18 +47,28 @@ public class ShaojieDocMain {
     private String version5 = "5.0";
 
     @Scheduled(cron = "0 30 6 * * ?")
-//    @Scheduled(cron = "0 0/1 * * * ?")
-    public void mainTask() {
-        mainDeal(version5);
-        mainDeal(version6);
+    //    @Scheduled(cron = "0 0/1 * * * ?")
+    public void mainJob() {
+        Date date = new Date();
+        mainDeal(version5, date);
+        mainDeal(version6, date);
         log.error("烧结word生成完毕！");
     }
 
-    public void mainDeal(String version) {
+
+    public void mainTask(Date date) {
+        mainDeal(version5, date);
+        mainDeal(version6, date);
+        log.error("烧结word生成完毕！");
+    }
+
+
+    public void mainDeal(String version, Date date) {
         init();
         dealVersion(version);
-
-        Date date = new Date();
+        if (Objects.isNull(date)) {
+            date = new Date();
+        }
         JSONObject data = dataHttp(L1, DateUtil.addDays(date, -1), version);
         for (int i = 0; i < L1.length; i++) {
             JSONObject o = data.getJSONObject(L1[i]);
