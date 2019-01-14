@@ -182,4 +182,16 @@ public class TestJob1 extends SteelApplicationTests {
     public void test14() {
         lugangWenduDayJob.execute(null);
     }
+
+
+    /**
+     * 重点部位参数监控报表
+     */
+    @Autowired
+    private ZhongdianbuweicanshuJob zhongdianbuweicanshuJob;
+
+    @Test
+    public void test15(){
+        zhongdianbuweicanshuJob.execute(null);
+    }
 }
