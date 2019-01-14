@@ -51,10 +51,10 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         String[] tagNamesIf={"CK67_L1R_CB_CBAmtTol_1m_max","CK67_L1R_CB_CBAcTol_1m_avg"};
         Double max = compareTagVal(tagNamesIf[0]);
         Double avg = compareTagVal(tagNamesIf[1]);
-        if(max<1 && avg==0){
-            log.error("根据条件判断停止执行自动配煤报表");
-            System.exit(0);
-        }
+//        if(max<1 && avg==0){
+//            log.error("根据条件判断停止执行自动配煤报表");
+//            System.exit(0);
+//        }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
@@ -68,15 +68,19 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                 // 自动配煤
                 if ("auto".equals(name)) {
                     String shift = "";
+                    Integer shiftNum = 0;
                     Date todayBeginTime = DateUtil.getTodayBeginTime();
                     Date date1 = DateUtil.addHours(todayBeginTime, 8);
                     Date date2 = DateUtil.addHours(date1, 8);
                     if (DateUtil.isEffectiveDate(new Date(),todayBeginTime,date1)) {
                         shift = "夜班";
+                        shiftNum = 1;
                     } else if (DateUtil.isEffectiveDate(new Date(),date1,date2)) {
                         shift = "白班";
+                        shiftNum = 2;
                     } else{
                         shift = "中班";
+                        shiftNum = 3;
                     }
                     Row row = sheet.createRow(29);
                     row.createCell(0).setCellValue(shift);
@@ -86,6 +90,11 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     Double aDouble = peimeiLeiji(getUrl3());
                     row1.createCell(0).setCellValue(aDouble);
                     row1.getCell(0).setCellType(CellType.NUMERIC);
+
+                    Double yiedNum = this.mapDataHandler1(shiftNum, getUrl4());
+                    Row row2 = sheet.createRow(30);
+                    row2.createCell(0).setCellValue(yiedNum);
+                    row2.getCell(0).setCellType(CellType.NUMERIC);
 //                    for (int j = 0; j < dateQueries.size(); j++) {
                     List<CellData> cellDataList = this.handlerData(dateQueries.get(dateQueries.size() - 1), sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -185,6 +194,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     }
 
 
+
     protected List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch) {
         Map<String, String> queryParam = getQueryParam2();
         String result = httpUtil.get(url, queryParam);
@@ -200,6 +210,24 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return ExcelWriterUtil.handlerRowData(columns, startRow, data);
     }
 
+    protected Double mapDataHandler1(Integer shiftNum, String url) {
+        Map<String, String> queryParam = getQueryParam3(shiftNum);
+        String result = httpUtil.get(url, queryParam);
+        Double confirmWgt=0.0;
+        if (StringUtils.isBlank(result)) {
+            return confirmWgt;
+        }
+        JSONArray array = JSONObject.parseArray(result);
+        if(Objects.isNull(array)|| array.size()==0){
+            return confirmWgt;
+        }
+        JSONObject jsonObject = array.getJSONObject(0);
+        if(Objects.nonNull(jsonObject)){
+            confirmWgt = jsonObject.getDouble("confirmWgt");
+        }
+        return confirmWgt;
+    }
+
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         String dateTime = DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:00");
@@ -213,6 +241,14 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam3(Integer shiftNum) {
+        Map<String, String> result = new HashMap<>();
+        result.put("dateTime", DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd 00:00:00"));
+        result.put("shift", shiftNum.toString());
+        result.put("code", "GHJY");
+        result.put("flag", "O");
+        return result;
+    }
     private String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
@@ -221,6 +257,10 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     }
     private String getUrl3() {
         return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
+    }
+
+    private String getUrl4() {
+        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
     }
 
 }

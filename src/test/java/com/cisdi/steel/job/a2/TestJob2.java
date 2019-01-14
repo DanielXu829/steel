@@ -276,6 +276,15 @@ public class TestJob2 extends SteelApplicationTests {
         guanjianzhibiaoJob.execute(null);
     }
 
+    /**
+     * 配煤量月
+     */
+    @Autowired
+    private PeimeiliangJob peimeiliangJob;
 
+    @Test
+    public void test27() {
+        peimeiliangJob.execute(null);
+    }
 
 }
