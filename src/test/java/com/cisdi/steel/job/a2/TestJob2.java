@@ -287,4 +287,16 @@ public class TestJob2 extends SteelApplicationTests {
         peimeiliangJob.execute(null);
     }
 
+    /**
+     * 指标管控
+     */
+    @Autowired
+    private ZhibiaoguankongJob zhibiaoguankongJob;
+
+    @Test
+    public void test28() {
+        zhibiaoguankongJob.execute(null);
+    }
+
+
 }

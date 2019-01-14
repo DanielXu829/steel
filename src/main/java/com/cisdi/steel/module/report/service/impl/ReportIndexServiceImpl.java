@@ -145,16 +145,10 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         } else {
             if (JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())) {
                 boolean f = dealGongyi(report.getRecordDate(), reportIndex.getRecordDate());
-                if (!f) {
-                    reportIndex.setCreateTime(now);
-                    this.save(reportIndex);
-                } else {
-                    if (!reportIndex.getPath().equals(report.getPath())) {
-                        FileUtils.deleteFile(report.getPath());
-                    }
-                    reportIndex.setId(report.getId());
-                    this.updateById(reportIndex);
-                }
+                otherHand(f,reportIndex,report,now);
+            }else if(JobEnum.jh_zhibiaoguankong.getCode().equals(reportIndex.getReportCategoryCode())){
+                boolean f = dealZhibiao(report.getRecordDate(), reportIndex.getRecordDate());
+                otherHand(f,reportIndex,report,now);
             } else {
                 if (!reportIndex.getPath().equals(report.getPath())) {
                     FileUtils.deleteFile(report.getPath());
@@ -163,6 +157,40 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 this.updateById(reportIndex);
             }
         }
+    }
+
+    private void otherHand(boolean f,ReportIndex reportIndex,ReportIndex report,Date date){
+        if (!f) {
+            reportIndex.setCreateTime(date);
+            this.save(reportIndex);
+        } else {
+            if (!reportIndex.getPath().equals(report.getPath())) {
+                FileUtils.deleteFile(report.getPath());
+            }
+            reportIndex.setId(report.getId());
+            this.updateById(reportIndex);
+        }
+    }
+
+    private boolean dealZhibiao(Date date, Date date1) {
+        boolean flag = false;
+        try {
+            int dateTime = Integer.valueOf(DateUtil.getFormatDateTime(date, "HH"));
+            int dateTime1 = Integer.valueOf(DateUtil.getFormatDateTime(date1, "HH"));
+            if (((dateTime >= 0 && dateTime < 8) )
+                    && ((dateTime1 >= 0 && dateTime1 < 8))) {
+                flag = true;
+            } else if ((dateTime <16  && dateTime >= 8)
+                    && (dateTime1 < 16 && dateTime1 >= 8)) {
+                flag = true;
+            } else if ((dateTime < 24 && dateTime >= 16)
+                    && (dateTime1 < 24 && dateTime1 >= 16)) {
+                flag = true;
+            }
+        } catch (Exception e) {
+        }
+
+        return flag;
     }
 
     private boolean dealGongyi(Date date, Date date1) {

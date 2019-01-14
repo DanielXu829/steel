@@ -10,10 +10,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -28,7 +25,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
-public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
+public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -43,33 +40,40 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                int size = dateQueries.size();
-                if ("crushing".equals(sheetSplit[1])) {
-                    for (int j = 0; j < size; j++) {
-                        int rowIndex = 1 + j;
-                        Double cellDataList = this.valHandler(getUrl(), dateQueries.get(j));
-                        setSheetValue(sheet, rowIndex, 0, cellDataList);
-                    }
-                } else if ("lianjiao".equals(sheetSplit[1])) {
-                    for (int j = 0; j < size; j++) {
-                        int rowIndex = 1 + j;
-                        List<CellData> cellData = this.valHandler1(getUrl2(), columns, dateQueries.get(j), rowIndex);
-                        ExcelWriterUtil.setCellValue(sheet, cellData);
-                    }
-                } else if ("tag".equals(sheetSplit[1])) {
-                    for (int j = 0; j < size; j++) {
-                        DateQuery item = dateQueries.get(j);
-                        int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(), columns, item);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    }
+                DateQuery dateQuery = null;
+                String shift="";
+                String shiftDate="";
+                if (DateUtil.isEffectiveDate(date.getRecordDate(), dateQueries.get(0).getStartTime(), dateQueries.get(0).getEndTime())) {
+                    dateQuery = dateQueries.get(0);
+                    shift="夜班";
+                    shiftDate="00:00";
+                } else if (DateUtil.isEffectiveDate(date.getRecordDate(), dateQueries.get(1).getStartTime(), dateQueries.get(1).getEndTime())) {
+                    dateQuery = dateQueries.get(1);
+                    shift="白班";
+                    shiftDate="08:00";
                 } else {
-                    for (int j = 0; j < size; j++) {
-                        DateQuery item = dateQueries.get(j);
-                        int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl4(), columns, item);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    }
+                    dateQuery = dateQueries.get(2);
+                    shift="中班";
+                    shiftDate="16:00";
+                }
+                int rowIndex = 1;
+                if ("crushing".equals(sheetSplit[1])) {
+                    Double cellDataList = this.valHandler(getUrl(), dateQuery);
+                    setSheetValue(sheet, 1, 0, cellDataList);
+                } else if ("lianjiao".equals(sheetSplit[1])) {
+                    List<CellData> cellData = this.valHandler1(getUrl2(), columns, dateQuery, rowIndex);
+                    ExcelWriterUtil.setCellValue(sheet, cellData);
+                } else if ("tag".equals(sheetSplit[1])) {
+                    List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(), columns, dateQuery);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                } else {
+                    Row row = sheet.createRow(0);
+                    row.createCell(2).setCellValue(shift);
+                    row.getCell(2).setCellType(CellType.STRING);
+                    row.createCell(3).setCellValue(shiftDate);
+                    row.getCell(3).setCellType(CellType.STRING);
+                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl4(), columns, dateQuery);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
         }
@@ -159,9 +163,6 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
     }
 
     public Double valHandler(String url, DateQuery dateQuery) {
-        if (dateQuery.getRecordDate().compareTo(new Date()) == 1) {
-            return null;
-        }
         Map<String, String> queryParam = getQueryParam(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -181,9 +182,6 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
     }
 
     public List<CellData> valHandler1(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
-        if (dateQuery.getRecordDate().compareTo(new Date()) == 1) {
-            return null;
-        }
         Map<String, String> queryParam = getQueryParam1(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -232,16 +230,16 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getStartTime(), -1), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getEndTime(), -1), "yyyy/MM/dd HH:mm:ss"));
+        result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
 
         return result;
     }
 
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -8), "yyyy/MM/dd HH:mm:ss"));
-        result.put("end", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("start", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("end", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("type", "avg");
         return result;
     }

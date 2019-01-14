@@ -239,11 +239,13 @@ public class DateUtil {
      * @author jqlin
      */
     public static boolean isEffectiveDate(Date nowTime, Date startTime, Date endTime) {
-        if (nowTime.getTime() == startTime.getTime()
-                || nowTime.getTime() == endTime.getTime()) {
+//        if (nowTime.getTime() == startTime.getTime()
+//                || nowTime.getTime() == endTime.getTime()) {
+//            return true;
+//        }
+        if (nowTime.getTime() == startTime.getTime()) {
             return true;
         }
-
         Calendar date = Calendar.getInstance();
         date.setTime(nowTime);
 
