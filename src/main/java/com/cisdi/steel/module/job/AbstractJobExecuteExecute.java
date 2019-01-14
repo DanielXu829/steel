@@ -136,12 +136,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                         .setCurrDate(dateQuery.getRecordDate())
                         .setRecordDate(dateQuery.getRecordDate());
 
-                String templatePath = reportIndexService.existTemplate(reportIndex);
-                if (StringUtils.isNotBlank(templatePath)) {
-                    // 修改为生成后文件名称
-                    template.setTemplatePath(templatePath);
-                }
-
+                this.replaceTemplatePath(reportIndex, template);
                 // 4、5填充数据
                 Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
                 // 6、生成文件
@@ -153,6 +148,18 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                 log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage(), e);
             }
         }
+    }
+
+    /**
+     * 替换模板文件使用 生成后的文件 作为模板
+     */
+    protected void replaceTemplatePath(ReportIndex reportIndex, ReportCategoryTemplate template) {
+        String templatePath = reportIndexService.existTemplate(reportIndex);
+        if (StringUtils.isNotBlank(templatePath)) {
+            // 修改为生成后文件名称
+            template.setTemplatePath(templatePath);
+        }
+
     }
 
     /**
