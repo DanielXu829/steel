@@ -191,7 +191,7 @@ public class TestJob1 extends SteelApplicationTests {
     private ZhongdianbuweicanshuJob zhongdianbuweicanshuJob;
 
     @Test
-    public void test15(){
+    public void test15() {
         zhongdianbuweicanshuJob.execute(null);
     }
 
@@ -200,8 +200,18 @@ public class TestJob1 extends SteelApplicationTests {
     private ZhongdianbuweicanshuTubiaoJob zhongdianbuweicanshuTubiaoJob;
 
     @Test
-    public void test16(){
+    public void test16() {
         zhongdianbuweicanshuTubiaoJob.execute(null);
     }
 
+    /**
+     * 高炉喷煤
+     */
+    @Autowired
+    private GaoLuPenMeiJob gaoLuPenMeiJob;
+
+    @Test
+    public void test18() {
+        gaoLuPenMeiJob.execute(null);
+    }
 }

@@ -83,4 +83,15 @@ public class TestJob3 extends SteelApplicationTests {
         gycanshuJob5.execute(null);
     }
 
+    /**
+     * 熔剂燃料质量管控
+     */
+    @Autowired
+    private RongjiJob5 rongjiJob5;
+
+    @Test
+    public void test8() {
+        rongjiJob5.execute(null);
+    }
+
 }

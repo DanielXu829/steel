@@ -38,6 +38,7 @@ public enum JobEnum {
     gl_refenglu_month("gl_refenglu_month", "热风炉 月报"),
     gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
     gl_peiliaodan("gl_peiliaodan", "配料单"),
+    gl_gaolupenmei("gl_gaolupenmei", "高炉喷煤运行报表"),
 
 
     // 焦化
@@ -75,6 +76,7 @@ public enum JobEnum {
     sj_shaojieji_day("sj_shaojieji_day", "烧结机生产日报"),
     sj_liushaogycanshu("sj_liushaogycanshu", "4小时发布-主要工艺参数及实物质量情况日报"),
     sj_caoyehui_day("sj_caoyehui_day", "烧结每日操业会"),
+    sj_rongji("sj_rongji", "熔剂燃料质量管控"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),

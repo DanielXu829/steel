@@ -9,6 +9,7 @@ import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.dto.ExcelPathInfo;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
@@ -17,10 +18,12 @@ import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -75,8 +78,8 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
                 if (StringUtils.isNotBlank(templatePath)) {
                     // 修改为生成后文件名称
                     template.setTemplatePath(templatePath);
+                    dealTemp(template, writerExcelDTO);
                 }
-
                 Workbook workbook = getWorkbook(template.getTemplatePath());
 
                 PoiCustomUtil.buildMetadata(workbook, writerExcelDTO);
@@ -91,6 +94,25 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
         }
     }
 
+    private void dealTemp(ReportCategoryTemplate template, WriterExcelDTO writerExcelDTO) throws Exception {
+        Workbook workbook = getWorkbook(template.getTemplatePath());
+        if (writerExcelDTO.getJobEnum().getCode().equals(JobEnum.nj_qiguidianjianruihua_month.getCode())) {
+            FileOutputStream fos = new FileOutputStream(template.getTemplatePath());
+            int index = workbook.getSheetIndex("每班加油记录本");
+            workbook.removeSheetAt(index);
+            int temp = workbook.getSheetIndex("_temp");
+            workbook.setSheetName(temp, "每班加油记录本");
+            workbook.setSheetHidden(temp, false);
+
+            Sheet sheet = workbook.cloneSheet(temp);
+            workbook.setSheetName(workbook.getSheetIndex(sheet), "_temp");
+            workbook.setSheetHidden(workbook.getSheetIndex(sheet), true);
+
+            workbook.write(fos);
+            fos.close();
+            workbook.close();
+        }
+    }
 
     /**
      * 查询条件
