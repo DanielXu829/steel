@@ -194,4 +194,14 @@ public class TestJob1 extends SteelApplicationTests {
     public void test15(){
         zhongdianbuweicanshuJob.execute(null);
     }
+
+
+    @Autowired
+    private ZhongdianbuweicanshuTubiaoJob zhongdianbuweicanshuTubiaoJob;
+
+    @Test
+    public void test16(){
+        zhongdianbuweicanshuTubiaoJob.execute(null);
+    }
+
 }
