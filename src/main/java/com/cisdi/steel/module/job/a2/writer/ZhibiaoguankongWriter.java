@@ -43,31 +43,35 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                 DateQuery dateQuery = null;
                 String shift="";
                 String shiftDate="";
+                int shiftNum=0;
                 if (DateUtil.isEffectiveDate(date.getRecordDate(), dateQueries.get(0).getStartTime(), dateQueries.get(0).getEndTime())) {
                     dateQuery = dateQueries.get(0);
                     shift="夜班";
                     shiftDate="00:00";
+                    shiftNum=1;
                 } else if (DateUtil.isEffectiveDate(date.getRecordDate(), dateQueries.get(1).getStartTime(), dateQueries.get(1).getEndTime())) {
                     dateQuery = dateQueries.get(1);
                     shift="白班";
                     shiftDate="08:00";
+                    shiftNum=2;
                 } else {
                     dateQuery = dateQueries.get(2);
                     shift="中班";
                     shiftDate="16:00";
+                    shiftNum=3;
                 }
                 int rowIndex = 1;
                 if ("crushing".equals(sheetSplit[1])) {
                     Double cellDataList = this.valHandler(getUrl(), dateQuery);
                     setSheetValue(sheet, 1, 0, cellDataList);
                 } else if ("lianjiao".equals(sheetSplit[1])) {
-                    List<CellData> cellData = this.valHandler1(getUrl2(), columns, dateQuery, rowIndex);
-                    ExcelWriterUtil.setCellValue(sheet, cellData);
+                    List<CellData> cellDataList = this.mapDataHandler(getUrl2(), columns, 1, dateQuery,shiftNum);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("tag".equals(sheetSplit[1])) {
                     List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(), columns, dateQuery);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else {
-                    Row row = sheet.createRow(0);
+                    Row row = sheet.createRow(1);
                     row.createCell(2).setCellValue(shift);
                     row.getCell(2).setCellType(CellType.STRING);
                     row.createCell(3).setCellValue(shiftDate);
@@ -139,7 +143,6 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                                             }
                                         }
                                     }
-
                                 }
                             }
                         }
@@ -181,50 +184,38 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         return crushingFineness;
     }
 
-    public List<CellData> valHandler1(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
-        Map<String, String> queryParam = getQueryParam1(dateQuery);
+    public List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch, DateQuery dateQuery,int shiftNum) {
+        Map<String, String> queryParam = getQueryParam1(dateQuery,shiftNum);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
         }
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        JSONObject data = jsonObject.getJSONObject("data");
-        if (Objects.isNull(data)) {
+        JSONArray array = JSONObject.parseArray(result);
+        if (Objects.isNull(array)) {
             return null;
         }
-        JSONArray r = data.getJSONArray("kAnkAvgs");
-        if (Objects.isNull(r) || r.size() == 0) {
-            return null;
-        }
-        Double k2 = 0.0;
-        Double coalLoadingCoefficient = 0.0;
-        Double no1FurnaceKAn = 0.0;
-        Double no1FurnaceKAvg = 0.0;
-        Double no2FurnaceKAn = 0.0;
-        Double no2FurnaceKAvg = 0.0;
-        for (int i = 0; i < r.size(); i++) {
-            JSONObject jsonObject1 = r.getJSONObject(i);
-            k2 += jsonObject1.getDouble("k2");
-            coalLoadingCoefficient += jsonObject1.getDouble("coalLoadingCoefficient");
-            no1FurnaceKAn += jsonObject1.getDouble("no1FurnaceKAn");
-            no1FurnaceKAvg += jsonObject1.getDouble("no1FurnaceKAvg");
-            no2FurnaceKAn += jsonObject1.getDouble("no2FurnaceKAn");
-            no2FurnaceKAvg += jsonObject1.getDouble("no2FurnaceKAvg");
-        }
+        JSONObject jsonObject = array.getJSONObject(0);
         HashMap<String, Object> Map = new HashMap<>();
-        Map.put("k2", k2 / r.size());
-        Map.put("coalLoadingCoefficient", coalLoadingCoefficient / r.size());
-        Map.put("kAn", (no1FurnaceKAn + no2FurnaceKAn) / (r.size() * 2));
-        Map.put("kAvg", (no1FurnaceKAvg + no2FurnaceKAvg) / (r.size() * 2));
-
+        Map.put("k2", jsonObject.getDouble("k2"));
+        Map.put("coalLoadingCoefficient", jsonObject.getDouble("coalLoadingCoefficient"));
+        Map.put("kAn", (jsonObject.getDouble("no1FurnaceKAn") + jsonObject.getDouble("no2FurnaceKAn")) / 2);
+        Map.put("kAvg", (jsonObject.getDouble("no1FurnaceKAvg") + jsonObject.getDouble("no2FurnaceKAvg")) /2);
         List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, rowBatch, Map);
         return cellData;
     }
+
 
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
+    protected Map<String, String> getQueryParam1(DateQuery dateQuery, Integer shiftNum) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss"));
+        result.put("shift", shiftNum.toString());
         return result;
     }
 
@@ -255,7 +246,7 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
     }
 
     private String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByTimeEnd";
+        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
     }
 
     private String getUrl3() {

@@ -299,4 +299,15 @@ public class TestJob2 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 主要工艺参数
+     */
+    @Autowired
+    private ZhuyaogycsJob zhuyaogycsJob;
+
+    @Test
+    public void test29() {
+        zhuyaogycsJob.execute(null);
+    }
+
 }

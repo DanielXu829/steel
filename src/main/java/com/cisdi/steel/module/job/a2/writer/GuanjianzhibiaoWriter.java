@@ -101,7 +101,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
     }
 
     protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam1(dateQuery);
+        Map<String, String> queryParam = getQueryParamx(dateQuery);
         int size = columns.size();
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -194,30 +194,16 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return null;
         }
-        JSONArray r = data.getJSONArray("kAnkAvgs");
-        if (Objects.isNull(r) || r.size() == 0) {
+        JSONObject r = data.getJSONObject("yesterdayAvg");
+        if (Objects.isNull(r)) {
             return null;
         }
-        Double k2 = 0.0;
-        Double coalLoadingCoefficient = 0.0;
-        Double no1FurnaceKAn = 0.0;
-        Double no1FurnaceKAvg = 0.0;
-        Double no2FurnaceKAn = 0.0;
-        Double no2FurnaceKAvg = 0.0;
-        for (int i = 0; i < r.size(); i++) {
-            JSONObject jsonObject1 = r.getJSONObject(i);
-            k2 += jsonObject1.getDouble("k2");
-            coalLoadingCoefficient += jsonObject1.getDouble("coalLoadingCoefficient");
-            no1FurnaceKAn += jsonObject1.getDouble("no1FurnaceKAn");
-            no1FurnaceKAvg += jsonObject1.getDouble("no1FurnaceKAvg");
-            no2FurnaceKAn += jsonObject1.getDouble("no2FurnaceKAn");
-            no2FurnaceKAvg += jsonObject1.getDouble("no2FurnaceKAvg");
-        }
+
         HashMap<String, Object> Map = new HashMap<>();
-        Map.put("k2", k2 / r.size());
-        Map.put("coalLoadingCoefficient", coalLoadingCoefficient / r.size());
-        Map.put("kAn", (no1FurnaceKAn + no2FurnaceKAn) / (r.size() * 2));
-        Map.put("kAvg", (no1FurnaceKAvg + no2FurnaceKAvg) / (r.size() * 2));
+        Map.put("k2", r.getDouble("k2"));
+        Map.put("coalLoadingCoefficient", r.getDouble("coalLoadingCoefficient"));
+        Map.put("kAn", (r.getDouble("no1FurnaceKAn") + r.getDouble("no2FurnaceKAn")) / 2);
+        Map.put("kAvg", (r.getDouble("no1FurnaceKAvg") + r.getDouble("no2FurnaceKAvg")) / 2);
 
         List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, rowBatch, Map);
         return cellData;
@@ -232,12 +218,18 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
+        result.put("start", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getStartTime(), -1), "yyyy/MM/dd HH:mm:ss"));
+        result.put("end", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getEndTime(), -1), "yyyy/MM/dd HH:mm:ss"));
+
+        return result;
+    }
+    protected Map<String, String> getQueryParamx(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getStartTime(), -1), "yyyy/MM/dd HH:mm:ss"));
         result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getEndTime(), -1), "yyyy/MM/dd HH:mm:ss"));
 
         return result;
     }
-
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -8), "yyyy/MM/dd HH:mm:ss"));
@@ -257,7 +249,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
     }
 
     private String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByTimeEnd";
+        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getKlineStatistics";
     }
 
     private String getUrl3() {

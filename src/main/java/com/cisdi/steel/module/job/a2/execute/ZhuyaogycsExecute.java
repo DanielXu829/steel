@@ -2,8 +2,8 @@ package com.cisdi.steel.module.job.a2.execute;
 
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
-import com.cisdi.steel.module.job.a2.writer.FensuixiduWriter;
-import com.cisdi.steel.module.job.a2.writer.ZhibiaoguankongWriter;
+import com.cisdi.steel.module.job.a2.writer.JiaolujiareWriter;
+import com.cisdi.steel.module.job.a2.writer.ZhuyaogycsWriter;
 import com.cisdi.steel.module.job.dto.ExcelPathInfo;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -33,14 +33,14 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class ZhibiaoguankongExecute extends AbstractJobExecuteExecute {
+public class ZhuyaogycsExecute extends AbstractJobExecuteExecute {
 
     @Autowired
-    private ZhibiaoguankongWriter zhibiaoguankongWriter;
+    private ZhuyaogycsWriter zhuyaogycsWriter;
 
     @Override
     public IExcelReadWriter getCurrentExcelWriter() {
-        return zhibiaoguankongWriter;
+        return zhuyaogycsWriter;
     }
 
     @Override
