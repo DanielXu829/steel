@@ -165,6 +165,16 @@ public class ChartUtils {
 
     }
 
+    private static void dealRenderer(CategoryItemRenderer renderer, CategoryPlot plot) {
+        if (renderer instanceof StackedBarRenderer) {
+            renderer = (StackedBarRenderer) plot
+                    .getRenderer();
+        } else if (renderer instanceof LineAndShapeRenderer) {
+            renderer = (LineAndShapeRenderer) plot
+                    .getRenderer();
+        }
+    }
+
     /**
      * 设置折线图样式
      *
@@ -174,7 +184,8 @@ public class ChartUtils {
     @SuppressWarnings("deprecation")
     public static void setLineRender(CategoryPlot plot,
                                      boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions,
-                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, int y2, DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3, DefaultCategoryDataset dataset4) {
+                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, int y2,
+                                     DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3, DefaultCategoryDataset dataset4, int stack[], int[] ystack) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
         categoryaxis.setCategoryLabelPositions(positions);
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
@@ -226,12 +237,18 @@ public class ChartUtils {
             axis2.setLabelPaint(Color.BLUE);
             axis2.setTickLabelPaint(Color.BLUE);
             axis2.setRange(rangIndex2, rangEnd2);
+            if (ystack[0] == 1 && ystack[1] == 1) {
+                axis2.setVisible(false);
+            }
             plot.setRangeAxis(1, axis2);
             plot.setDataset(1, dataset2);
             plot.mapDatasetToRangeAxis(1, 1);
 
+            CategoryItemRenderer rederer = new LineAndShapeRenderer();
             // -- 修改第2条曲线显示效果
-            LineAndShapeRenderer rederer = new LineAndShapeRenderer();
+            if (stack[1] == 2) {
+                rederer = new StackedBarRenderer();
+            }
             plot.setRenderer(1, rederer);
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
             rederer.setBaseItemLabelFont(new Font("Calibri", Font.ITALIC, 15));
@@ -239,6 +256,7 @@ public class ChartUtils {
             rederer.setSeriesPaint(1, Color.yellow);
             rederer.setSeriesPaint(2, Color.red);
             plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+
         }
 
         if (y2 > 2) {
@@ -249,7 +267,11 @@ public class ChartUtils {
             axis3.setLabelPaint(Color.BLUE);
             axis3.setTickLabelPaint(Color.BLUE);
             axis3.setRange(rangIndex3, rangEnd3);
-            axis3.setVisible(false);
+            if (ystack[0] == 1 && ystack[1] == 1) {
+                axis3.setVisible(true);
+            } else {
+                axis3.setVisible(false);
+            }
             plot.setRangeAxis(2, axis3);
             plot.mapDatasetToRangeAxis(2, 1);
 

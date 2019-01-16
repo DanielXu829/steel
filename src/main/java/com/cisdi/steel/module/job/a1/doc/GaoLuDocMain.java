@@ -51,7 +51,7 @@ public class GaoLuDocMain {
     private String version6 = "6.0";
     private String version8 = "8.0";
 
-//    @Scheduled(cron = "0 30 6 * * ?")
+    //    @Scheduled(cron = "0 30 6 * * ?")
     public void mainTask() {
         result = new HashMap<>();
         dealPart1(version8, L1);
@@ -355,43 +355,6 @@ public class GaoLuDocMain {
             }
         }
 
-//
-//        List<Double> rd = new ArrayList<>();
-//        List<Double> doubles1 = doubles.get(0);
-//        for (int i = 0; i < doubles1.size(); i++) {
-//            Double aDouble = doubles.get(0).get(i);
-//            Double bDouble = doubles.get(3).get(i);
-//            Double cDouble = doubles.get(6).get(i);
-//
-//            Double x = (aDouble + bDouble + cDouble) / cBrandCodes.length;
-//            rd.add(x);
-//        }
-//
-//        List<Double> rd1 = new ArrayList<>();
-//        List<Double> doubles2 = doubles.get(1);
-//        for (int i = 0; i < doubles2.size(); i++) {
-//            Double aDouble = doubles.get(1).get(i);
-//            Double bDouble = doubles.get(4).get(i);
-//            Double cDouble = doubles.get(7).get(i);
-//
-//            Double x = (aDouble + bDouble + cDouble) / cBrandCodes.length;
-//            rd1.add(x);
-//        }
-//
-//        List<Double> rd2 = new ArrayList<>();
-//        List<Double> doubles3 = doubles.get(2);
-//        for (int i = 0; i < doubles3.size(); i++) {
-//            Double aDouble = doubles.get(2).get(i);
-//            Double bDouble = doubles.get(5).get(i);
-//            Double cDouble = doubles.get(8).get(i);
-//
-//            Double x = (aDouble + bDouble + cDouble) / cBrandCodes.length;
-//            rd2.add(x);
-//        }
-//
-//        result.add(rd);
-//        result.add(rd1);
-//        result.add(rd2);
         return result;
 
     }
@@ -480,9 +443,9 @@ public class GaoLuDocMain {
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part1", doubles2.get(0).get(0));
-        result.put("part2", doubles2.get(1).get(0));
-        result.put("part3", doubles2.get(2).get(0));
+        result.put("part1", doubles2.get(0).get(0).intValue());
+        result.put("part2", doubles2.get(1).get(0).intValue());
+        result.put("part3", doubles2.get(2).get(0).intValue());
 
         /**
          * 产量BF8_L2C_BD_ProductionSum_1d_cur 0-8192
@@ -511,10 +474,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {2, 1, 1};
+        int[] ystack = {1, 2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 6000, 8500, 300, 600, 300, 600, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg1", image1);
     }
@@ -525,9 +490,21 @@ public class GaoLuDocMain {
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part4", doubles2.get(0).get(0));
-        result.put("part5", doubles2.get(1).get(0));
-        result.put("part6", doubles2.get(2).get(0));
+        double aa = doubles2.get(0).get(0);
+        BigDecimal a = new BigDecimal(aa);
+        aa = a.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+        double bb = doubles2.get(1).get(0);
+        BigDecimal b = new BigDecimal(bb);
+        bb = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+        double cc = doubles2.get(2).get(0);
+        BigDecimal c = new BigDecimal(cc);
+        cc = c.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+        result.put("part4", aa * 100);
+        result.put("part5", bb * 100);
+        result.put("part6", cc * 100);
 
 
         /**
@@ -558,17 +535,19 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {2, 2, 1};
+        int[] ystack = {1, 1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 2, 0, 2, 0, 2, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 100, 0, 100, 0, 40, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg2", image1);
     }
 
     private void dealPart3(String version, String[] tagNames) {
         String[] cBrandCodes = {"1_2_LYJJ_COKE", "WGYJJT_COKE", "6_7_LYJJ_COKE"};
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "LG");
+        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL");
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
@@ -599,10 +578,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {2, 2, 1};
+        int[] ystack = {1, 1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 100, 0, 100, 0, 20, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg3", image1);
     }
@@ -655,10 +636,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {1, 1, 1, 1};
+        int[] ystack = {1, 1, 1, 1};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, 4);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, 4, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
     }
@@ -686,10 +669,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {2, 1};
+        int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 1, 0, 1, 0, 1, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 50, 65, 0, 15, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg6", image1);
     }
@@ -715,20 +700,35 @@ public class GaoLuDocMain {
         series3.add(new Serie("Fcad", objects3));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series3);
         vectors.add(series1);
         vectors.add(series2);
-        vectors.add(series3);
 
         String title1 = "";
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {2, 1, 1};
+        int[] ystack = {2, 1, 1};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 50, 90, 0, 20, 0, 20, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg7", image1);
+    }
+
+    private Object[] dealData(Object[] old, int bs) {
+        Object[] objects4 = new Object[old.length];
+        for (int i = 0; i < old.length; i++) {
+            Object o = old[i];
+            if (Objects.nonNull(o)) {
+                double a = (Double) o;
+                o = a * bs;
+            }
+            objects4[i] = o;
+        }
+        return objects4;
     }
 
     private void dealPart8(String version, String[] tagNames) {
@@ -736,10 +736,12 @@ public class GaoLuDocMain {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
+
+        Object[] objects4 = dealData(objects2, 100);
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part7", doubles2.get(0).get(0));
-        result.put("part8", doubles2.get(1).get(0));
-        result.put("part9", doubles2.get(2).get(0));
+        result.put("part7", doubles2.get(0).get(0).intValue());
+        result.put("part8", doubles2.get(1).get(0).intValue());
+        result.put("part9", doubles2.get(2).get(0).intValue());
 
         /**
          * 风量BF8_L2C_BD_HotBlastFlow_1d_avg
@@ -754,7 +756,7 @@ public class GaoLuDocMain {
 
         // 标注类别
         Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("风压", objects2));
+        series2.add(new Serie("风压", objects4));
 
         // 标注类别
         Vector<Serie> series3 = new Vector<Serie>();
@@ -769,10 +771,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {2, 1, 1};
+        int[] ystack = {1, 2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 5500, 0, 1, 0, 180, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 5000, 6000, 100, 450, 100, 450, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg8", image1);
     }
@@ -782,8 +786,17 @@ public class GaoLuDocMain {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part10", doubles2.get(0).get(0));
-        result.put("part11", doubles2.get(1).get(0));
+
+        double a = doubles2.get(0).get(0);
+        BigDecimal b = new BigDecimal(a);
+        a = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+        double c = doubles2.get(0).get(0);
+        BigDecimal d = new BigDecimal(c);
+        c = d.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+        result.put("part10", a);
+        result.put("part11", c);
         /**
          * W BF8_L2C_BD_W_1d_avg
          * Z BF8_L2C_BD_Z_1d_avg
@@ -805,10 +818,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {1, 1};
+        int[] ystack = {2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 1, 0, 8, 0, 180, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 1, 1, 15, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg9", image1);
     }
@@ -818,8 +833,8 @@ public class GaoLuDocMain {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part12", doubles2.get(0).get(0));
-        result.put("part13", doubles2.get(1).get(0));
+        result.put("part12", doubles2.get(0).get(0).intValue());
+        result.put("part13", doubles2.get(1).get(0).intValue());
 
         /**
          * 炉芯BF8_L2C_BH_T0146_1d_avg
@@ -842,10 +857,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {1, 1};
+        int[] ystack = {2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 210, 0, 1, 0, 180, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 500, 0, 500, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg11", image1);
     }
@@ -854,7 +871,11 @@ public class GaoLuDocMain {
         List<List<Double>> doubles = part1(version, tagNames);
         Object[] objects1 = doubles.get(0).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part14", doubles2.get(0).get(0));
+
+        double aDouble = doubles2.get(0).get(0);
+        BigDecimal b = new BigDecimal(aDouble);
+        aDouble = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        result.put("part14", aDouble);
         /**
          *  煤气利用率  BF8_L2C_TP_GasUtilization_1d_avg
          */
@@ -870,10 +891,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {1};
+        int[] ystack = {2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 48, 0, 1, 0, 180, tagNames.length);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 40, 55, 0, 1, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg13", image1);
     }
@@ -893,6 +916,8 @@ public class GaoLuDocMain {
         Object[] objects = lc.get(0).toArray();
         Object[] objects1 = tagName.get(0).toArray();
 
+        Object[] objects4 = dealData(objects1, 100);
+
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
@@ -900,7 +925,7 @@ public class GaoLuDocMain {
 
         // 标注类别
         Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("PT", objects1));
+        series2.add(new Serie("PT", objects4));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
@@ -910,10 +935,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
+        int[] stack = {2, 1};
+        int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 1, 0, 1, 0, 1, 2);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 1300, 1600, 0, 100, 0, 1, 2, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg15", image1);
 
@@ -938,18 +965,44 @@ public class GaoLuDocMain {
         map.put("cz15", 240.00);
         map.put("cz16", 115.00);
         map.put("cz17", 2200.00);
+
+        //熟料比 R2 料批 未完成
+
         List<List<Double>> doubles2 = part2(version, tagNames);
         for (int i = 0; i < doubles2.size(); i++) {
             Double aDouble = doubles2.get(i).get(0);
             BigDecimal bigDecimal = new BigDecimal(aDouble);
             Double aDouble1 = map.get("cz" + (i + 1));
             BigDecimal bigDecimal1 = new BigDecimal(aDouble1);
-            bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
-            result.put("cz" + (i + 1), bigDecimal);
-
             BigDecimal subtract = bigDecimal.subtract(bigDecimal1);
-            subtract = subtract.setScale(2, BigDecimal.ROUND_HALF_UP);
-            result.put("pc" + (i + 1), subtract);
+            if (i == 0 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6 || i == 7 || i == 14) {
+                bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
+                result.put("cz" + (i + 1), bigDecimal.intValue());
+
+                subtract = subtract.setScale(2, BigDecimal.ROUND_HALF_UP);
+                result.put("pc" + (i + 1), subtract.intValue());
+            }
+
+            if (i == 11 || i == 12 || i == 13 || i == 15 || i == 16) {
+                bigDecimal = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP);
+                result.put("cz" + (i + 1), bigDecimal);
+
+                subtract = subtract.setScale(1, BigDecimal.ROUND_HALF_UP);
+                result.put("pc" + (i + 1), subtract);
+            }
+
+            if (i == 1) {
+                bigDecimal = bigDecimal.multiply(new BigDecimal(1000)).setScale(2, BigDecimal.ROUND_HALF_UP);
+                result.put("cz" + (i + 1), bigDecimal.intValue());
+
+                subtract= bigDecimal1.subtract(bigDecimal);
+                result.put("pc" + (i + 1), subtract.intValue());
+            }
+
+            if (i == 8 || i == 9 || i == 10) {
+                bigDecimal = bigDecimal.multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+                result.put("cz" + (i + 1), bigDecimal.intValue() + "%");
+            }
         }
     }
 

@@ -58,6 +58,14 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
+                } else if ("_penmei6_month_day".equals(sheetName) || "_penmei7_month_day".equals(sheetName)) {
+                    //换罐时间处理
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler2(url, columns, item, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
                 } else {
                     int index = 1;
                     for (DateQuery item : dateQueries) {
@@ -161,6 +169,10 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
 
         return resultList;
+    }
+
+    protected List<CellData> mapDataHandler2(String url, List<String> columns, DateQuery dateQuery, int index) {
+        return null;
     }
 
     private String getUrl(String version) {
