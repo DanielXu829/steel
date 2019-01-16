@@ -542,9 +542,6 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-
-
-
     private void setSheetValue(Sheet sheet, Integer rowNum, Integer columnNum, Object obj) {
         Row row = sheet.getRow(rowNum);
         if (Objects.isNull(row)) {
@@ -556,6 +553,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         }
         PoiCustomUtil.setCellValue(cell, obj);
     }
+
 
     private String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCodeOrSource";

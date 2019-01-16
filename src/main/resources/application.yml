@@ -68,6 +68,7 @@ http:
   url:
    urlApiGLOne: http://10.11.11.24:9001
    urlApiGLTwo: http://10.11.11.25:9001
+   urlApiGLThree: http://10.11.11.26:9001
    urlApiNJOne: http://10.11.11.33:8080
    urlApiJHOne:  http://10.11.11.31:8080
    urlApiYGLOne: http://10.11.11.32:8181

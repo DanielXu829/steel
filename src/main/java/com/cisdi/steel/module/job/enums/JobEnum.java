@@ -118,7 +118,13 @@ public enum JobEnum {
     nj_yasuokongqi("nj_yasuokongqi", "压缩空气生产情况汇总表"),
     nj_meiqihunhemei("nj_meiqihunhemei", "煤气柜作业区混合煤气情况表"),
     nj_guifengjimeiyaji("nj_guifengjimeiyaji", "柜区风机煤压机时间统计表"),
-    nj_dongli_month("nj_dongli_month", "动力分厂主要设备开停机信息表");
+    nj_dongli_month("nj_dongli_month", "动力分厂主要设备开停机信息表"),
+
+    // 环保
+    hb_6bftrt("hb_6bftrt", "6BF-TRT日报表"),
+    hb_7bftrt("hb_7bftrt", "7BF-TRT日报表"),
+    hb_8bftrt("hb_8bftrt", "8BF-TRT日报表");
+
 
     private String code;
     private String name;

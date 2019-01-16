@@ -23,9 +23,14 @@ public class HttpProperties {
     private String urlApiGLOne;
 
     /**
-     * 6高炉 8
+     * 8高炉 8
      */
     private String urlApiGLTwo;
+
+    /**
+     * 7高炉 7
+     */
+    private String urlApiGLThree;
 
     /**
      * 焦化的接口地址
@@ -57,6 +62,8 @@ public class HttpProperties {
             return urlApiGLOne;
         } else if ("8.0".equals(version)) {
             return urlApiGLTwo;
+        }else if ("7.0".equals(version)) {
+            return urlApiGLThree;
         }
         return urlApiGLOne;
     }
