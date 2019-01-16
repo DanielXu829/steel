@@ -10,20 +10,15 @@ import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportCategory;
-import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportCategoryMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryService;
 import com.cisdi.steel.module.report.util.ReportCategoryUtil;
-import com.cisdi.steel.module.sys.service.SysConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 /**
  * <p>Description: 报表分类 服务实现类 </p>
@@ -67,18 +62,7 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
         String name = record.getName();
         LambdaQueryWrapper<ReportCategory> wrapper = new QueryWrapper<ReportCategory>().lambda();
         if (StringUtils.isNotBlank(name)) {
-            name = Pattern.compile("[\\d]").matcher(name).replaceAll("");
-            if (name.startsWith("烧结")) {
-                wrapper.likeRight(true, ReportCategory::getCode, "sj_");
-            } else if (name.startsWith("高炉")) {
-                wrapper.likeRight(true, ReportCategory::getCode, "gl_");
-            } else if (name.startsWith("能介")) {
-                wrapper.likeRight(true, ReportCategory::getCode, "nj_");
-            } else if (name.startsWith("原料")) {
-                wrapper.likeRight(true, ReportCategory::getCode, "ygl_");
-            } else if (name.startsWith("焦化")) {
-                wrapper.likeRight(true, ReportCategory::getCode, "jh_");
-            }
+            wrapper.like(true, ReportCategory::getRemark, name );
         }
         wrapper.orderByAsc(ReportCategory::getSort);
         List<ReportCategory> list = this.list(wrapper);

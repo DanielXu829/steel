@@ -3,13 +3,13 @@ package com.cisdi.steel.module.report.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -54,6 +54,13 @@ public class ReportCategory extends Model<ReportCategory> {
 
     @TableField(value = "sort")
     private Integer sort;
+
+    /**
+     * 是否删除
+     */
+    @TableLogic
+    @TableField(value = "del_flag")
+    private String delFlag;
 
     /**
      * 备注（预留字段）
