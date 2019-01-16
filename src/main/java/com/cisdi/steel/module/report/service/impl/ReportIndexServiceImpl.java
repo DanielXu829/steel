@@ -110,7 +110,6 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
         }
 
-
         wrapper.likeRight(StringUtils.isNotBlank(query.getName()), ReportIndex::getName, query.getName());
         if (Objects.nonNull(query.getStartTime())) {
             Date dateBeginTime = DateUtil.getDateBeginTime(query.getStartTime());
