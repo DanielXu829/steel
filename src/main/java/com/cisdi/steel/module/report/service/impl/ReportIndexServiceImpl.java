@@ -107,6 +107,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         if (StringUtils.isNotBlank(query.getSequence()) && query.getSequence().contains("烧结")) {
             wrapper.like(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
         } else {
+            if (StringUtils.isNotBlank(query.getReportCategoryCode()) && "hb_8bftrt".equals(query.getReportCategoryCode())) {
+                query.setSequence("环保");
+            }
             wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
         }
 
@@ -145,10 +148,10 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         } else {
             if (JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())) {
                 boolean f = dealGongyi(report.getRecordDate(), reportIndex.getRecordDate());
-                otherHand(f,reportIndex,report,now);
-            }else if(JobEnum.jh_zhibiaoguankong.getCode().equals(reportIndex.getReportCategoryCode())||JobEnum.jh_zhuyaogycs.getCode().equals(reportIndex.getReportCategoryCode())){
+                otherHand(f, reportIndex, report, now);
+            } else if (JobEnum.jh_zhibiaoguankong.getCode().equals(reportIndex.getReportCategoryCode()) || JobEnum.jh_zhuyaogycs.getCode().equals(reportIndex.getReportCategoryCode())) {
                 boolean f = dealZhibiao(report.getRecordDate(), reportIndex.getRecordDate());
-                otherHand(f,reportIndex,report,now);
+                otherHand(f, reportIndex, report, now);
             } else {
                 if (!reportIndex.getPath().equals(report.getPath())) {
                     FileUtils.deleteFile(report.getPath());
@@ -159,7 +162,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         }
     }
 
-    private void otherHand(boolean f,ReportIndex reportIndex,ReportIndex report,Date date){
+    private void otherHand(boolean f, ReportIndex reportIndex, ReportIndex report, Date date) {
         if (!f) {
             reportIndex.setCreateTime(date);
             this.save(reportIndex);
@@ -177,10 +180,10 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         try {
             int dateTime = Integer.valueOf(DateUtil.getFormatDateTime(date, "HH"));
             int dateTime1 = Integer.valueOf(DateUtil.getFormatDateTime(date1, "HH"));
-            if (((dateTime >= 0 && dateTime < 8) )
+            if (((dateTime >= 0 && dateTime < 8))
                     && ((dateTime1 >= 0 && dateTime1 < 8))) {
                 flag = true;
-            } else if ((dateTime <16  && dateTime >= 8)
+            } else if ((dateTime < 16 && dateTime >= 8)
                     && (dateTime1 < 16 && dateTime1 >= 8)) {
                 flag = true;
             } else if ((dateTime < 24 && dateTime >= 16)
