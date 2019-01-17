@@ -6,9 +6,12 @@ import com.cisdi.steel.module.job.strategy.date.DateStrategy;
 import com.cisdi.steel.module.job.strategy.date.DateStrategyContext;
 import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
 import com.cisdi.steel.module.job.strategy.options.OptionsStrategyContext;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -83,5 +86,15 @@ public class StrategyContext {
 
     public OptionsStrategy getOption(String option) {
         return optionsStrategyContext.getOptionStrategy(option);
+    }
+
+
+    public List<DateQuery> handlerStrategy(String strategyName, Date date) {
+        String[] split = strategyName.split("_");
+        DateStrategy dateStrategy = getDate(split[2]);
+        DateQuery handlerDate = dateStrategy.handlerDate(date);
+        OptionsStrategy option = getOption(split[3]);
+        List<DateQuery> dateQueries = option.execute(handlerDate);
+        return dateQueries;
     }
 }

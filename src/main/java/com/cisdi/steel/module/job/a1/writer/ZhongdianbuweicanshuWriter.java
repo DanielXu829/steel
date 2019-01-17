@@ -1,13 +1,13 @@
 package com.cisdi.steel.module.job.a1.writer;
 
+import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
-import com.cisdi.steel.module.job.strategy.date.DateStrategy;
-import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>Description:         </p>
@@ -31,38 +32,33 @@ public class ZhongdianbuweicanshuWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        int numberOfSheets = workbook.getNumberOfSheets();
-        for (int i = 0; i < numberOfSheets; i++) {
-            Sheet sheet = workbook.getSheetAt(i);
-            // 以下划线开头的sheet 表示 隐藏表  待处理
-            String sheetName = sheet.getSheetName();
-            if (sheetName.startsWith("_tag")) {
-                String[] split = sheetName.split("_");
-                DateStrategy dateStrategy = strategyContext.getDate(split[2]);
-                DateQuery handlerDate = dateStrategy.handlerDate(excelDTO.getDateQuery().getRecordDate());
-                OptionsStrategy option = strategyContext.getOption(split[3]);
-                List<DateQuery> dateQueries = option.execute(handlerDate);
-                // 3、接口处理
-                SheetRowCellData execute = execute(workbook, sheet, dateQueries);
-                // 设置所有值
-                execute.allValueWriteExcel();
-            }
+        Sheet dictionary = workbook.getSheet("_dictionary");
+        String minCell = PoiCellUtil.getCellValue(dictionary, 1, 1);
+        String maxCell = PoiCellUtil.getCellValue(dictionary, 2, 1);
+        int min = Double.valueOf(minCell).intValue();
+        int max = Double.valueOf(maxCell).intValue();
+        for (int i = min; i < max; i++) {
+            String sheetName = PoiCellUtil.getCellValue(dictionary, i, 1);
+            String sheetStrategy = PoiCellUtil.getCellValue(dictionary, i, 2);
+            String rowIndexInit = PoiCellUtil.getCellValue(dictionary, i, 3);
+            String rowTagNameIndex = PoiCellUtil.getCellValue(dictionary, i, 4);
+            List<DateQuery> dateQueries = strategyContext.handlerStrategy(sheetStrategy, excelDTO.getDateQuery().getRecordDate());
+            Sheet sheet = workbook.getSheet(sheetName);
+
+            SheetRowCellData execute = execute(workbook, sheet, Double.valueOf(rowTagNameIndex).intValue(), Double.valueOf(rowIndexInit).intValue(), dateQueries);
+            // 设置所有值
+            execute.allValueWriteExcel();
         }
         return workbook;
     }
 
-    public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
-        List<String> columnCells = PoiCustomUtil.getFirstRowCelVal(sheet);
+    public SheetRowCellData execute(Workbook workbook, Sheet sheet, Integer rowTagNameIndex, Integer rowIndexInit, List<DateQuery> queryList) {
+        List<String> columnCells = PoiCustomUtil.getRowCelVal(sheet, rowTagNameIndex);
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
         String url = httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
         List<CellData> rowCellDataList = new ArrayList<>();
-        int size = queryList.size();
-        String sheetName = sheet.getSheetName();
-        String[] split = sheetName.split("_");
-        String type = split[2];
-        for (int rowNum = 0; rowNum < size; rowNum++) {
-            DateQuery eachDate = queryList.get(rowNum);
-            List<CellData> cellValInfoList = eachData(columnCells, url, eachDate.getQueryParam(), type);
+        for (DateQuery eachDate : queryList) {
+            List<CellData> cellValInfoList = eachData(columnCells, url, eachDate.getQueryParam(), rowIndexInit);
             rowCellDataList.addAll(cellValInfoList);
         }
         return SheetRowCellData.builder()
@@ -73,11 +69,12 @@ public class ZhongdianbuweicanshuWriter extends AbstractExcelReadWriter {
     }
 
 
-    private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam, String type) {
+    private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam, Integer rowIndexInit) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("starttime", queryParam.get("starttime"));
         jsonObject.put("endtime", queryParam.get("endtime"));
-        jsonObject.put("tagnames", cellList);
+        List<String> collect = cellList.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        jsonObject.put("tagnames", collect);
 
         String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
         JSONObject obj = JSONObject.parseObject(result);
@@ -101,8 +98,9 @@ public class ZhongdianbuweicanshuWriter extends AbstractExcelReadWriter {
                     for (int i = 0; i < size; i++) {
                         Long key = list[i];
                         Object o = data.get(key + "");
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 0, key);
-                        ExcelWriterUtil.addCellData(resultList, i + 1, columnIndex, o);
+                        String dateTime = DateUtil.getFormatDateTime(new Date(key), DateUtil.yyyyMMddHHmm);
+                        ExcelWriterUtil.addCellData(resultList, i + rowIndexInit, 0, dateTime);
+                        ExcelWriterUtil.addCellData(resultList, i + rowIndexInit, columnIndex, o);
                     }
 
                 }
