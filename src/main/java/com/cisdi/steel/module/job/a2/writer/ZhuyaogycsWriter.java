@@ -165,9 +165,9 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                                 if (Objects.nonNull(obj)) {
                                     String clock = obj.getString("clock");
                                     Date date = DateUtil.strToDate(clock, DateUtil.fullFormat);
-                                    Date endTime = dateQuery.getStartTime();
-                                    Date startTime = DateUtil.addHours(endTime, -8);
-                                    if (DateUtil.isEffectiveDate(date, startTime, endTime)) {
+//                                    Date endTime = dateQuery.getStartTime();
+//                                    Date startTime = DateUtil.addHours(endTime, -8);
+//                                    if (DateUtil.isEffectiveDate(date, startTime, endTime)) {
                                         Map<String, String> queryParam1 = getQueryParam2(DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:00"));
                                         queryParam1.put("tagName", "CK67_L1R_CB_CBAcTol_1m_avg");
                                         String result1 = httpUtil.get(getUrl3(), queryParam1);
@@ -182,7 +182,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                                         }
                                     }
                                 }
-                            }
+//                            }
                         }
                     }
                 }

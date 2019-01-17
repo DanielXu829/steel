@@ -100,17 +100,18 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         Page<ReportIndex> page = new Page<>(query.getCurrentPage(), query.getPageSize());
         LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
         wrapper.eq(true, ReportIndex::getHidden, "0");
+        if (query.getReportCategoryCode().startsWith("hb_")) {
+            query.setSequence("环保");
+            wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
+        }
         wrapper.eq(StringUtils.isNotBlank(query.getReportCategoryCode()), ReportIndex::getReportCategoryCode, query.getReportCategoryCode());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexType()), ReportIndex::getIndexType, query.getIndexType());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexLang()), ReportIndex::getIndexLang, query.getIndexLang());
 
-        if (StringUtils.isNotBlank(query.getSequence()) && query.getSequence().contains("烧结")) {
-            wrapper.like(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
-        } else {
-            if (StringUtils.isNotBlank(query.getReportCategoryCode()) && "hb_8bftrt".equals(query.getReportCategoryCode())) {
-                query.setSequence("环保");
+        if (StringUtils.isNotBlank(query.getSequence())) {
+            if (query.getSequence().contains("烧结")) {
+                wrapper.like(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
             }
-            wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
         }
 
         wrapper.likeRight(StringUtils.isNotBlank(query.getName()), ReportIndex::getName, query.getName());
