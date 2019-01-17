@@ -134,6 +134,11 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
             BigDecimal multiply = new BigDecimal(oreStockline.toString()).multiply(new BigDecimal(1000));
             materialValues.put("oreStockline", multiply);
         }
+        Object cokeStockline = materialValues.get("cokeStockline");
+        if (Objects.nonNull(cokeStockline)) {
+            BigDecimal multiply = new BigDecimal(cokeStockline.toString()).multiply(new BigDecimal(1000));
+            materialValues.put("cokeStockline", multiply);
+        }
         int size = rowVals.size();
         JSONObject distribution = data.getJSONObject("distribution");
 
@@ -304,6 +309,10 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                 continue;
             }
             Object obj = materialValues.get(s1);
+            if (Objects.nonNull(obj) &&"totalGrade".equals(s1)) {
+                BigDecimal multiply = new BigDecimal(obj.toString()).multiply(new BigDecimal(100));
+                obj = multiply.setScale(2, BigDecimal.ROUND_HALF_UP);
+            }
             if (Objects.nonNull(obj) &&"totalGrade".equals(s1)) {
                 BigDecimal multiply = new BigDecimal(obj.toString()).multiply(new BigDecimal(100));
                 obj = multiply.setScale(2, BigDecimal.ROUND_HALF_UP);
