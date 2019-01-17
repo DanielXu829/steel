@@ -1,9 +1,9 @@
 package com.cisdi.steel.module.job.strategy.api;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.common.resp.ResponseUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
@@ -13,7 +13,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>Description:   charge      </p>
@@ -40,7 +43,7 @@ public class ChargeStrategy extends AbstractApiStrategy {
         List<CellData> cellDataList = new ArrayList<>();
         for (DateQuery dateQuery : queryList) {
             // 理论上来说一次获取了所有，循环只执行一次
-            List<Map<String, Object>> dataList = this.requestApiData(url,dateQuery);
+            List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }
         return SheetRowCellData.builder()
@@ -63,10 +66,8 @@ public class ChargeStrategy extends AbstractApiStrategy {
         int starRow = 1;
         List<CellData> resultData = new ArrayList<>();
         for (Map<String, Object> data : dataList) {
-            // 每一行的数据
-            JSONObject jsonObject = (JSONObject) data.get("data");
             // 存储每一个
-            List<CellData> rowData = ExcelWriterUtil.handlerRowData(columns, starRow, jsonObject);
+            List<CellData> rowData = ExcelWriterUtil.handlerRowData(columns, starRow, data);
             resultData.addAll(rowData);
             starRow += 6;
         }
@@ -79,24 +80,30 @@ public class ChargeStrategy extends AbstractApiStrategy {
      * @param dateQuery 查询时间段
      * @return 结果
      */
-    private List<Map<String, Object>> requestApiData(String urlPre,DateQuery dateQuery) {
-        String url = urlPre + "/batchenos/period";
-        String s = httpUtil.get(url, dateQuery.getQueryParam());
-        List<String> list = ResponseUtil.getResponseArray(s, String.class);
-        List<Map<String, Object>> result = new ArrayList<>();
-        if (Objects.isNull(list) || list.isEmpty()) {
-            return result;
+    private List<Map<String, Object>> requestApiData(String urlPre, DateQuery dateQuery) {
+        String url = urlPre + "/batches/material/period";
+        Map<String, String> queryParam = dateQuery.getQueryParam();
+        queryParam.put("pagenum", "1");
+        queryParam.put("pagesize", "1");
+        String resultstr = httpUtil.get(url, queryParam);
+        JSONObject jsonObject = JSON.parseObject(resultstr);
+        Object total = jsonObject.get("total");
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        if (Objects.isNull(total) || "0".equals(total.toString())) {
+            return resultList;
         }
-        Collections.sort(list);
-        for (String batchNo : list) {
-            String detail = urlPre + "/batch/" + batchNo;
-            String detailData = httpUtil.get(detail);
-            if (StringUtils.isNotBlank(detailData)) {
-                Map<String, Object> mapType = JSON.parseObject(detailData, Map.class);
-                result.add(mapType);
-            }
+        queryParam.put("pagesize", total.toString());
+        String s = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(s)) {
+            return resultList;
         }
-        return result;
+        JSONObject object = JSONObject.parseObject(s);
+        JSONArray data = object.getJSONArray("data");
+        for (int i = data.size() - 1; i >= 0; i++) {
+            JSONObject dataJSONObject = data.getJSONObject(i);
+            resultList.add(dataJSONObject);
+        }
+        return resultList;
     }
 
 }
