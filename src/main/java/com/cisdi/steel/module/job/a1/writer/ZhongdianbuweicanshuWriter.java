@@ -1,13 +1,13 @@
 package com.cisdi.steel.module.job.a1.writer;
 
-import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.strategy.date.DateStrategy;
+import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -32,23 +32,40 @@ public class ZhongdianbuweicanshuWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        Sheet dictionary = workbook.getSheet("_dictionary");
-        String minCell = PoiCellUtil.getCellValue(dictionary, 1, 1);
-        String maxCell = PoiCellUtil.getCellValue(dictionary, 2, 1);
-        int min = Double.valueOf(minCell).intValue();
-        int max = Double.valueOf(maxCell).intValue();
-        for (int i = min; i < max; i++) {
-            String sheetName = PoiCellUtil.getCellValue(dictionary, i, 1);
-            String sheetStrategy = PoiCellUtil.getCellValue(dictionary, i, 2);
-            String rowIndexInit = PoiCellUtil.getCellValue(dictionary, i, 3);
-            String rowTagNameIndex = PoiCellUtil.getCellValue(dictionary, i, 4);
-            List<DateQuery> dateQueries = strategyContext.handlerStrategy(sheetStrategy, excelDTO.getDateQuery().getRecordDate());
-            Sheet sheet = workbook.getSheet(sheetName);
-
-            SheetRowCellData execute = execute(workbook, sheet, Double.valueOf(rowTagNameIndex).intValue(), Double.valueOf(rowIndexInit).intValue(), dateQueries);
-            // 设置所有值
-            execute.allValueWriteExcel();
+        int numberOfSheets = workbook.getNumberOfSheets();
+        for (int i = 0; i < numberOfSheets; i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            // 以下划线开头的sheet 表示 隐藏表  待处理
+            String sheetName = sheet.getSheetName();
+            if (sheetName.startsWith("_tag")) {
+                String[] split = sheetName.split("_");
+                DateStrategy dateStrategy = strategyContext.getDate(split[2]);
+                DateQuery handlerDate = dateStrategy.handlerDate(excelDTO.getDateQuery().getRecordDate());
+                OptionsStrategy option = strategyContext.getOption(split[3]);
+                List<DateQuery> dateQueries = option.execute(handlerDate);
+                // 3、接口处理
+                SheetRowCellData execute = execute(workbook, sheet, 0, 1, dateQueries);
+                // 设置所有值
+                execute.allValueWriteExcel();
+            }
         }
+//        Sheet dictionary = workbook.getSheet("_dictionary");
+//        String minCell = PoiCellUtil.getCellValue(dictionary, 1, 1);
+//        String maxCell = PoiCellUtil.getCellValue(dictionary, 2, 1);
+//        int min = Double.valueOf(minCell).intValue();
+//        int max = Double.valueOf(maxCell).intValue();
+//        for (int i = min; i < max; i++) {
+//            String sheetName = PoiCellUtil.getCellValue(dictionary, i, 1);
+//            String sheetStrategy = PoiCellUtil.getCellValue(dictionary, i, 2);
+//            String rowIndexInit = PoiCellUtil.getCellValue(dictionary, i, 3);
+//            String rowTagNameIndex = PoiCellUtil.getCellValue(dictionary, i, 4);
+//            List<DateQuery> dateQueries = strategyContext.handlerStrategy(sheetStrategy, excelDTO.getDateQuery().getRecordDate());
+//            Sheet sheet = workbook.getSheet(sheetName);
+//
+//            SheetRowCellData execute = execute(workbook, sheet, Double.valueOf(rowTagNameIndex).intValue(), Double.valueOf(rowIndexInit).intValue(), dateQueries);
+//            // 设置所有值
+//            execute.allValueWriteExcel();
+//        }
         return workbook;
     }
 
@@ -98,8 +115,8 @@ public class ZhongdianbuweicanshuWriter extends AbstractExcelReadWriter {
                     for (int i = 0; i < size; i++) {
                         Long key = list[i];
                         Object o = data.get(key + "");
-                        String dateTime = DateUtil.getFormatDateTime(new Date(key), DateUtil.yyyyMMddHHmm);
-                        ExcelWriterUtil.addCellData(resultList, i + rowIndexInit, 0, dateTime);
+//                        String dateTime = DateUtil.getFormatDateTime(new Date(key), DateUtil.yyyyMMddHHmm);
+                        ExcelWriterUtil.addCellData(resultList, i + rowIndexInit, 0, key);
                         ExcelWriterUtil.addCellData(resultList, i + rowIndexInit, columnIndex, o);
                     }
 
