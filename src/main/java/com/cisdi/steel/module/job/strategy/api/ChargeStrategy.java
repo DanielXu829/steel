@@ -99,7 +99,7 @@ public class ChargeStrategy extends AbstractApiStrategy {
         }
         JSONObject object = JSONObject.parseObject(s);
         JSONArray data = object.getJSONArray("data");
-        for (int i = data.size() - 1; i >= 0; i++) {
+        for (int i = data.size() - 1; i >= 0; i--) {
             JSONObject dataJSONObject = data.getJSONObject(i);
             resultList.add(dataJSONObject);
         }
