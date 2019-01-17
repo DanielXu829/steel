@@ -33,11 +33,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
-        return this.getMapHandler1(getUrl(version), excelDTO);
+        return this.getMapHandler1(getUrl(version), excelDTO, version);
     }
 
 
-    protected Workbook getMapHandler1(String url, WriterExcelDTO excelDTO) {
+    protected Workbook getMapHandler1(String url, WriterExcelDTO excelDTO, String version) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
@@ -54,7 +54,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                     //喷吹量处理
                     int index = 1;
                     for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler1(url, columns, item, index);
+                        List<CellData> cellDataList = mapDataHandler1(url, columns, item, index, version);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
@@ -62,7 +62,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                     //换罐时间处理
                     int index = 1;
                     for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler2(url, columns, item, index);
+                        List<CellData> cellDataList = mapDataHandler2(version, columns, item, index);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
@@ -111,7 +111,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
-    protected List<CellData> mapDataHandler1(String url, List<String> columns, DateQuery dateQuery, int index) {
+    protected List<CellData> mapDataHandler1(String url, List<String> columns, DateQuery dateQuery, int index, String version) {
         ArrayList<String> list = new ArrayList<>();
         list.add(columns.get(0));
         Map<String, String> queryParam = DateQueryUtil.getQueryParam(dateQuery, 0, 0, -1);
@@ -128,6 +128,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         String cell = columns.get(0);
         JSONObject data = obj.getJSONObject(cell);
 
+        int indes = index;
         List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
         for (int i = 0; i < dayHourEach.size(); i++) {
             Object v = "";
@@ -143,7 +144,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         if (b.intValue() == 0) {
                             Map<String, String> map = new HashMap<>();
                             map.put("datetime", key);
-                            String re = httpUtil.get(getUrl1("8.0", "BF8_L1R_PCI_pmsd1_10s_cur"), map);
+                            String re = httpUtil.get(getUrl1(version, columns.get(1)), map);
                             if (StringUtils.isNotBlank(re)) {
                                 JSONObject ob = JSONObject.parseObject(re);
                                 if (Objects.nonNull(ob)) {
@@ -151,7 +152,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                 }
                             }
 
-                            String re1 = httpUtil.get(getUrl1("8.0", "BF8_L1R_PCI_pmsd2_10s_cur"), map);
+                            String re1 = httpUtil.get(getUrl1(version, columns.get(2)), map);
                             if (StringUtils.isNotBlank(re1)) {
                                 JSONObject ob1 = JSONObject.parseObject(re1);
                                 if (Objects.nonNull(ob1)) {
@@ -162,17 +163,63 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
-            ExcelWriterUtil.addCellData(resultList, (i + 1), 0, v2);
-            ExcelWriterUtil.addCellData(resultList, (i + 1), 1, v);
-            ExcelWriterUtil.addCellData(resultList, (i + 1), 2, v1);
+            ExcelWriterUtil.addCellData(resultList, indes, 0, v2);
+            ExcelWriterUtil.addCellData(resultList, indes, 1, v);
+            ExcelWriterUtil.addCellData(resultList, indes, 2, v1);
+            indes++;
         }
 
 
         return resultList;
     }
 
-    protected List<CellData> mapDataHandler2(String url, List<String> columns, DateQuery dateQuery, int index) {
-        return null;
+    protected List<CellData> mapDataHandler2(String version, List<String> columns, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indes = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            Map<String, String> param = dayHourEach.get(i).getQueryParam();
+            String re1 = httpUtil.get(getUrl2(version, columns.get(0)), param);
+            String re2 = httpUtil.get(getUrl2(version, columns.get(1)), param);
+
+            Object o = "";
+            Object o1 = "";
+            boolean f = false;
+            if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
+                JSONObject ob1 = JSONObject.parseObject(re1);
+                JSONObject ob2 = JSONObject.parseObject(re1);
+                if (Objects.nonNull(ob1) && Objects.nonNull(ob2)) {
+                    JSONArray data = ob1.getJSONArray("data");
+                    for (int j = 0; j < data.size(); j++) {
+                        JSONObject jsonObject = data.getJSONObject(j);
+                        BigDecimal value = jsonObject.getBigDecimal("value");
+                        Long datetime = jsonObject.getLong("datetime");
+                        JSONArray data2 = ob2.getJSONArray("data");
+                        for (int m = 0; m < data2.size(); m++) {
+                            JSONObject jsonObject2 = data2.getJSONObject(j);
+                            BigDecimal value2 = jsonObject2.getBigDecimal("value");
+
+                            if (value.compareTo(value2) == 0) {
+                                Long datetime1 = jsonObject2.getLong("datetime");
+                                o = datetime;
+                                o1 = datetime1;
+                                f = true;
+                                break;
+                            }
+                        }
+
+                        if (f) {
+                            break;
+                        }
+                    }
+                }
+            }
+            ExcelWriterUtil.addCellData(resultList, indes, 0, o);
+            ExcelWriterUtil.addCellData(resultList, indes, 1, o1);
+            indes++;
+        }
+
+        return resultList;
     }
 
     private String getUrl(String version) {
@@ -181,5 +228,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
     private String getUrl1(String version, String tagName) {
         return httpProperties.getGlUrlVersion(version) + "/cache/getTagValueByTime/" + tagName;
+    }
+
+    private String getUrl2(String version, String tagName) {
+        return httpProperties.getGlUrlVersion(version) + "/cache/getTagValuesByRange/" + tagName;
     }
 }
