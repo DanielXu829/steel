@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.a6.writer;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -25,7 +26,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
-public class MeiqichuchenbfWriter<mapDa> extends AbstractExcelReadWriter {
+public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -42,27 +43,35 @@ public class MeiqichuchenbfWriter<mapDa> extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
-                if("tag".equals(sheetSplit[1])){
+                if ("tag".equals(sheetSplit[1])) {
                     for (int rowNum = 0; rowNum < size; rowNum++) {
                         DateQuery eachDate = dateQueries.get(rowNum);
                         List<CellData> cellValInfoList = eachData(columns, getUrl(version), eachDate.getQueryParam(), sheetSplit[2]);
                         ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
                     }
-                }else if("maxmin".equals(sheetSplit[1])){
+                } else if ("maxmin".equals(sheetSplit[1])) {
+                    int index = 1;
+                    for (int rowNum = 0; rowNum < size; rowNum++) {
+                        DateQuery eachDate = dateQueries.get(rowNum);
+                        List<CellData> cellValInfoList = mapDataHandler1(columns, getUrl2(version), eachDate, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
+                        index++;
+                    }
+                } else if ("fanchui6".equals(sheetSplit[1])) {
                     for (int rowNum = 0; rowNum < size; rowNum++) {
 
                     }
-                }else if("fanchui6".equals(sheetSplit[1])){
+                } else if ("fanchui7".equals(sheetSplit[1])) {
                     for (int rowNum = 0; rowNum < size; rowNum++) {
 
                     }
-                }else if("fanchui7".equals(sheetSplit[1])){
+                } else if ("fanchui8".equals(sheetSplit[1])) {
+                    int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
-
-                    }
-                }else if("fanchui8".equals(sheetSplit[1])){
-                    for (int rowNum = 0; rowNum < size; rowNum++) {
-
+                        DateQuery eachDate = dateQueries.get(rowNum);
+                        List<CellData> cellValInfoList = mapDataHandler2(columns, getUrl2(version), eachDate, index, version);
+                        ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
+                        index++;
                     }
                 }
             }
@@ -70,7 +79,7 @@ public class MeiqichuchenbfWriter<mapDa> extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    public List<CellData> mapDataHandler(List<String> columns,String url, DateQuery dateQuery, int rowBatch) {
+    public List<CellData> mapDataHandler(List<String> columns, String url, DateQuery dateQuery, int rowBatch) {
         Map<String, String> queryParam = getQueryParam(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -161,14 +170,161 @@ public class MeiqichuchenbfWriter<mapDa> extends AbstractExcelReadWriter {
 
         result.put("endtime", dateQuery.getQueryEndTime().toString());
         result.put("starttime", dateQuery.getQueryStartTime().toString());
-        result.put("method", "max,min");
         return result;
+    }
+
+    protected JSONObject getQueryParam(DateQuery dateQuery, List<String> tagNames) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("starttime", dateQuery.getStartTime().getTime());
+        jsonObject.put("endtime", dateQuery.getEndTime().getTime());
+        jsonObject.put("tagnames", tagNames);
+        return jsonObject;
+    }
+
+    public List<CellData> mapDataHandler1(List<String> columns, String url, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        Map<String, String> queryParam = getQueryParam(dateQuery);
+        queryParam.put("method", "max");
+        queryParam.put("tagname", columns.get(0));
+        String resultmax = httpUtil.get(url, queryParam);
+        queryParam.put("method", "min");
+        if (StringUtils.isNotBlank(resultmax)) {
+            JSONObject jsonObject1 = JSONObject.parseObject(resultmax);
+            if (Objects.nonNull(jsonObject1)) {
+                Object v = jsonObject1.get("data");
+                ExcelWriterUtil.addCellData(resultList, index, 0, v);
+            }
+        }
+        String resultmin = httpUtil.get(url, queryParam);
+        if (StringUtils.isNotBlank(resultmin)) {
+            JSONObject jsonObject1 = JSONObject.parseObject(resultmin);
+            if (Objects.nonNull(jsonObject1)) {
+                Object v = jsonObject1.get("data");
+                ExcelWriterUtil.addCellData(resultList, index, 1, v);
+            }
+        }
+        return resultList;
+    }
+
+    public List<CellData> mapDataHandler2(List<String> columns, String url, DateQuery dateQuery, int index, String version) {
+        List<CellData> resultList = new ArrayList<>();
+        List<String> c = new ArrayList<>();
+        c.add(columns.get(0));
+        c.add(columns.get(1));
+        JSONObject jsonObject = getQueryParam(dateQuery, c);
+
+        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject obj = JSONObject.parseObject(result);
+            obj = obj.getJSONObject("data");
+
+            JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
+            JSONObject jsonObject2 = obj.getJSONObject(columns.get(1));
+            if (Objects.nonNull(jsonObject1) && Objects.nonNull(jsonObject2)) {
+                Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
+                Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
+                Set<String> keyset = innerMap1.keySet();
+                List<Integer> list1 = new ArrayList<>();
+                for (String key : keyset) {
+                    Object o = innerMap1.get(key);
+                    list1.add((Integer) o);
+                }
+
+                Set<String> keyset2 = innerMap2.keySet();
+                List<Integer> list2 = new ArrayList<>();
+                for (String key : keyset2) {
+                    Object o = innerMap2.get(key);
+                    list2.add((Integer) o);
+                }
+
+                int indexkey = -1;
+                for (int i = 0; i < list1.size(); i++) {
+                    if (list1.get(i) * list2.get(i) == 1) {
+                        indexkey = i;
+                        break;
+                    }
+                }
+
+                String indextime = "";
+                Object[] objects = keyset2.toArray();
+                for (int i = 0; i < objects.length; i++) {
+                    if (i == indexkey) {
+                        indextime = String.valueOf(objects[i]);
+                        break;
+                    }
+                }
+
+                if (StringUtils.isNotBlank(indextime)) {
+                    ExcelWriterUtil.addCellData(resultList, index, 1, indextime);
+                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2));
+                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3));
+
+                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
+                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
+
+                    int indexkey2 = -1;
+                    for (int i = indexkey; i < list1.size(); i++) {
+                        if (list1.get(i) * list2.get(i) == 0) {
+                            indexkey2 = i;
+                            break;
+                        }
+                    }
+
+                    String indextime2 = "";
+                    Object[] objects2 = keyset2.toArray();
+                    for (int i = 0; i < objects2.length; i++) {
+                        if (i == indexkey2) {
+                            indextime2 = String.valueOf(objects2[i]);
+                            break;
+                        }
+                    }
+
+                    if (StringUtils.isNotBlank(indextime2)) {
+                        Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4));
+                        Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5));
+
+                        ExcelWriterUtil.addCellData(resultList, index, 4, o4);
+                        ExcelWriterUtil.addCellData(resultList, index, 5, o5);
+                    }
+                }
+
+            }
+
+        }
+
+        return resultList;
+    }
+
+    private Object dealPart1(String url, String indextime, String tagName) {
+        long value = Long.valueOf(indextime);
+        Date date = new Date(value);
+        Date curr = DateUtil.addMinute(date, -1);
+        Object v = null;
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("time ", curr.getTime() + "");
+        queryParam.put("tagname", tagName);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    v = data.get("val");
+                }
+            }
+        }
+        return v;
     }
 
     protected String getUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
     }
+
     protected String getUrl2(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValueAction";
+    }
+
+    protected String getUrl3(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
     }
 }

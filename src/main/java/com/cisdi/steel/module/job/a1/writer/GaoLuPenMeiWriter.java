@@ -133,6 +133,10 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Object v = "";
             Object v1 = "";
             Object v2 = "";
+            Object v3 = "";
+
+            Object v4 = "";
+            Object v5 = "";
 
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
             String re1 = httpUtil.get(getUrl2(version, columns.get(0)), param);
@@ -146,7 +150,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         BigDecimal value = jsonObjects.getBigDecimal("value");
                         if (Objects.nonNull(value) && value.compareTo(BigDecimal.ZERO) == 0) {
                             Long datetime = jsonObjects.getLong("datetime");
-                            v2 = datetime;
+                            v2 = value.intValue();
+                            v3 = datetime;
 
                             Map<String, String> map = new HashMap<>();
                             map.put("datetime", datetime.toString());
@@ -162,9 +167,27 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                             if (StringUtils.isNotBlank(res)) {
                                 JSONObject obs = JSONObject.parseObject(res);
                                 if (Objects.nonNull(obs)) {
-                                    v1 = ob1.getBigDecimal("value");
+                                    v1 = obs.getBigDecimal("value");
                                 }
                             }
+
+                            map.put("datetime", datetime.toString());
+                            String re3 = httpUtil.get(getUrl1(version, columns.get(4)), map);
+                            if (StringUtils.isNotBlank(re3)) {
+                                JSONObject ob = JSONObject.parseObject(re3);
+                                if (Objects.nonNull(ob)) {
+                                    v4 = ob.getBigDecimal("value");
+                                }
+                            }
+
+                            String res4 = httpUtil.get(getUrl1(version, columns.get(5)), map);
+                            if (StringUtils.isNotBlank(res4)) {
+                                JSONObject obs = JSONObject.parseObject(res4);
+                                if (Objects.nonNull(obs)) {
+                                    v5 = obs.getBigDecimal("value");
+                                }
+                            }
+
                         }
                     }
                 }
@@ -174,6 +197,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             ExcelWriterUtil.addCellData(resultList, indes, 0, v2);
             ExcelWriterUtil.addCellData(resultList, indes, 1, v);
             ExcelWriterUtil.addCellData(resultList, indes, 2, v1);
+            ExcelWriterUtil.addCellData(resultList, indes, 3, v3);
+            ExcelWriterUtil.addCellData(resultList, indes, 4, v4);
+            ExcelWriterUtil.addCellData(resultList, indes, 5, v5);
             indes++;
         }
 
