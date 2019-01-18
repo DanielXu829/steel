@@ -292,7 +292,6 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             Object o = "";
             Object o1 = "";
-            boolean f = false;
             if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 JSONObject ob2 = JSONObject.parseObject(re2);
@@ -311,11 +310,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                 Long datetime1 = jsonObject2.getLong("datetime");
                                 o = datetime;
                                 o1 = datetime1;
-                                f = true;
                             }
                         }
-
-
                     }
                 }
             }
