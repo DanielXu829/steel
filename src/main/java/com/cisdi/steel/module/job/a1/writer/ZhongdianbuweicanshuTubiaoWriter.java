@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.a1.writer;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
@@ -101,8 +102,9 @@ public class ZhongdianbuweicanshuTubiaoWriter extends AbstractExcelReadWriter {
                     for (int i = 0; i < size; i++) {
                         Long key = list[i];
                         Object o = data.get(key + "");
-                        ExcelWriterUtil.addCellData(resultList, i+1, 0, key);
-                        ExcelWriterUtil.addCellData(resultList, i+1, columnIndex, o);
+                        String dateTime = DateUtil.getFormatDateTime(new Date(key), DateUtil.yyyyMMddHHmm);
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 0, dateTime);
+                        ExcelWriterUtil.addCellData(resultList, i + 1, columnIndex, o);
                     }
 
                 }
