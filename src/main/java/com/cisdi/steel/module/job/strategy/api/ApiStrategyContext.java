@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,6 +29,12 @@ public class ApiStrategyContext {
     }
 
     public ApiStrategy getApiStrategy(String api) {
-        return this.apiStrategyMap.get(api);
+        Set<String> keySet = this.apiStrategyMap.keySet();
+        for (String key : keySet) {
+            if (api.contains(key)) {
+                return this.apiStrategyMap.get(key);
+            }
+        }
+        return null;
     }
 }
