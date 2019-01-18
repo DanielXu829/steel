@@ -123,6 +123,7 @@ public enum JobEnum {
     // 环保
     hb_6bftrt("hb_6bftrt", "6BF-TRT日报表"),
     hb_7bftrt("hb_7bftrt", "7BF-TRT日报表"),
+    hb_meiqichuchen6bf("hb_meiqichuchen6bf", "6BF-煤气布袋除尘报表"),
     hb_8bftrt("hb_8bftrt", "8BF-TRT日报表");
 
 
