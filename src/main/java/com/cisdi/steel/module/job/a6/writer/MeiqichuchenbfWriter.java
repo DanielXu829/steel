@@ -25,7 +25,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
-public class Meiqichuchen6bfWriter<mapDa> extends AbstractExcelReadWriter {
+public class MeiqichuchenbfWriter<mapDa> extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());

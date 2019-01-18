@@ -17,14 +17,14 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class Meiqichuchen6bfJob extends AbstractExportJob {
+public class Meiqichuchen8bfJob extends AbstractExportJob {
 
     @Autowired
     private MeiqichuchenbfExecute meiqichuchenbfExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.hb_meiqichuchen6bf;
+        return JobEnum.hb_meiqichuchen8bf;
     }
 
     @Override
