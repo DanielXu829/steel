@@ -63,14 +63,22 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(jsonObject)) {
             return null;
         }
-        JSONArray data = jsonObject.getJSONArray("cokeDistribution");
-        if (Objects.nonNull(data)) {
-            dealData(data, cellDataList, 1);
-        }
+        JSONArray data = jsonObject.getJSONArray("distribution");
 
-        data = jsonObject.getJSONArray("oreDistribution");
         if (Objects.nonNull(data)) {
-            dealData(data, cellDataList, 4);
+            JSONArray jsArr1=new JSONArray();
+            JSONArray jsArr2=new JSONArray();
+            for (int i = 0; i <data.size() ; i++) {
+                JSONObject jsonObject1 = data.getJSONObject(i);
+                String typ = jsonObject1.getString("typ");
+                if("C".equals(typ)){
+                    jsArr1.add(jsonObject1);
+                }else if("O".equals(typ)){
+                    jsArr2.add(jsonObject1);
+                }
+            }
+            dealData(jsArr1, cellDataList, 1);
+            dealData(jsArr2, cellDataList, 4);
         }
 
         JSONObject parameters = jsonObject.getJSONObject("parameters");
@@ -112,7 +120,7 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < size; i++) {
             JSONObject materialsJSONObject = bookMaterials.getJSONObject(i);
             if (Objects.nonNull(materialsJSONObject)) {
-                String matclass = materialsJSONObject.getString("matclass");
+                String matclass = materialsJSONObject.getString("matClass");
                 if ("SINTER".equals(matclass)) {
                     sinterList.add(materialsJSONObject);
                 } else if ("PELLETS".equals(matclass)) {

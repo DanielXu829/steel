@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -73,7 +74,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
                         DateQuery eachDate = dateQueries.get(rowNum);
-                        List<CellData> cellValInfoList = mapDataHandler2(columns, getUrl2(version), eachDate, index, version);
+                        List<CellData> cellValInfoList = mapDataHandler2(columns, getUrl(version), eachDate, index, version);
                         ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
                         index++;
                     }
@@ -229,17 +230,31 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
                 Set<String> keyset = innerMap1.keySet();
                 List<Integer> list1 = new ArrayList<>();
+                Long[] dateSort = new Long[keyset.size()];
+                int k = 0;
                 for (String key : keyset) {
                     Object o = innerMap1.get(key);
-                    list1.add((Integer) o);
+                    BigDecimal o1 = (BigDecimal) o;
+                    list1.add(o1.intValue());
+                    dateSort[k] = Long.valueOf(key);
+                    k++;
                 }
+                // 按照顺序排序
+                Arrays.sort(dateSort);
 
                 Set<String> keyset2 = innerMap2.keySet();
                 List<Integer> list2 = new ArrayList<>();
+                Long[] dateSort2 = new Long[keyset2.size()];
+                int l = 0;
                 for (String key : keyset2) {
                     Object o = innerMap2.get(key);
-                    list2.add((Integer) o);
+                    BigDecimal o1 = (BigDecimal) o;
+                    list2.add(o1.intValue());
+                    dateSort2[l] = Long.valueOf(key);
+                    l++;
                 }
+                // 按照顺序排序
+                Arrays.sort(dateSort2);
 
                 int indexkey = -1;
                 for (int i = 0; i < list1.size(); i++) {
@@ -250,10 +265,10 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 }
 
                 String indextime = "";
-                Object[] objects = keyset2.toArray();
-                for (int i = 0; i < objects.length; i++) {
+//                Object[] objects = keyset2.toArray();
+                for (int i = 0; i < dateSort2.length; i++) {
                     if (i == indexkey) {
-                        indextime = String.valueOf(objects[i]);
+                        indextime = String.valueOf(dateSort2[i]);
                         break;
                     }
                 }
@@ -275,10 +290,10 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     }
 
                     String indextime2 = "";
-                    Object[] objects2 = keyset2.toArray();
-                    for (int i = 0; i < objects2.length; i++) {
+                  //  Object[] objects2 = keyset2.toArray();
+                    for (int i = 0; i < dateSort2.length; i++) {
                         if (i == indexkey2) {
-                            indextime2 = String.valueOf(objects2[i]);
+                            indextime2 = String.valueOf(dateSort2[i]);
                             break;
                         }
                     }
@@ -313,10 +328,17 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
                 Set<String> keyset = innerMap1.keySet();
                 List<Integer> list1 = new ArrayList<>();
+                Long[] dateSort = new Long[keyset.size()];
+                int k = 0;
                 for (String key : keyset) {
                     Object o = innerMap1.get(key);
-                    list1.add((Integer) o);
+                    BigDecimal o1 = (BigDecimal) o;
+                    list1.add(o1.intValue());
+                    dateSort[k] = Long.valueOf(key);
+                    k++;
                 }
+                // 按照顺序排序
+                Arrays.sort(dateSort);
                 int indexkey = -1;
                 for (int i = 0; i < list1.size(); i++) {
                     if (list1.get(i) == 1) {
@@ -326,10 +348,10 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 }
 
                 String indextime = "";
-                Object[] objects = keyset.toArray();
-                for (int i = 0; i < objects.length; i++) {
+              //  Object[] objects = keyset.toArray();
+                for (int i = 0; i < dateSort.length; i++) {
                     if (i == indexkey) {
-                        indextime = String.valueOf(objects[i]);
+                        indextime = String.valueOf(dateSort[i]);
                         break;
                     }
                 }
@@ -350,10 +372,10 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     }
 
                     String indextime2 = "";
-                    Object[] objects2 = keyset.toArray();
-                    for (int i = 0; i < objects2.length; i++) {
+                   // Object[] objects2 = keyset.toArray();
+                    for (int i = 0; i < dateSort.length; i++) {
                         if (i == indexkey2) {
-                            indextime2 = String.valueOf(objects2[i]);
+                            indextime2 = String.valueOf(dateSort[i]);
                             break;
                         }
                     }
@@ -405,20 +427,5 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     protected String getUrl3(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
-    }
-
-    public static void main(String[] args) {
-        Map map = new HashMap();
-        map.put("1547794800000", 1);
-        map.put("1547794860000", 1);
-        map.put("1547794920000", 1);
-        map.put("1547794980000", 1);
-
-        Set<String> keyset = map.keySet();
-        List<Integer> list1 = new ArrayList<>();
-        for (String key : keyset) {
-            System.out.println(key);
-        }
-
     }
 }
