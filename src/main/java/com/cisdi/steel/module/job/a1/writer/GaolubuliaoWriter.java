@@ -317,10 +317,6 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                 BigDecimal multiply = new BigDecimal(obj.toString()).multiply(new BigDecimal(100));
                 obj = multiply.setScale(2, BigDecimal.ROUND_HALF_UP);
             }
-            if (Objects.nonNull(obj) && "totalGrade".equals(s1)) {
-                BigDecimal multiply = new BigDecimal(obj.toString()).multiply(new BigDecimal(100));
-                obj = multiply.setScale(2, BigDecimal.ROUND_HALF_UP);
-            }
             ExcelWriterUtil.addCellData(resultData, rowIndex, i, obj);
 
         }
