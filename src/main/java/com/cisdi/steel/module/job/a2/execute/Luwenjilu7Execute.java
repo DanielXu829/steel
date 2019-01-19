@@ -51,6 +51,10 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         return luwenjilu7Writer;
     }
 
+    @Override
+    protected void replaceTemplatePath(ReportIndex reportIndex, ReportCategoryTemplate template) {
+
+    }
 
     @Override
     public void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {

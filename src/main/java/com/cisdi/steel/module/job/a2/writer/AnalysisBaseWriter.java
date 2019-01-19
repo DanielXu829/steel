@@ -137,16 +137,17 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
             if (StringUtils.isNotBlank(column)) {
-                queryParam.put("tagName", column);
+                queryParam.put("tagNames", column);
                 String result = httpUtil.get(url, queryParam);
                 if (StringUtils.isNotBlank(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     if (Objects.nonNull(jsonObject)) {
-                        JSONArray rows = jsonObject.getJSONArray("rows");
-                        if (Objects.nonNull(rows)) {
-                            JSONObject obj = rows.getJSONObject(0);
-                            if (Objects.nonNull(obj)) {
-                                Double val = obj.getDouble("val");
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        if (Objects.nonNull(data)) {
+                            JSONArray arr = data.getJSONArray(column);
+                            if (Objects.nonNull(arr)&& arr.size()!=0) {
+                                JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
+                                Double val = jsonObject1.getDouble("val");
                                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                             }
                         }
@@ -160,12 +161,8 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateQuery.getRecordDate());
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        String dateTime = DateUtil.getFormatDateTime(calendar.getTime(),"yyyy/MM/dd HH:mm:ss");
-        result.put("time", dateTime);
+        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(),-10),"yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
@@ -211,7 +208,7 @@ public class AnalysisBaseWriter extends AbstractExcelReadWriter {
     }
 
     protected String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
+        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
     }
 
     protected String getUrl2() {

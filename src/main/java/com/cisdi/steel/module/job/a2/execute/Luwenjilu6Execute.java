@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.a2.execute;
 
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtils;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.a2.writer.Luwenjilu6Writer;
@@ -48,6 +49,10 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
         return luwenjilu6Writer;
     }
 
+    @Override
+    protected void replaceTemplatePath(ReportIndex reportIndex, ReportCategoryTemplate template) {
+
+    }
 
     @Override
     public void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {
@@ -80,6 +85,6 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             FileUtils.copyFile(excelPathInfo.getSaveFilePath(), writerExcelDTO.getTemplate().getTemplatePath());
         }
-    }
+        }
 
 }

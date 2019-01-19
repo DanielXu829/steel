@@ -82,8 +82,13 @@ public class XiaoHaoDayWriter extends ExcelReadWriter {
                     continue;
                 }
                 if (map.containsKey(val)) {
+                    new Date(key);
+                    Calendar calendar=Calendar.getInstance();
+                    calendar.setTime(new Date(key));
+                    int rowIndex = calendar.get(Calendar.DATE);
                     Object o = map.get(val);
-                    ExcelWriterUtil.addCellData(resultData, k+1, i, o);
+                    ExcelWriterUtil.addCellData(resultData, rowIndex, i, o);
+//                    ExcelWriterUtil.addCellData(resultData, k+1, i, o);
                 }
             }
         }
