@@ -15,7 +15,6 @@ import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
-import sun.rmi.runtime.Log;
 
 import java.util.*;
 
@@ -95,6 +94,12 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     Row row2 = sheet.createRow(30);
                     row2.createCell(0).setCellValue(yiedNum);
                     row2.getCell(0).setCellType(CellType.NUMERIC);
+
+                    Integer[] shiftArr={1,2,3};
+                    Double yiedNumLeiji = this.mapDataHandler2(shiftArr, getUrl4());
+                    Row row3 = sheet.createRow(31);
+                    row3.createCell(0).setCellValue(yiedNumLeiji);
+                    row3.getCell(0).setCellType(CellType.NUMERIC);
 //                    for (int j = 0; j < dateQueries.size(); j++) {
                     List<CellData> cellDataList = this.handlerData(dateQueries.get(dateQueries.size() - 1), sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -119,7 +124,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         instance.set(Calendar.MINUTE,0);
         instance.set(Calendar.SECOND,0);
         result.put("startDate",DateUtil.getFormatDateTime(instance.getTime(),"yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.getTodayEndTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("tagName","CK67_L1R_CB_CBReset_4_report");
         String results = httpUtil.get(url, result);
         Double val1=0.0;
@@ -193,8 +198,6 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-
-
     protected List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch) {
         Map<String, String> queryParam = getQueryParam2();
         String result = httpUtil.get(url, queryParam);
@@ -228,6 +231,36 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return confirmWgt;
     }
 
+    protected Double mapDataHandler2(Integer[] shiftArr, String url) {
+        Double confirmWgt=0.0;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.DAY_OF_MONTH,1);
+        calendar.set(Calendar.HOUR_OF_DAY,0);
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        Date start = calendar.getTime();
+        Date todayBeginTime = DateUtil.getTodayBeginTime();
+        int betweenDays = DateUtil.getTimeDistance(start,todayBeginTime);
+        for (int i = 0; i < betweenDays; i++) {
+            for (int j = 0; j <shiftArr.length ; j++) {
+                Map<String, String> queryParam = getQueryParam4(shiftArr[j],DateUtil.addDays(start,i));
+                String result = httpUtil.get(url, queryParam);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONArray array = JSONObject.parseArray(result);
+                    if(Objects.nonNull(array)&& array.size()!=0){
+                        JSONObject jsonObject = array.getJSONObject(0);
+                        if(Objects.nonNull(jsonObject)){
+                            confirmWgt += jsonObject.getDouble("confirmWgt");
+                        }
+                    }
+                }
+            }
+        }
+
+        return confirmWgt;
+    }
+
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         String dateTime = DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:00");
@@ -244,6 +277,15 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam3(Integer shiftNum) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd 00:00:00"));
+        result.put("shift", shiftNum.toString());
+        result.put("code", "GHJY");
+        result.put("flag", "O");
+        return result;
+    }
+
+    protected Map<String, String> getQueryParam4(Integer shiftNum,Date date) {
+        Map<String, String> result = new HashMap<>();
+        result.put("dateTime", DateUtil.getFormatDateTime(date, "yyyy/MM/dd 00:00:00"));
         result.put("shift", shiftNum.toString());
         result.put("code", "GHJY");
         result.put("flag", "O");

@@ -556,6 +556,32 @@ public class DateUtil {
     }
 
     /**
+     * 计算两个日期之间相差的天数
+     * @param beginDate 较小的时间
+     * @param endDate  较大的时间
+     * @return 相差天数
+     */
+
+    public static int getTimeDistance(Date beginDate , Date endDate ) {
+        Calendar beginCalendar = Calendar.getInstance();
+        beginCalendar.setTime(beginDate);
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+        long beginTime = beginCalendar.getTime().getTime();
+        long endTime = endCalendar.getTime().getTime();
+        int betweenDays = (int)((endTime - beginTime) / (1000 * 60 * 60 *24));//先算出两时间的毫秒数之差大于一天的天数
+
+        endCalendar.add(Calendar.DAY_OF_MONTH, -betweenDays);//使endCalendar减去这些天数，将问题转换为两时间的毫秒数之差不足一天的情况
+        endCalendar.add(Calendar.DAY_OF_MONTH, -1);//再使endCalendar减去1天
+        if(beginCalendar.get(Calendar.DAY_OF_MONTH)==endCalendar.get(Calendar.DAY_OF_MONTH))//比较两日期的DAY_OF_MONTH是否相等
+            return betweenDays + 1;	//相等说明确实跨天了
+        else
+            return betweenDays + 0;	//不相等说明确实未跨天
+    }
+
+
+
+    /**
      * 取得两时间相差的小时数
      *
      * @param from 第一个时间

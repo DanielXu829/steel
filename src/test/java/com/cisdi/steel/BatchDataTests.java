@@ -102,7 +102,16 @@ public class BatchDataTests extends SteelApplicationTests {
 
     @Test
     public void test3224() {
-        createTask(JobEnum.hb_8bftrt.getCode(),jobGroup,"0 5 0/1 * * ?","");
+        createTask(JobEnum.hb_meiqichuchen8bf.getCode(),jobGroup,"0 5 0/1 * * ?","");
+    }
+
+    /*
+    手動出發任務
+     */
+    @Test
+    public void test32() throws SchedulerException {
+        JobKey key = new JobKey(JobEnum.hb_meiqichuchen6bf.getCode(), jobGroup);
+        scheduler.triggerJob(key);
     }
 
     /**
