@@ -87,15 +87,17 @@ public class GufenglengningWriter extends BaseJhWriter {
                     int rowIndex = j + k;
                     List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
                     if ("_gfln2_day_hour".equals(sheetName)) {
-                        Row row = sheet.getRow(rowIndex);
-                        if (Objects.isNull(row)) {
-                            row=sheet.createRow(rowIndex);
+                        if(item.getRecordDate().before(new Date())){
+                            Row row = sheet.getRow(rowIndex);
+                            if (Objects.isNull(row)) {
+                                row=sheet.createRow(rowIndex);
+                            }
+                            Cell cell = row.getCell(32);
+                            if (Objects.isNull(cell)) {
+                                cell = row.createCell(32);
+                            }
+                            cell.setCellValue(no);
                         }
-                        Cell cell = row.getCell(32);
-                        if (Objects.isNull(cell)) {
-                            cell = row.createCell(32);
-                        }
-                        cell.setCellValue(no);
                     }
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
@@ -113,7 +115,7 @@ public class GufenglengningWriter extends BaseJhWriter {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
                 JSONArray rows = jsonObject.getJSONArray("rows");
-                if (Objects.nonNull(rows)) {
+                if (Objects.nonNull(rows)&&rows.size()!=0) {
                     JSONObject obj = rows.getJSONObject(0);
                     if (Objects.nonNull(obj)) {
                         data = obj.getDouble("val");
