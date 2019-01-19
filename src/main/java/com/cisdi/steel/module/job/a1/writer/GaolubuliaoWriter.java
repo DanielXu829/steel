@@ -121,14 +121,16 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return resultData;
         }
-        JSONObject chargeIndexInDay = data.getJSONObject("chargeIndexInDay");
+//        JSONObject chargeIndexInDay = data.getJSONObject("chargeIndexInDay");
         JSONObject materialValues = data.getJSONObject("materialValues");
         if (Objects.isNull(materialValues)) {
             return resultData;
         }
-        materialValues.put("chargeIndexInDay", chargeIndexInDay.get("value"));
         materialValues.put("chargeNo", chargeNo);
-        materialValues.put("time", new Date(chargeIndexInDay.getLong("datetime")));
+        materialValues.put("chargeIndexInDay", data.get("chargeIndexInDay"));
+        materialValues.put("time", new Date(Long.valueOf(time)));
+//        materialValues.put("chargeIndexInDay", chargeIndexInDay.get("value"));
+//        materialValues.put("time", new Date(chargeIndexInDay.getLong("datetime")));
         Object oreStockline = materialValues.get("oreStockline");
         if (Objects.nonNull(oreStockline)) {
             BigDecimal multiply = new BigDecimal(oreStockline.toString()).multiply(new BigDecimal(1000));
@@ -294,14 +296,16 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return resultData;
         }
-        JSONObject chargeIndexInDay = data.getJSONObject("chargeIndexInDay");
+//        JSONObject chargeIndexInDay = data.getJSONObject("chargeIndexInDay");
         JSONObject materialValues = data.getJSONObject("materialValues");
         if (Objects.isNull(materialValues)) {
             return resultData;
         }
-        materialValues.put("chargeIndexInDay", chargeIndexInDay.get("value"));
         materialValues.put("chargeNo", chargeNo);
-        materialValues.put("time", new Date(chargeIndexInDay.getLong("datetime")));
+        materialValues.put("chargeIndexInDay", data.get("chargeIndexInDay"));
+        materialValues.put("time", new Date(Long.valueOf(time)));
+//        materialValues.put("chargeIndexInDay", chargeIndexInDay.get("value"));
+//        materialValues.put("time", new Date(chargeIndexInDay.getLong("datetime")));
         int size = rowVals.size();
         for (int i = 0; i < size; i++) {
             String s1 = rowVals.get(i);
@@ -309,11 +313,11 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                 continue;
             }
             Object obj = materialValues.get(s1);
-            if (Objects.nonNull(obj) &&"totalGrade".equals(s1)) {
+            if (Objects.nonNull(obj) && "totalGrade".equals(s1)) {
                 BigDecimal multiply = new BigDecimal(obj.toString()).multiply(new BigDecimal(100));
                 obj = multiply.setScale(2, BigDecimal.ROUND_HALF_UP);
             }
-            if (Objects.nonNull(obj) &&"totalGrade".equals(s1)) {
+            if (Objects.nonNull(obj) && "totalGrade".equals(s1)) {
                 BigDecimal multiply = new BigDecimal(obj.toString()).multiply(new BigDecimal(100));
                 obj = multiply.setScale(2, BigDecimal.ROUND_HALF_UP);
             }
