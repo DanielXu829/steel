@@ -50,45 +50,45 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-//                if ("_penmei2_month_day".equals(sheetName)) {
-//                    //喷吹量处理
-//                    int index = 1;
-//                    for (DateQuery item : dateQueries) {
-//                        List<CellData> cellDataList = mapDataHandler1(url, columns, item, index, version);
-//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                        index += 24;
-//                    }
-//                } else if ("_penmei3_month_day".equals(sheetName)) {
-//                    //喷吹压力以及罐号处理
-//                    int index = 1;
-//                    for (DateQuery item : dateQueries) {
-//                        List<CellData> cellDataList = mapDataHandler2(version, columns, item, index);
-//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                        index += 24;
-//                    }
-//                } else if ("_penmei6_month_day".equals(sheetName) || "_penmei7_month_day".equals(sheetName)) {
-//                    //换罐时间处理
-//                    int index = 1;
-//                    for (DateQuery item : dateQueries) {
-//                        List<CellData> cellDataList = mapDataHandler3(version, columns, item, index);
-//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                        index += 24;
-//                    }
-//                } else if ("_penmei8_month_day".equals(sheetName) || "_penmei9_month_day".equals(sheetName)) {
-//                    int index = 1;
-//                    for (DateQuery item : dateQueries) {
-//                        List<CellData> cellDataList = mapDataHandler4(version, columns, item, index);
-//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                        index += 24;
-//                    }
-//                } else if ("_penmei10_month_day".equals(sheetName)) {
-//                    int index = 1;
-//                    for (DateQuery item : dateQueries) {
-//                        List<CellData> cellDataList = mapDataHandler5(version, columns, item, index);
-//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                        index += 24;
-//                    }
-//                } else
+                if ("_penmei2_month_day".equals(sheetName)) {
+                    //喷吹量处理
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler1(url, columns, item, index, version);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
+                } else if ("_penmei3_month_day".equals(sheetName)) {
+                    //喷吹压力以及罐号处理
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler2(version, columns, item, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
+                } else if ("_penmei6_month_day".equals(sheetName) || "_penmei7_month_day".equals(sheetName)) {
+                    //换罐时间处理
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler3(version, columns, item, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
+                } else if ("_penmei8_month_day".equals(sheetName) || "_penmei9_month_day".equals(sheetName)) {
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler4(version, columns, item, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
+                } else if ("_penmei10_month_day".equals(sheetName)) {
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler5(version, columns, item, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
+                } else
                 if ("_penmei11_month_day".equals(sheetName)) {
                     int index = 1;
                     for (DateQuery item : dateQueries) {
@@ -96,15 +96,14 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
+                } else {
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler(url, columns, item, index, version);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
                 }
-//                else {
-//                    int index = 1;
-//                    for (DateQuery item : dateQueries) {
-//                        List<CellData> cellDataList = mapDataHandler(url, columns, item, index,version);
-//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                        index += 24;
-//                    }
-//                }
             }
         }
         return workbook;
