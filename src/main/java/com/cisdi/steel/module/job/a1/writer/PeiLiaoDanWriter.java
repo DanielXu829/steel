@@ -66,14 +66,14 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         JSONArray data = jsonObject.getJSONArray("distribution");
 
         if (Objects.nonNull(data)) {
-            JSONArray jsArr1=new JSONArray();
-            JSONArray jsArr2=new JSONArray();
-            for (int i = 0; i <data.size() ; i++) {
+            JSONArray jsArr1 = new JSONArray();
+            JSONArray jsArr2 = new JSONArray();
+            for (int i = 0; i < data.size(); i++) {
                 JSONObject jsonObject1 = data.getJSONObject(i);
                 String typ = jsonObject1.getString("typ");
-                if("C".equals(typ)){
+                if ("C".equals(typ)) {
                     jsArr1.add(jsonObject1);
-                }else if("O".equals(typ)){
+                } else if ("O".equals(typ)) {
                     jsArr2.add(jsonObject1);
                 }
             }
@@ -197,9 +197,9 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         int size = data.size();
         for (int i = 0; i < size; i++) {
             JSONObject map = data.getJSONObject(i);
-            Integer val1 = map.getInteger("seq");
-            Integer val2 = map.getInteger("angle");
-            Integer val3 = map.getInteger("round");
+            Object val1 = map.get("seq");
+            Object val2 = map.get("angle");
+            Object val3 = map.get("round");
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val1);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex + 1, i, val2);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex + 2, i, val3);

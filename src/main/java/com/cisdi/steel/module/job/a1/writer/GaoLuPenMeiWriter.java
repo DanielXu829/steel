@@ -50,66 +50,69 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                if ("_penmei2_month_day".equals(sheetName)) {
-                    //喷吹量处理
+//                if ("_penmei2_month_day".equals(sheetName)) {
+//                    //喷吹量处理
+//                    int index = 1;
+//                    for (DateQuery item : dateQueries) {
+//                        List<CellData> cellDataList = mapDataHandler1(url, columns, item, index, version);
+//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+//                        index += 24;
+//                    }
+//                } else if ("_penmei3_month_day".equals(sheetName)) {
+//                    //喷吹压力以及罐号处理
+//                    int index = 1;
+//                    for (DateQuery item : dateQueries) {
+//                        List<CellData> cellDataList = mapDataHandler2(version, columns, item, index);
+//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+//                        index += 24;
+//                    }
+//                } else if ("_penmei6_month_day".equals(sheetName) || "_penmei7_month_day".equals(sheetName)) {
+//                    //换罐时间处理
+//                    int index = 1;
+//                    for (DateQuery item : dateQueries) {
+//                        List<CellData> cellDataList = mapDataHandler3(version, columns, item, index);
+//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+//                        index += 24;
+//                    }
+//                } else if ("_penmei8_month_day".equals(sheetName) || "_penmei9_month_day".equals(sheetName)) {
+//                    int index = 1;
+//                    for (DateQuery item : dateQueries) {
+//                        List<CellData> cellDataList = mapDataHandler4(version, columns, item, index);
+//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+//                        index += 24;
+//                    }
+//                } else if ("_penmei10_month_day".equals(sheetName)) {
+//                    int index = 1;
+//                    for (DateQuery item : dateQueries) {
+//                        List<CellData> cellDataList = mapDataHandler5(version, columns, item, index);
+//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+//                        index += 24;
+//                    }
+//                } else
+                if ("_penmei11_month_day".equals(sheetName)) {
                     int index = 1;
                     for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler1(url, columns, item, index, version);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        index += 24;
-                    }
-                } else if ("_penmei3_month_day".equals(sheetName)) {
-                    //喷吹压力以及罐号处理
-                    int index = 1;
-                    for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler2(version, columns, item, index);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        index += 24;
-                    }
-                } else if ("_penmei6_month_day".equals(sheetName) || "_penmei7_month_day".equals(sheetName)) {
-                    //换罐时间处理
-                    int index = 1;
-                    for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler3(version, columns, item, index);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        index += 24;
-                    }
-                } else if ("_penmei8_month_day".equals(sheetName) || "_penmei9_month_day".equals(sheetName)) {
-                    int index = 1;
-                    for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler4(version, columns, item, index);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        index += 24;
-                    }
-                } else if ("_penmei10_month_day".equals(sheetName)) {
-                    int index = 1;
-                    for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler5(version, columns, item, index);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        index += 24;
-                    }
-                } else {
-                    int index = 1;
-                    for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler(url, columns, item, index);
+                        List<CellData> cellDataList = mapDataHandler6(version, columns, item, index);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
                 }
+//                else {
+//                    int index = 1;
+//                    for (DateQuery item : dateQueries) {
+//                        List<CellData> cellDataList = mapDataHandler(url, columns, item, index,version);
+//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+//                        index += 24;
+//                    }
+//                }
             }
         }
         return workbook;
     }
 
-    @Override
-    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int index) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int index, String version) {
         Map<String, String> queryParam = DateQueryUtil.getQueryParam(dateQuery, 0, 0, -1);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("starttime", queryParam.get("starttime"));
-        jsonObject.put("endtime", queryParam.get("endtime"));
-        jsonObject.put("tagnames", columns);
-
-        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+        String result = getTagValues(queryParam, columns, version);
         JSONObject obj = JSONObject.parseObject(result);
         obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
@@ -389,9 +392,13 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("starttime", param.get("starttime"));
             jsonObject.put("endtime", param.get("endtime"));
-            jsonObject.put("tagnames", columns.get(0));
+            List<String> tagName1 = new ArrayList<>();
+            tagName1.add(columns.get(0));
+            jsonObject.put("tagnames", tagName1);
             String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
-            jsonObject.put("tagnames", columns.get(1));
+            List<String> tagName2 = new ArrayList<>();
+            tagName2.add(columns.get(1));
+            jsonObject.put("tagnames", tagName2);
             String re2 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
 
             Object o = "";
@@ -453,27 +460,80 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         int indes = index;
         for (int i = 0; i < dayHourEach.size(); i++) {
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("starttime", param.get("starttime"));
-            jsonObject.put("endtime", param.get("endtime"));
-            jsonObject.put("tagnames", columns.get(0));
-            String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
-            jsonObject.put("tagnames", columns.get(1));
-            String re2 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+            List<String> tagName1 = new ArrayList<>();
+            tagName1.add(columns.get(0));
+
+            String re1 = getTagValues(param, tagName1, version);
+            List<String> tagName2 = new ArrayList<>();
+            tagName2.add(columns.get(1));
+            String re2 = getTagValues(param, tagName2, version);
 
             String dateTime = dealPart10_1(re1, re2, columns.get(0), columns.get(1));
             Object o2 = dealPart10_2(dateTime, version, columns.get(2));
             ExcelWriterUtil.addCellData(resultList, indes, 2, o2);
 
-            jsonObject.put("tagnames", columns.get(3));
-            re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
-            jsonObject.put("tagnames", columns.get(4));
-            re2 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+            List<String> tagName3 = new ArrayList<>();
+            tagName3.add(columns.get(3));
+            re1 = getTagValues(param, tagName3, version);
+
+            List<String> tagName4 = new ArrayList<>();
+            tagName4.add(columns.get(4));
+            re2 = getTagValues(param, tagName4, version);
 
             dateTime = dealPart10_1(re1, re2, columns.get(3), columns.get(4));
             Object o3 = dealPart10_2(dateTime, version, columns.get(5));
             ExcelWriterUtil.addCellData(resultList, indes, 5, o3);
 
+            indes++;
+        }
+
+        return resultList;
+    }
+
+    protected List<CellData> mapDataHandler6(String version, List<String> columns, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indes = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            List<Object> dataList = new ArrayList<>();
+            Map<String, String> param = dayHourEach.get(i).getQueryParam();
+            List<String> tagName = new ArrayList<>();
+            tagName.add(columns.get(0));
+            String re1 = getTagValues(param, tagName, version);
+            if (StringUtils.isNotBlank(re1)) {
+                JSONObject object = JSONObject.parseObject(re1);
+                if (Objects.nonNull(object)) {
+                    JSONObject data = object.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject tag = data.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(tag)) {
+                            Map<String, Object> innerMap = tag.getInnerMap();
+                            Set<String> keys = innerMap.keySet();
+                            Long[] list = new Long[keys.size()];
+                            int k = 0;
+                            for (String key : keys) {
+                                list[k] = Long.valueOf(key);
+                                k++;
+                            }
+                            Arrays.sort(list);
+                            Object temp = "";
+                            for (int j = 0; j < list.length; j++) {
+                                Object o = innerMap.get(list[j] + "");
+                                if (!temp.equals(o)) {
+                                    temp = o;
+                                    if (j != 0) {
+                                        dataList.add(list[j]);
+                                        dataList.add(o);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (int m = 0; m < dataList.size(); m++) {
+                ExcelWriterUtil.addCellData(resultList, indes, m, dataList.get(m));
+            }
             indes++;
         }
 
