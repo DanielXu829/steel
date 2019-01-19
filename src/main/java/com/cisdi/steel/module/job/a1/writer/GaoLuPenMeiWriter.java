@@ -81,6 +81,13 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
+                } else if ("_penmei10_month_day".equals(sheetName)) {
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler5(version, columns, item, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
                 } else {
                     int index = 1;
                     for (DateQuery item : dateQueries) {
@@ -138,61 +145,38 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Object v4 = "";
             Object v5 = "";
 
-            Map<String, String> param = dayHourEach.get(i).getQueryParam();
-            String re1 = httpUtil.get(getUrl2(version, columns.get(0)), param);
+            List<String> col = new ArrayList<>();
+            col.add(columns.get(0));
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
 
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 if (Objects.nonNull(ob1)) {
-                    JSONArray datas = ob1.getJSONArray("data");
-                    for (int j = 0; j < datas.size(); j++) {
-                        JSONObject jsonObjects = datas.getJSONObject(j);
-                        BigDecimal value = jsonObjects.getBigDecimal("value");
-                        if (Objects.nonNull(value) && value.compareTo(BigDecimal.ZERO) == 0) {
-                            Long datetime = jsonObjects.getLong("datetime");
-                            v2 = value.intValue();
-                            v3 = datetime;
-
-                            Map<String, String> map = new HashMap<>();
-                            map.put("datetime", datetime.toString());
-                            String re = httpUtil.get(getUrl1(version, columns.get(1)), map);
-                            if (StringUtils.isNotBlank(re)) {
-                                JSONObject ob = JSONObject.parseObject(re);
-                                if (Objects.nonNull(ob)) {
-                                    v = ob.getBigDecimal("value");
+                    JSONObject datas = ob1.getJSONObject("data");
+                    if (Objects.nonNull(datas)) {
+                        JSONObject jsonObject = datas.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(jsonObject)) {
+                            Map<String, Object> innerMap = jsonObject.getInnerMap();
+                            Set<String> keySet = innerMap.keySet();
+                            for (String key : keySet) {
+                                Object o = innerMap.get(key);
+                                if (Objects.nonNull(o)) {
+                                    BigDecimal wac = (BigDecimal) o;
+                                    if (wac.intValue() == 0) {
+                                        v2 = wac.intValue();
+                                        v3 = key;
+                                        v = getTagValueByTime(key, version, columns.get(1));
+                                        v1 = getTagValueByTime(key, version, columns.get(2));
+                                        v4 = getTagValueByTime(key, version, columns.get(4));
+                                        v5 = getTagValueByTime(key, version, columns.get(5));
+                                        break;
+                                    }
                                 }
                             }
-
-                            String res = httpUtil.get(getUrl1(version, columns.get(2)), map);
-                            if (StringUtils.isNotBlank(res)) {
-                                JSONObject obs = JSONObject.parseObject(res);
-                                if (Objects.nonNull(obs)) {
-                                    v1 = obs.getBigDecimal("value");
-                                }
-                            }
-
-                            map.put("datetime", datetime.toString());
-                            String re3 = httpUtil.get(getUrl1(version, columns.get(4)), map);
-                            if (StringUtils.isNotBlank(re3)) {
-                                JSONObject ob = JSONObject.parseObject(re3);
-                                if (Objects.nonNull(ob)) {
-                                    v4 = ob.getBigDecimal("value");
-                                }
-                            }
-
-                            String res4 = httpUtil.get(getUrl1(version, columns.get(5)), map);
-                            if (StringUtils.isNotBlank(res4)) {
-                                JSONObject obs = JSONObject.parseObject(res4);
-                                if (Objects.nonNull(obs)) {
-                                    v5 = obs.getBigDecimal("value");
-                                }
-                            }
-
                         }
                     }
                 }
             }
-
 
             ExcelWriterUtil.addCellData(resultList, indes, 0, v2);
             ExcelWriterUtil.addCellData(resultList, indes, 1, v);
@@ -212,27 +196,48 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
         int indes = index;
         for (int i = 0; i < dayHourEach.size(); i++) {
-            Map<String, String> param = dayHourEach.get(i).getQueryParam();
-            String re1 = httpUtil.get(getUrl2(version, columns.get(0)), param);
+            List<String> col = new ArrayList<>();
+            col.add(columns.get(0));
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
+
             Object o = "";
             Object o1 = "";
             Object o2 = "";
             Object o3 = "";
             //罐号
             Set<Integer> set = new HashSet<>();
-            Long dateTime = null;
+            String dateTime = null;
+            boolean f = true;
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 if (Objects.nonNull(ob1)) {
-                    JSONArray data = ob1.getJSONArray("data");
-                    for (int j = 0; j < data.size(); j++) {
-                        JSONObject jsonObject = data.getJSONObject(j);
-                        BigDecimal value = jsonObject.getBigDecimal("value");
-                        if (Objects.nonNull(value)) {
-                            Integer ii = value.intValue();
-                            o = ii;
-                            set.add(ii);
-                            dateTime = jsonObject.getLong("datetime");
+                    JSONObject data = ob1.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject jsonObject = data.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(jsonObject)) {
+                            Map<String, Object> innerMap = jsonObject.getInnerMap();
+                            Set<String> keys = innerMap.keySet();
+                            Long[] list = new Long[keys.size()];
+                            int k = 0;
+                            for (String key : keys) {
+                                list[k] = Long.valueOf(key);
+                                k++;
+                            }
+                            Arrays.sort(list);
+
+                            for (int j = 0; j < list.length; j++) {
+                                Object mapObject = innerMap.get(list[j] + "");
+                                if (Objects.nonNull(mapObject)) {
+                                    BigDecimal ii = (BigDecimal) mapObject;
+                                    int value = ii.intValue();
+                                    if (f && value == 1) {
+                                        dateTime = list[j] + "";
+                                        f = false;
+                                    }
+                                    o = ii;
+                                    set.add(value);
+                                }
+                            }
                         }
                     }
                 }
@@ -292,19 +297,32 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
-    private Object getTagValueByTime(Long dateTime, String version, String column) {
+    private Object getTagValueByTime(String dateTime, String version, String column) {
         Object v = "";
         Map<String, String> map = new HashMap<>();
-        map.put("datetime", dateTime.toString());
-        String re = httpUtil.get(getUrl1(version, column), map);
+        map.put("time", dateTime);
+        map.put("tagname", column);
+        String re = httpUtil.get(getUrl1(version), map);
         if (StringUtils.isNotBlank(re)) {
             JSONObject ob = JSONObject.parseObject(re);
             if (Objects.nonNull(ob)) {
-                v = ob.getBigDecimal("value");
+                JSONObject data = ob.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    v = data.get("val");
+                }
             }
         }
 
         return v;
+    }
+
+    private String getTagValues(Map<String, String> param, List<String> col, String version) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("starttime", param.get("starttime"));
+        jsonObject.put("endtime", param.get("endtime"));
+        jsonObject.put("tagnames", col);
+        String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+        return re1;
     }
 
     protected List<CellData> mapDataHandler3(String version, List<String> columns, DateQuery dateQuery, int index) {
@@ -312,9 +330,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
         int indes = index;
         for (int i = 0; i < dayHourEach.size(); i++) {
-            Map<String, String> param = dayHourEach.get(i).getQueryParam();
-            String re1 = httpUtil.get(getUrl2(version, columns.get(0)), param);
-            String re2 = httpUtil.get(getUrl2(version, columns.get(1)), param);
+
+
+            List<String> col = new ArrayList<>();
+            col.add(columns.get(0));
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
+
+            List<String> col2 = new ArrayList<>();
+            col2.add(columns.get(1));
+            String re2 = getTagValues(dayHourEach.get(i).getQueryParam(), col2, version);
 
             Object o = "";
             Object o1 = "";
@@ -322,20 +346,27 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 JSONObject ob2 = JSONObject.parseObject(re2);
                 if (Objects.nonNull(ob1) && Objects.nonNull(ob2)) {
-                    JSONArray data = ob1.getJSONArray("data");
-                    for (int j = 0; j < data.size(); j++) {
-                        JSONObject jsonObject = data.getJSONObject(j);
-                        BigDecimal value = jsonObject.getBigDecimal("value");
-                        Long datetime = jsonObject.getLong("datetime");
-                        JSONArray data2 = ob2.getJSONArray("data");
-                        for (int m = 0; m < data2.size(); m++) {
-                            JSONObject jsonObject2 = data2.getJSONObject(j);
-                            BigDecimal value2 = jsonObject2.getBigDecimal("value");
-
-                            if (value.doubleValue() == value2.doubleValue()) {
-                                Long datetime1 = jsonObject2.getLong("datetime");
-                                o = datetime;
-                                o1 = datetime1;
+                    JSONObject data = ob1.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject jsonObject = data.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(jsonObject)) {
+                            Map<String, Object> innerMap = jsonObject.getInnerMap();
+                            for (String key : innerMap.keySet()) {
+                                BigDecimal b1 = (BigDecimal) innerMap.get(key);
+                                JSONObject data2 = ob2.getJSONObject("data");
+                                if (Objects.nonNull(data2)) {
+                                    JSONObject jsonObject2 = data2.getJSONObject(columns.get(1));
+                                    if (Objects.nonNull(jsonObject2)) {
+                                        Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
+                                        for (String key2 : innerMap2.keySet()) {
+                                            BigDecimal b2 = (BigDecimal) innerMap2.get(key2);
+                                            if (b1.doubleValue() == b2.doubleValue()) {
+                                                o = key;
+                                                o1 = key2;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -355,38 +386,52 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         int indes = index;
         for (int i = 0; i < dayHourEach.size(); i++) {
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
-            String re1 = httpUtil.get(getUrl2(version, columns.get(0)), param);
-            String re2 = httpUtil.get(getUrl2(version, columns.get(1)), param);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("starttime", param.get("starttime"));
+            jsonObject.put("endtime", param.get("endtime"));
+            jsonObject.put("tagnames", columns.get(0));
+            String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+            jsonObject.put("tagnames", columns.get(1));
+            String re2 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
 
             Object o = "";
             Object o1 = "";
             Object o2 = "";
-            Long dateTime = null;
+            String dateTime = null;
             boolean f = false;
             if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 JSONObject ob2 = JSONObject.parseObject(re2);
                 if (Objects.nonNull(ob1) && Objects.nonNull(ob2)) {
-                    JSONArray data = ob1.getJSONArray("data");
-                    for (int j = 0; j < data.size(); j++) {
-                        JSONObject jsonObject = data.getJSONObject(j);
-                        BigDecimal value = jsonObject.getBigDecimal("value");
-                        Long datetime = jsonObject.getLong("datetime");
-                        JSONArray data2 = ob2.getJSONArray("data");
-                        for (int m = 0; m < data2.size(); m++) {
-                            JSONObject jsonObject2 = data2.getJSONObject(j);
-                            BigDecimal value2 = jsonObject2.getBigDecimal("value");
-
-                            if (value.doubleValue() == 0 && value2.doubleValue() == 0) {
-                                dateTime = jsonObject2.getLong("datetime");
-                                f = true;
-                                break;
+                    JSONObject data = ob1.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject tag1 = data.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(tag1)) {
+                            Map<String, Object> innerMap = tag1.getInnerMap();
+                            for (String key : innerMap.keySet()) {
+                                BigDecimal b1 = (BigDecimal) innerMap.get(key);
+                                JSONObject data2 = ob2.getJSONObject("data");
+                                if (Objects.nonNull(data2)) {
+                                    JSONObject tag2 = data2.getJSONObject(columns.get(1));
+                                    if (Objects.nonNull(tag2)) {
+                                        Map<String, Object> innerMap2 = tag2.getInnerMap();
+                                        for (String key2 : innerMap2.keySet()) {
+                                            BigDecimal b2 = (BigDecimal) innerMap2.get(key2);
+                                            if (b1.intValue() == 0 && b2.intValue() == 0) {
+                                                Long aLong = Long.valueOf(key);
+                                                Long aLong1 = Long.valueOf(key2);
+                                                dateTime = aLong > aLong1 ? key : key2;
+                                                f = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (f) {
+                                    break;
+                                }
                             }
                         }
-                        if (f) {
-                            break;
-                        }
-
                     }
                 }
             }
@@ -402,16 +447,150 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
+    protected List<CellData> mapDataHandler5(String version, List<String> columns, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indes = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            Map<String, String> param = dayHourEach.get(i).getQueryParam();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("starttime", param.get("starttime"));
+            jsonObject.put("endtime", param.get("endtime"));
+            jsonObject.put("tagnames", columns.get(0));
+            String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+            jsonObject.put("tagnames", columns.get(1));
+            String re2 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+
+            String dateTime = dealPart10_1(re1, re2, columns.get(0), columns.get(1));
+            Object o2 = dealPart10_2(dateTime, version, columns.get(2));
+            ExcelWriterUtil.addCellData(resultList, indes, 2, o2);
+
+            jsonObject.put("tagnames", columns.get(3));
+            re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+            jsonObject.put("tagnames", columns.get(4));
+            re2 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+
+            dateTime = dealPart10_1(re1, re2, columns.get(3), columns.get(4));
+            Object o3 = dealPart10_2(dateTime, version, columns.get(5));
+            ExcelWriterUtil.addCellData(resultList, indes, 5, o3);
+
+            indes++;
+        }
+
+        return resultList;
+    }
+
+    private void dealData(List<Double> list, Object o) {
+        if (Objects.nonNull(o)) {
+            BigDecimal b = (BigDecimal) o;
+            list.add(b.doubleValue());
+        }
+    }
+
+    private String dealPart10(Map<String, Object> innerMap) {
+        String tempDateTime1 = null;
+        Set<String> keys = innerMap.keySet();
+        Long[] list = new Long[keys.size()];
+        int k = 0;
+        for (String key : keys) {
+            list[k] = Long.valueOf(key);
+            k++;
+        }
+        Arrays.sort(list);
+        int temp = -1;
+        for (int j = 0; j < list.length; j++) {
+            Object b1 = innerMap.get(list[j] + "");
+            if (Objects.nonNull(b1)) {
+                BigDecimal bb = (BigDecimal) b1;
+                if (bb.intValue() == 1) {
+                    temp = j;
+                    break;
+                }
+            }
+        }
+
+        if (temp == 1) {
+            for (int j = temp; j < list.length; j++) {
+                Object b1 = innerMap.get(list[j] + "");
+                if (Objects.nonNull(b1)) {
+                    BigDecimal bb = (BigDecimal) b1;
+                    if (bb.intValue() == 0) {
+                        tempDateTime1 = list[j] + "";
+                        break;
+                    }
+                }
+            }
+        }
+
+        return tempDateTime1;
+    }
+
+    private String dealPart10_1(String re1, String re2, String col1, String col2) {
+        String dateTime = null;
+        if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
+            JSONObject ob1 = JSONObject.parseObject(re1);
+            JSONObject ob2 = JSONObject.parseObject(re2);
+            if (Objects.nonNull(ob1) && Objects.nonNull(ob2)) {
+                JSONObject data = ob1.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    JSONObject tag1 = data.getJSONObject(col1);
+                    if (Objects.nonNull(tag1)) {
+                        Map<String, Object> innerMap = tag1.getInnerMap();
+                        String tempDateTime1 = dealPart10(innerMap);
+                        if (Objects.nonNull(tempDateTime1)) {
+                            JSONObject data2 = ob2.getJSONObject("data");
+                            if (Objects.nonNull(data2)) {
+                                JSONObject tag2 = data2.getJSONObject(col2);
+                                if (Objects.nonNull(tag2)) {
+                                    Map<String, Object> innerMap2 = tag2.getInnerMap();
+                                    String tempDateTime2 = dealPart10(innerMap2);
+                                    if (Objects.nonNull(tempDateTime2)) {
+                                        Long aLong = Long.valueOf(tempDateTime1);
+                                        Long bLong = Long.valueOf(tempDateTime2);
+                                        dateTime = aLong > bLong ? tempDateTime1 : tempDateTime2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return dateTime;
+    }
+
+    private Object dealPart10_2(String dateTime, String version, String col) {
+        Object v = null;
+        if (Objects.nonNull(dateTime)) {
+            //此时间往后5分钟的最大值
+            Long time = Long.valueOf(dateTime);
+            Date date = new Date(time);
+            Object object1 = getTagValueByTime(dateTime, version, col);
+            Object object2 = getTagValueByTime(DateUtil.addMinute(date, 1).getTime() + "", version, col);
+            Object object3 = getTagValueByTime(DateUtil.addMinute(date, 2).getTime() + "", version, col);
+            Object object4 = getTagValueByTime(DateUtil.addMinute(date, 3).getTime() + "", version, col);
+            Object object5 = getTagValueByTime(DateUtil.addMinute(date, 4).getTime() + "", version, col);
+
+            List<Double> list = new ArrayList<>();
+            dealData(list, object1);
+            dealData(list, object2);
+            dealData(list, object3);
+            dealData(list, object4);
+            dealData(list, object5);
+
+            Object[] array = list.toArray();
+            Arrays.sort(array);
+            v = array[array.length - 1];
+        }
+        return v;
+    }
+
     private String getUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
     }
 
-    private String getUrl1(String version, String tagName) {
-        return httpProperties.getGlUrlVersion(version) + "/cache/getTagValueByTime/" + tagName;
+    private String getUrl1(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
     }
-
-    private String getUrl2(String version, String tagName) {
-        return httpProperties.getGlUrlVersion(version) + "/cache/getTagValuesByRange/" + tagName;
-    }
-
 }
