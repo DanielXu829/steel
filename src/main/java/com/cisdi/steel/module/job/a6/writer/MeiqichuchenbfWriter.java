@@ -58,8 +58,12 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                         index++;
                     }
                 } else if ("fanchui6".equals(sheetSplit[1])) {
+                    int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
-
+                        DateQuery eachDate = dateQueries.get(rowNum);
+                        List<CellData> cellValInfoList = mapDataHandler3(columns, getUrl(version), eachDate, index, version);
+                        ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
+                        index++;
                     }
                 } else if ("fanchui7".equals(sheetSplit[1])) {
                     for (int rowNum = 0; rowNum < size; rowNum++) {
@@ -256,8 +260,8 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
                 if (StringUtils.isNotBlank(indextime)) {
                     ExcelWriterUtil.addCellData(resultList, index, 1, indextime);
-                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2));
-                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3));
+                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
+                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
 
                     ExcelWriterUtil.addCellData(resultList, index, 2, o2);
                     ExcelWriterUtil.addCellData(resultList, index, 3, o3);
@@ -280,8 +284,8 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     }
 
                     if (StringUtils.isNotBlank(indextime2)) {
-                        Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4));
-                        Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5));
+                        Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), 1);
+                        Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5), 1);
 
                         ExcelWriterUtil.addCellData(resultList, index, 4, o4);
                         ExcelWriterUtil.addCellData(resultList, index, 5, o5);
@@ -295,10 +299,85 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
-    private Object dealPart1(String url, String indextime, String tagName) {
+    public List<CellData> mapDataHandler3(List<String> columns, String url, DateQuery dateQuery, int index, String version) {
+        List<CellData> resultList = new ArrayList<>();
+        List<String> c = new ArrayList<>();
+        c.add(columns.get(0));
+        JSONObject jsonObject = getQueryParam(dateQuery, c);
+        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject obj = JSONObject.parseObject(result);
+            obj = obj.getJSONObject("data");
+            JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
+            if (Objects.nonNull(jsonObject1)) {
+                Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
+                Set<String> keyset = innerMap1.keySet();
+                List<Integer> list1 = new ArrayList<>();
+                for (String key : keyset) {
+                    Object o = innerMap1.get(key);
+                    list1.add((Integer) o);
+                }
+                int indexkey = -1;
+                for (int i = 0; i < list1.size(); i++) {
+                    if (list1.get(i) == 1) {
+                        indexkey = i;
+                        break;
+                    }
+                }
+
+                String indextime = "";
+                Object[] objects = keyset.toArray();
+                for (int i = 0; i < objects.length; i++) {
+                    if (i == indexkey) {
+                        indextime = String.valueOf(objects[i]);
+                        break;
+                    }
+                }
+
+                if (StringUtils.isNotBlank(indextime)) {
+                    ExcelWriterUtil.addCellData(resultList, index, 0, indextime);
+                    Object o1 = dealPart1(getUrl3(version), indextime, columns.get(1), -1);
+                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
+                    ExcelWriterUtil.addCellData(resultList, index, 1, o1);
+                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
+
+                    int indexkey2 = -1;
+                    for (int i = indexkey; i < list1.size(); i++) {
+                        if (list1.get(i) == 0) {
+                            indexkey2 = i;
+                            break;
+                        }
+                    }
+
+                    String indextime2 = "";
+                    Object[] objects2 = keyset.toArray();
+                    for (int i = 0; i < objects2.length; i++) {
+                        if (i == indexkey2) {
+                            indextime2 = String.valueOf(objects2[i]);
+                            break;
+                        }
+                    }
+
+                    if (StringUtils.isNotBlank(indextime2)) {
+                        Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), 1);
+                        Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), 1);
+
+                        ExcelWriterUtil.addCellData(resultList, index, 3, o3);
+                        ExcelWriterUtil.addCellData(resultList, index, 4, o4);
+                    }
+                }
+
+
+            }
+        }
+
+        return resultList;
+    }
+
+    private Object dealPart1(String url, String indextime, String tagName, int min) {
         long value = Long.valueOf(indextime);
         Date date = new Date(value);
-        Date curr = DateUtil.addMinute(date, -1);
+        Date curr = DateUtil.addMinute(date, min);
         Object v = null;
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("time ", curr.getTime() + "");
@@ -326,5 +405,20 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     protected String getUrl3(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
+    }
+
+    public static void main(String[] args) {
+        Map map = new HashMap();
+        map.put("1547794800000", 1);
+        map.put("1547794860000", 1);
+        map.put("1547794920000", 1);
+        map.put("1547794980000", 1);
+
+        Set<String> keyset = map.keySet();
+        List<Integer> list1 = new ArrayList<>();
+        for (String key : keyset) {
+            System.out.println(key);
+        }
+
     }
 }
