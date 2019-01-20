@@ -260,12 +260,6 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         o3 = "1";
                     }
                 } else if (set.size() == 2) {
-                    Integer m = (Integer) objects[0];
-                    if (m.intValue() == 0) {
-                        o3 += "2";
-                    } else {
-                        o3 += "1";
-                    }
                     Integer m1 = (Integer) objects[1];
                     if (m1.intValue() == 0) {
                         o3 += "2";
