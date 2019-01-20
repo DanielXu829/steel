@@ -103,6 +103,21 @@ public class RongjiWriter extends AbstractExcelReadWriter {
             Long clock = jsonObject.getLong("clock");
             ExcelWriterUtil.addCellData(cellDataList, index, 0, clock);
 
+            String bz = "";
+            if (Objects.nonNull(clock)) {
+                Date date = new Date(clock);
+                String hh = DateUtil.getFormatDateTime(date, "HH");
+                Integer h = Integer.valueOf(hh);
+                if (h.intValue() >= 0 && h < 8) {
+                    bz = "夜班";
+                } else if (h.intValue() >= 8 && h < 16) {
+                    bz = "白班";
+                } else if (h.intValue() >= 16 && h < 24) {
+                    bz = "中班";
+                }
+            }
+            ExcelWriterUtil.addCellData(cellDataList, index, 10, bz);
+
             JSONObject values = jsonObject.getJSONObject("values");
             Map<String, Object> innerMap = values.getInnerMap();
             for (int j = 1; j < columns.size(); j++) {
