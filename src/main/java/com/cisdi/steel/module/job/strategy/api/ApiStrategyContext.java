@@ -31,7 +31,7 @@ public class ApiStrategyContext {
     public ApiStrategy getApiStrategy(String api) {
         Set<String> keySet = this.apiStrategyMap.keySet();
         for (String key : keySet) {
-            if (api.contains(key)) {
+            if (api.contains(key) && api.startsWith(key)) {
                 return this.apiStrategyMap.get(key);
             }
         }

@@ -372,6 +372,6 @@ public class TapsPeriodStrategy extends AbstractApiStrategy {
 
     @Override
     public String getKey() {
-        return "tapsPeriod";
+        return "periodTaps";
     }
 }
