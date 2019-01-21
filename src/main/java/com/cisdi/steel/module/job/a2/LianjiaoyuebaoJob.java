@@ -24,7 +24,7 @@ public class LianjiaoyuebaoJob extends AbstractExportJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.jh_lianjiaoryuebao;
+        return JobEnum.jh_lianjiaoyuebao;
     }
 
     @Override

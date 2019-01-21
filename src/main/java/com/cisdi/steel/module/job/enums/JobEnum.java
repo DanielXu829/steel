@@ -60,7 +60,7 @@ public enum JobEnum {
     jh_zhonglengxiben("jh_zhonglengxiben", "CK67-化产-终冷洗苯报表（日）"),
     jh_tuoliujiexi("jh_tuoliujiexi", "CK67-化产-脱硫解吸（日）报表设计"),
     jh_zhisuancaozuo("jh_zhisuancaozuo", "CK67-化产-制酸操作报表（日）"),
-    jh_lianjiaoryuebao("jh_lianjiaoryuebao", "CK67-炼焦-月报表报表（日&月）"),
+    jh_lianjiaoyuebao("jh_lianjiaoyuebao", "CK67-炼焦-月报表报表（日&月）"),
     jh_jiaolujiare6("jh_jiaolujiare6", "CK67-炼焦-6#焦炉加热制度报表（日）"),
     jh_jiaolujiare7("jh_jiaolujiare7", "CK67-炼焦-7#焦炉加热制度报表（日）"),
     jh_luwenjilu6("jh_luwenjilu6", "CK67-炼焦-6#炉温记录报表（日）"),
