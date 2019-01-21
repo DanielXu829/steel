@@ -138,8 +138,8 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam5(DateQuery dateQuery, String brandcode, String anaitemname) {
         Map<String, String> result = new HashMap<>();
         result.put("brandcode", brandcode);
-        result.put("starttime", dateQuery.getStartTime().toString());
-        result.put("endtime", dateQuery.getEndTime().toString());
+        result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
         result.put("source", "三回收");
         return result;
