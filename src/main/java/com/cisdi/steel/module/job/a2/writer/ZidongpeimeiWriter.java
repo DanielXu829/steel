@@ -50,10 +50,10 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         String[] tagNamesIf={"CK67_L1R_CB_CBAmtTol_1m_max","CK67_L1R_CB_CBAcTol_1m_avg"};
         Double max = compareTagVal(tagNamesIf[0]);
         Double avg = compareTagVal(tagNamesIf[1]);
-//        if(max<1 && avg==0){
-//            log.error("根据条件判断停止执行自动配煤报表");
-//            System.exit(0);
-//        }
+        if(max<1 && avg==0){
+            log.error("根据条件判断停止执行自动配煤报表");
+            System.exit(0);
+        }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
