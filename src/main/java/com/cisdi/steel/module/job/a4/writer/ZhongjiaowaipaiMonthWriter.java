@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class ZhongjiaowaipaiMonthWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
-        return getMapHandler(getUrl(), 3, excelDTO);
+        return getMapHandler(getUrl(), 1, excelDTO);
     }
 
     private String getUrl() {
