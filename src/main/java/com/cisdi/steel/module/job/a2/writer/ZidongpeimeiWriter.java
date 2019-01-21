@@ -71,10 +71,10 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     Date todayBeginTime = DateUtil.getTodayBeginTime();
                     Date date1 = DateUtil.addHours(todayBeginTime, 8);
                     Date date2 = DateUtil.addHours(date1, 8);
-                    if (DateUtil.isEffectiveDate(new Date(),todayBeginTime,date1)) {
+                    if (DateUtil.isEffectiveDate(date.getRecordDate(),todayBeginTime,date1)) {
                         shift = "夜班";
                         shiftNum = 1;
-                    } else if (DateUtil.isEffectiveDate(new Date(),date1,date2)) {
+                    } else if (DateUtil.isEffectiveDate(date.getRecordDate(),date1,date2)) {
                         shift = "白班";
                         shiftNum = 2;
                     } else{
@@ -86,27 +86,27 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     row.getCell(0).setCellType(CellType.STRING);
 
                     Row row1 = sheet.createRow(33);
-                    Double aDouble = peimeiLeiji(getUrl3());
+                    Double aDouble = peimeiLeiji(getUrl3(),date);
                     row1.createCell(0).setCellValue(aDouble);
                     row1.getCell(0).setCellType(CellType.NUMERIC);
 
-                    Double yiedNum = this.mapDataHandler1(shiftNum, getUrl4());
+                    Double yiedNum = this.mapDataHandler1(shiftNum, getUrl4(),date);
                     Row row2 = sheet.createRow(30);
                     row2.createCell(0).setCellValue(yiedNum);
                     row2.getCell(0).setCellType(CellType.NUMERIC);
 
                     Integer[] shiftArr={1,2,3};
-                    Double yiedNumLeiji = this.mapDataHandler2(shiftArr, getUrl4());
+                    Double yiedNumLeiji = this.mapDataHandler2(shiftArr, getUrl4(),date);
                     Row row3 = sheet.createRow(31);
                     row3.createCell(0).setCellValue(yiedNumLeiji);
                     row3.getCell(0).setCellType(CellType.NUMERIC);
 //                    for (int j = 0; j < dateQueries.size(); j++) {
-                    List<CellData> cellDataList = this.handlerData(dateQueries.get(dateQueries.size() - 1), sheet);
+                    List<CellData> cellDataList = this.handlerData(date, sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
 //                    }
                 }else{
                     List<String> firstColumnCellVal = PoiCustomUtil.getFirstRowCelVal(sheet);
-                    List<CellData> cellData = this.mapDataHandler(getUrl2(), firstColumnCellVal, 1);
+                    List<CellData> cellData = this.mapDataHandler(getUrl2(), firstColumnCellVal, 1,date);
                     ExcelWriterUtil.setCellValue(sheet, cellData);
                 }
             }
@@ -114,11 +114,11 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    public Double peimeiLeiji(String url){
+    public Double peimeiLeiji(String url,DateQuery dateQuery){
         Map<String, String> result = new HashMap<>();
         Map<String, String> result1 = new HashMap<>();
         Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
+        instance.setTime(dateQuery.getRecordDate());
         instance.set(Calendar.DAY_OF_MONTH,1);
         instance.set(Calendar.HOUR_OF_DAY,0);
         instance.set(Calendar.MINUTE,0);
@@ -198,8 +198,8 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch) {
-        Map<String, String> queryParam = getQueryParam2();
+    protected List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch,DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam2(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -213,8 +213,8 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return ExcelWriterUtil.handlerRowData(columns, startRow, data);
     }
 
-    protected Double mapDataHandler1(Integer shiftNum, String url) {
-        Map<String, String> queryParam = getQueryParam3(shiftNum);
+    protected Double mapDataHandler1(Integer shiftNum, String url,DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam3(shiftNum,dateQuery);
         String result = httpUtil.get(url, queryParam);
         Double confirmWgt=0.0;
         if (StringUtils.isBlank(result)) {
@@ -231,10 +231,10 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return confirmWgt;
     }
 
-    protected Double mapDataHandler2(Integer[] shiftArr, String url) {
+    protected Double mapDataHandler2(Integer[] shiftArr, String url,DateQuery dateQuery) {
         Double confirmWgt=0.0;
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
+        calendar.setTime(dateQuery.getRecordDate());
         calendar.set(Calendar.DAY_OF_MONTH,1);
         calendar.set(Calendar.HOUR_OF_DAY,0);
         calendar.set(Calendar.MINUTE,0);
@@ -263,20 +263,20 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        String dateTime = DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:00");
+        String dateTime = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:00");
         result.put("time", dateTime);
         return result;
     }
 
-    protected Map<String, String> getQueryParam2() {
+    protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("dateTime", DateUtil.getFormatDateTime(new Date(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
-    protected Map<String, String> getQueryParam3(Integer shiftNum) {
+    protected Map<String, String> getQueryParam3(Integer shiftNum,DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("dateTime", DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd 00:00:00"));
+        result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd 00:00:00"));
         result.put("shift", shiftNum.toString());
         result.put("code", "GHJY");
         result.put("flag", "O");
