@@ -82,14 +82,14 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         index += 24;
                     }
                 } else if ("_penmei10_month_day".equals(sheetName)) {
+                    //罐重处理
                     int index = 1;
                     for (DateQuery item : dateQueries) {
                         List<CellData> cellDataList = mapDataHandler5(version, columns, item, index);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
-                } else
-                if ("_penmei11_month_day".equals(sheetName)) {
+                } else if ("_penmei11_month_day".equals(sheetName)) {
                     int index = 1;
                     for (DateQuery item : dateQueries) {
                         List<CellData> cellDataList = mapDataHandler6(version, columns, item, index);
@@ -234,9 +234,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                     int value = ii.intValue();
                                     if (f && value == 1) {
                                         dateTime = list[j] + "";
+                                        o = ii;
                                         f = false;
                                     }
-                                    o = ii;
                                     set.add(value);
                                 }
                             }
@@ -294,7 +294,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
     }
 
     private Object getTagValueByTime(String dateTime, String version, String column) {
-        Object v = "";
+        Object v = null;
         Map<String, String> map = new HashMap<>();
         map.put("time", dateTime);
         map.put("tagname", column);
@@ -455,8 +455,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
             List<String> tagName1 = new ArrayList<>();
             tagName1.add(columns.get(0));
-
             String re1 = getTagValues(param, tagName1, version);
+
             List<String> tagName2 = new ArrayList<>();
             tagName2.add(columns.get(1));
             String re2 = getTagValues(param, tagName2, version);
@@ -562,7 +562,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             }
         }
 
-        if (temp == 1) {
+        if (temp != -1) {
             for (int j = temp; j < list.length; j++) {
                 Object b1 = innerMap.get(list[j] + "");
                 if (Objects.nonNull(b1)) {
@@ -634,7 +634,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             Object[] array = list.toArray();
             Arrays.sort(array);
-            v = array[array.length - 1];
+            if (list.size() > 0) {
+                v = array[array.length - 1];
+            }
         }
         return v;
     }
