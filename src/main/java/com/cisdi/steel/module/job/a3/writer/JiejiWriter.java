@@ -138,6 +138,12 @@ public class JiejiWriter extends AbstractExcelReadWriter {
             query.put("type", "LG");
             query.put("itemNames", da);
         } else {
+            if ("_sjmain8_day_shift".equals(sheetName)) {
+                Date date = DateUtil.addHours(dateQuery.getStartTime(), 1);
+                Date date1 = DateUtil.addHours(dateQuery.getEndTime(), 1);
+                query.put("start", date.getTime());
+                query.put("end", date1.getTime());
+            }
             query.put("tagNames", columns);
         }
 
