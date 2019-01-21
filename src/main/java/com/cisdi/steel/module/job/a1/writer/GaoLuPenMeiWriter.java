@@ -232,9 +232,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                 if (Objects.nonNull(mapObject)) {
                                     BigDecimal ii = (BigDecimal) mapObject;
                                     int value = ii.intValue();
-                                    if (f && value == 1) {
-                                        dateTime = list[j] + "";
-                                        o = ii;
+                                    o = ii;
+                                    dateTime = list[j] + "";
+                                    if (value == 1) {
                                         f = false;
                                     }
                                     set.add(value);
@@ -336,8 +336,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             col2.add(columns.get(1));
             String re2 = getTagValues(dayHourEach.get(i).getQueryParam(), col2, version);
 
-            Object o = "";
-            Object o1 = "";
+            Long o = null;
+            Long o1 = null;
             if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 JSONObject ob2 = JSONObject.parseObject(re2);
@@ -356,9 +356,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                         Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
                                         for (String key2 : innerMap2.keySet()) {
                                             BigDecimal b2 = (BigDecimal) innerMap2.get(key2);
-                                            if (b1.doubleValue() == b2.doubleValue()) {
-                                                o = key;
-                                                o1 = key2;
+                                            BigDecimal subtract = b1.subtract(b2);
+                                            subtract = subtract.setScale(1, BigDecimal.ROUND_HALF_UP);
+                                            if (subtract.doubleValue() >= -0.2 && subtract.doubleValue() <= 0.2) {
+                                                o = Long.valueOf(key);
+                                                o1 = Long.valueOf(key2);
                                             }
                                         }
                                     }
