@@ -2,8 +2,7 @@ package com.cisdi.steel.module.job.a2;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a2.execute.BaseJhExecute;
-import com.cisdi.steel.module.job.a2.execute.LianjiaoribaoExecute;
+import com.cisdi.steel.module.job.a2.execute.LianjiaoyuebaoExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,18 +17,18 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class LianjiaoribaoJob extends AbstractExportJob {
+public class LianjiaoyuebaoJob extends AbstractExportJob {
 
     @Autowired
-    private LianjiaoribaoExecute lianjiaoribaoExecute;
+    private LianjiaoyuebaoExecute lianjiaoyuebaoExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.jh_lianjiaoribao;
+        return JobEnum.jh_lianjiaoryuebao;
     }
 
     @Override
     public IJobExecute getCurrentJobExecute() {
-        return lianjiaoribaoExecute;
+        return lianjiaoyuebaoExecute;
     }
 }

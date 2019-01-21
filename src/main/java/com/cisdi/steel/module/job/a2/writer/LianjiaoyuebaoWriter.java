@@ -10,6 +10,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -28,7 +29,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
-public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
+public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -46,44 +47,62 @@ public class LianjiaoribaoWriter extends AbstractExcelReadWriter {
                 String name = sheetSplit[1];
                 int size = dateQueries.size();
                 if ("lianjaorb".equals(name)) {
+                    int rowIndex = 1;
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl1(), columns, item);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
+                        for (int k = 0; k < dateQueries1.size(); k++) {
+                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl1(), columns, dateQueries1.get(k));
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            rowIndex++;
+                        }
                     }
                 } else if ("kjjunzhi".equals(name)) {
                     int startRow=1;
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        List<CellData> cellDataList = this.mapDataHandler2(getUrl2(), columns, 1,item,startRow);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        startRow++;
+                        List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
+                        for (int k = 0; k < dateQueries1.size(); k++) {
+                            List<CellData> cellDataList = this.mapDataHandler2(getUrl2(), columns, 1, dateQueries1.get(k), startRow);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            startRow++;
+                        }
+
                     }
                 } else if ("causek".equals(name)) {
                     int startRow=1;
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        List<CellData> cellDataList = this.mapDataHandler3(getUrl3(), columns, 1,item,startRow);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        startRow++;
+                        List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
+                        for (int k = 0; k < dateQueries1.size(); k++) {
+                            List<CellData> cellDataList = this.mapDataHandler3(getUrl3(), columns, 1, dateQueries1.get(k), startRow);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            startRow++;
+                        }
                     }
                 }else if ("actual".equals(name)) {
                     int startRow=1;
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        List<CellData> cellDataList = this.mapDataHandler4(getUrl4(), columns, 1,item,startRow);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        startRow++;
+                        List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
+                        for (int k = 0; k < dateQueries1.size(); k++) {
+                            List<CellData> cellDataList = this.mapDataHandler4(getUrl4(), columns, 1,dateQueries1.get(k),startRow);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            startRow++;
+                        }
                     }
                 }else {
+                    int rowIndex=1;
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        for (int k = 0; k < columns.size(); k++) {
+                        List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
+                        for (int m = 0; m < dateQueries1.size(); m++) {
+                            for (int k = 0; k < columns.size(); k++) {
                                 String[] split = columns.get(k).split("/");
-                                int rowIndex = 1 + j;
-                                Double cellDataList = mapDataHandler5(getUrl5(), item, split[0], split[1]);
+                                Double cellDataList = mapDataHandler5(getUrl5(), dateQueries1.get(m), split[0], split[1]);
                                 setSheetValue(sheet, rowIndex, k, cellDataList);
+                            }
+                            rowIndex++;
                         }
                     }
                 }

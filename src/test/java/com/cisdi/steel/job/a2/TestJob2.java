@@ -212,11 +212,11 @@ public class TestJob2 extends SteelApplicationTests {
      * 炼焦日报
      */
     @Autowired
-    private LianjiaoribaoJob lianjiaoribaoJob;
+    private LianjiaoyuebaoJob lianjiaoyuebaoJob;
 
     @Test
     public void test21() {
-        lianjiaoribaoJob.execute(null);
+        lianjiaoyuebaoJob.execute(null);
     }
 
 
