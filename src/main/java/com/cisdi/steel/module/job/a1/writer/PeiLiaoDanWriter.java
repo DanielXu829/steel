@@ -37,9 +37,6 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
-//                Row row = sheet.createRow(29);
-//                row.createCell(0).setCellValue(shift);
-//                row.getCell(0).setCellType(CellType.STRING);
                 List<CellData> cellDataList = this.mapDataHandler(url, workbook);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
 
@@ -194,9 +191,22 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
     }
 
     private void dealData(JSONArray data, List<CellData> cellDataList, int rowIndex) {
+        List<JSONObject> list = new ArrayList<>();
         int size = data.size();
         for (int i = 0; i < size; i++) {
             JSONObject map = data.getJSONObject(i);
+            Object val2 = map.get("angle");
+            Object val3 = map.get("round");
+            if (Objects.nonNull(val2) && Objects.nonNull(val3)) {
+                if ("0.0".equals(val2.toString()) && "0.0".equals(val3.toString())) {
+
+                } else {
+                    list.add(map);
+                }
+            }
+        }
+        for (int i = 0; i < list.size(); i++) {
+            JSONObject map = list.get(i);
             Object val1 = map.get("seq");
             Object val2 = map.get("angle");
             Object val3 = map.get("round");
