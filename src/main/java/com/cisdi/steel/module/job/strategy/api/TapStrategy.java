@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -73,7 +74,7 @@ public class TapStrategy extends AbstractApiStrategy {
     }
 
     private List<Map<String, Object>> requestApiData(String urlPre, DateQuery dateQuery) {
-        String url = urlPre + "/taps/summary/period";
+        String url = urlPre + "/taps/report/period";
         Map<String, String> queryParam = dateQuery.getQueryParam();
         queryParam.put("pagenum", "1");
         queryParam.put("pagesize", "1");
@@ -102,11 +103,35 @@ public class TapStrategy extends AbstractApiStrategy {
                     if (StringUtils.isNotBlank(startTime) && StringUtils.isNotBlank(endTime)) {
                         Date start = new Date(Long.parseLong(startTime));
                         Date end = new Date(Long.parseLong(endTime));
+                        Calendar calendarStart = Calendar.getInstance();
+                        calendarStart.setTime(start);
+                        Calendar calendarEnd = Calendar.getInstance();
+                        calendarEnd.setTime(end);
                         Long betweenMin = DateUtil.getBetweenMin(end, start);
-                        obj.put("between", betweenMin.intValue());
+                        if (calendarStart.get(Calendar.DATE) != calendarEnd.get(Calendar.DATE)) {
+                            Calendar calendarNow = Calendar.getInstance();
+                            calendarNow.setTime(dateQuery.getRecordDate());
+                            // 开始时间不等于今天
+                            Date dateBeginTime = DateUtil.getDateBeginTime(end);
+                            Long bet1=0L;
+                            if (calendarEnd.get(Calendar.DATE) == calendarNow.get(Calendar.DATE)) {
+                                bet1= DateUtil.getBetweenMin(end,dateBeginTime);
+                                // 理论
+                                handlerData(obj, betweenMin, bet1);
+                                obj.put("starttime", dateBeginTime.getTime());
+                                obj.put("endtime", end);
+                            } else {
+                                bet1 = DateUtil.getBetweenMin(dateBeginTime,start);
+                                handlerData(obj, betweenMin, bet1);
+                                obj.put("starttime", start.getTime());
+                                obj.put("endtime", dateBeginTime.getTime());
+                            }
+                            obj.put("between", bet1.intValue());
+                        }else{
+                            obj.put("between", betweenMin.intValue());
+                        }
                     }
                     mapResult.put("tapindex", obj);
-
                     Map<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", obj);
                     Map<String, BigDecimal> SLAG = handlerAnalysisValues(urlPre, "SLAG", obj);
                     mapResult.put("HM", hm);
@@ -117,6 +142,27 @@ public class TapStrategy extends AbstractApiStrategy {
         }
         return resultList;
     }
+
+    private void handlerData(JSONObject obj, Long betweenMin, Long bet1) {
+        if (betweenMin == 0) {
+            return;
+        }
+        // 理论
+        BigDecimal theroyweight = obj.getBigDecimal("theroyweight");
+        if (Objects.nonNull(theroyweight)) {
+            BigDecimal multiply = theroyweight.multiply(new BigDecimal(bet1));
+            BigDecimal divide = multiply.divide(new BigDecimal(betweenMin),3,RoundingMode.HALF_UP);
+            obj.put("theroyweight", divide);
+        }
+        // 实际
+        BigDecimal actweight = obj.getBigDecimal("actweight");
+        if (Objects.nonNull(actweight)) {
+            BigDecimal divide = actweight.multiply(new BigDecimal(bet1))
+                    .divide(new BigDecimal(betweenMin),3,RoundingMode.HALF_UP);
+            obj.put("actweight", divide);
+        }
+    }
+
 
     private Map<String, BigDecimal> handlerAnalysisValues(String urlPre, String brandCode, JSONObject obj) {
         Map<String, BigDecimal> map = new CaseInsensitiveMap<>();
