@@ -10,6 +10,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -181,14 +182,10 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        Calendar instance = Calendar.getInstance();
-        instance.setTime(dateQuery.getRecordDate());
-        instance.set(Calendar.DAY_OF_MONTH, 1);
-        instance.set(Calendar.HOUR_OF_DAY, 0);
-        instance.set(Calendar.MINUTE, 0);
-        instance.set(Calendar.SECOND, 0);
-        result.put("startDate", DateUtil.getFormatDateTime(instance.getTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(new Date(), "yyyy/MM/dd HH:mm:ss"));
+        String start=DateUtil.getFormatDateTime(DateQueryUtil.getMonthStartTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
+        String end=DateUtil.getFormatDateTime(DateQueryUtil.getMonthEndTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
+        result.put("startDate", start);
+        result.put("endDate", end);
         result.put("tagName", "CK67_L1R_CB_CBReset_4_report");
         return result;
     }
