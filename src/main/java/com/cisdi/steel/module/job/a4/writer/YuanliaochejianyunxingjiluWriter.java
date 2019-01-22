@@ -35,6 +35,7 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
 
     private Workbook getMapHandler2(String url, Integer rowBatch, WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
+        DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
@@ -43,7 +44,7 @@ public class YuanliaochejianyunxingjiluWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
-                DateQuery item = new DateQuery(new Date());
+                DateQuery item = new DateQuery(date.getRecordDate());
                 item.setStartTime(DateUtil.getTodayBeginTime());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 List<CellData> cellDataList = this.mapDataHandler(url, sheetName, columns, item, rowBatch);
