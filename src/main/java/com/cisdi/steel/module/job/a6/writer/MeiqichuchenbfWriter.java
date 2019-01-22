@@ -278,7 +278,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 }
 
                 if (StringUtils.isNotBlank(indextime)) {
-                    ExcelWriterUtil.addCellData(resultList, index, 1, indextime);
+                    ExcelWriterUtil.addCellData(resultList, index, 1, Long.valueOf(indextime));
                     Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
                     Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
 
@@ -382,7 +382,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 }
 
                 if (StringUtils.isNotBlank(indextime)) {
-                    ExcelWriterUtil.addCellData(resultList, index, 1, indextime);
+                    ExcelWriterUtil.addCellData(resultList, index, 1, Long.valueOf(indextime));
                     Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
                     Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
                     Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), -1);
@@ -479,7 +479,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 }
 
                 if (StringUtils.isNotBlank(indextime)) {
-                    ExcelWriterUtil.addCellData(resultList, index, 0, indextime);
+                    ExcelWriterUtil.addCellData(resultList, index, 0, Long.valueOf(indextime));
                     Object o1 = dealPart1(getUrl3(version), indextime, columns.get(1), -1);
                     Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
                     ExcelWriterUtil.addCellData(resultList, index, 1, o1);
