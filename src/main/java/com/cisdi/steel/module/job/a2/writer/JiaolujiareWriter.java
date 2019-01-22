@@ -26,12 +26,13 @@ import java.util.*;
  * @version 1.0
  */
 @Component
-public class JiaolujiareWriter extends BaseJhWriter {
+public class JiaolujiareWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = PoiCustomUtil.getSheetCellVersion(workbook);
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -53,12 +54,58 @@ public class JiaolujiareWriter extends BaseJhWriter {
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
                     int rowIndex = j + 1;
-                    List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
+                    List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(), columns, item,version);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
         }
         return workbook;
+    }
+
+    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery,String version) {
+        Map<String, String> queryParam = getQueryParam(dateQuery,version);
+        int size = columns.size();
+        List<CellData> cellDataList = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            String column = columns.get(i);
+            if (StringUtils.isNotBlank(column)) {
+                queryParam.put("tagNames", column);
+                String result = httpUtil.get(url, queryParam);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject jsonObject = JSONObject.parseObject(result);
+                    if (Objects.nonNull(jsonObject)) {
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        if (Objects.nonNull(data)) {
+                            JSONArray arr = data.getJSONArray(column);
+                            if (Objects.nonNull(arr)&& arr.size()!=0) {
+                                JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
+                                Double val = jsonObject1.getDouble("val");
+                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return cellDataList;
+    }
+
+    protected Map<String, String> getQueryParam(DateQuery dateQuery,String version) {
+        Map<String, String> result = new HashMap<>();
+        if("6.0".equals(version)){
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),15);
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-10),"yyyy/MM/dd HH:mm:ss"));
+            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
+        }else if("7.0".equals(version)){
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-5);
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-10),"yyyy/MM/dd HH:mm:ss"));
+            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
+        }
+       return result;
+    }
+
+    protected String getUrl() {
+        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
     }
 
 }
