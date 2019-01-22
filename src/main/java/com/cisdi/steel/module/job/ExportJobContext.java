@@ -38,9 +38,6 @@ public class ExportJobContext {
     private ReportIndexMapper reportIndexMapper;
 
     @Autowired
-    private ReportCategoryTemplateService reportCategoryTemplateService;
-
-    @Autowired
     public ExportJobContext(Map<String, AbstractExportJob> apiJobMap) {
         this.apiJob.clear();
         apiJobMap.forEach((k, v) -> this.apiJob.put(v.getCurrentJob().getCode(), v));
@@ -72,15 +69,6 @@ public class ExportJobContext {
             if (Objects.nonNull(reportIndex)) {
                 AbstractExportJob abstractExportJob = apiJob.get(reportIndex.getReportCategoryCode());
                 if (Objects.nonNull(abstractExportJob)) {
-//                    LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
-//                    wrapper.eq(ReportCategoryTemplate::getReportCategoryCode, reportIndex.getReportCategoryCode());
-//                    wrapper.eq(ReportCategoryTemplate::getSequence, reportIndex.getSequence());
-//                    wrapper.eq(ReportCategoryTemplate::getTemplateLang, reportIndex.getIndexLang());
-//                    wrapper.eq(ReportCategoryTemplate::getTemplateType, reportIndex.getIndexType());
-//                    ReportCategoryTemplate reportCategoryTemplate = reportCategoryTemplateService.getOne(wrapper);
-//                    DateQuery dateQuery = new DateQuery(reportIndex.getRecordDate(), reportIndex.getRecordDate(), reportIndex.getRecordDate());
-//                    dateQuery.setRecordDay(reportIndex.getRecordDate());
-//                    DateQuery dateQuery1 = DateQueryUtil.handlerDelay(dateQuery, reportCategoryTemplate.getBuildDelay(), reportCategoryTemplate.getBuildDelayUnit(),false);
                     DateQuery dateQuery = new DateQuery(reportIndex.getRecordDate(), reportIndex.getRecordDate(), reportIndex.getRecordDate());
                     dateQuery.setDelay(false);
                     JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
@@ -97,8 +85,6 @@ public class ExportJobContext {
 
     }
 
-    @Autowired
-    private ShaojieDocMain shaojieDocMain;
 
     /**
      * 生成指定日期的报表

@@ -126,12 +126,18 @@ public class JiejiWriter extends AbstractExcelReadWriter {
         } else if ("_lilunshengchan_day_shift".equals(sheetName)) {
             map.put("date", dateQuery.getStartTime().getTime() + "");
         } else if ("_sjmain5_day_shift".equals(sheetName)) {
+            query.put("start", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
+            query.put("end", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
+
             List<String> da = new ArrayList<>();
             da.add("GF3");
             query.put("materialType", "dolomite");
             query.put("type", "LG");
             query.put("itemNames", da);
         } else if ("_sjmain6_day_shift".equals(sheetName)) {
+            query.put("start", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
+            query.put("end", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
+
             List<String> da = new ArrayList<>();
             da.add("GF3");
             query.put("materialType", "coke");
