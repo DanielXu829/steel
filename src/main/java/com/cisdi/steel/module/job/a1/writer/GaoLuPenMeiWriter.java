@@ -261,9 +261,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                 for (int k = 0; k < set.size(); k++) {
                     int vv = set.get(k);
                     if (vv == 0) {
-                        o3 = "2";
+                        o3 += "2";
                     } else {
-                        o3 = "1";
+                        o3 += "1";
                     }
                 }
             }
