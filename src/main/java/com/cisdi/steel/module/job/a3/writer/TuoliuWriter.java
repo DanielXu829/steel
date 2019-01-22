@@ -49,14 +49,14 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
 
                 if ("_6tuoliutuoxiaomax_day_hour".equals(sheetName) || "_6tuoliutuoxiaosum_day_hour".equals(sheetName)) {
-                    int  rowBatch=1;
+                    int rowBatch = 1;
                     for (DateQuery dateQuery : dateQueries) {
                         List<CellData> cellDataList = this.mapDataHandler(getUrl1(version), columns, dateQuery, rowBatch, sheetName);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         rowBatch++;
                     }
                 } else {
-                    int  rowBatch=1;
+                    int rowBatch = 1;
                     DateQuery dateQuery = DateQueryUtil.buildToday(date.getRecordDate());
                     List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, dateQuery, rowBatch, sheetName);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -93,7 +93,7 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
         } else if ("_6tuoliutuoxiaomax_day_hour".equals(sheetName)) {
             return handlerJsonArray2(columns, data, rowBatch, sheetName);
         } else {
-            return handlerJsonArray(columns, data, rowBatch);
+            return handlerJsonArray(columns, data, rowBatch, dateQuery);
         }
     }
 
@@ -149,7 +149,7 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, int rowBatch) {
+    private List<CellData> handlerJsonArray(List<String> columns, JSONObject data, int rowBatch, DateQuery dateQuery) {
         List<CellData> cellDataList = new ArrayList<>();
         int size = columns.size();
         for (int i = 0; i < size; i++) {
@@ -168,7 +168,7 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
                     }
                     Arrays.sort(list);
 
-                    List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(new Date());
+                    List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
 
                     for (int j = 0; j < dateQueries.size(); j++) {
                         long time = dateQueries.get(j).getStartTime().getTime();
