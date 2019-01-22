@@ -163,7 +163,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                 Object o = innerMap.get(key);
                                 if (Objects.nonNull(o)) {
                                     BigDecimal wac = (BigDecimal) o;
-                                    if (wac.intValue() == 0) {
+                                    wac = wac.setScale(2, BigDecimal.ROUND_HALF_UP);
+                                    double value = wac.doubleValue();
+                                    if (value < 0.15) {
                                         v2 = wac.intValue();
                                         v3 = key;
                                         v = getTagValueByTime(key, version, columns.get(1));
@@ -343,8 +345,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                         for (String key2 : innerMap2.keySet()) {
                                             BigDecimal b2 = (BigDecimal) innerMap2.get(key2);
                                             BigDecimal subtract = b1.subtract(b2);
-                                            subtract = subtract.setScale(1, BigDecimal.ROUND_HALF_UP);
-                                            if (subtract.doubleValue() >= -0.2 && subtract.doubleValue() <= 0.2) {
+                                            subtract = subtract.setScale(2, BigDecimal.ROUND_HALF_UP);
+                                            if (subtract.doubleValue() >= -0.15 && subtract.doubleValue() <= 0.15) {
                                                 o = Long.valueOf(key);
                                                 o1 = Long.valueOf(key2);
                                             }
