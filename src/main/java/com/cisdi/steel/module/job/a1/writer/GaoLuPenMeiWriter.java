@@ -1,6 +1,5 @@
 package com.cisdi.steel.module.job.a1.writer;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
@@ -207,9 +206,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Object o2 = "";
             Object o3 = "";
             //罐号
-            Set<Integer> set = new HashSet<>();
+            List<Integer> set = new ArrayList<>();
             String dateTime = null;
-            boolean f = true;
+
+            int temp = -1;
+
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 if (Objects.nonNull(ob1)) {
@@ -234,10 +235,14 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                     int value = ii.intValue();
                                     o = ii;
                                     dateTime = list[j] + "";
-                                    if (value == 1) {
-                                        f = false;
+                                    if (j == 0) {
+                                        temp = value;
+                                        set.add(value);
                                     }
-                                    set.add(value);
+                                    if (temp != value) {
+                                        temp = value;
+                                        set.add(value);
+                                    }
                                 }
                             }
                         }
@@ -250,34 +255,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             }
 
             if (set.size() > 0) {
-
-                Object[] objects = set.toArray();
-                if (set.size() == 1) {
-                    Integer m = (Integer) objects[0];
-                    if (m.intValue() == 0) {
+                if (set.size() != 1) {
+                    set.remove(0);
+                }
+                for (int k = 0; k < set.size(); k++) {
+                    int vv = set.get(k);
+                    if (vv == 0) {
                         o3 = "2";
                     } else {
                         o3 = "1";
-                    }
-                } else if (set.size() == 2) {
-                    Integer m1 = (Integer) objects[1];
-                    if (m1.intValue() == 0) {
-                        o3 += "2";
-                    } else {
-                        o3 += "1";
-                    }
-                } else if (set.size() == 3) {
-                    Integer m = (Integer) objects[1];
-                    if (m.intValue() == 0) {
-                        o3 += "2";
-                    } else {
-                        o3 += "1";
-                    }
-                    Integer m1 = (Integer) objects[2];
-                    if (m1.intValue() == 0) {
-                        o3 += "2";
-                    } else {
-                        o3 += "1";
                     }
                 }
             }
