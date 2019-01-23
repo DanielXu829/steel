@@ -87,12 +87,17 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                     min = indexData.indexOf(lastValKey) + 1;
                 }
                 int max = indexData.size();
-
+                Integer count = 0;
                 for (int i = min; i < max; i++) {
                     Integer chargeNo = indexs.get(i);
-                    Integer newRowIndex = rowIndex + i * 4;
+                    Integer row = i - count;
+                    Integer newRowIndex = rowIndex + row * 4;
                     List<CellData> cellDataList = changeLiaozhiData(url, chargeNo.toString(), times.get(i), newRowIndex, rowVals);
-                    rowCellDataList.addAll(cellDataList);
+                    if (cellDataList.size() == 0) {
+                        count++;
+                    } else {
+                        rowCellDataList.addAll(cellDataList);
+                    }
                 }
                 if (max > 0) {
                     updateDictChargeNo(dictionary, indexData.get(max - 1), rowNum, 3);
@@ -121,7 +126,9 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return resultData;
         }
-//        JSONObject chargeIndexInDay = data.getJSONObject("chargeIndexInDay");
+        if (Objects.isNull(data.get("chargeIndexInDay"))) {
+            return resultData;
+        }
         JSONObject materialValues = data.getJSONObject("materialValues");
         if (Objects.isNull(materialValues)) {
             return resultData;
@@ -129,8 +136,6 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         materialValues.put("chargeNo", chargeNo);
         materialValues.put("chargeIndexInDay", data.get("chargeIndexInDay"));
         materialValues.put("time", new Date(Long.valueOf(time)));
-//        materialValues.put("chargeIndexInDay", chargeIndexInDay.get("value"));
-//        materialValues.put("time", new Date(chargeIndexInDay.getLong("datetime")));
         Object oreStockline = materialValues.get("oreStockline");
         if (Objects.nonNull(oreStockline)) {
             BigDecimal multiply = new BigDecimal(oreStockline.toString()).multiply(new BigDecimal(1000));
@@ -229,10 +234,16 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                     min = indexData.indexOf(lastValKey) + 1;
                 }
                 int max = indexs.size();
+                Integer count = 0;
                 for (int i = min; i < max; i++) {
                     Integer chargeNo = indexs.get(i);
-                    List<CellData> cellDataList = changeData(url, chargeNo.toString(), times.get(i), rowIndex + i, rowVals);
-                    rowCellDataList.addAll(cellDataList);
+                    Integer row = rowIndex + i - count;
+                    List<CellData> cellDataList = changeData(url, chargeNo.toString(), times.get(i), row, rowVals);
+                    if (cellDataList.size() == 0) {
+                        count++;
+                    } else {
+                        rowCellDataList.addAll(cellDataList);
+                    }
                 }
                 if (max > 0) {
                     updateDictChargeNo(dictionary, indexData.get(max - 1), 1, 3);
@@ -296,7 +307,9 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return resultData;
         }
-//        JSONObject chargeIndexInDay = data.getJSONObject("chargeIndexInDay");
+        if (Objects.isNull(data.get("chargeIndexInDay"))) {
+            return resultData;
+        }
         JSONObject materialValues = data.getJSONObject("materialValues");
         if (Objects.isNull(materialValues)) {
             return resultData;
@@ -304,8 +317,6 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         materialValues.put("chargeNo", chargeNo);
         materialValues.put("chargeIndexInDay", data.get("chargeIndexInDay"));
         materialValues.put("time", new Date(Long.valueOf(time)));
-//        materialValues.put("chargeIndexInDay", chargeIndexInDay.get("value"));
-//        materialValues.put("time", new Date(chargeIndexInDay.getLong("datetime")));
         int size = rowVals.size();
         for (int i = 0; i < size; i++) {
             String s1 = rowVals.get(i);
