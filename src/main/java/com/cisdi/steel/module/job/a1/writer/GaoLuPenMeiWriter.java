@@ -145,6 +145,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             Object v4 = "";
             Object v5 = "";
+            Object v6 = "";
 
             List<String> col = new ArrayList<>();
             col.add(columns.get(0));
@@ -159,7 +160,17 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         if (Objects.nonNull(jsonObject)) {
                             Map<String, Object> innerMap = jsonObject.getInnerMap();
                             Set<String> keySet = innerMap.keySet();
+
+                            Long[] list = new Long[keySet.size()];
+                            int k = 0;
                             for (String key : keySet) {
+                                list[k] = Long.valueOf(key);
+                                k++;
+                            }
+                            Arrays.sort(list);
+
+                            for (int j = 0; j < list.length; j++) {
+                                String key = list[j] + "";
                                 Object o = innerMap.get(key);
                                 if (Objects.nonNull(o)) {
                                     BigDecimal wac = (BigDecimal) o;
@@ -172,7 +183,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                         v1 = getTagValueByTime(key, version, columns.get(2));
                                         v4 = getTagValueByTime(key, version, columns.get(4));
                                         v5 = getTagValueByTime(key, version, columns.get(5));
-                                        break;
+                                        v6 = getTagValueByTime(key, version, columns.get(6));
                                     }
                                 }
                             }
@@ -187,6 +198,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             ExcelWriterUtil.addCellData(resultList, indes, 3, v3);
             ExcelWriterUtil.addCellData(resultList, indes, 4, v4);
             ExcelWriterUtil.addCellData(resultList, indes, 5, v5);
+            ExcelWriterUtil.addCellData(resultList, indes, 6, v6);
             indes++;
         }
 
@@ -282,21 +294,23 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
     }
 
     private Object getTagValueByTime(String dateTime, String version, String column) {
+
         Object v = null;
-        Map<String, String> map = new HashMap<>();
-        map.put("time", dateTime);
-        map.put("tagname", column);
-        String re = httpUtil.get(getUrl1(version), map);
-        if (StringUtils.isNotBlank(re)) {
-            JSONObject ob = JSONObject.parseObject(re);
-            if (Objects.nonNull(ob)) {
-                JSONObject data = ob.getJSONObject("data");
-                if (Objects.nonNull(data)) {
-                    v = data.get("val");
+        if (StringUtils.isNotBlank(dateTime)) {
+            Map<String, String> map = new HashMap<>();
+            map.put("time", dateTime);
+            map.put("tagname", column);
+            String re = httpUtil.get(getUrl1(version), map);
+            if (StringUtils.isNotBlank(re)) {
+                JSONObject ob = JSONObject.parseObject(re);
+                if (Objects.nonNull(ob)) {
+                    JSONObject data = ob.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        v = data.get("val");
+                    }
                 }
             }
         }
-
         return v;
     }
 
@@ -326,6 +340,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             Long o = null;
             Long o1 = null;
+
             if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 JSONObject ob2 = JSONObject.parseObject(re2);
@@ -463,9 +478,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             tagName4.add(columns.get(4));
             re2 = getTagValues(param, tagName4, version);
 
+            Object o6 = getTagValueByTime(dateTime, version, columns.get(6));
+            ExcelWriterUtil.addCellData(resultList, indes, 6, o6);
+
             dateTime = dealPart10_1(re1, re2, columns.get(3), columns.get(4));
             Object o3 = dealPart10_2(dateTime, version, columns.get(5));
             ExcelWriterUtil.addCellData(resultList, indes, 5, o3);
+
+            Object o7 = getTagValueByTime(dateTime, version, columns.get(6));
+            ExcelWriterUtil.addCellData(resultList, indes, 7, o7);
 
             indes++;
         }
