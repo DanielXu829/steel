@@ -53,9 +53,13 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
-                    int rowIndex = j + 1;
-                    List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(), columns, item,version);
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    if (item.getRecordDate().before(new Date())) {
+                        int rowIndex = j + 1;
+                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(), columns, item,version);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    } else {
+                        break;
+                    }
                 }
             }
         }
