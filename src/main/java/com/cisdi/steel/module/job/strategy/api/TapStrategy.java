@@ -108,31 +108,32 @@ public class TapStrategy extends AbstractApiStrategy {
                         Calendar calendarEnd = Calendar.getInstance();
                         calendarEnd.setTime(end);
                         Long betweenMin = DateUtil.getBetweenMin(end, start);
-                        if (calendarStart.get(Calendar.DATE) != calendarEnd.get(Calendar.DATE)) {
-                            Calendar calendarNow = Calendar.getInstance();
-                            calendarNow.setTime(dateQuery.getRecordDate());
-                            // 开始时间不等于今天
-                            Date dateBeginTime = DateUtil.getDateBeginTime(end);
-                            Long bet1 = 0L;
-                            if (calendarEnd.get(Calendar.DATE) == calendarNow.get(Calendar.DATE)) {
-                                bet1 = DateUtil.getBetweenMin(end, dateBeginTime);
-                                // 理论
-                                handlerData(obj, betweenMin, bet1);
-                                obj.put("starttime", dateBeginTime.getTime());
-                                obj.put("endtime", end.getTime());
-                            } else {
-                                bet1 = DateUtil.getBetweenMin(dateBeginTime, start);
-                                handlerData(obj, betweenMin, bet1);
-                                obj.put("starttime", start.getTime());
-                                obj.put("endtime", dateBeginTime.getTime());
-                            }
-                            if (bet1.intValue() == 0) {
-                                continue;
-                            }
-                            obj.put("between", bet1.intValue());
-                        } else {
-                            obj.put("between", betweenMin.intValue());
-                        }
+//                        if (calendarStart.get(Calendar.DATE) != calendarEnd.get(Calendar.DATE)) {
+//                            Calendar calendarNow = Calendar.getInstance();
+//                            calendarNow.setTime(dateQuery.getRecordDate());
+//                            // 开始时间不等于今天
+//                            Date dateBeginTime = DateUtil.getDateBeginTime(end);
+//                            Long bet1 = 0L;
+//                            if (calendarEnd.get(Calendar.DATE) == calendarNow.get(Calendar.DATE)) {
+//                                bet1 = DateUtil.getBetweenMin(end, dateBeginTime);
+//                                // 理论
+//                                handlerData(obj, betweenMin, bet1);
+//                                obj.put("starttime", dateBeginTime.getTime());
+//                                obj.put("endtime", end.getTime());
+//                            } else {
+//                                bet1 = DateUtil.getBetweenMin(dateBeginTime, start);
+//                                handlerData(obj, betweenMin, bet1);
+//                                obj.put("starttime", start.getTime());
+//                                obj.put("endtime", dateBeginTime.getTime());
+//                            }
+//                            if (bet1.intValue() == 0) {
+//                                continue;
+//                            }
+//                            obj.put("between", bet1.intValue());
+//                        } else {
+//                            obj.put("between", betweenMin.intValue());
+//                        }
+                        obj.put("between", betweenMin.intValue());
                     }
                     mapResult.put("tapindex", obj);
                     Map<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", obj);
