@@ -113,21 +113,24 @@ public class TapStrategy extends AbstractApiStrategy {
                             calendarNow.setTime(dateQuery.getRecordDate());
                             // 开始时间不等于今天
                             Date dateBeginTime = DateUtil.getDateBeginTime(end);
-                            Long bet1=0L;
+                            Long bet1 = 0L;
                             if (calendarEnd.get(Calendar.DATE) == calendarNow.get(Calendar.DATE)) {
-                                bet1= DateUtil.getBetweenMin(end,dateBeginTime);
+                                bet1 = DateUtil.getBetweenMin(end, dateBeginTime);
                                 // 理论
                                 handlerData(obj, betweenMin, bet1);
                                 obj.put("starttime", dateBeginTime.getTime());
-                                obj.put("endtime", end);
+                                obj.put("endtime", end.getTime());
                             } else {
-                                bet1 = DateUtil.getBetweenMin(dateBeginTime,start);
+                                bet1 = DateUtil.getBetweenMin(dateBeginTime, start);
                                 handlerData(obj, betweenMin, bet1);
                                 obj.put("starttime", start.getTime());
                                 obj.put("endtime", dateBeginTime.getTime());
                             }
+                            if (bet1.intValue() == 0) {
+                                continue;
+                            }
                             obj.put("between", bet1.intValue());
-                        }else{
+                        } else {
                             obj.put("between", betweenMin.intValue());
                         }
                     }
@@ -151,14 +154,14 @@ public class TapStrategy extends AbstractApiStrategy {
         BigDecimal theroyweight = obj.getBigDecimal("theroyweight");
         if (Objects.nonNull(theroyweight)) {
             BigDecimal multiply = theroyweight.multiply(new BigDecimal(bet1));
-            BigDecimal divide = multiply.divide(new BigDecimal(betweenMin),3,RoundingMode.HALF_UP);
+            BigDecimal divide = multiply.divide(new BigDecimal(betweenMin), 3, RoundingMode.HALF_UP);
             obj.put("theroyweight", divide);
         }
         // 实际
         BigDecimal actweight = obj.getBigDecimal("actweight");
         if (Objects.nonNull(actweight)) {
             BigDecimal divide = actweight.multiply(new BigDecimal(bet1))
-                    .divide(new BigDecimal(betweenMin),3,RoundingMode.HALF_UP);
+                    .divide(new BigDecimal(betweenMin), 3, RoundingMode.HALF_UP);
             obj.put("actweight", divide);
         }
     }
