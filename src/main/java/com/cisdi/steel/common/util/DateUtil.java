@@ -686,6 +686,15 @@ public class DateUtil {
         return time;
     }
 
+    public static Date addSecond(Date date, int second) {
+        Date time = null;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.SECOND, second);
+        time = cal.getTime();
+        return time;
+    }
+
     /**
      * 时间毫秒时间轴 转换 long
      *
