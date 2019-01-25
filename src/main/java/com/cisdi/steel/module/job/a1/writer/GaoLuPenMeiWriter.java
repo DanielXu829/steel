@@ -57,7 +57,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
-                }else if ("_penmei3_month_day".equals(sheetName)) {
+                } else if ("_penmei3_month_day".equals(sheetName)) {
                     //喷吹压力以及罐号处理
                     int index = 1;
                     for (DateQuery item : dateQueries) {
@@ -65,17 +65,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
-                }
-                else if ("_penmei6_month_day".equals(sheetName) || "_penmei7_month_day".equals(sheetName)) {
+                } else if ("_penmei6_month_day".equals(sheetName) || "_penmei7_month_day".equals(sheetName)) {
                     //换罐时间处理
                     int index = 1;
                     for (DateQuery item : dateQueries) {
-                        List<CellData> cellDataList = mapDataHandler3(version, columns, item, index);
+                        List<CellData> cellDataList = mapDataHandler3_1(version, columns, item, index);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
-                }
-                else if ("_penmei8_month_day".equals(sheetName) || "_penmei9_month_day".equals(sheetName)) {
+                } else if ("_penmei8_month_day".equals(sheetName) || "_penmei9_month_day".equals(sheetName)) {
                     int index = 1;
                     for (DateQuery item : dateQueries) {
                         List<CellData> cellDataList = mapDataHandler4(version, columns, item, index);
@@ -264,9 +262,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             //罐号
             List<Integer> set = new ArrayList<>();
             String dateTime = null;
-
             int temp = -1;
-
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 if (Objects.nonNull(ob1)) {
@@ -323,7 +319,6 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
-
 
             ExcelWriterUtil.addCellData(resultList, indes, 0, o);
             ExcelWriterUtil.addCellData(resultList, indes, 3, o1);
@@ -462,6 +457,86 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
+    protected List<CellData> mapDataHandler3_1(String version, List<String> columns, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indes = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            List<String> col = new ArrayList<>();
+            col.add(columns.get(0));
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
+            List<Map<String, Object>> listData = new ArrayList<>();
+            int temp = -1;
+
+            if (StringUtils.isNotBlank(re1)) {
+                JSONObject ob1 = JSONObject.parseObject(re1);
+                if (Objects.nonNull(ob1)) {
+                    JSONObject data = ob1.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject jsonObject = data.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(jsonObject)) {
+                            Map<String, Object> innerMap = jsonObject.getInnerMap();
+                            Set<String> keys = innerMap.keySet();
+                            Long[] list = new Long[keys.size()];
+                            int k = 0;
+                            for (String key : keys) {
+                                list[k] = Long.valueOf(key);
+                                k++;
+                            }
+                            Arrays.sort(list);
+
+                            for (int j = 0; j < list.length; j++) {
+                                Object mapObject = innerMap.get(list[j] + "");
+                                if (Objects.nonNull(mapObject)) {
+                                    BigDecimal ii = (BigDecimal) mapObject;
+                                    int value = ii.intValue();
+                                    if (j == 0) {
+                                        temp = value;
+                                        Map<String, Object> map = new HashMap<>();
+                                        map.put(list[j] + "", value);
+                                        listData.add(map);
+                                    }
+                                    if (temp != value) {
+                                        temp = value;
+                                        Map<String, Object> map = new HashMap<>();
+                                        map.put(list[j] + "", value);
+                                        listData.add(map);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            String dateResult = new String();
+            if (listData.size() > 0) {
+                if (listData.size() != 1) {
+                    listData.remove(0);
+                }
+
+                for (int k = 0; k < listData.size(); k++) {
+                    Map<String, Object> stringObjectMap = listData.get(k);
+                    Set<String> keySet = stringObjectMap.keySet();
+                    for (String key : keySet) {
+                        Long time = Long.valueOf(key);
+                        Date date = new Date(time);
+                        String formatDateTime = DateUtil.getFormatDateTime(date, "HH:mm");
+                        dateResult += formatDateTime + "/";
+                    }
+                }
+            }
+
+            if (dateResult.endsWith("/")) {
+                dateResult = dateResult.substring(0, dateResult.length() - 1);
+            }
+            ExcelWriterUtil.addCellData(resultList, indes, 0, dateResult);
+            indes++;
+        }
+
+        return resultList;
+    }
+
     protected List<CellData> mapDataHandler4(String version, List<String> columns, DateQuery dateQuery, int index) {
         List<CellData> resultList = new ArrayList<>();
         List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
@@ -548,7 +623,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             String re2 = getTagValues(param, tagName2, version);
 
             String dateTime = dealPart10_1(re1, re2, columns.get(0), columns.get(1));
-            Object o2 = dealPart(dateTime, version, columns.get(0), "m", 1, 5);
+            Object o2 = dealPart(dateTime, version, columns.get(2), "m", 1, 5);
             ExcelWriterUtil.addCellData(resultList, indes, 2, o2);
 
             List<String> tagName3 = new ArrayList<>();
