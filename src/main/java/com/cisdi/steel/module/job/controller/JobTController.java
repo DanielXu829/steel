@@ -7,6 +7,7 @@ import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.ExportJobContext;
+import com.cisdi.steel.module.job.a1.execute.ChutiezonglanExecute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/job")
@@ -32,6 +34,26 @@ public class JobTController {
         }
         String path = exportJobContext.execute(code);
         return ApiUtil.success(path);
+    }
+
+    @Autowired
+    private ChutiezonglanExecute chutiezonglanExecute;
+
+    /**
+     * 出铁总览导出
+     *
+     * @param starttime
+     * @param endtime
+     * @param request
+     * @param response
+     */
+    @GetMapping(value = "/chutiezonglan")
+    public void chutiezonglan(String starttime, String endtime, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            chutiezonglanExecute.export(request, starttime, endtime, response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @GetMapping(value = "/export")
