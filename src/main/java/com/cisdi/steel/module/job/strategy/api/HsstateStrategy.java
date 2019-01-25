@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.strategy.api;
 
+import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
@@ -31,11 +32,13 @@ public class HsstateStrategy extends AbstractApiStrategy {
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
         String url = httpProperties.getGlUrlVersion(version);
+        Sheet dictionary = workbook.getSheet("_dictionary");
+        String tagName = PoiCellUtil.getCellValue(dictionary, 1, 1);
+
         List<CellData> cellDataList = new ArrayList<>();
         List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
         for (DateQuery dateQuery : queryList) {
-//            dateQuery = new DateQuery(new Date(1545321600000L), new Date(1545494400000L), new Date());
-            List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery, sheet);
+            List<Map<String, Object>> dataList = this.requestApiData(url, dateQuery, sheet, tagName);
             cellDataList.addAll(this.loopRowData(dataList, columns));
         }
         return SheetRowCellData.builder()
@@ -57,7 +60,7 @@ public class HsstateStrategy extends AbstractApiStrategy {
         return resultData;
     }
 
-    private List<Map<String, Object>> requestApiData(String urlPre, DateQuery dateQuery, Sheet sheet) {
+    private List<Map<String, Object>> requestApiData(String urlPre, DateQuery dateQuery, Sheet sheet, String tagName) {
         String url = urlPre + "/hsstate";
         Map<String, String> queries = new HashMap<>();
         queries.put("begintime", dateQuery.getQueryStartTime().toString());
@@ -87,6 +90,7 @@ public class HsstateStrategy extends AbstractApiStrategy {
                 if ("0".equals(state.toString())) {
                     continue;
                 }
+
                 map.put("state", optionVal);
                 Integer hsno = obj.getInteger("hsno");
                 map.put("hsno", hsno);
@@ -95,6 +99,11 @@ public class HsstateStrategy extends AbstractApiStrategy {
                 Long endtime = obj.getLong("endtime");
                 map.put("starttime", starttime);
                 map.put("endtime", endtime);
+                // 送风
+                if (4 == state &&Objects.nonNull(starttime)&& Objects.nonNull(endtime)) {
+                    Object data1 = getData(urlPre, starttime.toString(), endtime.toString(), tagName);
+                    map.put(tagName, data1);
+                }
 
                 // 缓存列名
                 Set<String> tagNames = columns.get(hsno);
@@ -122,6 +131,37 @@ public class HsstateStrategy extends AbstractApiStrategy {
 
         }
         return list;
+    }
+
+    private Object getData(String urlPre, String startTime, String endTime, String tagName) {
+        String url = urlPre + "/getTagValues/tagNamesInRange";
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("starttime", startTime);
+        jsonObject.put("endtime", endTime);
+        List<String> cellList = new ArrayList<>();
+        cellList.add(tagName);
+        jsonObject.put("tagnames", cellList);
+
+        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+        if (StringUtils.isBlank(result)) {
+            return 0;
+        }
+        JSONObject obj = JSONObject.parseObject(result);
+        obj = obj.getJSONObject("data");
+        JSONObject jsonDatas = obj.getJSONObject(tagName);
+        if (Objects.nonNull(jsonDatas) && jsonDatas.size() > 0) {
+            List<Double> resultData = new ArrayList<>();
+            Set<String> keySet = jsonDatas.keySet();
+            keySet.forEach(key->{
+                double doubleValue = jsonDatas.getDoubleValue(key);
+                resultData.add(doubleValue);
+            });
+            OptionalDouble average = resultData.stream().mapToDouble(value -> value).average();
+            if (average.isPresent()) {
+                return average.getAsDouble();
+            }
+        }
+        return 0;
     }
 
 
