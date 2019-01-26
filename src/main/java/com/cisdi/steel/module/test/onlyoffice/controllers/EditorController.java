@@ -2,6 +2,7 @@ package com.cisdi.steel.module.test.onlyoffice.controllers;
 
 import com.alibaba.fastjson.support.spring.FastJsonJsonView;
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.common.util.encodes.MD5Util;
 import com.cisdi.steel.module.test.onlyoffice.entities.FileModel;
 import com.cisdi.steel.module.test.onlyoffice.helpers.ConfigManager;
 import com.cisdi.steel.module.test.onlyoffice.helpers.DocumentManager;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.util.Date;
 import java.util.Random;
 
@@ -61,7 +63,12 @@ public class EditorController {
         model.addAttribute("documentType", FileUtility.GetFileType(filePath).toString().toLowerCase());
         //要编辑的文档访问url
         model.addAttribute("fileUri", DocumentManager.GetFileUri(fileName) + "." + fileType);
-        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + filePath + new Random().nextInt(100)));
+
+        File file1 = new File(filePath);
+        String md5 = MD5Util.MD5(file1);
+
+        model.addAttribute("fileKey", md5);
+//        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(DocumentManager.CurUserHostAddress(null) + "/" + filePath + new Random().nextInt(100)));
         model.addAttribute("callbackUrl", DocumentManager.GetCallback(filePath));
         model.addAttribute("serverUrl", DocumentManager.GetServerUrl());
         model.addAttribute("editorMode", DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(filePath)) && !"view".equals(request.getAttribute("mode")) ? "edit" : "view");
