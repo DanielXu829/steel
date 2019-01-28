@@ -116,8 +116,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
     }
 
     protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int index, String version) {
-        Map<String, String> queryParam = DateQueryUtil.getQueryParam(dateQuery, 0, 0, -1);
-        String result = getTagValues(queryParam, columns, version, true);
+        Map<String, String> queryParam = dateQuery.getQueryParam();
+        String result = getTagValues1(queryParam, columns, version);
         JSONObject obj = JSONObject.parseObject(result);
         obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
@@ -242,7 +242,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             List<String> col = new ArrayList<>();
             col.add(columns.get(0));
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
-            String re1 = getTagValues(param, col, version,false);
+            String re1 = getTagValues(param, col, version, false);
 
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
@@ -465,8 +465,33 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         JSONObject jsonObject = new JSONObject();
         //将时间全部往前推1个小时
         if (flag) {
-//            dealDate(param);
+            dealDate(param);
         }
+
+        jsonObject.put("starttime", param.get("starttime"));
+        jsonObject.put("endtime", param.get("endtime"));
+        jsonObject.put("tagnames", col);
+        String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+        return re1;
+    }
+
+    private String getTagValues1(Map<String, String> param, List<String> col, String version) {
+        JSONObject jsonObject = new JSONObject();
+        //将时间全部往前推1个小时
+
+        String starttime = param.get("starttime");
+        String endtime = param.get("endtime");
+
+        Long aLong = Long.valueOf(starttime);
+        Long bLong = Long.valueOf(endtime);
+
+        Date sDate = new Date(aLong);
+        Date date = DateUtil.addHours(sDate, -1);
+
+        Date eDate = new Date(bLong);
+        param.put("starttime", date.getTime() + "");
+        param.put("endtime", eDate.getTime() + "");
+
 
         jsonObject.put("starttime", param.get("starttime"));
         jsonObject.put("endtime", param.get("endtime"));
