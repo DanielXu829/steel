@@ -130,6 +130,12 @@ public class TapsPeriodStrategy extends AbstractApiStrategy {
 
                     Map<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", endtime, starttime);
                     Map<String, BigDecimal> slag = handlerAnalysisValues(urlPre, "SLAG", endtime, starttime);
+                    final int aaa = i;
+                    slag.forEach((k, v) -> {
+                        if ("R".equals(k)) {
+                            System.err.println(aaa + "--" + v);
+                        }
+                    });
                     hmResults.add(hm);
                     slagResults.add(slag);
 
@@ -307,7 +313,7 @@ public class TapsPeriodStrategy extends AbstractApiStrategy {
     }
 
     private Map<String, BigDecimal> getSampletime(String urlPre, String brandCode, String endTime) {
-        Map<String, BigDecimal> map = new HashMap<>();
+        Map<String, BigDecimal> map = new CaseInsensitiveMap<>();
         String url = urlPre + "/analysisValue/sampletime/" + endTime;
         Map<String, String> queries = new HashMap<>();
         queries.put("brandcode", brandCode);
