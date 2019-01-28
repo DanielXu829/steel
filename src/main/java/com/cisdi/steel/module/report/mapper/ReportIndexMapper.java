@@ -35,6 +35,13 @@ public interface ReportIndexMapper extends BaseMapper<ReportIndex> {
     ReportIndex selectIdByParamter(ReportIndex reportIndex);
 
     /**
+     * 查询最新一条
+     *
+     * @param reportIndex
+     */
+    ReportIndex selectIdByParamter1(ReportIndex reportIndex);
+
+    /**
      * 通过编码查询最新的一条数据
      *
      * @param code

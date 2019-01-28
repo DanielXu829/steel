@@ -117,4 +117,14 @@
         order by update_time desc
         limit 1
     </select>
+    <select id="selectIdByParamter1" resultType="com.cisdi.steel.module.report.entity.ReportIndex">
+        select * from report_index
+        <where>
+            report_category_code =#{reportCategoryCode}
+            AND index_lang =#{indexLang}
+            AND sequence =#{sequence}
+        </where>
+        order by update_time desc
+        limit 1
+    </select>
 </mapper>

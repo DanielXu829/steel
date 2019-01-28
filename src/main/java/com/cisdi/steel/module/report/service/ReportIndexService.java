@@ -72,4 +72,13 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
      * @return 生成文件位置 or null
      */
     String existTemplate(ReportIndex reportIndex);
+
+
+    /**
+     * 判断当天的模板是否存在
+     *
+     * @param reportIndex 索引数据
+     * @return 生成文件位置 or null
+     */
+    ReportIndex existTemplate1(ReportIndex reportIndex);
 }

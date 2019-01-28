@@ -74,11 +74,11 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
                         .setCurrDate(dateQuery.getRecordDate())
                         .setRecordDate(dateQuery.getRecordDate());
 
-                String templatePath = reportIndexService.existTemplate(reportIndex);
-                if (StringUtils.isNotBlank(templatePath)) {
+                ReportIndex templatePath = reportIndexService.existTemplate1(reportIndex);
+                if (Objects.nonNull(templatePath) && StringUtils.isNotBlank(templatePath.getPath())) {
                     // 修改为生成后文件名称
-                    template.setTemplatePath(templatePath);
-                    dealTemp(template, writerExcelDTO);
+                    template.setTemplatePath(templatePath.getPath());
+                    dealTemp(template, writerExcelDTO, templatePath.getRecordDate());
                 }
                 Workbook workbook = getWorkbook(template.getTemplatePath());
 
@@ -94,9 +94,11 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
         }
     }
 
-    private void dealTemp(ReportCategoryTemplate template, WriterExcelDTO writerExcelDTO) throws Exception {
+    private void dealTemp(ReportCategoryTemplate template, WriterExcelDTO writerExcelDTO, Date date) throws Exception {
         Workbook workbook = getWorkbook(template.getTemplatePath());
-        if (writerExcelDTO.getJobEnum().getCode().equals(JobEnum.nj_qiguidianjianruihua_month.getCode())) {
+        String dateTime = DateUtil.getFormatDateTime(writerExcelDTO.getDateQuery().getRecordDate(), "yyyy-MM");
+        String dateTime1 = DateUtil.getFormatDateTime(date, "yyyy-MM");
+        if (writerExcelDTO.getJobEnum().getCode().equals(JobEnum.nj_qiguidianjianruihua_month.getCode()) && !dateTime.equals(dateTime1)) {
             FileOutputStream fos = new FileOutputStream(template.getTemplatePath());
             int index = workbook.getSheetIndex("每班加油记录本");
             workbook.removeSheetAt(index);

@@ -294,4 +294,27 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         return null;
     }
 
+
+    @Override
+    public ReportIndex existTemplate1(ReportIndex reportIndex) {
+        ReportIndex report = null;
+        if (JobEnum.nj_qiguidianjianruihua_month.getCode().equals(reportIndex.getReportCategoryCode())) {
+            report = reportIndexMapper.selectIdByParamter1(reportIndex);
+        } else {
+            report = reportIndexMapper.selectIdByParamter(reportIndex);
+        }
+        // 判断数据库是否存在报表
+        if (Objects.isNull(report) || Objects.isNull(report.getPath())) {
+            // 不存在，直接返回null
+            return null;
+        } else {
+            // 存在
+            File file = new File(report.getPath());
+            if (file.exists()) {
+                return report;
+            }
+        }
+        return null;
+    }
+
 }

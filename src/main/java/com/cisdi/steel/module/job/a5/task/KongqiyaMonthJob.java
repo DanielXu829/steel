@@ -35,7 +35,7 @@ public class KongqiyaMonthJob extends AbstractExportJob {
     /**
      * 0 2 0 1 * ? 每月第一天过两分
      */
-    @Scheduled(cron = "0 2 0 1 * ?")
+    @Scheduled(cron = "0 1 0 * * ?")
     public void task() {
         execute(null);
     }
