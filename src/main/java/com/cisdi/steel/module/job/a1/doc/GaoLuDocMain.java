@@ -263,7 +263,7 @@ public class GaoLuDocMain {
                         if (da.equals(fomDate)) {
                             JSONObject object = jsonObject.getJSONObject("values");
                             Map<String, Object> innerMap = object.getInnerMap();
-                            Object o = innerMap.get(tagNames[0]);
+                            Object o = innerMap.get(tagNames[i]);
                             Object o1 = null;
                             Object o2 = null;
                             Object o3 = null;

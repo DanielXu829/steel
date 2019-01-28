@@ -35,7 +35,6 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         return this.getMapHandler1(getUrl(version), excelDTO, version);
     }
 
-
     protected Workbook getMapHandler1(String url, WriterExcelDTO excelDTO, String version) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
@@ -50,10 +49,18 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 if ("_penmei2_month_day".equals(sheetName)) {
-                    //喷吹量处理
+                    //正点余量
                     int index = 1;
                     for (DateQuery item : dateQueries) {
                         List<CellData> cellDataList = mapDataHandler1(url, columns, item, index, version);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
+                } else if ("_penmei12_month_day".equals(sheetName)) {
+                    //喷吹量
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler12(url, columns, item, index, version);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
@@ -110,7 +117,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int index, String version) {
         Map<String, String> queryParam = DateQueryUtil.getQueryParam(dateQuery, 0, 0, -1);
-        String result = getTagValues(queryParam, columns, version);
+        String result = getTagValues(queryParam, columns, version, true);
         JSONObject obj = JSONObject.parseObject(result);
         obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
@@ -150,7 +157,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             List<String> col = new ArrayList<>();
             col.add(columns.get(0));
-            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version, true);
 
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
@@ -201,7 +208,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
-            v2 = dealPart(tempTime, version, columns.get(0), "s", -10, 10);
+            //v2 = dealPart(tempTime, version, columns.get(0), "s", -10, 10);
+            //v2 = dealPenChuiLiang(columns.get(i + 8), dayHourEach.get(i).getQueryParam(), version);
+//            if (Objects.nonNull(tempTime)) {
+//                Long time = Long.valueOf(tempTime);
+//                Date date = new Date(time);
+//                v2 = getTagValueByTime(DateUtil.addMinute(date, -1).getTime() + "", version, columns.get(i + 8));
+//            }
+
+
             ExcelWriterUtil.addCellData(resultList, indes, 0, v2);
             ExcelWriterUtil.addCellData(resultList, indes, 1, v);
             ExcelWriterUtil.addCellData(resultList, indes, 2, v1);
@@ -214,6 +229,101 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
 
         return resultList;
+    }
+
+    protected List<CellData> mapDataHandler12(String url, List<String> columns, DateQuery dateQuery, int index, String version) {
+        List<CellData> resultList = new ArrayList<>();
+
+        int indes = index;
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            Object v = "";
+            String tempTime = null;
+            List<String> col = new ArrayList<>();
+            col.add(columns.get(0));
+            Map<String, String> param = dayHourEach.get(i).getQueryParam();
+            String re1 = getTagValues(param, col, version,false);
+
+            if (StringUtils.isNotBlank(re1)) {
+                JSONObject ob1 = JSONObject.parseObject(re1);
+                if (Objects.nonNull(ob1)) {
+                    JSONObject datas = ob1.getJSONObject("data");
+                    if (Objects.nonNull(datas)) {
+                        JSONObject jsonObject = datas.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(jsonObject)) {
+                            Map<String, Object> innerMap = jsonObject.getInnerMap();
+                            Set<String> keySet = innerMap.keySet();
+
+                            Long[] list = new Long[keySet.size()];
+                            int k = 0;
+                            for (String key : keySet) {
+                                list[k] = Long.valueOf(key);
+                                k++;
+                            }
+                            Arrays.sort(list);
+
+                            Double temp = null;
+
+                            for (int j = 0; j < list.length; j++) {
+                                String key = list[j] + "";
+                                Object o = innerMap.get(key);
+                                if (Objects.nonNull(o)) {
+                                    BigDecimal wac = (BigDecimal) o;
+                                    wac = wac.setScale(2, BigDecimal.ROUND_HALF_UP);
+                                    double value = wac.doubleValue();
+                                    if (value < 0.15) {
+                                        if (Objects.isNull(temp)) {
+                                            temp = value;
+                                            tempTime = key;
+                                        }
+                                        //1.找到最小时间
+                                        tempTime = temp < value ? tempTime : key;
+                                        temp = temp < value ? temp : value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //v2 = dealPart(tempTime, version, columns.get(0), "s", -10, 10);
+            //v2 = dealPenChuiLiang(columns.get(i + 8), dayHourEach.get(i).getQueryParam(), version);
+            if (Objects.nonNull(tempTime)) {
+                Long time = Long.valueOf(tempTime);
+                Date date = new Date(time);
+                v = getTagValueByTime(DateUtil.addMinute(date, 1).getTime() + "", version, columns.get(i + 1));
+            }
+
+            ExcelWriterUtil.addCellData(resultList, indes, 0, v);
+            indes++;
+        }
+
+
+        return resultList;
+    }
+
+    private Object dealPenChuiLiang(String tagName, Map<String, String> param, String version) {
+        Object v = null;
+        List<String> col = new ArrayList<>();
+        col.add(tagName);
+        String re1 = getTagValues(param, col, version, true);
+        if (StringUtils.isNotBlank(re1)) {
+            JSONObject ob1 = JSONObject.parseObject(re1);
+            if (Objects.nonNull(ob1)) {
+                JSONObject datas = ob1.getJSONObject("data");
+                if (Objects.nonNull(datas)) {
+                    JSONObject jsonObject = datas.getJSONObject(tagName);
+                    if (Objects.nonNull(jsonObject)) {
+                        Map<String, Object> innerMap = jsonObject.getInnerMap();
+                        for (String key : innerMap.keySet()) {
+                            v = innerMap.get(key);
+                        }
+                    }
+                }
+            }
+        }
+
+        return v;
     }
 
     private Object dealPart(String dateTime, String version, String col, String type, int batch, int num) {
@@ -253,7 +363,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < dayHourEach.size(); i++) {
             List<String> col = new ArrayList<>();
             col.add(columns.get(0));
-            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version, true);
 
             Object o = "";
             Object o1 = "";
@@ -351,13 +461,34 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         return v;
     }
 
-    private String getTagValues(Map<String, String> param, List<String> col, String version) {
+    private String getTagValues(Map<String, String> param, List<String> col, String version, boolean flag) {
         JSONObject jsonObject = new JSONObject();
+        //将时间全部往前推1个小时
+        if (flag) {
+//            dealDate(param);
+        }
+
         jsonObject.put("starttime", param.get("starttime"));
         jsonObject.put("endtime", param.get("endtime"));
         jsonObject.put("tagnames", col);
         String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
         return re1;
+    }
+
+    private void dealDate(Map<String, String> param) {
+        String starttime = param.get("starttime");
+        String endtime = param.get("endtime");
+
+        Long aLong = Long.valueOf(starttime);
+        Long bLong = Long.valueOf(endtime);
+
+        Date sDate = new Date(aLong);
+        Date date = DateUtil.addHours(sDate, -1);
+
+        Date eDate = new Date(bLong);
+        Date date1 = DateUtil.addHours(eDate, -1);
+        param.put("starttime", date.getTime() + "");
+        param.put("endtime", date1.getTime() + "");
     }
 
     protected List<CellData> mapDataHandler3(String version, List<String> columns, DateQuery dateQuery, int index) {
@@ -369,11 +500,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             List<String> col = new ArrayList<>();
             col.add(columns.get(0));
-            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version, true);
 
             List<String> col2 = new ArrayList<>();
             col2.add(columns.get(1));
-            String re2 = getTagValues(dayHourEach.get(i).getQueryParam(), col2, version);
+            String re2 = getTagValues(dayHourEach.get(i).getQueryParam(), col2, version, true);
 
             Long o = null;
             Long o1 = null;
@@ -464,7 +595,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < dayHourEach.size(); i++) {
             List<String> col = new ArrayList<>();
             col.add(columns.get(0));
-            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version);
+            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version, true);
             List<Map<String, Object>> listData = new ArrayList<>();
             int temp = -1;
 
@@ -543,17 +674,12 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         int indes = index;
         for (int i = 0; i < dayHourEach.size(); i++) {
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("starttime", param.get("starttime"));
-            jsonObject.put("endtime", param.get("endtime"));
             List<String> tagName1 = new ArrayList<>();
             tagName1.add(columns.get(0));
-            jsonObject.put("tagnames", tagName1);
-            String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+            String re1 = getTagValues(param, tagName1, version, true);
             List<String> tagName2 = new ArrayList<>();
             tagName2.add(columns.get(1));
-            jsonObject.put("tagnames", tagName2);
-            String re2 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
+            String re2 = getTagValues(param, tagName2, version, true);
 
             Object o = "";
             Object o1 = "";
@@ -616,11 +742,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
             List<String> tagName1 = new ArrayList<>();
             tagName1.add(columns.get(0));
-            String re1 = getTagValues(param, tagName1, version);
+            String re1 = getTagValues(param, tagName1, version, false);
 
             List<String> tagName2 = new ArrayList<>();
             tagName2.add(columns.get(1));
-            String re2 = getTagValues(param, tagName2, version);
+            String re2 = getTagValues(param, tagName2, version, false);
 
             String dateTime = dealPart10_1(re1, re2, columns.get(0), columns.get(1));
             Object o2 = dealPart(dateTime, version, columns.get(2), "m", 1, 5);
@@ -628,11 +754,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             List<String> tagName3 = new ArrayList<>();
             tagName3.add(columns.get(3));
-            re1 = getTagValues(param, tagName3, version);
+            re1 = getTagValues(param, tagName3, version, false);
 
             List<String> tagName4 = new ArrayList<>();
             tagName4.add(columns.get(4));
-            re2 = getTagValues(param, tagName4, version);
+            re2 = getTagValues(param, tagName4, version, false);
 
             Object o6 = getTagValueByTime(dateTime, version, columns.get(6));
             ExcelWriterUtil.addCellData(resultList, indes, 6, o6);
@@ -659,7 +785,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Map<String, String> param = dayHourEach.get(i).getQueryParam();
             List<String> tagName = new ArrayList<>();
             tagName.add(columns.get(0));
-            String re1 = getTagValues(param, tagName, version);
+            String re1 = getTagValues(param, tagName, version, true);
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject object = JSONObject.parseObject(re1);
                 if (Objects.nonNull(object)) {

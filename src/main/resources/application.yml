@@ -38,7 +38,7 @@ spring:
         org.quartz.jobStore.tablePrefix: QRTZ_
         # 是否集群配置
         org.quartz.jobStore.isClustered: true
-        # 设置集群检查间隔10s
+        # 设置集群检查间隔1h
         org.quartz.jobStore.clusterCheckinInterval: 10000
         # 是否使用job存储配置
         org.quartz.jobStore.useProperties: false
