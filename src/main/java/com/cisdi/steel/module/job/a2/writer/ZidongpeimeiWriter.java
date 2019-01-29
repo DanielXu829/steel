@@ -32,9 +32,9 @@ import java.util.*;
 @Slf4j
 public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
-    public Double compareTagVal(String tagName){
+    public Double compareTagVal(String tagName) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("tagName",tagName);
+        map.put("tagName", tagName);
         String s = httpUtil.get(getUrl3(), map);
         JSONObject jsonObject = JSONObject.parseObject(s);
         JSONObject data = jsonObject.getJSONObject("data");
@@ -47,12 +47,12 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
-        String[] tagNamesIf={"CK67_L1R_CB_CBAmtTol_1m_max","CK67_L1R_CB_CBAcTol_1m_avg"};
+        String[] tagNamesIf = {"CK67_L1R_CB_CBAmtTol_1m_max", "CK67_L1R_CB_CBAcTol_1m_avg"};
         Double max = compareTagVal(tagNamesIf[0]);
         Double avg = compareTagVal(tagNamesIf[1]);
-        if(max<1 && avg==0){
+        if (max < 1 && avg == 0) {
             log.error("根据条件判断停止执行自动配煤报表");
-            System.exit(0);
+            return null;
         }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
@@ -71,13 +71,13 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     Date todayBeginTime = DateUtil.getTodayBeginTime();
                     Date date1 = DateUtil.addHours(todayBeginTime, 8);
                     Date date2 = DateUtil.addHours(date1, 8);
-                    if (DateUtil.isEffectiveDate(date.getRecordDate(),todayBeginTime,date1)) {
+                    if (DateUtil.isEffectiveDate(date.getRecordDate(), todayBeginTime, date1)) {
                         shift = "夜班";
                         shiftNum = 1;
-                    } else if (DateUtil.isEffectiveDate(date.getRecordDate(),date1,date2)) {
+                    } else if (DateUtil.isEffectiveDate(date.getRecordDate(), date1, date2)) {
                         shift = "白班";
                         shiftNum = 2;
-                    } else{
+                    } else {
                         shift = "中班";
                         shiftNum = 3;
                     }
@@ -86,17 +86,17 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     row.getCell(0).setCellType(CellType.STRING);
 
                     Row row1 = sheet.createRow(33);
-                    Double aDouble = peimeiLeiji(getUrl3(),date);
+                    Double aDouble = peimeiLeiji(getUrl3(), date);
                     row1.createCell(0).setCellValue(aDouble);
                     row1.getCell(0).setCellType(CellType.NUMERIC);
 
-                    Double yiedNum = this.mapDataHandler1(shiftNum, getUrl4(),date);
+                    Double yiedNum = this.mapDataHandler1(shiftNum, getUrl4(), date);
                     Row row2 = sheet.createRow(30);
                     row2.createCell(0).setCellValue(yiedNum);
                     row2.getCell(0).setCellType(CellType.NUMERIC);
 
-                    Integer[] shiftArr={1,2,3};
-                    Double yiedNumLeiji = this.mapDataHandler2(shiftArr, getUrl4(),date);
+                    Integer[] shiftArr = {1, 2, 3};
+                    Double yiedNumLeiji = this.mapDataHandler2(shiftArr, getUrl4(), date);
                     Row row3 = sheet.createRow(31);
                     row3.createCell(0).setCellValue(yiedNumLeiji);
                     row3.getCell(0).setCellType(CellType.NUMERIC);
@@ -104,9 +104,9 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     List<CellData> cellDataList = this.handlerData(date, sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
 //                    }
-                }else{
+                } else {
                     List<String> firstColumnCellVal = PoiCustomUtil.getFirstRowCelVal(sheet);
-                    List<CellData> cellData = this.mapDataHandler(getUrl2(), firstColumnCellVal, 1,date);
+                    List<CellData> cellData = this.mapDataHandler(getUrl2(), firstColumnCellVal, 1, date);
                     ExcelWriterUtil.setCellValue(sheet, cellData);
                 }
             }
@@ -114,20 +114,20 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    public Double peimeiLeiji(String url,DateQuery dateQuery){
+    public Double peimeiLeiji(String url, DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         Map<String, String> result1 = new HashMap<>();
         Calendar instance = Calendar.getInstance();
         instance.setTime(dateQuery.getRecordDate());
-        instance.set(Calendar.DAY_OF_MONTH,1);
-        instance.set(Calendar.HOUR_OF_DAY,0);
-        instance.set(Calendar.MINUTE,0);
-        instance.set(Calendar.SECOND,0);
-        result.put("startDate",DateUtil.getFormatDateTime(instance.getTime(),"yyyy/MM/dd HH:mm:ss"));
+        instance.set(Calendar.DAY_OF_MONTH, 1);
+        instance.set(Calendar.HOUR_OF_DAY, 0);
+        instance.set(Calendar.MINUTE, 0);
+        instance.set(Calendar.SECOND, 0);
+        result.put("startDate", DateUtil.getFormatDateTime(instance.getTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endDate", DateUtil.getFormatDateTime(DateUtil.getTodayEndTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("tagName","CK67_L1R_CB_CBReset_4_report");
+        result.put("tagName", "CK67_L1R_CB_CBReset_4_report");
         String results = httpUtil.get(url, result);
-        Double val1=0.0;
+        Double val1 = 0.0;
         if (StringUtils.isNotBlank(results)) {
             JSONObject jsonObject = JSONObject.parseObject(results);
             if (Objects.nonNull(jsonObject)) {
@@ -139,13 +139,13 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                             String clock = obj.getString("clock");
                             result1.put("tagName", "CK67_L1R_CB_CBAmtTol_1m_max");
                             Date date = DateUtil.strToDate(clock, DateUtil.fullFormat);
-                            result1.put("time",DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:00"));
+                            result1.put("time", DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:00"));
                             String results1 = httpUtil.get(getUrl(), result1);
                             if (StringUtils.isNotBlank(results1)) {
                                 JSONObject jsonObject1 = JSONObject.parseObject(results1);
                                 JSONArray rows1 = jsonObject1.getJSONArray("rows");
                                 JSONObject obj1 = rows1.getJSONObject(0);
-                                if(Objects.nonNull(obj1)){
+                                if (Objects.nonNull(obj1)) {
                                     val1 += obj1.getDouble("val");
                                 }
                             }
@@ -198,7 +198,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch,DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam2(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -213,44 +213,44 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return ExcelWriterUtil.handlerRowData(columns, startRow, data);
     }
 
-    protected Double mapDataHandler1(Integer shiftNum, String url,DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam3(shiftNum,dateQuery);
+    protected Double mapDataHandler1(Integer shiftNum, String url, DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam3(shiftNum, dateQuery);
         String result = httpUtil.get(url, queryParam);
-        Double confirmWgt=0.0;
+        Double confirmWgt = 0.0;
         if (StringUtils.isBlank(result)) {
             return confirmWgt;
         }
         JSONArray array = JSONObject.parseArray(result);
-        if(Objects.isNull(array)|| array.size()==0){
+        if (Objects.isNull(array) || array.size() == 0) {
             return confirmWgt;
         }
         JSONObject jsonObject = array.getJSONObject(0);
-        if(Objects.nonNull(jsonObject)){
+        if (Objects.nonNull(jsonObject)) {
             confirmWgt = jsonObject.getDouble("confirmWgt");
         }
         return confirmWgt;
     }
 
-    protected Double mapDataHandler2(Integer[] shiftArr, String url,DateQuery dateQuery) {
-        Double confirmWgt=0.0;
+    protected Double mapDataHandler2(Integer[] shiftArr, String url, DateQuery dateQuery) {
+        Double confirmWgt = 0.0;
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateQuery.getRecordDate());
-        calendar.set(Calendar.DAY_OF_MONTH,1);
-        calendar.set(Calendar.HOUR_OF_DAY,0);
-        calendar.set(Calendar.MINUTE,0);
-        calendar.set(Calendar.SECOND,0);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
         Date start = calendar.getTime();
         Date todayBeginTime = DateUtil.getTodayBeginTime();
-        int betweenDays = DateUtil.getTimeDistance(start,todayBeginTime);
+        int betweenDays = DateUtil.getTimeDistance(start, todayBeginTime);
         for (int i = 0; i < betweenDays; i++) {
-            for (int j = 0; j <shiftArr.length ; j++) {
-                Map<String, String> queryParam = getQueryParam4(shiftArr[j],DateUtil.addDays(start,i));
+            for (int j = 0; j < shiftArr.length; j++) {
+                Map<String, String> queryParam = getQueryParam4(shiftArr[j], DateUtil.addDays(start, i));
                 String result = httpUtil.get(url, queryParam);
                 if (StringUtils.isNotBlank(result)) {
                     JSONArray array = JSONObject.parseArray(result);
-                    if(Objects.nonNull(array)&& array.size()!=0){
+                    if (Objects.nonNull(array) && array.size() != 0) {
                         JSONObject jsonObject = array.getJSONObject(0);
-                        if(Objects.nonNull(jsonObject)){
+                        if (Objects.nonNull(jsonObject)) {
                             confirmWgt += jsonObject.getDouble("confirmWgt");
                         }
                     }
@@ -270,11 +270,11 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
-    protected Map<String, String> getQueryParam3(Integer shiftNum,DateQuery dateQuery) {
+    protected Map<String, String> getQueryParam3(Integer shiftNum, DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd 00:00:00"));
         result.put("shift", shiftNum.toString());
@@ -283,7 +283,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam4(Integer shiftNum,Date date) {
+    protected Map<String, String> getQueryParam4(Integer shiftNum, Date date) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(date, "yyyy/MM/dd 00:00:00"));
         result.put("shift", shiftNum.toString());
@@ -291,12 +291,15 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         result.put("flag", "O");
         return result;
     }
+
     private String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
+
     private String getUrl2() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getCoalSiloName";
     }
+
     private String getUrl3() {
         return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
     }
