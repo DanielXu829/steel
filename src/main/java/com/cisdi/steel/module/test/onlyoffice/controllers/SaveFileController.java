@@ -80,7 +80,8 @@ public class SaveFileController {
                 filePath = request.getParameter("filePath");
             }
             Integer status = (Integer) jsonObj.get("status");
-            if (status.intValue() == 6 || status.intValue() == 2) {
+            //强制保存时 回调修改文件
+            if (status.intValue() == 6) {
                 /*
                  * 当我们关闭编辑窗口后，十秒钟左右onlyoffice会将它存储的我们的编辑后的文件，，此时status = 2，通过request发给我们，我们需要做的就是接收到文件然后回写该文件。
                  * */
