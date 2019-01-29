@@ -157,7 +157,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             List<String> col = new ArrayList<>();
             col.add(columns.get(0));
-            String re1 = getTagValues(dayHourEach.get(i).getQueryParam(), col, version, true);
+            Map<String, String> param = dayHourEach.get(i).getQueryParam();
+            String re1 = getTagValues(param, col, version, true);
 
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
@@ -186,22 +187,22 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                     BigDecimal wac = (BigDecimal) o;
                                     wac = wac.setScale(2, BigDecimal.ROUND_HALF_UP);
                                     double value = wac.doubleValue();
-                                    if (value < 0.15) {
-                                        if (Objects.isNull(temp)) {
-                                            temp = value;
-                                            tempTime = key;
-                                        }
-                                        //1.找到最小时间
-                                        tempTime = temp < value ? tempTime : key;
-                                        temp = temp < value ? temp : value;
-//                                        v2 = wac.intValue();
-                                        v3 = key;
-                                        v = getTagValueByTime(key, version, columns.get(1));
-                                        v1 = getTagValueByTime(key, version, columns.get(2));
-                                        v4 = getTagValueByTime(key, version, columns.get(4));
-                                        v5 = getTagValueByTime(key, version, columns.get(5));
-                                        v6 = getTagValueByTime(key, version, columns.get(6));
+//                                    if (value < 0.20) {
+                                    if (Objects.isNull(temp)) {
+                                        temp = value;
+                                        tempTime = key;
                                     }
+                                    //1.找到最小时间
+                                    tempTime = temp < value ? tempTime : key;
+                                    temp = temp < value ? temp : value;
+//                                        v2 = wac.intValue();
+//                                        v3 = key;
+//                                        v = getTagValueByTime(key, version, columns.get(1));
+//                                        v1 = getTagValueByTime(key, version, columns.get(2));
+//                                        v4 = getTagValueByTime(key, version, columns.get(4));
+//                                        v5 = getTagValueByTime(key, version, columns.get(5));
+//                                        v6 = getTagValueByTime(key, version, columns.get(6));
+//                                    }
                                 }
                             }
                         }
@@ -215,6 +216,22 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 //                Date date = new Date(time);
 //                v2 = getTagValueByTime(DateUtil.addMinute(date, -1).getTime() + "", version, columns.get(i + 8));
 //            }
+
+
+            if (Objects.isNull(tempTime)) {
+                tempTime = param.get("endtime");
+                v = getTagValueByTime(tempTime, version, columns.get(i + 1));
+                v4 = getTagValueByTime(tempTime, version, columns.get(4));
+                v5 = getTagValueByTime(tempTime, version, columns.get(5));
+            }
+            if (Objects.nonNull(tempTime)) {
+                v3 = tempTime;
+                v = getTagValueByTime(tempTime, version, columns.get(1));
+                v1 = getTagValueByTime(tempTime, version, columns.get(2));
+                v4 = getTagValueByTime(tempTime, version, columns.get(4));
+                v5 = getTagValueByTime(tempTime, version, columns.get(5));
+                v6 = getTagValueByTime(tempTime, version, columns.get(6));
+            }
 
 
             ExcelWriterUtil.addCellData(resultList, indes, 0, v2);
@@ -271,15 +288,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                     BigDecimal wac = (BigDecimal) o;
                                     wac = wac.setScale(2, BigDecimal.ROUND_HALF_UP);
                                     double value = wac.doubleValue();
-                                    if (value < 0.15) {
-                                        if (Objects.isNull(temp)) {
-                                            temp = value;
-                                            tempTime = key;
-                                        }
-                                        //1.找到最小时间
-                                        tempTime = temp < value ? tempTime : key;
-                                        temp = temp < value ? temp : value;
+//                                    if (value < 0.20) {
+                                    if (Objects.isNull(temp)) {
+                                        temp = value;
+                                        tempTime = key;
                                     }
+                                    //1.找到最小时间
+                                    tempTime = temp < value ? tempTime : key;
+                                    temp = temp < value ? temp : value;
+//                                    }
                                 }
                             }
                         }
@@ -288,6 +305,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             }
             //v2 = dealPart(tempTime, version, columns.get(0), "s", -10, 10);
             //v2 = dealPenChuiLiang(columns.get(i + 8), dayHourEach.get(i).getQueryParam(), version);
+
+            if (Objects.isNull(tempTime)) {
+                tempTime = param.get("endtime");
+                v = getTagValueByTime(tempTime, version, columns.get(i + 1));
+            }
             if (Objects.nonNull(tempTime)) {
                 Long time = Long.valueOf(tempTime);
                 Date date = new Date(time);
@@ -842,8 +864,14 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
-            for (int m = 0; m < dataList.size(); m++) {
-                ExcelWriterUtil.addCellData(resultList, indes, m, dataList.get(m));
+            if (dataList.size() == 0) {
+                for (int m = 0; m < 16; m++) {
+                    ExcelWriterUtil.addCellData(resultList, indes, m, "");
+                }
+            } else {
+                for (int m = 0; m < dataList.size(); m++) {
+                    ExcelWriterUtil.addCellData(resultList, indes, m, dataList.get(m));
+                }
             }
             indes++;
         }
