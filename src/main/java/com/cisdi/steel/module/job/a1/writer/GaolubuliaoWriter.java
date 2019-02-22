@@ -148,7 +148,8 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         }
         int size = rowVals.size();
         JSONObject distribution = data.getJSONObject("distribution");
-
+        int count=0;
+        int count2=0;
         for (int i = 0; i < size; i++) {
             String s1 = rowVals.get(i);
             if (StringUtils.isBlank(s1)) {
@@ -164,15 +165,22 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                 ExcelWriterUtil.addCellData(resultData, rowIndex, i - 1, "PWC");
                 ExcelWriterUtil.addCellData(resultData, rowIndex + 2, i - 1, "PWO");
             }
-            handlerDistribution(distribution, "C", Double.valueOf(s1).intValue() + "", rowIndex, i, resultData);
-            handlerDistribution(distribution, "O", Double.valueOf(s1).intValue() + "", rowIndex + 2, i, resultData);
+            boolean flag=handlerDistribution(distribution, "C", Double.valueOf(s1).intValue() + "", rowIndex, i-count, resultData);
+            if(!flag){
+                count++;
+            }
+            boolean flag2=handlerDistribution(distribution, "O", Double.valueOf(s1).intValue() + "", rowIndex + 2, i-count2, resultData);
+            if (!flag2) {
+                count2++;
+            }
 
         }
         return resultData;
 
     }
 
-    private void handlerDistribution(JSONObject distribution,
+
+    private boolean handlerDistribution(JSONObject distribution,
                                      String type,
                                      String key,
                                      Integer rowIndex,
@@ -182,18 +190,19 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         JSONObject obj = distribution.getJSONObject(type);
         JSONObject jsonObject = obj.getJSONObject(key);
         if (Objects.isNull(jsonObject)) {
-            return;
+            return false;
         }
         BigDecimal degreeSet = jsonObject.getBigDecimal("degreeSet");
         BigDecimal roundSet = jsonObject.getBigDecimal("roundSet");
         if (Objects.isNull(degreeSet) || Objects.isNull(roundSet)) {
-            return;
+            return false;
         }
         if (BigDecimal.ZERO.doubleValue() == degreeSet.doubleValue() || BigDecimal.ZERO.doubleValue() == roundSet.doubleValue()) {
-            return;
+            return false;
         }
         ExcelWriterUtil.addCellData(resultData, rowIndex, columnIndex, degreeSet);
         ExcelWriterUtil.addCellData(resultData, rowIndex + 1, columnIndex, roundSet);
+        return true;
     }
 
 
