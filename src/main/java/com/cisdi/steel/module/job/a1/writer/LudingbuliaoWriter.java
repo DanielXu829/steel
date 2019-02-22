@@ -62,9 +62,11 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
         int size = data.size();
         int rowIndex = 1;
         List<CellData> cellDataList = new ArrayList<>();
-        for (int i = size-1; i >=0; i--) {
+        for (int i = size - 1; i >= 0; i--) {
             JSONObject map = data.getJSONObject(i);
-            int columnIndex=0;
+            int columnIndex = 0;
+            // 隐藏的行
+            int index = 0;
             for (String column : columns) {
                 if (StringUtils.isBlank(column)) {
                     continue;
@@ -80,7 +82,7 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
                             JSONObject jsonObject1 = jsonArray.getJSONObject(j);
                             if (Objects.nonNull(jsonObject1)) {
                                 BigDecimal position = jsonObject1.getBigDecimal("position");
-                                if (child.equals(position.toString())){
+                                if (child.equals(position.toString())) {
                                     BigDecimal val1 = jsonObject1.getBigDecimal("angleset");
                                     BigDecimal val2 = jsonObject1.getBigDecimal("angleact");
                                     BigDecimal val3 = jsonObject1.getBigDecimal("roundset");
@@ -88,12 +90,17 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
                                     BigDecimal val5 = jsonObject1.getBigDecimal("weightset");
                                     BigDecimal val6 = jsonObject1.getBigDecimal("weightact");
                                     int row = rowIndex;
-                                    ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val1);
-                                    ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val2);
-                                    ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val3);
-                                    ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val4);
-                                    ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val5);
-                                    ExcelWriterUtil.addCellData(cellDataList, row, columnIndex, val6);
+                                    if (Objects.nonNull(val3) && val3.intValue() != 3) {
+                                        int newColumnIndex = columnIndex - index;
+                                        ExcelWriterUtil.addCellData(cellDataList, row++, newColumnIndex, val1);
+                                        ExcelWriterUtil.addCellData(cellDataList, row++, newColumnIndex, val2);
+                                        ExcelWriterUtil.addCellData(cellDataList, row++, newColumnIndex, val3);
+                                        ExcelWriterUtil.addCellData(cellDataList, row++, newColumnIndex, val4);
+                                        ExcelWriterUtil.addCellData(cellDataList, row++, newColumnIndex, val5);
+                                        ExcelWriterUtil.addCellData(cellDataList, row, newColumnIndex, val6);
+                                    } else {
+                                        index++;
+                                    }
                                 }
                             }
                         }
