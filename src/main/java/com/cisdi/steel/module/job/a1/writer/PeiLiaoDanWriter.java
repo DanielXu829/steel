@@ -195,10 +195,10 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         int size = data.size();
         for (int i = 0; i < size; i++) {
             JSONObject map = data.getJSONObject(i);
-            Object val2 = map.get("angle");
+//            Object val2 = map.get("angle");
             Object val3 = map.get("round");
-            if (Objects.nonNull(val2) && Objects.nonNull(val3)) {
-                if ("0.0".equals(val2.toString()) && "0.0".equals(val3.toString())) {
+            if (Objects.nonNull(val3)) {
+                if ("0.0".equals(val3.toString())) {
 
                 } else {
                     list.add(map);

@@ -33,6 +33,37 @@ public class CommonTests {
     }
 
     @Test
+    public void test22() throws Exception {
+        String path = "C:\\Users\\cj\\Desktop\\8高炉英文\\BF Stave Temperature Daily Report.xlsx";
+        Workbook workbook = WorkbookFactory.create(new File(path));
+
+        Sheet sheet = workbook.getSheet("_tag_day_all");
+        List<String> celVal = PoiCustomUtil.getFirstRowCelVal(sheet);
+        for (int i = 0; i < celVal.size(); i++) {
+            String v = celVal.get(i);
+            if (StringUtils.isNotBlank(v)) {
+                v = "BF8_L2C_BD_" + v + "_1h_avg";
+                Row row = sheet.getRow(0);
+                if (Objects.isNull(row)) {
+                    row = sheet.createRow(0);
+                }
+                Cell cell = row.getCell(i);
+                if (Objects.isNull(cell)) {
+                    cell = row.createCell(i);
+                }
+                PoiCustomUtil.setCellValue(cell, v);
+            }
+        }
+
+        workbook.setForceFormulaRecalculation(true);
+        FileOutputStream fos = new FileOutputStream("C:\\Users\\cj\\Desktop\\8高炉英文1\\BF Proper Temperature Monthly Report.xlsx");
+        workbook.write(fos);
+        fos.close();
+        workbook.close();
+
+    }
+
+    @Test
     public void excelCopySheetTest() throws Exception {
         String path = "D:\\高炉本体温度月报表_2018-11-22_08.xlsx";
         String path1 = "D:\\test3.xlsx";
