@@ -229,4 +229,26 @@ public class TestJob1 extends SteelApplicationTests {
     public void test18() {
         gaoLuPenMeiJob.execute(null);
     }
+
+    /**
+     * 高炉重点管控指标
+     */
+    @Autowired
+    private GuankongzhibiaoJob guankongzhibiaoJob;
+
+    @Test
+    public void test19() {
+        guankongzhibiaoJob.execute(null);
+    }
+
+    /**
+     * 6高炉工艺参数跟踪
+     */
+    @Autowired
+    private BF6gongyicanshuJob bf6gongyicanshuJob;
+
+    @Test
+    public void test20() {
+        bf6gongyicanshuJob.execute(null);
+    }
 }

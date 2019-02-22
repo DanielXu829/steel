@@ -43,7 +43,8 @@ public enum JobEnum {
     gl_gaolupenmei("gl_gaolupenmei", "高炉喷煤运行报表"),
     gl_jingya_day("gl_jingya_day", "高炉静压日报"),
     gl_jingya_month("gl_jingya_month", "高炉静压月报"),
-    gl_guankongzhibiao("gl_guankongzhibiao", "高炉管控指标"),
+    gl_guankongzhibiao("gl_guankongzhibiao", "高炉重点管控指标"),
+    gl_bf6gongyicanshu("gl_bf6gongyicanshu", "6高炉工艺参数跟踪"),
 
 
     // 焦化
