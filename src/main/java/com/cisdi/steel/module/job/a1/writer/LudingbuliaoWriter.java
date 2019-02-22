@@ -90,7 +90,7 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
                                     BigDecimal val5 = jsonObject1.getBigDecimal("weightset");
                                     BigDecimal val6 = jsonObject1.getBigDecimal("weightact");
                                     int row = rowIndex;
-                                    if (Objects.nonNull(val3) && val3.intValue() != 3) {
+                                    if (Objects.nonNull(val3) && val3.intValue() != 0) {
                                         int newColumnIndex = columnIndex - index;
                                         ExcelWriterUtil.addCellData(cellDataList, row++, newColumnIndex, val1);
                                         ExcelWriterUtil.addCellData(cellDataList, row++, newColumnIndex, val2);

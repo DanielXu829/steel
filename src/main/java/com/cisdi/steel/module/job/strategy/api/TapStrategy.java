@@ -134,6 +134,16 @@ public class TapStrategy extends AbstractApiStrategy {
 //                            obj.put("between", betweenMin.intValue());
 //                        }
                         obj.put("between", betweenMin.intValue());
+                        int day = calendarStart.get(Calendar.HOUR_OF_DAY);
+                        int shift = 1;
+                        if (day < 8) {
+                            shift = 1;
+                        } else if (day < 16) {
+                            shift = 2;
+                        } else if (day < 25) {
+                            shift = 3;
+                        }
+                        mapResult.put("SHIFT", shift);
                     }
                     mapResult.put("tapindex", obj);
                     Map<String, BigDecimal> hm = handlerAnalysisValues(urlPre, "HM", obj);
