@@ -43,7 +43,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
 
         Sheet dictionary = workbook.getSheet("_dictionary");
         // 炉料结构
-        handlerPart1(workbook, dictionary, excelDTO, url);
+//        handlerPart1(workbook, dictionary, excelDTO, url);
 
         handlerPart2(workbook, dictionary, excelDTO, url);
 
@@ -62,7 +62,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         String lastVal = PoiCellUtil.getCellValue(dictionary, rowNum, 3);
         // 写入数据的行数
         String rowIndexStr = PoiCellUtil.getCellValue(dictionary, rowNum, 4);
-        Integer rowIndex = 3;
+        int rowIndex = 3;
         if (StringUtils.isNotBlank(rowIndexStr)) {
             rowIndex = Double.valueOf(rowIndexStr).intValue();
         }
@@ -87,21 +87,21 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                     min = indexData.indexOf(lastValKey) + 1;
                 }
                 int max = indexData.size();
-                Integer count = 0;
+                int count = 0;
+                int lastRowIndex = rowIndex;
                 for (int i = min; i < max; i++) {
                     Integer chargeNo = indexs.get(i);
-                    Integer row = i - count;
-                    Integer newRowIndex = rowIndex + row * 4;
+                    Integer newRowIndex = rowIndex + count * 4;
+                    lastRowIndex=newRowIndex;
                     List<CellData> cellDataList = changeLiaozhiData(url, chargeNo.toString(), times.get(i), newRowIndex, rowVals);
-                    if (cellDataList.size() == 0) {
+                    if (cellDataList.size() != 0) {
                         count++;
-                    } else {
                         rowCellDataList.addAll(cellDataList);
                     }
                 }
                 if (max > 0) {
                     updateDictChargeNo(dictionary, indexData.get(max - 1), rowNum, 3);
-                    updateDictChargeNo(dictionary, max * 4 + rowIndex, rowNum, 4);
+                    updateDictChargeNo(dictionary, lastRowIndex, rowNum, 4);
                 }
 
             }
@@ -208,7 +208,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         String lastVal = PoiCellUtil.getCellValue(dictionary, 1, 3);
         // 写入数据的行数
         String rowIndexStr = PoiCellUtil.getCellValue(dictionary, 1, 4);
-        Integer rowIndex = 3;
+        int rowIndex = 3;
         if (StringUtils.isNotBlank(rowIndexStr)) {
             rowIndex = Double.valueOf(rowIndexStr).intValue();
         }
@@ -234,20 +234,19 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                     min = indexData.indexOf(lastValKey) + 1;
                 }
                 int max = indexs.size();
-                Integer count = 0;
+                int count = 0;
                 for (int i = min; i < max; i++) {
                     Integer chargeNo = indexs.get(i);
-                    Integer row = rowIndex + i - count;
+                    Integer row = rowIndex + count;
                     List<CellData> cellDataList = changeData(url, chargeNo.toString(), times.get(i), row, rowVals);
-                    if (cellDataList.size() == 0) {
+                    if (cellDataList.size() != 0) {
                         count++;
-                    } else {
                         rowCellDataList.addAll(cellDataList);
                     }
                 }
                 if (max > 0) {
                     updateDictChargeNo(dictionary, indexData.get(max - 1), 1, 3);
-                    updateDictChargeNo(dictionary, max + rowIndex, 1, 4);
+                    updateDictChargeNo(dictionary, count + rowIndex, 1, 4);
                 }
 
             }
