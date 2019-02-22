@@ -43,7 +43,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
 
         Sheet dictionary = workbook.getSheet("_dictionary");
         // 炉料结构
-//        handlerPart1(workbook, dictionary, excelDTO, url);
+        handlerPart1(workbook, dictionary, excelDTO, url);
 
         handlerPart2(workbook, dictionary, excelDTO, url);
 
