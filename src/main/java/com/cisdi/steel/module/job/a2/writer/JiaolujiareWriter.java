@@ -46,7 +46,7 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                 String formatDateTime = DateUtil.getFormatDateTime(date1, DateUtil.yyyyMMddFormat);
                 Date date2 = DateUtil.strToDate(formatDateTime + " 23:30:00", DateUtil.fullFormat);
                 DateQuery dateQuery = new DateQuery(dateQueries.get(0).getRecordDate());
-                dateQuery.setRecordDate(dateQueries.get(0).getRecordDate());
+                dateQuery.setRecordDate(date2);
                 dateQuery.setStartTime(date2);
                 dateQuery.setEndTime(DateUtil.getTodayBeginTime());
                 dateQueries.add(0,dateQuery);

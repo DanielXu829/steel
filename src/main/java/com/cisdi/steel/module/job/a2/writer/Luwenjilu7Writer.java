@@ -14,6 +14,7 @@ import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -121,8 +122,19 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
             if (Objects.nonNull(jsonObject)) {
                 JSONArray rows = jsonObject.getJSONArray("rows");
                 if (Objects.nonNull(rows)) {
+                    List<JSONObject> list = new ArrayList<>();
                     for (int j = 0; j < rows.size(); j++) {
                         JSONObject obj = rows.getJSONObject(j);
+                        if (Objects.nonNull(obj)) {
+                            BigDecimal rlno = obj.getBigDecimal("rlno");
+                            if (rlno.intValue() >= 1 && rlno.intValue() < 57) {
+                                list.add(obj);
+                            }
+                        }
+                    }
+                    int listsize=list.size();
+                    for (int j = 0; j < listsize; j++) {
+                        JSONObject obj = list.get(j);
                         if (Objects.nonNull(obj)) {
                             List<CellData> cellData1 = handlerRowData(columns, rowIndex, obj);
                             cellDataList.addAll(cellData1);
@@ -131,7 +143,6 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
                     }
                 }
             }
-
         }
         return cellDataList;
     }
