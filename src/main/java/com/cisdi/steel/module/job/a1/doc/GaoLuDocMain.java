@@ -118,14 +118,18 @@ public class GaoLuDocMain {
 
     private List<List<Double>> part1(String version, String[] tagNames, int scale) {
 
+        categoriesList.clear();
+        dateList.clear();
+
         Date date = new Date();
-        Date beginDate = DateUtil.addDays(date, -30);
+        Date date1 = DateUtil.addDays(date, 1);
+        Date beginDate = DateUtil.addDays(date1, -30);
         Date start = beginDate;
 
         List<List<Double>> doubles = new ArrayList<>();
 
 
-        while (beginDate.before(date)) {
+        while (beginDate.before(date1)) {
             categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
             dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
             beginDate = DateUtil.addDays(beginDate, 1);
@@ -224,15 +228,18 @@ public class GaoLuDocMain {
     }
 
     private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
+        categoriesList.clear();
+        dateList.clear();
 
         Date date = new Date();
-        Date beginDate = DateUtil.addDays(date, -30);
+        Date date1 = DateUtil.addDays(date, 1);
+        Date beginDate = DateUtil.addDays(date1, -30);
         Date start = beginDate;
 
         List<List<Double>> doubles = new ArrayList<>();
 
 
-        while (beginDate.before(date)) {
+        while (beginDate.before(date1)) {
             categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
             dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
             beginDate = DateUtil.addDays(beginDate, 1);
@@ -576,6 +583,11 @@ public class GaoLuDocMain {
                 objects3[i] = v * 100;
             }
         }
+
+        result.put("part7", objects1[objects1.length-2]);
+        result.put("part8", objects2[objects2.length-2]);
+        result.put("part9", objects3[objects3.length-2]);
+
         /**
          *          CSR
          *         M40
@@ -633,6 +645,10 @@ public class GaoLuDocMain {
         Object[] objects2 = lGList.get(0).toArray();
         Object[] objects3 = lGList.get(1).toArray();
         Object[] objects4 = lGList.get(2).toArray();
+
+
+        result.put("part10", objects2[objects2.length-2]);
+        result.put("part11", objects4[objects4.length-2]);
 
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
@@ -711,6 +727,10 @@ public class GaoLuDocMain {
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
 
+        result.put("part12", objects1[objects1.length-2]);
+        result.put("part13", objects2[objects2.length-2]);
+        result.put("part14", objects3[objects3.length-2]);
+
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
@@ -764,9 +784,9 @@ public class GaoLuDocMain {
         Object[] objects4 = dealData(objects2, 1000);
 
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part7", doubles2.get(0).get(0).intValue());
-        result.put("part8", Double.valueOf(doubles2.get(1).get(0) * 1000).intValue());
-        result.put("part9", doubles2.get(2).get(0).intValue());
+        result.put("part15", doubles2.get(0).get(0).intValue());
+        result.put("part16", Double.valueOf(doubles2.get(1).get(0) * 1000).intValue());
+        result.put("part17", doubles2.get(2).get(0).intValue());
 
         /**
          * 风量BF8_L2C_BD_HotBlastFlow_1d_avg
@@ -820,8 +840,7 @@ public class GaoLuDocMain {
         BigDecimal d = new BigDecimal(c);
         c = d.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 
-        result.put("part10", a);
-        result.put("part11", c);
+        result.put("part18", a);
         /**
          * W BF8_L2C_BD_W_1d_avg
          * Z BF8_L2C_BD_Z_1d_avg
@@ -858,8 +877,7 @@ public class GaoLuDocMain {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part12", doubles2.get(0).get(0).intValue());
-        result.put("part13", doubles2.get(1).get(0).intValue());
+        result.put("part20", doubles2.get(0).get(0).intValue());
 
         /**
          * 炉芯BF8_L2C_BH_T0146_1d_avg
@@ -900,7 +918,7 @@ public class GaoLuDocMain {
         double aDouble = doubles2.get(0).get(0);
         BigDecimal b = new BigDecimal(aDouble);
         aDouble = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-        result.put("part14", aDouble);
+        result.put("part21", aDouble);
         /**
          *  煤气利用率  BF8_L2C_TP_GasUtilization_1d_avg
          */
@@ -937,6 +955,9 @@ public class GaoLuDocMain {
         Object[] objects2 = doubles.get(1).toArray();
 
         Object[] objects3 = dealData(objects1, 100);
+        result.put("part22", objects2[objects2.length-2]);
+
+
 //"BF8_L2C_HMTemp_1d_avg" "BF8_L2M_HMTempTargetRatio_1d_cur"
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
