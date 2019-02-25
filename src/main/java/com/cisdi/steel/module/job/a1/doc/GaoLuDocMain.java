@@ -57,22 +57,7 @@ public class GaoLuDocMain {
     @Scheduled(cron = "0 30 6 * * ?")
     public void mainTask() {
         result = new HashMap<>();
-        dealPart1(version8, L1);
-        dealPart2(version8, L2);
-
-        dealPart3(version8, L3);
-        dealPart5(version8);
-        dealPart6(version8, L6);
-        dealPart7(version8, L7);
-
-        dealPart8(version8, L8);
-        dealPart9(version8, L9);
-        dealPart11(version8, L11);
-        dealPart13(version8, L13);
-        dealPart14(version8);
-        dealPart15(version8, L15);
-        dealPart17(version8, L17);
-
+//        mainDeal(version6);
         mainDeal(version8);
         log.error("高炉word生成完毕！");
     }
@@ -81,9 +66,26 @@ public class GaoLuDocMain {
         String name = "8";
         if ("6.0".equals(version)) {
             name = "6";
+            dealTagName6();
         } else if ("8.0".equals(version)) {
             name = "8";
+            dealTagName8();
         }
+        dealPart1(version, L1);
+        dealPart2(version, L2);
+
+        dealPart3(version, L3);
+        dealPart5(version);
+        dealPart6(version, L6);
+        dealPart7(version, L7);
+
+        dealPart8(version, L8);
+        dealPart9(version, L9);
+        dealPart11(version, L11);
+        dealPart13(version, L13);
+        dealPart14(version);
+        dealPart15(version, L15);
+        dealPart17(version, L17);
         comm(version, jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + name + "高炉操业会议纪要（实施版）.docx");
     }
 
@@ -91,6 +93,42 @@ public class GaoLuDocMain {
      * doc最后结果
      */
     private HashMap<String, Object> result = null;
+
+    private void dealTagName6() {
+        L1 = new String[]{"BF6_L2C_BD_ProductionSum_1d_cur", "BF6_L2M_CokeRate_1d_avg", "BF6_L2M_FuelRate_1d_avg"};
+        L2 = new String[]{"BF6_L2M_SinterRatio_evt", "BF6_L2M_LumporeRatio_1h_avg", "BF6_L2M_PelletsRatio_1h_avg"};
+        L3 = new String[]{"CSR", "M40", "Ad"};
+        L6 = new String[]{"TFe", "FeO"};
+        L7 = new String[]{"Vdaf", "Ad", "Fcad"};
+        L8 = new String[]{"BF6_L2C_BD_HotBlastFlow_1d_avg", "BF6_L2C_BD_ColdBlastPress_1d_avg", "BF6_L2C_BD_Pressdiff_1d_avg"};
+        L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
+        L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L2C_TP_StockLineSetL4_1d_avg"};
+        L13 = new String[]{"BF8_L2C_TP_GasUtilization_1d_avg"};
+        L15 = new String[]{"BF8_L2C_AnalysisSiValue_1d_avg", "BF8_L2C_HMTemp_1d_avg"};
+        L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenRate_1d_avg",
+                "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_PelletsRatio_1h_avg",
+                "BF8_L2M_SinterRatio_evt", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
+                "BF8_L2C_BD_BlastVelocityAct_1d_avg", "BF8_L2C_BD_Ek_1d_avg", "BF8_L2C_BD_FlamTemp_1d_avg"
+        };
+    }
+
+    private void dealTagName8() {
+        L1 = new String[]{"BF8_L2C_BD_ProductionSum_1d_cur", "BF8_L2C_BD_CokeRate_1d_avg", "BF8_L2M_FuelRate_1d_avg"};
+        L2 = new String[]{"BF8_L2M_SinterRatio_evt", "BF8_L2M_LumporeRatio_1h_avg", "BF8_L2M_PelletsRatio_1h_avg"};
+        L3 = new String[]{"CSR", "M40", "Ad"};
+        L6 = new String[]{"TFe", "FeO"};
+        L7 = new String[]{"Vdaf", "Ad", "Fcad"};
+        L8 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg"};
+        L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
+        L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L2C_TP_StockLineSetL4_1d_avg"};
+        L13 = new String[]{"BF8_L2C_TP_GasUtilization_1d_avg"};
+        L15 = new String[]{"BF8_L2C_AnalysisSiValue_1d_avg", "BF8_L2C_HMTemp_1d_avg"};
+        L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenRate_1d_avg",
+                "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_PelletsRatio_1h_avg",
+                "BF8_L2M_SinterRatio_evt", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
+                "BF8_L2C_BD_BlastVelocityAct_1d_avg", "BF8_L2C_BD_Ek_1d_avg", "BF8_L2C_BD_FlamTemp_1d_avg"
+        };
+    }
 
     private String[] L1 = new String[]{"BF8_L2C_BD_ProductionSum_1d_cur", "BF8_L2C_BD_CokeRate_1d_avg", "BF8_L2M_FuelRate_1d_avg"};
     private String[] L2 = new String[]{"BF8_L2M_SinterRatio_evt", "BF8_L2M_LumporeRatio_1h_avg", "BF8_L2M_PelletsRatio_1h_avg"};
@@ -461,6 +499,26 @@ public class GaoLuDocMain {
 
         return result;
 
+    }
+
+    private List<Double> part5(String version) {
+        List<Double> list = new ArrayList<>();
+        Date date = new Date();
+        date = DateUtil.addDays(date, -1);
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Date dateEndTime = DateUtil.getDateEndTime(date);
+        JSONArray jsonArray = dataHttp3(dateBeginTime, dateEndTime, version);
+        if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
+            JSONObject object = jsonArray.getJSONObject(0);
+            JSONObject values = object.getJSONObject("values");
+            BigDecimal aggl = values.getBigDecimal("Aggl");
+            BigDecimal r = values.getBigDecimal("R");
+
+            list.add(aggl.doubleValue());
+            list.add(r.doubleValue());
+        }
+
+        return list;
     }
 
 
@@ -961,7 +1019,11 @@ public class GaoLuDocMain {
         Object[] objects2 = doubles.get(1).toArray();
 
         Object[] objects3 = dealData(objects1, 100);
-        result.put("part22", objects2[objects2.length - 2]);
+        if (Objects.nonNull(objects2) && objects2.length > 1) {
+            result.put("part22", objects2[objects2.length - 2]);
+        } else {
+            result.put("part22", 0);
+        }
 
 
 //"BF8_L2C_HMTemp_1d_avg" "BF8_L2M_HMTempTargetRatio_1d_cur"
@@ -1014,6 +1076,21 @@ public class GaoLuDocMain {
         map.put("cz17", 2200.00);
 
         //熟料比 R2 料批 未完成
+//        /anaChargeValue/range?category=ALL&endtime=1551110400000&granularity=day&starttime=1551024000000&type=LC
+
+        List<Double> part5 = part5(version);
+        Double a = part5.get(0).doubleValue() * 100;
+        Double b = part5.get(1).doubleValue();
+        result.put("cz18", a.intValue() + "%");
+        result.put("pc18", (a.intValue() - 80) + "%");
+
+        BigDecimal decimal = new BigDecimal(b);
+        BigDecimal subtract1 = decimal.subtract(new BigDecimal(1.25));
+        decimal = decimal.setScale(2, BigDecimal.ROUND_HALF_UP);
+        subtract1 = subtract1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        result.put("cz19", decimal);
+        result.put("pc19", subtract1);
+
 
         List<List<Double>> doubles2 = part2(version, tagNames);
         for (int i = 0; i < doubles2.size(); i++) {
@@ -1083,6 +1160,19 @@ public class GaoLuDocMain {
         map.put("starttime", beginDate.getTime() + "");
         map.put("endtime", endDate.getTime() + "");
         String results = httpUtil.get(getUrl2(version), map);
+        JSONObject jsonObject = JSONObject.parseObject(results);
+        JSONArray data = jsonObject.getJSONArray("data");
+        return data;
+    }
+
+    private JSONArray dataHttp3(Date beginDate, Date endDate, String version) {
+        Map<String, String> map = new HashMap<>();
+        map.put("starttime", beginDate.getTime() + "");
+        map.put("endtime", endDate.getTime() + "");
+        map.put("category", "ALL");
+        map.put("granularity", "day");
+        map.put("type", "LC");
+        String results = httpUtil.get(getUrl3(version), map);
         JSONObject jsonObject = JSONObject.parseObject(results);
         JSONArray data = jsonObject.getJSONArray("data");
         return data;
@@ -1158,6 +1248,16 @@ public class GaoLuDocMain {
      */
     private String getUrl2(String version) {
         return httpProperties.getGlUrlVersion(version) + "/batches/distribution/period";
+    }
+
+    /**
+     * 检化验
+     *
+     * @param version
+     * @return
+     */
+    private String getUrl3(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/anaChargeValue/range";
     }
 
     private WordImageEntity image(JFreeChart chart) {
