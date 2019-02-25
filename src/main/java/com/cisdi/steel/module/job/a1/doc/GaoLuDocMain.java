@@ -78,7 +78,13 @@ public class GaoLuDocMain {
     }
 
     public void mainDeal(String version) {
-        comm(version, jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "八高炉操业会议纪要（实施版）.docx");
+        String name = "8";
+        if ("6.0".equals(version)) {
+            name = "6";
+        } else if ("8.0".equals(version)) {
+            name = "8";
+        }
+        comm(version, jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + name + "高炉操业会议纪要（实施版）.docx");
     }
 
     /**
@@ -584,9 +590,9 @@ public class GaoLuDocMain {
             }
         }
 
-        result.put("part7", objects1[objects1.length-2]);
-        result.put("part8", objects2[objects2.length-2]);
-        result.put("part9", objects3[objects3.length-2]);
+        result.put("part7", objects1[objects1.length - 2]);
+        result.put("part8", objects2[objects2.length - 2]);
+        result.put("part9", objects3[objects3.length - 2]);
 
         /**
          *          CSR
@@ -647,8 +653,8 @@ public class GaoLuDocMain {
         Object[] objects4 = lGList.get(2).toArray();
 
 
-        result.put("part10", objects2[objects2.length-2]);
-        result.put("part11", objects4[objects4.length-2]);
+        result.put("part10", objects2[objects2.length - 2]);
+        result.put("part11", objects4[objects4.length - 2]);
 
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
@@ -727,9 +733,9 @@ public class GaoLuDocMain {
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
 
-        result.put("part12", objects1[objects1.length-2]);
-        result.put("part13", objects2[objects2.length-2]);
-        result.put("part14", objects3[objects3.length-2]);
+        result.put("part12", objects1[objects1.length - 2]);
+        result.put("part13", objects2[objects2.length - 2]);
+        result.put("part14", objects3[objects3.length - 2]);
 
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
@@ -955,7 +961,7 @@ public class GaoLuDocMain {
         Object[] objects2 = doubles.get(1).toArray();
 
         Object[] objects3 = dealData(objects1, 100);
-        result.put("part22", objects2[objects2.length-2]);
+        result.put("part22", objects2[objects2.length - 2]);
 
 
 //"BF8_L2C_HMTemp_1d_avg" "BF8_L2M_HMTempTargetRatio_1d_cur"
