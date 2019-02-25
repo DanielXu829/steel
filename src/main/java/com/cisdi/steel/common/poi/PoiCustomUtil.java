@@ -99,7 +99,7 @@ public class PoiCustomUtil {
         }
         int firstRowNum = sheet.getFirstRowNum();
         int lastRowNum = sheet.getLastRowNum();
-        for (int rowNum = firstRowNum; rowNum < lastRowNum; rowNum++) {
+        for (int rowNum = firstRowNum; rowNum <= lastRowNum; rowNum++) {
             Row row = sheet.getRow(rowNum);
             if (Objects.isNull(row)) {
                 continue;
