@@ -48,10 +48,13 @@ public class GaoLuDocMain {
     @Autowired
     private JobProperties jobProperties;
 
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
+
     private String version6 = "6.0";
     private String version8 = "8.0";
 
-    //    @Scheduled(cron = "0 30 6 * * ?")
+    @Scheduled(cron = "0 0 12 * * ?")
     public void mainTask() {
         result = new HashMap<>();
         dealPart1(version8, L1);
@@ -75,11 +78,7 @@ public class GaoLuDocMain {
     }
 
     public void mainDeal(String version) {
-        if ("6.0".equals(version)) {
-//            comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "五烧每日操业会-设计版v1.docx");
-        } else {
-            comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "八高炉操业会议纪要（实施版）.docx");
-        }
+        comm(version, jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "八高炉操业会议纪要（实施版）.docx");
     }
 
     /**
@@ -94,9 +93,9 @@ public class GaoLuDocMain {
     private String[] L7 = new String[]{"Vdaf", "Ad", "Fcad"};
     private String[] L8 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg"};
     private String[] L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
-    private String[] L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L1R_TP_StockLineSetL4_evt"};
+    private String[] L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L2C_TP_StockLineSetL4_1d_avg"};
     private String[] L13 = new String[]{"BF8_L2C_TP_GasUtilization_1d_avg"};
-    private String[] L15 = new String[]{"BF8_L2C_HMTemp_1m_max"};
+    private String[] L15 = new String[]{"BF8_L2C_AnalysisSiValue_1d_avg", "BF8_L2C_HMTemp_1d_avg"};
     private String[] L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenRate_1d_avg",
             "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_PelletsRatio_1h_avg",
             "BF8_L2M_SinterRatio_evt", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
@@ -117,7 +116,7 @@ public class GaoLuDocMain {
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
 
-    private List<List<Double>> part1(String version, String[] tagNames) {
+    private List<List<Double>> part1(String version, String[] tagNames, int scale) {
 
         Date date = new Date();
         Date beginDate = DateUtil.addDays(date, -30);
@@ -159,7 +158,11 @@ public class GaoLuDocMain {
                                 break;
                             }
                         }
-                        a.add(v);
+                        if (Objects.nonNull(v)) {
+                            a.add(v * scale);
+                        } else {
+                            a.add(v);
+                        }
                     }
                 }
                 doubles.add(a);
@@ -220,7 +223,7 @@ public class GaoLuDocMain {
 
     }
 
-    private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type) {
+    private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
 
         Date date = new Date();
         Date beginDate = DateUtil.addDays(date, -30);
@@ -234,7 +237,6 @@ public class GaoLuDocMain {
             dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
             beginDate = DateUtil.addDays(beginDate, 1);
         }
-
         for (String cBrandCode : cBrandCodes) {
             List<Double> csrR = new ArrayList<>();
             List<Double> m40R = new ArrayList<>();
@@ -263,7 +265,7 @@ public class GaoLuDocMain {
                         if (da.equals(fomDate)) {
                             JSONObject object = jsonObject.getJSONObject("values");
                             Map<String, Object> innerMap = object.getInnerMap();
-                            Object o = innerMap.get(tagNames[i]);
+                            Object o = innerMap.get(tagNames[0]);
                             Object o1 = null;
                             Object o2 = null;
                             Object o3 = null;
@@ -340,6 +342,7 @@ public class GaoLuDocMain {
             List<Double> rd = new ArrayList<>();
             List<Double> doubles1 = doubles.get(j);
             for (int i = 0; i < doubles1.size(); i++) {
+                int size = 1;
                 Double aDouble = doubles.get(j).get(i);
                 Double bDouble = 0.0;
                 if ((j + tagNames.length) < doubles.size()) {
@@ -349,10 +352,21 @@ public class GaoLuDocMain {
                 if ((j + 2 * tagNames.length) < doubles.size()) {
                     cDouble = doubles.get(j + 2 * tagNames.length).get(i);
                 }
-                Double x = (aDouble + bDouble + cDouble) / cBrandCodes.length;
-                rd.add(x);
-                result.add(rd);
+
+                if (bDouble.doubleValue() != 0.0) {
+                    size++;
+                }
+                if (cDouble.doubleValue() != 0.0) {
+                    size++;
+                }
+                Double x = (aDouble + bDouble + cDouble) / size;
+                if (Objects.nonNull(x)) {
+                    rd.add(x * scale);
+                } else {
+                    rd.add(x);
+                }
             }
+            result.add(rd);
         }
 
         return result;
@@ -438,7 +452,7 @@ public class GaoLuDocMain {
 
 
     private void dealPart1(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames);
+        List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
@@ -485,7 +499,7 @@ public class GaoLuDocMain {
     }
 
     private void dealPart2(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames);
+        List<List<Double>> doubles = part1(version, tagNames, 100);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
@@ -546,11 +560,22 @@ public class GaoLuDocMain {
     }
 
     private void dealPart3(String version, String[] tagNames) {
-        String[] cBrandCodes = {"1_2_LYJJ_COKE", "WGYJJT_COKE", "6_7_LYJJ_COKE"};
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL");
+        String[] cBrandCodes = {"1_2_LYJJ_COKE",
+                "WGYJJT_COKE",
+                "6_7_LYJJ_COKE",
+                "4_5_LYJJ_COKE"};
+        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
+
+        for (int i = 0; i < objects3.length; i++) {
+            Object o = objects3[i];
+            if (Objects.nonNull(o)) {
+                Double v = (Double) o;
+                objects3[i] = v * 100;
+            }
+        }
         /**
          *          CSR
          *         M40
@@ -570,8 +595,8 @@ public class GaoLuDocMain {
         series3.add(new Serie("Ad", objects3));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
-        vectors.add(series1);
         vectors.add(series2);
+        vectors.add(series1);
         vectors.add(series3);
 
         String title1 = "";
@@ -589,18 +614,18 @@ public class GaoLuDocMain {
     }
 
     private void dealPart5(String version) {
-        String[] cBrandCodes = {"6_SJK_SINTER", "6_SJK_SINTER", "6_SJK_SINTER"};
+        String[] cBrandCodes = {"5_SJK_SINTER", "6_SJK_SINTER"};
         /**
-         *   <5mm GL5
+         *         <5mm GL5
          *         >40mm GF40
          *         5-10mm
          */
         //转鼓
-        String[] lp = {"TI"};
+        String[] lp = {"Drum"};
         //粒度
-        String[] lg = {"LF5", "GF40", "GF5"};
-        List<List<Double>> lPList = part3(version, lp, cBrandCodes, "LP");
-        List<List<Double>> lGList = part3(version, lg, cBrandCodes, "LG");
+        String[] lg = {"GS5", "GL40", "G0510"};
+        List<List<Double>> lPList = part3(version, lp, cBrandCodes, "ALL", 100);
+        List<List<Double>> lGList = part3(version, lg, cBrandCodes, "ALL", 1);
 
 
         Object[] objects1 = lPList.get(0).toArray();
@@ -647,8 +672,8 @@ public class GaoLuDocMain {
     }
 
     private void dealPart6(String version, String[] tagNames) {
-        String[] cBrandCodes = {"6_SJK_SINTER", "6_SJK_SINTER", "6_SJK_SINTER"};
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "LC");
+        String[] cBrandCodes = {"5_SJK_SINTER", "6_SJK_SINTER"};
+        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 100);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
@@ -680,8 +705,8 @@ public class GaoLuDocMain {
     }
 
     private void dealPart7(String version, String[] tagNames) {
-        String[] cBrandCodes = {"6_SJK_SINTER", "6_SJK_SINTER", "6_SJK_SINTER"};
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "LC");
+        String[] cBrandCodes = {"4_ZMHPCM_COAL"};
+        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 100);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
@@ -732,15 +757,15 @@ public class GaoLuDocMain {
     }
 
     private void dealPart8(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames);
+        List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
+        Object[] objects4 = dealData(objects2, 1000);
 
-        Object[] objects4 = dealData(objects2, 100);
         List<List<Double>> doubles2 = part2(version, tagNames);
         result.put("part7", doubles2.get(0).get(0).intValue());
-        result.put("part8", doubles2.get(1).get(0).intValue());
+        result.put("part8", Double.valueOf(doubles2.get(1).get(0) * 1000).intValue());
         result.put("part9", doubles2.get(2).get(0).intValue());
 
         /**
@@ -782,7 +807,7 @@ public class GaoLuDocMain {
     }
 
     private void dealPart9(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames);
+        List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
@@ -829,7 +854,7 @@ public class GaoLuDocMain {
     }
 
     private void dealPart11(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames);
+        List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
@@ -838,7 +863,7 @@ public class GaoLuDocMain {
 
         /**
          * 炉芯BF8_L2C_BH_T0146_1d_avg
-         * L4x BF8_L1R_TP_StockLineSetL4_evt
+         * L4x BF8_L2C_TP_StockLineSetL4_1d_avg
          */
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
@@ -868,7 +893,7 @@ public class GaoLuDocMain {
     }
 
     private void dealPart13(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames);
+        List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         List<List<Double>> doubles2 = part2(version, tagNames);
 
@@ -907,25 +932,20 @@ public class GaoLuDocMain {
     }
 
     private void dealPart15(String version, String[] tagNames) {
-        String[] cBrandCodes = {"HM"};
-        String[] si = {"Si"};
-        List<List<Double>> lc = part3(version, si, cBrandCodes, "LC");
+        List<List<Double>> doubles = part1(version, tagNames, 1);
+        Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
 
-        List<List<Double>> tagName = part2(version, tagNames);
-
-        Object[] objects = lc.get(0).toArray();
-        Object[] objects1 = tagName.get(0).toArray();
-
-        Object[] objects4 = dealData(objects1, 100);
-
+        Object[] objects3 = dealData(objects1, 100);
+//"BF8_L2C_HMTemp_1d_avg" "BF8_L2M_HMTempTargetRatio_1d_cur"
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
-        series1.add(new Serie("Si", objects));
+        series1.add(new Serie("PT", objects2));
 
         // 标注类别
         Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("PT", objects4));
+        series2.add(new Serie("Si", objects3));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
@@ -940,7 +960,7 @@ public class GaoLuDocMain {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 1300, 1600, 0, 100, 0, 1, 2, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 1300, 1600, 0, 100, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg15", image1);
 
@@ -995,7 +1015,7 @@ public class GaoLuDocMain {
                 bigDecimal = bigDecimal.multiply(new BigDecimal(1000)).setScale(2, BigDecimal.ROUND_HALF_UP);
                 result.put("cz" + (i + 1), bigDecimal.intValue());
 
-                subtract= bigDecimal1.subtract(bigDecimal);
+                subtract = bigDecimal1.subtract(bigDecimal);
                 result.put("pc" + (i + 1), subtract.intValue());
             }
 
@@ -1041,16 +1061,33 @@ public class GaoLuDocMain {
         return data;
     }
 
-    private void comm(String path) {
+    private void comm(String version, String path) {
         //文档所有日期
         dealDate(result);
         try {
+            String sqquence = "8高炉";
+            if ("6.0".equals(version)) {
+                sqquence = "6高炉";
+            }
+
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
-            String fileName = "高炉" + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "操业会议纪要（实施版）.docx";
+            String fileName = sqquence + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "操业会议纪要（实施版）.docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
+
+            ReportIndex reportIndex = new ReportIndex();
+            reportIndex.setCreateTime(new Date());
+            reportIndex.setUpdateTime(new Date());
+            reportIndex.setSequence(sqquence);
+            reportIndex.setIndexLang("cn_zh");
+            reportIndex.setIndexType("report_day");
+            reportIndex.setRecordDate(new Date());
+            reportIndex.setName(fileName);
+            reportIndex.setReportCategoryCode(JobEnum.gl_caoyehui_day.getCode());
+            reportIndex.setPath(filePath);
+            reportIndexMapper.insert(reportIndex);
         } catch (Exception e) {
             e.printStackTrace();
         }

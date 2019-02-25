@@ -191,8 +191,9 @@ public class ChartUtils {
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
-        categoryaxis.setCategoryLabelPositionOffset(20);
-        categoryaxis.setTickLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
+        categoryaxis.setCategoryLabelPositionOffset(10);
+        categoryaxis.setTickLabelFont(new Font("宋体", Font.LAYOUT_NO_LIMIT_CONTEXT, 13));
+        categoryaxis.setCategoryMargin(0.4);
 
         ValueAxis rangeAxis = plot.getRangeAxis();
         rangeAxis.setAxisLineVisible(true);
