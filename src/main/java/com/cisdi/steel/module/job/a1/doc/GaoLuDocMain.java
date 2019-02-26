@@ -54,7 +54,7 @@ public class GaoLuDocMain {
     private String version6 = "6.0";
     private String version8 = "8.0";
 
-    @Scheduled(cron = "0 30 8 * * ?")
+    @Scheduled(cron = "0 0 12 * * ?")
     public void mainTask() {
         result = new HashMap<>();
 //        mainDeal(version6);

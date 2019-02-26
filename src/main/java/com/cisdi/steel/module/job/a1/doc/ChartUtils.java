@@ -192,7 +192,8 @@ public class ChartUtils {
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
         categoryaxis.setCategoryLabelPositionOffset(10);
-        categoryaxis.setTickLabelFont(new Font("宋体", Font.LAYOUT_NO_LIMIT_CONTEXT, 13));
+        categoryaxis.setTickLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
+        categoryaxis.setLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
         categoryaxis.setCategoryMargin(0.4);
 
         ValueAxis rangeAxis = plot.getRangeAxis();
@@ -252,7 +253,7 @@ public class ChartUtils {
             }
             plot.setRenderer(1, rederer);
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-            rederer.setBaseItemLabelFont(new Font("Calibri", Font.ITALIC, 15));
+            rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
             rederer.setSeriesPaint(0, Color.green);
             rederer.setSeriesPaint(1, Color.yellow);
             rederer.setSeriesPaint(2, Color.red);
@@ -279,7 +280,7 @@ public class ChartUtils {
             // -- 修改第3条曲线显示效果
             LineAndShapeRenderer rederer = new LineAndShapeRenderer();
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-            rederer.setBaseItemLabelFont(new Font("Calibri", Font.ITALIC, 15));
+            rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
             rederer.setSeriesPaint(0, Color.yellow);
             rederer.setSeriesPaint(1, Color.yellow);
             rederer.setSeriesPaint(2, Color.red);
@@ -305,7 +306,7 @@ public class ChartUtils {
             // -- 修改第3条曲线显示效果
             LineAndShapeRenderer rederer = new LineAndShapeRenderer();
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-            rederer.setBaseItemLabelFont(new Font("Calibri", Font.ITALIC, 15));
+            rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
             rederer.setSeriesPaint(0, Color.yellow);
             rederer.setSeriesPaint(1, Color.yellow);
             rederer.setSeriesPaint(2, Color.red);

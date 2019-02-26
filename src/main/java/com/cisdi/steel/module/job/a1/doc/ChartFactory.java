@@ -4,6 +4,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
 
 import org.jfree.chart.block.BlockBorder;
+import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 
@@ -62,6 +63,7 @@ public class ChartFactory {
         DefaultCategoryDataset dataset3 = null;
         DefaultCategoryDataset dataset4 = null;
 
+
         JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
         if (stack[0] == 2) {
             chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, valueAxisLabel, dataset);
@@ -85,12 +87,14 @@ public class ChartFactory {
                     .createDefaultCategoryDataset(series.get(3), categories);
         }
 
+        LegendTitle legend = chart.getLegend(); // 设置图例的字体
+        legend.setItemFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
 
         chart.setBorderVisible(false);
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3, dataset4, stack,ystack);//
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3, dataset4, stack, ystack);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
         ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
