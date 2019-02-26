@@ -76,44 +76,54 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
 
                 ReportIndex templatePath = reportIndexService.existTemplate1(reportIndex);
                 if (Objects.nonNull(templatePath) && StringUtils.isNotBlank(templatePath.getPath())) {
-                    // 修改为生成后文件名称
-                    template.setTemplatePath(templatePath.getPath());
-                    dealTemp(template, writerExcelDTO, templatePath.getRecordDate());
+                    if (writerExcelDTO.getJobEnum().getCode().equals(JobEnum.nj_qiguidianjianruihua_month.getCode())) {
+                        // 修改为生成后文件名称
+                        String dateTime = DateUtil.getFormatDateTime(writerExcelDTO.getDateQuery().getRecordDate(), "yyyy-MM");
+                        String dateTime1 = DateUtil.getFormatDateTime(templatePath.getRecordDate(), "yyyy-MM");
+                        if (!dateTime.equals(dateTime1)) {
+                            template.setTemplatePath(templatePath.getPath());
+                            Workbook workbook = dealTemp(template);
+
+                            PoiCustomUtil.buildMetadata(workbook, writerExcelDTO);
+                            // 6、生成文件
+                            this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
+
+                            // 7、插入索引
+                            reportIndexService.insertReportRecord(reportIndex);
+                        }
+
+                    }
+                } else {
+                    Workbook workbook = getWorkbook(template.getTemplatePath());
+
+                    PoiCustomUtil.buildMetadata(workbook, writerExcelDTO);
+                    // 6、生成文件
+                    this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
+
+                    // 7、插入索引
+                    reportIndexService.insertReportRecord(reportIndex);
                 }
-                Workbook workbook = getWorkbook(template.getTemplatePath());
-
-                PoiCustomUtil.buildMetadata(workbook, writerExcelDTO);
-                // 6、生成文件
-                this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
-
-                // 7、插入索引
-                reportIndexService.insertReportRecord(reportIndex);
             } catch (Exception e) {
                 log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage(), e);
             }
         }
     }
 
-    private void dealTemp(ReportCategoryTemplate template, WriterExcelDTO writerExcelDTO, Date date) throws Exception {
+    private Workbook dealTemp(ReportCategoryTemplate template) {
         Workbook workbook = getWorkbook(template.getTemplatePath());
-        String dateTime = DateUtil.getFormatDateTime(writerExcelDTO.getDateQuery().getRecordDate(), "yyyy-MM");
-        String dateTime1 = DateUtil.getFormatDateTime(date, "yyyy-MM");
-        if (writerExcelDTO.getJobEnum().getCode().equals(JobEnum.nj_qiguidianjianruihua_month.getCode()) && !dateTime.equals(dateTime1)) {
-            FileOutputStream fos = new FileOutputStream(template.getTemplatePath());
-            int index = workbook.getSheetIndex("每班加油记录本");
-            workbook.removeSheetAt(index);
-            int temp = workbook.getSheetIndex("_temp");
-            workbook.setSheetName(temp, "每班加油记录本");
-            workbook.setSheetHidden(temp, false);
 
-            Sheet sheet = workbook.cloneSheet(temp);
-            workbook.setSheetName(workbook.getSheetIndex(sheet), "_temp");
-            workbook.setSheetHidden(workbook.getSheetIndex(sheet), true);
+        int index = workbook.getSheetIndex("每班加油记录本");
+        workbook.removeSheetAt(index);
+        int temp = workbook.getSheetIndex("_temp");
+        workbook.setSheetName(temp, "每班加油记录本");
+        workbook.setSheetHidden(temp, false);
 
-            workbook.write(fos);
-            fos.close();
-            workbook.close();
-        }
+        Sheet sheet = workbook.cloneSheet(temp);
+        workbook.setSheetName(workbook.getSheetIndex(sheet), "_temp");
+        workbook.setSheetHidden(workbook.getSheetIndex(sheet), true);
+
+
+        return workbook;
     }
 
     /**

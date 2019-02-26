@@ -29,7 +29,7 @@ public abstract class AbstractNJExportJob extends AbstractExportJob {
      * 0 0 0/3 * * ? 每3小时生成
      * 0 0/1 * * * ? 每分钟生成
      */
-    @Scheduled(cron = "0 0 0/3 * * ?")
+    @Scheduled(cron = "0 2 0/3 * * ?")
     public void task() {
         execute(null);
     }
