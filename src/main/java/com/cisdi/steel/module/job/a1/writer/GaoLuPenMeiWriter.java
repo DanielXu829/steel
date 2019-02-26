@@ -732,7 +732,6 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Object o1 = "";
             Object o2 = "";
             String dateTime = null;
-            boolean f = false;
             if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 JSONObject ob2 = JSONObject.parseObject(re2);
@@ -742,27 +741,20 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         JSONObject tag1 = data.getJSONObject(columns.get(0));
                         if (Objects.nonNull(tag1)) {
                             Map<String, Object> innerMap = tag1.getInnerMap();
-                            for (String key : innerMap.keySet()) {
-                                BigDecimal b1 = (BigDecimal) innerMap.get(key);
+                            String dateTime1 = dealPart10(innerMap);
+                            if (Objects.nonNull(dateTime1)) {
                                 JSONObject data2 = ob2.getJSONObject("data");
                                 if (Objects.nonNull(data2)) {
                                     JSONObject tag2 = data2.getJSONObject(columns.get(1));
                                     if (Objects.nonNull(tag2)) {
                                         Map<String, Object> innerMap2 = tag2.getInnerMap();
-                                        for (String key2 : innerMap2.keySet()) {
-                                            BigDecimal b2 = (BigDecimal) innerMap2.get(key2);
-                                            if (b1.intValue() == 0 && b2.intValue() == 0) {
-                                                Long aLong = Long.valueOf(key);
-                                                Long aLong1 = Long.valueOf(key2);
-                                                dateTime = aLong > aLong1 ? key : key2;
-                                                f = true;
-                                                break;
-                                            }
+                                        String dateTime2 = dealPart10(innerMap2);
+                                        if (Objects.nonNull(dateTime2)) {
+                                            Long aLong = Long.valueOf(dateTime1);
+                                            Long bLong = Long.valueOf(dateTime2);
+                                            dateTime = aLong > bLong ? dateTime1 : dateTime2;
                                         }
                                     }
-                                }
-                                if (f) {
-                                    break;
                                 }
                             }
                         }
