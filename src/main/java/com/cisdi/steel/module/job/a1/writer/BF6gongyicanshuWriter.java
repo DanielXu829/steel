@@ -28,7 +28,7 @@ import java.util.Objects;
  * @version 1.0
  */
 @Component
-public class BF6gongyicanshuWriter extends AbstractExcelReadWriter {
+public class BF6gongyicanshuWriter extends GuankongzhibiaoWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -59,42 +59,6 @@ public class BF6gongyicanshuWriter extends AbstractExcelReadWriter {
             }
         }
         return workbook;
-    }
-
-    private void setSheetValue(Sheet sheet, Integer rowNum, Integer columnNum, Object obj) {
-        Row row = sheet.getRow(rowNum);
-        if (Objects.isNull(row)) {
-            row = sheet.createRow(rowNum);
-        }
-        Cell cell = row.getCell(columnNum);
-        if (Objects.isNull(cell)) {
-            cell = row.createCell(columnNum);
-        }
-        PoiCustomUtil.setCellValue(cell, obj);
-    }
-
-    protected Double mapDataHandler(String url, String tagName, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam(dateQuery);
-        queryParam.put("tagname", tagName);
-        String result = httpUtil.get(url, queryParam);
-        BigDecimal val = BigDecimal.ZERO;
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject jsonObject = JSONObject.parseObject(result);
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject data = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(data)) {
-                    val = data.getBigDecimal("val");
-                }
-            }
-        }
-        return val.doubleValue();
-    }
-
-    @Override
-    protected Map<String, String> getQueryParam(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        result.put("time", dateQuery.getRecordDate().getTime() + "");
-        return result;
     }
 
 }

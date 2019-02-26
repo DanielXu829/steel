@@ -54,7 +54,7 @@ public class GuankongzhibiaoWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    private void setSheetValue(Sheet sheet, Integer rowNum, Integer columnNum, Object obj) {
+    protected void setSheetValue(Sheet sheet, Integer rowNum, Integer columnNum, Object obj) {
         Row row = sheet.getRow(rowNum);
         if (Objects.isNull(row)) {
             row = sheet.createRow(rowNum);
