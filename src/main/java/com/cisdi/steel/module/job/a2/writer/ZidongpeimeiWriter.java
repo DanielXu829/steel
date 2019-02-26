@@ -32,13 +32,16 @@ import java.util.*;
 @Slf4j
 public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
-    public Double compareTagVal(String tagName) {
+    public Double compareTagVal(String tagName,DateQuery dateQuery) {
         HashMap<String, String> map = new HashMap<>();
         map.put("tagName", tagName);
+        String time=DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:00");
+        map.put("startDate", time);
+        map.put("endDate", time);
         String s = httpUtil.get(getUrl3(), map);
         JSONObject jsonObject = JSONObject.parseObject(s);
-        JSONObject data = jsonObject.getJSONObject("data");
-        JSONObject tagValue = data.getJSONObject("TagValue");
+        JSONArray rows = jsonObject.getJSONArray("rows");
+        JSONObject tagValue = rows.getJSONObject(0);
         Double val = tagValue.getDouble("val");
         return val;
     }
@@ -48,8 +51,8 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         String[] tagNamesIf = {"CK67_L1R_CB_CBAmtTol_1m_max", "CK67_L1R_CB_CBAcTol_1m_avg"};
-        Double max = compareTagVal(tagNamesIf[0]);
-        Double avg = compareTagVal(tagNamesIf[1]);
+        Double max = compareTagVal(tagNamesIf[0],date);
+        Double avg = compareTagVal(tagNamesIf[1],date);
         if (max < 1 && avg == 0) {
             log.error("根据条件判断停止执行自动配煤报表");
             return null;
