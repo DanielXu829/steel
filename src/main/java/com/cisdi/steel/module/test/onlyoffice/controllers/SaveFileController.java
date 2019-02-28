@@ -30,12 +30,6 @@ import java.util.Scanner;
  * */
 @RestController
 public class SaveFileController {
-    @Autowired
-    private ReportIndexService reportIndexService;
-
-    @Autowired
-    private ReportCategoryTemplateService reportCategoryTemplateService;
-
     /**
      * 文档编辑服务使用JavaScript API通知callbackUrl，向文档存储服务通知文档编辑的状态。文档编辑服务使用具有正文中的信息的POST请求。
      * https://api.onlyoffice.com/editors/callback
