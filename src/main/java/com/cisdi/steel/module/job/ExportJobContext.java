@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.module.job.a3.doc.ShaojieDocMain;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportIndex;
@@ -47,12 +48,14 @@ public class ExportJobContext {
         AbstractExportJob abstractExportJob = apiJob.get(code);
         if (Objects.nonNull(abstractExportJob)) {
             abstractExportJob.execute(null);
-
+            AbstractExportJob buliao = apiJob.get(JobEnum.gl_gaolubuliao.getCode());
+            if (Objects.nonNull(buliao)) {
+                buliao.execute(null);
+            }
             ReportIndex reportIndex = reportIndexMapper.queryLastOne(code);
             if (Objects.nonNull(reportIndex)) {
                 return reportIndex.getPath();
             }
-
         }
         return null;
     }
