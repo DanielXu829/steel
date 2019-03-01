@@ -724,49 +724,28 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             List<String> tagName1 = new ArrayList<>();
             tagName1.add(columns.get(0));
             String re1 = getTagValues(param, tagName1, version, true);
-            List<String> tagName2 = new ArrayList<>();
-            tagName2.add(columns.get(1));
-            String re2 = getTagValues(param, tagName2, version, true);
 
             Object o = "";
-            Object o1 = "";
             Object o2 = "";
             String dateTime = null;
-            if (StringUtils.isNotBlank(re1) && StringUtils.isNotBlank(re2)) {
+            if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
-                JSONObject ob2 = JSONObject.parseObject(re2);
-                if (Objects.nonNull(ob1) && Objects.nonNull(ob2)) {
+                if (Objects.nonNull(ob1)) {
                     JSONObject data = ob1.getJSONObject("data");
                     if (Objects.nonNull(data)) {
                         JSONObject tag1 = data.getJSONObject(columns.get(0));
                         if (Objects.nonNull(tag1)) {
                             Map<String, Object> innerMap = tag1.getInnerMap();
-                            String dateTime1 = dealPart10(innerMap);
-                            if (Objects.nonNull(dateTime1)) {
-                                JSONObject data2 = ob2.getJSONObject("data");
-                                if (Objects.nonNull(data2)) {
-                                    JSONObject tag2 = data2.getJSONObject(columns.get(1));
-                                    if (Objects.nonNull(tag2)) {
-                                        Map<String, Object> innerMap2 = tag2.getInnerMap();
-                                        String dateTime2 = dealPart10(innerMap2);
-                                        if (Objects.nonNull(dateTime2)) {
-                                            Long aLong = Long.valueOf(dateTime1);
-                                            Long bLong = Long.valueOf(dateTime2);
-                                            dateTime = aLong > bLong ? dateTime1 : dateTime2;
-                                        }
-                                    }
-                                }
-                            }
+                            dateTime = dealPart10(innerMap, true);
                         }
                     }
                 }
             }
             ExcelWriterUtil.addCellData(resultList, indes, 0, o);
-            ExcelWriterUtil.addCellData(resultList, indes, 1, o1);
             if (Objects.nonNull(dateTime)) {
-                o2 = getTagValueByTime(dateTime, version, columns.get(2));
+                o2 = getTagValueByTime(dateTime, version, columns.get(1));
             }
-            ExcelWriterUtil.addCellData(resultList, indes, 2, o2);
+            ExcelWriterUtil.addCellData(resultList, indes, 1, o2);
             indes++;
         }
 
@@ -884,7 +863,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         }
     }
 
-    private String dealPart10(Map<String, Object> innerMap) {
+    private String dealPart10(Map<String, Object> innerMap, boolean desc) {
         String tempDateTime1 = null;
         Set<String> keys = innerMap.keySet();
         Long[] list = new Long[keys.size()];
@@ -893,7 +872,11 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             list[k] = Long.valueOf(key);
             k++;
         }
-        Arrays.sort(list);
+        if (desc) {
+            Arrays.sort(list, Collections.reverseOrder());
+        } else {
+            Arrays.sort(list);
+        }
         int temp = -1;
         for (int j = 0; j < list.length; j++) {
             Object b1 = innerMap.get(list[j] + "");
@@ -933,14 +916,14 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                     JSONObject tag1 = data.getJSONObject(col1);
                     if (Objects.nonNull(tag1)) {
                         Map<String, Object> innerMap = tag1.getInnerMap();
-                        String tempDateTime1 = dealPart10(innerMap);
+                        String tempDateTime1 = dealPart10(innerMap, false);
                         if (Objects.nonNull(tempDateTime1)) {
                             JSONObject data2 = ob2.getJSONObject("data");
                             if (Objects.nonNull(data2)) {
                                 JSONObject tag2 = data2.getJSONObject(col2);
                                 if (Objects.nonNull(tag2)) {
                                     Map<String, Object> innerMap2 = tag2.getInnerMap();
-                                    String tempDateTime2 = dealPart10(innerMap2);
+                                    String tempDateTime2 = dealPart10(innerMap2, false);
                                     if (Objects.nonNull(tempDateTime2)) {
                                         Long aLong = Long.valueOf(tempDateTime1);
                                         Long bLong = Long.valueOf(tempDateTime2);
