@@ -872,9 +872,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             list[k] = Long.valueOf(key);
             k++;
         }
+        int index1=-1;
+        int index2=-1;
         if (desc) {
+            index1=0;
+            index2=1;
             Arrays.sort(list, Collections.reverseOrder());
         } else {
+            index1=1;
+            index2=0;
             Arrays.sort(list);
         }
         int temp = -1;
@@ -882,7 +888,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             Object b1 = innerMap.get(list[j] + "");
             if (Objects.nonNull(b1)) {
                 BigDecimal bb = (BigDecimal) b1;
-                if (bb.intValue() == 1) {
+                if (bb.intValue() == index1) {
                     temp = j;
                     break;
                 }
@@ -894,7 +900,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                 Object b1 = innerMap.get(list[j] + "");
                 if (Objects.nonNull(b1)) {
                     BigDecimal bb = (BigDecimal) b1;
-                    if (bb.intValue() == 0) {
+                    if (bb.intValue() == index2) {
                         tempDateTime1 = list[j] + "";
                         break;
                     }
