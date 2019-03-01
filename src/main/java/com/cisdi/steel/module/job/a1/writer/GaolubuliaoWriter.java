@@ -137,7 +137,9 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                 }
                 if (!resultData.isEmpty()) {
                     double sum = resultData.stream().mapToDouble(Double::doubleValue).sum();
-                    result.put(key, sum);
+                    if (sum != 0) {
+                        result.put(key, sum);
+                    }
                 }
             }
 
@@ -155,7 +157,9 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                 }
                 if (!resultData.isEmpty()) {
                     double sum = resultData.stream().mapToDouble(Double::doubleValue).sum();
-                    result.put(key, sum);
+                    if (sum != 0) {
+                        result.put(key, sum);
+                    }
                 }
             }
         }
