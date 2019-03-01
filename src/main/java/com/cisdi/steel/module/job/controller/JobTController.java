@@ -8,6 +8,7 @@ import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.ExportJobContext;
 import com.cisdi.steel.module.job.a1.execute.ChutiezonglanExecute;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,7 @@ public class JobTController {
             return ApiUtil.fail("编码不能为空");
         }
         String path = exportJobContext.execute(code);
+        exportJobContext.execute(JobEnum.gl_gaolubuliao.getCode());
         return ApiUtil.success(path);
     }
 
