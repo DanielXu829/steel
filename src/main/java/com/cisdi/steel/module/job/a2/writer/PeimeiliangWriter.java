@@ -57,7 +57,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                 } else {
                     for (int j = 0; j < size; j++) {
                         int rowIndex=10+j;
-                        List<CellData> cellData = mapDataHandler2(getUrl2(), columns, dateQueries.get(j), rowIndex, sheet);
+                        List<CellData> cellData = mapDataHandler2(getUrl2(), columns, dateQueries.get(26), rowIndex, sheet);
                         ExcelWriterUtil.setCellValue(sheet, cellData);
                     }
                 }
@@ -138,8 +138,9 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                     JSONObject data = jsonObject2.getJSONObject("data");
                     Map<String, Object> innerMap = data.getInnerMap();
                     Set<String> strings = innerMap.keySet();
-                    for (String key : strings) {
-                        nameList.add(innerMap.get(key).toString());
+                    for (int j = 1; j <=strings.size() ; j++) {
+                        String s="coalSiloName"+j;
+                        nameList.add(innerMap.get(s).toString());
                     }
                     String date1 = DateUtil.getFormatDateTime(DateUtil.strToDate(clock, DateUtil.fullFormat), "yyyy/MM/dd HH:mm:00");
                     for (int j = 0; j < nameList.size(); j++) {
