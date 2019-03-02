@@ -137,7 +137,6 @@ public class MetadataDTO {
         result.put("DateTime4", DateUtil.getFormatDateTime(this.dateTime, "MM/dd"));
         result.put("DateTime5", DateUtil.getFormatDateTime(this.dateTime, "MM月"));
         result.put("DateTime6", DateUtil.getFormatDateTime(this.dateTime, "yyyy年MM月"));
-        result.put("DateTime7", DateQueryUtil.getMonthStartTime(this.dateTime));
         result.put("TemplateName", this.templateName);
         result.put("Type", this.type);
         result.put("TemplatePath", this.templatePath);
@@ -152,6 +151,7 @@ public class MetadataDTO {
         result.put("Build_StartTime", this.buildStartTime);
         result.put("Build_EndTime", this.buildEndTime);
         result.put("ExcelFile", this.excelFile);
+        result.put("DateTime7", DateQueryUtil.getMonthStartTime(this.dateTime));
         return result;
     }
 }
