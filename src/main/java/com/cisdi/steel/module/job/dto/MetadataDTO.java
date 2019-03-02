@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.dto;
 
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -136,6 +137,7 @@ public class MetadataDTO {
         result.put("DateTime4", DateUtil.getFormatDateTime(this.dateTime, "MM/dd"));
         result.put("DateTime5", DateUtil.getFormatDateTime(this.dateTime, "MM月"));
         result.put("DateTime6", DateUtil.getFormatDateTime(this.dateTime, "yyyy年MM月"));
+        result.put("DateTime7", DateQueryUtil.getMonthStartTime(this.dateTime));
         result.put("TemplateName", this.templateName);
         result.put("Type", this.type);
         result.put("TemplatePath", this.templatePath);
