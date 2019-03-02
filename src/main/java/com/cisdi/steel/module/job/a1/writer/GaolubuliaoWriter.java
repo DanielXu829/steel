@@ -52,7 +52,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
 
         String s = httpUtil.get(url + "/burden/latest/forward");
         if (StringUtils.isBlank(s)) {
-            return null;
+            return workbook;
         }
         JSONObject jsonObject = JSONObject.parseObject(s);
 

@@ -33,8 +33,12 @@ public class JobTController {
         if (StringUtils.isBlank(code)) {
             return ApiUtil.fail("编码不能为空");
         }
+        if ("gl_peiliaodan".equals(code)) {
+            exportJobContext.execute(JobEnum.gl_gaolubuliao.getCode());
+        } else if ("gl_peiliaodan6".equals(code)) {
+            exportJobContext.execute(JobEnum.gl_gaolubuliao6.getCode());
+        }
         String path = exportJobContext.execute(code);
-        exportJobContext.execute(JobEnum.gl_gaolubuliao.getCode());
         return ApiUtil.success(path);
     }
 
