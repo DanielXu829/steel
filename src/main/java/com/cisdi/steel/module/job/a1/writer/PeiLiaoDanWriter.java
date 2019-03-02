@@ -107,6 +107,9 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         //锰矿
         List<JSONObject> mnore = new ArrayList<>();
 
+        //废钢
+        List<JSONObject> scrap = new ArrayList<>();
+
 
         //小粒焦
         List<JSONObject> cokenut = new ArrayList<>();
@@ -138,6 +141,8 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                     cokenut.add(materialsJSONObject);
                 } else if ("COKE".equals(matclass)) {
                     coke.add(materialsJSONObject);
+                }else if("SCRAP".equals(matclass)){
+                    scrap.add(materialsJSONObject);
                 }
             }
         }
@@ -160,9 +165,9 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                 Double clinkerRatio = components.getDouble("ClinkerRatio");
                 Double oreWeight = components.getDouble("OreWeight");
                 Double allOCRate = components.getDouble("AllOCRate");
-                ExcelWriterUtil.addCellData(cellDataList, 13, 2, clinkerRatio);
-                ExcelWriterUtil.addCellData(cellDataList, 14, 2, oreWeight);
-                ExcelWriterUtil.addCellData(cellDataList, 15, 2, allOCRate);
+                ExcelWriterUtil.addCellData(cellDataList, 13, 3, clinkerRatio);
+                ExcelWriterUtil.addCellData(cellDataList, 14, 3, oreWeight);
+                ExcelWriterUtil.addCellData(cellDataList, 15, 3, allOCRate);
             }
         }
 
@@ -174,8 +179,8 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             JSONObject object = list.get(i);
             String weight = object.getString("weight");
             Double moisture = object.getDouble("moisture");
-            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 2, weight);
-            ExcelWriterUtil.addCellData(cellDataList, ++rowIndex, 2, moisture);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 3, weight);
+            ExcelWriterUtil.addCellData(cellDataList, ++rowIndex, 3, moisture);
         }
     }
 
@@ -185,8 +190,10 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             JSONObject object = list.get(i);
             String descr = object.getString("descr");
             Double weight = object.getDouble("weight");
+            Double moisture = object.getDouble("moisture");
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, descr);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex++, 1, weight);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex++, 2, moisture);
         }
     }
 

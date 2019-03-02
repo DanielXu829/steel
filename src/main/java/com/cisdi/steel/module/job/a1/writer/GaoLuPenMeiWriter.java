@@ -35,6 +35,26 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         return this.getMapHandler1(getUrl(version), excelDTO, version);
     }
 
+    /**
+     * 处理6高炉喷煤 关联上月数据值
+     * @param date
+     */
+    //@TODO
+    private void dealSp(Date date) {
+        String dd = DateUtil.getFormatDateTime(date, "dd");
+        //判断今天是否是本月第一天
+        if("01".equals(dd)){
+            //获取上月日期
+            Date months = DateUtil.addMonths(date, -1);
+
+            //查询数据库中 上月最后一张报表
+
+            //获取最后一张报表指定列最后一天的数据
+
+            //将数据写入当前表中指定位置
+        }
+    }
+
     protected Workbook getMapHandler1(String url, WriterExcelDTO excelDTO, String version) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
@@ -872,15 +892,15 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             list[k] = Long.valueOf(key);
             k++;
         }
-        int index1=-1;
-        int index2=-1;
+        int index1 = -1;
+        int index2 = -1;
         if (desc) {
-            index1=0;
-            index2=1;
+            index1 = 0;
+            index2 = 1;
             Arrays.sort(list, Collections.reverseOrder());
         } else {
-            index1=1;
-            index2=0;
+            index1 = 1;
+            index2 = 0;
             Arrays.sort(list);
         }
         int temp = -1;

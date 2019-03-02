@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TestJob1 extends SteelApplicationTests {
 
     /**
-     * 配料单
+     * 8高炉配料单
      */
     @Autowired
     private PeiLiaoDanJob peiLiaoDanJob;
@@ -25,6 +25,19 @@ public class TestJob1 extends SteelApplicationTests {
     public void test11111() {
         peiLiaoDanJob.execute(null);
     }
+
+
+    /**
+     * 6高炉配料单
+     */
+    @Autowired
+    private PeiLiaoDan6Job peiLiaoDan6Job;
+
+    @Test
+    public void test11112() {
+        peiLiaoDan6Job.execute(null);
+    }
+
 
     /**
      * 高炉炉顶装料作业 日报
