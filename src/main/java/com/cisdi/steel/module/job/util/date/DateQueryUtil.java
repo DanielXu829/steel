@@ -85,7 +85,7 @@ public class DateQueryUtil {
         Date dateBeginTime = DateUtil.getDateBeginTime(date);
         int hour = 23;
         List<DateQuery> queryList = new ArrayList<>();
-        for (int i = 0; i<=hour; i++) {
+        for (int i = 0; i <= hour; i++) {
             Date nextDate = DateUtil.addHours(dateBeginTime, i);
             DateQuery query = DateQueryUtil.buildHour(nextDate);
             queryList.add(query);
@@ -97,6 +97,7 @@ public class DateQueryUtil {
         List<DateQuery> dateQueries = buildDayHourEach(new Date());
         dateQueries.forEach(System.out::println);
     }
+
     /**
      * 构建每小时时间段
      *
@@ -323,5 +324,42 @@ public class DateQueryUtil {
         calendar1.set(Calendar.SECOND, sec);
         map.put("endtime", calendar1.getTime().getTime() + "");
         return map;
+    }
+
+    /**
+     * 判断当前月有多少天
+     *
+     * @param year
+     * @param month
+     * @return
+     */
+    public static int getDays(int year, int month) {
+        int days = 0;
+        if (month != 2) {
+            switch (month) {
+                case 1:
+                case 3:
+                case 5:
+                case 7:
+                case 8:
+                case 10:
+                case 12:
+                    days = 31;
+                    break;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    days = 30;
+            }
+        } else {
+            // 闰年
+            if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0) {
+                days = 29;
+            } else {
+                days = 28;
+            }
+        }
+        return days;
     }
 }

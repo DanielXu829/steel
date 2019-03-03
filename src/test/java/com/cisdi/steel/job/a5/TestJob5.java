@@ -2,6 +2,7 @@ package com.cisdi.steel.job.a5;
 
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.a5.*;
+import com.cisdi.steel.module.job.a5.task.DiaojianOneKongDayJob;
 import com.cisdi.steel.module.job.a5.task.QiguidianjianJob;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,4 +171,12 @@ public class TestJob5 extends SteelApplicationTests {
         qiguidianjianJob.execute(null);
     }
 
+
+    @Autowired
+    private DiaojianOneKongDayJob diaojianOneKongDayJob;
+
+    @Test
+    public void fasdf() {
+        diaojianOneKongDayJob.execute(null);
+    }
 }
