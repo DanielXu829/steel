@@ -36,6 +36,7 @@ public class QiguidianjianruihuaMonthJob extends AbstractNJExportJob {
      * 0 2 0 1 * ? 每月第一天过两分
      * 0 1 0 * * ? 每天0点执行
      */
+    @Override
     @Scheduled(cron = "0 1 0 * * ?")
     public void task() {
         execute(null);
