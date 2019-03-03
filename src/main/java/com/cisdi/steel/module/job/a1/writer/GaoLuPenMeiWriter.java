@@ -10,8 +10,11 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -28,6 +31,7 @@ import java.util.*;
  */
 @Component
 public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -37,13 +41,14 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
     /**
      * 处理6高炉喷煤 关联上月数据值
+     *
      * @param date
      */
     //@TODO
     private void dealSp(Date date) {
         String dd = DateUtil.getFormatDateTime(date, "dd");
         //判断今天是否是本月第一天
-        if("01".equals(dd)){
+        if ("01".equals(dd)) {
             //获取上月日期
             Date months = DateUtil.addMonths(date, -1);
 
@@ -747,7 +752,9 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
             Object o = "";
             Object o2 = "";
+            BigDecimal tota = BigDecimal.ZERO;
             String dateTime = null;
+            List<Long> dateList = null;
             if (StringUtils.isNotBlank(re1)) {
                 JSONObject ob1 = JSONObject.parseObject(re1);
                 if (Objects.nonNull(ob1)) {
@@ -756,16 +763,36 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         JSONObject tag1 = data.getJSONObject(columns.get(0));
                         if (Objects.nonNull(tag1)) {
                             Map<String, Object> innerMap = tag1.getInnerMap();
-                            dateTime = dealPart10(innerMap, true);
+                            //dateTime = dealPart10(innerMap, true);
+                            dateList = dealPart10_3(innerMap);
+
                         }
                     }
                 }
             }
-            ExcelWriterUtil.addCellData(resultList, indes, 0, o);
-            if (Objects.nonNull(dateTime)) {
-                o2 = getTagValueByTime(dateTime, version, columns.get(1));
+
+
+            if (Objects.nonNull(dateList) && dateList.size() > 0) {
+                for (Long key : dateList) {
+                    Object valueByTime = getTagValueByTime(key + "", version, columns.get(1));
+                    if (Objects.nonNull(valueByTime)) {
+
+                        if (valueByTime instanceof BigDecimal) {
+                            BigDecimal bigDecimal = (BigDecimal) valueByTime;
+                            tota = tota.add(bigDecimal);
+                        } else if (valueByTime instanceof Integer) {
+                            Integer integer = (Integer) valueByTime;
+                            tota = tota.add(new BigDecimal(integer));
+                        }
+                    }
+                }
             }
-            ExcelWriterUtil.addCellData(resultList, indes, 1, o2);
+
+//            ExcelWriterUtil.addCellData(resultList, indes, 0, o);
+//            if (Objects.nonNull(dateTime)) {
+//                o2 = getTagValueByTime(dateTime, version, columns.get(1));
+//            }
+            ExcelWriterUtil.addCellData(resultList, indes, 1, tota);
             indes++;
         }
 
@@ -881,6 +908,31 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             }
 
         }
+    }
+
+    private List<Long> dealPart10_3(Map<String, Object> innerMap) {
+        List<Long> dateList = new ArrayList<>();
+        Set<String> keys = innerMap.keySet();
+        Long[] list = new Long[keys.size()];
+        int k = 0;
+        for (String key : keys) {
+            list[k] = Long.valueOf(key);
+            k++;
+        }
+        Arrays.sort(list, Collections.reverseOrder());
+
+        for (int j = 0; j < list.length - 1; j++) {
+            Object b1 = innerMap.get(list[j] + "");
+            Object b2 = innerMap.get(list[j + 1] + "");
+            if (Objects.nonNull(b1) && Objects.nonNull(b2)) {
+                BigDecimal bb = (BigDecimal) b1;
+                BigDecimal bb1 = (BigDecimal) b2;
+                if (bb.intValue() == 0 && bb1.intValue() == 1) {
+                    dateList.add(list[j]);
+                }
+            }
+        }
+        return dateList;
     }
 
     private String dealPart10(Map<String, Object> innerMap, boolean desc) {
