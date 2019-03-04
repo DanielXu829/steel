@@ -18,25 +18,25 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class KongqiyaMonthJob extends AbstractExportJob {
+public class KongqiyaMonthJob extends AbstractNJExportJob {
     @Override
     public JobEnum getCurrentJob() {
         return JobEnum.nj_kongqiya_month;
     }
 
-    @Autowired
-    private QiguidianjianExecute qiguidianjianExecute;
-
-    @Override
-    public IJobExecute getCurrentJobExecute() {
-        return qiguidianjianExecute;
-    }
-
-    /**
-     * 0 2 0 1 * ? 每月第一天过两分
-     */
-    @Scheduled(cron = "0 1 0 * * ?")
-    public void task() {
-        execute(null);
-    }
+//    @Autowired
+//    private QiguidianjianExecute qiguidianjianExecute;
+//
+//    @Override
+//    public IJobExecute getCurrentJobExecute() {
+//        return qiguidianjianExecute;
+//    }
+//
+//    /**
+//     * 0 2 0 1 * ? 每月第一天过两分
+//     */
+//    @Scheduled(cron = "0 1 0 * * ?")
+//    public void task() {
+//        execute(null);
+//    }
 }

@@ -23,22 +23,22 @@ public class QiguidianjianruihuaMonthJob extends AbstractNJExportJob {
     public JobEnum getCurrentJob() {
         return JobEnum.nj_qiguidianjianruihua_month;
     }
-
-    @Autowired
-    private QiguidianjianExecute qiguidianjianExecute;
-
-    @Override
-    public IJobExecute getCurrentJobExecute() {
-        return qiguidianjianExecute;
-    }
-
-    /**
-     * 0 2 0 1 * ? 每月第一天过两分
-     * 0 1 0 * * ? 每天0点执行
-     */
-    @Override
-    @Scheduled(cron = "0 1 0 * * ?")
-    public void task() {
-        execute(null);
-    }
+//
+//    @Autowired
+//    private QiguidianjianExecute qiguidianjianExecute;
+//
+//    @Override
+//    public IJobExecute getCurrentJobExecute() {
+//        return qiguidianjianExecute;
+//    }
+//
+//    /**
+//     * 0 2 0 1 * ? 每月第一天过两分
+//     * 0 1 0 * * ? 每天0点执行
+//     */
+//    @Override
+//    @Scheduled(cron = "0 1 0 * * ?")
+//    public void task() {
+//        execute(null);
+//    }
 }

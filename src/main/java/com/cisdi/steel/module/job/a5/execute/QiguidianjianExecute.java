@@ -99,8 +99,10 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
                     Workbook workbook = getWorkbook(template.getTemplatePath());
                     // 构建元数据
                     PoiCustomUtil.buildMetadata(workbook, writerExcelDTO);
-
-                    handlerCopyFile(workbook, dateQuery);
+                    //除开其余月报
+                    if (!writerExcelDTO.getJobEnum().getCode().equals(JobEnum.nj_kongqiya_month.getCode())) {
+                        handlerCopyFile(workbook, dateQuery);
+                    }
                     // 6、生成文件
                     this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
 
