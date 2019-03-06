@@ -1373,11 +1373,11 @@ public class GaoLuDocMain {
 
     private WordImageEntity image(JFreeChart chart) {
         WordImageEntity image = new WordImageEntity();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             chart.getRenderingHints().put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
             chart.getPlot().setBackgroundAlpha(0.1f);
             chart.getPlot().setNoDataMessage("当前没有有效的数据");
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ChartUtilities.writeChartAsJPEG(baos, chart, 600, 300);
             image.setHeight(350);
             image.setWidth(650);
@@ -1385,7 +1385,12 @@ public class GaoLuDocMain {
             image.setType(WordImageEntity.Data);
         } catch (Exception e) {
             e.printStackTrace();
-
+        }finally {
+            try {
+                baos.close();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
         return image;
     }
