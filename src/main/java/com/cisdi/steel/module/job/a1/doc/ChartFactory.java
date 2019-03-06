@@ -62,6 +62,7 @@ public class ChartFactory {
         DefaultCategoryDataset dataset2 = null;
         DefaultCategoryDataset dataset3 = null;
         DefaultCategoryDataset dataset4 = null;
+        DefaultCategoryDataset dataset5 = null;
 
 
         JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
@@ -85,6 +86,17 @@ public class ChartFactory {
 
             dataset4 = ChartUtils
                     .createDefaultCategoryDataset(series.get(3), categories);
+        }else if (y2 == 5) {
+            dataset2 = ChartUtils
+                    .createDefaultCategoryDataset(series.get(1), categories);
+            dataset3 = ChartUtils
+                    .createDefaultCategoryDataset(series.get(2), categories);
+
+            dataset4 = ChartUtils
+                    .createDefaultCategoryDataset(series.get(3), categories);
+
+            dataset5 = ChartUtils
+                    .createDefaultCategoryDataset(series.get(4), categories);
         }
 
         LegendTitle legend = chart.getLegend(); // 设置图例的字体
@@ -94,13 +106,23 @@ public class ChartFactory {
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3, dataset4, stack, ystack);//
+        for(int i = 0; i<categories.length; i++){
+            Object s = categories[i];
+            if(i%2 ==0){
+                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.black);
+            }else{
+                // 设置背景色为白色
+                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.white);
+            }
+        }
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3, dataset4,dataset5, stack, ystack);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
         ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
         // 设置标注无边框
 //        ChartUtils.setLegendEmptyBorder(chart);
         //设置标注不显示
+        chart.setTextAntiAlias(false);
 
 
         ChartUtils.setLegendShow(chart, 0, show);

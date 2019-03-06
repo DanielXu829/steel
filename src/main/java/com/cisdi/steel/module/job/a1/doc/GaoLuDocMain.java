@@ -81,7 +81,9 @@ public class GaoLuDocMain {
 
         dealPart8(version, L8);
         dealPart9(version, L9);
+        dealPart10(version, L10);
         dealPart11(version, L11);
+        dealPart12(version, L12);
         dealPart13(version, L13);
         dealPart14(version);
         dealPart15(version, L15);
@@ -102,12 +104,14 @@ public class GaoLuDocMain {
         L7 = new String[]{"Vdaf", "Ad", "Fcad"};
         L8 = new String[]{"BF6_L2C_BD_HotBlastFlow_1d_avg", "BF6_L2C_BD_ColdBlastPress_1d_avg", "BF6_L2C_BD_Pressdiff_1d_avg"};
         L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
+        L10 = new String[]{"BF8_L2C_BD_CCT_1d_avg", "BF8_L2M_PCT_1d_avg", "BF8_L2C_BD_AvgTopTemp_1d_avg"};
         L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L2C_TP_StockLineSetL4_1d_avg"};
+        L12 = new String[]{"BF8_L2C_BD_WT6_Q_1d_avg", "BF8_L2C_BD_B1B3_HeatLoad_1d_avg", "BF8_L2C_BD_S1S3_HeatLoad_1d_avg", "BF8_L2C_BD_S4S6_HeatLoad_1d_avg", "BF8_L2C_BD_R1R3_HeatLoad_1d_avg"};
         L13 = new String[]{"BF8_L2C_TP_GasUtilization_1d_avg"};
         L15 = new String[]{"BF8_L2C_AnalysisSiValue_1d_avg", "BF8_L2C_HMTemp_1d_avg"};
-        L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenRate_1d_avg",
-                "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_PelletsRatio_1h_avg",
-                "BF8_L2M_SinterRatio_evt", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
+        L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenFlow_1d_avg",
+                "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_LumporeRatio_1d_avg", "BF8_L2M_PelletsRatio_1d_avg",
+                "BF8_L2M_SinterRatio_1d_avg", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
                 "BF8_L2C_BD_BlastVelocityAct_1d_avg", "BF8_L2C_BD_Ek_1d_avg", "BF8_L2C_BD_FlamTemp_1d_avg"
         };
     }
@@ -120,12 +124,14 @@ public class GaoLuDocMain {
         L7 = new String[]{"Vdaf", "Ad", "Fcad"};
         L8 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg"};
         L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
+        L10 = new String[]{"BF8_L2C_BD_CCT_1d_avg", "BF8_L2M_PCT_1d_avg", "BF8_L2C_BD_AvgTopTemp_1d_avg"};
         L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L2C_TP_StockLineSetL4_1d_avg"};
+        L12 = new String[]{"BF8_L2C_BD_WT6_Q_1d_avg", "BF8_L2C_BD_B1B3_HeatLoad_1d_avg", "BF8_L2C_BD_S1S3_HeatLoad_1d_avg", "BF8_L2C_BD_S4S6_HeatLoad_1d_avg", "BF8_L2C_BD_R1R3_HeatLoad_1d_avg"};
         L13 = new String[]{"BF8_L2C_TP_GasUtilization_1d_avg"};
         L15 = new String[]{"BF8_L2C_AnalysisSiValue_1d_avg", "BF8_L2C_HMTemp_1d_avg"};
-        L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenRate_1d_avg",
-                "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_PelletsRatio_1h_avg",
-                "BF8_L2M_SinterRatio_evt", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
+        L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenFlow_1d_avg",
+                "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_LumporeRatio_1d_avg", "BF8_L2M_PelletsRatio_1d_avg",
+                "BF8_L2M_SinterRatio_1d_avg", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
                 "BF8_L2C_BD_BlastVelocityAct_1d_avg", "BF8_L2C_BD_Ek_1d_avg", "BF8_L2C_BD_FlamTemp_1d_avg"
         };
     }
@@ -137,12 +143,14 @@ public class GaoLuDocMain {
     private String[] L7 = new String[]{"Vdaf", "Ad", "Fcad"};
     private String[] L8 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg"};
     private String[] L9 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
+    private String[] L10 = new String[]{"BF8_L2C_BD_CCT_1d_avg", "BF8_L2M_PCT_1d_avg", "BF8_L2C_BD_AvgTopTemp_1d_avg"};
     private String[] L11 = new String[]{"BF8_L2C_BH_T0146_1d_avg", "BF8_L2C_TP_StockLineSetL4_1d_avg"};
+    private String[] L12 = new String[]{"BF8_L2C_BD_WT6_Q_1d_avg", "BF8_L2C_BD_B1B3_HeatLoad_1d_avg", "BF8_L2C_BD_S1S3_HeatLoad_1d_avg", "BF8_L2C_BD_S4S6_HeatLoad_1d_avg", "BF8_L2C_BD_R1R3_HeatLoad_1d_avg"};
     private String[] L13 = new String[]{"BF8_L2C_TP_GasUtilization_1d_avg"};
     private String[] L15 = new String[]{"BF8_L2C_AnalysisSiValue_1d_avg", "BF8_L2C_HMTemp_1d_avg"};
-    private String[] L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenRate_1d_avg",
-            "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_PelletsRatio_1h_avg",
-            "BF8_L2M_SinterRatio_evt", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
+    private String[] L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg", "BF8_L2C_BD_OxygenFlow_1d_avg",
+            "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg", "BF8_L2C_BD_TopPress_1d_avg", "BF8_L2M_FuelRate_1d_avg", "BF8_L2M_LumporeRatio_1d_avg", "BF8_L2M_PelletsRatio_1d_avg",
+            "BF8_L2M_SinterRatio_1d_avg", "BF8_L2C_BD_CokeLoad_1d_avg", "BF8_L2C_SH_OreBatchWeight", "BF8_L2C_SH_CokeBatchWeight",
             "BF8_L2C_BD_BlastVelocityAct_1d_avg", "BF8_L2C_BD_Ek_1d_avg", "BF8_L2C_BD_FlamTemp_1d_avg"
     };
 
@@ -620,12 +628,12 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
-        int[] stack = {2, 2, 1};
-        int[] ystack = {1, 1, 2};
+        int[] stack = {1, 2, 1};
+        int[] ystack = {1, 2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 100, 0, 100, 0, 40, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 50, 90, 0, 30, 0, 30, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg2", image1);
     }
@@ -671,20 +679,20 @@ public class GaoLuDocMain {
         series3.add(new Serie("Ad", objects3));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
-        vectors.add(series2);
         vectors.add(series1);
+        vectors.add(series2);
         vectors.add(series3);
 
         String title1 = "";
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
-        int[] stack = {2, 2, 1};
+        int[] stack = {1, 1, 1};
         int[] ystack = {1, 1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 100, 0, 100, 0, 20, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 50, 100, 50, 100, 10, 15, 3, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg3", image1);
     }
@@ -746,7 +754,7 @@ public class GaoLuDocMain {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 500, 4, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 8192, 0, 360, 0, 100, 4, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
     }
@@ -817,7 +825,7 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
-        int[] stack = {2, 1, 1};
+        int[] stack = {1, 1, 1};
         int[] ystack = {2, 1, 1};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
@@ -880,7 +888,7 @@ public class GaoLuDocMain {
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
-        int[] stack = {2, 1, 1};
+        int[] stack = {1, 1, 2};
         int[] ystack = {1, 2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
@@ -936,6 +944,50 @@ public class GaoLuDocMain {
         result.put("jfreechartImg9", image1);
     }
 
+    private void dealPart10(String version, String[] tagNames) {
+        List<List<Double>> doubles = part1(version, tagNames, 1);
+        Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
+        Object[] objects3 = doubles.get(2).toArray();
+
+        result.put("part19", objects1[objects1.length - 2]);
+
+        /**
+         * CCT1 BF8_L2C_BD_CCT_1d_avg
+         * W4边缘温度
+         * 顶温 BF8_L2C_BD_AvgTopTemp_1d_avg
+         */
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("CCT1", objects1));
+
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("W4边缘温度", objects2));
+
+        Vector<Serie> series3 = new Vector<Serie>();
+        series3.add(new Serie("顶温", objects3));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series3);
+        vectors.add(series2);
+
+        String title1 = "";
+        String categoryAxisLabel1 = null;
+        String valueAxisLabel1 = null;
+
+        int[] stack = {1, 1, 2};
+        int[] ystack = {1, 2, 2};
+
+        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
+                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 200, 700, 0, 300, 0, 300, tagNames.length, stack, ystack);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg10", image1);
+    }
+
     private void dealPart11(String version, String[] tagNames) {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
@@ -969,9 +1021,65 @@ public class GaoLuDocMain {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 500, 0, 500, 0, 180, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0, 500, 0, 180, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg11", image1);
+    }
+
+    private void dealPart12(String version, String[] tagNames) {
+        List<List<Double>> doubles = part1(version, tagNames, 1);
+        Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
+        Object[] objects3 = doubles.get(2).toArray();
+        Object[] objects4 = doubles.get(3).toArray();
+        Object[] objects5 = doubles.get(4).toArray();
+
+
+        /**
+         * 总热负荷 BF8_L2C_BD_WT6_Q_1m_avg Q值主坐标8000-15000
+         * B1-B3 BF8_L2C_BD_B1B3_HeatLoad_1m_cur
+         * S1-S3 BF8_L2C_BD_S1S3_HeatLoad_1m_cur
+         * S4-S6 BF8_L2C_BD_S4S6_HeatLoad_1m_cur
+         * R1-R3  BF8_L2C_BD_R1R3_HeatLoad_1m_cur
+         * 1000-5000
+         */
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("Q值", objects1));
+
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("B1-B3", objects2));
+
+        Vector<Serie> series3 = new Vector<Serie>();
+        series3.add(new Serie("S1-S3", objects3));
+
+        Vector<Serie> series4 = new Vector<Serie>();
+        series4.add(new Serie("S4-S6", objects4));
+
+        Vector<Serie> series5 = new Vector<Serie>();
+        series5.add(new Serie("R1-R3", objects5));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series2);
+        vectors.add(series3);
+        vectors.add(series4);
+        vectors.add(series5);
+
+        String title1 = "";
+        String categoryAxisLabel1 = null;
+        String valueAxisLabel1 = null;
+
+        int[] stack = {1, 1, 1, 1, 1};
+        int[] ystack = {2, 2, 2, 2, 2};
+
+        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
+                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 8000, 15000, 1000, 5000, 1000, 5000, tagNames.length, stack, ystack);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg12", image1);
     }
 
     private void dealPart13(String version, String[] tagNames) {
@@ -1020,9 +1128,9 @@ public class GaoLuDocMain {
 
         Object[] objects3 = dealData(objects1, 100);
         if (Objects.nonNull(objects2) && objects2.length > 1) {
-            result.put("part22", objects2[objects2.length - 2]);
+            result.put("part23", objects2[objects2.length - 2]);
         } else {
-            result.put("part22", 0);
+            result.put("part23", 0);
         }
 
 
@@ -1049,7 +1157,7 @@ public class GaoLuDocMain {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 1300, 1600, 0, 100, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 1400, 1550, 0, 100, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg15", image1);
 
@@ -1126,6 +1234,9 @@ public class GaoLuDocMain {
             if (i == 8 || i == 9 || i == 10) {
                 bigDecimal = bigDecimal.multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
                 result.put("cz" + (i + 1), bigDecimal.intValue() + "%");
+
+                subtract = bigDecimal1.subtract(bigDecimal);
+                result.put("pc" + (i + 1), subtract.intValue() + "%");
             }
         }
     }
