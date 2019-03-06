@@ -48,6 +48,11 @@ public enum JobEnum {
     gl_guankongzhibiao("gl_guankongzhibiao", "高炉重点管控指标"),
     gl_bf6gongyicanshu("gl_bf6gongyicanshu", "6高炉工艺参数跟踪"),
     gl_caoyehui_day("gl_caoyehui_day", "高炉操业会议"),
+    gl_tuosifuyang("gl_tuosifuyang", "6高炉脱湿富氧操作报表"),
+    gl_zhuangliaochuchen("gl_zhuangliaochuchen", "装料除尘操作报表"),
+    gl_refenglujiankong("gl_refenglujiankong", "6高炉热风炉设备监控日报"),
+    gl_zhouliuyasuoji("gl_zhouliuyasuoji", "轴流压缩机操作报表AV50"),
+    gl_zhouliuyasuoji_two("gl_zhouliuyasuoji_two", "轴流压缩机操作报表AV63"),
 
 
     // 焦化
