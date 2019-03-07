@@ -47,7 +47,7 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                 List<CellData> cellDataList = this.mapDataHandler(url, workbook);
                 //处理关联到上一次数据
                 if ("6.0".equals(version)) {
-                    dealLastData(date.getRecordDate(), excelDTO, cellDataList);
+                    dealLastData(date.getRecordDate(), cellDataList);
                 }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
 
@@ -57,7 +57,7 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    private void dealLastData(Date date, WriterExcelDTO excelDTO, List<CellData> cellDataList) {
+    private void dealLastData(Date date, List<CellData> cellDataList) {
         //查询配料单最后一条数据
         ReportIndex reportIndex = new ReportIndex();
         reportIndex.setIndexType("report_day");
@@ -66,15 +66,16 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         reportIndex.setSequence("6高炉");
         reportIndex.setCurrDate(date);
         ReportIndex reportIndex1 = reportIndexMapper.selectIdByParamter(reportIndex);
-        //解析excel获取指定位置的值
         if (Objects.nonNull(reportIndex1)) {
-            Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
+            //获取到指定路径下的excel
+            Workbook workbook = this.getWorkbook(reportIndex1.getPath());
+            //解析excel获取指定位置的值
             String v1 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 5, 16);
             String v2 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 6, 16);
+            //写入到当前excel中
             ExcelWriterUtil.addCellData(cellDataList, 5, 16, v1);
             ExcelWriterUtil.addCellData(cellDataList, 6, 16, v2);
         }
-        //写入到当前excel中
     }
 
     protected List<CellData> mapDataHandler(String url, Workbook workbook) {
