@@ -7,30 +7,37 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
+import lombok.AllArgsConstructor;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 配料单报表
  */
 @Component
 public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
+
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
         String url = getUrl(version);
         int numberOfSheets = workbook.getNumberOfSheets();
+        DateQuery date = this.getDateQuery(excelDTO);
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -38,12 +45,37 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 List<CellData> cellDataList = this.mapDataHandler(url, workbook);
+                //处理关联到上一次数据
+                if ("6.0".equals(version)) {
+                    dealLastData(date.getRecordDate(), cellDataList);
+                }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
 
             }
 
         }
         return workbook;
+    }
+
+    private void dealLastData(Date date, List<CellData> cellDataList) {
+        //查询配料单最后一条数据
+        ReportIndex reportIndex = new ReportIndex();
+        reportIndex.setIndexType("report_day");
+        reportIndex.setIndexLang("cn_zh");
+        reportIndex.setReportCategoryCode(JobEnum.gl_peiliaodan6.getCode());
+        reportIndex.setSequence("6高炉");
+        reportIndex.setCurrDate(date);
+        ReportIndex reportIndex1 = reportIndexMapper.selectIdByParamter(reportIndex);
+        if (Objects.nonNull(reportIndex1)) {
+            //获取到指定路径下的excel
+            Workbook workbook = this.getWorkbook(reportIndex1.getPath());
+            //解析excel获取指定位置的值
+            String v1 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 5, 16);
+            String v2 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 6, 16);
+            //写入到当前excel中
+            ExcelWriterUtil.addCellData(cellDataList, 5, 16, v1);
+            ExcelWriterUtil.addCellData(cellDataList, 6, 16, v2);
+        }
     }
 
     protected List<CellData> mapDataHandler(String url, Workbook workbook) {
@@ -141,7 +173,7 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                     cokenut.add(materialsJSONObject);
                 } else if ("COKE".equals(matclass)) {
                     coke.add(materialsJSONObject);
-                }else if("SCRAP".equals(matclass)){
+                } else if ("SCRAP".equals(matclass)) {
                     scrap.add(materialsJSONObject);
                 }
             }

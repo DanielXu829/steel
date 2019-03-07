@@ -264,4 +264,45 @@ public class TestJob1 extends SteelApplicationTests {
     public void test20() {
         bf6gongyicanshuJob.execute(null);
     }
+
+    /**
+     * 脱湿富氧操作报表
+     */
+    @Autowired
+    private TuosifuyangDayJob tuosifuyangDayJob;
+
+    @Test
+    public void test21() {
+        tuosifuyangDayJob.execute(null);
+    }
+
+    /**
+     * 装料除尘操作报表.xlsx
+     */
+    @Autowired
+    private ZhuangliaochuchenDayJob zhuangliaochuchenDayJob;
+
+    @Test
+    public void test22() {
+        zhuangliaochuchenDayJob.execute(null);
+    }
+
+    /**
+     * 热风炉设备监控日报.xlsx
+     */
+    @Autowired
+    private RefenglujiankongDayJob refenglujiankongDayJob;
+
+    @Test
+    public void test23() {
+        refenglujiankongDayJob.execute(null);
+    }
+
+    @Autowired
+    private ZhouliuyasuojiDayJob zhouliuyasuojiDayJob;
+
+    @Test
+    public void test24() {
+        zhouliuyasuojiDayJob.execute(null);
+    }
 }

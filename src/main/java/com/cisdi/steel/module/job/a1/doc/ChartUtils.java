@@ -185,16 +185,17 @@ public class ChartUtils {
     public static void setLineRender(CategoryPlot plot,
                                      boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions,
                                      int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, int y2,
-                                     DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3, DefaultCategoryDataset dataset4, int stack[], int[] ystack) {
+                                     DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3, DefaultCategoryDataset dataset4, DefaultCategoryDataset dataset5, int stack[], int[] ystack) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
         categoryaxis.setCategoryLabelPositions(positions);
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
         categoryaxis.setCategoryLabelPositionOffset(10);
-        categoryaxis.setTickLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
-        categoryaxis.setLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
+        categoryaxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 13));
+        categoryaxis.setLabelFont(new Font("宋体", Font.PLAIN, 13));
         categoryaxis.setCategoryMargin(0.4);
+
 
         ValueAxis rangeAxis = plot.getRangeAxis();
         rangeAxis.setAxisLineVisible(true);
@@ -225,11 +226,17 @@ public class ChartUtils {
             renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(
                     ItemLabelAnchor.OUTSIDE1, TextAnchor.BOTTOM_CENTER));// weizhi
         }
+        plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 //        renderer.setBaseShapesVisible(isShapesVisible);// 数据点绘制形状
 
         // 设置折线加粗
         renderer.setSeriesStroke(0, new BasicStroke(3F));
         renderer.setSeriesOutlineStroke(0, new BasicStroke(2.0F));
+//        if (stack[0] == 2) {
+//            renderer.setSeriesPaint(0, Color.black);
+//            renderer.setSeriesPaint(1, Color.black);
+//            renderer.setSeriesPaint(2, Color.black);
+//        }
 
         if (y2 > 1) {
             // 添加第2个Y轴
@@ -254,10 +261,22 @@ public class ChartUtils {
             plot.setRenderer(1, rederer);
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
             rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
-            rederer.setSeriesPaint(0, Color.green);
-            rederer.setSeriesPaint(1, Color.yellow);
-            rederer.setSeriesPaint(2, Color.red);
-            plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+
+//            if (stack[1] == 2) {
+//                rederer.setSeriesPaint(0, Color.black);
+//                rederer.setSeriesPaint(1, Color.black);
+//                rederer.setSeriesPaint(2, Color.black);
+//            } else {
+//                rederer.setSeriesPaint(0, Color.green);
+//                rederer.setSeriesPaint(1, Color.yellow);
+//                rederer.setSeriesPaint(2, Color.red);
+//            }
+
+            if (stack[1] == 2) {
+                plot.setDatasetRenderingOrder(DatasetRenderingOrder.REVERSE);
+            } else {
+                plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+            }
 
         }
 
@@ -275,20 +294,30 @@ public class ChartUtils {
                 axis3.setVisible(false);
             }
             plot.setRangeAxis(2, axis3);
-            plot.mapDatasetToRangeAxis(2, 1);
+            plot.mapDatasetToRangeAxis(2, 2);
 
             // -- 修改第3条曲线显示效果
-            LineAndShapeRenderer rederer = new LineAndShapeRenderer();
+            CategoryItemRenderer rederer = new LineAndShapeRenderer();
+            if (stack[2] == 2) {
+                rederer = new StackedBarRenderer();
+            }
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
             rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
-            rederer.setSeriesPaint(0, Color.yellow);
-            rederer.setSeriesPaint(1, Color.yellow);
-            rederer.setSeriesPaint(2, Color.red);
+
+//            if (stack[1] == 2) {
+//                rederer.setSeriesPaint(0, Color.black);
+//                rederer.setSeriesPaint(1, Color.black);
+//                rederer.setSeriesPaint(2, Color.black);
+//            } else {
+//                rederer.setSeriesPaint(0, Color.yellow);
+//                rederer.setSeriesPaint(1, Color.yellow);
+//                rederer.setSeriesPaint(2, Color.red);
+//            }
+
 
             plot.setRenderer(2, rederer);
             plot.setDataset(2, dataset3);
             plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-
         }
 
         if (y2 > 3) {
@@ -301,18 +330,44 @@ public class ChartUtils {
             axis4.setRange(rangIndex3, rangEnd3);
             axis4.setVisible(false);
             plot.setRangeAxis(3, axis4);
-            plot.mapDatasetToRangeAxis(3, 1);
+            plot.mapDatasetToRangeAxis(3, 3);
 
             // -- 修改第3条曲线显示效果
             LineAndShapeRenderer rederer = new LineAndShapeRenderer();
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
             rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
-            rederer.setSeriesPaint(0, Color.yellow);
+            rederer.setSeriesPaint(0, Color.MAGENTA);
             rederer.setSeriesPaint(1, Color.yellow);
             rederer.setSeriesPaint(2, Color.red);
 
             plot.setRenderer(3, rederer);
             plot.setDataset(3, dataset4);
+            plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+
+        }
+
+        if (y2 > 4) {
+            // 添加第5个Y轴
+            NumberAxis axis5 = new NumberAxis();
+            // -- 修改第2个Y轴的显示效果
+            axis5.setAxisLinePaint(Color.MAGENTA);
+            axis5.setLabelPaint(Color.BLUE);
+            axis5.setTickLabelPaint(Color.BLUE);
+            axis5.setRange(rangIndex3, rangEnd3);
+            axis5.setVisible(false);
+            plot.setRangeAxis(4, axis5);
+            plot.mapDatasetToRangeAxis(4, 4);
+
+            // -- 修改第3条曲线显示效果
+            LineAndShapeRenderer rederer = new LineAndShapeRenderer();
+            rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+            rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
+            rederer.setSeriesPaint(0, Color.MAGENTA);
+            rederer.setSeriesPaint(1, Color.yellow);
+            rederer.setSeriesPaint(2, Color.red);
+
+            plot.setRenderer(4, rederer);
+            plot.setDataset(4, dataset5);
             plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 
         }

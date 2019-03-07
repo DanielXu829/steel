@@ -186,7 +186,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 2、获取需要生成的模板信息
         List<ReportCategoryTemplate> templates = templateService.selectTemplateInfo(jobEnum.getCode(), lang);
         if (Objects.isNull(templates) || templates.isEmpty()) {
-            this.handlerException(jobEnum.getName() + "-->数据库中没有对应的模板");
+            this.handlerException(jobEnum.getName() + "-->数据库中没有对应的模板" + jobEnum.getCode());
         }
         return templates;
     }
@@ -207,7 +207,9 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum, dateQuery);
 
         //自动配煤报表 单独特殊处理到分钟
-        if (StringUtils.isNotBlank(code) && JobEnum.jh_zidongpeimei.getCode().equals(code) || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan.getCode().equals(code)) {
+        if (StringUtils.isNotBlank(code) && JobEnum.jh_zidongpeimei.getCode().equals(code)
+                || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan.getCode().equals(code)
+                || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan6.getCode().equals(code)) {
             // yyyy-MM-dd_HH_mm
             datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
         }
