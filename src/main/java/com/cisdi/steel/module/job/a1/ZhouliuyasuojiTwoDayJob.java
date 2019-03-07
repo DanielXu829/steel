@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component;
 public class ZhouliuyasuojiTwoDayJob extends AbstractBaseCommonExportJob1{
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.gl_zhouliuyasuoji;
+        return JobEnum.gl_zhouliuyasuoji_two;
     }
 }
