@@ -144,7 +144,8 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
         if (Objects.isNull(report)
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())) {
+                || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.gl_peiliaodan6.getCode().equals(reportIndex.getReportCategoryCode())) {
             reportIndex.setCreateTime(now);
             this.save(reportIndex);
         } else {
