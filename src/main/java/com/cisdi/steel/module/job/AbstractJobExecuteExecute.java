@@ -186,7 +186,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 2、获取需要生成的模板信息
         List<ReportCategoryTemplate> templates = templateService.selectTemplateInfo(jobEnum.getCode(), lang);
         if (Objects.isNull(templates) || templates.isEmpty()) {
-            this.handlerException(jobEnum.getName() + "-->数据库中没有对应的模板");
+            this.handlerException(jobEnum.getName() + "-->数据库中没有对应的模板" + jobEnum.getCode());
         }
         return templates;
     }
