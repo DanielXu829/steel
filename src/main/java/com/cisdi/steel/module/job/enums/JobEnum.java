@@ -53,6 +53,7 @@ public enum JobEnum {
     gl_refenglujiankong("gl_refenglujiankong", "6高炉热风炉设备监控日报"),
     gl_zhouliuyasuoji("gl_zhouliuyasuoji", "轴流压缩机操作报表AV50"),
     gl_zhouliuyasuoji_two("gl_zhouliuyasuoji_two", "轴流压缩机操作报表AV63"),
+    gl_qimixiang_day("gl_qimixiang_day", "上料日报"),
 
 
     // 焦化
