@@ -305,4 +305,15 @@ public class TestJob1 extends SteelApplicationTests {
     public void test24() {
         zhouliuyasuojiDayJob.execute(null);
     }
+
+    /**
+     * 上料日报
+     */
+    @Autowired
+    private QimixiangDayJob qimixiangDayJob;
+
+    @Test
+    public void test25() {
+        qimixiangDayJob.execute(null);
+    }
 }

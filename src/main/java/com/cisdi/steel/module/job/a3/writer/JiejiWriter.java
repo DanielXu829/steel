@@ -298,9 +298,27 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                     }
                     Arrays.sort(list);
 
-                    for (int m = 0; m < list.length; m++) {
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex++, i, innerMap.get(String.valueOf(list[m])));
+                    List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(dateQuerys.getRecordDate());
+
+                    for (int j = 0; j < dateQueries.size(); j++) {
+                        long time = dateQueries.get(j).getEndTime().getTime();
+                        Object v = "";
+                        for (int m = 0; m < list.length; m++) {
+                            if (time == list[m].longValue()) {
+                                Object o = innerMap.get(String.valueOf(list[m]));
+                                v = o;
+                                break;
+                            }
+                        }
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
+                        rowIndex++;
                     }
+
+
+
+//                    for (int m = 0; m < list.length; m++) {
+//                        ExcelWriterUtil.addCellData(cellDataList, rowIndex++, i, innerMap.get(String.valueOf(list[m])));
+//                    }
                 }
             }
         }
