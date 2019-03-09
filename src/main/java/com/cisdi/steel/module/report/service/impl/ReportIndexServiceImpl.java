@@ -204,8 +204,8 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         try {
             int dateTime = Integer.valueOf(DateUtil.getFormatDateTime(date, "HH"));
             int dateTime1 = Integer.valueOf(DateUtil.getFormatDateTime(date1, "HH"));
-            if (((dateTime >= 0 && dateTime < 3) || dateTime >= 23)
-                    && ((dateTime1 >= 0 && dateTime1 < 3) || dateTime1 >= 23)) {
+            if (((dateTime >= 0 && dateTime < 3) && (dateTime1 >= 0 && dateTime1 < 3))
+                    || (dateTime >= 23 && dateTime1 >= 23)) {
                 flag = true;
             } else if ((dateTime < 7 && dateTime >= 3)
                     && (dateTime1 < 7 && dateTime1 >= 3)) {
