@@ -48,13 +48,13 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
                 execute.allValueWriteExcel();
             }
             // 处理其他数据
-            if (sheetName.startsWith("_template")) {
+            if ("_template".equals(sheetName)) {
                 HourOptionStrategy hourOptionStrategy = new HourOptionStrategy();
                 List<DateQuery> dateQueries = hourOptionStrategy.execute(excelDTO.getDateQuery());
                 handlerData(workbook, sheet, dateQueries);
             }
             // 处理热风炉重点监控报表
-            if (sheetName.startsWith("_temp")) {
+            if ("_temp".equals(sheetName)) {
                 DateQuery dateQuery = DateQueryUtil.buildMonth(excelDTO.getDateQuery().getRecordDate());
                 handlerRefenglu(workbook, sheet, dateQuery);
             }
@@ -91,8 +91,8 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
         JSONObject obj = JSONObject.parseObject(result);
         obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
-        for (int columnIndex = 0; columnIndex < cellList.size(); columnIndex++) {
-            String cell = cellList.get(columnIndex);
+        for (int columnIndex = 0; columnIndex < tagNames.size(); columnIndex++) {
+            String cell = tagNames.get(columnIndex);
             if (StringUtils.isNotBlank(cell)) {
                 JSONObject data = obj.getJSONObject(cell);
                 if (Objects.nonNull(data)) {
@@ -105,9 +105,9 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
                         int day = instance.get(Calendar.DATE);
                         int hour = instance.get(Calendar.HOUR_OF_DAY);
                         int inr = 0;
-                        if (hour == 7) {
+                        if (hour == 8) {
                             inr = 2;
-                        } else if (hour == 15) {
+                        } else if (hour == 16) {
                             inr = 4;
                         }
                         int rowIndex = row + ((day - 1) * 6) + inr;
