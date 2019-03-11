@@ -145,58 +145,47 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Double getQueryBegin(DateQuery dateQuery, String tagName) {
-        Map<String, String> queryParam = new HashMap<>();
-        queryParam.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
-        queryParam.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
-        queryParam.put("tagName", tagName);
-        String result = httpUtil.get(getUrl6(), queryParam);
-        Double max = 0.0;
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject jsonObject = JSONObject.parseObject(result);
-            if (Objects.nonNull(jsonObject)) {
-                JSONArray rows = jsonObject.getJSONArray("rows");
-                if (Objects.nonNull(rows)) {
-                    for (int i = 0; i < rows.size(); i++) {
-                        JSONObject jsonObject1 = rows.getJSONObject(i);
-                        Double val = jsonObject1.getDouble("val");
-                        if (max < val) {
-                            max = val;
-                        }
-                    }
-                }
-            }
-        }
-        return max;
-    }
-
     protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam(dateQuery);
-        Map<String, String> queryParam1 = getQueryParam4(dateQuery);
+        Map<String, String> queryParam1 = getQueryParam(dateQuery);
+        Map<String, String> queryParam2 = getQueryParam4(dateQuery);
+        Map<String, String> queryParam3 = getQueryParam4(dateQuery);
         int size = columns.size();
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
             if (StringUtils.isNotBlank(column)) {
-                queryParam.put("tagName", column);
-                queryParam1.put("tagName", column);
+                String[] split = column.split(",");
+                queryParam.put("tagName", split[0]);
+                queryParam1.put("tagName", split[1]);
+                queryParam2.put("tagName", split[0]);
+                queryParam3.put("tagName", split[1]);
                 String result = httpUtil.get(url, queryParam);
                 String result1 = httpUtil.get(url, queryParam1);
-                if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)) {
+                String result2 = httpUtil.get(url, queryParam2);
+                String result3 = httpUtil.get(url, queryParam3);
+                if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)
+                        && StringUtils.isNotBlank(result2)&& StringUtils.isNotBlank(result3)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     JSONObject jsonObject1 = JSONObject.parseObject(result1);
-                    if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject1)) {
+                    JSONObject jsonObject2 = JSONObject.parseObject(result2);
+                    JSONObject jsonObject3 = JSONObject.parseObject(result3);
+                    if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject1)
+                            && Objects.nonNull(jsonObject2)&& Objects.nonNull(jsonObject3)) {
                         JSONArray rows = jsonObject.getJSONArray("rows");
                         JSONArray rows1 = jsonObject1.getJSONArray("rows");
-                        if (Objects.nonNull(rows) && Objects.nonNull(rows1)) {
+                        JSONArray rows2 = jsonObject2.getJSONArray("rows");
+                        JSONArray rows3 = jsonObject3.getJSONArray("rows");
+                        if (Objects.nonNull(rows) && Objects.nonNull(rows1)
+                                && Objects.nonNull(rows2)&& Objects.nonNull(rows3)) {
                             JSONObject obj = rows.getJSONObject(0);
                             JSONObject obj1 = rows1.getJSONObject(0);
-                            if (Objects.nonNull(obj) && Objects.nonNull(obj1)) {
-                                Double val = obj1.getDouble("val")-obj.getDouble("val");
-                                if (val < 0) {
-                                    Double queryBegin = getQueryBegin(dateQuery, column);
-                                    val = obj1.getDouble("val") - obj.getDouble("val") + queryBegin;
-                                }
+                            JSONObject obj2 = rows2.getJSONObject(0);
+                            JSONObject obj3 = rows3.getJSONObject(0);
+                            if (Objects.nonNull(obj) && Objects.nonNull(obj1)
+                                    && Objects.nonNull(obj2) && Objects.nonNull(obj3)) {
+                                Double val = obj3.getDouble("val")+obj2.getDouble("val")
+                                        -obj1.getDouble("val")-obj.getDouble("val");
                                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                             }
                         }

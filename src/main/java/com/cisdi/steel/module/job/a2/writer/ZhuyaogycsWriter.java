@@ -26,6 +26,8 @@ import java.util.*;
  */
 @Component
 public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
+    private JSONObject jsonObject1;
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -66,6 +68,14 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         if (StringUtils.isNotBlank(columns.get(k))) {
                             String[] split = columns.get(k).split("/");
                             Double cellDataList = mapDataHandler(getUrl(), dateQuery, split[0], split[1]);
+                            setSheetValue(sheet, rowIndex, k, cellDataList);
+                        }
+                    }
+                }else if ("analysislast".equals(sheetSplit[1])) {
+                    for (int k = 0; k < columns.size(); k++) {
+                        if (StringUtils.isNotBlank(columns.get(k))) {
+                            String[] split = columns.get(k).split("/");
+                            Double cellDataList = mapDataHandlerx(getUrlx(), split[0], split[1]);
                             setSheetValue(sheet, rowIndex, k, cellDataList);
                         }
                     }
@@ -146,6 +156,35 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return data;
     }
 
+    protected Double mapDataHandlerx(String url, String brandcode, String anaitemname) {
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("brandcode", brandcode);
+        queryParam.put("anaitemname", anaitemname);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        Double data = jsonObject.getDouble("data");
+        if("48MM".equals(anaitemname)){
+            Map<String, String> queryParam1 = new HashMap<>();
+            queryParam1.put("brandcode", brandcode);
+            queryParam1.put("anaitemname", "LD40-60");
+            Map<String, String> queryParam2 = new HashMap<>();
+            queryParam2.put("brandcode", brandcode);
+            queryParam2.put("anaitemname", "LD60-80");
+            String result1 = httpUtil.get(url, queryParam1);
+            String result2 = httpUtil.get(url, queryParam2);
+            if (StringUtils.isBlank(result1)|| StringUtils.isBlank(result2)) {
+                return null;
+            }
+            JSONObject jsonObject1 = JSONObject.parseObject(result1);
+            JSONObject jsonObject2 = JSONObject.parseObject(result2);
+             data = jsonObject1.getDouble("data")+jsonObject2.getDouble("data");
+        }
+        return data;
+    }
+
     protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam1(dateQuery);
         int size = columns.size();
@@ -213,20 +252,29 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     protected Double mapDataHandler3(String url, DateQuery dateQuery,int shiftNum) {
         Map<String, String> queryParam = getQueryParam5(dateQuery,shiftNum);
         String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
-            return null;
+        Double ganxi =0.0;
+        if (StringUtils.isNotBlank(result)) {
+            JSONArray array = JSONObject.parseArray(result);
+            if (Objects.nonNull(array) && array.size()!=0) {
+                JSONObject jsonObject = array.getJSONObject(0);
+                if (Objects.nonNull(jsonObject)) {
+                    Double backn5 = jsonObject.getDouble("backn5");
+                    Double backn6 = jsonObject.getDouble("backn6");
+                    ganxi = backn5/(backn5+backn6);
+                }
+            }else {
+                Map<String, String> queryParam1 = getQueryParam5x(dateQuery, shiftNum);
+                String result1 = httpUtil.get(getUrl6x(), queryParam1);
+                if (StringUtils.isBlank(result1)) {
+                    return null;
+                }
+                JSONArray array1 = JSONObject.parseArray(result1);
+                JSONObject jsonObject1 = array1.getJSONObject(0);
+                Double backn5x = jsonObject1.getDouble("backn5");
+                Double backn6x = jsonObject1.getDouble("backn6");
+                ganxi = backn5x / (backn5x + backn6x);
+            }
         }
-        JSONArray array = JSONObject.parseArray(result);
-        if (Objects.isNull(array) || array.size()==0) {
-            return null;
-        }
-        JSONObject jsonObject = array.getJSONObject(0);
-        if (Objects.isNull(jsonObject)) {
-            return null;
-        }
-        Double backn5 = jsonObject.getDouble("backn5");
-        Double backn6 = jsonObject.getDouble("backn6");
-        Double ganxi = backn5/(backn5+backn6);
         return ganxi;
     }
 
@@ -511,6 +559,13 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam5x(DateQuery dateQuery, int shiftNum) {
+        Map<String, String> result = new HashMap<>();
+        result.put("code", "KH-Y");
+        result.put("flag", "O");
+        return result;
+    }
+
     protected Map<String, String> getQueryParam6(DateQuery dateQuery,int shiftNum,String cokeovenNo,int therMometryNum) {
         Map<String, String> result = new HashMap<>();
         result.put("date", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd 00:00:00"));
@@ -558,6 +613,9 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     private String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCodeOrSource";
     }
+    private String getUrlx() {
+        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemLatest";
+    }
 
     private String getUrl2() {
         return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
@@ -577,6 +635,10 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
 
     private String getUrl6() {
         return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
+    }
+
+    private String getUrl6x() {
+        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeActuPerfLastest";
     }
 
     private String getUrl7() {
