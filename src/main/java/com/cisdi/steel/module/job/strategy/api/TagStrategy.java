@@ -118,26 +118,4 @@ public class TagStrategy extends AbstractApiStrategy {
         }
         return resultList;
     }
-
-    private String judgeKey(Long[] list) {
-        Set<Integer> months = new HashSet<>();
-        Set<Integer> days = new HashSet<>();
-        Set<Integer> hours = new HashSet<>();
-        for (Long a : list) {
-            Date date = new Date(a);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            months.add(calendar.get(Calendar.MONTH));
-            days.add(calendar.get(Calendar.DATE));
-            hours.add(calendar.get(Calendar.HOUR_OF_DAY));
-        }
-        // 判断是否日报表
-        if (days.size() == 1 && months.size() == 1 && hours.size() > 0) {
-            return "day";
-        }
-        if (months.size() == 1 && days.size() > 0 && hours.size() < 5) {
-            return "month";
-        }
-        return null;
-    }
 }

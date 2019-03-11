@@ -13,7 +13,9 @@ import com.cisdi.steel.module.job.strategy.api.ApiStrategy;
 import com.cisdi.steel.module.job.strategy.date.DateStrategy;
 import com.cisdi.steel.module.job.strategy.options.HourOptionStrategy;
 import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("Duplicates")
 @Component
 public class RefenglujiankongWriter extends AbstractExcelReadWriter {
     @Override
@@ -48,16 +51,27 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
             if (sheetName.startsWith("_template")) {
                 HourOptionStrategy hourOptionStrategy = new HourOptionStrategy();
                 List<DateQuery> dateQueries = hourOptionStrategy.execute(excelDTO.getDateQuery());
-                handlerData(workbook,sheet,dateQueries);
+                handlerData(workbook, sheet, dateQueries);
+            }
+            // 处理热风炉重点监控报表
+            if (sheetName.startsWith("_temp")) {
+                DateQuery dateQuery = DateQueryUtil.buildMonth(excelDTO.getDateQuery().getRecordDate());
+                handlerRefenglu(workbook, sheet, dateQuery);
             }
         }
         return workbook;
     }
 
-    private void handlerData(Workbook workbook, Sheet sheet, List<DateQuery> dateQueries) {
+    private void handlerRefenglu(Workbook workbook, Sheet sheet, DateQuery dateQuery) {
+        // 第一行
+        List<String> firstRowCelVal = PoiCustomUtil.getFirstRowCelVal(sheet);
+        // 第二行
+        List<String> twoCellVal = PoiCustomUtil.getRowCelVal(sheet, 1);
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
-        String url = httpProperties.getGlUrlVersion(version) + "/hsstate";
-        List<CellData> cellData = handlerSixData(url, version,dateQueries);
+        String url = httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
+        List<CellData> cellData = handlerRefengluData(url, firstRowCelVal, dateQuery, 2);
+        List<CellData> cellData1 = handlerRefengluData(url, twoCellVal, dateQuery, 3);
+        cellData.addAll(cellData1);
         SheetRowCellData.builder()
                 .workbook(workbook)
                 .sheet(sheet)
@@ -65,20 +79,69 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
                 .build().allValueWriteExcel();
     }
 
-    private List<CellData> handlerSixData(String url,String version,List<DateQuery> dateQueries) {
+    private List<CellData> handlerRefengluData(String url, List<String> tagNames, DateQuery dateQuery, int row) {
+        JSONObject jsonObject = new JSONObject();
+        Map<String, String> queryParam = dateQuery.getQueryParam();
+        jsonObject.put("starttime", queryParam.get("starttime"));
+        jsonObject.put("endtime", queryParam.get("endtime"));
+        List<String> cellList = tagNames.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        jsonObject.put("tagnames", cellList);
+
+        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+        JSONObject obj = JSONObject.parseObject(result);
+        obj = obj.getJSONObject("data");
+        List<CellData> resultList = new ArrayList<>();
+        for (int columnIndex = 0; columnIndex < cellList.size(); columnIndex++) {
+            String cell = cellList.get(columnIndex);
+            if (StringUtils.isNotBlank(cell)) {
+                JSONObject data = obj.getJSONObject(cell);
+                if (Objects.nonNull(data)) {
+                    int columnIndexVal = columnIndex;
+                    data.keySet().forEach(key -> {
+                        Object o = data.get(key);
+                        Date date = new Date(Long.valueOf(key));
+                        Calendar instance = Calendar.getInstance();
+                        instance.setTime(date);
+                        int day = instance.get(Calendar.DATE);
+                        int hour = instance.get(Calendar.HOUR_OF_DAY);
+                        int inr = 0;
+                        if (hour == 7) {
+                            inr = 2;
+                        } else if (hour == 15) {
+                            inr = 4;
+                        }
+                        int rowIndex = row + ((day - 1) * 6) + inr;
+                        CellData cellData = new CellData(rowIndex, columnIndexVal, o);
+                        resultList.add(cellData);
+                    });
+
+                }
+            }
+        }
+        return resultList;
+    }
+
+    private void handlerData(Workbook workbook, Sheet sheet, List<DateQuery> dateQueries) {
+        String version = PoiCustomUtil.getSheetCellVersion(workbook);
+        String url = httpProperties.getGlUrlVersion(version) + "/hsstatebyendtime";
+        List<CellData> cellData = handlerSixData(url, version, dateQueries);
+        SheetRowCellData.builder()
+                .workbook(workbook)
+                .sheet(sheet)
+                .cellDataList(cellData)
+                .build().allValueWriteExcel();
+    }
+
+    private List<CellData> handlerSixData(String url, String version, List<DateQuery> dateQueries) {
         int size = dateQueries.size();
         DateQuery dateQuery;
         // 送风炉号所在的列
-        int columnIndex=2;
+        int columnIndex = 2;
         // 送风时间所在的列
-        int columnIndex2=1;
-        List<CellData> resultData =new ArrayList<>();
+        int columnIndex2 = 1;
+        List<CellData> resultData = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             dateQuery = dateQueries.get(i);
-            Date start = DateUtil.addHours(dateQuery.getStartTime(), -1);
-            Date end = DateUtil.addHours(dateQuery.getEndTime(), -1);
-            dateQuery.setStartTime(start);
-            dateQuery.setEndTime(end);
             List<Map<String, Object>> result = handlerRequestData(url, dateQuery);
             if (Objects.isNull(result)) {
                 continue;
@@ -86,15 +149,14 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
             if ("6.0".equals(version)) {
                 // 处理送风炉号
                 Object handlerluhao = handlerluhao(result);
-                CellData cellData=new CellData(i+1,columnIndex,handlerluhao);
+                CellData cellData = new CellData(i + 1, columnIndex, handlerluhao);
                 resultData.add(cellData);
             } else if ("8.0".equals(version)) {
                 // 处理送风时间
                 Object o = handlerTime(result);
-                CellData cellData=new CellData(i+1,columnIndex2,o);
+                CellData cellData = new CellData(i + 1, columnIndex2, o);
                 resultData.add(cellData);
             }
-
 
 
         }
@@ -122,7 +184,7 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
     }
 
 
-    private List<Map<String, Object>> handlerRequestData(String url,DateQuery dateQuery) {
+    private List<Map<String, Object>> handlerRequestData(String url, DateQuery dateQuery) {
         Map<String, String> queries = new HashMap<>();
         queries.put("begintime", dateQuery.getQueryStartTime().toString());
         queries.put("endtime", dateQuery.getQueryEndTime().toString());
