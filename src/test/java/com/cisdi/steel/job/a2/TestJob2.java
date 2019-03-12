@@ -209,7 +209,7 @@ public class TestJob2 extends SteelApplicationTests {
 
 
     /**
-     * 炼焦日报
+     * 炼焦月报
      */
     @Autowired
     private LianjiaoyuebaoJob lianjiaoyuebaoJob;

@@ -91,6 +91,30 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                             startRow++;
                         }
                     }
+                } else if ("kanavg6".equals(name)) {
+                    int startRow = 1;
+                    for (int j = 0; j < size; j++) {
+                        DateQuery item = dateQueries.get(j);
+                        List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
+                        for (int k = 0; k < dateQueries1.size(); k++) {
+                            String version = "CO6";
+                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl4x(), columns, dateQueries1.get(k), startRow, version);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            startRow++;
+                        }
+                    }
+                } else if ("kanavg7".equals(name)) {
+                    int startRow = 1;
+                    for (int j = 0; j < size; j++) {
+                        DateQuery item = dateQueries.get(j);
+                        List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
+                        for (int k = 0; k < dateQueries1.size(); k++) {
+                            String version = "CO7";
+                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl4x(), columns,  dateQueries1.get(k),startRow, version);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                            startRow++;
+                        }
+                    }
                 }else {
                     int rowIndex=1;
                     for (int j = 0; j < size; j++) {
@@ -246,6 +270,29 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         return handlerJsonArray(columns, rowBatch, objects, startRow);
     }
 
+    public List<CellData> mapDataHandler4x(String url, List<String> columns, DateQuery dateQuery,int startRow, String version) {
+        Map<String, String> queryParam = getQueryParame3(dateQuery);
+        queryParam.put("cokeNo", version);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject objects = JSONObject.parseObject(result);
+        if (Objects.isNull(objects)) {
+            return null;
+        }
+        JSONObject data = objects.getJSONObject("data");
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        JSONObject dayTemp = data.getJSONObject("DayTemperatureStatistics");
+        if (Objects.isNull(dayTemp)) {
+            return null;
+        }
+        List<CellData> cellDataList = ExcelWriterUtil.handlerRowData(columns, startRow, dayTemp);
+        return cellDataList;
+    }
+
 
     /**
      * 处理返回的 json格式
@@ -323,6 +370,10 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
 
     protected String getUrl4() {
         return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    }
+
+    protected String getUrl4x() {
+        return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 
     protected String getUrl5() {
