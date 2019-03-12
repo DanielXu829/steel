@@ -281,6 +281,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         if (Objects.isNull(report) || Objects.isNull(report.getPath())
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.gl_peiliaodan6.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())) {
             // 不存在，直接返回null
             return null;
