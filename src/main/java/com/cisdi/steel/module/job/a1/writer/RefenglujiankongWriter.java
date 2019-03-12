@@ -104,11 +104,11 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
                         instance.setTime(date);
                         int day = instance.get(Calendar.DATE);
                         int hour = instance.get(Calendar.HOUR_OF_DAY);
-                        int inr = 0;
+                        int inr = -2;
                         if (hour == 8) {
-                            inr = 2;
+                            inr = 0;
                         } else if (hour == 16) {
-                            inr = 4;
+                            inr = 2;
                         }
                         int rowIndex = row + ((day - 1) * 6) + inr;
                         CellData cellData = new CellData(rowIndex, columnIndexVal, o);
