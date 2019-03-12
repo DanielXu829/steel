@@ -14,7 +14,6 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;

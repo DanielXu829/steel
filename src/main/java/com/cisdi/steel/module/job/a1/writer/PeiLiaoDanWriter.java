@@ -97,6 +97,10 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         if (Objects.nonNull(data)) {
             JSONArray jsArr1 = new JSONArray();
             JSONArray jsArr2 = new JSONArray();
+
+            Set<Object> set = new HashSet<>();
+            Map<Object, Object> map = new HashMap<>();
+
             for (int i = 0; i < data.size(); i++) {
                 JSONObject jsonObject1 = data.getJSONObject(i);
                 String typ = jsonObject1.getString("typ");
@@ -106,8 +110,17 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                     jsArr2.add(jsonObject1);
                 }
             }
-            dealData(jsArr1, cellDataList, 1);
-            dealData(jsArr2, cellDataList, 4);
+            dealData(jsArr1, cellDataList, 1, set, map);
+            dealData(jsArr2, cellDataList, 4, set, map);
+            int index = 0;
+            if (set.size() > 0) {
+                for (Object key : set) {
+                    Object value = map.get(key);
+                    ExcelWriterUtil.addCellData(cellDataList, 23, index, key);
+                    ExcelWriterUtil.addCellData(cellDataList, 24, index, value);
+                    index++;
+                }
+            }
         }
 
         JSONObject parameters = jsonObject.getJSONObject("parameters");
@@ -224,12 +237,13 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             Double weight = object.getDouble("weight");
             Double moisture = object.getDouble("moisture");
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, descr);
-            ExcelWriterUtil.addCellData(cellDataList, rowIndex++, 1, weight);
-            ExcelWriterUtil.addCellData(cellDataList, rowIndex++, 2, moisture);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 1, weight);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 2, moisture);
+            rowIndex++;
         }
     }
 
-    private void dealData(JSONArray data, List<CellData> cellDataList, int rowIndex) {
+    private void dealData(JSONArray data, List<CellData> cellDataList, int rowIndex, Set<Object> set, Map<Object, Object> mapData) {
         List<JSONObject> list = new ArrayList<>();
         int size = data.size();
         for (int i = 0; i < size; i++) {
@@ -252,6 +266,9 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val1);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex + 1, i, val2);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex + 2, i, val3);
+            //将装料编号和数据放入相应的集合中
+            set.add(val1);
+            mapData.put(val1, val2);
         }
     }
 
