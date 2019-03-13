@@ -310,4 +310,15 @@ public class TestJob2 extends SteelApplicationTests {
         zhuyaogycsJob.execute(null);
     }
 
+    /**
+     * 主要工艺参数
+     */
+    @Autowired
+    private ChanhaozongheJob chanhaozongheJob;
+
+    @Test
+    public void test30() {
+        chanhaozongheJob.execute(null);
+    }
+
 }
