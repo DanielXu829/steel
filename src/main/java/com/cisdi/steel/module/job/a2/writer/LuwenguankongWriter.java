@@ -10,6 +10,8 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -27,8 +29,14 @@ import java.util.*;
  */
 @Component
 public class LuwenguankongWriter extends AbstractExcelReadWriter {
+    /**
+     * 当前行数
+     */
+    private int rowIndex = 1;
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
+
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
@@ -44,57 +52,156 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
-                    if (item.getRecordDate().before(new Date())) {
-                        int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    } else {
-                        break;
-                    }
-
+                    List<CellData> cellDataList = mapDataHandler(this.rowIndex, getUrl(), columns, item);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
         }
         return workbook;
     }
 
-    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam(dateQuery);
-        int size = columns.size();
+    protected List<CellData> mapDataHandler(int rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+
         List<CellData> cellDataList = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            String column = columns.get(i);
+
+        StringBuilder builder = new StringBuilder();
+        for (String column : columns) {
             if (StringUtils.isNotBlank(column)) {
-                queryParam.put("tagNames", column);
-                String result = httpUtil.get(url, queryParam);
-                if (StringUtils.isNotBlank(result)) {
-                    JSONObject jsonObject = JSONObject.parseObject(result);
-                    if (Objects.nonNull(jsonObject)) {
-                        JSONObject data = jsonObject.getJSONObject("data");
-                        if (Objects.nonNull(data)) {
-                            JSONArray arr = data.getJSONArray(column);
-                            if (Objects.nonNull(arr)&& arr.size()!=0) {
-                                JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                Double val = jsonObject1.getDouble("val");
-                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
-                            }
+                builder.append(column).append(",");
+            }
+        }
+
+        String tagNames = builder.toString().substring(0, builder.toString().length() - 1);
+
+        Map<String, String> queryParam = getQueryParam(dateQuery, tagNames);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (Objects.nonNull(data)) {
+            int index = 0;
+            for (int i = 0; i < columns.size(); i++) {
+                String col = columns.get(i);
+                if (StringUtils.isNotBlank(col)) {
+                    JSONArray jsonArray = data.getJSONArray(col);
+                    if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
+                        for (int j = 0; j < jsonArray.size(); j++) {
+                            //3.该点名其他时间值关联上一个时间点值
+                            dealPart1(jsonArray, col, cellDataList, this.rowIndex, index, j);
+                            this.rowIndex += 1;
                         }
                     }
+                    index += 4;
                 }
             }
         }
+
         return cellDataList;
     }
 
-    @Override
-    protected Map<String, String> getQueryParam(DateQuery dateQuery) {
+    /**
+     * 对单元格进行填值
+     *
+     * @param jsonArray    接口返回的数据数组
+     * @param col          当前列名
+     * @param cellDataList 数据集合
+     * @param rowIndex     当前行
+     * @param index        当前列
+     * @param row          当前数据数组的角标
+     */
+    private void dealPart1(JSONArray jsonArray, String col, List<CellData> cellDataList, int rowIndex, int index, int row) {
+        //1.获取该点名最早的一个值
+        JSONObject child = jsonArray.getJSONObject(row);
+        //2.查找该最早时的前一个值
+        Date clock = child.getDate("clock");
+        Integer before = null;
+        //处理每一个点名的第一个数值关联
+        if (row == 0) {
+            before = dealPart(clock, col);
+        } else {
+            JSONObject fir = jsonArray.getJSONObject(row - 1);
+            if (Objects.nonNull(fir)) {
+                before = fir.getInteger("val");
+            }
+        }
+        Integer after = child.getInteger("val");
+        //如果调整前没值 就等于调整后的值
+        if (Objects.isNull(before)) {
+            before = after;
+        }
+        Object curr = after.intValue() - before.intValue();
+
+        //处理班次
+        Integer hh = Integer.valueOf(DateUtil.getFormatDateTime(clock, "HH"));
+        String bb = "";
+        if (0 <= hh.intValue() && hh.intValue() < 8) {
+            bb = "夜班";
+        } else if (8 <= hh.intValue() && hh.intValue() < 16) {
+            bb = "白班";
+        } else if (16 <= hh.intValue() && hh.intValue() < 24) {
+            bb = "中班";
+        }
+
+        //将时间和班次填在前两列，班组暂未处理 2
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, clock);
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 1, bb);
+
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, index + 3, clock);
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, index + 4, before);
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, index + 5, after);
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, index + 6, curr);
+    }
+
+    /**
+     * 查询前一个的处理值
+     *
+     * @param date
+     * @param tagName
+     * @return
+     */
+    private Integer dealPart(Date date, String tagName) {
+        Map<String, String> queryParam = getQueryParam1(date, tagName);
+        String result = httpUtil.get(getUrl1(), queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+
+        Integer val = null;
+
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (Objects.nonNull(data)) {
+            JSONArray jsonArray = data.getJSONArray(tagName);
+            if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
+                JSONObject first = jsonArray.getJSONObject(0);
+                val = first.getInteger("val");
+            }
+        }
+        return val;
+    }
+
+    protected Map<String, String> getQueryParam(DateQuery dateQuery, String tagNames) {
         Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(),-10),"yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("tagNames", tagNames);
+        return result;
+    }
+
+    protected Map<String, String> getQueryParam1(Date date, String tagName) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:ss"));
+        result.put("tagName", tagName);
         return result;
     }
 
     protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    }
+
+    protected String getUrl1() {
+        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValLastestByDate";
     }
 }

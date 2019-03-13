@@ -14,7 +14,6 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
@@ -282,6 +281,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         if (Objects.isNull(report) || Objects.isNull(report.getPath())
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.gl_peiliaodan6.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())) {
             // 不存在，直接返回null
             return null;
