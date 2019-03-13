@@ -355,7 +355,6 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
     }
 
 
-
     protected String getUrl1() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }

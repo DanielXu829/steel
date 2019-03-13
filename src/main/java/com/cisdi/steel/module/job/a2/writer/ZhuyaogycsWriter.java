@@ -109,6 +109,9 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         setSheetValue(sheet, rowNum, 0, cellDataList);
                         rowNum++;
                     }
+                }else if("standard".equals(sheetSplit[1])){
+                    List<CellData> cellDataList = this.mapDataHandler9(getUrl10(), columns,  date, 1);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("kstatis".equals(sheetSplit[1])) {
                     Date dateBeginTime = DateUtil.getDateBeginTime(dateQuery.getRecordDate());
                     int rowNum = 1;
@@ -391,6 +394,25 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return val;
     }
 
+    public List<CellData> mapDataHandler9(String url, List<String> columns,DateQuery dateQuery,int startRow) {
+        Map<String, String> queryParam = getQueryParame4(dateQuery);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject objects = JSONObject.parseObject(result);
+        if (Objects.isNull(objects)) {
+            return null;
+        }
+        return ExcelWriterUtil.handlerRowData(columns, startRow, objects);
+    }
+
+    protected Map<String, String> getQueryParame4(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date",DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
     protected List<CellData> mapDataHandler6(String url, List<String> columns, Date start, Date end, int rowBatch) {
         Map<String, String> queryParam = getQueryParam8(start, end);
         String result = httpUtil.get(url, queryParam);
@@ -653,4 +675,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingParameter/getHistoryByDateTime";
     }
 
+    protected String getUrl10() {
+        return httpProperties.getUrlApiJHOne() + "/thermalRegulation/getCurrentByDate";
+    }
 }

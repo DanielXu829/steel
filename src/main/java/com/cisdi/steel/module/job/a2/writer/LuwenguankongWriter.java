@@ -136,17 +136,36 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         //处理班次
         Integer hh = Integer.valueOf(DateUtil.getFormatDateTime(clock, "HH"));
         String bb = "";
+        int shiftNum=0;
         if (0 <= hh.intValue() && hh.intValue() < 8) {
-            bb = "夜班";
+            bb = "夜";
+            shiftNum=1;
         } else if (8 <= hh.intValue() && hh.intValue() < 16) {
-            bb = "白班";
+            bb = "白";
+            shiftNum=2;
         } else if (16 <= hh.intValue() && hh.intValue() < 24) {
-            bb = "中班";
+            bb = "中";
+            shiftNum=3;
+        }
+        //处理班组
+        String bz="";
+        Map<String, String> queryParam2 = getQueryParam2(clock, shiftNum);
+        String result = httpUtil.get(getUrl2(), queryParam2);
+        if(StringUtils.isNotBlank(result)){
+            JSONArray array = JSONObject.parseArray(result);
+            if(array.size()!=0||Objects.nonNull(array)){
+                JSONObject jsonObject = array.getJSONObject(0);
+                if(Objects.nonNull(jsonObject)){
+                    bz = jsonObject.getString("workTeam");
+                }
+
+            }
         }
 
-        //将时间和班次填在前两列，班组暂未处理 2
+        //将时间和班次填在前两列
         ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, clock);
         ExcelWriterUtil.addCellData(cellDataList, rowIndex, 1, bb);
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 2, bz);
 
         ExcelWriterUtil.addCellData(cellDataList, rowIndex, index + 3, clock);
         ExcelWriterUtil.addCellData(cellDataList, rowIndex, index + 4, before);
@@ -197,6 +216,13 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam2(Date clock,int shiftNum) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(clock), "yyyy/MM/dd HH:mm:ss"));
+        result.put("shift", shiftNum+"");
+        return result;
+    }
+
     protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
     }
@@ -204,4 +230,9 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
     protected String getUrl1() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValLastestByDate";
     }
+
+    protected String getUrl2() {
+        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    }
+
 }

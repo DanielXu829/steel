@@ -321,7 +321,7 @@ public class TestJob2 extends SteelApplicationTests {
     }
 
     /**
-     * 主要工艺参数
+     * 产耗综合报表
      */
     @Autowired
     private ChanhaozongheJob chanhaozongheJob;
