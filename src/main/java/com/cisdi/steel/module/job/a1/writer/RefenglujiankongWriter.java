@@ -140,26 +140,30 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
         // 送风时间所在的列
         int columnIndex2 = 1;
         List<CellData> resultData = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            dateQuery = dateQueries.get(i);
-            List<Map<String, Object>> result = handlerRequestData(url, dateQuery);
-            if (Objects.isNull(result)) {
-                continue;
+        if ("6.0".equals(version)) {
+            // 处理送风炉号
+            Object handlerluhao = handlerluhao();
+            Calendar calendar = Calendar.getInstance();
+            int i = calendar.get(Calendar.HOUR_OF_DAY);
+            if (i == 0) {
+                i = 24;
             }
-            if ("6.0".equals(version)) {
-                // 处理送风炉号
-                Object handlerluhao = handlerluhao(result);
-                CellData cellData = new CellData(i + 1, columnIndex, handlerluhao);
-                resultData.add(cellData);
-            } else if ("8.0".equals(version)) {
+            CellData cellData = new CellData(i + 1, columnIndex, handlerluhao);
+            resultData.add(cellData);
+        } else if ("8.0".equals(version)) {
+            for (int i = 0; i < size; i++) {
+                dateQuery = dateQueries.get(i);
+                List<Map<String, Object>> result = handlerRequestData(url, dateQuery);
+                if (Objects.isNull(result)) {
+                    continue;
+                }
                 // 处理送风时间
                 Object o = handlerTime(result);
                 CellData cellData = new CellData(i + 1, columnIndex2, o);
                 resultData.add(cellData);
             }
-
-
         }
+
         return resultData;
     }
 
@@ -205,19 +209,12 @@ public class RefenglujiankongWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private Object handlerluhao(List<Map<String, Object>> result) {
-        List<Map<String, Object>> collect = result.stream().filter(item -> {
-            // 状态为4   endtime为null的数据
-            Object state = item.get("state");
-            if (Objects.nonNull(state) && "4".equals(state.toString())) {
-                Object endtime = item.get("endtime");
-                return Objects.isNull(endtime);
-            }
-            return false;
-        }).collect(Collectors.toList());
-        if (collect.size() > 0) {
-            Map<String, Object> stringObjectMap = collect.get(0);
-            return stringObjectMap.get("hsno");
+    private Object handlerluhao() {
+        String s = httpProperties.getUrlApiGLOne() + "/blastinghsno";
+        String s1 = httpUtil.get(s);
+        if (StringUtils.isNotBlank(s1)) {
+            JSONObject jsonObject = JSONObject.parseObject(s1);
+            return jsonObject.get("data");
         }
         return null;
     }
