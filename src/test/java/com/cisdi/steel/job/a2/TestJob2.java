@@ -18,6 +18,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TestJob2 extends SteelApplicationTests {
 
     /**
+     * 炉温管控
+     */
+    @Autowired
+    private LuwenguankongJob luwenguankongJob;
+    @Test
+    public void test100() {
+        luwenguankongJob.execute(null);
+    }
+
+    /**
      * 自动配煤
      */
     @Autowired
