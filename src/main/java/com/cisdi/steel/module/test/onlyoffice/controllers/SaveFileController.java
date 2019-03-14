@@ -111,5 +111,6 @@ public class SaveFileController {
          * status = 1，我们给onlyoffice的服务返回{"error":"0"}的信息，这样onlyoffice会认为回调接口是没问题的，这样就可以在线编辑文档了，否则的话会弹出窗口说明
          * */
         writer.write("{\"error\":0}");
+//        writer.print("<script language='javascript'>alert(\"保存成功"  + "\");</script>");
     }
 }

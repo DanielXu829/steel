@@ -14,7 +14,7 @@
         body {
             background: #fff;
             color: #333;
-            font-family: Arial, Tahoma,sans-serif;
+            font-family: Arial, Tahoma, sans-serif;
             font-size: 12px;
             font-weight: normal;
             height: 100%;
@@ -41,8 +41,10 @@
         var fileType = [[${fileType}]];
 
         var innerAlert = function (message) {
-            if (console && console.log)
+            console.log(message.error);
+            if (console && console.log){
                 console.log(message);
+            }
         };
 
         var onReady = function () {
@@ -59,8 +61,17 @@
         };
 
         var onError = function (event) {
-            if (event)
+            if (event) {
                 innerAlert(event.data);
+            }
+        };
+
+        var onWarning = function (event) {
+            console.log("ONLYOFFICE Document Editor reports an warning: code " + event.data.warningCode +"---"+event.data.code+ ", description " + event.data.warningDescription);
+        };
+
+        var onInfo = function (event) {
+            console.log("ONLYOFFICE Document Editor is opened in mode " + event.data.error);
         };
 
         var onOutdatedVersion = function (event) {
@@ -126,6 +137,8 @@
                         "onDocumentStateChange": onDocumentStateChange,
                         'onRequestEditRights': onRequestEditRights,
                         "onError": onError,
+                        "onInfo": onInfo,
+                        "onWarning": onWarning,
                         "onOutdatedVersion": onOutdatedVersion,
                     }
                 });
