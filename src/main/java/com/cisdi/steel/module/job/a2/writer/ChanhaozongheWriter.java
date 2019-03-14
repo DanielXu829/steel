@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -55,6 +56,20 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
                         List<CellData> cellDataList = this.mapDataHandler2(rowIndex, getUrl1(), columns, item);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    }
+                } else if ("taghe".equals(sheetSplit[1])) {
+                    for (int k = 0; k < size; k++) {
+                        DateQuery item = dateQueries.get(k);
+                        int rowIndex = k + 1;
+                        List<CellData> cellDataList = this.mapDataHandler1(rowIndex, getUrl(), columns, item);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    }
+                } else if ("reval".equals(sheetSplit[1])) {
+                    for (int k = 0; k < size; k++) {
+                        DateQuery item = dateQueries.get(k);
+                        int rowIndex = k + 1;
+                        List<CellData> cellDataList = this.mapDataHandler3(rowIndex, getUrl2(), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 }
@@ -143,9 +158,9 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
     }
 
     protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam(dateQuery);
+        Map<String, String> queryParam = getQueryParam1(dateQuery);
         Map<String, String> queryParam1 = getQueryParam1(dateQuery);
-        Map<String, String> queryParam2 = getQueryParam(dateQuery);
+        Map<String, String> queryParam2 = getQueryParam1(dateQuery);
         Map<String, String> queryParam3 = getQueryParam1(dateQuery);
         int size = columns.size();
         List<CellData> cellDataList = new ArrayList<>();
@@ -153,9 +168,9 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
             String column = columns.get(i);
             if (StringUtils.isNotBlank(column)) {
                 String[] split = column.split(",");
-                if (split.length == 1) {
+                if (split.length == 2) {
                     queryParam.put("tagName", split[0]);
-                    queryParam1.put("tagName", split[0]);
+                    queryParam1.put("tagName", split[1]);
                     String result = httpUtil.get(url, queryParam);
                     String result1 = httpUtil.get(url, queryParam1);
                     if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)) {
@@ -168,12 +183,53 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                                     && Objects.nonNull(arr1) && arr1.size() != 0) {
                                 JSONObject job = arr.getJSONObject(0);
                                 JSONObject job1 = arr1.getJSONObject(0);
-                                double val = job1.getDouble("val") - job.getDouble("val");
+                                if (Objects.isNull(job) || Objects.isNull(job1)) {
+                                    continue;
+                                }
+                                double val = job1.getDouble("val") + job.getDouble("val");
                                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                             }
                         }
                     }
-
+                } else if (split.length == 4) {
+                    queryParam.put("tagName", split[0]);
+                    queryParam1.put("tagName", split[1]);
+                    queryParam2.put("tagName", split[2]);
+                    queryParam3.put("tagName", split[3]);
+                    String result = httpUtil.get(url, queryParam);
+                    String result1 = httpUtil.get(url, queryParam1);
+                    String result2 = httpUtil.get(url, queryParam2);
+                    String result3 = httpUtil.get(url, queryParam3);
+                    if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)
+                            && StringUtils.isNotBlank(result2) && StringUtils.isNotBlank(result3)) {
+                        JSONObject jsonObject = JSONObject.parseObject(result);
+                        JSONObject jsonObject1 = JSONObject.parseObject(result1);
+                        JSONObject jsonObject2 = JSONObject.parseObject(result2);
+                        JSONObject jsonObject3 = JSONObject.parseObject(result3);
+                        if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject1)
+                                && Objects.nonNull(jsonObject2) && Objects.nonNull(jsonObject3)) {
+                            JSONArray arr = jsonObject.getJSONArray("rows");
+                            JSONArray arr1 = jsonObject1.getJSONArray("rows");
+                            JSONArray arr2 = jsonObject2.getJSONArray("rows");
+                            JSONArray arr3 = jsonObject3.getJSONArray("rows");
+                            if (Objects.nonNull(arr) && arr.size() != 0
+                                    && Objects.nonNull(arr1) && arr1.size() != 0
+                                    && Objects.nonNull(arr2) && arr2.size() != 0
+                                    && Objects.nonNull(arr3) && arr3.size() != 0) {
+                                JSONObject job = arr.getJSONObject(0);
+                                JSONObject job1 = arr1.getJSONObject(0);
+                                JSONObject job2 = arr2.getJSONObject(0);
+                                JSONObject job3 = arr3.getJSONObject(0);
+                                if (Objects.isNull(job) || Objects.isNull(job1)
+                                        || Objects.isNull(job2) || Objects.isNull(job3)) {
+                                    continue;
+                                }
+                                double val = job1.getDouble("val") + job.getDouble("val")
+                                        + job2.getDouble("val") + job3.getDouble("val");
+                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -200,14 +256,14 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                                 JSONObject job = jsonArray.getJSONObject(i);
                                 Double val = job.getDouble("val");
                                 if(val>0){
-                                  list.add(job);
-                                  if("".equals(time)){
-                                      time=job.getString("clock")+"~";
-                                  }else {
-                                     if(",".equals(time.substring(time.length()-1))){
-                                         time=time+job.getString("clock")+"~";
-                                     }
-                                  }
+                                    list.add(job);
+                                    if("".equals(time)){
+                                        time=job.getString("clock")+"~";
+                                    }else {
+                                        if(",".equals(time.substring(time.length()-1))){
+                                            time=time+job.getString("clock")+"~";
+                                        }
+                                    }
                                 }else {
                                     time=job.getString("clock")+",";
                                     if(",".equals(time.substring(time.length()-1))){
@@ -236,6 +292,30 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    protected List<CellData> mapDataHandler3(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam3(dateQuery);
+        List<CellData> cellDataList = new ArrayList<>();
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray rows = jsonObject.getJSONArray("rows");
+                if (Objects.nonNull(rows) && rows.size() != 0) {
+                    JSONArray jsonArray = rows.getJSONArray(0);
+                    if(Objects.nonNull(jsonArray) && jsonArray.size() != 0){
+                        JSONObject object = jsonArray.getJSONObject(0);
+                        if(Objects.nonNull(object)){
+                            BigDecimal cog = object.getBigDecimal("cogCalorificvalue");
+                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, cog.intValue());
+                        }
+                    }
+                }
+            }
+        }
+
+        return cellDataList;
+    }
+
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("time", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
@@ -255,11 +335,23 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam3(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("datetime", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("currentPage", "1");
+        result.put("pageSize", "1");
+        return result;
+    }
+
     protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 
     protected String getUrl1() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    }
+
+    protected String getUrl2() {
+        return httpProperties.getUrlApiJHOne() + "/cokingStatementParameter/getByDateTime";
     }
 }
