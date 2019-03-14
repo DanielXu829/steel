@@ -68,7 +68,7 @@ public class EditorController {
         String md5 = MD5Util.MD5(file1);
 
         // model.addAttribute("fileKey", md5);
-        model.addAttribute("fileKey", new Random().nextInt(1000) + ServiceConverter.GenerateRevisionId(md5 + filePath));
+        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(new Random().nextInt(1000) + md5 + filePath));
         model.addAttribute("callbackUrl", DocumentManager.GetCallback(filePath));
         model.addAttribute("serverUrl", DocumentManager.GetServerUrl());
         model.addAttribute("editorMode", DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(filePath)) && !"view".equals(request.getAttribute("mode")) ? "edit" : "view");
