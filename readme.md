@@ -1,0 +1,28 @@
+﻿steel
+    excel--报表服务excel相关模板
+    ppt--报表服务PPT相关模板
+    sql--报表服务数据库
+    src
+        main
+            java
+                common--报表服务公共模块
+                config--报表服务配置模块
+                module--报表服务核心主模块
+                    job--报表服务任务子模块
+                        a1--高炉报表模块
+                        a2--焦化报表模块
+                        a3--烧结报表模块
+                        a4--原料报表模块
+                        a5--能介报表模块
+                        a6--环保报表模块
+                        config--报表各模块相关配置
+                        controller--报表服务接口
+                        dto--报表服务相关dto
+                        enums--报表相关核心编码等
+                        strategy--报表服务各模块相关处理策略
+                        util--报表服务相关工具
+            resources
+                config--报表项目核心配置文件
+                static--报表服务相关静态文件
+                templates--报表服务相关模板（查看、编辑）
+            
