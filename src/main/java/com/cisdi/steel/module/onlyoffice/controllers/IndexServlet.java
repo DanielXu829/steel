@@ -30,11 +30,11 @@
 //
 //import com.alibaba.fastjson.JSONObject;
 //import com.cisdi.steel.common.util.JsonUtil;
-//import com.cisdi.steel.module.test.onlyoffice.entities.FileType;
-//import com.cisdi.steel.module.test.onlyoffice.helpers.ConfigManager;
-//import com.cisdi.steel.module.test.onlyoffice.helpers.DocumentManager;
-//import com.cisdi.steel.module.test.onlyoffice.helpers.FileUtility;
-//import com.cisdi.steel.module.test.onlyoffice.helpers.ServiceConverter;
+//import FileType;
+//import ConfigManager;
+//import DocumentManager;
+//import FileUtility;
+//import ServiceConverter;
 //import com.cisdi.steel.module.test.entity.Demo;
 //import org.primeframework.jwt.domain.JWT;
 //import org.springframework.web.bind.annotation.RequestMapping;

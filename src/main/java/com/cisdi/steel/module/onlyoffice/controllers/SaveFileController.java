@@ -1,4 +1,4 @@
-package com.cisdi.steel.module.test.onlyoffice.controllers;
+package com.cisdi.steel.module.onlyoffice.controllers;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.util.FileUtils;
