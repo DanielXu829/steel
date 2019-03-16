@@ -1,4 +1,5 @@
-﻿steel
+﻿`````
+steel
     excel--报表服务excel相关模板
     ppt--报表服务PPT相关模板
     sql--报表服务数据库
@@ -14,15 +15,22 @@
                         a3--烧结报表模块
                         a4--原料报表模块
                         a5--能介报表模块
-                        a6--环保报表模块
+                        a6--环保报表模块````
                         config--报表各模块相关配置
                         controller--报表服务接口
                         dto--报表服务相关dto
                         enums--报表相关核心编码等
                         strategy--报表服务各模块相关处理策略
                         util--报表服务相关工具
+                    onlyoffice--报表onlyoffice服务接口
+                    quartz--报表定时任务
+                    report--报表数据服务接口
+                    sys--报表服务系统设置
             resources
                 config--报表项目核心配置文件
+                    onlyoffice.properties--在线办公服务配置文件信息
                 static--报表服务相关静态文件
                 templates--报表服务相关模板（查看、编辑）
-            
+        test--报表服务相关测试
+            doc--报表服务word测试
+            job--报表服务任务测试（按模块已划分）``````
