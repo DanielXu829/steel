@@ -79,6 +79,13 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                         List<CellData> cellDataList = this.mapDataHandler4(rowIndex, getUrl1(), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
+                }else if ("yield".equals(sheetSplit[1])) {
+                    for (int k = 0; k < size; k++) {
+                        DateQuery item = dateQueries.get(k);
+                        int rowIndex = k + 1;
+                        List<CellData> cellDataList = this.mapDataHandler5(rowIndex, getUrl3(), columns, item);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    }
                 }
             }
         }
@@ -365,6 +372,23 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    protected List<CellData> mapDataHandler5(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam5(dateQuery);
+        List<CellData> cellDataList = new ArrayList<>();
+        String result = httpUtil.get(url, queryParam);
+        if(StringUtils.isNotBlank(result)){
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if(Objects.nonNull(jsonObject)){
+                JSONObject data = jsonObject.getJSONObject("data");
+                if(Objects.nonNull(data)){
+                    Double currentYield = data.getDouble("currentYield");
+                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, currentYield);
+                }
+            }
+        }
+        return cellDataList;
+    }
+
 
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
@@ -400,6 +424,12 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam5(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
     protected String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
@@ -410,5 +440,9 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
 
     protected String getUrl2() {
         return httpProperties.getUrlApiJHOne() + "/cokingStatementParameter/getByDateTime";
+    }
+
+    protected String getUrl3() {
+        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getYieldByDate";
     }
 }
