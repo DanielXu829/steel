@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
+ * 配煤量月报
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -56,7 +57,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                     }
                 } else {
                     for (int j = 0; j < size; j++) {
-                        int rowIndex=10+j;
+                        int rowIndex = 10 + j;
                         List<CellData> cellData = mapDataHandler2(getUrl2(), columns, dateQueries.get(j), rowIndex, sheet);
                         ExcelWriterUtil.setCellValue(sheet, cellData);
                     }
@@ -138,8 +139,8 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                     JSONObject data = jsonObject2.getJSONObject("data");
                     Map<String, Object> innerMap = data.getInnerMap();
                     Set<String> strings = innerMap.keySet();
-                    for (int j = 0; j <strings.size() ; j++) {
-                        String s="coalSiloName"+(j+1);
+                    for (int j = 0; j < strings.size(); j++) {
+                        String s = "coalSiloName" + (j + 1);
                         nameList.add(innerMap.get(s).toString());
                     }
                     String date1 = DateUtil.getFormatDateTime(DateUtil.strToDate(clock, DateUtil.fullFormat), "yyyy/MM/dd HH:mm:00");
@@ -158,11 +159,11 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                         }
 //                        valList.add(val);
                         Object o = rowData.get(name);
-                        if(Objects.isNull(o)){
+                        if (Objects.isNull(o)) {
                             rowData.put(name, val);
-                        }else {
-                            Double cc=(Double)o+ val;
-                            rowData.put(name,cc);
+                        } else {
+                            Double cc = (Double) o + val;
+                            rowData.put(name, cc);
                         }
 
                     }
@@ -183,8 +184,8 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        String start=DateUtil.getFormatDateTime(DateQueryUtil.getMonthStartTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
-        String end=DateUtil.getFormatDateTime(DateQueryUtil.getMonthEndTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
+        String start = DateUtil.getFormatDateTime(DateQueryUtil.getMonthStartTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
+        String end = DateUtil.getFormatDateTime(DateQueryUtil.getMonthEndTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
         result.put("startDate", start);
         result.put("endDate", end);
         result.put("tagName", "CK67_L1R_CB_CBReset_4_report");

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
+ * 焦化公共执行处理类
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -73,7 +74,7 @@ public class BaseJhWriter extends AbstractExcelReadWriter {
                         JSONObject data = jsonObject.getJSONObject("data");
                         if (Objects.nonNull(data)) {
                             JSONArray arr = data.getJSONArray(column);
-                            if (Objects.nonNull(arr)&& arr.size()!=0) {
+                            if (Objects.nonNull(arr) && arr.size() != 0) {
                                 JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
                                 Double val = jsonObject1.getDouble("val");
                                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
@@ -89,8 +90,8 @@ public class BaseJhWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(),-10),"yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(), -10), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 

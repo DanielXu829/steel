@@ -25,10 +25,10 @@
 */
 
 
-package com.cisdi.steel.module.test.onlyoffice.helpers;
+package com.cisdi.steel.module.onlyoffice.helpers;
 
 
-import com.cisdi.steel.module.test.onlyoffice.entities.FileType;
+import com.cisdi.steel.module.onlyoffice.entities.FileType;
 
 import java.net.URL;
 import java.util.Arrays;

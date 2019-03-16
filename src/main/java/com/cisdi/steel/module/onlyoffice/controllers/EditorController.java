@@ -1,13 +1,13 @@
-package com.cisdi.steel.module.test.onlyoffice.controllers;
+package com.cisdi.steel.module.onlyoffice.controllers;
 
 import com.alibaba.fastjson.support.spring.FastJsonJsonView;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.encodes.MD5Util;
-import com.cisdi.steel.module.test.onlyoffice.entities.FileModel;
-import com.cisdi.steel.module.test.onlyoffice.helpers.ConfigManager;
-import com.cisdi.steel.module.test.onlyoffice.helpers.DocumentManager;
-import com.cisdi.steel.module.test.onlyoffice.helpers.FileUtility;
-import com.cisdi.steel.module.test.onlyoffice.helpers.ServiceConverter;
+import com.cisdi.steel.module.onlyoffice.entities.FileModel;
+import com.cisdi.steel.module.onlyoffice.helpers.ConfigManager;
+import com.cisdi.steel.module.onlyoffice.helpers.ServiceConverter;
+import com.cisdi.steel.module.onlyoffice.helpers.DocumentManager;
+import com.cisdi.steel.module.onlyoffice.helpers.FileUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.Date;
-import java.util.Random;
 
+/**
+ * onlyoffice编辑类
+ */
 @RestController
 @Slf4j
 public class EditorController {
@@ -67,8 +69,7 @@ public class EditorController {
         File file1 = new File(filePath);
         String md5 = MD5Util.MD5(file1);
 
-        // model.addAttribute("fileKey", md5);
-        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(new Random().nextInt(1000) + md5 + filePath));
+        model.addAttribute("fileKey", ServiceConverter.GenerateRevisionId(md5));
         model.addAttribute("callbackUrl", DocumentManager.GetCallback(filePath));
         model.addAttribute("serverUrl", DocumentManager.GetServerUrl());
         model.addAttribute("editorMode", DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(filePath)) && !"view".equals(request.getAttribute("mode")) ? "edit" : "view");

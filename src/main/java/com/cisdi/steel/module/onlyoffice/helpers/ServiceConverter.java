@@ -24,7 +24,7 @@
  *
 */
 
-package com.cisdi.steel.module.test.onlyoffice.helpers;
+package com.cisdi.steel.module.onlyoffice.helpers;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.util.JsonUtil;

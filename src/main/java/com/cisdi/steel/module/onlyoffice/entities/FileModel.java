@@ -25,11 +25,11 @@
  */
 
 
-package com.cisdi.steel.module.test.onlyoffice.entities;
+package com.cisdi.steel.module.onlyoffice.entities;
 
-import com.cisdi.steel.module.test.onlyoffice.helpers.DocumentManager;
-import com.cisdi.steel.module.test.onlyoffice.helpers.FileUtility;
-import com.cisdi.steel.module.test.onlyoffice.helpers.ServiceConverter;
+import com.cisdi.steel.module.onlyoffice.helpers.DocumentManager;
+import com.cisdi.steel.module.onlyoffice.helpers.FileUtility;
+import com.cisdi.steel.module.onlyoffice.helpers.ServiceConverter;
 import lombok.Data;
 
 import java.util.HashMap;

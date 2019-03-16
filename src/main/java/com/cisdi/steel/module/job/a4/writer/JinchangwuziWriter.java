@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 /**
+ * 进厂物资
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -15,11 +16,12 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class JinchangwuziWriter  extends AbstractExcelReadWriter {
+public class JinchangwuziWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         return getMapHandler(getUrl(), 1, excelDTO);
     }
+
     private String getUrl() {
         return httpProperties.getUrlApiYGLOne() + "/reportManager/getReport11Entity";
     }

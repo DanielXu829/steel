@@ -24,11 +24,11 @@
  *
  */
 
-package com.cisdi.steel.module.test.onlyoffice.helpers;
+package com.cisdi.steel.module.onlyoffice.helpers;
 
 import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
-import com.cisdi.steel.module.test.onlyoffice.entities.FileType;
+import com.cisdi.steel.module.onlyoffice.entities.FileType;
 import org.primeframework.jwt.Signer;
 import org.primeframework.jwt.Verifier;
 import org.primeframework.jwt.domain.JWT;

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
+ * 炉温管控
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -136,26 +137,26 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         //处理班次
         Integer hh = Integer.valueOf(DateUtil.getFormatDateTime(clock, "HH"));
         String bb = "";
-        int shiftNum=0;
+        int shiftNum = 0;
         if (0 <= hh.intValue() && hh.intValue() < 8) {
             bb = "夜";
-            shiftNum=1;
+            shiftNum = 1;
         } else if (8 <= hh.intValue() && hh.intValue() < 16) {
             bb = "白";
-            shiftNum=2;
+            shiftNum = 2;
         } else if (16 <= hh.intValue() && hh.intValue() < 24) {
             bb = "中";
-            shiftNum=3;
+            shiftNum = 3;
         }
         //处理班组
-        String bz="";
+        String bz = "";
         Map<String, String> queryParam2 = getQueryParam2(clock, shiftNum);
         String result = httpUtil.get(getUrl2(), queryParam2);
-        if(StringUtils.isNotBlank(result)){
+        if (StringUtils.isNotBlank(result)) {
             JSONArray array = JSONObject.parseArray(result);
-            if(array.size()!=0||Objects.nonNull(array)){
+            if (array.size() != 0 || Objects.nonNull(array)) {
                 JSONObject jsonObject = array.getJSONObject(0);
-                if(Objects.nonNull(jsonObject)){
+                if (Objects.nonNull(jsonObject)) {
                     bz = jsonObject.getString("workTeam");
                 }
 
@@ -216,10 +217,10 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam2(Date clock,int shiftNum) {
+    protected Map<String, String> getQueryParam2(Date clock, int shiftNum) {
         Map<String, String> result = new HashMap<>();
         result.put("date", DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(clock), "yyyy/MM/dd HH:mm:ss"));
-        result.put("shift", shiftNum+"");
+        result.put("shift", shiftNum + "");
         return result;
     }
 

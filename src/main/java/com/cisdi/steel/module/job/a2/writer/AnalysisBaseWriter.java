@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
+ * 公共检化验处理类
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -51,13 +52,13 @@ public class AnalysisBaseWriter extends BaseJhWriter {
                             if (StringUtils.isNotBlank(columns.get(k))) {
                                 String[] split = columns.get(k).split("/");
                                 int rowIndex = 1 + j;
-                                if(split.length==2){
+                                if (split.length == 2) {
                                     Double cellDataList = mapDataHandler2(getUrl2(), item, split[0], split[1]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 } else if (split.length == 3) {
                                     Double cellDataList = mapDataHandler3(getUrl3(), item, split[0], split[1], split[2]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
-                                }else {
+                                } else {
                                     Double cellDataList = mapDataHandler4(getUrl4(), item, split[0], split[1]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 }
@@ -101,7 +102,7 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     }
 
     protected Double mapDataHandler3(String url, DateQuery dateQuery, String brandcode, String anaitemname, String source) {
-        Map<String, String> queryParam = getQueryParam3(dateQuery, brandcode, anaitemname,source);
+        Map<String, String> queryParam = getQueryParam3(dateQuery, brandcode, anaitemname, source);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -134,8 +135,8 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     protected Map<String, String> getQueryParam2(DateQuery dateQuery, String brandcode, String anaitemname) {
         Map<String, String> result = new HashMap<>();
         result.put("brandcode", brandcode);
-        result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
-        result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
         result.put("source", "三回收");
         return result;
@@ -144,8 +145,8 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     protected Map<String, String> getQueryParam3(DateQuery dateQuery, String brandcode, String anaitemname, String source) {
         Map<String, String> result = new HashMap<>();
         result.put("brandcode", brandcode);
-        result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
-        result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
         result.put("source", source);
         return result;

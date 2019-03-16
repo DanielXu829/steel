@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
+ * 关键指标
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -223,6 +224,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
         return result;
     }
+
     protected Map<String, String> getQueryParamx(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getStartTime(), -1), "yyyy/MM/dd HH:mm:ss"));
@@ -230,6 +232,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
         return result;
     }
+
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -8), "yyyy/MM/dd HH:mm:ss"));
