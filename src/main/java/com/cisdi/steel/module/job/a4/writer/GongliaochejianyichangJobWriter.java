@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 供料车间异常记录
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>

@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 /**
+ * 管控指标
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -44,7 +45,7 @@ public class GuankongzhibiaoWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstColumnCellVal(sheet);
                 DateQuery item = dateQueries.get(0);
                 for (int j = 0; j < columns.size(); j++) {
-                    if(StringUtils.isNotBlank(columns.get(j))){
+                    if (StringUtils.isNotBlank(columns.get(j))) {
                         Double cellDataList = mapDataHandler(url, columns.get(j), item);
                         setSheetValue(sheet, j, 1, cellDataList);
                     }

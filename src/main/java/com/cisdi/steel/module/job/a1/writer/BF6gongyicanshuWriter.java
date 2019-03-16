@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 工艺参数
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -45,15 +46,15 @@ public class BF6gongyicanshuWriter extends GuankongzhibiaoWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 DateQuery item = dateQueries.get(0);
-                if("canshutag".equals(sheetSplit[1])){
+                if ("canshutag".equals(sheetSplit[1])) {
                     List<String> columns = PoiCustomUtil.getFirstColumnCellVal(sheet);
                     for (int j = 0; j < columns.size(); j++) {
-                        if(StringUtils.isNotBlank(columns.get(j))){
+                        if (StringUtils.isNotBlank(columns.get(j))) {
                             Double cellDataList = mapDataHandler(url, columns.get(j), item);
                             setSheetValue(sheet, j, 1, cellDataList);
                         }
                     }
-                }else{
+                } else {
 
                 }
             }

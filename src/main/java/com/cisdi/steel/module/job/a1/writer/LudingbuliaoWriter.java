@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 高炉炉顶布料
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>

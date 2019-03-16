@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * 报表手动执行相关处理接口
+ */
 @RestController
 @RequestMapping("/job")
 public class JobTController {
@@ -27,7 +30,12 @@ public class JobTController {
     @Autowired
     ExportJobContext exportJobContext;
 
-
+    /**
+     * 配料单手动触发执行
+     *
+     * @param code 配料单任务编码
+     * @return
+     */
     @GetMapping(value = "/peiLiaoDan")
     public ApiResult peiLiaoDan(String code) {
         if (StringUtils.isBlank(code)) {
@@ -62,6 +70,14 @@ public class JobTController {
         }
     }
 
+    /**
+     * 公共报表统一执行导出
+     *
+     * @param code     报表执行编码
+     * @param request
+     * @param response
+     * @return
+     */
     @GetMapping(value = "/export")
     public ApiResult selectAllCategory(String code, HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.isBlank(code)) {

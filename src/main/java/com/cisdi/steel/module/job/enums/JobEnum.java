@@ -10,9 +10,9 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
  * gl:代表高炉
  * jh:代表焦化
  * sj:代表烧结
- * gl:代表供料
- * yl:代表原料
  * ygl:代表原供料
+ * nj:代表能介
+ * hb:代表环保
  *
  * @author leaf
  * @version 1.0

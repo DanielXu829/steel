@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 /**
+ * 高炉喷煤报表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>

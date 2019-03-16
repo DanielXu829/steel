@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * 化产报表
+ * 鼓风冷凝
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -87,10 +87,10 @@ public class GufenglengningWriter extends BaseJhWriter {
                     int rowIndex = j + k;
                     List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
                     if ("_gfln2_day_hour".equals(sheetName)) {
-                        if(item.getRecordDate().before(new Date())){
+                        if (item.getRecordDate().before(new Date())) {
                             Row row = sheet.getRow(rowIndex);
                             if (Objects.isNull(row)) {
-                                row=sheet.createRow(rowIndex);
+                                row = sheet.createRow(rowIndex);
                             }
                             Cell cell = row.getCell(32);
                             if (Objects.isNull(cell)) {
@@ -115,7 +115,7 @@ public class GufenglengningWriter extends BaseJhWriter {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
                 JSONArray rows = jsonObject.getJSONArray("rows");
-                if (Objects.nonNull(rows)&&rows.size()!=0) {
+                if (Objects.nonNull(rows) && rows.size() != 0) {
                     JSONObject obj = rows.getJSONObject(0);
                     if (Objects.nonNull(obj)) {
                         data = obj.getDouble("val");

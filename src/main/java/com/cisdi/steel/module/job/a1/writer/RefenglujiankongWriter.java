@@ -23,6 +23,9 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 热风炉监控
+ */
 @SuppressWarnings("Duplicates")
 @Component
 public class RefenglujiankongWriter extends AbstractExcelReadWriter {

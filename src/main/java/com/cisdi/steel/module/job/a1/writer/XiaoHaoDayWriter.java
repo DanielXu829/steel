@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * 消耗日报
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>

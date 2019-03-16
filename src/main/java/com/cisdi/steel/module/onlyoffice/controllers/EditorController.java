@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.Date;
 
+/**
+ * onlyoffice编辑类
+ */
 @RestController
 @Slf4j
 public class EditorController {

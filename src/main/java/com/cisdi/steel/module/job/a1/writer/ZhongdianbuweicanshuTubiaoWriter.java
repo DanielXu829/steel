@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
+ * 重点部位参数图表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>

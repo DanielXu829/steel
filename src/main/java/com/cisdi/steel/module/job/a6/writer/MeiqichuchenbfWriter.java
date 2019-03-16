@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 /**
+ * 煤气除尘报表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -294,7 +295,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     }
 
                     String indextime2 = "";
-                  //  Object[] objects2 = keyset2.toArray();
+                    //  Object[] objects2 = keyset2.toArray();
                     for (int i = 0; i < dateSort2.length; i++) {
                         if (i == indexkey2) {
                             indextime2 = String.valueOf(dateSort2[i]);
@@ -470,7 +471,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 }
 
                 String indextime = "";
-              //  Object[] objects = keyset.toArray();
+                //  Object[] objects = keyset.toArray();
                 for (int i = 0; i < dateSort.length; i++) {
                     if (i == indexkey) {
                         indextime = String.valueOf(dateSort[i]);
@@ -494,7 +495,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     }
 
                     String indextime2 = "";
-                   // Object[] objects2 = keyset.toArray();
+                    // Object[] objects2 = keyset.toArray();
                     for (int i = 0; i < dateSort.length; i++) {
                         if (i == indexkey2) {
                             indextime2 = String.valueOf(dateSort[i]);

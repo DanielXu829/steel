@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
+ * 产耗综合报表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -254,40 +255,40 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                 JSONObject jsonObject = JSONObject.parseObject(result);
                 if (Objects.nonNull(jsonObject)) {
                     JSONObject data = jsonObject.getJSONObject("data");
-                    if(Objects.nonNull(data)){
+                    if (Objects.nonNull(data)) {
                         JSONArray jsonArray = data.getJSONArray(column);
                         if (Objects.nonNull(jsonArray) && jsonArray.size() != 0) {
-                            List<JSONObject> list=new ArrayList<>();
-                            String time="";
+                            List<JSONObject> list = new ArrayList<>();
+                            String time = "";
                             for (int i = 0; i < jsonArray.size(); i++) {
                                 JSONObject job = jsonArray.getJSONObject(i);
                                 Double val = job.getDouble("val");
-                                if(val>0){
+                                if (val > 0) {
                                     list.add(job);
-                                    if("".equals(time)){
-                                        time=job.getString("clock")+"~";
-                                    }else {
-                                        if(",".equals(time.substring(time.length()-1))){
-                                            time=time+job.getString("clock")+"~";
+                                    if ("".equals(time)) {
+                                        time = job.getString("clock") + "~";
+                                    } else {
+                                        if (",".equals(time.substring(time.length() - 1))) {
+                                            time = time + job.getString("clock") + "~";
                                         }
                                     }
-                                }else {
-                                    time=job.getString("clock")+",";
-                                    if(",".equals(time.substring(time.length()-1))){
+                                } else {
+                                    time = job.getString("clock") + ",";
+                                    if (",".equals(time.substring(time.length() - 1))) {
                                         continue;
                                     }
                                 }
                             }
-                            Double val=0.0;
+                            Double val = 0.0;
                             for (int i = 0; i < list.size(); i++) {
                                 JSONObject job = list.get(i);
-                                val+=job.getDouble("val");
+                                val += job.getDouble("val");
                             }
-                            JSONObject job = jsonArray.getJSONObject(jsonArray.size()-1);
-                            if("~".equals(time.substring(time.length()-1))){
-                                time=time+job.getString("clock");
+                            JSONObject job = jsonArray.getJSONObject(jsonArray.size() - 1);
+                            if ("~".equals(time.substring(time.length() - 1))) {
+                                time = time + job.getString("clock");
                             }
-                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, val/list.size());
+                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, val / list.size());
                             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 1, time);
                         }
                     }
@@ -309,9 +310,9 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                 JSONArray rows = jsonObject.getJSONArray("rows");
                 if (Objects.nonNull(rows) && rows.size() != 0) {
                     JSONArray jsonArray = rows.getJSONArray(0);
-                    if(Objects.nonNull(jsonArray) && jsonArray.size() != 0){
+                    if (Objects.nonNull(jsonArray) && jsonArray.size() != 0) {
                         JSONObject object = jsonArray.getJSONObject(0);
-                        if(Objects.nonNull(object)){
+                        if (Objects.nonNull(object)) {
                             BigDecimal cog = object.getBigDecimal("cogCalorificvalue");
                             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, cog.intValue());
                         }
@@ -336,14 +337,14 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                 if (Objects.nonNull(data)) {
                     JSONArray jsonArray = data.getJSONArray(column);
                     if (Objects.nonNull(jsonArray) && jsonArray.size() != 0) {
-                        Double val=0.0;
-                        for (int i = 0; i <jsonArray.size() ; i++) {
+                        Double val = 0.0;
+                        for (int i = 0; i < jsonArray.size(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
                             String clock = obj.getString("clock");
                             Date date = DateUtil.strToDate(clock, DateUtil.fullFormat);
                             Map<String, String> queryParam4 = getQueryParam4(date);
                             String s = httpUtil.get(getUrl(), queryParam4);
-                            if(StringUtils.isNotBlank(s)){
+                            if (StringUtils.isNotBlank(s)) {
                                 JSONObject jsonObject1 = JSONObject.parseObject(s);
                                 if (Objects.nonNull(jsonObject1)) {
                                     JSONArray arr1 = jsonObject1.getJSONArray("rows");
