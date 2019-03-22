@@ -243,6 +243,18 @@ public class TestJob1 extends SteelApplicationTests {
         gaoLuPenMeiJob.execute(null);
     }
 
+
+    /**
+     * 高炉喷煤
+     */
+    @Autowired
+    private GaoLuPenMei6Job gaoLuPenMeiJob6;
+
+    @Test
+    public void test118() {
+        gaoLuPenMeiJob6.execute(null);
+    }
+
     /**
      * 高炉重点管控指标
      */

@@ -43,6 +43,7 @@ public enum JobEnum {
     gl_peiliaodan("gl_peiliaodan", "配料单"),
     gl_peiliaodan6("gl_peiliaodan6", "配料单"),
     gl_gaolupenmei("gl_gaolupenmei", "高炉喷煤运行报表"),
+    gl_gaolupenmei6("gl_gaolupenmei6", "6高炉喷煤运行报表"),
     gl_jingya_day("gl_jingya_day", "高炉静压日报"),
     gl_jingya_month("gl_jingya_month", "高炉静压月报"),
     gl_guankongzhibiao("gl_guankongzhibiao", "高炉重点管控指标"),
