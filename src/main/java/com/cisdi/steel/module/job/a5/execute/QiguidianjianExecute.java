@@ -168,12 +168,6 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
                         dealCommonCell(copySheet, sheetName, workbook, index, 7);
                         dealCommonCell(copySheet, sheetName, workbook, index, 8);
                         dealCommonCell(copySheet, sheetName, workbook, index, 9);
-
-                        // 设置日期
-                        Row rowD = copySheet.getRow(3);
-                        Cell cellD = rowD.getCell(0);
-                        String cellValD = DateUtil.getFormatDateTime(time, DateUtil.yyyyMMddChineseFormat);
-                        PoiCustomUtil.setCellValue(cellD, cellValD);
                     }
                 }
             }
