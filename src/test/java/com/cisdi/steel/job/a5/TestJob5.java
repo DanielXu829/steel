@@ -3,6 +3,7 @@ package com.cisdi.steel.job.a5;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.a5.*;
 import com.cisdi.steel.module.job.a5.task.DiaojianOneKongDayJob;
+import com.cisdi.steel.module.job.a5.task.MeiqihunhemeisdJob;
 import com.cisdi.steel.module.job.a5.task.QiguidianjianJob;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,5 +179,16 @@ public class TestJob5 extends SteelApplicationTests {
     @Test
     public void fasdf() {
         diaojianOneKongDayJob.execute(null);
+    }
+
+    @Autowired
+    private MeiqihunhemeisdJob meiqihunhemeiJob1;
+
+    /**
+     * 煤气柜作业区混合煤气情况表-人工录入
+     */
+    @Test
+    public void meiqiTest() {
+        meiqihunhemeiJob1.execute(null);
     }
 }

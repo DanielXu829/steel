@@ -101,7 +101,7 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
                     PoiCustomUtil.buildMetadata(workbook, writerExcelDTO);
                     //除开其余月报
                     if (!writerExcelDTO.getJobEnum().getCode().equals(JobEnum.nj_kongqiya_month.getCode())) {
-                        handlerCopyFile(workbook, dateQuery);
+                        handlerCopyFile(workbook, dateQuery, writerExcelDTO.getJobEnum().getCode());
                     }
                     // 6、生成文件
                     this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
@@ -115,46 +115,79 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
         }
     }
 
-    private void handlerCopyFile(Workbook workbook, DateQuery dateQuery) {
-        // 获取当月天数
-        Date recordDate = dateQuery.getRecordDate();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(recordDate);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int days = DateQueryUtil.getDays(year, month);
-        DateQuery date = DateQueryUtil.buildMonth(recordDate);
-        //当月开始时间
-        Date startTime = date.getStartTime();
+    private void handlerCopyFile(Workbook workbook, DateQuery dateQuery, String code) {
+        if (!code.equals(JobEnum.nj_kongqiya_month.getCode())) {
+            // 获取当月天数
+            Date recordDate = dateQuery.getRecordDate();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(recordDate);
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH) + 1;
+            int days = DateQueryUtil.getDays(year, month);
+            DateQuery date = DateQueryUtil.buildMonth(recordDate);
+            //当月开始时间
+            Date startTime = date.getStartTime();
 
-        Sheet template = workbook.getSheet("_Template");
-        if (Objects.isNull(template)) {
-            return;
-        }
-        int sheetIndex = workbook.getSheetIndex(template);
-        int firstActive = 0;
-        for (int i = 1; i <= days; i++) {
-            Sheet copySheet = workbook.cloneSheet(sheetIndex);
-            int index = workbook.getSheetIndex(copySheet);
-            Date time = DateUtil.addDays(startTime, i - 1);
-
-            // 设置日期
-            Row row = copySheet.getRow(1);
-            Cell cell = row.getCell(2);
-            String cellVal = DateUtil.getFormatDateTime(time, DateUtil.yyyyMMddChineseFormat);
-            PoiCustomUtil.setCellValue(cell, cellVal);
-
-            if (i == 1) {
-                // 设置每月第一天的sheet选中
-                firstActive = index;
-                copySheet.setSelected(true);
+            Sheet template = workbook.getSheet("_Template");
+            if (Objects.isNull(template)) {
+                return;
             }
-            // 处理sheet的名称
-            String sheetName = DateUtil.getFormatDateTime(time, "dd");
-            workbook.setSheetName(index, sheetName);
+            int sheetIndex = workbook.getSheetIndex(template);
+            int firstActive = 0;
+            for (int i = 1; i <= days; i++) {
+                Sheet copySheet = workbook.cloneSheet(sheetIndex);
+                int index = workbook.getSheetIndex(copySheet);
+                Date time = DateUtil.addDays(startTime, i - 1);
+
+                // 设置日期
+                if (code.equals(JobEnum.nj_meiqihunhemeisd_month.getCode())) {
+                    Row rowD = copySheet.getRow(3);
+                    Cell cellD = rowD.getCell(0);
+                    String cellValD = DateUtil.getFormatDateTime(time, DateUtil.yyyyMMddChineseFormat);
+                    PoiCustomUtil.setCellValue(cellD, cellValD);
+                }else{
+                    Row row = copySheet.getRow(1);
+                    Cell cell = row.getCell(2);
+                    String cellVal = DateUtil.getFormatDateTime(time, DateUtil.yyyyMMddChineseFormat);
+                    PoiCustomUtil.setCellValue(cell, cellVal);
+                }
+
+                // 处理sheet的名称
+                String sheetName = DateUtil.getFormatDateTime(time, "dd");
+                workbook.setSheetName(index, sheetName);
+
+
+                if (i == 1) {
+                    // 设置每月第一天的sheet选中
+                    firstActive = index;
+                    copySheet.setSelected(true);
+                } else {
+                    //处理煤气柜作业区混合煤气情况表-人工录入公式引用
+                    if (code.equals(JobEnum.nj_meiqihunhemeisd_month.getCode())) {
+                        dealCommonCell(copySheet, sheetName, workbook, index, 6);
+                        dealCommonCell(copySheet, sheetName, workbook, index, 7);
+                        dealCommonCell(copySheet, sheetName, workbook, index, 8);
+                        dealCommonCell(copySheet, sheetName, workbook, index, 9);
+
+                        // 设置日期
+                        Row rowD = copySheet.getRow(3);
+                        Cell cellD = rowD.getCell(0);
+                        String cellValD = DateUtil.getFormatDateTime(time, DateUtil.yyyyMMddChineseFormat);
+                        PoiCustomUtil.setCellValue(cellD, cellValD);
+                    }
+                }
+            }
+            workbook.setSheetHidden(sheetIndex, true);
+            workbook.setActiveSheet(firstActive);
         }
-        workbook.setSheetHidden(sheetIndex, true);
-        workbook.setActiveSheet(firstActive);
+    }
+
+    private void dealCommonCell(Sheet copySheet, String sheetName, Workbook workbook, int index, int indexRow) {
+        Row rowE = copySheet.getRow(indexRow);
+        Cell cellE = rowE.getCell(10);
+        String cellValue = "IFERROR(SUM('" + sheetName + "'!E" + (indexRow + 1) + ",'" + workbook.getSheetName(index - 1) + "'!K" + (indexRow + 1) + "),\"\")";
+        cellE.setCellFormula(cellValue);
+        cellE.setCellType(CellType.FORMULA);
     }
 
     private Workbook dealTemp(ReportCategoryTemplate template) {
@@ -172,6 +205,11 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
 
 
         return workbook;
+    }
+
+    private Workbook dealMeiqi() {
+
+        return null;
     }
 
     /**

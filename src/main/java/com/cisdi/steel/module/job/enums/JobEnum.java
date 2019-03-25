@@ -136,6 +136,7 @@ public enum JobEnum {
     nj_meiqihunhemei("nj_meiqihunhemei", "煤气柜作业区混合煤气情况表"),
     nj_guifengjimeiyaji("nj_guifengjimeiyaji", "柜区风机煤压机时间统计表"),
     nj_dongli_month("nj_dongli_month", "动力分厂主要设备开停机信息表"),
+    nj_meiqihunhemeisd_month("nj_meiqihunhemeisd_month", "煤气柜作业区混合煤气情况表-人工录入"),
 
     // 环保
     hb_6bftrt("hb_6bftrt", "6BF-TRT日报表"),
