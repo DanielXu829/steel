@@ -209,11 +209,6 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
         return workbook;
     }
 
-    private Workbook dealMeiqi() {
-
-        return null;
-    }
-
     /**
      * 查询条件
      * 一定存在 recordDate数据
