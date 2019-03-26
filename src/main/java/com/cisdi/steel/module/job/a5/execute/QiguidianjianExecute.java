@@ -145,7 +145,7 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
                     Cell cellD = rowD.getCell(0);
                     String cellValD = DateUtil.getFormatDateTime(time, DateUtil.yyyyMMddChineseFormat);
                     PoiCustomUtil.setCellValue(cellD, cellValD);
-                }else{
+                } else {
                     Row row = copySheet.getRow(1);
                     Cell cell = row.getCell(2);
                     String cellVal = DateUtil.getFormatDateTime(time, DateUtil.yyyyMMddChineseFormat);
@@ -167,7 +167,7 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
                         dealCommonCell(copySheet, sheetName, workbook, index, 6);
                         dealCommonCell(copySheet, sheetName, workbook, index, 7);
                         dealCommonCell(copySheet, sheetName, workbook, index, 8);
-                        dealCommonCell(copySheet, sheetName, workbook, index, 9);
+                        dealCommonCellAvg(copySheet, sheetName, workbook, index, 9);
                     }
                 }
             }
@@ -178,8 +178,16 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
 
     private void dealCommonCell(Sheet copySheet, String sheetName, Workbook workbook, int index, int indexRow) {
         Row rowE = copySheet.getRow(indexRow);
-        Cell cellE = rowE.getCell(10);
-        String cellValue = "IFERROR(SUM('" + sheetName + "'!E" + (indexRow + 1) + ",'" + workbook.getSheetName(index - 1) + "'!K" + (indexRow + 1) + "),\"\")";
+        Cell cellE = rowE.getCell(8);
+        String cellValue = "IFERROR(SUM('" + sheetName + "'!E" + (indexRow + 1) + ",'" + workbook.getSheetName(index - 1) + "'!I" + (indexRow + 1) + "),\"\")";
+        cellE.setCellFormula(cellValue);
+        cellE.setCellType(CellType.FORMULA);
+    }
+
+    private void dealCommonCellAvg(Sheet copySheet, String sheetName, Workbook workbook, int index, int indexRow) {
+        Row rowE = copySheet.getRow(indexRow);
+        Cell cellE = rowE.getCell(8);
+        String cellValue = "IFERROR(AVERAGE(E10,'" + workbook.getSheetName(index - 1) + "'!I" + (indexRow + 1) + "),\"\")";
         cellE.setCellFormula(cellValue);
         cellE.setCellType(CellType.FORMULA);
     }
