@@ -233,7 +233,7 @@ public class TestJob1 extends SteelApplicationTests {
     }
 
     /**
-     * 高炉喷煤
+     * 8高炉喷煤
      */
     @Autowired
     private GaoLuPenMeiJob gaoLuPenMeiJob;
@@ -245,7 +245,7 @@ public class TestJob1 extends SteelApplicationTests {
 
 
     /**
-     * 高炉喷煤
+     * 6高炉喷煤
      */
     @Autowired
     private GaoLuPenMei6Job gaoLuPenMeiJob6;

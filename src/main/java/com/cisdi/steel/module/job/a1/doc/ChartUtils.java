@@ -10,6 +10,7 @@ import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.category.*;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
@@ -184,7 +185,7 @@ public class ChartUtils {
     @SuppressWarnings("deprecation")
     public static void setLineRender(CategoryPlot plot,
                                      boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions,
-                                     int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, int y2,
+                                     double rangIndex, double rangEnd, double rangIndex2, double rangEnd2, double rangIndex3, double rangEnd3, int y2,
                                      DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3, DefaultCategoryDataset dataset4, DefaultCategoryDataset dataset5, int stack[], int[] ystack) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
         categoryaxis.setCategoryLabelPositions(positions);
@@ -238,6 +239,11 @@ public class ChartUtils {
 //            renderer.setSeriesPaint(2, Color.black);
 //        }
 
+        renderer.setSeriesPaint(0, new Color(29, 192, 158));
+        renderer.setSeriesPaint(1, new Color(29, 192, 158));
+        renderer.setSeriesPaint(2, new Color(29, 192, 158));
+
+
         if (y2 > 1) {
             // 添加第2个Y轴
             NumberAxis axis2 = new NumberAxis();
@@ -271,6 +277,11 @@ public class ChartUtils {
 //                rederer.setSeriesPaint(1, Color.yellow);
 //                rederer.setSeriesPaint(2, Color.red);
 //            }
+
+            rederer.setSeriesPaint(0, new Color(234, 118, 18));
+            rederer.setSeriesPaint(1, new Color(234, 118, 18));
+            rederer.setSeriesPaint(2, new Color(234, 118, 18));
+
 
             if (stack[1] == 2) {
                 plot.setDatasetRenderingOrder(DatasetRenderingOrder.REVERSE);
@@ -313,6 +324,9 @@ public class ChartUtils {
 //                rederer.setSeriesPaint(1, Color.yellow);
 //                rederer.setSeriesPaint(2, Color.red);
 //            }
+            rederer.setSeriesPaint(0, new Color(39, 54, 67));
+            rederer.setSeriesPaint(1, new Color(39, 54, 67));
+            rederer.setSeriesPaint(2, new Color(39, 54, 67));
 
 
             plot.setRenderer(2, rederer);
@@ -373,7 +387,7 @@ public class ChartUtils {
         }
 
 
-        plot.setBackgroundPaint(Color.white);
+        plot.setBackgroundPaint(Color.WHITE);
         plot.setDomainGridlinePaint(new Color(112, 128, 144));
         plot.setRangeGridlinePaint(new Color(112, 128, 144));
         plot.setAxisOffset(new RectangleInsets(5D, 5D, 5D, 5D));

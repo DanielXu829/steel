@@ -55,7 +55,7 @@ public class ChartFactory {
     public static JFreeChart createLineChart(String title,
                                              String categoryAxisLabel, String valueAxisLabel,
                                              List<Vector<Serie>> series, Object[] categories, CategoryLabelPositions positions, boolean show,
-                                             int rangIndex, int rangEnd, int rangIndex2, int rangEnd2, int rangIndex3, int rangEnd3, int y2, int[] stack, int[] ystack) {
+                                             double rangIndex, double rangEnd, double rangIndex2, double rangEnd2, double rangIndex3, double rangEnd3, int y2, int[] stack, int[] ystack) {
         // 1：创建数据集合
         DefaultCategoryDataset dataset = ChartUtils
                 .createDefaultCategoryDataset(series.get(0), categories);
@@ -86,7 +86,7 @@ public class ChartFactory {
 
             dataset4 = ChartUtils
                     .createDefaultCategoryDataset(series.get(3), categories);
-        }else if (y2 == 5) {
+        } else if (y2 == 5) {
             dataset2 = ChartUtils
                     .createDefaultCategoryDataset(series.get(1), categories);
             dataset3 = ChartUtils
@@ -106,16 +106,16 @@ public class ChartFactory {
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
-        for(int i = 0; i<categories.length; i++){
+        for (int i = 0; i < categories.length; i++) {
             Object s = categories[i];
-            if(i%2 ==0){
+            if (i % 2 == 0) {
                 chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.black);
-            }else{
+            } else {
                 // 设置背景色为白色
                 chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.white);
             }
         }
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3, dataset4,dataset5, stack, ystack);//
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3, dataset4, dataset5, stack, ystack);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
         ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
@@ -123,7 +123,6 @@ public class ChartFactory {
 //        ChartUtils.setLegendEmptyBorder(chart);
         //设置标注不显示
         chart.setTextAntiAlias(false);
-
 
         ChartUtils.setLegendShow(chart, 0, show);
         return chart;

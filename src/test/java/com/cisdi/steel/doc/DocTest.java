@@ -4,7 +4,7 @@ import cn.afterturn.easypoi.word.WordExportUtil;
 import cn.afterturn.easypoi.word.entity.WordImageEntity;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.module.job.a1.doc.GaoLuDocMain;
+import com.cisdi.steel.module.job.a1.doc.GaoLuDocMain2;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.BreakType;
@@ -26,13 +26,22 @@ import java.util.List;
 @Slf4j
 public class DocTest extends SteelApplicationTests {
 
+//    @Autowired
+//    private GaoLuDocMain gaoLuDocMain;
+//
+//    @Test
+//    public void test4(){
+//        gaoLuDocMain.mainTask();
+//    }
+
     @Autowired
-    private GaoLuDocMain gaoLuDocMain;
+    private GaoLuDocMain2 gaoLuDocMain2;
 
     @Test
-    public void test4(){
-        gaoLuDocMain.mainTask();
+    public void test5(){
+        gaoLuDocMain2.mainTask();
     }
+
 
     @Test
     public void test3() throws Exception {
