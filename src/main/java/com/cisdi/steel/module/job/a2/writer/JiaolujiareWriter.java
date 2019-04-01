@@ -73,6 +73,10 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
+            String[] s = column.split("_");
+            if("30s".equals(s[s.length-2])){
+                queryParam = getQueryParam(dateQuery,6+"");
+            }
             if (StringUtils.isNotBlank(column)) {
                 queryParam.put("tagNames", column);
                 String result = httpUtil.get(url, queryParam);
