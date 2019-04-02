@@ -65,14 +65,13 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 }
                 int rowIndex = 1;
                 if ("analysis".equals(sheetSplit[1])) {
-                    for (int k = 0; k < columns.size(); k++) {
-                        if (StringUtils.isNotBlank(columns.get(k))) {
-                            String[] split = columns.get(k).split("/");
-                            Double cellDataList = mapDataHandler(getUrl(), dateQuery, split[0], split[1]);
-                            setSheetValue(sheet, rowIndex, k, cellDataList);
-                        }
-                    }
-                } else if ("analysislast".equals(sheetSplit[1])) {
+//                    for (int k = 0; k < columns.size(); k++) {
+//                        if (StringUtils.isNotBlank(columns.get(k))) {
+//                            String[] split = columns.get(k).split("/");
+//                            Double cellDataList = mapDataHandler(getUrl(), dateQuery, split[0], split[1]);
+//                            setSheetValue(sheet, rowIndex, k, cellDataList);
+//                        }
+//                    }
                     for (int k = 0; k < columns.size(); k++) {
                         if (StringUtils.isNotBlank(columns.get(k))) {
                             String[] split = columns.get(k).split("/");
@@ -80,7 +79,17 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                             setSheetValue(sheet, rowIndex, k, cellDataList);
                         }
                     }
-                } else if ("peimei".equals(sheetSplit[1])) {
+                }
+//                else if ("analysislast".equals(sheetSplit[1])) {
+//                    for (int k = 0; k < columns.size(); k++) {
+//                        if (StringUtils.isNotBlank(columns.get(k))) {
+//                            String[] split = columns.get(k).split("/");
+//                            Double cellDataList = mapDataHandlerx(getUrlx(), split[0], split[1]);
+//                            setSheetValue(sheet, rowIndex, k, cellDataList);
+//                        }
+//                    }
+//                }
+                else if ("peimei".equals(sheetSplit[1])) {
                     Row row = sheet.createRow(1);
                     row.createCell(2).setCellValue(shift);
                     row.getCell(2).setCellType(CellType.STRING);
