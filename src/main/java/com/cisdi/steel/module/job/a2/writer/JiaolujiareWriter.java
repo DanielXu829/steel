@@ -74,8 +74,8 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
             String[] s = column.split("_");
-            if("30s".equals(s[s.length-2])){
-                queryParam = getQueryParam(dateQuery,6+"");
+            if("cur".equals(s[s.length-1])){
+                queryParam = getQueryParam(dateQuery,"6.0");
             }
             if (StringUtils.isNotBlank(column)) {
                 queryParam.put("tagNames", column);
