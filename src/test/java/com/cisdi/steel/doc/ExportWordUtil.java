@@ -61,8 +61,8 @@ public class ExportWordUtil {
 			createTitle(xdoc, "一、	未来科技数据统计分析");
  
 			// 报表数据分析
-//			XWPFTable dataReportTable = xdoc.createTable(4, 2);
-//			createDataReportTable(dataReportTable, xdoc, base64Info1);
+			XWPFTable dataReportTable = xdoc.createTable(4, 2);
+			createDataReportTable(dataReportTable, xdoc, base64Info1);
  
 			return xdoc;
 		} catch (Exception e) {
