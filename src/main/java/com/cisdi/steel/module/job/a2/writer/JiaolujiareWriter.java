@@ -73,6 +73,10 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
+            String[] s = column.split("_");
+            if("cur".equals(s[s.length-1])){
+                queryParam = getQueryParam(dateQuery,"6.0");
+            }
             if (StringUtils.isNotBlank(column)) {
                 queryParam.put("tagNames", column);
                 String result = httpUtil.get(url, queryParam);
@@ -98,12 +102,12 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam(DateQuery dateQuery,String version) {
         Map<String, String> result = new HashMap<>();
         if("6.0".equals(version)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),15);
-            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-10),"yyyy/MM/dd HH:mm:ss"));
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-15);
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }else if("7.0".equals(version)){
             Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-5);
-            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-10),"yyyy/MM/dd HH:mm:ss"));
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }
        return result;
