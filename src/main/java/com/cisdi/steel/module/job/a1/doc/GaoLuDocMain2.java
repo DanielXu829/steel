@@ -19,6 +19,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -48,11 +49,11 @@ public class GaoLuDocMain2 {
     private String version6 = "6.0";
     private String version8 = "8.0";
 
-    //@Scheduled(cron = "0 30 6 * * ?")
+    @Scheduled(cron = "0 31 6 * * ?")
     public void mainTask() {
         result = new HashMap<>();
         mainDeal(version6);
-        // mainDeal(version8);
+        mainDeal(version8);
         log.error("高炉word生成完毕！");
     }
 
@@ -380,23 +381,31 @@ public class GaoLuDocMain2 {
                             }
                             if (Objects.nonNull(o)) {
                                 BigDecimal v = dealType(o);
-                                csr.add(v);
-                                a = a.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    csr.add(v);
+                                    a = a.add(v);
+                                }
                             }
                             if (Objects.nonNull(o1)) {
                                 BigDecimal v = dealType(o1);
-                                m40.add(v);
-                                b = b.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    m40.add(v);
+                                    b = b.add(v);
+                                }
                             }
                             if (Objects.nonNull(o2)) {
                                 BigDecimal v = dealType(o2);
-                                ad.add(v);
-                                c = c.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    ad.add(v);
+                                    c = c.add(v);
+                                }
                             }
                             if (Objects.nonNull(o3)) {
                                 BigDecimal v = dealType(o3);
-                                a4.add(v);
-                                d = d.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    a4.add(v);
+                                    d = d.add(v);
+                                }
                             }
                         }
                     }
@@ -460,10 +469,13 @@ public class GaoLuDocMain2 {
                     size++;
                 }
                 Double x = (aDouble + bDouble + cDouble) / size;
-                if (Objects.nonNull(x)) {
+
+                if (Objects.nonNull(x) && x.doubleValue() != 0.0) {
                     rd.add(x * scale);
                 } else {
-                    rd.add(x);
+                    if (i < dateList.size()) {
+                        dateList.remove(i);
+                    }
                 }
             }
             result.add(rd);
@@ -834,7 +846,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 60, 100, 4, 7, 10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg4", image1);
     }
@@ -889,7 +901,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 50, 80, 18, 30, 10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
     }
@@ -911,8 +923,8 @@ public class GaoLuDocMain2 {
         Double min1 = data.get(1) * 0.8;
 
         List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0) * 1.2;
-        Double min2 = data2.get(1) * 0.8;
+        Double max2 = data2.get(0) * 1.1;
+        Double min2 = data2.get(1) * 0.9;
 
 
         /**
@@ -945,7 +957,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0.11, 0.14, 0.0066, 0.008, 10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0.122, 0.1295, 0.00738, 0.00741,10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg6", image1);
     }
@@ -989,7 +1001,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 55.95, 56.38, min2, max2, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 55.8, 56.8, 8.0, 8.6, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg7", image1);
     }
