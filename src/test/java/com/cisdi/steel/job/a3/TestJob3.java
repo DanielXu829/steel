@@ -94,4 +94,16 @@ public class TestJob3 extends SteelApplicationTests {
         rongjiJob5.execute(null);
     }
 
+    /**
+     * 烧结机生产月报
+     */
+    @Autowired
+    private JiejiMonthJob5 jiejiMonthJob5;
+
+    @Test
+    public void test9() {
+        jiejiMonthJob5.execute(null);
+    }
+
+
 }

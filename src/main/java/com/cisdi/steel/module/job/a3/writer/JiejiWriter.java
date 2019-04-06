@@ -297,28 +297,29 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                         k++;
                     }
                     Arrays.sort(list);
-
-                    List<DateQuery> dateQueries = DateQueryUtil.buildDayHourEach(dateQuerys.getRecordDate());
-
-                    for (int j = 0; j < dateQueries.size(); j++) {
-                        long time = dateQueries.get(j).getEndTime().getTime();
-                        Object v = "";
+                    List<DateQuery> dateQueries = new ArrayList<>();
+                    if ("_sjmain8_day_shift".equals(sheetName)) {
                         for (int m = 0; m < list.length; m++) {
-                            if (time == list[m].longValue()) {
-                                Object o = innerMap.get(String.valueOf(list[m]));
-                                v = o;
-                                break;
-                            }
+                            ExcelWriterUtil.addCellData(cellDataList, rowIndex++, i, innerMap.get(String.valueOf(list[m])));
                         }
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
-                        rowIndex++;
+                    } else {
+                        dateQueries = DateQueryUtil.buildDayHourEach(dateQuerys.getRecordDate());
+                        for (int j = 0; j < dateQueries.size(); j++) {
+                            long time = dateQueries.get(j).getEndTime().getTime();
+                            Object v = "";
+                            for (int m = 0; m < list.length; m++) {
+                                Date zero = DateUtil.handleToZero(list[m].longValue(), 0, 0);
+                                if (time == zero.getTime()) {
+                                    Object o = innerMap.get(String.valueOf(list[m]));
+                                    v = o;
+                                    break;
+                                }
+                            }
+                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, v);
+                            rowIndex++;
+                        }
                     }
 
-
-
-//                    for (int m = 0; m < list.length; m++) {
-//                        ExcelWriterUtil.addCellData(cellDataList, rowIndex++, i, innerMap.get(String.valueOf(list[m])));
-//                    }
                 }
             }
         }

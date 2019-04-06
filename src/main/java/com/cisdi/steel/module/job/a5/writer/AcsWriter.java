@@ -4,6 +4,7 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -94,13 +95,8 @@ public class AcsWriter extends AbstractExcelReadWriter {
                                 for (int index = 0; index < size; index++) {
                                     JSONObject obj = jsonArray.getJSONObject(index);
                                     Long timestamp = (Long) obj.get("timestamp");
-                                    Date time = new Date(timestamp);
-                                    Calendar calendar = Calendar.getInstance();
-                                    calendar.setTime(time);
-                                    calendar.set(Calendar.MINUTE, 0);
-                                    calendar.set(Calendar.SECOND, 0);
-
-                                    if (date.getStartTime().getTime() == calendar.getTime().getTime()) {
+                                    Date zero = DateUtil.handleToZero(timestamp, 0, 0);
+                                    if (date.getStartTime().getTime() == zero.getTime()) {
                                         val = obj.get("val");
                                         break;
                                     }
