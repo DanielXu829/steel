@@ -66,7 +66,7 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                     Double cellDataList = this.valHandler(getUrl(), dateQuery);
                     setSheetValue(sheet, 1, 0, cellDataList);
                 } else if ("lianjiao".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler(getUrl2(), columns, 1, dateQuery, shiftNum);
+                    List<CellData> cellDataList = this.mapDataHandler(getUrl6(), rowIndex,dateQuery, shiftNum+"");
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("tag".equals(sheetSplit[1])) {
                     List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(), columns, dateQuery);
@@ -185,24 +185,56 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         return crushingFineness;
     }
 
-    public List<CellData> mapDataHandler(String url, List<String> columns, int rowBatch, DateQuery dateQuery, int shiftNum) {
-        Map<String, String> queryParam = getQueryParam1(dateQuery, shiftNum);
+    public List<CellData> mapDataHandler(String url, int rowIndex, DateQuery dateQuery, String shift) {
+        String[] coke = {"CO6", "CO7"};
+        List<Double> list = new ArrayList<>();
+        List<CellData> cellDataList = new ArrayList<>();
+        Double k2 = 0.0;
+        Double km = 0.0;
+        Double kAvg = 0.0;
+        Double kAn = 0.0;
+        for (int i = 0; i < coke.length; i++) {
+            String cokeNo = coke[i];
+            Map<String, String> queryParam = getQueryParam4(dateQuery, shift, cokeNo);
+            String result = httpUtil.get(url, queryParam);
+            if (StringUtils.isNotBlank(result)) {
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                if (Objects.nonNull(jsonObject)) {
+                    JSONObject data = jsonObject.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
+                        if (Objects.nonNull(obj)) {
+                            kAvg += obj.getDouble("dayKAvg");
+                            kAn += obj.getDouble("dayKan");
+                        }
+                    }
+                }
+            }
+        }
+        Map<String, String> queryParam = getQueryParam4(dateQuery, shift, "CO6");
         String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
-            return null;
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
+                    if (Objects.nonNull(obj)) {
+                        k2 = obj.getDouble("k2");
+                        km = obj.getDouble("kM");
+                    }
+                }
+            }
         }
-        JSONArray array = JSONObject.parseArray(result);
-        if (Objects.isNull(array)) {
-            return null;
+        list.add(k2);
+        list.add(km);
+        list.add(kAvg / 2);
+        list.add(kAn / 2);
+        for (int i = 0; i < list.size(); i++) {
+            Double val = list.get(i);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
         }
-        JSONObject jsonObject = array.getJSONObject(0);
-        HashMap<String, Object> Map = new HashMap<>();
-        Map.put("k2", jsonObject.getDouble("k2"));
-        Map.put("coalLoadingCoefficient", jsonObject.getDouble("coalLoadingCoefficient"));
-        Map.put("kAn", (jsonObject.getDouble("no1FurnaceKAn") + jsonObject.getDouble("no2FurnaceKAn")) / 2);
-        Map.put("kAvg", (jsonObject.getDouble("no1FurnaceKAvg") + jsonObject.getDouble("no2FurnaceKAvg")) / 2);
-        List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, rowBatch, Map);
-        return cellData;
+        return cellDataList;
     }
 
 
@@ -210,13 +242,6 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
-        return result;
-    }
-
-    protected Map<String, String> getQueryParam1(DateQuery dateQuery, Integer shiftNum) {
-        Map<String, String> result = new HashMap<>();
-        result.put("date", DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss"));
-        result.put("shift", shiftNum.toString());
         return result;
     }
 
@@ -242,12 +267,16 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
+    protected Map<String, String> getQueryParam4(DateQuery dateQuery, String shift, String cokeNo) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd hh:mm:ss"));
+        result.put("shift", shift);
+        result.put("cokeNo", cokeNo);
+        return result;
     }
 
-    private String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    private String getUrl() {
+        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
     }
 
     private String getUrl3() {
@@ -262,4 +291,7 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 
+    private String getUrl6() {
+        return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
+    }
 }

@@ -54,7 +54,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                 } else if ("lianjiao".equals(sheetSplit[1])) {
                     for (int j = 0; j < size; j++) {
                         int rowIndex = 1 + j;
-                        List<CellData> cellData = this.valHandler1(getUrl2(), columns, dateQueries.get(j), rowIndex);
+                        List<CellData> cellData = this.valHandler1(getUrl6(), rowIndex, dateQueries.get(j));
                         ExcelWriterUtil.setCellValue(sheet, cellData);
                     }
                 } else if ("tag".equals(sheetSplit[1])) {
@@ -181,47 +181,66 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return crushingFineness;
     }
 
-    public List<CellData> valHandler1(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
-        if (dateQuery.getRecordDate().compareTo(new Date()) == 1) {
-            return null;
+    public List<CellData> valHandler1(String url, int rowIndex, DateQuery dateQuery) {
+        String[] shifts = {1 + "", 2 + "", 3 + ""};
+        String[] coke = {"CO6", "CO7"};
+        List<Double> list = new ArrayList<>();
+        List<CellData> cellDataList = new ArrayList<>();
+        Double k2 = 0.0;
+        Double km = 0.0;
+        Double kAvg = 0.0;
+        Double kAn = 0.0;
+        for (int i = 0; i < coke.length; i++) {
+            String cokeNo = coke[i];
+            Map<String, String> queryParam = getQueryParam4(dateQuery, 1+"", cokeNo);
+            String result = httpUtil.get(url, queryParam);
+            if (StringUtils.isNotBlank(result)) {
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                if (Objects.nonNull(jsonObject)) {
+                    JSONObject data = jsonObject.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
+                        if (Objects.nonNull(obj)) {
+                            kAvg += obj.getDouble("dayKAvg");
+                            kAn += obj.getDouble("dayKan");
+                        }
+                    }
+                }
+            }
         }
-        Map<String, String> queryParam = getQueryParam1(dateQuery);
-        String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
-            return null;
+        for (int i = 0; i <shifts.length ; i++) {
+            String shift = shifts[i];
+            Map<String, String> queryParam = getQueryParam4(dateQuery, shift, "CO6");
+            String result = httpUtil.get(url, queryParam);
+            if (StringUtils.isNotBlank(result)) {
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                if (Objects.nonNull(jsonObject)) {
+                    JSONObject data = jsonObject.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
+                        if (Objects.nonNull(obj)) {
+                            k2 += obj.getDouble("k2");
+                            km += obj.getDouble("kM");
+                        }
+                    }
+                }
+            }
         }
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        JSONObject data = jsonObject.getJSONObject("data");
-        if (Objects.isNull(data)) {
-            return null;
+        list.add(k2/3);
+        list.add(km/3);
+        list.add(kAvg/2);
+        list.add(kAn/2);
+        for (int i = 0; i <list.size() ; i++) {
+            Double val = list.get(i);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
         }
-        JSONObject r = data.getJSONObject("yesterdayAvg");
-        if (Objects.isNull(r)) {
-            return null;
-        }
-
-        HashMap<String, Object> Map = new HashMap<>();
-        Map.put("k2", r.getDouble("k2"));
-        Map.put("coalLoadingCoefficient", r.getDouble("coalLoadingCoefficient"));
-        Map.put("kAn", (r.getDouble("no1FurnaceKAn") + r.getDouble("no2FurnaceKAn")) / 2);
-        Map.put("kAvg", (r.getDouble("no1FurnaceKAvg") + r.getDouble("no2FurnaceKAvg")) / 2);
-
-        List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, rowBatch, Map);
-        return cellData;
+        return cellDataList;
     }
 
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
-        return result;
-    }
-
-    protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        result.put("start", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getStartTime(), -1), "yyyy/MM/dd HH:mm:ss"));
-        result.put("end", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getEndTime(), -1), "yyyy/MM/dd HH:mm:ss"));
-
         return result;
     }
 
@@ -247,12 +266,17 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
+    protected Map<String, String> getQueryParam4(DateQuery dateQuery, String shift, String cokeNo) {
+        Map<String, String> result = new HashMap<>();
+        Date date = DateUtil.addDays(dateQuery.getRecordDate(), -2);
+        result.put("date", DateUtil.getFormatDateTime(date, "yyyy/MM/dd hh:mm:ss"));
+        result.put("shift", shift);
+        result.put("cokeNo", cokeNo);
+        return result;
     }
 
-    private String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getKlineStatistics";
+    private String getUrl() {
+        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
     }
 
     private String getUrl3() {
@@ -265,6 +289,10 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
     private String getUrl5() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
+    }
+
+    private String getUrl6() {
+        return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 
 }
