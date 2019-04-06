@@ -19,6 +19,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -48,7 +49,7 @@ public class GaoLuDocMain2 {
     private String version6 = "6.0";
     private String version8 = "8.0";
 
-    //@Scheduled(cron = "0 30 6 * * ?")
+    @Scheduled(cron = "0 31 6 * * ?")
     public void mainTask() {
         result = new HashMap<>();
         mainDeal(version6);
@@ -153,9 +154,9 @@ public class GaoLuDocMain2 {
         L13 = new String[]{"BF8_L2C_BD_CCT_1d_avg", "BF8_L2M_PCT_1d_avg"};
         L14 = new String[]{"BF8_L2C_BD_B1B3_HeatLoad_1d_avg", "BF8_L2C_BD_S1S3_HeatLoad_1d_avg"};
 
-        L15 = new String[]{"BF8_L2C_BD_WT6_Q_1d_avg", "BF8_L2C_BD_S4S6_HeatLoad_1d_avg", "BF8_L2C_BD_R1R3_HeatLoad_1d_avg"};
+        L15 = new String[]{"BF8_L2C_BD_S4S6_HeatLoad_1d_avg", "BF8_L2C_BD_R1R3_HeatLoad_1d_avg"};
 
-        L16 = new String[]{"BF8_L2C_TP_GasUtilization_1d_avg"};
+        L16 = new String[]{"BF8_L2C_BD_WT6_Q_1d_avg", "BF8_L2C_TP_GasUtilization_1d_avg"};
 
         L17 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_Pressdiff_1d_avg",
                 "BF8_L2C_BD_OxygenFlow_1d_avg", "BF8_L2C_BD_HotBlastTemp_1d_avg", "BF8_L2C_BD_BH_1d_avg",
@@ -380,23 +381,31 @@ public class GaoLuDocMain2 {
                             }
                             if (Objects.nonNull(o)) {
                                 BigDecimal v = dealType(o);
-                                csr.add(v);
-                                a = a.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    csr.add(v);
+                                    a = a.add(v);
+                                }
                             }
                             if (Objects.nonNull(o1)) {
                                 BigDecimal v = dealType(o1);
-                                m40.add(v);
-                                b = b.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    m40.add(v);
+                                    b = b.add(v);
+                                }
                             }
                             if (Objects.nonNull(o2)) {
                                 BigDecimal v = dealType(o2);
-                                ad.add(v);
-                                c = c.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    ad.add(v);
+                                    c = c.add(v);
+                                }
                             }
                             if (Objects.nonNull(o3)) {
                                 BigDecimal v = dealType(o3);
-                                a4.add(v);
-                                d = d.add(v);
+                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+                                    a4.add(v);
+                                    d = d.add(v);
+                                }
                             }
                         }
                     }
@@ -460,10 +469,13 @@ public class GaoLuDocMain2 {
                     size++;
                 }
                 Double x = (aDouble + bDouble + cDouble) / size;
-                if (Objects.nonNull(x)) {
+
+                if (Objects.nonNull(x) && x.doubleValue() != 0.0) {
                     rd.add(x * scale);
                 } else {
-                    rd.add(x);
+                    if (i < dateList.size()) {
+                        dateList.remove(i);
+                    }
                 }
             }
             result.add(rd);
@@ -476,113 +488,91 @@ public class GaoLuDocMain2 {
     private List<Map<String, Object>> part4(String version) {
 
         Date date = new Date();
-        Date beginDate = DateUtil.addDays(date, -3);
+        Date beginDate = DateUtil.addDays(date, -1);
 
         List<Map<String, Object>> result = new ArrayList<>();
-
-        int index = 1;
         while (beginDate.before(date)) {
             String dateTime = DateUtil.getFormatDateTime(beginDate, "yyyy-MM-dd 00:00:00");
             String dateTime1 = DateUtil.getFormatDateTime(beginDate, "yyyy-MM-dd 24:00:00");
 
             Date date1 = DateUtil.strToDate(dateTime, DateUtil.fullFormat);
             Date date2 = DateUtil.strToDate(dateTime1, DateUtil.fullFormat);
-            JSONArray jsonArray = dataHttp2(date1, date2, version);
+            JSONObject data = dataHttp2(date1, date2, version);
 
-            List<Object> anglesetListC = new ArrayList<>();
-            List<Object> roundsetListC = new ArrayList<>();
+            if (Objects.nonNull(data)) {
+                Map<String, Object> innerMap = data.getInnerMap();
+                Set<String> keys = innerMap.keySet();
 
-            Map<String, Object> map = new HashMap<>();
-            List<Object> anglesetListO = new ArrayList<>();
-            List<Object> roundsetListO = new ArrayList<>();
+                Long[] list = new Long[keys.size()];
+                int k = 0;
+                for (String key : keys) {
+                    list[k] = Long.valueOf(key);
+                    k++;
+                }
+                Arrays.sort(list);
 
-            for (int i = 0; i < jsonArray.size(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                if (Objects.nonNull(jsonObject)) {
-                    JSONObject batchIndex = jsonObject.getJSONObject("batchIndex");
-                    if (Objects.nonNull(batchIndex)) {
-                        String typ = batchIndex.getString("typ");
-                        Long weighttime = batchIndex.getLong("weighttime");
-                        String time = DateUtil.getFormatDateTime(new Date(weighttime), DateUtil.fullFormat);
 
-                        if (StringUtils.isNotBlank(typ) && "C".equals(typ)) {
-                            roundsetListC.add(time);
-                            anglesetListC.add(time);
-                            roundsetListC.add("C");
-                            anglesetListC.add("C");
+                for (int i = 0; i < list.length; i++) {
+                    Map<String, Object> cAngle = new HashMap<>();
+                    Map<String, Object> cRound = new HashMap<>();
+                    Map<String, Object> oAngle = new HashMap<>();
+                    Map<String, Object> oRound = new HashMap<>();
 
-                            JSONArray batchDistributions = jsonObject.getJSONArray("batchDistributions");
-                            for (int j = 0; j < batchDistributions.size(); j++) {
-                                JSONObject object = batchDistributions.getJSONObject(j);
-                                BigDecimal roundset = object.getBigDecimal("roundset");
-                                roundsetListC.add(roundset);
+                    int index = 1;
+                    int useCIndex = 1;
+                    int useOIndex = 1;
 
-                                BigDecimal angleset = object.getBigDecimal("angleset");
-                                anglesetListC.add(angleset);
+                    JSONArray jsonArray = (JSONArray) innerMap.get(list[i] + "");
+                    for (int j = 0; j < jsonArray.size(); j++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(j);
+                        String typ = jsonObject.getString("typ");
+                        String angle = jsonObject.getString("angle");
+                        String round = jsonObject.getString("round");
+                        String formatDateTime = DateUtil.getFormatDateTime(new Date(list[i]), "yyyy-MM-dd HH:mm");
+
+                        if (!"0.0".equals(angle) && !"0.0".equals(round)) {
+                            if ("C".equals(typ)) {
+                                if (index % 4 == 0) {
+                                    cAngle.put("a0", formatDateTime);
+                                }
+                                cAngle.put("a" + useCIndex, angle);
+                                cRound.put("a" + useCIndex, round);
+                                cAngle.put("type", typ);
+                                cRound.put("a0", "");
+                                cRound.put("type", typ);
+                                useCIndex++;
+                            } else if ("O".equals(typ)) {
+                                oAngle.put("a" + useOIndex, angle);
+                                oRound.put("a" + useOIndex, round);
+                                oAngle.put("a0", "");
+                                oAngle.put("type", typ);
+                                oRound.put("a0", "");
+                                oRound.put("type", typ);
+                                useOIndex++;
                             }
                         }
-                        if (StringUtils.isNotBlank(typ) && "O".equals(typ)) {
-                            roundsetListO.add(time);
-                            anglesetListO.add(time);
-                            roundsetListO.add("O");
-                            anglesetListO.add("O");
-                            JSONArray batchDistributions = jsonObject.getJSONArray("batchDistributions");
-                            for (int j = 0; j < batchDistributions.size(); j++) {
-                                JSONObject object = batchDistributions.getJSONObject(j);
-                                BigDecimal roundset = object.getBigDecimal("roundset");
-                                roundsetListO.add(roundset);
-
-                                BigDecimal angleset = object.getBigDecimal("angleset");
-                                anglesetListO.add(angleset);
-                            }
-                        }
+                        index++;
                     }
+
+                    for (int m = useCIndex; m < 12; m++) {
+                        cAngle.put("a" + m, "");
+                        cRound.put("a" + m, "");
+                    }
+
+                    for (int n = useOIndex; n < 12; n++) {
+                        oAngle.put("a" + n, "");
+                        oRound.put("a" + n, "");
+                    }
+
+                    result.add(cAngle);
+                    result.add(cRound);
+                    result.add(oAngle);
+                    result.add(oRound);
                 }
-            }
 
-            Map<String, Object> map1 = new HashMap<>();
-            Map<String, Object> map2 = new HashMap<>();
-
-            Map<String, Object> map3 = new HashMap<>();
-            Map<String, Object> map4 = new HashMap<>();
-
-            int ind = 1;
-            int i = 0;
-            for (int m = 0; m < anglesetListC.size(); m++) {
-                Object o = anglesetListC.get(m);
-                Object o1 = roundsetListC.get(m);
-                map1.put("a" + (i + 1), o);
-                map2.put("a" + (i + 1), o1);
-
-                Object o2 = anglesetListO.get(m);
-                Object o3 = roundsetListO.get(m);
-
-                map3.put("a" + (i + 1), o2);
-                map4.put("a" + (i + 1), o3);
-
-                i++;
-                if (ind % 2 != 0 && i % 13 == 0) {
-                    result.add(map1);
-                    result.add(map2);
-
-                    map1 = new HashMap<>();
-                    map2 = new HashMap<>();
-                    ind++;
-                    i = 0;
-                } else if (ind % 2 == 0 && i % 13 == 0) {
-                    result.add(map3);
-                    result.add(map4);
-
-                    map3 = new HashMap<>();
-                    map4 = new HashMap<>();
-                    ind++;
-                    i = 0;
-                }
             }
             beginDate = DateUtil.addDays(beginDate, 1);
         }
-
-
         return result;
 
     }
@@ -933,8 +923,8 @@ public class GaoLuDocMain2 {
         Double min1 = data.get(1) * 0.8;
 
         List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0) * 1.2;
-        Double min2 = data2.get(1) * 0.8;
+        Double max2 = data2.get(0) * 1.1;
+        Double min2 = data2.get(1) * 0.9;
 
 
         /**
@@ -967,7 +957,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0.122, 0.1295, 0.00738, 0.00741,10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg6", image1);
     }
@@ -978,12 +968,9 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
-//        result.put("part12", objects1[objects1.length - 2]);
-//        result.put("part13", objects2[objects2.length - 2]);
-//        result.put("part14", objects3[objects3.length - 2]);
         List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.2;
-        Double min1 = data.get(1) * 0.8;
+        Double max1 = data.get(0) * 1.06;
+        Double min1 = data.get(1) * 0.94;
 
         List<Double> data2 = dealList(objects2);
         Double max2 = data2.get(0) * 1.2;
@@ -1014,7 +1001,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 55.8, 56.8, 8.0, 8.6, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg7", image1);
     }
@@ -1154,8 +1141,8 @@ public class GaoLuDocMain2 {
         series2.add(new Serie("氧量", objects2));
 
         List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.2;
-        Double min1 = data.get(1) * 0.8;
+        Double max1 = data.get(0) * 1.1;
+        Double min1 = data.get(1) * 0.9;
 
         List<Double> data2 = dealList(objects2);
         Double max2 = data2.get(0) * 1.2;
@@ -1189,12 +1176,12 @@ public class GaoLuDocMain2 {
         result.put("part23", getLastVal(objects2));
 
         List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.2;
-        Double min1 = data.get(1) * 0.8;
+        Double max1 = data.get(0) * 1.055;
+        Double min1 = data.get(1) * 0.975;
 
         List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0) * 1.2;
-        Double min2 = data2.get(1) * 0.8;
+        Double max2 = data2.get(0) * 1.055;
+        Double min2 = data2.get(1) * 0.975;
 
         /**
          * 风压
@@ -1375,36 +1362,28 @@ public class GaoLuDocMain2 {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
-        Object[] objects3 = doubles.get(2).toArray();
 
 
         /**
-         * 总热负荷
          * S4-S6
          * R1-R3
          */
 
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
-        // 柱子名称：柱子所有的值集合
-        series1.add(new Serie("总热负荷", objects1));
+        series1.add(new Serie("S4-S6", objects1));
 
         // 标注类别
         Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("S4-S6", objects2));
-
-        // 标注类别
-        Vector<Serie> series3 = new Vector<Serie>();
-        series2.add(new Serie("R1-R3", objects3));
+        series2.add(new Serie("R1-R3", objects2));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
         vectors.add(series2);
-        vectors.add(series3);
+
 
         result.put("part30", getLastVal(objects1));
         result.put("part31", getLastVal(objects2));
-        result.put("part32", getLastVal(objects3));
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
@@ -1414,20 +1393,17 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.2;
         Double min2 = data2.get(1) * 0.8;
 
-        List<Double> data3 = dealList(objects3);
-        Double max3 = data3.get(0) * 1.2;
-        Double min3 = data3.get(1) * 0.8;
 
         String title1 = "";
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
-        int[] stack = {1, 1, 1};
-        int[] ystack = {1, 2, 3};
+        int[] stack = {1, 1};
+        int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, min3, max3, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg15", image1);
 
@@ -1436,34 +1412,47 @@ public class GaoLuDocMain2 {
     private void dealPart16(String version, String[] tagNames) {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
+        Object[] objects2 = doubles.get(1).toArray();
 
         /**
+         * 总热负荷
          * 煤气利用率
          */
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
-        series1.add(new Serie("煤气利用率", objects1));
+        series1.add(new Serie("总热负荷", objects1));
+
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series2.add(new Serie("煤气利用率", objects2));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
+        vectors.add(series2);
 
-        result.put("part33", getLastVal(objects1));
+        result.put("part32", getLastVal(objects1));
+        result.put("part33", getLastVal(objects2));
 
         List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.2;
-        Double min1 = data.get(1) * 0.8;
+        Double max1 = data.get(0) * 1.1;
+        Double min1 = data.get(1) * 0.9;
+
+        List<Double> data2 = dealList(objects2);
+        Double max2 = data2.get(0) * 1.085;
+        Double min2 = data2.get(1) * 0.95;
 
         String title1 = "";
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
 
-        int[] stack = {1};
-        int[] ystack = {1};
+        int[] stack = {1, 1};
+        int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 100, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg16", image1);
 
@@ -1664,8 +1653,8 @@ public class GaoLuDocMain2 {
         Double min1 = data.get(1) * 0.8;
 
         List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0) * 1.2;
-        Double min2 = data2.get(1) * 0.8;
+        Double max2 = data2.get(0) * 1.1;
+        Double min2 = data2.get(1) * 0.9;
 
         result.put("part34", getLastVal(objects1));
         result.put("part35", getLastVal(objects2));
@@ -1680,7 +1669,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 1, 1, 2, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 1, 2, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg17", image1);
 
@@ -1716,13 +1705,17 @@ public class GaoLuDocMain2 {
         return data;
     }
 
-    private JSONArray dataHttp2(Date beginDate, Date endDate, String version) {
+    private JSONObject dataHttp2(Date beginDate, Date endDate, String version) {
+        JSONObject data = null;
         Map<String, String> map = new HashMap<>();
-        map.put("starttime", beginDate.getTime() + "");
-        map.put("endtime", endDate.getTime() + "");
+        map.put("startTime", beginDate.getTime() + "");
+        map.put("endTime", endDate.getTime() + "");
+        map.put("calcModel", "forward");
         String results = httpUtil.get(getUrl2(version), map);
-        JSONObject jsonObject = JSONObject.parseObject(results);
-        JSONArray data = jsonObject.getJSONArray("data");
+        if (StringUtils.isNotBlank(results)) {
+            JSONObject jsonObject = JSONObject.parseObject(results);
+            data = jsonObject.getJSONObject("data");
+        }
         return data;
     }
 
@@ -1818,7 +1811,7 @@ public class GaoLuDocMain2 {
      * @return
      */
     private String getUrl2(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/batches/distribution/period";
+        return httpProperties.getGlUrlVersion(version) + "/burden/round/range";
     }
 
     /**
