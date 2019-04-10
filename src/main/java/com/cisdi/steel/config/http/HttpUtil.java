@@ -1,5 +1,6 @@
 package com.cisdi.steel.config.http;
 
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -12,6 +13,15 @@ import java.util.Map;
  * @version 1.0
  */
 public interface HttpUtil {
+    /**
+     * get
+     *
+     * @param url    请求的url
+     * @param params 请求的参数，在浏览器？后面的数据，没有可以传null
+     * @return 结果
+     */
+    byte[] getStrem(String url, Map<String, String> params);
+
     /**
      * get
      *

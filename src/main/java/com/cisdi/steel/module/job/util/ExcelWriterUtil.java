@@ -9,10 +9,12 @@ import com.cisdi.steel.module.job.dto.CellValInfo;
 import com.cisdi.steel.module.job.dto.RowCellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.util.IOUtils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -162,15 +164,47 @@ public class ExcelWriterUtil {
                         Object value = map.get(keyChild);
                         ExcelWriterUtil.addCellData(resultData, childIndex++, columnIndex, value);
                     }
-                } else if(o instanceof Map){
-                    Map<String,Object> object= (Map<String, Object>) o;
+                } else if (o instanceof Map) {
+                    Map<String, Object> object = (Map<String, Object>) o;
                     Object value = object.get(keyChild);
                     ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
-                }else{
+                } else {
                     ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, o);
                 }
             }
         }
         return resultData;
+    }
+
+    /**
+     *      *
+     *      * @param ImgPath:图片路径
+     *      * @param row1：起始行
+     *      * @param row2：终止行
+     *      * @param col1：起始列
+     *      * @param col2：终止列
+     *      * @throws IOException
+     *     
+     */
+    public static void setImg(Workbook workbook, byte[] bytes, String sheetName, int row1, int row2, int col1, int col2) {
+        // 插入 PNG 图片至 Excel
+        int pictureIdx = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
+        Sheet sheet2 = workbook.getSheet(sheetName);
+        CreationHelper helper = workbook.getCreationHelper();
+        Drawing drawing = sheet2.createDrawingPatriarch();
+        ClientAnchor anchor = helper.createClientAnchor();
+
+        // 图片插入坐标
+        anchor.setDx1(0);
+        anchor.setDy1(0);
+        anchor.setDx2(0);
+        anchor.setDy2(0);
+        anchor.setRow1(row1);
+        anchor.setRow2(row2);
+        anchor.setCol1(col1);
+        anchor.setCol2(col2);
+        // 插入图片
+        drawing.createPicture(anchor, pictureIdx);
+
     }
 }

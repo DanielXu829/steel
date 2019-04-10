@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.Map;
@@ -23,6 +24,47 @@ public class OkHttpImpl implements HttpUtil {
 
     @Autowired
     private OkHttpClient okHttpClient;
+
+    @Override
+    public byte[] getStrem(String url, Map<String, String> params) {
+        StringBuffer sb = new StringBuffer(url);
+        try {
+            if (params != null && params.keySet().size() > 0) {
+                boolean firstFlag = true;
+                Iterator iterator = params.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = (Map.Entry<String, String>) iterator.next();
+                    if (firstFlag) {
+                        sb.append("?" + entry.getKey() + "=" + URLEncoder.encode(entry.getValue().toString(), java.nio.charset.StandardCharsets.UTF_8.toString()));
+                        firstFlag = false;
+                    } else {
+                        sb.append("&" + entry.getKey() + "=" + URLEncoder.encode(entry.getValue().toString(), java.nio.charset.StandardCharsets.UTF_8.toString()));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        log.debug("GET请求URL:" + sb.toString());
+        Request request = new Request.Builder()
+                .url(sb.toString())
+                .build();
+        Response response = null;
+        try {
+            response = okHttpClient.newCall(request).execute();
+            int status = response.code();
+            if (response.isSuccessful()) {
+                return response.body().bytes();
+            }
+        } catch (Exception e) {
+            logger.error("okhttp3 get error >> ex = {}", ExceptionUtils.getStackTrace(e));
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+        return null;
+    }
 
     /**
      * get
