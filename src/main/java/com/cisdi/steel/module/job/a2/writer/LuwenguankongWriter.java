@@ -99,7 +99,56 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
             }
         }
 
-        return cellDataList;
+        List<CellData> yeList = new ArrayList<>();
+        List<CellData> baiList = new ArrayList<>();
+        List<CellData> zhongList = new ArrayList<>();
+
+        List<CellData> dataR = new ArrayList<>();
+
+        for (int i = 0; i < cellDataList.size(); i++) {
+            CellData cellData = cellDataList.get(i);
+            if ("夜".equals(cellData.getCellValue())) {
+                yeList.add(cellData);
+            }
+            if ("白".equals(cellData.getCellValue())) {
+                baiList.add(cellData);
+            }
+            if ("中".equals(cellData.getCellValue())) {
+                zhongList.add(cellData);
+            }
+        }
+        dealList(yeList, cellDataList, dataR);
+        dealList(baiList, cellDataList, dataR);
+        dealList(zhongList, cellDataList, dataR);
+
+
+        return dataR;
+    }
+
+    /**
+     * 记录重新排序的序列
+     */
+    private int tempIndex = 1;
+
+    /**
+     * 处理数据先按时间再按班次排序
+     *
+     * @param list1 待排序的班次集合
+     * @param list2 所有的数据集合
+     * @param list3 排序后的数据集合
+     */
+    private void dealList(List<CellData> list1, List<CellData> list2, List<CellData> list3) {
+        for (int j = 0; j < list1.size(); j++) {
+            CellData data1 = list1.get(j);
+            for (int i = 0; i < list2.size(); i++) {
+                CellData data2 = list2.get(i);
+                if (data1.getRowIndex().intValue() == data2.getRowIndex().intValue()) {
+                    CellData temp = new CellData(tempIndex, data2.getColumnIndex(), data2.getCellValue());
+                    list3.add(temp);
+                }
+            }
+            this.tempIndex += 1;
+        }
     }
 
     /**
