@@ -37,8 +37,15 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
      */
     private int rowIndex = 1;
 
+    /**
+     * 记录重新排序的序列
+     */
+    private int tempIndex = 1;
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
+        rowIndex = 1;
+        tempIndex = 1;
 
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
@@ -129,11 +136,6 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
     }
 
     /**
-     * 记录重新排序的序列
-     */
-    private int tempIndex = 1;
-
-    /**
      * 处理数据先按时间再按班次排序
      *
      * @param list1 待排序的班次集合
@@ -146,7 +148,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
             for (int i = 0; i < list2.size(); i++) {
                 CellData data2 = list2.get(i);
                 if (data1.getRowIndex().intValue() == data2.getRowIndex().intValue()) {
-                    CellData temp = new CellData(tempIndex, data2.getColumnIndex(), data2.getCellValue());
+                    CellData temp = new CellData(this.tempIndex, data2.getColumnIndex(), data2.getCellValue());
                     list3.add(temp);
                 }
             }
@@ -206,7 +208,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         String result = httpUtil.get(getUrl2(), queryParam2);
         if (StringUtils.isNotBlank(result)) {
             JSONArray array = JSONObject.parseArray(result);
-            if (array.size() != 0 || Objects.nonNull(array)) {
+            if (Objects.nonNull(array) && array.size() != 0) {
                 JSONObject jsonObject = array.getJSONObject(0);
                 if (Objects.nonNull(jsonObject)) {
                     bz = jsonObject.getString("workTeam");
