@@ -152,6 +152,7 @@ public class MetadataDTO {
         result.put("Build_EndTime", this.buildEndTime);
         result.put("ExcelFile", this.excelFile);
         result.put("DateTime7", DateQueryUtil.getMonthStartTime(this.dateTime));
+        result.put("DateTime8", DateQueryUtil.getYearStartTime(this.dateTime));
         return result;
     }
 }

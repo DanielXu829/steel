@@ -106,4 +106,16 @@ public class TestJob3 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 脱硫脱硝年报
+     */
+    @Autowired
+    private TuoliuTuoxiaoYearJob tuoliuTuoxiaoYearJob;
+
+    @Test
+    public void test10() {
+        tuoliuTuoxiaoYearJob.execute(null);
+    }
+
+
 }

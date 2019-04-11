@@ -94,7 +94,7 @@ public class DateQueryUtil {
     }
 
     public static void main(String[] args) {
-        List<DateQuery> dateQueries = buildDayHourEach(new Date());
+        List<DateQuery> dateQueries = buildYearDayEach(new Date());
         dateQueries.forEach(System.out::println);
     }
 
@@ -209,6 +209,25 @@ public class DateQueryUtil {
     }
 
     /**
+     * 记录每年的每天
+     *
+     * @return 结果
+     */
+    public static List<DateQuery> buildYearDayEach(Date date) {
+        DateQuery dateQuery = buildYear(date);
+        Date startTime = dateQuery.getStartTime();
+        long betweenDays = DateUtil.getBetweenDays(startTime, date);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date currentDate = startTime;
+        for (int i = 0; i <= betweenDays; i++) {
+            DateQuery query = buildToday(currentDate);
+            queryList.add(query);
+            currentDate = DateUtil.addDays(currentDate, 1);
+        }
+        return queryList;
+    }
+
+    /**
      * 每月的数据
      *
      * @param date 查询的时间
@@ -232,6 +251,20 @@ public class DateQueryUtil {
         return new DateQuery(beginTime, endTime, date);
     }
 
+    /**
+     * 指定 年的时间范围
+     *
+     * @param date 指定年
+     * @return 结果
+     */
+    public static DateQuery buildYear(Date date) {
+        Date yearStartTime = getYearStartTime(date);
+        Date beginTime = DateUtil.getDateBeginTime(yearStartTime);
+        Date yearEndTime = getYearEndTime(date);
+        Date endTime = DateUtil.getDateEndTime(yearEndTime);
+        return new DateQuery(beginTime, endTime, date);
+    }
+
 
     /**
      * 获取指定月日期 1号
@@ -252,6 +285,28 @@ public class DateQueryUtil {
         calendar.setTime(date);
         //设置日期为本月最大日期
         calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取指定年日期 1号
+     */
+    public static Date getYearStartTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        // 设置为第一天
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_YEAR, 1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取指定年 最后一天
+     */
+    public static Date getYearEndTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        //设置日期为本年最大日期
+        calendar.set(Calendar.DAY_OF_YEAR, calendar.getActualMaximum(Calendar.DAY_OF_YEAR));
         return calendar.getTime();
     }
 
