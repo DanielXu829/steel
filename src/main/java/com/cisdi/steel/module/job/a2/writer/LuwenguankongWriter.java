@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,6 +29,7 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@Slf4j
 @Component
 public class LuwenguankongWriter extends AbstractExcelReadWriter {
     /**
@@ -76,9 +78,10 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
 
         Map<String, String> queryParam = getQueryParam(dateQuery, tagNames);
         String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
+        if (StringUtils.isEmpty(result)) {
             return null;
         }
+
         JSONObject jsonObject = JSONObject.parseObject(result);
         JSONObject data = jsonObject.getJSONObject("data");
         if (Objects.nonNull(data)) {
