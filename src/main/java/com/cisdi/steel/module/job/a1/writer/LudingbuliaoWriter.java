@@ -74,7 +74,11 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
                 }
                 String[] columnSplit = column.split("/");
                 String key = columnSplit[0];
-                String child = columnSplit[1];
+                String child = columnSplit[0];
+                if (columnSplit.length > 1) {
+                    child = columnSplit[1];
+                }
+
                 if ("batchDistributions".equals(key)) {
                     JSONArray jsonArray = map.getJSONArray(key);
                     if (Objects.nonNull(jsonArray)) {
@@ -107,9 +111,14 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
                         }
                     }
                 } else {
-                    JSONObject keyData = map.getJSONObject(key);
-                    if (Objects.nonNull(keyData)) {
-                        Object value = keyData.get(child);
+                    if (columnSplit.length > 1) {
+                        JSONObject keyData = map.getJSONObject(key);
+                        if (Objects.nonNull(keyData)) {
+                            Object value = keyData.get(child);
+                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, value);
+                        }
+                    } else {
+                        Object value = map.get(key);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, value);
                     }
                 }
