@@ -51,7 +51,7 @@ public class GycanshuExecute extends AbstractJobExecuteExecute {
          */
         try {
             int dateTime = Integer.valueOf(DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "HH"));
-            if ((dateTime >= 0 && dateTime < 3) || dateTime == 23) {
+            if ((dateTime > 0 && dateTime < 3) || dateTime == 23) {
                 workbook.removeSheetAt(workbook.getSheetIndex("23"));
                 workbook.removeSheetAt(workbook.getSheetIndex("19"));
                 workbook.removeSheetAt(workbook.getSheetIndex("11"));

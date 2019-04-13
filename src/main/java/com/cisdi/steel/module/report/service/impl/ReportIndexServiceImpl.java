@@ -148,7 +148,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             reportIndex.setCreateTime(now);
             this.save(reportIndex);
         } else {
-            if (JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())) {
+            if (JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())
+                    ||JobEnum.sj_gycanshutotal.getCode().equals(reportIndex.getReportCategoryCode())
+            ) {
                 boolean f = dealGongyi(report.getRecordDate(), reportIndex.getRecordDate());
                 otherHand(f, reportIndex, report, now);
             } else if (JobEnum.jh_zhibiaoguankong.getCode().equals(reportIndex.getReportCategoryCode()) || JobEnum.jh_zhuyaogycs.getCode().equals(reportIndex.getReportCategoryCode())) {
@@ -204,7 +206,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             int dateTime = Integer.valueOf(DateUtil.getFormatDateTime(date, "HH"));
             int dateTime1 = Integer.valueOf(DateUtil.getFormatDateTime(date1, "HH"));
             if (((dateTime >= 0 && dateTime < 3) && (dateTime1 >= 0 && dateTime1 < 3))
-                    || (dateTime >= 23 && dateTime1 >= 23)) {
+                    || (dateTime == 23 && dateTime1 == 23)) {
                 flag = true;
             } else if ((dateTime < 7 && dateTime >= 3)
                     && (dateTime1 < 7 && dateTime1 >= 3)) {

@@ -117,5 +117,16 @@ public class TestJob3 extends SteelApplicationTests {
         tuoliuTuoxiaoYearJob.execute(null);
     }
 
+    /**
+     * 烧结分厂主要工艺参数及实物质量情况
+     */
+    @Autowired
+    private GycanshuTotalJob gycanshuTotalJob;
+
+    @Test
+    public void test11() {
+        gycanshuTotalJob.execute(null);
+    }
+
 
 }
