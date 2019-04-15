@@ -85,7 +85,7 @@ public class TestJob1 extends SteelApplicationTests {
 
 
     /**
-     * 高炉本体温度月报表
+     * 高炉本体温度月报表（耐材）
      */
     @Autowired
     private BentiwenduMonthJob bentiwenduMonthJob;

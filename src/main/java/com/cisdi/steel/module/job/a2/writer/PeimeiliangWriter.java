@@ -31,6 +31,9 @@ import java.util.*;
  */
 @Component
 public class PeimeiliangWriter extends AbstractExcelReadWriter {
+
+    private List<String> columns = new ArrayList<>();
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -47,11 +50,13 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
 //                List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
                 DateQuery dateQuery = dateQueries.get(0);
-                Set<String> strings = mapDataHandler(getUrl2(), dateQuery);
-                List<String> columns = new ArrayList<>(strings);
+                if (this.columns.size() == 0) {
+                    Set<String> strings = mapDataHandler(getUrl2(), dateQuery);
+                    columns = new ArrayList<>(strings);
+                }
                 if ("name".equals(sheetSplit[1])) {
                     int rowNum = 0;
-                    for (String val : strings) {
+                    for (String val : columns) {
                         setSheetValue(sheet, 0, rowNum, val);
                         rowNum++;
                     }
@@ -152,10 +157,21 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                             String tagName = rowCelVal.get(k);
                             Map<String, String> queryParam3 = getQueryParam3(date1, tagName);
                             String result2 = httpUtil.get(getUrl3(), queryParam3);
-                            JSONObject jsonObject3 = JSONObject.parseObject(result2);
-                            JSONArray rows3 = jsonObject3.getJSONArray("rows");
-                            JSONObject obj = rows3.getJSONObject(0);
-                            val += obj.getDouble("val");
+                            if (StringUtils.isNotBlank(result2)) {
+                                JSONObject jsonObject3 = JSONObject.parseObject(result2);
+                                if (Objects.nonNull(jsonObject3)) {
+                                    JSONArray rows3 = jsonObject3.getJSONArray("rows");
+                                    if (Objects.nonNull(rows3) && rows3.size() > 0) {
+                                        JSONObject obj = rows3.getJSONObject(0);
+                                        if (Objects.nonNull(obj)) {
+                                            Double val1 = obj.getDouble("val");
+                                            if (Objects.nonNull(val1)) {
+                                                val += val1.doubleValue();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
 //                        valList.add(val);
                         Object o = rowData.get(name);
