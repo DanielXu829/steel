@@ -42,10 +42,13 @@ public class JobTController {
         if (StringUtils.isBlank(code)) {
             return ApiUtil.fail("编码不能为空");
         }
+        //判断执行变料月报数据
         if ("gl_peiliaodan".equals(code)) {
             exportJobContext.execute(JobEnum.gl_gaolubuliao.getCode());
         } else if ("gl_peiliaodan6".equals(code)) {
             exportJobContext.execute(JobEnum.gl_gaolubuliao6.getCode());
+        } else if ("gl_peiliaodan7".equals(code)) {
+            exportJobContext.execute(JobEnum.gl_gaolubuliao7.getCode());
         }
         String path = exportJobContext.execute(code);
         return ApiUtil.success(path);
@@ -60,7 +63,7 @@ public class JobTController {
     @GetMapping(value = "/gongyiExport")
     public void gongyiExport(HttpServletRequest request, String time, String code, String save, HttpServletResponse response) {
         try {
-            gongyiLuruExecute.export(request, time, code,save, response);
+            gongyiLuruExecute.export(request, time, code, save, response);
         } catch (Exception e) {
             e.printStackTrace();
         }
