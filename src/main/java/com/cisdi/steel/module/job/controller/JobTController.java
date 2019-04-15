@@ -8,6 +8,7 @@ import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.ExportJobContext;
 import com.cisdi.steel.module.job.a1.execute.ChutiezonglanExecute;
+import com.cisdi.steel.module.job.a1.execute.GongyiLuruExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +49,21 @@ public class JobTController {
         }
         String path = exportJobContext.execute(code);
         return ApiUtil.success(path);
+    }
+
+    @Autowired
+    private GongyiLuruExecute gongyiLuruExecute;
+
+    /**
+     * 工艺参数导出
+     */
+    @GetMapping(value = "/gongyiExport")
+    public void gongyiExport(HttpServletRequest request, String time, String code, String save, HttpServletResponse response) {
+        try {
+            gongyiLuruExecute.export(request, time, code,save, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Autowired

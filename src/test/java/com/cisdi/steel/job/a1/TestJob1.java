@@ -198,6 +198,16 @@ public class TestJob1 extends SteelApplicationTests {
         lugangWenduDayJob.execute(null);
     }
 
+    /**
+     * 炉缸温度月报表
+     */
+    @Autowired
+    private LugangWenduMonthJob lugangWenduMonthJob;
+
+    @Test
+    public void test200() {
+        lugangWenduMonthJob.execute(null);
+    }
 
     /**
      * 重点部位参数监控报表

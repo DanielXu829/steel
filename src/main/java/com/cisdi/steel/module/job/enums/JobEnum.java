@@ -26,6 +26,7 @@ public enum JobEnum {
     gl_zhongdianbuweicanshutubiao("gl_zhongdianbuweicanshutubiao", "重点部位参数监控报表-图表"),
     gl_xiaohao_day("gl_xiaohao_day", "高炉消耗月报表"),
     gl_lugangwendu_day("gl_lugangwendu_day", "炉缸温度日报表"),
+    gl_lugangwendu_month("gl_lugangwendu_month", "炉缸温度月报表"),
     gl_chutiezuoye_day("gl_chutiezuoye_day", "出铁作业日报表"),
     gl_chutiezuoye_month("gl_chutiezuoye_month", " 出铁作业月报表"),
     gl_bentilushenjingya_day("gl_bentilushenjingya_day", " 高炉本体炉身静压 日报"),
@@ -55,7 +56,9 @@ public enum JobEnum {
     gl_zhouliuyasuoji("gl_zhouliuyasuoji", "轴流压缩机操作报表AV50"),
     gl_zhouliuyasuoji_two("gl_zhouliuyasuoji_two", "轴流压缩机操作报表AV63"),
     gl_qimixiang_day("gl_qimixiang_day", "上料日报"),
-
+    gl_6gyicanshu_export("gl_6gyicanshu_export", "上料日报"),
+    gl_7gyicanshu_export("gl_7gyicanshu_export", "上料日报"),
+    gl_8gyicanshu_export("gl_8gyicanshu_export", "上料日报"),
 
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "CK67-配煤-自动配煤报表（班）"),
