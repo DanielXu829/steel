@@ -83,8 +83,8 @@ public class ChargeStrategy extends AbstractApiStrategy {
     private List<Map<String, Object>> requestApiData(String urlPre, DateQuery dateQuery) {
         String url = urlPre + "/batches/material/period";
         Map<String, String> queryParam = dateQuery.getQueryParam();
-        queryParam.put("pagenum", "1");
-        queryParam.put("pagesize", "1");
+//        queryParam.put("pagenum", "1");
+//        queryParam.put("pagesize", "1");
         String resultstr = httpUtil.get(url, queryParam);
         JSONObject jsonObject = JSON.parseObject(resultstr);
         Object total = jsonObject.get("total");

@@ -37,8 +37,8 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         HashMap<String, String> map = new HashMap<>();
         map.put("tagName", tagName);
         String time = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:00");
-        map.put("startDate", time);
-        map.put("endDate", time);
+//        map.put("startDate", time);
+//        map.put("endDate", time);
         String s = httpUtil.get(getUrl3(), map);
         Double val = null;
         if (StringUtils.isNotBlank(s)) {

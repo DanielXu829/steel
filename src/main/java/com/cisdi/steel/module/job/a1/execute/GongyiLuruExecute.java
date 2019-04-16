@@ -109,6 +109,7 @@ public class GongyiLuruExecute extends AbstractJobExecuteExecute {
             reportIndex.setPath(tempFile);
             reportIndex.setIndexType("report_day");
             reportIndex.setCreateTime(new Date());
+            reportIndex.setUpdateTime(new Date());
             reportIndex.setRecordDate(new Date());
             reportIndexMapper.insert(reportIndex);
         }
