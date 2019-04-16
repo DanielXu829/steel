@@ -40,7 +40,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         map.put("startDate", time);
         map.put("endDate", time);
         String s = httpUtil.get(getUrl3(), map);
-        Double val = 0.0;
+        Double val = null;
         if (StringUtils.isNotBlank(s)) {
             JSONObject jsonObject = JSONObject.parseObject(s);
             if (Objects.nonNull(jsonObject)) {
@@ -62,9 +62,11 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         String[] tagNamesIf = {"CK67_L1R_CB_CBAmtTol_1m_max", "CK67_L1R_CB_CBAcTol_1m_avg"};
         Double max = compareTagVal(tagNamesIf[0], date);
         Double avg = compareTagVal(tagNamesIf[1], date);
-        if (max.intValue() < 1 && avg.intValue() == 0) {
-            log.error("根据条件判断停止执行自动配煤报表");
-            return null;
+        if (Objects.nonNull(max) && Objects.nonNull(avg)) {
+            if (max.intValue() < 1 && avg.intValue() == 0) {
+                log.error("根据条件判断停止执行自动配煤报表");
+                //return null;
+            }
         }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
