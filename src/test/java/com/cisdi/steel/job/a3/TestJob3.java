@@ -128,5 +128,16 @@ public class TestJob3 extends SteelApplicationTests {
         gycanshuTotalJob.execute(null);
     }
 
+    /**
+     * 烧结公辅环保设施运行情况及在线监测数据发布
+     */
+    @Autowired
+    private HuanbaoJiankongJob huanbaoJiankongJob;
+
+    @Test
+    public void test12() {
+        huanbaoJiankongJob.execute(null);
+    }
+
 
 }
