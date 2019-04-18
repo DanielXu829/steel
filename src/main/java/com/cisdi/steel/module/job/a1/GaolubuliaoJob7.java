@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 高炉布料
+ * 7高炉布料
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>

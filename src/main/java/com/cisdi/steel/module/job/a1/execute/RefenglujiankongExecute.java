@@ -6,8 +6,11 @@ import com.cisdi.steel.module.job.a1.writer.RefenglujiankongWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * 热风炉监控
+ */
 @Component
-public class RefenglujiankongExecute  extends AbstractJobExecuteExecute {
+public class RefenglujiankongExecute extends AbstractJobExecuteExecute {
 
     @Autowired
     private RefenglujiankongWriter refenglujiankongWriter;

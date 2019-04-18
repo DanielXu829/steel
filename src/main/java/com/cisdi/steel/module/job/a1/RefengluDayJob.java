@@ -4,6 +4,7 @@ import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.stereotype.Component;
 
 /**
+ * 热风炉日报
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class RefengluDayJob extends AbstractBaseCommonExportJob1  {
+public class RefengluDayJob extends AbstractBaseCommonExportJob1 {
 
     @Override
     public JobEnum getCurrentJob() {
