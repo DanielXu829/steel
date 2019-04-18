@@ -40,7 +40,7 @@ public class LudingbuliaoWriter extends AbstractExcelReadWriter {
     @Override
     protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch) {
         Map<String, String> queryParam = dateQuery.getQueryParam();
-        queryParam.put("pagesize", "1");
+        queryParam.put("pagesize", "1000");
         String s = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(s)) {
             return null;

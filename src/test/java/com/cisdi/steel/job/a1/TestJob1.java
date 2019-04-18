@@ -338,4 +338,28 @@ public class TestJob1 extends SteelApplicationTests {
     public void test25() {
         qimixiangDayJob.execute(null);
     }
+
+    /**
+     * 高炉炉缸冷却壁进出水日报
+     */
+    @Autowired
+    private GaoLuluganglengquebiDayJob gaoLuluganglengquebiDayJob;
+
+    @Test
+    public void test26() {
+        gaoLuluganglengquebiDayJob.execute(null);
+    }
+
+
+    /**
+     * 高炉炉缸冷却壁进出水月报
+     */
+    @Autowired
+    private GaoLuluganglengquebiMonthJob gaoLuluganglengquebiMonthJob;
+
+    @Test
+    public void test27() {
+        gaoLuluganglengquebiMonthJob.execute(null);
+    }
+
 }
