@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : cisdi
+ Source Server         : 10.11.11.36
  Source Server Type    : MySQL
  Source Server Version : 50724
  Source Host           : 10.11.11.36:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50724
  File Encoding         : 65001
 
- Date: 25/01/2019 16:16:06
+ Date: 18/04/2019 16:03:02
 */
 
 SET NAMES utf8mb4;
@@ -209,7 +209,7 @@ CREATE TABLE `report_category`  (
   `attr4` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `attr5` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 112 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表分类' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 145 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表分类' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for report_category_template
@@ -237,7 +237,7 @@ CREATE TABLE `report_category_template`  (
   `attr4` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `attr5` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 165 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '分类模板配置' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 206 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '分类模板配置' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for report_index
@@ -261,7 +261,7 @@ CREATE TABLE `report_index`  (
   `attr4` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `record_date` datetime(0) NULL DEFAULT NULL COMMENT '报表时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 75530 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表文件-索引' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 84108 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表文件-索引' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for sys_config
@@ -273,6 +273,6 @@ CREATE TABLE `sys_config`  (
   `action` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '值',
   `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '名称',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 92 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '配置' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 109 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '配置' ROW_FORMAT = Compact;
 
 SET FOREIGN_KEY_CHECKS = 1;

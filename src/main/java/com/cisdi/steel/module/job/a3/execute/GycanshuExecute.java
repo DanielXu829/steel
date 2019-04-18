@@ -94,13 +94,4 @@ public class GycanshuExecute extends AbstractJobExecuteExecute {
         }
         super.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
     }
-
-    private Date getDeal(Date date, int hour) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY, 3);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        return calendar.getTime();
-    }
 }
