@@ -89,8 +89,26 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             for (int i = 0; i < dayHourEach.size(); i++) {
                 Object v = "";
                 if (Objects.nonNull(data)) {
+                    Map<String, Object> innerMap = data.getInnerMap();
+                    Set<String> keySet = innerMap.keySet();
+                    Long[] list = new Long[keySet.size()];
+                    int k = 0;
+                    for (String key : keySet) {
+                        list[k] = Long.valueOf(key);
+                        k++;
+                    }
+                    Arrays.sort(list);
                     Date startTime = dayHourEach.get(i).getStartTime();
-                    v = data.get(startTime.getTime() + "");
+
+                    for (int j = 0; j < list.length; j++) {
+                        Long tempTime = list[j];
+                        String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                        Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                        if (date.getTime() == startTime.getTime()) {
+                            v = data.get(tempTime + "");
+                            break;
+                        }
+                    }
                 }
                 ExcelWriterUtil.addCellData(resultList, indexs++, columnIndex, v);
             }
@@ -106,6 +124,8 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
         String coke = "bf8";
         if ("6.0".equals(version)) {
             coke = "bf6";
+        } else if ("7.0".equals(version)) {
+            coke = "bf7";
         }
 
         Map<String, String> map = new HashMap<>();
