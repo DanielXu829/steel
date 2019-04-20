@@ -177,6 +177,14 @@ public class DateQueryUtil {
         return queryList;
     }
 
+    /**
+     * 指定构建 从指定时间 加减指定时间
+     *
+     * @param date
+     * @param hour
+     * @param index
+     * @return
+     */
     private static DateQuery buildHour(Date date, int hour, int index) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -316,6 +324,9 @@ public class DateQueryUtil {
     }
 
     /**
+     * 时间参数延迟处理
+     * flag=true:需要延迟处理  flag=false:正常时间处理
+     *
      * @param dateQuery
      * @param delay
      * @param delayUnit
@@ -363,6 +374,15 @@ public class DateQueryUtil {
         return dateQuery;
     }
 
+    /**
+     * 指定时间格式化
+     *
+     * @param dateQuery 需格式化的时间参数
+     * @param hour      格式化小时
+     * @param min       格式化分钟
+     * @param sec       格式化秒
+     * @return
+     */
     public static Map<String, String> getQueryParam(DateQuery dateQuery, int hour, int min, int sec) {
         Map<String, String> map = new HashMap<>();
         Calendar calendar = Calendar.getInstance();

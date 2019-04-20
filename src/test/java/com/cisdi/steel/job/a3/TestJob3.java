@@ -140,4 +140,26 @@ public class TestJob3 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 烧结无纸办公通用执行类-工作流水账
+     */
+    @Autowired
+    private GongzuoliushuizhangJob gongzuoliushuizhangJob;
+
+    @Test
+    public void test13() {
+        gongzuoliushuizhangJob.execute(null);
+    }
+
+    /**
+     * 烧结无纸办公通用执行类-烧结生产作业区雨季生产记录表
+     */
+    @Autowired
+    private YujishengchanjiluJob yujishengchanjiluJob;
+
+    @Test
+    public void test14() {
+        yujishengchanjiluJob.execute(null);
+    }
+
 }

@@ -38,6 +38,17 @@ public class TestJob1 extends SteelApplicationTests {
         peiLiaoDan6Job.execute(null);
     }
 
+    /**
+     * 7高炉配料单
+     */
+    @Autowired
+    private PeiLiaoDan7Job peiLiaoDan7Job;
+
+    @Test
+    public void test11113() {
+        peiLiaoDan7Job.execute(null);
+    }
+
 
     /**
      * 高炉炉顶装料作业 日报

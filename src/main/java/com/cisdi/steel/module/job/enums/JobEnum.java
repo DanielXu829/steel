@@ -44,6 +44,7 @@ public enum JobEnum {
     gl_refenglu_day("gl_refenglu_day", "热风炉 日报"),
     gl_peiliaodan("gl_peiliaodan", "配料单"),
     gl_peiliaodan6("gl_peiliaodan6", "配料单"),
+    gl_peiliaodan7("gl_peiliaodan7", "配料单"),
     gl_gaolupenmei("gl_gaolupenmei", "高炉喷煤运行报表"),
     gl_gaolupenmei6("gl_gaolupenmei6", "6高炉喷煤运行报表"),
     gl_jingya_day("gl_jingya_day", "高炉静压日报"),
@@ -106,6 +107,8 @@ public enum JobEnum {
     sj_tuoliutuoxiao_year("sj_tuoliutuoxiao_year", "脱硫脱硝生产运行年报表"),
     sj_gycanshutotal("sj_gycanshutotal", "烧结分厂主要工艺参数及实物质量情况"),
     sj_huanbaojiankong_day("sj_huanbaojiankong_day", "烧结公辅环保设施运行情况及在线监测数据发布"),
+    sj_gongzuoliushuizhang("sj_gongzuoliushuizhang", "工作流水账"),
+    sj_yujizuoyequ("sj_yujizuoyequ", "烧结生产作业区雨季生产记录表"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
