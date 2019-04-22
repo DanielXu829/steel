@@ -383,4 +383,15 @@ public class TestJob1 extends SteelApplicationTests {
         gaoLuluganglengquebiMonthJob.execute(null);
     }
 
+    /**
+     * 高炉进出水月报
+     */
+    @Autowired
+    private GaoLuJinchushuiMonthJob gaoLuJinchushuiMonthJob;
+
+    @Test
+    public void test28() {
+        gaoLuJinchushuiMonthJob.execute(null);
+    }
+
 }

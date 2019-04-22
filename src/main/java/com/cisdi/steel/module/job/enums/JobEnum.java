@@ -64,6 +64,7 @@ public enum JobEnum {
     gl_8gyicanshu_export("gl_8gyicanshu_export", "8高炉工艺参数导出"),
     gl_lglqbjcs_day("gl_lglqbjcs_day", "高炉炉缸冷却壁进出水日报"),
     gl_lglqbjcs_month("gl_lglqbjcs_month", "高炉炉缸冷却壁进出水月报"),
+    gl_lqbjcs_month("gl_lqbjcs_month", "高炉冷却壁进出水量月报"),
 
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "CK67-配煤-自动配煤报表（班）"),
