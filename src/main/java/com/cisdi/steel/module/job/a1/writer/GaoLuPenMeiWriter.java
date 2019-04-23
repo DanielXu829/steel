@@ -155,6 +155,12 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         workdate = dealDate(new Date(workdate));
                         if (dayHourEach.get(i).getStartTime().getTime() == workdate) {
                             v = jsonObject.get(columns.get(k));
+                            if ("tankweight".equals(columns.get(k))) {
+                                String o = jsonObject.getString(columns.get(k));
+                                if (StringUtils.isNotBlank(o)) {
+                                    v = new BigDecimal(o);
+                                }
+                            }
                             break;
                         }
                     }
