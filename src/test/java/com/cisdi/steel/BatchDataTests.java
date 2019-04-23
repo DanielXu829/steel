@@ -102,7 +102,7 @@ public class BatchDataTests extends SteelApplicationTests {
 
     @Test
     public void test3224() {
-        createTask(JobEnum.gl_gaolupenmei7.getCode(), jobGroup, "0 10 0/1 * * ?", "");
+        createTask(JobEnum.gl_lqbjcs_month.getCode(), jobGroup, "0 15 0/1 * * ?", "");
     }
 
     /*

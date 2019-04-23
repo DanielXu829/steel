@@ -111,6 +111,8 @@ public enum JobEnum {
     sj_huanbaojiankong_day("sj_huanbaojiankong_day", "烧结公辅环保设施运行情况及在线监测数据发布"),
     sj_gongzuoliushuizhang("sj_gongzuoliushuizhang", "工作流水账"),
     sj_yujizuoyequ("sj_yujizuoyequ", "烧结生产作业区雨季生产记录表"),
+    sj_gongzuoliushuizhang6("sj_gongzuoliushuizhang6", "工作流水账"),
+    sj_yujizuoyequ6("sj_yujizuoyequ6", "烧结生产作业区雨季生产记录表"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),

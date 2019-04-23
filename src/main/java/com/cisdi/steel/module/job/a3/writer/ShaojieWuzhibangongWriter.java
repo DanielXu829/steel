@@ -62,11 +62,13 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                 String url = getUrl(version);
                 //获取对应的请求接口地址
                 //工作流水账
-                if (JobEnum.sj_gongzuoliushuizhang.getCode().equals(excelDTO.getJobEnum().getCode())) {
+                if (JobEnum.sj_gongzuoliushuizhang.getCode().equals(excelDTO.getJobEnum().getCode())
+                        || JobEnum.sj_gongzuoliushuizhang6.getCode().equals(excelDTO.getJobEnum().getCode())) {
                     url = getUrl(version);
 
                     //雨季生产作业
-                } else if (JobEnum.sj_yujizuoyequ.getCode().equals(excelDTO.getJobEnum().getCode())) {
+                } else if (JobEnum.sj_yujizuoyequ.getCode().equals(excelDTO.getJobEnum().getCode())
+                        || JobEnum.sj_yujizuoyequ6.getCode().equals(excelDTO.getJobEnum().getCode())) {
                     url = getUrl1(version);
                 }
 
