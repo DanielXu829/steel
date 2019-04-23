@@ -387,7 +387,7 @@ public class TestJob1 extends SteelApplicationTests {
      * 高炉进出水月报
      */
     @Autowired
-    private GaoLuJinchushuiMonthJob gaoLuJinchushuiMonthJob;
+    private GaoLuJinchushuiLiuliangMonthJob gaoLuJinchushuiMonthJob;
 
     @Test
     public void test28() {

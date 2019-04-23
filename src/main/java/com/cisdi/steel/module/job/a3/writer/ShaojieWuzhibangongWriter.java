@@ -9,6 +9,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -57,11 +58,21 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                 if (main1.startsWith("6")) {
                     version = "6.0";
                 }
+
+                String url = getUrl(version);
+                //获取对应的请求接口地址
+                //工作流水账
+                if (JobEnum.sj_gongzuoliushuizhang.getCode().equals(excelDTO.getJobEnum().getCode())) {
+                    url = getUrl(version);
+
+                    //雨季生产作业
+                } else if (JobEnum.sj_yujizuoyequ.getCode().equals(excelDTO.getJobEnum().getCode())) {
+                    url = getUrl1(version);
+                }
+
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                List<CellData> cellDataList = mapDataHandler(getUrl(version), columns);
+                List<CellData> cellDataList = mapDataHandler(url, columns);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
-
-
             }
         }
         return workbook;
@@ -100,6 +111,15 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/ploWorkNote/selectAll";
+        }
+    }
+
+    private String getUrl1(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/ploRainyProduce/selectAll";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/ploRainyProduce/selectAll";
         }
     }
 }

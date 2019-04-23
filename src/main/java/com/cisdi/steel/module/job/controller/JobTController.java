@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.common.util.FileUtil;
@@ -10,6 +11,7 @@ import com.cisdi.steel.module.job.ExportJobContext;
 import com.cisdi.steel.module.job.a1.execute.ChutiezonglanExecute;
 import com.cisdi.steel.module.job.a1.execute.GongyiLuruExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +21,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * 报表手动执行相关处理接口
  */
+@Slf4j
 @RestController
 @RequestMapping("/job")
 public class JobTController {
@@ -98,19 +102,18 @@ public class JobTController {
      * @return
      */
     @GetMapping(value = "/export")
-    public ApiResult selectAllCategory(String code, HttpServletRequest request, HttpServletResponse response) {
-        if (StringUtils.isBlank(code)) {
-            return ApiUtil.fail("编码不能为空");
-        }
-        String path = exportJobContext.execute(code);
-        if (StringUtils.isNotBlank(path)) {
-            try {
-                FileUtils.downFile(new File(path), request, response, FileUtil.getFileName(path));
-                return null;
-            } catch (Exception e) {
-                return ApiUtil.fail();
+    public void selectAllCategory(String code, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            PrintWriter writer = response.getWriter();
+            if (StringUtils.isBlank(code)) {
+                writer.write(JSONObject.toJSONString(ApiUtil.fail("编码不能为空")));
             }
+            String path = exportJobContext.execute(code);
+            if (StringUtils.isNotBlank(path)) {
+                FileUtils.downFile(new File(path), request, response, FileUtil.getFileName(path));
+            }
+        } catch (Exception e) {
+            log.error("执行导出失败apiCode=" + code + ">>>>>>>>>>>>>>>>>>" + e.getMessage());
         }
-        return ApiUtil.fail();
     }
 }
