@@ -37,13 +37,21 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         HashMap<String, String> map = new HashMap<>();
         map.put("tagName", tagName);
         String time = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:00");
-        map.put("startDate", time);
-        map.put("endDate", time);
+//        map.put("startDate", time);
+//        map.put("endDate", time);
         String s = httpUtil.get(getUrl3(), map);
-        JSONObject jsonObject = JSONObject.parseObject(s);
-        JSONArray rows = jsonObject.getJSONArray("rows");
-        JSONObject tagValue = rows.getJSONObject(0);
-        Double val = tagValue.getDouble("val");
+        Double val = null;
+        if (StringUtils.isNotBlank(s)) {
+            JSONObject jsonObject = JSONObject.parseObject(s);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray rows = jsonObject.getJSONArray("rows");
+                if (Objects.nonNull(rows) && rows.size() > 0) {
+                    JSONObject tagValue = rows.getJSONObject(0);
+                    val = tagValue.getDouble("val");
+                }
+            }
+
+        }
         return val;
     }
 
@@ -54,9 +62,11 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         String[] tagNamesIf = {"CK67_L1R_CB_CBAmtTol_1m_max", "CK67_L1R_CB_CBAcTol_1m_avg"};
         Double max = compareTagVal(tagNamesIf[0], date);
         Double avg = compareTagVal(tagNamesIf[1], date);
-        if (max < 1 && avg == 0) {
-            log.error("根据条件判断停止执行自动配煤报表");
-            return null;
+        if (Objects.nonNull(max) && Objects.nonNull(avg)) {
+            if (max.intValue() < 1 && avg.intValue() == 0) {
+                log.error("根据条件判断停止执行自动配煤报表");
+                //return null;
+            }
         }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {

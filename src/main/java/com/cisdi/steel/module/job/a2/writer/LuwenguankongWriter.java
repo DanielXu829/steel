@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,6 +29,7 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@Slf4j
 @Component
 public class LuwenguankongWriter extends AbstractExcelReadWriter {
     /**
@@ -35,8 +37,15 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
      */
     private int rowIndex = 1;
 
+    /**
+     * 记录重新排序的序列
+     */
+    private int tempIndex = 1;
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
+        rowIndex = 1;
+        tempIndex = 1;
 
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
@@ -76,9 +85,10 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
 
         Map<String, String> queryParam = getQueryParam(dateQuery, tagNames);
         String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
+        if (StringUtils.isEmpty(result)) {
             return null;
         }
+
         JSONObject jsonObject = JSONObject.parseObject(result);
         JSONObject data = jsonObject.getJSONObject("data");
         if (Objects.nonNull(data)) {
@@ -99,7 +109,51 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
             }
         }
 
-        return cellDataList;
+        List<CellData> yeList = new ArrayList<>();
+        List<CellData> baiList = new ArrayList<>();
+        List<CellData> zhongList = new ArrayList<>();
+
+        List<CellData> dataR = new ArrayList<>();
+
+        for (int i = 0; i < cellDataList.size(); i++) {
+            CellData cellData = cellDataList.get(i);
+            if ("夜".equals(cellData.getCellValue())) {
+                yeList.add(cellData);
+            }
+            if ("白".equals(cellData.getCellValue())) {
+                baiList.add(cellData);
+            }
+            if ("中".equals(cellData.getCellValue())) {
+                zhongList.add(cellData);
+            }
+        }
+        dealList(yeList, cellDataList, dataR);
+        dealList(baiList, cellDataList, dataR);
+        dealList(zhongList, cellDataList, dataR);
+
+
+        return dataR;
+    }
+
+    /**
+     * 处理数据先按时间再按班次排序
+     *
+     * @param list1 待排序的班次集合
+     * @param list2 所有的数据集合
+     * @param list3 排序后的数据集合
+     */
+    private void dealList(List<CellData> list1, List<CellData> list2, List<CellData> list3) {
+        for (int j = 0; j < list1.size(); j++) {
+            CellData data1 = list1.get(j);
+            for (int i = 0; i < list2.size(); i++) {
+                CellData data2 = list2.get(i);
+                if (data1.getRowIndex().intValue() == data2.getRowIndex().intValue()) {
+                    CellData temp = new CellData(this.tempIndex, data2.getColumnIndex(), data2.getCellValue());
+                    list3.add(temp);
+                }
+            }
+            this.tempIndex += 1;
+        }
     }
 
     /**
@@ -154,7 +208,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         String result = httpUtil.get(getUrl2(), queryParam2);
         if (StringUtils.isNotBlank(result)) {
             JSONArray array = JSONObject.parseArray(result);
-            if (array.size() != 0 || Objects.nonNull(array)) {
+            if (Objects.nonNull(array) && array.size() != 0) {
                 JSONObject jsonObject = array.getJSONObject(0);
                 if (Objects.nonNull(jsonObject)) {
                     bz = jsonObject.getString("workTeam");

@@ -6,10 +6,13 @@ import com.cisdi.steel.common.util.JsonUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import com.cisdi.steel.module.onlyoffice.entities.FileModel;
+import com.cisdi.steel.module.onlyoffice.helpers.DocumentManager;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.report.service.ReportIndexService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +32,7 @@ import java.util.Scanner;
  * 用于保存修改后的文件
  */
 @RestController
+@Slf4j
 public class SaveFileController {
     /**
      * 文档编辑服务使用JavaScript API通知callbackUrl，向文档存储服务通知文档编辑的状态。文档编辑服务使用具有正文中的信息的POST请求。
@@ -50,7 +54,6 @@ public class SaveFileController {
      * @throws Exception
      */
     @RequestMapping("/onlyoffice/save")
-
     public void saveFile(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         System.out.println("===saveeditedfile------------");
@@ -89,20 +92,22 @@ public class SaveFileController {
                 String fileName = downloadUri.substring(downloadUri.lastIndexOf('/') + 1);
                 System.out.println("====下载的文件名:" + fileName);
 
-                URL url = new URL(downloadUri);
-                java.net.HttpURLConnection connection = (java.net.HttpURLConnection) url.openConnection();
-                InputStream stream = connection.getInputStream();
+                synchronized (this) {
+                    URL url = new URL(downloadUri);
+                    java.net.HttpURLConnection connection = (java.net.HttpURLConnection) url.openConnection();
+                    InputStream stream = connection.getInputStream();
 
-                File savedFile = new File(filePath);
-                try (FileOutputStream out = new FileOutputStream(savedFile)) {
-                    int read;
-                    final byte[] bytes = new byte[1024];
-                    while ((read = stream.read(bytes)) != -1) {
-                        out.write(bytes, 0, read);
+                    File savedFile = new File(filePath);
+                    try (FileOutputStream out = new FileOutputStream(savedFile)) {
+                        int read;
+                        final byte[] bytes = new byte[1024];
+                        while ((read = stream.read(bytes)) != -1) {
+                            out.write(bytes, 0, read);
+                        }
+                        out.flush();
                     }
-                    out.flush();
+                    connection.disconnect();
                 }
-                connection.disconnect();
             }
         } catch (Exception e) {
             e.printStackTrace();

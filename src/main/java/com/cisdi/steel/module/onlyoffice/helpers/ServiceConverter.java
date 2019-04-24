@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
-*/
+ */
 
 package com.cisdi.steel.module.onlyoffice.helpers;
 
@@ -37,13 +37,11 @@ import java.util.Map;
 import java.util.UUID;
 
 
-public class ServiceConverter
-{
+public class ServiceConverter {
     private static int ConvertTimeout = 120000;
     private static final String DocumentConverterUrl = ConfigManager.GetProperty("files.docservice.url.converter");
 
-    public static class ConvertBody
-    {
+    public static class ConvertBody {
         public String url;
         public String outputtype;
         public String filetype;
@@ -53,23 +51,17 @@ public class ServiceConverter
         public String token;
     }
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             int timeout = Integer.parseInt(ConfigManager.GetProperty("files.docservice.timeout"));
-            if (timeout > 0) 
-            {
+            if (timeout > 0) {
                 ConvertTimeout = timeout;
             }
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
         }
     }
 
-    public static String GetConvertedUri(String documentUri, String fromExtension, String toExtension, String documentRevisionId, Boolean isAsync) throws Exception
-    {
+    public static String GetConvertedUri(String documentUri, String fromExtension, String toExtension, String documentRevisionId, Boolean isAsync) throws Exception {
         fromExtension = fromExtension == null || fromExtension.isEmpty() ? FileUtility.GetFileExtension(documentUri) : fromExtension;
 
         String title = FileUtility.GetFileName(documentUri);
@@ -91,7 +83,7 @@ public class ServiceConverter
 //        Gson gson = new Gson();
 //        String bodyString = gson.toJson(body);
 
-        String bodyString=JsonUtil.toJson(body);
+        String bodyString = JsonUtil.toJson(body);
 
         byte[] bodyByte = bodyString.getBytes(StandardCharsets.UTF_8);
 
@@ -104,8 +96,7 @@ public class ServiceConverter
         connection.setRequestProperty("Accept", "application/json");
         connection.setConnectTimeout(ConvertTimeout);
 
-        if (DocumentManager.TokenEnabled())
-        {
+        if (DocumentManager.TokenEnabled()) {
             Map<String, Object> map = new HashMap<>();
             map.put("payload", body);
             String token = DocumentManager.CreateToken(map);
@@ -129,23 +120,22 @@ public class ServiceConverter
         return GetResponseUri(jsonString);
     }
 
-    public static String GenerateRevisionId(String expectedKey)
-    {
-        if (expectedKey.length() > 20)
-            expectedKey = Integer.toString(expectedKey.hashCode());
+    public static String GenerateRevisionId(String expectedKey) {
+//        if (expectedKey.length() > 20) {
+//            expectedKey = Integer.toString(expectedKey.hashCode());
+//        }
 
         String key = expectedKey.replace("[^0-9-.a-zA-Z_=]", "_");
+        String substring = key.substring(0, Math.min(key.length(), 20));
 
-        return key.substring(0, Math.min(key.length(), 20));
+        return substring;
     }
 
-    private static void ProcessConvertServiceResponceError(int errorCode) throws Exception
-    {
+    private static void ProcessConvertServiceResponceError(int errorCode) throws Exception {
         String errorMessage = "";
         String errorMessageTemplate = "Error occurred in the ConvertService: ";
 
-        switch (errorCode)
-        {
+        switch (errorCode) {
             case -8:
                 errorMessage = errorMessageTemplate + "Error document VKey";
                 break;
@@ -180,28 +170,24 @@ public class ServiceConverter
         throw new Exception(errorMessage);
     }
 
-    private static String GetResponseUri(String jsonString) throws Exception
-    {
+    private static String GetResponseUri(String jsonString) throws Exception {
 //        JSONObject jsonObj = ConvertStringToJSON(jsonString);
 
         JSONObject jsonObj = JsonUtil.jsonToObject(jsonString, JSONObject.class);
 
         Object error = jsonObj.get("error");
         if (error != null)
-            ProcessConvertServiceResponceError(Math.toIntExact((long)error));
+            ProcessConvertServiceResponceError(Math.toIntExact((long) error));
 
         Boolean isEndConvert = (Boolean) jsonObj.get("endConvert");
 
         Long resultPercent = 0l;
         String responseUri = null;
 
-        if (isEndConvert)
-        {
+        if (isEndConvert) {
             resultPercent = 100l;
             responseUri = (String) jsonObj.get("fileUrl");
-        }
-        else
-        {
+        } else {
             resultPercent = (Long) jsonObj.get("percent");
             resultPercent = resultPercent >= 100l ? 99l : resultPercent;
         }
@@ -209,15 +195,13 @@ public class ServiceConverter
         return resultPercent >= 100l ? responseUri : "";
     }
 
-    private static String ConvertStreamToString(InputStream stream) throws IOException
-    {
+    private static String ConvertStreamToString(InputStream stream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(stream);
         StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         String line = bufferedReader.readLine();
 
-        while (line != null)
-        {
+        while (line != null) {
             stringBuilder.append(line);
             line = bufferedReader.readLine();
         }

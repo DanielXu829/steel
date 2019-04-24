@@ -38,6 +38,17 @@ public class TestJob1 extends SteelApplicationTests {
         peiLiaoDan6Job.execute(null);
     }
 
+    /**
+     * 7高炉配料单
+     */
+    @Autowired
+    private PeiLiaoDan7Job peiLiaoDan7Job;
+
+    @Test
+    public void test11113() {
+        peiLiaoDan7Job.execute(null);
+    }
+
 
     /**
      * 高炉炉顶装料作业 日报
@@ -85,7 +96,7 @@ public class TestJob1 extends SteelApplicationTests {
 
 
     /**
-     * 高炉本体温度月报表
+     * 高炉本体温度月报表（耐材）
      */
     @Autowired
     private BentiwenduMonthJob bentiwenduMonthJob;
@@ -198,6 +209,16 @@ public class TestJob1 extends SteelApplicationTests {
         lugangWenduDayJob.execute(null);
     }
 
+    /**
+     * 炉缸温度月报表
+     */
+    @Autowired
+    private LugangWenduMonthJob lugangWenduMonthJob;
+
+    @Test
+    public void test200() {
+        lugangWenduMonthJob.execute(null);
+    }
 
     /**
      * 重点部位参数监控报表
@@ -253,6 +274,16 @@ public class TestJob1 extends SteelApplicationTests {
     @Test
     public void test118() {
         gaoLuPenMeiJob6.execute(null);
+    }
+    /**
+     * 7高炉喷煤
+     */
+    @Autowired
+    private GaoLuPenMei7Job gaoLuPenMei7Job;
+
+    @Test
+    public void test119() {
+        gaoLuPenMei7Job.execute(null);
     }
 
     /**
@@ -328,4 +359,39 @@ public class TestJob1 extends SteelApplicationTests {
     public void test25() {
         qimixiangDayJob.execute(null);
     }
+
+    /**
+     * 高炉炉缸冷却壁进出水日报
+     */
+    @Autowired
+    private GaoLuluganglengquebiDayJob gaoLuluganglengquebiDayJob;
+
+    @Test
+    public void test26() {
+        gaoLuluganglengquebiDayJob.execute(null);
+    }
+
+
+    /**
+     * 高炉炉缸冷却壁进出水月报
+     */
+    @Autowired
+    private GaoLuluganglengquebiMonthJob gaoLuluganglengquebiMonthJob;
+
+    @Test
+    public void test27() {
+        gaoLuluganglengquebiMonthJob.execute(null);
+    }
+
+    /**
+     * 高炉进出水月报
+     */
+    @Autowired
+    private GaoLuJinchushuiLiuliangMonthJob gaoLuJinchushuiMonthJob;
+
+    @Test
+    public void test28() {
+        gaoLuJinchushuiMonthJob.execute(null);
+    }
+
 }

@@ -7,6 +7,9 @@ import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * 热风炉监控
+ */
 @Component
 public class RefenglujiankongDayJob extends AbstractExportJob {
 

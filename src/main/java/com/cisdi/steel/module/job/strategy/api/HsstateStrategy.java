@@ -98,9 +98,9 @@ public class HsstateStrategy extends AbstractApiStrategy {
                 Long starttime = obj.getLong("starttime");
                 Long endtime = obj.getLong("endtime");
                 map.put("starttime", starttime);
-                map.put("endtime", endtime);
+                map.put("endtime", null == endtime ? "" : endtime);
                 // 送风
-                if (4 == state &&Objects.nonNull(starttime)&& Objects.nonNull(endtime)) {
+                if (4 == state && Objects.nonNull(starttime) && Objects.nonNull(endtime)) {
                     Object data1 = getData(urlPre, starttime.toString(), endtime.toString(), tagName);
                     map.put(tagName, data1);
                 }
@@ -152,7 +152,7 @@ public class HsstateStrategy extends AbstractApiStrategy {
         if (Objects.nonNull(jsonDatas) && jsonDatas.size() > 0) {
             List<Double> resultData = new ArrayList<>();
             Set<String> keySet = jsonDatas.keySet();
-            keySet.forEach(key->{
+            keySet.forEach(key -> {
                 double doubleValue = jsonDatas.getDoubleValue(key);
                 resultData.add(doubleValue);
             });

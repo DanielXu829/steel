@@ -48,10 +48,6 @@ public class ExportJobContext {
         AbstractExportJob abstractExportJob = apiJob.get(code);
         if (Objects.nonNull(abstractExportJob)) {
             abstractExportJob.execute(null);
-//            AbstractExportJob buliao = apiJob.get(JobEnum.gl_gaolubuliao.getCode());
-//            if (Objects.nonNull(buliao)) {
-//                buliao.execute(null);
-//            }
             ReportIndex reportIndex = reportIndexMapper.queryLastOne(code);
             if (Objects.nonNull(reportIndex)) {
                 return reportIndex.getPath();

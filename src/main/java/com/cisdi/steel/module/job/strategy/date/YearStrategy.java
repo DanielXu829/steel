@@ -21,7 +21,7 @@ import java.util.Date;
 public class YearStrategy implements DateStrategy {
     @Override
     public DateQuery handlerDate(Date date) {
-        DateQuery dateQuery = DateQueryUtil.buildMonth(date);
+        DateQuery dateQuery = DateQueryUtil.buildYear(date);
         Date startTime = dateQuery.getStartTime();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(startTime);

@@ -102,7 +102,7 @@ public class BatchDataTests extends SteelApplicationTests {
 
     @Test
     public void test3224() {
-        createTask(JobEnum.gl_gaolupenmei6.getCode(), jobGroup, "0 3 0/1 * * ?", "");
+        createTask(JobEnum.gl_lqbjcs_month.getCode(), jobGroup, "0 15 0/1 * * ?", "");
     }
 
     /*
@@ -135,7 +135,7 @@ public class BatchDataTests extends SteelApplicationTests {
      */
     @Test
     public void test3333() {
-        JobKey jobKey = JobKey.jobKey("jh_lianjiaoribao", jobGroup);
+        JobKey jobKey = JobKey.jobKey(JobEnum.gl_gaolupenmei7.getCode(), jobGroup);
         try {
             scheduler.deleteJob(jobKey);
         } catch (SchedulerException e) {

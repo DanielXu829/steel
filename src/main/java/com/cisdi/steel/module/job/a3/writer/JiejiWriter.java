@@ -236,13 +236,47 @@ public class JiejiWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> handlerJsonArray2(List<String> columns, int rowBatch, JSONArray data, int startRow) {
         List<CellData> cellDataList = new ArrayList<>();
+
         List<JSONObject> list = new ArrayList<>();
+        List<JSONObject> list2 = new ArrayList<>();
         for (int i = 0; i < data.size(); i++) {
             JSONObject o = data.getJSONObject(i);
             if (Objects.nonNull(o)) {
                 JSONObject analysis = o.getJSONObject("analysis");
-                if ("LC".equals(analysis.get("type")) || "LP".equals(analysis.get("type"))) {
+                if ("LC".equals(analysis.get("type"))) {
                     list.add(o);
+                }
+
+                if ("LP".equals(analysis.get("type"))) {
+                    list2.add(o);
+                }
+            }
+        }
+
+        for (int j = 0; j < list.size(); j++) {
+            JSONObject o1 = list.get(j);
+            if (Objects.nonNull(o1)) {
+                JSONObject analysis = o1.getJSONObject("analysis");
+                String sampleid = analysis.getString("sampleid");
+                for (int m = 0; m < list2.size(); m++) {
+                    JSONObject o2 = list2.get(m);
+                    if (Objects.nonNull(o2)) {
+                        JSONObject analysis2 = o2.getJSONObject("analysis");
+                        String sampleid2 = analysis2.getString("sampleid");
+                        if (sampleid.equals(sampleid2)) {
+                            JSONObject values1 = o1.getJSONObject("values");
+                            JSONObject values2 = o2.getJSONObject("values");
+
+                            Map<String, Object> innerMap = values1.getInnerMap();
+                            Map<String, Object> innerMap2 = values2.getInnerMap();
+                            for (String key : innerMap.keySet()) {
+                                Object o = innerMap.get(key);
+                                Object o3 = innerMap2.get(key);
+                                values1.put(key, o == null ? o3 : o);
+                            }
+                            o1.put("values", values1);
+                        }
+                    }
                 }
             }
         }
@@ -255,6 +289,8 @@ public class JiejiWriter extends AbstractExcelReadWriter {
                 cellDataList.addAll(cellDataList1);
             }
         }
+
+
         return cellDataList;
     }
 

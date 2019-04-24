@@ -51,7 +51,7 @@ public class GycanshuExecute extends AbstractJobExecuteExecute {
          */
         try {
             int dateTime = Integer.valueOf(DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "HH"));
-            if ((dateTime >= 0 && dateTime < 3) || dateTime == 23) {
+            if ((dateTime > 0 && dateTime < 3) || dateTime == 23) {
                 workbook.removeSheetAt(workbook.getSheetIndex("23"));
                 workbook.removeSheetAt(workbook.getSheetIndex("19"));
                 workbook.removeSheetAt(workbook.getSheetIndex("11"));
@@ -93,14 +93,5 @@ public class GycanshuExecute extends AbstractJobExecuteExecute {
         } catch (Exception e) {
         }
         super.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
-    }
-
-    private Date getDeal(Date date, int hour) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY, 3);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        return calendar.getTime();
     }
 }

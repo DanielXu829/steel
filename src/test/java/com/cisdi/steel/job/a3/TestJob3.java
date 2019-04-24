@@ -106,4 +106,60 @@ public class TestJob3 extends SteelApplicationTests {
     }
 
 
+    /**
+     * 脱硫脱硝年报
+     */
+    @Autowired
+    private TuoliuTuoxiaoYearJob tuoliuTuoxiaoYearJob;
+
+    @Test
+    public void test10() {
+        tuoliuTuoxiaoYearJob.execute(null);
+    }
+
+    /**
+     * 烧结分厂主要工艺参数及实物质量情况
+     */
+    @Autowired
+    private GycanshuTotalJob gycanshuTotalJob;
+
+    @Test
+    public void test11() {
+        gycanshuTotalJob.execute(null);
+    }
+
+    /**
+     * 烧结公辅环保设施运行情况及在线监测数据发布
+     */
+    @Autowired
+    private HuanbaoJiankongJob huanbaoJiankongJob;
+
+    @Test
+    public void test12() {
+        huanbaoJiankongJob.execute(null);
+    }
+
+
+    /**
+     * 烧结无纸办公通用执行类-工作流水账
+     */
+    @Autowired
+    private GongzuoliushuizhangJob gongzuoliushuizhangJob;
+
+    @Test
+    public void test13() {
+        gongzuoliushuizhangJob.execute(null);
+    }
+
+    /**
+     * 烧结无纸办公通用执行类-烧结生产作业区雨季生产记录表
+     */
+    @Autowired
+    private YujishengchanjiluJob yujishengchanjiluJob;
+
+    @Test
+    public void test14() {
+        yujishengchanjiluJob.execute(null);
+    }
+
 }

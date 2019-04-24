@@ -94,7 +94,7 @@ public class DateQueryUtil {
     }
 
     public static void main(String[] args) {
-        List<DateQuery> dateQueries = buildDayHourEach(new Date());
+        List<DateQuery> dateQueries = buildYearDayEach(new Date());
         dateQueries.forEach(System.out::println);
     }
 
@@ -177,6 +177,14 @@ public class DateQueryUtil {
         return queryList;
     }
 
+    /**
+     * 指定构建 从指定时间 加减指定时间
+     *
+     * @param date
+     * @param hour
+     * @param index
+     * @return
+     */
     private static DateQuery buildHour(Date date, int hour, int index) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -196,6 +204,25 @@ public class DateQueryUtil {
      */
     public static List<DateQuery> buildMonthDayEach(Date date) {
         DateQuery dateQuery = buildMonth(date);
+        Date startTime = dateQuery.getStartTime();
+        long betweenDays = DateUtil.getBetweenDays(startTime, date);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date currentDate = startTime;
+        for (int i = 0; i <= betweenDays; i++) {
+            DateQuery query = buildToday(currentDate);
+            queryList.add(query);
+            currentDate = DateUtil.addDays(currentDate, 1);
+        }
+        return queryList;
+    }
+
+    /**
+     * 记录每年的每天
+     *
+     * @return 结果
+     */
+    public static List<DateQuery> buildYearDayEach(Date date) {
+        DateQuery dateQuery = buildYear(date);
         Date startTime = dateQuery.getStartTime();
         long betweenDays = DateUtil.getBetweenDays(startTime, date);
         List<DateQuery> queryList = new ArrayList<>();
@@ -232,6 +259,20 @@ public class DateQueryUtil {
         return new DateQuery(beginTime, endTime, date);
     }
 
+    /**
+     * 指定 年的时间范围
+     *
+     * @param date 指定年
+     * @return 结果
+     */
+    public static DateQuery buildYear(Date date) {
+        Date yearStartTime = getYearStartTime(date);
+        Date beginTime = DateUtil.getDateBeginTime(yearStartTime);
+        Date yearEndTime = getYearEndTime(date);
+        Date endTime = DateUtil.getDateEndTime(yearEndTime);
+        return new DateQuery(beginTime, endTime, date);
+    }
+
 
     /**
      * 获取指定月日期 1号
@@ -255,12 +296,37 @@ public class DateQueryUtil {
         return calendar.getTime();
     }
 
+    /**
+     * 获取指定年日期 1号
+     */
+    public static Date getYearStartTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        // 设置为第一天
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_YEAR, 1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取指定年 最后一天
+     */
+    public static Date getYearEndTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        //设置日期为本年最大日期
+        calendar.set(Calendar.DAY_OF_YEAR, calendar.getActualMaximum(Calendar.DAY_OF_YEAR));
+        return calendar.getTime();
+    }
+
 
     public static DateQuery handlerDelay(DateQuery dateQuery, Integer delay, String delayUnit) {
         return handlerDelay(dateQuery, delay, delayUnit, true);
     }
 
     /**
+     * 时间参数延迟处理
+     * flag=true:需要延迟处理  flag=false:正常时间处理
+     *
      * @param dateQuery
      * @param delay
      * @param delayUnit
@@ -308,6 +374,15 @@ public class DateQueryUtil {
         return dateQuery;
     }
 
+    /**
+     * 指定时间格式化
+     *
+     * @param dateQuery 需格式化的时间参数
+     * @param hour      格式化小时
+     * @param min       格式化分钟
+     * @param sec       格式化秒
+     * @return
+     */
     public static Map<String, String> getQueryParam(DateQuery dateQuery, int hour, int min, int sec) {
         Map<String, String> map = new HashMap<>();
         Calendar calendar = Calendar.getInstance();

@@ -209,6 +209,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         //自动配煤报表 单独特殊处理到分钟
         if (StringUtils.isNotBlank(code) && JobEnum.jh_zidongpeimei.getCode().equals(code)
                 || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan.getCode().equals(code)
+                || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan7.getCode().equals(code)
                 || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan6.getCode().equals(code)) {
             // yyyy-MM-dd_HH_mm
             datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");

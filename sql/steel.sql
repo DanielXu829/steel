@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : cisdi
+ Source Server         : 10.11.11.36
  Source Server Type    : MySQL
  Source Server Version : 50724
  Source Host           : 10.11.11.36:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50724
  File Encoding         : 65001
 
- Date: 17/01/2019 16:04:13
+ Date: 18/04/2019 16:04:20
 */
 
 SET NAMES utf8mb4;
@@ -215,7 +215,7 @@ CREATE TABLE `QRTZ_TRIGGERS`  (
 -- ----------------------------
 -- Records of QRTZ_TRIGGERS
 -- ----------------------------
-INSERT INTO `QRTZ_TRIGGERS` VALUES ('schedulerFactoryBean', 'triggertest', '高炉', 'test', '高炉', NULL, 1547707140000, 1547707080000, 5, 'WAITING', 'CRON', 1542609734000, 0, NULL, 0, '');
+INSERT INTO `QRTZ_TRIGGERS` VALUES ('schedulerFactoryBean', 'triggertest', '高炉', 'test', '高炉', NULL, 1555571100000, 1555571090264, 5, 'WAITING', 'CRON', 1542609734000, 0, NULL, 0, '');
 
 -- ----------------------------
 -- Table structure for report_category
@@ -323,7 +323,7 @@ CREATE TABLE `report_category_template`  (
   `attr4` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `attr5` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 133 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '分类模板配置' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 174 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '分类模板配置' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of report_category_template
@@ -400,7 +400,7 @@ INSERT INTO `report_category_template` VALUES (78, 'jh_chubenzhengliu', '焦化'
 INSERT INTO `report_category_template` VALUES (79, 'jh_zhonglengxiben', '焦化', 'CK67-化产-终冷洗苯报表（日）', 'D:\\template\\焦化\\CK67-化产-终冷洗苯报表（日）.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (80, 'jh_tuoliujiexi', '焦化', 'CK67-化产-脱硫解吸（日）报表设计', 'D:\\template\\焦化\\CK67-化产-脱硫解吸（日）报表设计.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (81, 'jh_zhisuancaozuo', '焦化', 'CK67-化产-制酸操作报表（日）', 'D:\\template\\焦化\\CK67-化产-制酸操作报表（日）.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (82, 'jh_lianjiaoribao', '焦化', 'CK67-炼焦-日报表报表（日&月）', 'D:\\template\\焦化\\CK67-炼焦-日报表报表（日&月）.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, 5, 'MINUTE', NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (82, 'jh_lianjiaoyuebao', '焦化', 'CK67-炼焦-月报表报表（日&月）', 'D:\\template\\焦化\\CK67-炼焦-月报表报表（日&月）.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, 5, 'MINUTE', NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (83, 'jh_jiaolujiare6', '焦化', 'CK67-炼焦-6#焦炉加热制度报表（日）', 'D:\\template\\焦化\\CK67-炼焦-6#焦炉加热制度报表（日）.xlsx', 'report_day', 'cn_zh', NULL, 1, 'HOUR', 5, 'MINUTE', NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (84, 'jh_jiaolujiare7', '焦化', 'CK67-炼焦-7#焦炉加热制度报表（日）', 'D:\\template\\焦化\\CK67-炼焦-7#焦炉加热制度报表（日）.xlsx', 'report_day', 'cn_zh', NULL, 1, 'HOUR', 5, 'MINUTE', NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (85, 'jh_luwenjilu6', '焦化', 'CK67-炼焦-6#炉温记录报表（日）', 'D:\\template\\焦化\\CK67-炼焦-6#炉温记录报表（日）.xlsx', 'report_day', 'cn_zh', NULL, 1, 'HOUR', 5, 'MINUTE', NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
@@ -422,16 +422,16 @@ INSERT INTO `report_category_template` VALUES (101, 'gl_refenglu_month', '8高�
 INSERT INTO `report_category_template` VALUES (102, 'nj_dongli_month', '能介', '动力分厂主要设备开停机信息表', 'D:\\template\\能介\\动力分厂主要设备开停机信息表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (103, 'jh_cdqcaozuob', '焦化', 'CK67-干熄焦-CDQ操作运行报表B（日）', 'D:\\template\\焦化\\CK67-干熄焦-CDQ操作运行报表B（日）.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (106, 'jh_gufenglengning1', '焦化', 'CK67-化产-鼓风冷凝报表（一）（日）', 'D:\\template\\焦化\\CK67-化产-鼓风冷凝报表（一）（日）.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (107, 'gl_peiliaodan', '8高炉', '配料单报表', 'D:\\配料单报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (107, 'gl_peiliaodan', '8高炉', '配料单报表', 'D:\\template\\8高炉\\配料单报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (108, 'jh_jlguanjianzhibiao', '焦化', '炼焦-6#-7#焦炉关键指标统计', 'D:\\template\\焦化\\炼焦-6#-7#焦炉关键指标统计.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (109, 'nj_qiguidianjian', '能介', '气柜点检表', 'D:\\template\\能介\\气柜点检表.xlsx', 'report_day', 'cn_zh', NULL, 1, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (109, 'nj_qiguidianjian', '能介', '气柜点检表', 'D:\\template\\能介\\气柜点检表.xlsx', 'report_month', 'cn_zh', NULL, 1, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (110, 'jh_peimeiliang', '焦化', '配煤-配煤量月报表', 'D:\\template\\焦化\\配煤-配煤量月报表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (111, 'gl_xiaohao_day', '8高炉', '高炉消耗月报表', 'D:\\template\\8高炉\\高炉消耗月报表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (112, 'gl_lugangwendu_day', '8高炉', '炉缸温度日报', 'D:\\template\\8高炉\\炉缸温度日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (113, 'nj_diaojianoneKong_day', '能介', '能源环保部一空压站设备日点检表', 'D:\\template\\能介\\能源环保部一空压站设备日点检表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (114, 'nj_diaojiantwoKong_day', '能介', '能源环保部二空压站设备日点检表', 'D:\\template\\能介\\能源环保部二空压站设备日点检表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (115, 'nj_diaojianthreeKong_day', '能介', '能源环保部三空压站设备日点检表', 'D:\\template\\能介\\能源环保部三空压站设备日点检表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (116, 'nj_diaojianfourKong_day', '能介', '能源环保部四空压站设备日点检表', 'D:\\template\\能介\\能源环保部四空压站设备日点检表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (113, 'nj_diaojianoneKong_day', '能介', '能源环保部空压站设备日点检表', 'D:\\template\\能介\\能源环保部空压站设备日点检表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (114, 'nj_diaojiantwoKong_day', '能介', '能源环保部二空压站设备日点检表', 'D:\\template\\能介\\能源环保部二空压站设备日点检表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (115, 'nj_diaojianthreeKong_day', '能介', '能源环保部三空压站设备日点检表', 'D:\\template\\能介\\能源环保部三空压站设备日点检表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (116, 'nj_diaojianfourKong_day', '能介', '能源环保部四空压站设备日点检表', 'D:\\template\\能介\\能源环保部四空压站设备日点检表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (117, 'nj_qiguidianjianruihua_month', '能介', '气柜区润滑台帐表格', 'D:\\template\\能介\\气柜区润滑台帐表格.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (118, 'nj_kongqiya_month', '能介', '空压站设备给油脂标准及加油记录', 'D:\\template\\能介\\空压站设备给油脂标准及加油记录.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (119, 'gl_chutiezuoye_month', '6高炉', '出铁作业 月报', 'D:\\template\\6高炉\\出铁作业月报表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, 5, 'MINUTE', NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
@@ -439,15 +439,56 @@ INSERT INTO `report_category_template` VALUES (120, 'gl_zhongdianbuweicanshu', '
 INSERT INTO `report_category_template` VALUES (121, 'jh_zhibiaoguankong', '焦化', '炼焦-关键指标管控', 'D:\\template\\焦化\\炼焦-关键指标管控.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (122, 'gl_zhongdianbuweicanshutubiao', '8高炉', '重点部位参数监控-图表', 'D:\\template\\8高炉\\重点部位参数监控-图表.xlsx', 'report_year', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (123, 'gl_gaolubuliao', '8高炉', '高炉布料报表', 'D:\\template\\8高炉\\重点部位参数监控-图表.xlsx', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (124, 'gl_gaolupenmei', '8高炉', '高炉喷煤运行报表', 'D:\\template\\8高炉\\高炉喷煤运行报表v1.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (124, 'gl_gaolupenmei', '8高炉', '高炉喷煤运行报表', 'D:\\template\\8高炉\\8高炉喷煤运行报表v1.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (125, 'jh_zhuyaogycs', '焦化', '炼焦-主要工艺参数', 'D:\\template\\焦化\\炼焦-主要工艺参数.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (126, 'gl_gaolubuliao', '8高炉', '高炉布料报表', 'D:\\template\\8高炉\\高炉布料报表.xlsx', 'report_year', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (127, 'sj_rongji', '烧结', '熔剂燃料质量管控', 'D:\\template\\烧结\\熔剂燃料质量管控.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (128, 'hb_6bftrt', '环保', '6BF-TRT日报表', 'D:\\template\\环保\\6BF-TRT日报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (129, 'hb_7bftrt', '环保', '7BF-TRT日报表', 'D:\\template\\环保\\7BF-TRT日报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (130, 'hb_8bftrt', '环保', '8BF-TRT日报表', 'D:\\template\\环保\\8BF-TRT日报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `report_category_template` VALUES (131, 'gl_gaolupenmei', '6高炉', '高炉喷煤运行报表', 'D:\\template\\6高炉\\高炉喷煤运行报表v1.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (131, 'gl_gaolupenmei6', '6高炉', '高炉喷煤运行报表', 'D:\\template\\6高炉\\6高炉喷煤运行报表v1.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `report_category_template` VALUES (132, 'hb_meiqichuchen6bf', '环保', '6BF-煤气布袋除尘报表', 'D:\\template\\环保\\6BF-煤气布袋除尘报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (133, 'hb_meiqichuchen7bf', '环保', '7BF-煤气布袋除尘报表', 'D:\\template\\环保\\7BF-煤气布袋除尘报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (134, 'hb_meiqichuchen8bf', '环保', '8BF-煤气布袋除尘报表', 'D:\\template\\环保\\8BF-煤气布袋除尘报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (135, 'gl_guankongzhibiao', '8高炉', '高炉管控指标', 'D:\\template\\8高炉\\BF8高炉重点管控指标.xlsx', 'report_day', 'cn_zh', '', NULL, '', NULL, '', '', '0', '', '', '', '', '', '');
+INSERT INTO `report_category_template` VALUES (136, 'gl_guankongzhibiao', '6高炉', '高炉管控指标', 'D:\\template\\6高炉\\BF6高炉重点管控指标.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (137, 'gl_bf6gongyicanshu', '6高炉', '6高炉工艺参数跟踪', 'D:\\template\\6高炉\\6高炉工艺参数跟踪.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (138, 'gl_xiaohao_day', '6高炉', '高炉消耗月报表', 'D:\\template\\6高炉\\高炉消耗月报表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (139, 'gl_gaolubuliao6', '6高炉', '高炉布料报表', 'D:\\template\\6高炉\\高炉布料报表.xlsx', 'report_year', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (140, 'gl_peiliaodan6', '6高炉', '配料单报表', 'D:\\template\\6高炉\\配料单报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (141, 'gl_tuosifuyang', '6高炉', '脱湿鼓风富氧', 'D:\\template\\6高炉\\脱湿富氧操作报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (142, 'gl_zhuangliaochuchen', '6高炉', '装料除尘操作', 'D:\\template\\6高炉\\装料除尘操作报表.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (143, 'gl_refenglujiankong', '6高炉', '热风炉设备监控日报', 'D:\\template\\6高炉\\热风炉设备监控日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (144, 'gl_zhouliuyasuoji', '6高炉', '轴流压缩机操作报表AV50', 'D:\\template\\6高炉\\轴流压缩机操作报表AV50.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (145, 'gl_zhouliuyasuoji_two', '6高炉', '轴流压缩机操作报表AV63', 'D:\\template\\6高炉\\轴流压缩机操作报表AV63.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (146, 'gl_refenglujiankong', '8高炉', '热风炉设备监控日报', 'D:\\template\\8高炉\\热风炉监控日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (147, 'gl_qimixiang_day', '8高炉', '上料日报', 'D:\\template\\8高炉\\上料日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (148, 'jh_luwenguankong', '焦化', '炼焦-炉温管控', 'D:\\template\\焦化\\焦炉炉温管控.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (149, 'jh_chanhaozonghe', '焦化', '化产-产耗综合报表', 'D:\\template\\焦化\\化产产耗综合报表.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (150, 'nj_meiqihunhemeisd_month', '能介', '煤气柜作业区转炉煤气回收情况', 'D:\\template\\能介\\煤气柜作业区转炉煤气回收情况.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (151, 'sj_shaojieji_month', '5烧结', '5#烧结机生产月报', 'D:\\template\\烧结\\5#烧结机生产月报v1.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (152, 'sj_shaojieji_month', '6烧结', '6#烧结机生产月报', 'D:\\template\\烧结\\6#烧结机生产月报v1.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (153, 'sj_tuoliutuoxiao_year', '5烧结', '脱硫脱硝生产运行年报表', 'D:\\template\\烧结\\5#烧结机脱硫脱硝生产运行报表-v1.xlsx', 'report_year', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (154, 'sj_tuoliutuoxiao_year', '6烧结', '脱硫脱硝生产运行年报表', 'D:\\template\\烧结\\6#烧结机脱硫脱硝生产运行报表-v1.xlsx', 'report_year', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (155, 'sj_gycanshutotal', '5烧结6烧结', '烧结分厂主要工艺参数及实物质量情况', 'D:\\template\\烧结\\烧结分厂主要工艺参数及实物质量情况-v1.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (156, 'gl_jswgaolu_day', '7高炉', '高炉 日报', 'D:\\template\\7高炉\\7高炉参数日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (157, 'gl_taisu1_month', '7高炉', '高炉 月报', 'D:\\template\\7高炉\\7高炉参数月报.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (158, 'gl_lugangwendu_day', '7高炉', '炉缸温度日报', 'D:\\template\\7高炉\\7高炉炉缸温度日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (159, 'gl_lugangwendu_month', '7高炉', '炉缸温度月报', 'D:\\template\\7高炉\\7高炉炉缸温度月报.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (160, 'gl_bentiwendu_day', '7高炉', '高炉耐材温度日报表', 'D:\\template\\7高炉\\7高炉耐材温度日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (161, 'gl_refenglu_month', '7高炉', '热风炉月报', 'D:\\template\\7高炉\\7热风炉参数月报.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (162, 'gl_6gyicanshu_export', '6高炉', '工艺参数导出', 'D:\\template\\6高炉\\工艺卡录入.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (163, 'gl_7gyicanshu_export', '7高炉', '工艺参数导出', 'D:\\template\\7高炉\\工艺卡录入.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (164, 'gl_8gyicanshu_export', '8高炉', '工艺参数导出', 'D:\\template\\8高炉\\工艺卡录入.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (165, 'gl_chutiezuoye_day', '7高炉', '出铁作业 日报', 'D:\\template\\7高炉\\7高炉出铁日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (166, 'gl_chutiezuoye_month', '7高炉', '出铁作业 月报', 'D:\\template\\7高炉\\7高炉出铁月报.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (167, 'gl_gaolubuliao', '7高炉', '高炉布料报表', 'D:\\template\\7高炉\\7高炉变料月报.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (168, 'gl_ludingbuliao_day', '7高炉', '高炉炉顶布料作业日报', 'D:\\template\\7高炉\\7高炉布料日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (169, 'gl_ludingzhuangliaozuoye_day1', '7高炉', '高炉炉顶装料作业日报', 'D:\\template\\7高炉\\7高炉装料日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (170, 'gl_bentiwendu_month', '7高炉', '高炉耐材温度月报表', 'D:\\template\\7高炉\\7高炉耐材温度月报.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (171, 'gl_lglqbjcs_day', '7高炉', '高炉炉缸冷却壁进出水日报', 'D:\\template\\7高炉\\7高炉炉缸冷却壁进出水日报.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (172, 'gl_lglqbjcs_month', '7高炉', '高炉炉缸冷却壁进出水月报', 'D:\\template\\7高炉\\7高炉炉缸冷却壁进出水月报.xlsx', 'report_month', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `report_category_template` VALUES (173, 'sj_huanbaojiankong_day', '5烧结6烧结', '烧结公辅环保设施运行情况及在线监测数据发布', 'D:\\template\\烧结\\烧结公辅环保设施运行情况及在线监测数据发布.xlsx', 'report_day', 'cn_zh', NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for report_index
@@ -471,19 +512,7 @@ CREATE TABLE `report_index`  (
   `attr4` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `record_date` datetime(0) NULL DEFAULT NULL COMMENT '报表时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8087 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表文件-索引' ROW_FORMAT = Compact;
-
--- ----------------------------
--- Records of report_index
--- ----------------------------
-INSERT INTO `report_index` VALUES (8075, 'gl_zhongdianbuweicanshu', '8高炉', '重点部位参数监控报表_2019-01-17.xlsx', 'D:\\excel\\cn_zh\\8高炉\\月表报\\重点部位参数监控报表_2019-01-17.xlsx', '2019-01-17 09:59:10', '2019-01-17 15:14:31', NULL, 'report_month', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 15:14:27');
-INSERT INTO `report_index` VALUES (8079, 'gl_ludingzhuangliaozuoye_day1', '6高炉', '高炉炉顶装料作业 日报1_2019-01-17_16.xlsx', 'D:\\excel\\cn_zh\\6高炉\\日报表\\高炉炉顶装料作业 日报1_2019-01-17_16.xlsx', '2019-01-17 10:25:09', '2019-01-17 15:38:49', NULL, 'report_day', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 15:38:47');
-INSERT INTO `report_index` VALUES (8080, 'gl_ludingzhuangliaozuoye_day1', '8高炉', '高炉炉顶装料作业 日报1_2019-01-17_16.xlsx', 'D:\\excel\\cn_zh\\8高炉\\日报表\\高炉炉顶装料作业 日报1_2019-01-17_16.xlsx', '2019-01-17 10:25:12', '2019-01-17 15:38:51', NULL, 'report_day', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 15:38:50');
-INSERT INTO `report_index` VALUES (8082, 'gl_gaolupenmei', '8高炉', '高炉喷煤运行报表_2019-01-17.xlsx', 'D:\\excel\\cn_zh\\8高炉\\月表报\\高炉喷煤运行报表_2019-01-17.xlsx', '2019-01-17 10:43:35', '2019-01-17 10:43:35', NULL, 'report_month', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 10:43:19');
-INSERT INTO `report_index` VALUES (8083, 'hb_6bftrt', '环保', '6BF-TRT日报表_2019-01-17_15.xlsx', 'D:\\excel\\cn_zh\\环保\\日报表\\6BF-TRT日报表_2019-01-17_15.xlsx', '2019-01-17 14:34:00', '2019-01-17 14:34:00', NULL, 'report_day', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 14:32:21');
-INSERT INTO `report_index` VALUES (8084, 'hb_meiqichuchen6bf', '环保', '6BF-煤气布袋除尘报表_2019-01-17_15.xlsx', 'D:\\excel\\cn_zh\\环保\\日报表\\6BF-煤气布袋除尘报表_2019-01-17_15.xlsx', '2019-01-17 14:38:40', '2019-01-17 14:38:40', NULL, 'report_day', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 14:36:54');
-INSERT INTO `report_index` VALUES (8085, 'gl_ludingbuliao_day', '6高炉', '高炉炉顶布料作业日报_2019-01-17_16.xlsx', 'D:\\excel\\cn_zh\\6高炉\\日报表\\高炉炉顶布料作业日报_2019-01-17_16.xlsx', '2019-01-17 15:51:04', '2019-01-17 15:51:04', NULL, 'report_day', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 15:51:00');
-INSERT INTO `report_index` VALUES (8086, 'gl_ludingbuliao_day', '8高炉', '高炉炉顶布料作业日报_2019-01-17_16.xlsx', 'D:\\excel\\cn_zh\\8高炉\\日报表\\高炉炉顶布料作业日报_2019-01-17_16.xlsx', '2019-01-17 15:51:06', '2019-01-17 15:51:06', NULL, 'report_day', 'cn_zh', '0', NULL, NULL, NULL, NULL, '2019-01-17 15:51:04');
+) ENGINE = InnoDB AUTO_INCREMENT = 8626 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表文件-索引' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for sys_config
@@ -495,7 +524,7 @@ CREATE TABLE `sys_config`  (
   `action` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '值',
   `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '名称',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 69 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '配置' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 175 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '配置' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of sys_config
@@ -568,6 +597,112 @@ INSERT INTO `sys_config` VALUES (65, 'nj_threekong', 'com.cisdi.steel.module.job
 INSERT INTO `sys_config` VALUES (66, 'nj_twokongcount', 'com.cisdi.steel.module.job.a5.TwokongCountJob', '二空压站启停次数表');
 INSERT INTO `sys_config` VALUES (67, 'nj_twokong', 'com.cisdi.steel.module.job.a5.TwokongJob', '二空压站运行记录表');
 INSERT INTO `sys_config` VALUES (68, 'nj_yasuokongqi', 'com.cisdi.steel.module.job.a5.YasuoKongQiJob', '压缩空气生产情况汇总表');
+INSERT INTO `sys_config` VALUES (69, 'gl_gaolupenmei6', 'com.cisdi.steel.module.job.a1.GaoLuPenMei6Job', '6高炉喷煤');
+INSERT INTO `sys_config` VALUES (70, 'gl_bentiwendu_day', 'com.cisdi.steel.module.job.a1.BentiwenduDayJob', '高炉本体温度日报表');
+INSERT INTO `sys_config` VALUES (71, 'gl_bentiwendu_month', 'com.cisdi.steel.module.job.a1.BentiwenduMonthJob', ' 高炉本体温度 月报');
+INSERT INTO `sys_config` VALUES (72, 'gl_bf6gongyicanshu', 'com.cisdi.steel.module.job.a1.BF6gongyicanshuJob', '6高炉工艺参数跟踪');
+INSERT INTO `sys_config` VALUES (73, 'gl_chutiezonglan', 'com.cisdi.steel.module.job.a1.ChutiezonglanJob', '出铁总览');
+INSERT INTO `sys_config` VALUES (74, 'gl_chutiezuoye_day', 'com.cisdi.steel.module.job.a1.ChutiezuoyeDayJob', '出铁作业日报表');
+INSERT INTO `sys_config` VALUES (75, 'gl_chutiezuoye_month', 'com.cisdi.steel.module.job.a1.ChutiezuoyeMonthJob', ' 出铁作业月报表');
+INSERT INTO `sys_config` VALUES (76, 'gl_gaolubuliao', 'com.cisdi.steel.module.job.a1.GaolubuliaoJob', '高炉布料');
+INSERT INTO `sys_config` VALUES (77, 'gl_gaolubuliao6', 'com.cisdi.steel.module.job.a1.GaolubuliaoJob6', '高炉布料');
+INSERT INTO `sys_config` VALUES (78, 'gl_jswgaolu_day', 'com.cisdi.steel.module.job.a1.GaoLuDayJob', '6高炉 日报');
+INSERT INTO `sys_config` VALUES (79, 'gl_taisu1_month', 'com.cisdi.steel.module.job.a1.GaoLuMonthJob', '6高炉 月报');
+INSERT INTO `sys_config` VALUES (80, 'gl_gaolupenmei6', 'com.cisdi.steel.module.job.a1.GaoLuPenMei6Job', '6高炉喷煤运行报表');
+INSERT INTO `sys_config` VALUES (81, 'gl_gaolupenmei', 'com.cisdi.steel.module.job.a1.GaoLuPenMeiJob', '高炉喷煤运行报表');
+INSERT INTO `sys_config` VALUES (82, 'gl_guankongzhibiao', 'com.cisdi.steel.module.job.a1.GuankongzhibiaoJob', '高炉重点管控指标');
+INSERT INTO `sys_config` VALUES (83, 'gl_lengquebiwendu_day', 'com.cisdi.steel.module.job.a1.LengquebiwenduDayJob', '高炉冷却壁温度日报表');
+INSERT INTO `sys_config` VALUES (84, 'gl_lengquebiwendu_month', 'com.cisdi.steel.module.job.a1.LengquebiwenduMonthJob', '高炉冷却壁温度 月报');
+INSERT INTO `sys_config` VALUES (85, 'gl_ludingbuliao_day', 'com.cisdi.steel.module.job.a1.LudingbuliaoJob', '炉顶装料作业日报表');
+INSERT INTO `sys_config` VALUES (86, 'gl_ludingzhuangliaozuoye_day1', 'com.cisdi.steel.module.job.a1.LudingzhuangliaoDayJob', '炉顶装料作业日报表');
+INSERT INTO `sys_config` VALUES (87, 'gl_lugangwendu_day', 'com.cisdi.steel.module.job.a1.LugangWenduDayJob', '炉缸温度日报表');
+INSERT INTO `sys_config` VALUES (88, 'gl_peiliaodan6', 'com.cisdi.steel.module.job.a1.PeiLiaoDan6Job', '配料单');
+INSERT INTO `sys_config` VALUES (89, 'gl_peiliaodan', 'com.cisdi.steel.module.job.a1.PeiLiaoDanJob', '配料单');
+INSERT INTO `sys_config` VALUES (90, 'gl_qimixiang_day', 'com.cisdi.steel.module.job.a1.QimixiangDayJob', '上料日报');
+INSERT INTO `sys_config` VALUES (91, 'gl_refenglu_day', 'com.cisdi.steel.module.job.a1.RefengluDayJob', '热风炉 日报');
+INSERT INTO `sys_config` VALUES (92, 'gl_refenglujiankong', 'com.cisdi.steel.module.job.a1.RefenglujiankongDayJob', '6高炉热风炉设备监控日报');
+INSERT INTO `sys_config` VALUES (93, 'gl_refenglu_month', 'com.cisdi.steel.module.job.a1.ReFengluMonthJob', '热风炉 月报');
+INSERT INTO `sys_config` VALUES (94, 'gl_tuosifuyang', 'com.cisdi.steel.module.job.a1.TuosifuyangDayJob', '6高炉脱湿富氧操作报表');
+INSERT INTO `sys_config` VALUES (95, 'gl_xiaohao_day', 'com.cisdi.steel.module.job.a1.XiaoHaoDayJob', '高炉消耗月报表');
+INSERT INTO `sys_config` VALUES (96, 'gl_zhongdianbuweicanshu', 'com.cisdi.steel.module.job.a1.ZhongdianbuweicanshuJob', '重点部位参数监控报表');
+INSERT INTO `sys_config` VALUES (97, 'gl_zhongdianbuweicanshutubiao', 'com.cisdi.steel.module.job.a1.ZhongdianbuweicanshuTubiaoJob', '重点部位参数监控报表-图表');
+INSERT INTO `sys_config` VALUES (98, 'gl_zhouliuyasuoji', 'com.cisdi.steel.module.job.a1.ZhouliuyasuojiDayJob', '轴流压缩机操作报表AV50');
+INSERT INTO `sys_config` VALUES (99, 'gl_zhouliuyasuoji_two', 'com.cisdi.steel.module.job.a1.ZhouliuyasuojiTwoDayJob', '轴流压缩机操作报表AV63');
+INSERT INTO `sys_config` VALUES (100, 'gl_zhuangliaochuchen', 'com.cisdi.steel.module.job.a1.ZhuangliaochuchenDayJob', '装料除尘操作报表');
+INSERT INTO `sys_config` VALUES (101, 'jh_cdqcaozuoa', 'com.cisdi.steel.module.job.a2.CDQcaozuoAJob', 'CK67-干熄焦-CDQ操作运行报表A（日）');
+INSERT INTO `sys_config` VALUES (102, 'jh_cdqcaozuob', 'com.cisdi.steel.module.job.a2.CDQcaozuoBJob', 'CK67-干熄焦-CDQ操作运行报表B（日）');
+INSERT INTO `sys_config` VALUES (103, 'jh_cdqchuchen', 'com.cisdi.steel.module.job.a2.CDQchuchenJob', 'CK67-CDQ除尘报表');
+INSERT INTO `sys_config` VALUES (104, 'jh_chanhaozonghe', 'com.cisdi.steel.module.job.a2.ChanhaozongheJob', '化产-产耗综合报表');
+INSERT INTO `sys_config` VALUES (105, 'jh_chubenzhengliu', 'com.cisdi.steel.module.job.a2.ChubenzhengliuJob', 'CK67-化产-粗苯蒸馏报表（日）');
+INSERT INTO `sys_config` VALUES (106, 'jh_chujiaochuchen', 'com.cisdi.steel.module.job.a2.ChujiaochuchenJob', 'CK67-出焦除尘报表');
+INSERT INTO `sys_config` VALUES (107, 'jh_fensuixidu', 'com.cisdi.steel.module.job.a2.FensuixiduJob', 'CK67-配煤-粉碎细度报表（月）');
+INSERT INTO `sys_config` VALUES (108, 'jh_jlguanjianzhibiao', 'com.cisdi.steel.module.job.a2.GuanjianzhibiaoJob', '炼焦-6#-7#焦炉关键指标统计');
+INSERT INTO `sys_config` VALUES (109, 'jh_gufenglengning1', 'com.cisdi.steel.module.job.a2.Gufenglengning1Job', 'CK67-化产-鼓风冷凝报表（一）（日）');
+INSERT INTO `sys_config` VALUES (110, 'jh_gufenglengning2', 'com.cisdi.steel.module.job.a2.Gufenglengning2Job', 'CK67-化产-鼓风冷凝报表（二）（日）');
+INSERT INTO `sys_config` VALUES (111, 'jh_jiaolujiare6', 'com.cisdi.steel.module.job.a2.Jiaolujiare6Job', 'CK67-炼焦-6#焦炉加热制度报表（日）');
+INSERT INTO `sys_config` VALUES (112, 'jh_jiaolujiare7', 'com.cisdi.steel.module.job.a2.Jiaolujiare7Job', 'CK67-炼焦-7#焦炉加热制度报表（日）');
+INSERT INTO `sys_config` VALUES (113, 'jh_lianjiaoyuebao', 'com.cisdi.steel.module.job.a2.LianjiaoyuebaoJob', 'CK67-炼焦-月报表报表（日&月）');
+INSERT INTO `sys_config` VALUES (114, 'jh_liuan', 'com.cisdi.steel.module.job.a2.LiuanJob', 'CK67-化产-硫铵报表（日）');
+INSERT INTO `sys_config` VALUES (115, 'jh_luwenguankong', 'com.cisdi.steel.module.job.a2.LuwenguankongJob', '炼焦-炉温管控');
+INSERT INTO `sys_config` VALUES (116, 'jh_luwenjilu6', 'com.cisdi.steel.module.job.a2.Luwenjilu6Job', 'CK67-炼焦-6#炉温记录报表（日）');
+INSERT INTO `sys_config` VALUES (117, 'jh_luwenjilu7', 'com.cisdi.steel.module.job.a2.Luwenjilu7Job', 'CK67-炼焦-7#炉温记录报表（日）');
+INSERT INTO `sys_config` VALUES (118, 'jh_peimeiliang', 'com.cisdi.steel.module.job.a2.PeimeiliangJob', '配煤-配煤量月报表');
+INSERT INTO `sys_config` VALUES (119, 'jh_shaijiaochuchen', 'com.cisdi.steel.module.job.a2.ShaijiaochuchenJob', 'CK67-干熄焦-筛焦除尘报表（日）');
+INSERT INTO `sys_config` VALUES (120, 'jh_tuoliujiexi', 'com.cisdi.steel.module.job.a2.TuoliujiexiJob', 'CK67-化产-脱硫解吸（日）报表设计');
+INSERT INTO `sys_config` VALUES (121, 'jh_zhengan', 'com.cisdi.steel.module.job.a2.ZhenganJob', 'CK67-化产-蒸氨报表（日）');
+INSERT INTO `sys_config` VALUES (122, 'jh_zhibiaoguankong', 'com.cisdi.steel.module.job.a2.ZhibiaoguankongJob', '炼焦-6#-7#焦炉关键指标管控');
+INSERT INTO `sys_config` VALUES (123, 'jh_zhilengxunhuanshui', 'com.cisdi.steel.module.job.a2.ZhilengxunhuanshuiJob', 'CK67-化产-制冷循环水报表（日）');
+INSERT INTO `sys_config` VALUES (124, 'jh_zhisuancaozuo', 'com.cisdi.steel.module.job.a2.ZhisuancaozuoJob', 'CK67-化产-制酸操作报表（日）');
+INSERT INTO `sys_config` VALUES (125, 'jh_zhonglengxiben', 'com.cisdi.steel.module.job.a2.ZhonglengxibenJob', 'CK67-化产-终冷洗苯报表（日）');
+INSERT INTO `sys_config` VALUES (126, 'jh_zhuangmeichuchen', 'com.cisdi.steel.module.job.a2.ZhuangmeichuchenJob', 'CK67-装煤除尘报表');
+INSERT INTO `sys_config` VALUES (127, 'jh_zhuyaogycs', 'com.cisdi.steel.module.job.a2.ZhuyaogycsJob', '炼焦-主要工艺参数');
+INSERT INTO `sys_config` VALUES (128, 'jh_zidongpeimei', 'com.cisdi.steel.module.job.a2.ZidongpeimeiJob', 'CK67-配煤-自动配煤报表（班）');
+INSERT INTO `sys_config` VALUES (129, 'sj_liushaogycanshu', 'com.cisdi.steel.module.job.a3.GycanshuJob5', '4小时发布-主要工艺参数及实物质量情况日报');
+INSERT INTO `sys_config` VALUES (130, 'sj_shaojieji_day', 'com.cisdi.steel.module.job.a3.JiejiJob5', '烧结机生产日报');
+INSERT INTO `sys_config` VALUES (131, 'sj_rongji', 'com.cisdi.steel.module.job.a3.RongjiJob5', '熔剂燃料质量管控');
+INSERT INTO `sys_config` VALUES (132, 'sj_tuoliu', 'com.cisdi.steel.module.job.a3.TuoliuJob5', '脱硫系统运行日报');
+INSERT INTO `sys_config` VALUES (133, 'sj_tuoliutuoxiaogongyicaiji', 'com.cisdi.steel.module.job.a3.TuoliuTuoxiaoGongyiJob', '脱硫脱硝工艺参数采集');
+INSERT INTO `sys_config` VALUES (134, 'sj_tuoxiaoyunxingjilu', 'com.cisdi.steel.module.job.a3.TuoXiaoJob', '脱硝运行记录表');
+INSERT INTO `sys_config` VALUES (135, 'sj_gengzongbiao', 'com.cisdi.steel.module.job.a3.ZhuChouWuAndLiuJob', '五烧六烧主抽电耗跟踪表');
+INSERT INTO `sys_config` VALUES (136, 'ygl_chengpincang', 'com.cisdi.steel.module.job.a4.ChengPinCangJob', '成品仓出入记录');
+INSERT INTO `sys_config` VALUES (137, 'ygl_chejianjikongzhongxinjioajieban', 'com.cisdi.steel.module.job.a4.GongliaochejianJob', '供料车间集控中心交接班记录');
+INSERT INTO `sys_config` VALUES (138, 'ygl_gongliaochejian_month', 'com.cisdi.steel.module.job.a4.GongliaochejianMonthJob', '供料车间运输车辆统计_录入');
+INSERT INTO `sys_config` VALUES (139, 'ygl_yichanggenzong', 'com.cisdi.steel.module.job.a4.GongliaochejianyichangJob', '供料异常跟踪表');
+INSERT INTO `sys_config` VALUES (140, 'ygl_jinchangwuzi', 'com.cisdi.steel.module.job.a4.JinchangwuziJob', '进厂物资（精煤）化验记录表');
+INSERT INTO `sys_config` VALUES (141, 'ygl_Liaojiaomei_day', 'com.cisdi.steel.module.job.a4.LiaojiaomeiDayJob', '炼焦煤每日库存动态表');
+INSERT INTO `sys_config` VALUES (142, 'ygl_meitouwaipai_month', 'com.cisdi.steel.module.job.a4.MeitouwaipaiMonthJob', '煤头外排记录');
+INSERT INTO `sys_config` VALUES (143, 'ygl_shaixiafentongji_day', 'com.cisdi.steel.module.job.a4.ShaixiafentongjiDayJob', '筛下粉统计');
+INSERT INTO `sys_config` VALUES (144, 'ygl_shengchanxiechedegji', 'com.cisdi.steel.module.job.a4.ShengchanxiechedegjiJob', '生产卸车登记表');
+INSERT INTO `sys_config` VALUES (145, 'ygl_chejianshengchanjiaoban', 'com.cisdi.steel.module.job.a4.YuanliaochejianshenchanjiaojiebanJob', '原料车间生产交班表');
+INSERT INTO `sys_config` VALUES (146, 'ygl_chejianshengchanyunxing', 'com.cisdi.steel.module.job.a4.YuanliaochejianyunxingjiluJob', '原料车间生产运行记录表');
+INSERT INTO `sys_config` VALUES (147, 'ygl_zhongjiaowaipai_month', 'com.cisdi.steel.module.job.a4.ZhongjiaowaipaiMonthJob', '中焦外排记录');
+INSERT INTO `sys_config` VALUES (148, 'nj_dongli_month', 'com.cisdi.steel.module.job.a5.AcsDongLiJob', '动力分厂主要设备开停机信息表');
+INSERT INTO `sys_config` VALUES (149, 'nj_fourkongcount', 'com.cisdi.steel.module.job.a5.FourkongCountJob', '四空压站启停次数表');
+INSERT INTO `sys_config` VALUES (150, 'nj_fourkong', 'com.cisdi.steel.module.job.a5.FourkongJob', '四空压站运行记录表');
+INSERT INTO `sys_config` VALUES (151, 'nj_guifengjimeiyaji', 'com.cisdi.steel.module.job.a5.GuifengjimeiyajiJob', '柜区风机煤压机时间统计表');
+INSERT INTO `sys_config` VALUES (152, 'nj_meiqihunhemei', 'com.cisdi.steel.module.job.a5.MeiqihunhemeiJob', '煤气柜作业区混合煤气情况表');
+INSERT INTO `sys_config` VALUES (153, 'nj_xinyikong', 'com.cisdi.steel.module.job.a5.NewOnekongJob', '新一空压站运行记录表');
+INSERT INTO `sys_config` VALUES (154, 'nj_onekongcount', 'com.cisdi.steel.module.job.a5.OnekongCountJob', '一空压站启停次数表');
+INSERT INTO `sys_config` VALUES (155, 'nj_diaojianfourKong_day', 'com.cisdi.steel.module.job.a5.task.DiaojianFourKongDayJob', '能源环保部四空压站设备日点检表');
+INSERT INTO `sys_config` VALUES (156, 'nj_diaojianoneKong_day', 'com.cisdi.steel.module.job.a5.task.DiaojianOneKongDayJob', '能源环保部一空压站设备日点检表');
+INSERT INTO `sys_config` VALUES (157, 'nj_diaojianthreeKong_day', 'com.cisdi.steel.module.job.a5.task.DiaojianThreeKongDayJob', '能源环保部三空压站设备日点检表');
+INSERT INTO `sys_config` VALUES (158, 'nj_diaojiantwoKong_day', 'com.cisdi.steel.module.job.a5.task.DiaojiantwoKongDayJob', '能源环保部二空压站设备日点检表');
+INSERT INTO `sys_config` VALUES (159, 'nj_kongqiya_month', 'com.cisdi.steel.module.job.a5.task.KongqiyaMonthJob', '空压站设备给油脂标准及加油记录');
+INSERT INTO `sys_config` VALUES (160, 'nj_meiqihunhemeisd_month', 'com.cisdi.steel.module.job.a5.task.MeiqihunhemeisdJob', '煤气柜作业区混合煤气情况表-人工录入');
+INSERT INTO `sys_config` VALUES (161, 'nj_qiguidianjian', 'com.cisdi.steel.module.job.a5.task.QiguidianjianJob', '气柜点检表');
+INSERT INTO `sys_config` VALUES (162, 'nj_qiguidianjianruihua_month', 'com.cisdi.steel.module.job.a5.task.QiguidianjianruihuaMonthJob', '气柜区润滑台帐表格');
+INSERT INTO `sys_config` VALUES (163, 'nj_sansigui_day', 'com.cisdi.steel.module.job.a5.ThreeFourKongJob', '三四柜区运行记录表');
+INSERT INTO `sys_config` VALUES (164, 'nj_threekongcount', 'com.cisdi.steel.module.job.a5.ThreekongCountJob', '三空压站启停次数表');
+INSERT INTO `sys_config` VALUES (165, 'nj_threekong', 'com.cisdi.steel.module.job.a5.ThreekongJob', '三空压站运行记录表');
+INSERT INTO `sys_config` VALUES (166, 'nj_twokongcount', 'com.cisdi.steel.module.job.a5.TwokongCountJob', '二空压站启停次数表');
+INSERT INTO `sys_config` VALUES (167, 'nj_twokong', 'com.cisdi.steel.module.job.a5.TwokongJob', '二空压站运行记录表');
+INSERT INTO `sys_config` VALUES (168, 'nj_yasuokongqi', 'com.cisdi.steel.module.job.a5.YasuoKongQiJob', '压缩空气生产情况汇总表');
+INSERT INTO `sys_config` VALUES (169, 'hb_6bftrt', 'com.cisdi.steel.module.job.a6.BF6trtJob', '6BF-TRT日报表');
+INSERT INTO `sys_config` VALUES (170, 'hb_7bftrt', 'com.cisdi.steel.module.job.a6.BF7trtJob', '7BF-TRT日报表');
+INSERT INTO `sys_config` VALUES (171, 'hb_8bftrt', 'com.cisdi.steel.module.job.a6.BF8trtJob', '8BF-TRT日报表');
+INSERT INTO `sys_config` VALUES (172, 'hb_meiqichuchen6bf', 'com.cisdi.steel.module.job.a6.Meiqichuchen6bfJob', '6BF-煤气布袋除尘报表');
+INSERT INTO `sys_config` VALUES (173, 'hb_meiqichuchen7bf', 'com.cisdi.steel.module.job.a6.Meiqichuchen7bfJob', '7BF-煤气布袋除尘报表');
+INSERT INTO `sys_config` VALUES (174, 'hb_meiqichuchen8bf', 'com.cisdi.steel.module.job.a6.Meiqichuchen8bfJob', '8BF-煤气布袋除尘报表');
 
 -- ----------------------------
 -- Table structure for sys_dict

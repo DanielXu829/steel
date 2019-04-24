@@ -4,7 +4,7 @@ import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.stereotype.Component;
 
 /**
- * 高炉本体温度日报表
+ * 热风炉月报
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
  * <P>Date: 2018/11/9 </P>

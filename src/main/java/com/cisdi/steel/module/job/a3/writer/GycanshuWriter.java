@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -54,6 +55,23 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                     index += 4;
                 }
 
+            }
+            String picTime = null;
+            if ("3".equals(sheetName)) {
+                picTime = "3";
+            } else if ("7".equals(sheetName)) {
+                picTime = "7";
+            } else if ("11".equals(sheetName)) {
+                picTime = "11";
+            } else if ("15".equals(sheetName)) {
+                picTime = "15";
+            } else if ("19".equals(sheetName)) {
+                picTime = "19";
+            } else if ("23".equals(sheetName)) {
+                picTime = "23";
+            }
+            if (Objects.nonNull(picTime)) {
+                dealPicLocation(version, date, sheetName, workbook, picTime);
             }
         }
         return workbook;
@@ -258,6 +276,59 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    /**
+     * 将图片写入到对应位置
+     *
+     * @param version
+     * @param date
+     * @param sheetName
+     * @param workbook
+     * @param picTime
+     */
+    private void dealPicLocation(String version, DateQuery date, String sheetName, Workbook workbook, String picTime) {
+        byte[] inputStream = dealPicture(version, date.getRecordDate(), "1", picTime);
+        if (Objects.nonNull(inputStream)) {
+            ExcelWriterUtil.setImg(workbook, inputStream, sheetName, 18, 25, 3, 4);
+        }
+
+        byte[] inputStream2 = dealPicture(version, date.getRecordDate(), "6", picTime);
+        if (Objects.nonNull(inputStream2)) {
+            ExcelWriterUtil.setImg(workbook, inputStream2, sheetName, 18, 25, 8, 9);
+        }
+    }
+
+    /**
+     * 处理图片参数
+     *
+     * @param version
+     * @param picDate
+     * @param picLocation
+     * @param picTime
+     * @return
+     */
+    private byte[] dealPicture(String version, Date picDate, String picLocation, String picTime) {
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("picDate", DateUtil.getFormatDateTime(picDate, DateUtil.yyyyMMddFormat));
+//        queryParam.put("picDate", "2019-04-09");
+        queryParam.put("picLocation", picLocation);
+        queryParam.put("picTime", picTime);
+        String s = httpUtil.get(getUrl5(version), queryParam);
+        String picUrl = null;
+        if (StringUtils.isNotBlank(s)) {
+            JSONObject jsonObject = JSONObject.parseObject(s);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
+                    JSONObject object = jsonArray.getJSONObject(0);
+                    picUrl = object.getString("picUrl");
+                }
+            }
+        }
+
+        byte[] strem = httpUtil.getStrem(getUrl6(version) + picUrl, null);
+        return strem;
+    }
+
     private String getUrl(String version) {
         if ("5.0".equals(version)) {
             return httpProperties.getUrlApiSJOne() + "/tagValues/latestAndStatus";
@@ -293,6 +364,25 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
             // "6.0".equals(version) 默认
 //            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemKeyVal";
             return httpProperties.getUrlApiSJTwo() + "/anaLatestValue/sampleTime";
+        }
+    }
+
+    private String getUrl6(String version) {
+        if ("5.0".equals(version)) {
+            // http://10.11.11.27:9001/getPictures?picDate=2019-04-09&picLocation=1&picTime=15
+            return "http://10.11.11.27/images/";
+        } else {
+            // "6.0".equals(version) 默认
+            return "http://10.11.11.28/images/";
+        }
+    }
+
+    private String getUrl5(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/getPictures";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/getPictures";
         }
     }
 }
