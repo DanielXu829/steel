@@ -162,9 +162,11 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                             if (StringUtils.isNotBlank(results1)) {
                                 JSONObject jsonObject1 = JSONObject.parseObject(results1);
                                 JSONArray rows1 = jsonObject1.getJSONArray("rows");
-                                JSONObject obj1 = rows1.getJSONObject(0);
-                                if (Objects.nonNull(obj1)) {
-                                    val1 += obj1.getDouble("val");
+                                if(Objects.nonNull(rows1)&&rows1.size()!=0){
+                                    JSONObject obj1 = rows1.getJSONObject(0);
+                                    if (Objects.nonNull(obj1)) {
+                                        val1 += obj1.getDouble("val");
+                                    }
                                 }
                             }
                         }
@@ -218,9 +220,9 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     }
 
     public List<CellData> handlerDataX(String url, List<String> columns, DateQuery date) {
-        Map<String, String> queryParam = getQueryParam(date);
+        Map<String, String> queryParam = getQueryParamX(date);
         List<CellData> cellDataList = new ArrayList<>();
-        for (int i = 0; i <= columns.size(); i++) {
+        for (int i = 0; i < columns.size(); i++) {
             String tagName = columns.get(i);
             queryParam.put("tagNames", tagName);
             String result = httpUtil.get(url, queryParam);
