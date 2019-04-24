@@ -113,6 +113,7 @@ public enum JobEnum {
     sj_yujizuoyequ("sj_yujizuoyequ", "烧结生产作业区雨季生产记录表"),
     sj_gongzuoliushuizhang6("sj_gongzuoliushuizhang6", "工作流水账"),
     sj_yujizuoyequ6("sj_yujizuoyequ6", "烧结生产作业区雨季生产记录表"),
+    sj_jingyiguankong5("sj_jingyiguankong5", "精益生产管控系统"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),

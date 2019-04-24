@@ -124,4 +124,13 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
             return httpProperties.getUrlApiSJTwo() + "/ploRainyProduce/selectAll";
         }
     }
+
+    private String getUrl2(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/ploSteamTemp/selectAll";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/ploSteamTemp/selectAll";
+        }
+    }
 }

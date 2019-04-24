@@ -162,4 +162,16 @@ public class TestJob3 extends SteelApplicationTests {
         yujishengchanjiluJob.execute(null);
     }
 
+
+    /**
+     * 5烧结精益生产管控系统
+     */
+    @Autowired
+    private JingyiJob5 jingyiJob5;
+
+    @Test
+    public void test15() {
+        jingyiJob5.execute(null);
+    }
+
 }

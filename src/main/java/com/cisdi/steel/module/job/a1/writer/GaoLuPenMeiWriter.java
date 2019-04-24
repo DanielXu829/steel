@@ -13,6 +13,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@Slf4j
 @Component
 public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
 
@@ -78,41 +80,46 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                                             int index, String version) {
         Map<String, String> queryParam = dateQuery.getQueryParam();
         String result = getTagValues(queryParam, columns, version, false);
-        JSONObject obj = JSONObject.parseObject(result);
-        obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
-        for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
-            int indexs = index;
-            String cell = columns.get(columnIndex);
-            JSONObject data = obj.getJSONObject(cell);
-            List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
-            for (int i = 0; i < dayHourEach.size(); i++) {
-                Object v = "";
-                if (Objects.nonNull(data)) {
-                    Map<String, Object> innerMap = data.getInnerMap();
-                    Set<String> keySet = innerMap.keySet();
-                    Long[] list = new Long[keySet.size()];
-                    int k = 0;
-                    for (String key : keySet) {
-                        list[k] = Long.valueOf(key);
-                        k++;
-                    }
-                    Arrays.sort(list);
-                    Date startTime = dayHourEach.get(i).getStartTime();
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject obj = JSONObject.parseObject(result);
+            obj = obj.getJSONObject("data");
+            if (Objects.nonNull(obj)) {
+                for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+                    int indexs = index;
+                    String cell = columns.get(columnIndex);
+                    if (StringUtils.isNotBlank(cell)) {
+                        JSONObject data = obj.getJSONObject(cell);
+                        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+                        for (int i = 0; i < dayHourEach.size(); i++) {
+                            Object v = "";
+                            if (Objects.nonNull(data)) {
+                                Map<String, Object> innerMap = data.getInnerMap();
+                                Set<String> keySet = innerMap.keySet();
+                                Long[] list = new Long[keySet.size()];
+                                int k = 0;
+                                for (String key : keySet) {
+                                    list[k] = Long.valueOf(key);
+                                    k++;
+                                }
+                                Arrays.sort(list);
+                                Date startTime = dayHourEach.get(i).getStartTime();
 
-                    for (int j = 0; j < list.length; j++) {
-                        Long tempTime = list[j];
-                        String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
-                        Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
-                        if (date.getTime() == startTime.getTime()) {
-                            v = data.get(tempTime + "");
-                            break;
+                                for (int j = 0; j < list.length; j++) {
+                                    Long tempTime = list[j];
+                                    String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                                    Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                                    if (date.getTime() == startTime.getTime()) {
+                                        v = data.get(tempTime + "");
+                                        break;
+                                    }
+                                }
+                            }
+                            ExcelWriterUtil.addCellData(resultList, indexs++, columnIndex, v);
                         }
                     }
                 }
-                ExcelWriterUtil.addCellData(resultList, indexs++, columnIndex, v);
             }
-
         }
         return resultList;
     }
@@ -158,10 +165,16 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                             if ("tankweight".equals(columns.get(k))) {
                                 String o = jsonObject.getString(columns.get(k));
                                 if (StringUtils.isNotBlank(o)) {
-                                    v = new BigDecimal(o);
+                                    try {
+                                        v = new BigDecimal(o);
+                                    } catch (Exception e) {
+                                        log.error("喷煤罐重转换异常：>>>>>>>>" + e.getMessage());
+                                    }
                                 }
                             }
                             break;
+//                            v = jsonObject.get(columns.get(k));
+//                            break;
                         }
                     }
                 }
