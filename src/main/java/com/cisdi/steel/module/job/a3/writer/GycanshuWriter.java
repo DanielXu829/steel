@@ -71,7 +71,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                 picTime = "23";
             }
             if (Objects.nonNull(picTime)) {
-                dealPicLocation(version, date, sheetName, workbook, picTime);
+                dealPicLocation(version, date, sheetName, workbook, picTime, sheet);
             }
         }
         return workbook;
@@ -285,13 +285,13 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
      * @param workbook
      * @param picTime
      */
-    private void dealPicLocation(String version, DateQuery date, String sheetName, Workbook workbook, String picTime) {
-        byte[] inputStream = dealPicture(version, date.getRecordDate(), "1", picTime);
+    private void dealPicLocation(String version, DateQuery date, String sheetName, Workbook workbook, String picTime, Sheet sheet) {
+        byte[] inputStream = dealPicture(version, date.getRecordDate(), "1", picTime, sheet);
         if (Objects.nonNull(inputStream)) {
             ExcelWriterUtil.setImg(workbook, inputStream, sheetName, 18, 25, 3, 4);
         }
 
-        byte[] inputStream2 = dealPicture(version, date.getRecordDate(), "6", picTime);
+        byte[] inputStream2 = dealPicture(version, date.getRecordDate(), "6", picTime, sheet);
         if (Objects.nonNull(inputStream2)) {
             ExcelWriterUtil.setImg(workbook, inputStream2, sheetName, 18, 25, 8, 9);
         }
@@ -306,7 +306,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
      * @param picTime
      * @return
      */
-    private byte[] dealPicture(String version, Date picDate, String picLocation, String picTime) {
+    private byte[] dealPicture(String version, Date picDate, String picLocation, String picTime, Sheet sheet) {
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("picDate", DateUtil.getFormatDateTime(picDate, DateUtil.yyyyMMddFormat));
 //        queryParam.put("picDate", "2019-04-09");
@@ -314,6 +314,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
         queryParam.put("picTime", picTime);
         String s = httpUtil.get(getUrl5(version), queryParam);
         String picUrl = null;
+        String picEvaluate = "";
         if (StringUtils.isNotBlank(s)) {
             JSONObject jsonObject = JSONObject.parseObject(s);
             if (Objects.nonNull(jsonObject)) {
@@ -321,8 +322,20 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                 if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
                     JSONObject object = jsonArray.getJSONObject(0);
                     picUrl = object.getString("picUrl");
+                    picEvaluate = object.getString("picEvaluate");
                 }
             }
+        }
+        if (StringUtils.isNotBlank(picEvaluate)) {
+            List<CellData> results = new ArrayList<>();
+            int c = 2;
+            if ("1".equals(picLocation)) {
+                c = 2;
+            } else if ("6".equals(picLocation)) {
+                c = 7;
+            }
+            ExcelWriterUtil.addCellData(results, 26, c, picEvaluate);
+            ExcelWriterUtil.setCellValue(sheet, results);
         }
 
         byte[] strem = httpUtil.getStrem(getUrl6(version) + picUrl, null);

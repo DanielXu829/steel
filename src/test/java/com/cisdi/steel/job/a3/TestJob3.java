@@ -174,4 +174,26 @@ public class TestJob3 extends SteelApplicationTests {
         jingyiJob5.execute(null);
     }
 
+    /**
+     * 烧结混合机加水蒸汽预热温度统计表
+     */
+    @Autowired
+    private Gongzuozhengqi5Job gongzuozhengqi5Job;
+
+    @Test
+    public void test16() {
+        gongzuozhengqi5Job.execute(null);
+    }
+
+    /**
+     * 缓料情况记录表
+     */
+    @Autowired
+    private Gongzuohuancun5Job gongzuohuancun5Job;
+
+    @Test
+    public void test17() {
+        gongzuohuancun5Job.execute(null);
+    }
+
 }

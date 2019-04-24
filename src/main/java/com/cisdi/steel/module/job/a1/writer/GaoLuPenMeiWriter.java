@@ -11,12 +11,9 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
-import com.cisdi.steel.module.report.entity.ReportIndex;
-import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

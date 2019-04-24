@@ -2,9 +2,7 @@ package com.cisdi.steel.module.job.a3.writer;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -16,7 +14,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 烧结无纸办公通用执行类
@@ -70,6 +70,14 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                 } else if (JobEnum.sj_yujizuoyequ.getCode().equals(excelDTO.getJobEnum().getCode())
                         || JobEnum.sj_yujizuoyequ6.getCode().equals(excelDTO.getJobEnum().getCode())) {
                     url = getUrl1(version);
+
+                    //烧结混合机加水蒸汽预热温度统计表
+                } else if (JobEnum.sj_hunhejiashuizhengqi5_month.getCode().equals(excelDTO.getJobEnum().getCode())
+                        || JobEnum.sj_hunhejiashuizhengqi6_month.getCode().equals(excelDTO.getJobEnum().getCode())) {
+                    url = getUrl2(version);
+                } else if (JobEnum.sj_huanliaoqingkuang5_month.getCode().equals(excelDTO.getJobEnum().getCode())
+                        || JobEnum.sj_huanliaoqingkuang6_month.getCode().equals(excelDTO.getJobEnum().getCode())) {
+                    url = getUrl3(version);
                 }
 
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
@@ -131,6 +139,15 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/ploSteamTemp/selectAll";
+        }
+    }
+
+    private String getUrl3(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/ploRetardMaterial/selectAll";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/ploRetardMaterial/selectAll";
         }
     }
 }
