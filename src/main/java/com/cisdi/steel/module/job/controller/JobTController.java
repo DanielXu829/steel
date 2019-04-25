@@ -10,6 +10,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.ExportJobContext;
 import com.cisdi.steel.module.job.a1.execute.ChutiezonglanExecute;
 import com.cisdi.steel.module.job.a1.execute.GongyiLuruExecute;
+import com.cisdi.steel.module.job.a3.execute.GongyikaExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,11 +59,27 @@ public class JobTController {
         return ApiUtil.success(path);
     }
 
+
+    @Autowired
+    private GongyikaExecute gongyikaExecute;
+
+    /**
+     * 烧结工艺参数导出
+     */
+    @GetMapping(value = "/gongyiSJExport")
+    public void gongyiSJExport(HttpServletRequest request, String id, String code, String save, HttpServletResponse response) {
+        try {
+            gongyikaExecute.export(request, id, code, save, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Autowired
     private GongyiLuruExecute gongyiLuruExecute;
 
     /**
-     * 工艺参数导出
+     * 高炉工艺参数导出
      */
     @GetMapping(value = "/gongyiExport")
     public void gongyiExport(HttpServletRequest request, String time, String code, String save, HttpServletResponse response) {

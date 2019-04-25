@@ -92,8 +92,9 @@ public class GongyiLuruExecute extends AbstractJobExecuteExecute {
         }
 
         if (flag) {
+            String sequencem = dealApiSequencem(code);
             String dateTime = DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd_HH_mm_ss");
-            String fileName = "工艺卡参数总览" + dateTime + ".xlsx";
+            String fileName = sequencem + "工艺卡参数总览" + dateTime + ".xlsx";
             String tempFile = jobProperties.getFilePath() + File.separator + "gyexport" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(tempFile);
             workbook.setForceFormulaRecalculation(true);
@@ -102,7 +103,7 @@ public class GongyiLuruExecute extends AbstractJobExecuteExecute {
             FileUtils.downFile(new File(tempFile), request, response, fileName);
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setSequence(dealApiSequencem(code));
+            reportIndex.setSequence(sequencem);
             reportIndex.setReportCategoryCode(code);
             reportIndex.setName(fileName);
             reportIndex.setIndexLang("cn_zh");

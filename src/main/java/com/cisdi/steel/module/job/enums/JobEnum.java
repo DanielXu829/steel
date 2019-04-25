@@ -118,11 +118,12 @@ public enum JobEnum {
     sj_hunhejiashuizhengqi6_month("sj_hunhejiashuizhengqi6_month", "烧结混合机加水蒸汽预热温度统计表"),
     sj_huanliaoqingkuang5_month("sj_huanliaoqingkuang5_month", "缓料情况记录表"),
     sj_huanliaoqingkuang6_month("sj_huanliaoqingkuang6_month", "缓料情况记录表"),
+    sj_gyicanshu5_export("sj_gyicanshu5_export", "5烧结工艺参数导出"),
+    sj_gyicanshu6_export("sj_gyicanshu6_export", "6烧结工艺参数导出"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
     gl_chejianjikongzhongxinjioajieban("ygl_chejianjikongzhongxinjioajieban", "供料车间集控中心交接班记录"),
-
     ygl_shaixiafentongji_day("ygl_shaixiafentongji_day", "筛下粉统计"),
     ygl_zhongjiaowaipai_month("ygl_zhongjiaowaipai_month", "中焦外排记录"),
     ygl_meitouwaipai_month("ygl_meitouwaipai_month", "煤头外排记录"),
@@ -132,7 +133,6 @@ public enum JobEnum {
     ygl_yichanggenzong("ygl_yichanggenzong", "供料异常跟踪表"),
     ygl_shengchanxiechedegji("ygl_shengchanxiechedegji", "生产卸车登记表"),
     ygl_jinchangwuzi("ygl_jinchangwuzi", "进厂物资（精煤）化验记录表"),
-
     yl_chejianshengchanyunxing("ygl_chejianshengchanyunxing", "原料车间生产运行记录表"),
     yl_chejianshengchanjiaoban("ygl_chejianshengchanjiaoban", "原料车间生产交班表"),
 
