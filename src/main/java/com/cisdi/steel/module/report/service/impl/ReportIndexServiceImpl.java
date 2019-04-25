@@ -99,14 +99,11 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         Page<ReportIndex> page = new Page<>(query.getCurrentPage(), query.getPageSize());
         LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
         wrapper.eq(true, ReportIndex::getHidden, "0");
+        wrapper.eq(StringUtils.isNotBlank(query.getReportCategoryCode()), ReportIndex::getReportCategoryCode, query.getReportCategoryCode());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexType()), ReportIndex::getIndexType, query.getIndexType());
         wrapper.eq(StringUtils.isNotBlank(query.getIndexLang()), ReportIndex::getIndexLang, query.getIndexLang());
 
         if (StringUtils.isNotBlank(query.getSequence()) && query.getSequence().contains("烧结")) {
-//            if (StringUtils.isNotBlank(query.getReportCategoryCode())
-//                    && (query.getReportCategoryCode().startsWith("hb_") || query.getReportCategoryCode().startsWith("gl_gaolupenmei"))) {
-//                query.setSequence(null);
-//            }
             wrapper.like(StringUtils.isNotBlank(query.getSequence()), ReportIndex::getSequence, query.getSequence());
         } else {
             if (StringUtils.isNotBlank(query.getReportCategoryCode())
