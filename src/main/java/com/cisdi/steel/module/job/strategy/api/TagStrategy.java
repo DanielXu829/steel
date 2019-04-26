@@ -86,7 +86,7 @@ public class TagStrategy extends AbstractApiStrategy {
                                 calendar.setTime(date);
                                 int rowIndex = calendar.get(Calendar.HOUR_OF_DAY);
                                 if (rowIndex == 0) {
-                                    if (i == size - 1) {
+                                    if (size > 1 && i == size - 1) {
                                         rowIndex = 24;
                                     } else {
                                         continue;
