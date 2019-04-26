@@ -43,28 +43,17 @@ public class BaseChuChenWriter extends BaseJhWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
-                if ("tag".equals(sheetSplit[1])) {
+                if ("speed".equals(sheetSplit[1])) {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        if (item.getRecordDate().before(new Date())) {
-                            int rowIndex = j + 1;
-                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
-                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                        } else {
-                            break;
-                        }
-                    }
-                } else if ("speed".equals(sheetSplit[1])) {
-                    for (int j = 0; j < size; j++) {
-                        DateQuery item = dateQueries.get(j);
-                        double speedVal = tagVal(getUrl(), columns.get(1), item);
+                        double speedVal = tagVal(getUrl(), columns.get(6), item);
                         item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
-                        double speedVal1 = tagVal(getUrl(), columns.get(1), item);
+                        double speedVal1 = tagVal(getUrl(), columns.get(6), item);
                         if((Math.abs(speedVal-speedVal1))>50){
                             item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
-                            double speedVal2 = tagVal(getUrl(), columns.get(1), item);
+                            double speedVal2 = tagVal(getUrl(), columns.get(6), item);
                             item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
-                            double speedVal3 = tagVal(getUrl(), columns.get(1), item);
+                            double speedVal3 = tagVal(getUrl(), columns.get(6), item);
                             if((Math.abs(speedVal2-speedVal3))>50){
                                 item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
                             }else {
