@@ -60,6 +60,13 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         index += 24;
                     }
+                } else if ("_penmei3_month_day".equals(sheetName)) {
+                    int index = 1;
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler3(version, columns, item, index);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
                 } else {
                     int index = 1;
                     for (DateQuery item : dateQueries) {
@@ -179,6 +186,62 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
             }
 
         }
+        return resultList;
+    }
+
+    protected List<CellData> mapDataHandler3(String version, List<String> columns, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indes = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            List<Object> dataList = new ArrayList<>();
+            Map<String, String> param = dayHourEach.get(i).getQueryParam();
+            List<String> tagName = new ArrayList<>();
+            tagName.add(columns.get(0));
+            String re1 = getTagValues(param, tagName, version, true);
+            if (StringUtils.isNotBlank(re1)) {
+                JSONObject object = JSONObject.parseObject(re1);
+                if (Objects.nonNull(object)) {
+                    JSONObject data = object.getJSONObject("data");
+                    if (Objects.nonNull(data)) {
+                        JSONObject tag = data.getJSONObject(columns.get(0));
+                        if (Objects.nonNull(tag)) {
+                            Map<String, Object> innerMap = tag.getInnerMap();
+                            Set<String> keys = innerMap.keySet();
+                            Long[] list = new Long[keys.size()];
+                            int k = 0;
+                            for (String key : keys) {
+                                list[k] = Long.valueOf(key);
+                                k++;
+                            }
+                            Arrays.sort(list);
+                            Object temp = "";
+                            for (int j = 0; j < list.length; j++) {
+                                Object o = innerMap.get(list[j] + "");
+                                if (!temp.equals(o)) {
+                                    temp = o;
+                                    if (j != 0) {
+                                        dataList.add(list[j]);
+                                        dataList.add(o);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (dataList.size() == 0) {
+                for (int m = 0; m < 16; m++) {
+                    ExcelWriterUtil.addCellData(resultList, indes, m, "");
+                }
+            } else {
+                for (int m = 0; m < dataList.size(); m++) {
+                    ExcelWriterUtil.addCellData(resultList, indes, m, dataList.get(m));
+                }
+            }
+            indes++;
+        }
+
         return resultList;
     }
 
