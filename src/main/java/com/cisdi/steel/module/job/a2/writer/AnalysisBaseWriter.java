@@ -34,6 +34,11 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
+        String version ="67.0";
+        try{
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        }catch(Exception e){
+        }
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
@@ -53,13 +58,13 @@ public class AnalysisBaseWriter extends BaseJhWriter {
                                 String[] split = columns.get(k).split("/");
                                 int rowIndex = 1 + j;
                                 if (split.length == 2) {
-                                    Double cellDataList = mapDataHandler2(getUrl2(), item, split[0], split[1]);
+                                    Double cellDataList = mapDataHandler2(getUrl2(version), item, split[0], split[1]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 } else if (split.length == 3) {
-                                    Double cellDataList = mapDataHandler3(getUrl3(), item, split[0], split[1], split[2]);
+                                    Double cellDataList = mapDataHandler3(getUrl3(version), item, split[0], split[1], split[2]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 } else {
-                                    Double cellDataList = mapDataHandler4(getUrl4(), item, split[0], split[1]);
+                                    Double cellDataList = mapDataHandler4(getUrl4(version), item, split[0], split[1]);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 }
                             }
@@ -69,7 +74,7 @@ public class AnalysisBaseWriter extends BaseJhWriter {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
+                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 }
@@ -174,15 +179,15 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     }
 
 
-    protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCodeOrSource";
+    protected String getUrl2(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemValByCodeOrSource";
     }
 
-    protected String getUrl3() {
-        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCode";
+    protected String getUrl3(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemValByCode";
     }
 
-    protected String getUrl4() {
-        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
+    protected String getUrl4(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
     }
 }

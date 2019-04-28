@@ -33,6 +33,11 @@ public class BaseJhWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version ="67.0";
+        try{
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        }catch(Exception e){
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -47,7 +52,7 @@ public class BaseJhWriter extends AbstractExcelReadWriter {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
+                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -95,7 +100,7 @@ public class BaseJhWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    protected String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 }

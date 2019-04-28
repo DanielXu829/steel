@@ -33,9 +33,20 @@ public class HttpProperties {
     private String urlApiGLThree;
 
     /**
-     * 焦化的接口地址
+     * 67焦化的接口地址
      */
     private String urlApiJHOne;
+
+    /**
+     * 12焦化的接口地址
+     */
+    private String urlApiJHTwo;
+
+    /**
+     * 45焦化的接口地址
+     */
+    private String urlApiJHThree;
+
     /**
      * 能介的接口地址
      */
@@ -68,4 +79,14 @@ public class HttpProperties {
         return urlApiGLOne;
     }
 
+    public String getJHUrlVersion(String version) {
+        if ("12.0".equals(version)) {
+            return urlApiJHTwo;
+        } else if ("67.0".equals(version)) {
+            return urlApiJHOne;
+        }else if ("45.0".equals(version)) {
+            return urlApiJHThree;
+        }
+        return urlApiGLOne;
+    }
 }

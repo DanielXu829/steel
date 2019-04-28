@@ -37,6 +37,11 @@ public class GufenglengningWriter extends BaseJhWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version ="67.0";
+        try{
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        }catch(Exception e){
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -61,9 +66,9 @@ public class GufenglengningWriter extends BaseJhWriter {
                     String cellValue2 = PoiCellUtil.getCellValue(cell2);
                     String cellValue3 = PoiCellUtil.getCellValue(cell3);
                     DateQuery dateQuery = dateQueries.get(0);
-                    double a1 = getCellValue(dateQuery, cellValue1);
-                    double a2 = getCellValue(dateQuery, cellValue2);
-                    double a3 = getCellValue(dateQuery, cellValue3);
+                    double a1 = getCellValue(dateQuery, cellValue1,version);
+                    double a2 = getCellValue(dateQuery, cellValue2,version);
+                    double a3 = getCellValue(dateQuery, cellValue3,version);
                     double max = (a1 > a2) ? a1 : a2;
                     max = (max > a3) ? max : a3;
                     if (max == a1) {
@@ -85,7 +90,7 @@ public class GufenglengningWriter extends BaseJhWriter {
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
                     int rowIndex = j + k;
-                    List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
+                    List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
                     if ("_gfln2_day_hour".equals(sheetName)) {
                         if (item.getRecordDate().before(new Date())) {
                             Row row = sheet.getRow(rowIndex);
@@ -106,11 +111,11 @@ public class GufenglengningWriter extends BaseJhWriter {
         return workbook;
     }
 
-    private double getCellValue(DateQuery dateQuery, String cellValue) {
+    private double getCellValue(DateQuery dateQuery, String cellValue,String version) {
         double data = 0;
         Map<String, String> queryParam = getQueryParam(dateQuery);
         queryParam.put("tagName", cellValue);
-        String result = httpUtil.get(getUrl(), queryParam);
+        String result = httpUtil.get(getUrl(version), queryParam);
         if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {

@@ -71,6 +71,8 @@ http:
    urlApiGLThree: http://10.11.11.26:9001
    urlApiNJOne: http://10.11.11.33:8080
    urlApiJHOne:  http://10.11.11.31:8080
+   urlApiJHTwo:  http://10.11.11.29:8080
+   urlApiJHThree:  http://10.11.11.30:8080
    urlApiYGLOne: http://10.11.11.32:8181
    urlApiSJOne: http://10.11.11.27:9001
    urlApiSJTwo: http://10.11.11.28:9001

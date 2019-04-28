@@ -33,6 +33,11 @@ public class BaseChuChenWriter extends BaseJhWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version ="67.0";
+        try{
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        }catch(Exception e){
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -46,14 +51,14 @@ public class BaseChuChenWriter extends BaseJhWriter {
                 if ("speed".equals(sheetSplit[1])) {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        double speedVal = tagVal(getUrl(), columns.get(6), item);
+                        double speedVal = tagVal(getUrl(version), columns.get(6), item);
                         item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
-                        double speedVal1 = tagVal(getUrl(), columns.get(6), item);
+                        double speedVal1 = tagVal(getUrl(version), columns.get(6), item);
                         if((Math.abs(speedVal-speedVal1))>50){
                             item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
-                            double speedVal2 = tagVal(getUrl(), columns.get(6), item);
+                            double speedVal2 = tagVal(getUrl(version), columns.get(6), item);
                             item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
-                            double speedVal3 = tagVal(getUrl(), columns.get(6), item);
+                            double speedVal3 = tagVal(getUrl(version), columns.get(6), item);
                             if((Math.abs(speedVal2-speedVal3))>50){
                                 item.setRecordDate(DateUtil.addMinute(item.getRecordDate(),-1));
                             }else {
@@ -64,7 +69,7 @@ public class BaseChuChenWriter extends BaseJhWriter {
                         }
                         if (item.getRecordDate().before(new Date())) {
                             int rowIndex = j + 1;
-                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(), columns, item);
+                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         } else {
                             break;

@@ -69,8 +69,8 @@ public enum JobEnum {
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "CK67-配煤-自动配煤报表（班）"),
     jh_fensuixidu("jh_fensuixidu", "CK67-配煤-粉碎细度报表（月）"),
-    jh_cdqcaozuoa("jh_cdqcaozuoa", "CK67-干熄焦-CDQ操作运行报表A（日）"),
-    jh_cdqcaozuob("jh_cdqcaozuob", "CK67-干熄焦-CDQ操作运行报表B（日）"),
+    jh_cdqcaozuoa("jh_cdqcaozuoa", "干熄焦-CDQ操作运行报表A（日）"),
+    jh_cdqcaozuob("jh_cdqcaozuob", "干熄焦-CDQ操作运行报表B（日）"),
     jh_chujiaochuchen("jh_chujiaochuchen", "CK67-出焦除尘报表"),
     jh_zhuangmeichuchen("jh_zhuangmeichuchen", "CK67-装煤除尘报表"),
     jh_cdqchuchen("jh_cdqchuchen", "CK67-CDQ除尘报表"),
