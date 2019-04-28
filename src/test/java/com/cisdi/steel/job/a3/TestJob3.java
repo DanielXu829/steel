@@ -196,4 +196,18 @@ public class TestJob3 extends SteelApplicationTests {
         gongzuohuancun5Job.execute(null);
     }
 
+    /**
+     * 缓料情况记录表
+     */
+    @Autowired
+    private GongzuotuoliuJob gongzuotuoliuJob;
+
+    /**
+     * 脱硫无纸化
+     */
+    @Test
+    public void test18() {
+        gongzuotuoliuJob.execute(null);
+    }
+
 }

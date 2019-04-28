@@ -120,6 +120,7 @@ public enum JobEnum {
     sj_huanliaoqingkuang6_month("sj_huanliaoqingkuang6_month", "缓料情况记录表"),
     sj_gyicanshu5_export("sj_gyicanshu5_export", "5烧结工艺参数导出"),
     sj_gyicanshu6_export("sj_gyicanshu6_export", "6烧结工艺参数导出"),
+    sj_wuzhituoliu_month("sj_wuzhituoliu_month", "56脱硫运行记录"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
