@@ -214,30 +214,32 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     if (Objects.nonNull(jsonObject)) {
                         JSONArray rows = jsonObject.getJSONArray("rows");
-                        if (Objects.nonNull(rows)) {
+                        if (Objects.nonNull(rows)&&rows.size()>0) {
                             for (int j = 0; j < rows.size(); j++) {
                                 JSONObject obj = rows.getJSONObject(j);
                                 if (Objects.nonNull(obj)) {
                                     String clock = obj.getString("clock");
                                     Date date = DateUtil.strToDate(clock, DateUtil.fullFormat);
-//                                    Date endTime = dateQuery.getStartTime();
-//                                    Date startTime = DateUtil.addHours(endTime, -8);
-//                                    if (DateUtil.isEffectiveDate(date, startTime, endTime)) {
-                                    Map<String, String> queryParam1 = getQueryParam2(DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:00"));
-                                    queryParam1.put("tagName", "CK67_L1R_CB_CBAcTol_1m_avg");
-                                    String result1 = httpUtil.get(getUrl3(), queryParam1);
+                                    Map<String, String> queryParam1 = getQueryParamX(date);
+                                    queryParam1.put("tagNames", "CK67_L1R_CB_CBAcTol_1m_evt");
+                                    String result1 = httpUtil.get(getUrl12(), queryParam1);
                                     if (StringUtils.isNotBlank(result1)) {
                                         JSONObject jsonObject1 = JSONObject.parseObject(result1);
-                                        JSONArray rows1 = jsonObject1.getJSONArray("rows");
-                                        JSONObject obj1 = rows1.getJSONObject(0);
-                                        if (Objects.nonNull(obj1)) {
-                                            Double val1 = obj1.getDouble("val");
-                                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val1);
+                                        JSONObject data = jsonObject1.getJSONObject("data");
+                                        JSONArray arr = data.getJSONArray("CK67_L1R_CB_CBAcTol_1m_evt");
+                                        if (Objects.nonNull(arr) && arr.size() != 0) {
+                                            Double val = 0.0;
+                                            for (int k = 0; k < arr.size(); k++) {
+                                                JSONObject jsonObject2 = arr.getJSONObject(k);
+                                                if (jsonObject2.getDouble("val") > 80) {
+                                                    val = jsonObject2.getDouble("val");
+                                                }
+                                            }
+                                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                                         }
                                     }
                                 }
                             }
-//                            }
                         }
                     }
                 }
@@ -279,7 +281,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     ganxi = backn5 / (backn5 + backn6);
                 }
             } else {
-                Map<String, String> queryParam1 = getQueryParam5x(dateQuery, shiftNum);
+                Map<String, String> queryParam1 = getQueryParam5x();
                 String result1 = httpUtil.get(getUrl6x(), queryParam1);
                 if (StringUtils.isBlank(result1)) {
                     return null;
@@ -647,7 +649,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam5x(DateQuery dateQuery, int shiftNum) {
+    protected Map<String, String> getQueryParam5x() {
         Map<String, String> result = new HashMap<>();
         result.put("code", "KH-Y");
         result.put("flag", "O");
@@ -690,6 +692,13 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         result.put("date", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd hh:mm:ss"));
         result.put("shift", shift);
         result.put("cokeNo", cokeNo);
+        return result;
+    }
+
+    protected Map<String, String> getQueryParamX(Date date) {
+        Map<String, String> result = new HashMap<>();
+        result.put("startDate", DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date, 1), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
@@ -752,5 +761,10 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
 
     private String getUrl11() {
         return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
+    }
+
+
+    protected String getUrl12() {
+        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
     }
 }

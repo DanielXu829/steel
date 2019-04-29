@@ -123,16 +123,22 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                                     Date endTime = dateQuery.getStartTime();
                                     Date startTime = DateUtil.addHours(endTime, -8);
                                     if (DateUtil.isEffectiveDate(date, startTime, endTime)) {
-                                        Map<String, String> queryParam1 = getQueryParam3(DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:00"));
-                                        queryParam1.put("tagName", "CK67_L1R_CB_CBAcTol_1m_avg");
-                                        String result1 = httpUtil.get(getUrl5(), queryParam1);
+                                        Map<String, String> queryParam1 = getQueryParamX(date);
+                                        queryParam1.put("tagNames", "CK67_L1R_CB_CBAcTol_1m_evt");
+                                        String result1 = httpUtil.get(getUrl7(), queryParam1);
                                         if (StringUtils.isNotBlank(result1)) {
                                             JSONObject jsonObject1 = JSONObject.parseObject(result1);
-                                            JSONArray rows1 = jsonObject1.getJSONArray("rows");
-                                            JSONObject obj1 = rows1.getJSONObject(0);
-                                            if (Objects.nonNull(obj1)) {
-                                                Double val1 = obj1.getDouble("val");
-                                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val1);
+                                            JSONObject data = jsonObject1.getJSONObject("data");
+                                            JSONArray arr = data.getJSONArray("CK67_L1R_CB_CBAcTol_1m_evt");
+                                            if (Objects.nonNull(arr) && arr.size() > 0) {
+                                                Double val = 0.0;
+                                                for (int k = 0; k < arr.size(); k++) {
+                                                    JSONObject jsonObject2 = arr.getJSONObject(k);
+                                                    if (jsonObject2.getDouble("val") > 80) {
+                                                        val = jsonObject2.getDouble("val");
+                                                    }
+                                                }
+                                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                                             }
                                         }
                                     }
@@ -275,6 +281,13 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParamX(Date date) {
+        Map<String, String> result = new HashMap<>();
+        result.put("startDate", DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date, 1), "yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
     private String getUrl() {
         return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
     }
@@ -293,6 +306,10 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
     private String getUrl6() {
         return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
+    }
+
+    protected String getUrl7() {
+        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
     }
 
 }
