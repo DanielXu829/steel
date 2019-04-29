@@ -46,23 +46,29 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
-                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+                List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int index = 1;
-                for (DateQuery item : dateQueries) {
-                    List<CellData> cellDataList = mapDataHandler(columns, item, index, version);
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    index += 24;
+                if ("_tag_month_day".equals(sheetName)) {
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler(columns, item, index, version, 1);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 24;
+                    }
+                } else if ("_tag_month_shift".equals(sheetName)) {
+                    for (DateQuery item : dateQueries) {
+                        List<CellData> cellDataList = mapDataHandler(columns, item, index, version, 2);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        index += 3;
+                    }
                 }
             }
         }
         return workbook;
     }
 
-    protected List<CellData> mapDataHandler(List<String> columns, DateQuery dateQuery,
-                                            int index, String version) {
-        Map<String, String> queryParam = dateQuery.getQueryParam();
-        String result = getTagValues(queryParam, columns, version);
+    protected List<CellData> mapDataHandler(List<String> columns, DateQuery dateQuery, int index, String version, int t) {
+        String result = getTagValues(dateQuery, columns, version);
         List<CellData> resultList = new ArrayList<>();
         if (StringUtils.isNotBlank(result)) {
             JSONObject obj = JSONObject.parseObject(result);
@@ -74,6 +80,9 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                     if (StringUtils.isNotBlank(cell)) {
                         JSONObject data = obj.getJSONObject(cell);
                         List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+                        if (t == 2) {
+                            dayHourEach = DateQueryUtil.buildDay8HourEach(dateQuery.getRecordDate());
+                        }
                         for (int i = 0; i < dayHourEach.size(); i++) {
                             Object v = "";
                             if (Objects.nonNull(data)) {
@@ -87,7 +96,6 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                                 }
                                 Arrays.sort(list);
                                 Date startTime = dayHourEach.get(i).getStartTime();
-
                                 for (int j = 0; j < list.length; j++) {
                                     Long tempTime = list[j];
                                     String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
@@ -107,10 +115,10 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
-    private String getTagValues(Map<String, String> param, List<String> col, String version) {
+    private String getTagValues(DateQuery param, List<String> col, String version) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("start", param.get("starttime"));
-        jsonObject.put("end", param.get("endtime"));
+        jsonObject.put("start", DateUtil.getFormatDateTime(param.getStartTime(), DateUtil.fullFormat));
+        jsonObject.put("end", DateUtil.getFormatDateTime(param.getEndTime(), DateUtil.fullFormat));
         jsonObject.put("tagNames", col);
         String re1 = httpUtil.postJsonParams(getUrl(version), jsonObject.toJSONString());
         return re1;

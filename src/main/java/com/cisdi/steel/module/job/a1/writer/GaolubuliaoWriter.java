@@ -96,6 +96,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         handlerDataMethod(result, data, "parameters");
         handlerDataMethod(result, data, "results");
         handlerDataMethod(result, data, "slag");
+        result.put("time", new Date());
 
         JSONArray bookOreRatios = data.getJSONArray("bookOreRatios");
         if (Objects.nonNull(bookOreRatios)) {
@@ -165,8 +166,6 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
             }
         }
 
-        result.put("time", new Date());
-
         List<CellData> resultData = new ArrayList<>();
         int size = rowVals.size();
         for (int i = 0; i < size; i++) {
@@ -233,14 +232,14 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
             if (Objects.nonNull(components)) {
                 materialValues.put("OreStock", components.getInteger("OreStock"));
                 materialValues.put("CokeStock", components.getInteger("CokeStock"));
-                materialValues.put("OreWeight", components.getInteger("OreWeight"));
+                materialValues.put("OreWeight", components.get("OreWeight"));
             }
         }
         JSONObject results = data.getJSONObject("results");
         if (Objects.nonNull(results)) {
             JSONObject components = results.getJSONObject("components");
             if (Objects.nonNull(components)) {
-                materialValues.put("AllOCRate", components.getInteger("AllOCRate"));
+                materialValues.put("AllOCRate", components.get("AllOCRate"));
                 materialValues.put("ClinkerRatio", components.getInteger("ClinkerRatio"));
             }
         }

@@ -243,7 +243,7 @@ public class TestJob1 extends SteelApplicationTests {
     }
 
     /**
-     * 高炉布料
+     * 高炉变料月报
      */
     @Autowired
     private GaolubuliaoJob gaolubuliaoJob;
@@ -275,6 +275,7 @@ public class TestJob1 extends SteelApplicationTests {
     public void test118() {
         gaoLuPenMeiJob6.execute(null);
     }
+
     /**
      * 7高炉喷煤
      */
