@@ -222,8 +222,8 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
     private void dealData2(List<JSONObject> list, List<CellData> cellDataList, int rowIndex) {
         for (int i = 0; i < list.size(); i++) {
             JSONObject object = list.get(i);
-            String weight = object.getString("weight");
-            Double moisture = object.getDouble("moisture");
+            Object weight = object.get("weight");
+            Object moisture = object.get("moisture");
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 3, weight);
             ExcelWriterUtil.addCellData(cellDataList, ++rowIndex, 3, moisture);
         }
@@ -233,8 +233,8 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
     private void dealData1(List<JSONObject> list, List<CellData> cellDataList, int rowIndex) {
         for (int i = 0; i < list.size(); i++) {
             JSONObject object = list.get(i);
-            String descr = object.getString("descr");
-            Double weight = object.getDouble("weight");
+            Object descr = object.get("descr");
+            Object weight = object.get("weight");
             Double moisture = object.getDouble("moisture");
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, descr);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 1, weight);
