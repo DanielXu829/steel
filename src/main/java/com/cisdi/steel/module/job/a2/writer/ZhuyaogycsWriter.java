@@ -452,6 +452,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> mapDataHandler7(String url, DateQuery dateQuery, Sheet sheet,int len) {
         List<CellData> cellDataList = new ArrayList<>();
+        dateQuery.setRecordDate(DateUtil.addDays(dateQuery.getRecordDate(),-2));
         Map<String, String> queryParam = getQueryParam9(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -489,17 +490,30 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         JSONObject objNow= arrNow.getJSONObject(j);
                         String nameNow = objNow.getString("coalTypeDescr");
                         String ratioNow = objNow.getString("dryMatchRatio");
+                        int num=0;
                         for (int m = 0; m < arrNow.size(); m++){
                             JSONObject objEd = arrEd.getJSONObject(m);
                             String nameEd = objEd.getString("coalTypeDescr");
                             String ratioEd = objEd.getString("dryMatchRatio");
-                            if(nameNow.equals(nameEd)&&ratioNow.equals(ratioEd)==false){
-                                keyNow=keyed;
-                                bl=true;
+                            if(nameNow.equals(nameEd)){
+                                num+=1;
+                                if(ratioNow.equals(ratioEd)==false){
+                                    keyNow=keyed;
+                                    bl=true;
+                                    break;
+                                }
                             }
                         }
+                        if (bl) {
+                            break;
+                        }
+                        if(num==0){
+                            keyNow=keyed;
+                            bl=true;
+                            break;
+                        }
                     }
-                    if(bl==true){
+                    if (bl) {
                         break;
                     }
                 }
