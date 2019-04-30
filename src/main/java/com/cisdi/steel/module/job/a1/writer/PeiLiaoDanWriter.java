@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -220,13 +221,15 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
     }
 
     private void dealData2(List<JSONObject> list, List<CellData> cellDataList, int rowIndex) {
+        BigDecimal weight = BigDecimal.ZERO;
+        BigDecimal moisture = BigDecimal.ZERO;
         for (int i = 0; i < list.size(); i++) {
             JSONObject object = list.get(i);
-            Object weight = object.get("weight");
-            Object moisture = object.get("moisture");
-            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 3, weight);
-            ExcelWriterUtil.addCellData(cellDataList, ++rowIndex, 3, moisture);
+            weight = weight.add(object.getBigDecimal("weight"));
+            moisture = moisture.add(object.getBigDecimal("moisture"));
         }
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 3, weight);
+        ExcelWriterUtil.addCellData(cellDataList, ++rowIndex, 3, moisture);
     }
 
 
