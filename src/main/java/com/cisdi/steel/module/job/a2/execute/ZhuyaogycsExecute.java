@@ -45,9 +45,11 @@ public class ZhuyaogycsExecute extends AbstractJobExecuteExecute {
 
     @Override
     public void execute(JobExecuteInfo jobExecuteInfo) {
-        //生成今天的
-        super.execute(jobExecuteInfo);
         //生成昨天的
         super.executeDateParam1(jobExecuteInfo, -8);
+
+        //生成今天的
+        super.execute(jobExecuteInfo);
+
     }
 }
