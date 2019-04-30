@@ -315,6 +315,26 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
     }
 
     /**
+     * 生成当前时间上一个班次的数据，下一个班次的数据
+     *
+     * @param jobExecuteInfo 执行信息
+     * @param dayIndex       当前 前/后 n 小时，
+     */
+    protected void executeDateParam1(JobExecuteInfo jobExecuteInfo, int hourIndex) {
+        if (Objects.isNull(jobExecuteInfo.getDateQuery())) {
+            Date date = new Date();
+            DateQuery dateQuery = new DateQuery(date, date, date);
+            jobExecuteInfo.setDateQuery(dateQuery);
+        }
+
+        DateQuery dateQuery = jobExecuteInfo.getDateQuery();
+        dateQuery.setRecordDate(DateUtil.addHours(dateQuery.getRecordDate(), hourIndex));
+        jobExecuteInfo.setDateQuery(dateQuery);
+        // 真正的执行的方法
+        this.executeDetail(jobExecuteInfo);
+    }
+
+    /**
      * 模板通用清空操作
      *
      * @param dateQuery      时间参数
