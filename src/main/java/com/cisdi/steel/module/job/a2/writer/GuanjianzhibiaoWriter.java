@@ -241,11 +241,6 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam3(String date) {
-        Map<String, String> result = new HashMap<>();
-        result.put("time", date);
-        return result;
-    }
 
     protected Map<String, String> getQueryParam4(DateQuery dateQuery, String shift, String cokeNo) {
         Map<String, String> result = new HashMap<>();
@@ -269,14 +264,6 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
     private String getUrl3() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValueStatisticType";
-    }
-
-    private String getUrl4() {
-        return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
-    }
-
-    private String getUrl5() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 
     private String getUrl6() {

@@ -593,13 +593,6 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
-
-        return result;
-    }
 
     protected Map<String, String> getQueryParam2(String date) {
         Map<String, String> result = new HashMap<>();
@@ -697,10 +690,6 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
 
     private String getUrlx() {
         return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemLatest";
-    }
-
-    private String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
     }
 
     private String getUrl3() {
