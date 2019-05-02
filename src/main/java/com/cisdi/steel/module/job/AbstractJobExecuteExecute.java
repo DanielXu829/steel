@@ -155,7 +155,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      */
     protected void replaceTemplatePath(ReportIndex reportIndex, ReportCategoryTemplate template) {
         String templatePath = reportIndexService.existTemplate(reportIndex);
-        if (StringUtils.isNotBlank(templatePath)) {
+        if (StringUtils.isNotBlank(templatePath) && !"1".equals(template.getAttr1())) {
             // 修改为生成后文件名称
             template.setTemplatePath(templatePath);
         }
