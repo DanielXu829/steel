@@ -154,6 +154,9 @@ public class ExcelWriterUtil {
                     JSONObject object = (JSONObject) o;
                     CaseInsensitiveMap<String, Object> map = new CaseInsensitiveMap<>(object);
                     Object value = map.get(keyChild);
+                    if (null == value) {
+                        value = "";
+                    }
                     ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
                 } else if (o instanceof JSONArray) {
                     JSONArray jsonArray = (JSONArray) o;
@@ -162,13 +165,22 @@ public class ExcelWriterUtil {
                         JSONObject item = (JSONObject) obj;
                         CaseInsensitiveMap<String, Object> map = new CaseInsensitiveMap<>(item);
                         Object value = map.get(keyChild);
+                        if (null == value) {
+                            value = "";
+                        }
                         ExcelWriterUtil.addCellData(resultData, childIndex++, columnIndex, value);
                     }
                 } else if (o instanceof Map) {
                     Map<String, Object> object = (Map<String, Object>) o;
                     Object value = object.get(keyChild);
+                    if (null == value) {
+                        value = "";
+                    }
                     ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
                 } else {
+                    if (null == o) {
+                        o = "";
+                    }
                     ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, o);
                 }
             }
