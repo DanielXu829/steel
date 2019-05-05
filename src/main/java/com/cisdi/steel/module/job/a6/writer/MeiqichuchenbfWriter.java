@@ -10,6 +10,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -46,10 +47,12 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
                 if ("tag".equals(sheetSplit[1])) {
+                    int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
-                        DateQuery eachDate = dateQueries.get(rowNum);
-                        List<CellData> cellValInfoList = eachData(columns, getUrl(version), eachDate.getQueryParam(), sheetSplit[2]);
+                        DateQuery dateQuery = dateQueries.get(rowNum);
+                        List<CellData> cellValInfoList = eachData(columns, getUrl(version), dateQuery,index);
                         ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
+                        index ++;
                     }
                 } else if ("maxmin".equals(sheetSplit[1])) {
                     int index = 1;
@@ -108,67 +111,47 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
         return handlerJsonArray(columns, rowBatch, r, startRow);
     }
 
-    private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam, String type) {
+    private List<CellData> eachData(List<String> columns, String url,DateQuery dateQuery, int index) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("starttime", queryParam.get("starttime"));
-        jsonObject.put("endtime", queryParam.get("endtime"));
-        jsonObject.put("tagnames", cellList);
+        jsonObject.put("starttime", dateQuery.getStartTime());
+        jsonObject.put("endtime", dateQuery.getEndTime());
+        jsonObject.put("tagnames", columns);
 
         String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
         JSONObject obj = JSONObject.parseObject(result);
         obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
-        for (int columnIndex = 0; columnIndex < cellList.size(); columnIndex++) {
-            String cell = cellList.get(columnIndex);
+        for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+            int indexs = index;
+            String cell = columns.get(columnIndex);
             if (StringUtils.isNotBlank(cell)) {
                 JSONObject data = obj.getJSONObject(cell);
-                if (Objects.nonNull(data)) {
-                    Set<String> keys = data.keySet();
-                    Long[] list = new Long[keys.size()];
-                    int k = 0;
-                    for (String key : keys) {
-                        list[k] = Long.valueOf(key);
-                        k++;
-                    }
-                    // 按照顺序排序
-                    Arrays.sort(list);
-                    if (StringUtils.isNotBlank(type)) {
-                        if ("day".equals(type)) {
-                            int size = list.length;
-                            for (int i = 0; i < size; i++) {
-                                Long key = list[i];
-                                Date date = new Date(key);
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.setTime(date);
-                                int rowIndex = calendar.get(Calendar.HOUR_OF_DAY);
-                                if (rowIndex == 0) {
-                                    if (size > 1 && i == size - 1) {
-                                        rowIndex = 24;
-                                    } else {
-                                        continue;
-                                    }
-                                }
-                                Object o = data.get(key + "");
-                                ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
-                            }
-                        } else if ("month".equals(type)) {
-                            for (Long key : list) {
-                                Date date = new Date(key);
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.setTime(date);
-                                int rowIndex = calendar.get(Calendar.DATE);
-                                Object o = data.get(key + "");
-                                ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
-                            }
+                List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+                for (int i = 0; i < dayHourEach.size(); i++) {
+                    Object v = "";
+                    if (Objects.nonNull(data)) {
+                        Map<String, Object> innerMap = data.getInnerMap();
+                        Set<String> keySet = innerMap.keySet();
+                        Long[] list = new Long[keySet.size()];
+                        int k = 0;
+                        for (String key : keySet) {
+                            list[k] = Long.valueOf(key);
+                            k++;
                         }
-                    } else {
-                        int rowIndex = 1;
-                        for (Long key : list) {
-                            Object o = data.get(key + "");
-                            ExcelWriterUtil.addCellData(resultList, rowIndex++, columnIndex, o);
-                        }
-                    }
+                        Arrays.sort(list);
+                        Date startTime = dayHourEach.get(i).getStartTime();
 
+                        for (int j = 0; j < list.length; j++) {
+                            Long tempTime = list[j];
+                            String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                            Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                            if (date.getTime() == startTime.getTime()) {
+                                v = data.get(tempTime + "");
+                                break;
+                            }
+                        }
+                    }
+                    ExcelWriterUtil.addCellData(resultList, indexs, columnIndex, v);
                 }
             }
         }
