@@ -279,7 +279,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     protected List<CellData> mapDataHandler4(String url, DateQuery dateQuery, List<String> columns, int shiftNum) {
         Map<String, String> queryParam = getQueryParam6(dateQuery, 1, "CO6", 1);
         Map<String, String> queryParam1 = getQueryParam6(dateQuery, 1, "CO6", 2);
-        Map<String, String> queryParam2 = getQueryParam6(dateQuery, 1, "CO7", 2);
+        Map<String, String> queryParam2 = getQueryParam6(dateQuery, 1, "CO7", 1);
         Map<String, String> queryParam3 = getQueryParam6(dateQuery, 1, "CO7", 2);
         String result = httpUtil.get(url, queryParam);
         String result1 = httpUtil.get(url, queryParam1);
@@ -309,7 +309,8 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         JSONArray arr1 = data1.getJSONArray("TmmirbtmpDataTables");
         JSONArray arr2 = data2.getJSONArray("TmmirbtmpDataTables");
         JSONArray arr3 = data3.getJSONArray("TmmirbtmpDataTables");
-        if (Objects.isNull(arr) || Objects.isNull(arr1) || Objects.isNull(arr2) || Objects.isNull(arr3)) {
+        if (Objects.isNull(arr) || Objects.isNull(arr1) ||
+                Objects.isNull(arr2) || Objects.isNull(arr3)) {
             return null;
         }
         arr.addAll(arr1);
