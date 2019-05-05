@@ -1,7 +1,10 @@
 package com.cisdi.steel.module.job.a6;
 
-import com.cisdi.steel.module.job.a1.AbstractBaseCommonExportJob1;
+import com.cisdi.steel.module.job.AbstractExportJob;
+import com.cisdi.steel.module.job.IJobExecute;
+import com.cisdi.steel.module.job.a6.execute.MeiqichuchenbfExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,10 +17,18 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class BF7trtJob extends AbstractBaseCommonExportJob1 {
+public class BF7trtJob extends AbstractExportJob {
+
+    @Autowired
+    private MeiqichuchenbfExecute meiqichuchenbfExecute;
 
     @Override
     public JobEnum getCurrentJob() {
         return JobEnum.hb_7bftrt;
+    }
+
+    @Override
+    public IJobExecute getCurrentJobExecute() {
+        return meiqichuchenbfExecute;
     }
 }
