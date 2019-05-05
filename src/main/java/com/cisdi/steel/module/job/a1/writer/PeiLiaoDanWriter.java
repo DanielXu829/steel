@@ -46,14 +46,17 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 List<CellData> cellDataList = this.mapDataHandler(url, workbook);
-                //处理关联到上一次数据
-                if ("6.0".equals(version)) {
-                    dealLastData(date.getRecordDate(), cellDataList);
-                }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
 
             }
 
+            if ("Sheet1".equals(sheetName)) {
+                //处理关联到上一次数据
+                if ("6.0".equals(version)) {
+                    List<CellData> cellDataList = new ArrayList<>();
+                    dealLastData(date.getRecordDate(), cellDataList);
+                }
+            }
         }
         return workbook;
     }
@@ -71,11 +74,11 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             //获取到指定路径下的excel
             Workbook workbook = this.getWorkbook(reportIndex1.getPath());
             //解析excel获取指定位置的值
-            String v1 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 5, 16);
-            String v2 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 6, 16);
+            String v1 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 5, 17);
+            String v2 = PoiCustomUtil.getSheetCell(workbook, "Sheet1", 6, 17);
             //写入到当前excel中
-            ExcelWriterUtil.addCellData(cellDataList, 5, 16, v1);
-            ExcelWriterUtil.addCellData(cellDataList, 6, 16, v2);
+            ExcelWriterUtil.addCellData(cellDataList, 5, 17, v1);
+            ExcelWriterUtil.addCellData(cellDataList, 6, 17, v2);
         }
     }
 
@@ -93,6 +96,14 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(jsonObject)) {
             return null;
         }
+        JSONObject results = json.getJSONObject("results");
+        if (Objects.nonNull(results)) {
+            Object cokeWithAdd = results.get("CokeWithAdd");
+            ExcelWriterUtil.addCellData(cellDataList, 0, 9, cokeWithAdd);
+        } else {
+            ExcelWriterUtil.addCellData(cellDataList, 0, 9, 7.856);
+        }
+
         JSONArray data = jsonObject.getJSONArray("distribution");
 
         if (Objects.nonNull(data)) {
@@ -200,6 +211,7 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         dealData1(dolomite, cellDataList, 16);
         dealData1(quart, cellDataList, 17);
         dealData1(mnore, cellDataList, 18);
+        dealData1(scrap, cellDataList, 19);
 
 
         dealData2(cokenut, cellDataList, 8);
