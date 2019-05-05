@@ -100,8 +100,6 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         if (Objects.nonNull(results)) {
             Object cokeWithAdd = results.get("CokeWithAdd");
             ExcelWriterUtil.addCellData(cellDataList, 0, 9, cokeWithAdd);
-        } else {
-            ExcelWriterUtil.addCellData(cellDataList, 0, 9, 7.856);
         }
 
         JSONArray data = jsonObject.getJSONArray("distribution");
