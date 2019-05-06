@@ -4,6 +4,7 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.common.util.ValidUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
@@ -15,6 +16,7 @@ import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import javafx.beans.binding.ObjectExpression;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -36,8 +38,12 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 @SuppressWarnings("Duplicates")
+@Slf4j
 @Component
 public class GaolubuliaoWriter extends AbstractExcelReadWriter {
+    //限制两次时间间隔10分钟
+    private static int LIMITTIME = 10;
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -58,7 +64,14 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         JSONObject jsonObject = JSONObject.parseObject(s);
 
         // 料制
-        handlerPart3(workbook, dictionary, excelDTO, jsonObject);
+        boolean b = handlerPart3(workbook, dictionary, excelDTO, jsonObject);
+
+        //若是两次时间间隔小于10分钟就不写入
+        if (!b) {
+            int i = 1 / 0;
+            log.error("高炉变料月报小于" + LIMITTIME + "分钟,不继续谢写入数据");
+        }
+
         // 炉料结构
         handlerPart4(workbook, dictionary, excelDTO, jsonObject);
         return workbook;
@@ -194,15 +207,25 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
 
     }
 
-    private void handlerPart3(Workbook workbook, Sheet dictionary, WriterExcelDTO excelDTO, JSONObject jsonObject) {
+    private boolean handlerPart3(Workbook workbook, Sheet dictionary, WriterExcelDTO excelDTO, JSONObject jsonObject) {
         int rowNum = 2;
         // 料制
         String sheetName = PoiCellUtil.getCellValue(dictionary, rowNum, 0);
         // 写入数据的行数
         String rowIndexStr = PoiCellUtil.getCellValue(dictionary, rowNum, 4);
+        //上次执行时间
+        String dateStr = PoiCellUtil.getCellValue(dictionary, rowNum, 5);
         int rowIndex = 3;
         if (StringUtils.isNotBlank(rowIndexStr)) {
             rowIndex = Double.valueOf(rowIndexStr).intValue();
+        }
+        Date curr = new Date();
+        if (StringUtils.isNotBlank(dateStr)) {
+            Date date = DateUtil.strToDate(dateStr, DateUtil.fullFormat);
+            Long betweenMin = DateUtil.getBetweenMin(curr, date);
+            if (betweenMin.intValue() < LIMITTIME) {
+                return false;
+            }
         }
 
         Sheet sheet = workbook.getSheet(sheetName);
@@ -211,6 +234,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         if (Objects.nonNull(rowCellDataList) && !rowCellDataList.isEmpty()) {
             // 更新写入数据的行数
             updateDictChargeNo(dictionary, rowIndex + 4, rowNum, 4);
+            updateDictChargeNo(dictionary, DateUtil.getFormatDateTime(curr, DateUtil.fullFormat), rowNum, 5);
         }
         SheetRowCellData build = SheetRowCellData.builder()
                 .workbook(workbook)
@@ -218,7 +242,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
                 .cellDataList(rowCellDataList)
                 .build();
         build.allValueWriteExcel();
-
+        return true;
     }
 
     private List<CellData> changeLiaozhiData(JSONObject jsonObject, int rowIndex, List<String> rowVals) {

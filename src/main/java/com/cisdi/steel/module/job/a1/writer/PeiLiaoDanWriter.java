@@ -96,10 +96,13 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(jsonObject)) {
             return null;
         }
-        JSONObject results = json.getJSONObject("results");
+        JSONObject results = jsonObject.getJSONObject("results");
         if (Objects.nonNull(results)) {
-            Object cokeWithAdd = results.get("CokeWithAdd");
-            ExcelWriterUtil.addCellData(cellDataList, 0, 9, cokeWithAdd);
+            JSONObject components = results.getJSONObject("components");
+            if (Objects.nonNull(components)) {
+                Object cokeWithAdd = components.get("CokeWithAdd");
+                ExcelWriterUtil.addCellData(cellDataList, 0, 9, cokeWithAdd);
+            }
         }
 
         JSONArray data = jsonObject.getJSONArray("distribution");
@@ -286,6 +289,6 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
     }
 
     private String getUrl(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/burden/report";
+        return httpProperties.getGlUrlVersion(version) + "/burden/latest/forward";
     }
 }
