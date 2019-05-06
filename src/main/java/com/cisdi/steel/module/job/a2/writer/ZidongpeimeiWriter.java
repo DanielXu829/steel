@@ -100,7 +100,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     row.getCell(0).setCellType(CellType.STRING);
 
                     Row row1 = sheet.createRow(33);
-                    Double aDouble = peimeiLeiji(getUrl3(), date);
+                    Double aDouble = peimeiLeiji(getUrl(), date);
                     row1.createCell(0).setCellValue(aDouble);
                     row1.getCell(0).setCellType(CellType.NUMERIC);
 
@@ -133,48 +133,32 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     }
 
     public Double peimeiLeiji(String url, DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        Map<String, String> result1 = new HashMap<>();
-        Calendar instance = Calendar.getInstance();
-        instance.setTime(dateQuery.getRecordDate());
-        instance.set(Calendar.DAY_OF_MONTH, 1);
-        instance.set(Calendar.HOUR_OF_DAY, 0);
-        instance.set(Calendar.MINUTE, 0);
-        instance.set(Calendar.SECOND, 0);
-        result.put("startDate", DateUtil.getFormatDateTime(instance.getTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.getTodayEndTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("tagName", "CK67_L1R_CB_CBReset_4_report");
-        String results = httpUtil.get(url, result);
-        Double val1 = 0.0;
-        if (StringUtils.isNotBlank(results)) {
-            JSONObject jsonObject = JSONObject.parseObject(results);
+        Date startTime = DateQueryUtil.getMonthStartTime(dateQuery.getRecordDate());
+        dateQuery.setStartTime(startTime);
+        Map<String, String> queryParam = getQueryParamX1(dateQuery);
+        List<CellData> cellDataList = new ArrayList<>();
+        String tagName = "CK67_L1R_CB_CBAmtTol_1m_evt";
+        queryParam.put("tagNames", tagName);
+        String result = httpUtil.get(url, queryParam);
+        Double val = 0.0;
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
-                JSONArray rows = jsonObject.getJSONArray("rows");
-                if (Objects.nonNull(rows)) {
-                    for (int i = 0; i < rows.size(); i++) {
-                        JSONObject obj = rows.getJSONObject(i);
-                        if (Objects.nonNull(obj)) {
-                            String clock = obj.getString("clock");
-                            result1.put("tagName", "CK67_L1R_CB_CBAmtTol_1m_max");
-                            Date date = DateUtil.strToDate(clock, DateUtil.fullFormat);
-                            result1.put("time", DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:00"));
-                            String results1 = httpUtil.get(getUrl(), result1);
-                            if (StringUtils.isNotBlank(results1)) {
-                                JSONObject jsonObject1 = JSONObject.parseObject(results1);
-                                JSONArray rows1 = jsonObject1.getJSONArray("rows");
-                                if(Objects.nonNull(rows1)&&rows1.size()!=0){
-                                    JSONObject obj1 = rows1.getJSONObject(0);
-                                    if (Objects.nonNull(obj1)) {
-                                        val1 += obj1.getDouble("val");
-                                    }
-                                }
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    JSONArray arr = data.getJSONArray(tagName);
+                    if (Objects.nonNull(arr) && arr.size() != 0) {
+                        for (int i = 0; i < arr.size(); i++) {
+                            JSONObject jsonObject1 = arr.getJSONObject(i);
+                            if (jsonObject1.getDouble("val") > 3) {
+                                val += jsonObject1.getDouble("val");
                             }
                         }
                     }
                 }
             }
         }
-        return val1;
+        return val;
     }
 
     public List<CellData> handlerData(DateQuery dateQuery, Sheet sheet) {
@@ -317,7 +301,14 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParamX(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(), 1), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(), 3), "yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
+    protected Map<String, String> getQueryParamX1(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(), 3), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 

@@ -282,7 +282,7 @@ public class DateQueryUtil {
         // 设置为第一天
         calendar.setTime(date);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         return calendar.getTime();
@@ -439,5 +439,8 @@ public class DateQueryUtil {
             }
         }
         return days;
+    }
+
+    public static void getMonthStartTime() {
     }
 }
