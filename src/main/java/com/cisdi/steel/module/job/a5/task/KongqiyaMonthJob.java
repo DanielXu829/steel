@@ -1,11 +1,6 @@
 package com.cisdi.steel.module.job.a5.task;
 
-import com.cisdi.steel.module.job.AbstractExportJob;
-import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a5.execute.QiguidianjianExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,20 +18,4 @@ public class KongqiyaMonthJob extends AbstractNJExportJob {
     public JobEnum getCurrentJob() {
         return JobEnum.nj_kongqiya_month;
     }
-
-//    @Autowired
-//    private QiguidianjianExecute qiguidianjianExecute;
-//
-//    @Override
-//    public IJobExecute getCurrentJobExecute() {
-//        return qiguidianjianExecute;
-//    }
-//
-//    /**
-//     * 0 2 0 1 * ? 每月第一天过两分
-//     */
-//    @Scheduled(cron = "0 1 0 * * ?")
-//    public void task() {
-//        execute(null);
-//    }
 }

@@ -96,14 +96,6 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(jsonObject)) {
             return null;
         }
-        JSONObject results = jsonObject.getJSONObject("results");
-        if (Objects.nonNull(results)) {
-            JSONObject components = results.getJSONObject("components");
-            if (Objects.nonNull(components)) {
-                Object cokeWithAdd = components.get("CokeWithAdd");
-                ExcelWriterUtil.addCellData(cellDataList, 0, 9, cokeWithAdd);
-            }
-        }
 
         JSONArray data = jsonObject.getJSONArray("distribution");
 
@@ -133,17 +125,6 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                     ExcelWriterUtil.addCellData(cellDataList, 24, index, value);
                     index++;
                 }
-            }
-        }
-
-        JSONObject parameters = jsonObject.getJSONObject("parameters");
-        if (Objects.nonNull(parameters)) {
-            JSONObject components = parameters.getJSONObject("components");
-            if (Objects.nonNull(components)) {
-                Double oreStock = components.getDouble("OreStock");
-                Double cokeStock = components.getDouble("CokeStock");
-                ExcelWriterUtil.addCellData(cellDataList, 0, 6, oreStock);
-                ExcelWriterUtil.addCellData(cellDataList, 0, 7, cokeStock);
             }
         }
 
@@ -218,6 +199,8 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         dealData2(cokenut, cellDataList, 8);
         dealData2(coke, cellDataList, 10);
 
+        JSONObject parameters = jsonObject.getJSONObject("parameters");
+
         if (Objects.nonNull(parameters)) {
             JSONObject components = parameters.getJSONObject("components");
             if (Objects.nonNull(components)) {
@@ -227,6 +210,15 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                 ExcelWriterUtil.addCellData(cellDataList, 13, 3, clinkerRatio);
                 ExcelWriterUtil.addCellData(cellDataList, 14, 3, oreWeight);
                 ExcelWriterUtil.addCellData(cellDataList, 15, 3, allOCRate);
+
+                Double oreStock = components.getDouble("OreStock");
+                Double cokeStock = components.getDouble("CokeStock");
+                ExcelWriterUtil.addCellData(cellDataList, 0, 6, oreStock);
+                ExcelWriterUtil.addCellData(cellDataList, 0, 7, cokeStock);
+
+
+                Object cokeWithAdd = components.get("CokeWithAdd");
+                ExcelWriterUtil.addCellData(cellDataList, 0, 9, cokeWithAdd);
             }
         }
 
@@ -289,6 +281,6 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
     }
 
     private String getUrl(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/burden/latest/forward";
+        return httpProperties.getGlUrlVersion(version) + "/burden/report";
     }
 }

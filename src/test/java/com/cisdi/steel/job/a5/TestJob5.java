@@ -3,6 +3,7 @@ package com.cisdi.steel.job.a5;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.a5.*;
 import com.cisdi.steel.module.job.a5.task.DiaojianOneKongDayJob;
+import com.cisdi.steel.module.job.a5.task.KongqiyaMonthJob;
 import com.cisdi.steel.module.job.a5.task.MeiqihunhemeisdJob;
 import com.cisdi.steel.module.job.a5.task.QiguidianjianJob;
 import org.junit.Test;
@@ -190,5 +191,13 @@ public class TestJob5 extends SteelApplicationTests {
     @Test
     public void meiqiTest() {
         meiqihunhemeiJob1.execute(null);
+    }
+
+    @Autowired
+    private DiaojianOneKongDayJob kongqiyaMonthJob;
+
+    @Test
+    public void kqTest(){
+        kongqiyaMonthJob.task();
     }
 }

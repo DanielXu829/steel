@@ -71,10 +71,10 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         queryParam.put("itemNames", columns);
         ArrayList<String> list = new ArrayList<>();
         if ("_jiaofen5_month_all".equals(sheetName)) {
-            list.add("5#烧结用焦粉");
+            list.add("CN-JN");
             queryParam.put("brandCodes", list);
         } else if ("_jiaofen6_month_all".equals(sheetName)) {
-            list.add("6#烧结用焦粉");
+            list.add("CN-JN");
             queryParam.put("brandCodes", list);
         } else if ("_meifen5_month_all".equals(sheetName)) {
             list.add("5#烧结用煤粉");
