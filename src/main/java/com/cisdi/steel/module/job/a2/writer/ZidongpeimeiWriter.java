@@ -300,8 +300,8 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParamX(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(), 3), "yyyy/MM/dd HH:mm:ss"));
+        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(),-2), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(), 2), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
