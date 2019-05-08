@@ -58,7 +58,7 @@ public class AnalysisBaseWriter extends BaseJhWriter {
                                 String[] split = columns.get(k).split("/");
                                 int rowIndex = 1 + j;
                                 if (split.length == 2) {
-                                    Double cellDataList = mapDataHandler2(getUrl2(version), item, split[0], split[1]);
+                                    Double cellDataList = mapDataHandler2(getUrl2(version), item, split[0], split[1], version);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 } else if (split.length == 3) {
                                     Double cellDataList = mapDataHandler3(getUrl3(version), item, split[0], split[1], split[2]);
@@ -95,8 +95,8 @@ public class AnalysisBaseWriter extends BaseJhWriter {
         PoiCustomUtil.setCellValue(cell, obj);
     }
 
-    protected Double mapDataHandler2(String url, DateQuery dateQuery, String brandcode, String anaitemname) {
-        Map<String, String> queryParam = getQueryParam2(dateQuery, brandcode, anaitemname);
+    protected Double mapDataHandler2(String url, DateQuery dateQuery, String brandcode, String anaitemname, String version) {
+        Map<String, String> queryParam = getQueryParam2(dateQuery, brandcode, anaitemname, version);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -137,13 +137,19 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     }
 
 
-    protected Map<String, String> getQueryParam2(DateQuery dateQuery, String brandcode, String anaitemname) {
+    protected Map<String, String> getQueryParam2(DateQuery dateQuery, String brandcode, String anaitemname, String version) {
         Map<String, String> result = new HashMap<>();
         result.put("brandcode", brandcode);
         result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
-        result.put("source", "三回收");
+        if ("12.0".equals(version)) {
+            result.put("source", "一回收");
+        } else if ("67.0".equals(version)) {
+            result.put("source", "三回收");
+        } else {
+            result.put("source", "二回收");
+        }
         return result;
     }
 

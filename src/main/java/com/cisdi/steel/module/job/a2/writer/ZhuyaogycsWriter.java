@@ -502,9 +502,9 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 }
             }
         }
-        Row row = sheet.createRow(1);
-        row.createCell(15).setCellValue(DateUtil.getFormatDateTime(new Date(Long.valueOf(keyNow)), "yyyy/MM/dd"));
-        row.getCell(15).setCellType(CellType.STRING);
+        Row row = sheet.createRow(3);
+        row.createCell(0).setCellValue(DateUtil.getFormatDateTime(new Date(Long.valueOf(keyNow)), "yyyy/MM/dd"));
+        row.getCell(0).setCellType(CellType.STRING);
         JSONArray arrNow = data.getJSONArray(keyNow);
         for (int i = 0; i < arrNow.size(); i++) {
             JSONObject jsonObject1 = arrNow.getJSONObject(i);
