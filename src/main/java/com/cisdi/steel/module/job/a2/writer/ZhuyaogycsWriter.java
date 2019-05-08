@@ -27,7 +27,6 @@ import java.util.*;
  */
 @Component
 public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
-    private JSONObject jsonObject1;
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -65,30 +64,14 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 }
                 int rowIndex = 1;
                 if ("analysis".equals(sheetSplit[1])) {
-//                    for (int k = 0; k < columns.size(); k++) {
-//                        if (StringUtils.isNotBlank(columns.get(k))) {
-//                            String[] split = columns.get(k).split("/");
-//                            Double cellDataList = mapDataHandler(getUrl(), dateQuery, split[0], split[1]);
-//                            setSheetValue(sheet, rowIndex, k, cellDataList);
-//                        }
-//                    }
                     for (int k = 0; k < columns.size(); k++) {
                         if (StringUtils.isNotBlank(columns.get(k))) {
                             String[] split = columns.get(k).split("/");
-                            Double cellDataList = mapDataHandlerx(getUrlx(), split[0], split[1]);
+                            Double cellDataList = mapDataHandlerx(getUrlx(), split[0], split[1],dateQuery);
                             setSheetValue(sheet, rowIndex, k, cellDataList);
                         }
                     }
                 }
-//                else if ("analysislast".equals(sheetSplit[1])) {
-//                    for (int k = 0; k < columns.size(); k++) {
-//                        if (StringUtils.isNotBlank(columns.get(k))) {
-//                            String[] split = columns.get(k).split("/");
-//                            Double cellDataList = mapDataHandlerx(getUrlx(), split[0], split[1]);
-//                            setSheetValue(sheet, rowIndex, k, cellDataList);
-//                        }
-//                    }
-//                }
                 else if ("peimei".equals(sheetSplit[1])) {
                     Row row = sheet.createRow(1);
                     row.createCell(2).setCellValue(shift);
@@ -172,10 +155,12 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return data;
     }
 
-    protected Double mapDataHandlerx(String url, String brandcode, String anaitemname) {
+    protected Double mapDataHandlerx(String url, String brandcode, String anaitemname,DateQuery dateQuery) {
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("brandcode", brandcode);
         queryParam.put("anaitemname", anaitemname);
+        queryParam.put("unitCode", "JH67");
+        queryParam.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
