@@ -70,21 +70,26 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         JSONObject queryParam = this.getQueryParam1(dateQuery);
         queryParam.put("itemNames", columns);
         ArrayList<String> list = new ArrayList<>();
+        String url = getUrl(version);
         if ("_jiaofen5_month_all".equals(sheetName)) {
             list.add("CN-JN");
             queryParam.put("brandCodes", list);
+            url = getUrl(version);
         } else if ("_jiaofen6_month_all".equals(sheetName)) {
             list.add("CN-JN");
             queryParam.put("brandCodes", list);
+            url = getUrl(version);
         } else if ("_meifen5_month_all".equals(sheetName)) {
             list.add("5#烧结用煤粉");
             queryParam.put("brandCodes", list);
+            url = getUrl1(version);
         } else if ("_rongji5_month_all".equals(sheetName)) {
             list.add("5#烧结用白云石粉");
             list.add("5#烧结用石灰石粉");
             queryParam.put("brandCodes", list);
+            url = getUrl1(version);
         }
-        String url = getUrl(version);
+
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(queryParam, serializeConfig);
         String result = httpUtil.postJsonParams(url, jsonString);
@@ -137,6 +142,15 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemValues4";
+        }
+    }
+
+    private String getUrl1(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/analysis/anaItemValuesByMatType";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemValuesByMatType";
         }
     }
 }

@@ -47,13 +47,15 @@ public class GaoLuDocMain2 {
     private ReportIndexMapper reportIndexMapper;
 
     private String version6 = "6.0";
+    private String version7 = "7.0";
     private String version8 = "8.0";
 
     @Scheduled(cron = "0 31 6 * * ?")
     public void mainTask() {
         result = new HashMap<>();
-        mainDeal(version6);
-        mainDeal(version8);
+//        mainDeal(version6);
+        mainDeal(version7);
+//        mainDeal(version8);
         log.error("高炉word生成完毕！");
     }
 
@@ -62,6 +64,9 @@ public class GaoLuDocMain2 {
         if ("6.0".equals(version)) {
             name = "6";
             dealTagName6();
+        } else if ("7.0".equals(version)) {
+            name = "7";
+            dealTagName7();
         } else if ("8.0".equals(version)) {
             name = "8";
             dealTagName8();
@@ -134,6 +139,41 @@ public class GaoLuDocMain2 {
 
         L18 = new String[]{"BF6_L2C_HMTemp_1d_avg"};
         L19 = new String[]{"BF6_L2C_AnalysisSiValue_1d_avg", "BF6_L2C_AnalysisSValue_1d_avg"};
+    }
+
+    private void dealTagName7() {
+        L1 = new String[]{"BF7_L2M_BX_HM_confirmWgt_evt", "BF7_L2M_FuelRate_1d_avg"};
+        L2 = new String[]{"BF7_L2M_CokeRate_1d_avg", "BF7_L2M_NTCokeRate_1d_avg", "BF7_L2M_CoalRate_1d_avg"};
+        L3 = new String[]{"BF7_L2M_SinterRatio_1d_avg", "BF7_L2M_PelletsRatio_1d_avg", "BF7_L2M_LumporeRatio_1d_avg"};
+        L4 = new String[]{"M40", "M10"};
+        L5 = new String[]{"CSR", "CRI"};
+        L6 = new String[]{"Ad", "S"};
+        L7 = new String[]{"TFe", "FeO"};
+        L8 = new String[]{"BF7_L2C_BD_HotBlastFlow_1d_avg", "BF7_L2C_BD_ColdBlastPress_1d_avg", "BF7_L2C_BD_Pressdiff_1d_avg"};
+        L9 = new String[]{"Ad", "S"};
+
+        L10 = new String[]{"BF7_L2C_BD_HotBlastFlow_1d_avg", "BF7_L2C_BD_OxygenFlow_1d_avg"};
+        L11 = new String[]{"BF7_L2C_BD_ColdBlastPress_1d_avg", "BF7_L2C_BD_TopPress2_1d_avg"};
+
+        L12 = new String[]{"BF7_L2C_BD_W_1d_avg", "BF7_L2C_BD_Z_1d_avg"};
+        L13 = new String[]{"BF7_L2C_BD_CCT_1d_avg", "BF7_L2M_PCT_1d_avg"};
+        L14 = new String[]{"BF7_L2C_BD_B1B3_HeatLoad_1d_avg", "BF7_L2C_BD_S1S3_HeatLoad_1d_avg"};
+
+        L15 = new String[]{"BF7_L2C_BD_S4S6_HeatLoad_1d_avg", "BF7_L2C_BD_R1R3_HeatLoad_1d_avg"};
+
+        L16 = new String[]{"BF7_L2C_BD_WT6_Q_1d_avg", "BF7_L2C_TP_GasUtilization_1d_avg"};
+
+        L17 = new String[]{"BF7_L2C_BD_HotBlastFlow_1d_avg", "BF7_L2C_BD_ColdBlastPress_1d_avg", "BF7_L2C_BD_Pressdiff_1d_avg",
+                "BF7_L2C_BD_OxygenFlow_1d_avg", "BF7_L2C_BD_HotBlastTemp_1d_avg", "BF7_L2C_BD_BH_1d_avg",
+                "BF7_L2C_BD_TopPress_1d_avg", "BF7_L2M_FuelRate_1d_avg", "BF7_L2M_LumporeRatio_1d_avg",
+                "BF7_L2M_PelletsRatio_1d_avg", "BF7_L2M_SinterRatio_1d_avg", "",
+                "BF7_L2C_BD_CokeLoad_1d_avg", "BF7_L2C_SH_OreBatchWeight", "BF7_L2C_SH_CokeBatchWeight",
+                "BF7_L2M_LAB_slagR2_1d_avg", "BF7_L2M_BatchRate_1d_avg", "BF7_L2C_BD_BlastVelocityAct_1d_avg",
+                "BF7_L2C_BD_Ek_1d_avg", "BF7_L2C_BD_FlamTemp_1d_avg"
+        };
+
+        L18 = new String[]{"BF7_L2C_HMTemp_1d_avg"};
+        L19 = new String[]{"BF7_L2C_AnalysisSiValue_1d_avg", "BF7_L2C_AnalysisSValue_1d_avg"};
     }
 
     private void dealTagName8() {
@@ -957,7 +997,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0.122, 0.1295, 0.00738, 0.00741,10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0.122, 0.1295, 0.00738, 0.00741, 10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg6", image1);
     }

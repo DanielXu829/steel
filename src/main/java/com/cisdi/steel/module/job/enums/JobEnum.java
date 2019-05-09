@@ -121,6 +121,7 @@ public enum JobEnum {
     sj_gyicanshu5_export("sj_gyicanshu5_export", "5烧结工艺参数导出"),
     sj_gyicanshu6_export("sj_gyicanshu6_export", "6烧结工艺参数导出"),
     sj_wuzhituoliu_month("sj_wuzhituoliu_month", "56脱硫运行记录"),
+    sj_gyijiancha_month("sj_gyijiancha_month", "工艺检查项目"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
@@ -160,6 +161,9 @@ public enum JobEnum {
     nj_guifengjimeiyaji("nj_guifengjimeiyaji", "柜区风机煤压机时间统计表"),
     nj_dongli_month("nj_dongli_month", "动力分厂主要设备开停机信息表"),
     nj_meiqihunhemeisd_month("nj_meiqihunhemeisd_month", "煤气柜作业区混合煤气情况表-人工录入"),
+    nj_jiepailing_day("nj_jiepailing_day", "界牌岭运行日志"),
+    nj_gongluyinsutongji_month("nj_gongluyinsutongji_month", "功率因素统计表"),
+    nj_jidu_year("nj_jidu_year", "能介年度报表"),
 
     // 环保
     hb_6bftrt("hb_6bftrt", "6BF-TRT日报表"),

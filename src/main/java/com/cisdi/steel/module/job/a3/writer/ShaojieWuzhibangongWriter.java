@@ -68,7 +68,7 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                     JSONObject query = new JSONObject();
                     String url = getUrl(version);
                     int rowBatch = 1;
-                    boolean flag = false;
+                    int flag = 1;
                     //获取对应的请求接口地址
                     //工作流水账
                     if (JobEnum.sj_gongzuoliushuizhang.getCode().equals(excelDTO.getJobEnum().getCode())
@@ -78,7 +78,6 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                     } else if (JobEnum.sj_yujizuoyequ.getCode().equals(excelDTO.getJobEnum().getCode())
                             || JobEnum.sj_yujizuoyequ6.getCode().equals(excelDTO.getJobEnum().getCode())) {
                         url = getUrl1(version);
-
                         //烧结混合机加水蒸汽预热温度统计表
                     } else if (JobEnum.sj_hunhejiashuizhengqi5_month.getCode().equals(excelDTO.getJobEnum().getCode())
                             || JobEnum.sj_hunhejiashuizhengqi6_month.getCode().equals(excelDTO.getJobEnum().getCode())) {
@@ -89,7 +88,11 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                     } else if (JobEnum.sj_wuzhituoliu_month.getCode().equals(excelDTO.getJobEnum().getCode())) {
                         url = getUrl4(version);
                         rowBatch = 3;
-                        flag = true;
+                        flag = 2;
+                    } else if (JobEnum.sj_gyijiancha_month.getCode().equals(excelDTO.getJobEnum().getCode())) {
+                        url = getUrl5(version);
+                        rowBatch = 7;
+                        flag = 3;
                     }
                     List<JSONObject> clauses = new ArrayList<>();
                     dealClauses(clauses, "recordDate", ">=", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
@@ -112,7 +115,7 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    private void dealClauses( List<JSONObject> clauses, String column, String operation, String value) {
+    private void dealClauses(List<JSONObject> clauses, String column, String operation, String value) {
         JSONObject clause = new JSONObject();
         clause.put("column", column);
         clause.put("operation", operation);
@@ -120,7 +123,7 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
         clauses.add(clause);
     }
 
-    private List<CellData> mapDataHandler(String url, JSONObject query, List<String> columns, Date date, int rowBatch, boolean flag) {
+    private List<CellData> mapDataHandler(String url, JSONObject query, List<String> columns, Date date, int rowBatch, int flag) {
 
         List<CellData> cellDataList = new ArrayList<>();
         SerializeConfig serializeConfig = new SerializeConfig();
@@ -129,10 +132,12 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
         if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
-                if (flag) {
+                if (flag == 2) {
                     dealByTime(jsonObject, date, columns, cellDataList, rowBatch);
-                } else {
+                } else if (flag == 1) {
                     dealNoTime(jsonObject, columns, cellDataList);
+                } else if (flag == 3) {
+                    dealNoTime2(jsonObject, columns, cellDataList);
                 }
             }
         }
@@ -148,6 +153,31 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                 JSONObject jsonObject1 = rows.getJSONObject(i);
                 List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, (i + 1), jsonObject1);
                 cellDataList.addAll(cellData);
+            }
+        }
+    }
+
+
+    private void dealNoTime2(JSONObject jsonObject, List<String> columns, List<CellData> cellDataList) {
+        JSONObject pageInfo = jsonObject.getJSONObject("pageInfo");
+        if (Objects.nonNull(pageInfo)) {
+            JSONArray list = pageInfo.getJSONArray("list");
+            if (Objects.nonNull(list) && list.size() > 0) {
+                for (int i = 0; i < list.size(); i++) {
+                    JSONObject jsonObject1 = list.getJSONObject(i);
+                    JSONObject ploProcessCheck = jsonObject1.getJSONObject("ploProcessCheck");
+                    List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, (i + 1), ploProcessCheck);
+                    cellDataList.addAll(cellData);
+
+                    JSONArray items = jsonObject1.getJSONArray("items");
+                    if (Objects.nonNull(items) && items.size() > 0) {
+                        for (int j = 0; j < items.size(); j++) {
+                            JSONObject jsonObject2 = items.getJSONObject(j);
+                            List<CellData> cellData2 = ExcelWriterUtil.handlerRowData(columns, (j + 1), jsonObject2);
+                            cellDataList.addAll(cellData2);
+                        }
+                    }
+                }
             }
         }
     }
@@ -233,6 +263,15 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/ploDesulfuration/select";
+        }
+    }    //无纸化-烧结机生产工艺检查项目表
+
+    private String getUrl5(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/ploProcessCheck/selectPage";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/ploProcessCheck/selectPage";
         }
     }
 }
