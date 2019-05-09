@@ -178,6 +178,22 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建不规则时间段
+     *
+     * @param date
+     * @return
+     */
+    public static void buildJiePaiLing(List<String> list, Date date, int hour) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        String dateTime = DateUtil.getFormatDateTime(calendar.getTime(), DateUtil.fullFormat);
+        list.add(dateTime);
+    }
+
+    /**
      * 指定构建 从指定时间 加减指定时间
      *
      * @param date
@@ -236,13 +252,22 @@ public class DateQueryUtil {
     }
 
     /**
-     * 每月的数据
+     * 记录每年的每月
      *
-     * @param date 查询的时间
      * @return 结果
      */
     public static List<DateQuery> buildYearMonthEach(Date date) {
-        return null;
+        DateQuery dateQuery = buildYear(date);
+        Date startTime = dateQuery.getStartTime();
+        long betweenDays = DateUtil.getBetweenMonths(date);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date currentDate = startTime;
+        for (int i = 0; i <= betweenDays; i++) {
+            DateQuery query = buildMonth(currentDate);
+            queryList.add(query);
+            currentDate = DateUtil.addMonths(currentDate, 1);
+        }
+        return queryList;
     }
 
     /**
@@ -273,6 +298,18 @@ public class DateQueryUtil {
         return new DateQuery(beginTime, endTime, date);
     }
 
+    /**
+     * 获取指定月日期指定号
+     */
+    public static Date getMonthSomeTime(Date date, int day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime();
+    }
 
     /**
      * 获取指定月日期 1号

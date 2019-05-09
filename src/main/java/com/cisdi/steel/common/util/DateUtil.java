@@ -555,6 +555,11 @@ public class DateUtil {
         return days;
     }
 
+    public static long getBetweenMonths(Date to) {
+        String dateTime = DateUtil.getFormatDateTime(to, "MM");
+        return Long.valueOf(dateTime);
+    }
+
     /**
      * 计算两个日期之间相差的天数
      *

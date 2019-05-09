@@ -70,21 +70,25 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         JSONObject queryParam = this.getQueryParam1(dateQuery);
         queryParam.put("itemNames", columns);
         ArrayList<String> list = new ArrayList<>();
+        String url = getUrl(version);
         if ("_jiaofen5_month_all".equals(sheetName)) {
             list.add("CN-JN");
             queryParam.put("brandCodes", list);
+            url = getUrl(version);
         } else if ("_jiaofen6_month_all".equals(sheetName)) {
             list.add("CN-JN");
             queryParam.put("brandCodes", list);
+            url = getUrl(version);
         } else if ("_meifen5_month_all".equals(sheetName)) {
             list.add("5#烧结用煤粉");
+            list.add("6#烧结用煤粉");
             queryParam.put("brandCodes", list);
+            url = getUrl(version);
         } else if ("_rongji5_month_all".equals(sheetName)) {
-            list.add("5#烧结用白云石粉");
-            list.add("5#烧结用石灰石粉");
-            queryParam.put("brandCodes", list);
+            queryParam.put("materialClass", "flux");
+            url = getUrl1(version);
         }
-        String url = getUrl(version);
+
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(queryParam, serializeConfig);
         String result = httpUtil.postJsonParams(url, jsonString);
@@ -101,7 +105,6 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < size; i++) {
             JSONObject jsonObject = data.getJSONObject(i);
             Long clock = jsonObject.getLong("clock");
-            ExcelWriterUtil.addCellData(cellDataList, index, 0, clock);
 
             String bz = "";
             if (Objects.nonNull(clock)) {
@@ -116,15 +119,18 @@ public class RongjiWriter extends AbstractExcelReadWriter {
                     bz = "中班";
                 }
             }
-            ExcelWriterUtil.addCellData(cellDataList, index, 10, bz);
 
             JSONObject values = jsonObject.getJSONObject("values");
             Map<String, Object> innerMap = values.getInnerMap();
-            for (int j = 1; j < columns.size(); j++) {
-                Object o = innerMap.get(columns.get(j));
-                ExcelWriterUtil.addCellData(cellDataList, index, j, o);
+            if (innerMap.size() > 0) {
+                ExcelWriterUtil.addCellData(cellDataList, index, 0, clock);
+                ExcelWriterUtil.addCellData(cellDataList, index, 10, bz);
+                for (int j = 1; j < columns.size(); j++) {
+                    Object o = innerMap.get(columns.get(j));
+                    ExcelWriterUtil.addCellData(cellDataList, index, j, o);
+                }
+                index++;
             }
-            index++;
         }
 
         return cellDataList;
@@ -137,6 +143,15 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemValues4";
+        }
+    }
+
+    private String getUrl1(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/analysis/anaItemValues3";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemValues3";
         }
     }
 }

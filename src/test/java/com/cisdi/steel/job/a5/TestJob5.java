@@ -3,7 +3,6 @@ package com.cisdi.steel.job.a5;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.a5.*;
 import com.cisdi.steel.module.job.a5.task.DiaojianOneKongDayJob;
-import com.cisdi.steel.module.job.a5.task.KongqiyaMonthJob;
 import com.cisdi.steel.module.job.a5.task.MeiqihunhemeisdJob;
 import com.cisdi.steel.module.job.a5.task.QiguidianjianJob;
 import org.junit.Test;
@@ -197,7 +196,40 @@ public class TestJob5 extends SteelApplicationTests {
     private DiaojianOneKongDayJob kongqiyaMonthJob;
 
     @Test
-    public void kqTest(){
+    public void kqTest() {
         kongqiyaMonthJob.task();
+    }
+
+    /**
+     * 电力-界牌岭
+     */
+    @Autowired
+    private JiepailingJob jiepailingJob;
+
+    @Test
+    public void jiepailingTest() {
+        jiepailingJob.execute(null);
+    }
+
+
+    /**
+     * 电力-功率因素统计
+     */
+    @Autowired
+    private GongLuYinsuJob gongLuYinsuJob;
+
+    @Test
+    public void gonglvTest() {
+        gongLuYinsuJob.execute(null);
+    }
+    /**
+     * 电力-年度报表
+     */
+    @Autowired
+    private JiduJob jiduJob;
+
+    @Test
+    public void jiDuTest() {
+        jiduJob.execute(null);
     }
 }
