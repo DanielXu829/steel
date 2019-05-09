@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -181,16 +182,30 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                             Double cc = (Double) o + val;
                             rowData.put(name, cc);
                         }
-
                     }
-
                 }
             }
-
         }
         int startRow = rowIndex;
-        return ExcelWriterUtil.handlerRowData(columns, startRow, rowData);
+        return handlerRowData(columns, startRow, rowData);
     }
+
+    private List<CellData> handlerRowData(List<String> columns, int starRow, Map<String, Object> rowData) {
+        List<CellData> resultData = new ArrayList<>();
+        int size = columns.size();
+        // 忽略大小写
+        CaseInsensitiveMap<String, Object> rowDataMap = new CaseInsensitiveMap<>(rowData);
+        for (int columnIndex = 0; columnIndex < size; columnIndex++) {
+            String column = columns.get(columnIndex);
+            if (StringUtils.isBlank(column)) {
+                continue;
+            }
+            Object value = rowDataMap.get(column);
+            ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
+        }
+        return resultData;
+    }
+
 
     protected Map<String, String> getQueryParam(String date) {
         Map<String, String> result = new HashMap<>();
