@@ -102,7 +102,6 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
 
                     JSONObject sortMap = new JSONObject();
                     sortMap.put("recordDate", "desc");
-                    sortMap.put("workShift", "asc");
 
                     query.put("sortMap", sortMap);
 
@@ -137,7 +136,7 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                 } else if (flag == 1) {
                     dealNoTime(jsonObject, columns, cellDataList);
                 } else if (flag == 3) {
-                    dealNoTime2(jsonObject, columns, cellDataList);
+                    dealNoTime2(jsonObject, columns, cellDataList, rowBatch);
                 }
             }
         }
@@ -158,25 +157,28 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
     }
 
 
-    private void dealNoTime2(JSONObject jsonObject, List<String> columns, List<CellData> cellDataList) {
+    private void dealNoTime2(JSONObject jsonObject, List<String> columns, List<CellData> cellDataList, int rowBatch) {
         JSONObject pageInfo = jsonObject.getJSONObject("pageInfo");
         if (Objects.nonNull(pageInfo)) {
             JSONArray list = pageInfo.getJSONArray("list");
             if (Objects.nonNull(list) && list.size() > 0) {
+                int rowIndex = 1;
                 for (int i = 0; i < list.size(); i++) {
                     JSONObject jsonObject1 = list.getJSONObject(i);
                     JSONObject ploProcessCheck = jsonObject1.getJSONObject("ploProcessCheck");
-                    List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, (i + 1), ploProcessCheck);
+                    List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, rowIndex, ploProcessCheck);
                     cellDataList.addAll(cellData);
 
                     JSONArray items = jsonObject1.getJSONArray("items");
                     if (Objects.nonNull(items) && items.size() > 0) {
+                        int chRowIndex = rowIndex;
                         for (int j = 0; j < items.size(); j++) {
                             JSONObject jsonObject2 = items.getJSONObject(j);
-                            List<CellData> cellData2 = ExcelWriterUtil.handlerRowData(columns, (j + 1), jsonObject2);
+                            List<CellData> cellData2 = ExcelWriterUtil.handlerRowData(columns, chRowIndex++, jsonObject2);
                             cellDataList.addAll(cellData2);
                         }
                     }
+                    rowIndex += rowBatch;
                 }
             }
         }

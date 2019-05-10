@@ -175,6 +175,17 @@ public class TestJob3 extends SteelApplicationTests {
     }
 
     /**
+     * 6烧结精益生产管控系统
+     */
+    @Autowired
+    private JingyiJob6 jingyiJob6;
+
+    @Test
+    public void test151() {
+        jingyiJob6.execute(null);
+    }
+
+    /**
      * 烧结混合机加水蒸汽预热温度统计表
      */
     @Autowired
