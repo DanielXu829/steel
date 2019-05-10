@@ -45,7 +45,8 @@ public class RongjiWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int index = 1;
-                if ("_jiaofen6_month_all".equals(sheetName)) {
+                String main1 = sheetSplit[1];
+                if (main1.startsWith("6")) {
                     version = "6.0";
                 }
                 for (DateQuery item : dateQueries) {
@@ -71,22 +72,30 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         queryParam.put("itemNames", columns);
         ArrayList<String> list = new ArrayList<>();
         String url = getUrl(version);
-        if ("_jiaofen5_month_all".equals(sheetName)) {
+        if ("_5jiaofen_month_all".equals(sheetName) || "_6jiaofen_month_all".equals(sheetName)) {
             list.add("CN-JN");
             queryParam.put("brandCodes", list);
             url = getUrl(version);
-        } else if ("_jiaofen6_month_all".equals(sheetName)) {
-            list.add("CN-JN");
-            queryParam.put("brandCodes", list);
-            url = getUrl(version);
-        } else if ("_meifen5_month_all".equals(sheetName)) {
+        } else if ("_5meifen_month_all".equals(sheetName)) {
             list.add("5#烧结用煤粉");
+            queryParam.put("brandCodes", list);
+            url = getUrl(version);
+        } else if ("_6meifen_month_all".equals(sheetName)) {
             list.add("6#烧结用煤粉");
             queryParam.put("brandCodes", list);
             url = getUrl(version);
-        } else if ("_rongji5_month_all".equals(sheetName)) {
-            queryParam.put("materialClass", "flux");
-            url = getUrl1(version);
+        } else if ("_5rongji_month_all".equals(sheetName)) {
+            list.add("5#烧结用生石灰粉");
+            list.add("5#烧结用白云石粉");
+            list.add("5#烧结用石灰石粉");
+            queryParam.put("brandCodes", list);
+            url = getUrl(version);
+        } else if ("_6rongji_month_all".equals(sheetName)) {
+            list.add("6#烧结用生石灰粉");
+            list.add("6#烧结用白云石粉");
+            list.add("6#烧结用石灰石粉");
+            queryParam.put("brandCodes", list);
+            url = getUrl(version);
         }
 
         SerializeConfig serializeConfig = new SerializeConfig();
@@ -143,15 +152,6 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemValues4";
-        }
-    }
-
-    private String getUrl1(String version) {
-        if ("5.0".equals(version)) {
-            return httpProperties.getUrlApiSJOne() + "/analysis/anaItemValues3";
-        } else {
-            // "6.0".equals(version) 默认
-            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemValues3";
         }
     }
 }
