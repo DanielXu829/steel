@@ -159,7 +159,7 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < size; i++) {
             JSONObject materialsJSONObject = bookMaterials.getJSONObject(i);
             if (Objects.nonNull(materialsJSONObject)) {
-                String matclass = materialsJSONObject.getString("matClass");
+                String matclass = materialsJSONObject.getString("matType");
                 if ("SINTER".equals(matclass)) {
                     sinterList.add(materialsJSONObject);
                 } else if ("PELLETS".equals(matclass)) {
