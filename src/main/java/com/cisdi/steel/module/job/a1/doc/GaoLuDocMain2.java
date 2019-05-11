@@ -53,9 +53,9 @@ public class GaoLuDocMain2 {
     @Scheduled(cron = "0 31 6 * * ?")
     public void mainTask() {
         result = new HashMap<>();
-//        mainDeal(version6);
+        mainDeal(version6);
         mainDeal(version7);
-//        mainDeal(version8);
+        mainDeal(version8);
         log.error("高炉word生成完毕！");
     }
 
@@ -86,7 +86,7 @@ public class GaoLuDocMain2 {
         dealPart12(version, L12);
         dealPart13(version, L13);
 
-        if ("6.0".equals(version)) {
+        if ("6.0".equals(version) || "7.0".equals(version)) {
             dealPart16_2(version, L16);
         } else if ("8.0".equals(version)) {
             dealPart14(version, L14);
@@ -143,7 +143,7 @@ public class GaoLuDocMain2 {
 
     private void dealTagName7() {
         L1 = new String[]{"BF7_L2M_BX_HM_confirmWgt_evt", "BF7_L2M_FuelRate_1d_avg"};
-        L2 = new String[]{"BF7_L2M_CokeRate_1d_avg", "BF7_L2M_NTCokeRate_1d_avg", "BF7_L2M_CoalRate_1d_avg"};
+        L2 = new String[]{"BF7_L2M_BX_CokeRate_1d_cur", "BF7_L2M_BX_NTCokeRate_1d_cur", "BF7_L2M_BX_CoalRate_1d_cur"};
         L3 = new String[]{"BF7_L2M_SinterRatio_1d_avg", "BF7_L2M_PelletsRatio_1d_avg", "BF7_L2M_LumporeRatio_1d_avg"};
         L4 = new String[]{"M40", "M10"};
         L5 = new String[]{"CSR", "CRI"};
@@ -152,27 +152,27 @@ public class GaoLuDocMain2 {
         L8 = new String[]{"BF7_L2C_BD_HotBlastFlow_1d_avg", "BF7_L2C_BD_ColdBlastPress_1d_avg", "BF7_L2C_BD_Pressdiff_1d_avg"};
         L9 = new String[]{"Ad", "S"};
 
-        L10 = new String[]{"BF7_L2C_BD_HotBlastFlow_1d_avg", "BF7_L2C_BD_OxygenFlow_1d_avg"};
-        L11 = new String[]{"BF7_L2C_BD_ColdBlastPress_1d_avg", "BF7_L2C_BD_TopPress2_1d_avg"};
+        L10 = new String[]{"BF7_L2C_BD_ColdBlastFlow_1h_avg", "BF7_L2C_BD_OxygenFlow_1d_avg"};
+        L11 = new String[]{"BF7_L2C_BD_ColdWindPress2_1d_avg", "BF7_L2C_TP_TopPress_1d_avg"};
 
-        L12 = new String[]{"BF7_L2C_BD_W_1d_avg", "BF7_L2C_BD_Z_1d_avg"};
-        L13 = new String[]{"BF7_L2C_BD_CCT_1d_avg", "BF7_L2M_PCT_1d_avg"};
+        L12 = new String[]{"BF7_L2C_BD_PeripheralAirflowFinger_1d_avg", "BF7_L2C_BD_CentralAirFinger_1d_avg"};
+        L13 = new String[]{"BF7_L2C_BD_CCTCenterTemp_1d_avg", "BF7_L2M_PCT_1d_avg"};
         L14 = new String[]{"BF7_L2C_BD_B1B3_HeatLoad_1d_avg", "BF7_L2C_BD_S1S3_HeatLoad_1d_avg"};
 
         L15 = new String[]{"BF7_L2C_BD_S4S6_HeatLoad_1d_avg", "BF7_L2C_BD_R1R3_HeatLoad_1d_avg"};
 
-        L16 = new String[]{"BF7_L2C_BD_WT6_Q_1d_avg", "BF7_L2C_TP_GasUtilization_1d_avg"};
+        L16 = new String[]{"BF7_L2C_BD_WT6_Q_1d_avg", "BF7_L2C_BD_GasUtilization_1d_avg"};
 
-        L17 = new String[]{"BF7_L2C_BD_HotBlastFlow_1d_avg", "BF7_L2C_BD_ColdBlastPress_1d_avg", "BF7_L2C_BD_Pressdiff_1d_avg",
+        L17 = new String[]{"BF7_L2C_BD_ColdBlastFlow_1d_avg", "BF7_L2C_BD_ColdWindPress2_1d_avg", "BF7_L2M_PressDiff_1d_avg",
                 "BF7_L2C_BD_OxygenFlow_1d_avg", "BF7_L2C_BD_HotBlastTemp_1d_avg", "BF7_L2C_BD_BH_1d_avg",
-                "BF7_L2C_BD_TopPress_1d_avg", "BF7_L2M_FuelRate_1d_avg", "BF7_L2M_LumporeRatio_1d_avg",
+                "BF7_L2C_TP_TopPress_1d_avg", "BF7_L2M_BX_FuelRate_1d_cur", "BF7_L2M_LumporeRatio_1d_avg",
                 "BF7_L2M_PelletsRatio_1d_avg", "BF7_L2M_SinterRatio_1d_avg", "",
-                "BF7_L2C_BD_CokeLoad_1d_avg", "BF7_L2C_SH_OreBatchWeight", "BF7_L2C_SH_CokeBatchWeight",
-                "BF7_L2M_LAB_slagR2_1d_avg", "BF7_L2M_BatchRate_1d_avg", "BF7_L2C_BD_BlastVelocityAct_1d_avg",
-                "BF7_L2C_BD_Ek_1d_avg", "BF7_L2C_BD_FlamTemp_1d_avg"
+                "BF7_L2C_SH_OCRate_1d_avg", "BF7_L2C_SH_OreBatchWeight", "BF7_L2C_SH_CokeBatchWeight",
+                "BF7_L2M_LAB_slagR2_1d_avg", "BF7_L2C_TP_MaBatch_1d_avg", "BF7_L2C_BD_ActualWindSpeed_1d_avg",
+                "BF7_L2M_BlastKineticEnergy_1d_avg", "BF7_L2C_BD_FlamTemp_1d_avg"
         };
 
-        L18 = new String[]{"BF7_L2C_HMTemp_1d_avg"};
+        L18 = new String[]{"BF7_L2M_HMTemp_1d_avg"};
         L19 = new String[]{"BF7_L2C_AnalysisSiValue_1d_avg", "BF7_L2C_AnalysisSValue_1d_avg"};
     }
 
@@ -661,7 +661,9 @@ public class GaoLuDocMain2 {
             max = useList.get(i) > max ? useList.get(i) : max;
             min = useList.get(i) < min ? useList.get(i) : min;
         }
-
+        if (max == 0) {
+            max = 1;
+        }
         data.add(max);
         data.add(min);
 
@@ -1210,7 +1212,11 @@ public class GaoLuDocMain2 {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
-        objects1 = dealData(objects1, 1000);
+        int xc = 1;
+        if (!"7.0".equals(version)) {
+            xc = 1000;
+        }
+        objects1 = dealData(objects1, xc);
 
         result.put("part22", getLastVal(objects1));
         result.put("part23", getLastVal(objects2));
@@ -1433,7 +1439,6 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.2;
         Double min2 = data2.get(1) * 0.8;
 
-
         String title1 = "";
         String categoryAxisLabel1 = null;
         String valueAxisLabel1 = null;
@@ -1502,6 +1507,11 @@ public class GaoLuDocMain2 {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
+        int xc = 1;
+        if ("7.0".equals(version)) {
+            xc = 100;
+        }
+        objects2 = dealData(objects2, xc);
 
         /**总热负荷
          * 煤气利用率
@@ -1779,6 +1789,8 @@ public class GaoLuDocMain2 {
             String sqquence = "8高炉";
             if ("6.0".equals(version)) {
                 sqquence = "6高炉";
+            } else if ("7.0".equals(version)) {
+                sqquence = "7高炉";
             }
 
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
@@ -1815,6 +1827,9 @@ public class GaoLuDocMain2 {
     }
 
     private Object getLastVal(Object[] objects1) {
+        if (Objects.isNull(objects1) || objects1.length == 0) {
+            return null;
+        }
         Object o = objects1[objects1.length - 2];
         Object v1 = 0.0;
         if (Objects.nonNull(o)) {
