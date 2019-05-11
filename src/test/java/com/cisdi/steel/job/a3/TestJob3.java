@@ -229,4 +229,15 @@ public class TestJob3 extends SteelApplicationTests {
         gongzuogongyijiancha5Job.execute(null);
     }
 
+    /**
+     * 5烧结机指标运行记录
+     */
+    @Autowired
+    private ZhibiaoyunxingJob5 zhibiaoyunxingJob5;
+
+    @Test
+    public void test20() {
+        zhibiaoyunxingJob5.execute(null);
+    }
+
 }
