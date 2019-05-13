@@ -102,7 +102,7 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
             result = getTagValues(getUrl1(version), dateQuery, columns);
         } else if (jk == 3) {
             Map<String, String> map = new HashMap<>();
-            map.put("brandCode", "sinter");
+            map.put("brandCode", "ore_blending");
             map.put("timeType", "sampleTime");
             map.put("pageSize", Integer.MAX_VALUE + "");
             map.put("startTime", dateQuery.getQueryStartTime().toString());
