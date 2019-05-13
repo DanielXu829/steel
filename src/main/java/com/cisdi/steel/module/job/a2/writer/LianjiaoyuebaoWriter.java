@@ -36,6 +36,11 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version ="67.0";
+        try{
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        }catch(Exception e){
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -53,7 +58,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl1(), columns, dateQueries1.get(k));
+                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl1(version), columns, dateQueries1.get(k));
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             rowIndex++;
                         }
@@ -64,7 +69,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            List<CellData> cellDataList = this.mapDataHandler2(getUrl2(), columns, 1, dateQueries1.get(k), startRow);
+                            List<CellData> cellDataList = this.mapDataHandler2(getUrl2(version), columns, 1, dateQueries1.get(k), startRow);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
                         }
@@ -76,7 +81,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            List<CellData> cellDataList = this.mapDataHandler3(getUrl3(), columns, 1, dateQueries1.get(k), startRow);
+                            List<CellData> cellDataList = this.mapDataHandler3(getUrl3(version), columns, 1, dateQueries1.get(k), startRow);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
                         }
@@ -87,7 +92,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            List<CellData> cellDataList = this.mapDataHandler4(getUrl4(), columns, 1,dateQueries1.get(k),startRow);
+                            List<CellData> cellDataList = this.mapDataHandler4(getUrl4(version), columns, 1,dateQueries1.get(k),startRow);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
                         }
@@ -98,8 +103,8 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            String version = "CO6";
-                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(), startRow, dateQueries1.get(k), version);
+                            String jhno = "CO6";
+                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
                         }
@@ -110,8 +115,8 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            String version = "CO7";
-                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(), startRow, dateQueries1.get(k), version);
+                            String jhno = "CO7";
+                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
                         }
@@ -124,7 +129,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         for (int m = 0; m < dateQueries1.size(); m++) {
                             for (int k = 0; k < columns.size(); k++) {
                                 String[] split = columns.get(k).split("/");
-                                Double cellDataList = mapDataHandler5(getUrl5(), dateQueries1.get(m), split[0], split[1]);
+                                Double cellDataList = mapDataHandler5(getUrl5(version), dateQueries1.get(m), split[0], split[1]);
                                 setSheetValue(sheet, rowIndex, k, cellDataList);
                             }
                             rowIndex++;
@@ -271,8 +276,8 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         return handlerJsonArray(columns, rowBatch, objects, startRow);
     }
 
-    public List<CellData> mapDataHandler4x(String url, int startRow, DateQuery dateQuery, String version) {
-        Map<String, String> queryParam = getQueryParam5(dateQuery, version);
+    public List<CellData> mapDataHandler4x(String url, int startRow, DateQuery dateQuery, String jhno) {
+        Map<String, String> queryParam = getQueryParam5(dateQuery, jhno);
         String result = httpUtil.get(url, queryParam);
         List<Double> list = new ArrayList<>();
         List<CellData> cellDataList = new ArrayList<>();
@@ -393,27 +398,27 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected String getUrl1() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
+    protected String getUrl1(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 
-    protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/cokingStatementParameter/getByDateTime";
+    protected String getUrl2(String version) {
+        return httpProperties.getJHUrlVersion(version)  + "/cokingStatementParameter/getByDateTime";
     }
 
-    protected String getUrl3() {
-        return httpProperties.getUrlApiJHOne() + "/productionExecution/getCauseOfKCoefficientByDateTime";
+    protected String getUrl3(String version) {
+        return httpProperties.getJHUrlVersion(version)  + "/productionExecution/getCauseOfKCoefficientByDateTime";
     }
 
-    protected String getUrl4() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    protected String getUrl4(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
     }
 
-    protected String getUrl5() {
-        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemValByCodeOrSource";
+    protected String getUrl5(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemValByCodeOrSource";
     }
 
-    private String getUrl6() {
-        return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
+    private String getUrl6(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 }

@@ -33,7 +33,12 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
-        String version = PoiCustomUtil.getSheetCellVersion(workbook);
+        String version ="67.0";
+        try{
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        }catch(Exception e){
+        }
+        String jhNo = PoiCustomUtil.getSheetCell(workbook, "_jhNo", 0, 1);
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -56,7 +61,7 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(), columns, item,version);
+                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, item,jhNo);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -67,8 +72,8 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery,String version) {
-        Map<String, String> queryParam = getQueryParam(dateQuery,version);
+    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery,String jhNo) {
+        Map<String, String> queryParam = getQueryParam(dateQuery,jhNo);
         int size = columns.size();
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -99,22 +104,30 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected Map<String, String> getQueryParam(DateQuery dateQuery,String version) {
+    protected Map<String, String> getQueryParam(DateQuery dateQuery,String jhNo) {
         Map<String, String> result = new HashMap<>();
-        if("6.0".equals(version)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-15);
+        if("6.0".equals(jhNo)){
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-25);
             result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-        }else if("7.0".equals(version)){
+        }else if("7.0".equals(jhNo)){
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-10);
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
+            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
+        }else if("1.0".equals(jhNo)){
             Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-5);
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
+            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
+        }else if("2.0".equals(jhNo)){
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-20);
             result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }
        return result;
     }
 
-    protected String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    protected String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
 }
