@@ -2,13 +2,14 @@ package com.cisdi.steel.module.job.a3;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a3.execute.JingyishengchanguankongExecute;
+import com.cisdi.steel.module.job.a3.execute.JiejiExecute;
+import com.cisdi.steel.module.job.a3.execute.RongjiExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 5烧结精益生产管控系统
+ * 指标运行记录日报
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -18,18 +19,18 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class JingyiJob5 extends AbstractExportJob {
+public class ZhibiaoyunxingJob5 extends AbstractExportJob {
 
     @Autowired
-    private JingyishengchanguankongExecute jingyishengchanguankongExecute;
+    private RongjiExecute rongjiExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.sj_jingyiguankong5;
+        return JobEnum.sj_zhibiaoyunxing_day;
     }
 
     @Override
     public IJobExecute getCurrentJobExecute() {
-        return jingyishengchanguankongExecute;
+        return rongjiExecute;
     }
 }

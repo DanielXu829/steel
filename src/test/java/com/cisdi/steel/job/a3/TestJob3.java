@@ -175,6 +175,17 @@ public class TestJob3 extends SteelApplicationTests {
     }
 
     /**
+     * 6烧结精益生产管控系统
+     */
+    @Autowired
+    private JingyiJob6 jingyiJob6;
+
+    @Test
+    public void test151() {
+        jingyiJob6.execute(null);
+    }
+
+    /**
      * 烧结混合机加水蒸汽预热温度统计表
      */
     @Autowired
@@ -216,6 +227,17 @@ public class TestJob3 extends SteelApplicationTests {
     @Test
     public void test19() {
         gongzuogongyijiancha5Job.execute(null);
+    }
+
+    /**
+     * 5烧结机指标运行记录
+     */
+    @Autowired
+    private ZhibiaoyunxingJob5 zhibiaoyunxingJob5;
+
+    @Test
+    public void test20() {
+        zhibiaoyunxingJob5.execute(null);
     }
 
 }

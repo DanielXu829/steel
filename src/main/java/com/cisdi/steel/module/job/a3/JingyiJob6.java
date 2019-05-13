@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 5烧结精益生产管控系统
+ * 6烧结精益生产管控系统
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -18,14 +18,14 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class JingyiJob5 extends AbstractExportJob {
+public class JingyiJob6 extends AbstractExportJob {
 
     @Autowired
     private JingyishengchanguankongExecute jingyishengchanguankongExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.sj_jingyiguankong5;
+        return JobEnum.sj_jingyiguankong6;
     }
 
     @Override
