@@ -32,6 +32,11 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = "67.0";
+        try {
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -63,13 +68,13 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                 }
                 int rowIndex = 1;
                 if ("crushing".equals(sheetSplit[1])) {
-                    Double cellDataList = this.valHandler(getUrl(), dateQuery);
+                    Double cellDataList = this.valHandler(getUrl(version), dateQuery);
                     setSheetValue(sheet, 1, 0, cellDataList);
                 } else if ("lianjiao".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler(getUrl6(), rowIndex,dateQuery, shiftNum+"");
+                    List<CellData> cellDataList = this.mapDataHandler(getUrl6(version), rowIndex, dateQuery, shiftNum + "");
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("tag".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(), columns, dateQuery);
+                    List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(version), columns, dateQuery);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else {
                     Row row = sheet.createRow(1);
@@ -77,7 +82,7 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                     row.getCell(2).setCellType(CellType.STRING);
                     row.createCell(3).setCellValue(shiftDate);
                     row.getCell(3).setCellType(CellType.STRING);
-                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl5(), columns, dateQuery);
+                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl5(version), columns, dateQuery);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
@@ -250,19 +255,19 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
+    private String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getParticleDistributionLatest";
     }
 
-    private String getUrl3() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValueStatisticType";
+    private String getUrl3(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValueStatisticType";
     }
 
-    private String getUrl6() {
-        return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
+    private String getUrl6(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 
-    protected String getUrl5() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    protected String getUrl5(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 }
