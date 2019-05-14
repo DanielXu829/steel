@@ -2,9 +2,7 @@ package com.cisdi.steel.module.job.a2;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a2.execute.BaseJhExecute;
 import com.cisdi.steel.module.job.a2.execute.JiaolujiareExecute;
-import com.cisdi.steel.module.job.a2.execute.Luwenjilu6Execute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
