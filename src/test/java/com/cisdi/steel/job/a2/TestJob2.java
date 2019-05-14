@@ -342,4 +342,25 @@ public class TestJob2 extends SteelApplicationTests {
         chanhaozongheJob.execute(null);
     }
 
+    /**
+     * CK12转运站除尘报表
+     */
+    @Autowired
+    private ZhuanyunzhanChuchenJob zhuanyunzhanChuchenJob;
+
+    @Test
+    public void test31() {
+        zhuanyunzhanChuchenJob.execute(null);
+    }
+
+    /**
+     * CK12取样除尘报表
+     */
+    @Autowired
+    private QuyangChuchenJob quyangChuchenJob;
+
+    @Test
+    public void test32() {
+        quyangChuchenJob.execute(null);
+    }
 }

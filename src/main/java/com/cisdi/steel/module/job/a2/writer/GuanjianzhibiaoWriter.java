@@ -35,6 +35,11 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version ="67.0";
+        try{
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        }catch(Exception e){
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -48,27 +53,27 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                 if ("crushing".equals(sheetSplit[1])) {
                     for (int j = 0; j < size; j++) {
                         int rowIndex = 1 + j;
-                        Double cellDataList = this.valHandler(getUrl(), dateQueries.get(j));
+                        Double cellDataList = this.valHandler(getUrl(version), dateQueries.get(j));
                         setSheetValue(sheet, rowIndex, 0, cellDataList);
                     }
                 } else if ("lianjiao".equals(sheetSplit[1])) {
                     for (int j = 0; j < size; j++) {
                         int rowIndex = 1 + j;
-                        List<CellData> cellData = this.valHandler1(getUrl6(), rowIndex, dateQueries.get(j));
+                        List<CellData> cellData = this.valHandler1(getUrl6(version), rowIndex, dateQueries.get(j));
                         ExcelWriterUtil.setCellValue(sheet, cellData);
                     }
                 } else if ("tag".equals(sheetSplit[1])) {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(), columns, item);
+                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl7(), columns, item);
+                        List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl7(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 }
@@ -225,14 +230,6 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParamx(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getStartTime(), -1), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(DateUtil.addDays(dateQuery.getEndTime(), -1), "yyyy/MM/dd HH:mm:ss"));
-
-        return result;
-    }
-
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -8), "yyyy/MM/dd HH:mm:ss"));
@@ -258,20 +255,20 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
+    private String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getParticleDistributionLatest";
     }
 
-    private String getUrl3() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValueStatisticType";
+    private String getUrl3(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValueStatisticType";
     }
 
-    private String getUrl6() {
-        return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
+    private String getUrl6(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 
-    protected String getUrl7() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    protected String getUrl7(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
 }

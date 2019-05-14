@@ -96,6 +96,8 @@ public enum JobEnum {
     jh_zhuyaogycs("jh_zhuyaogycs", "炼焦-主要工艺参数"),
     jh_luwenguankong("jh_luwenguankong", "炼焦-炉温管控"),
     jh_chanhaozonghe("jh_chanhaozonghe", "化产-产耗综合报表"),
+    jh_zhuanyunzhanchuchen("jh_zhuanyunzhanchuchen", "CK12转运站除尘报表"),
+    jh_quyangchuchen("jh_quyangchuchen", "CK12取样除尘报表"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫系统运行日报"),
