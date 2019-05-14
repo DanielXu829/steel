@@ -100,7 +100,7 @@ public class DateQueryUtil {
     }
 
     /**
-     * 构建每小时时间段
+     * 构建每半小时时间段
      *
      * @param date 指定时间
      * @return 结果
