@@ -7,7 +7,6 @@ import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
-import com.cisdi.steel.module.job.a1.writer.GongyiLuruWriter;
 import com.cisdi.steel.module.job.a3.writer.GongyikaWriter;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;

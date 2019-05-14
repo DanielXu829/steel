@@ -2,15 +2,12 @@ package com.cisdi.steel.module.job.a1.execute;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.common.util.CookieUtils;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.a1.writer.GongyiLuruWriter;
-import com.cisdi.steel.module.job.a1.writer.PeiLiaoDanWriter;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -32,8 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 工艺录入导出

@@ -9,17 +9,12 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
-import com.cisdi.steel.module.job.util.ExcelCellColorUtil;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**

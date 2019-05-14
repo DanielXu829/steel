@@ -6,7 +6,6 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
-import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;

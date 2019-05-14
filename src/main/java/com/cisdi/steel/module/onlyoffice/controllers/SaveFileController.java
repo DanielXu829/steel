@@ -1,19 +1,8 @@
 package com.cisdi.steel.module.onlyoffice.controllers;
 
 import com.alibaba.fastjson.JSONObject;
-import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.JsonUtil;
-import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.module.job.config.JobProperties;
-import com.cisdi.steel.module.job.enums.JobEnum;
-import com.cisdi.steel.module.onlyoffice.entities.FileModel;
-import com.cisdi.steel.module.onlyoffice.helpers.DocumentManager;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
-import com.cisdi.steel.module.report.entity.ReportIndex;
-import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
-import com.cisdi.steel.module.report.service.ReportIndexService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,8 +13,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 
 /**

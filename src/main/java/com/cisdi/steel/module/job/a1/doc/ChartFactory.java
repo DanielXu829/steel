@@ -2,11 +2,9 @@ package com.cisdi.steel.module.job.a1.doc;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
-
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
-
 
 import java.awt.*;
 import java.util.List;

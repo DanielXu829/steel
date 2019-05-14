@@ -2,7 +2,6 @@ package com.cisdi.steel.module.report.service;
 
 import com.cisdi.steel.common.base.service.IBaseService;
 import com.cisdi.steel.common.resp.ApiResult;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import org.springframework.web.multipart.MultipartFile;

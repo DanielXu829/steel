@@ -1,30 +1,11 @@
 package com.cisdi.steel.module.job.a3.execute;
 
-import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.a3.writer.JiejiWriter;
-import com.cisdi.steel.module.job.a3.writer.TuoliuWriter;
-import com.cisdi.steel.module.job.dto.ExcelPathInfo;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
-import com.cisdi.steel.module.job.dto.WriterExcelDTO;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
-import com.cisdi.steel.module.report.entity.ReportIndex;
-import com.cisdi.steel.module.report.enums.LanguageEnum;
-import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * 5#、6#烧结机生产日报

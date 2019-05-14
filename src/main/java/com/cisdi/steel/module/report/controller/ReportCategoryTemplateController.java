@@ -3,21 +3,16 @@ package com.cisdi.steel.module.report.controller;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
-import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.common.util.FileUtil;
-import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.util.Date;
 import java.util.Objects;
 
 /**

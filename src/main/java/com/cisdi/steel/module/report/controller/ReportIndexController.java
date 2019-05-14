@@ -1,7 +1,5 @@
 package com.cisdi.steel.module.report.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
@@ -23,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
 /**

@@ -1,6 +1,5 @@
 package com.cisdi.steel.module.report.util;
 
-import com.cisdi.steel.common.base.vo.BaseTreeObj;
 import com.cisdi.steel.module.report.entity.ReportCategory;
 import org.springframework.util.CollectionUtils;
 

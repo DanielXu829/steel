@@ -4,9 +4,7 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.a3.writer.GycanshuWriter;
-import com.cisdi.steel.module.job.a3.writer.JiejiWriter;
 import com.cisdi.steel.module.job.dto.ExcelPathInfo;
-import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -14,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * 五、六号烧结机主要工艺参数及实物质量情况

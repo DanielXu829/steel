@@ -1,14 +1,11 @@
 package com.cisdi.steel.module.quartz.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.mapper.QuartzMapper;
 import com.cisdi.steel.module.quartz.query.QuartzEntityQuery;
 import com.cisdi.steel.module.quartz.service.JobService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

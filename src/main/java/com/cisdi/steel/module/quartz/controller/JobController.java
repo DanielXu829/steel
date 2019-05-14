@@ -7,7 +7,6 @@ import com.cisdi.steel.module.quartz.query.CronQuery;
 import com.cisdi.steel.module.quartz.query.QuartzEntityQuery;
 import com.cisdi.steel.module.quartz.service.JobService;
 import com.cisdi.steel.module.quartz.util.QuartzUtil;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;

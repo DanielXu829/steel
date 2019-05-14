@@ -2,14 +2,11 @@ package com.cisdi.steel.module.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.cisdi.steel.module.job.a3.doc.ShaojieDocMain;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
-import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
-import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

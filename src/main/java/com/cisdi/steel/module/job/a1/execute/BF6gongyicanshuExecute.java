@@ -3,7 +3,6 @@ package com.cisdi.steel.module.job.a1.execute;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
 import com.cisdi.steel.module.job.a1.writer.BF6gongyicanshuWriter;
-import com.cisdi.steel.module.job.a1.writer.GuankongzhibiaoWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

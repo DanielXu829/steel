@@ -1,11 +1,11 @@
 package com.cisdi.steel.module.sys.query;
 
-import java.time.LocalDateTime;
-import lombok.Data;
-import lombok.experimental.Accessors;
-import lombok.EqualsAndHashCode;
-import java.io.Serializable;
 import com.cisdi.steel.common.base.vo.PageQuery;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
 
 /**
  * <p>Description: 配置 查询参数</p>
