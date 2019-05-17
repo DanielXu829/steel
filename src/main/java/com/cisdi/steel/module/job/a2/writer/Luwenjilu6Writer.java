@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.a2.writer;
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
@@ -33,6 +34,11 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = "67.0";
+        try {
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+        }
         DateQuery dateQuery = this.getDateQuery(excelDTO);
         String dd = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "dd");
         String format = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "MM.dd");
@@ -44,7 +50,13 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
                 workbook.removeSheetAt(i);
                 numberOfSheets--;
             }
-            if ("6炉机侧炉温管控".equals(sheetName)) {
+            String sheetName1 = "6炉机侧炉温管控";
+            String sheetName2 = "6炉焦侧炉温管控";
+            if ("12.0".equals(version)) {
+                sheetName1 = "1炉机侧炉温管控";
+                sheetName2 = "1炉焦侧炉温管控";
+            }
+            if (sheetName1.equals(sheetName)) {
                 int rowNum = 5;
                 for (int j = 3; j < 59; j++) {
                     Row row = sheetAt.getRow(j);
@@ -54,7 +66,7 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
                     cell.setCellType(CellType.FORMULA);
                     rowNum++;
                 }
-            } else if ("6炉焦侧炉温管控".equals(sheetName)) {
+            } else if (sheetName2.equals(sheetName)) {
                 int rowNum = 5;
                 for (int j = 3; j < 59; j++) {
                     Row row = sheetAt.getRow(j);
@@ -72,7 +84,7 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         Row row = sheet.getRow(0);
         Cell cell = row.getCell(1);
         cell.setCellValue(DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd"));
-        HashMap<String, Integer> map = mapDataHandler2(getUrl2(), dateQuery);
+        HashMap<String, Integer> map = mapDataHandler2(getUrl2(version), dateQuery);
         Row row1 = sheet.getRow(66);
         for (int r = 1; r < 8; r++) {
             Cell cell1 = row1.getCell(r);
@@ -83,7 +95,11 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
             cell1.setCellValue(map.get("standardTempCoke"));
         }
         List<String> rowCelVal1 = getRowCelVal1(sheet, 3);
-        List<CellData> cellData1 = mapDataHandler(4, getUrl(), rowCelVal1, "CO6", dateQuery);
+        String jhNo = "CO6";
+        if ("12.0".equals(version)) {
+            jhNo = "CO1";
+        }
+        List<CellData> cellData1 = mapDataHandler(4, getUrl(version), rowCelVal1, jhNo, dateQuery);
         ExcelWriterUtil.setCellValue(sheet, cellData1);
 
         return workbook;
@@ -179,12 +195,12 @@ public class Luwenjilu6Writer extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/tmmirbtmpDataTable/selectByDateAndType";
+    protected String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/tmmirbtmpDataTable/selectByDateAndType";
     }
 
-    protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/thermalRegulation/getCurrentByDate";
+    protected String getUrl2(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/thermalRegulation/getCurrentByDate";
     }
 
 }
