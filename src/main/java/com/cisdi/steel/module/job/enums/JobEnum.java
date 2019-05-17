@@ -98,6 +98,13 @@ public enum JobEnum {
     jh_chanhaozonghe("jh_chanhaozonghe", "化产-产耗综合报表"),
     jh_zhuanyunzhanchuchen("jh_zhuanyunzhanchuchen", "CK12转运站除尘报表"),
     jh_quyangchuchen("jh_quyangchuchen", "CK12取样除尘报表"),
+    jh_ck45gufenglengning("jh_ck45gufenglengning", "CK45-化产-鼓风冷凝报表（日）"),
+    jh_ck45cuben1("jh_ck45cuben1", "CK45-化产-粗苯(一)（日）"),
+    jh_ck45cuben2("jh_ck45cuben2", "CK45-化产-粗苯(二)（日）"),
+    jh_ck45meiqihuishou1("jh_ck45meiqihuishou1", "CK45-化产-余热煤气回收(一)"),
+    jh_ck45meiqihuishou2("jh_ck45meiqihuishou2", "CK45-化产-余热煤气回收(二)"),
+    jh_ck45zkcaozuo1("jh_ck45zkcaozuo1", "CK45-化产-中控操作(一)"),
+    jh_ck45zkcaozuo2("jh_ck45zkcaozuo2", "CK45-化产-中控操作(二)"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫系统运行日报"),

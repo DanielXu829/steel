@@ -363,4 +363,81 @@ public class TestJob2 extends SteelApplicationTests {
     public void test32() {
         quyangChuchenJob.execute(null);
     }
+
+    /**
+     * CK45鼓风冷宁报表
+     */
+    @Autowired
+    private CK45GufenglengningJob ck45GufenglengningJob;
+
+    @Test
+    public void test33() {
+        ck45GufenglengningJob.execute(null);
+    }
+
+    /**
+     * CK45粗苯1
+     */
+    @Autowired
+    private CK45Cuben1Job ck45Cuben1Job;
+
+    @Test
+    public void test34() {
+        ck45Cuben1Job.execute(null);
+    }
+
+    /**
+     * CK45粗苯2
+     */
+    @Autowired
+    private CK45Cuben2Job ck45Cuben2Job;
+
+    @Test
+    public void test35() {
+        ck45Cuben2Job.execute(null);
+    }
+
+    /**
+     * CK45余热煤气回收1
+     */
+    @Autowired
+    private CK45Meiqihuishou1Job ck45Meiqihuishou1Job;
+
+    @Test
+    public void test36() {
+        ck45Meiqihuishou1Job.execute(null);
+    }
+
+    /**
+     * CK45余热煤气回收2
+     */
+    @Autowired
+    private CK45Meiqihuishou2Job ck45Meiqihuishou2Job;
+
+    @Test
+    public void test37() {
+        ck45Meiqihuishou2Job.execute(null);
+    }
+
+    /**
+     * CK45中控操作1
+     */
+    @Autowired
+    private CK45Zkcaozuo1Job ck45Zkcaozuo1Job;
+
+    @Test
+    public void test38() {
+        ck45Zkcaozuo1Job.execute(null);
+    }
+
+    /**
+     * CK45中控操作2
+     */
+    @Autowired
+    private CK45Zkcaozuo2Job ck45Zkcaozuo2Job;
+
+    @Test
+    public void test39() {
+        ck45Zkcaozuo2Job.execute(null);
+    }
 }
