@@ -1,5 +1,7 @@
 package com.cisdi.steel.module.job.a2.execute;
 
+import cn.afterturn.easypoi.util.PoiCellUtil;
+import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
@@ -49,6 +51,12 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
 
     @Override
     public void createFile(Workbook workbook, ExcelPathInfo excelPathInfo, WriterExcelDTO writerExcelDTO, DateQuery dateQuery) throws IOException {
+        String version = "67.0";
+        try {
+            Sheet dictionary = workbook.getSheet("_dictionary");
+            version = PoiCellUtil.getCellValue(dictionary, 0, 1);
+        } catch (Exception e) {
+        }
         // 隐藏 下划线的sheet  强制计算
         FileOutputStream fos = new FileOutputStream(excelPathInfo.getSaveFilePath());
         int numberOfSheets = workbook.getNumberOfSheets();
@@ -73,7 +81,13 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
         if (!formatDateTime1.equals(formatDateTime)) {
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             // FileUtils.copyFile("D:\\template\\焦化\\CK67-炼焦-6#炉温记录报表（日）copy.xlsx",writerExcelDTO.getTemplate().getTemplatePath());
-            FileUtils.copyFile("/u01/templates/焦化/CK67-炼焦-6#炉温记录报表（日）copy.xlsx", writerExcelDTO.getTemplate().getTemplatePath());
+            String path ="";
+            if ("12.0".equals(version)) {
+                path = "/u01/templates/焦化/CK12-炼焦-1#炉温记录报表（日）copy.xlsx";
+            } else if ("67.0".equals(version)) {
+                path = "/u01/templates/焦化/CK67-炼焦-6#炉温记录报表（日）copy.xlsx";
+            }
+            FileUtils.copyFile(path, writerExcelDTO.getTemplate().getTemplatePath());
         } else {
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             FileUtils.copyFile(excelPathInfo.getSaveFilePath(), writerExcelDTO.getTemplate().getTemplatePath());
