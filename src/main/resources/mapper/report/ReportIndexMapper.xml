@@ -44,7 +44,7 @@
             AND index_lang=#{indexLang}
         </if>
         <if test="sequence!=null and sequence!=''">
-            AND sequence LIKE concat('%',#{sequence},'%')
+            AND sequence=#{sequence}
         </if>
     </sql>
 
