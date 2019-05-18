@@ -44,7 +44,12 @@
             AND index_lang=#{indexLang}
         </if>
         <if test="sequence!=null and sequence!=''">
-            AND sequence=#{sequence}
+            <if test="sequence=='5烧结' or sequence=='6烧结'">
+                AND sequence LIKE concat('%',#{sequence},'%')
+            </if>
+            <if test="sequence!='5烧结' and sequence!='6烧结'">
+                AND sequence=#{sequence}
+            </if>
         </if>
     </sql>
 
