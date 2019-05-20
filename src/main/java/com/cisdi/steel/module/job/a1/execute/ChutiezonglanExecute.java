@@ -131,7 +131,7 @@ public class ChutiezonglanExecute extends AbstractJobExecuteExecute {
                                             JSONObject object2 = data1.getJSONObject(m);
                                             if (Objects.nonNull(object2)) {
                                                 Long id = object2.getLong("id");
-                                                if (o.longValue() == id.longValue()) {
+                                                if (Objects.nonNull(o) && Objects.nonNull(id) && o.longValue() == id.longValue()) {
                                                     String nameCn = object2.getString("nameCn");
                                                     ExcelWriterUtil.addCellData(cellDataList, rowIndex++, i, nameCn);
                                                     break;
