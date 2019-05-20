@@ -114,7 +114,6 @@ public class Test extends AbstractExcelReadWriter {
         }
         return workbook;
     }
-
     protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int index, String version) {
         Map<String, String> queryParam = dateQuery.getQueryParam();
         String result = getTagValues1(queryParam, columns, version);

@@ -30,7 +30,7 @@ public class DateQueryUtil {
     public static DateQuery buildToday(Date date) {
         Date todayBeginTime = DateUtil.getDateBeginTime(date);
         Date todayEndTime = DateUtil.getDateEndTime(date);
-        todayEndTime = DateUtil.addMinute(todayEndTime, 30);
+        todayEndTime = DateUtil.addMinute(todayEndTime, 50);
         return new DateQuery(todayBeginTime, todayEndTime, date);
     }
 
