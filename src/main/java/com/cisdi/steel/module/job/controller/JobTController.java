@@ -105,21 +105,12 @@ public class JobTController {
      */
     @GetMapping(value = "/chutiezonglan")
     public void chutiezonglan(String starttime, String endtime, HttpServletRequest request, HttpServletResponse response) {
-//        try {
-//            chutiezonglanExecute.export(request, starttime, endtime, response);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        String cookieValue = CookieUtils.getCookieValue(request, COOKIE_NAME);
-        String code = JobEnum.gl_chutiezuoye_day.getCode();
-        if ("cms".equals(cookieValue)) {
-            code = JobEnum.gl_chutiezuoye6_day.getCode();
-        } else if ("cms2".equals(cookieValue)) {
-            code = JobEnum.gl_chutiezuoye_day.getCode();
-        } else if ("cms3".equals(cookieValue)) {
-            code = JobEnum.gl_chutiezuoye7_day.getCode();
+        try {
+            chutiezonglanExecute.export(request, starttime, endtime, response);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        selectAllCategory(code, request, response);
+
     }
 
     /**
