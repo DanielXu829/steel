@@ -61,8 +61,55 @@ public class TestJob1 extends SteelApplicationTests {
         ludingDayJob.execute(null);
     }
 
+
     /**
-     * 出铁作业 日
+     * 6高炉出铁作业 日
+     */
+    @Autowired
+    private Chutiezuoye6DayJob chutiezuoye6DayJob;
+
+    @Test
+    public void test2666() {
+        chutiezuoye6DayJob.execute(null);
+    }
+
+    /**
+     * 6高炉出铁作业 月
+     */
+    @Autowired
+    private Chutiezuoye6MonthJob chutiezuoye6MonthJob;
+
+    @Test
+    public void testa666() {
+        chutiezuoye6MonthJob.execute(null);
+    }
+
+
+    /**
+     * 7高炉出铁作业 日
+     */
+    @Autowired
+    private Chutiezuoye7DayJob chutiezuoye7DayJob;
+
+    @Test
+    public void test2777() {
+        chutiezuoye7DayJob.execute(null);
+    }
+
+    /**
+     * 7高炉出铁作业 月
+     */
+    @Autowired
+    private Chutiezuoye7MonthJob chutiezuoye7MonthJob;
+
+    @Test
+    public void testa777() {
+        chutiezuoye7MonthJob.execute(null);
+    }
+
+
+    /**
+     * 8高炉出铁作业 日
      */
     @Autowired
     private ChutiezuoyeDayJob chutiezuoyeDayJob;
@@ -73,7 +120,7 @@ public class TestJob1 extends SteelApplicationTests {
     }
 
     /**
-     * 出铁作业 月
+     * 8高炉出铁作业 月
      */
     @Autowired
     private ChutiezuoyeMonthJob chutiezuoyeMonthJob;

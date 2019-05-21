@@ -1,6 +1,10 @@
 package com.cisdi.steel.module.job.a1;
 
+import com.cisdi.steel.module.job.AbstractExportJob;
+import com.cisdi.steel.module.job.IJobExecute;
+import com.cisdi.steel.module.job.a1.execute.ChutiezonglanExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,12 +17,20 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class ChutiezuoyeMonthJob extends AbstractBaseCommonExportJob1 {
+public class ChutiezuoyeMonthJob extends AbstractExportJob {
 
 
     @Override
     public JobEnum getCurrentJob() {
         return JobEnum.gl_chutiezuoye_month;
+    }
+
+    @Autowired
+    private ChutiezonglanExecute chutiezonglanExecute;
+
+    @Override
+    public IJobExecute getCurrentJobExecute() {
+        return chutiezonglanExecute;
     }
 
 
