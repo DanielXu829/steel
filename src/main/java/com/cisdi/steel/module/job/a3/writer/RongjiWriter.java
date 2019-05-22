@@ -44,7 +44,7 @@ public class RongjiWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 //指定时间的最开始时间
-                Date beginTime = DateUtil.getDateBeginTime(DateUtil.strToDate("2019-05-10 00:00:00", DateUtil.fullFormat));
+                Date beginTime = DateUtil.getDateBeginTime(date.getRecordDate());
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
