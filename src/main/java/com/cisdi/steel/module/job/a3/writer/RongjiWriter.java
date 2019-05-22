@@ -11,10 +11,12 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -41,6 +43,8 @@ public class RongjiWriter extends AbstractExcelReadWriter {
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
+                //指定时间的最开始时间
+                Date beginTime = DateUtil.getDateBeginTime(DateUtil.strToDate("2019-05-10 00:00:00", DateUtil.fullFormat));
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
@@ -50,7 +54,7 @@ public class RongjiWriter extends AbstractExcelReadWriter {
                     version = "6.0";
                 }
                 for (DateQuery item : dateQueries) {
-                    List<CellData> cellDataList = this.mapDataHandler1(columns, item, index, sheetName, version);
+                    List<CellData> cellDataList = this.mapDataHandler1(columns, item, index, sheetName, version, beginTime);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
 
@@ -66,14 +70,18 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected List<CellData> mapDataHandler1(List<String> columns, DateQuery dateQuery, int index, String sheetName, String version) {
+    protected List<CellData> mapDataHandler1(List<String> columns, DateQuery dateQuery, int index, String sheetName, String version, Date beginTime) {
         List<CellData> cellDataList = new ArrayList<>();
         JSONObject queryParam = this.getQueryParam1(dateQuery);
         queryParam.put("itemNames", columns);
         ArrayList<String> list = new ArrayList<>();
         String url = getUrl(version);
-        if ("_5jiaofen_month_all".equals(sheetName) || "_6jiaofen_month_all".equals(sheetName)) {
-            list.add("CN-JN");
+        if ("_5jiaofen_month_all".equals(sheetName)) {
+            list.add("5#烧结用焦粉");
+            queryParam.put("brandCodes", list);
+            url = getUrl(version);
+        } else if ("_6jiaofen_month_all".equals(sheetName)) {
+            list.add("6#烧结用焦粉");
             queryParam.put("brandCodes", list);
             url = getUrl(version);
         } else if ("_5meifen_month_all".equals(sheetName)) {
@@ -111,10 +119,11 @@ public class RongjiWriter extends AbstractExcelReadWriter {
             return null;
         }
         int size = data.size();
+
+        Map map = new HashMap();
         for (int i = 0; i < size; i++) {
             JSONObject jsonObject = data.getJSONObject(i);
             Long clock = jsonObject.getLong("clock");
-
             String bz = "";
             if (Objects.nonNull(clock)) {
                 Date date = new Date(clock);
@@ -137,8 +146,39 @@ public class RongjiWriter extends AbstractExcelReadWriter {
                 for (int j = 1; j < columns.size(); j++) {
                     Object o = innerMap.get(columns.get(j));
                     ExcelWriterUtil.addCellData(cellDataList, index, j, o);
+                    if ("_5jiaofen_month_all".equals(sheetName) || "_6jiaofen_month_all".equals(sheetName)) {
+                        if (Objects.nonNull(clock) && clock.longValue() == beginTime.getTime()) {
+                            Object v = o;
+                            if (map.containsKey(columns.get(j))) {
+                                Object o1 = map.get(columns.get(j));
+
+                                BigDecimal t1 = BigDecimal.ZERO;
+                                BigDecimal t2 = BigDecimal.ZERO;
+                                if (v instanceof BigDecimal) {
+                                    t1 = (BigDecimal) v;
+                                } else if (v instanceof Integer) {
+                                    t1 = new BigDecimal((Integer) v);
+                                }
+
+                                if (o1 instanceof BigDecimal) {
+                                    t2 = (BigDecimal) o1;
+                                } else if (o1 instanceof Integer) {
+                                    t2 = new BigDecimal((Integer) o1);
+                                }
+                                v = t1.add(t2).divide(new BigDecimal(2), 6, BigDecimal.ROUND_HALF_UP);
+                            }
+                            if (Objects.nonNull(v)) {
+                                map.put(columns.get(j), v);
+                            }
+                        }
+                    }
                 }
                 index++;
+            }
+        }
+        if ("_5jiaofen_month_all".equals(sheetName) || "_6jiaofen_month_all".equals(sheetName)) {
+            for (int j = 1; j < columns.size(); j++) {
+                ExcelWriterUtil.addCellData(cellDataList, 1, 13 + j, map.get(columns.get(j)));
             }
         }
 
