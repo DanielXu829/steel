@@ -129,7 +129,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         for (int m = 0; m < dateQueries1.size(); m++) {
                             for (int k = 0; k < columns.size(); k++) {
                                 String[] split = columns.get(k).split("/");
-                                Double cellDataList = mapDataHandler5(getUrl5(version), dateQueries1.get(m), split[0], split[1]);
+                                Double cellDataList = mapDataHandler5(getUrl5(version), dateQueries1.get(m), split[0], split[1], version);
                                 setSheetValue(sheet, rowIndex, k, cellDataList);
                             }
                             rowIndex++;
@@ -154,8 +154,8 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         PoiCustomUtil.setCellValue(cell, obj);
     }
 
-    protected Double mapDataHandler5(String url, DateQuery dateQuery, String brandcode, String anaitemname) {
-        Map<String, String> queryParam = getQueryParam5(dateQuery, brandcode, anaitemname);
+    protected Double mapDataHandler5(String url, DateQuery dateQuery, String brandcode, String anaitemname, String version) {
+        Map<String, String> queryParam = getQueryParam5(dateQuery, brandcode, anaitemname, version);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -165,13 +165,22 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         return data;
     }
 
-    protected Map<String, String> getQueryParam5(DateQuery dateQuery, String brandcode, String anaitemname) {
+    protected Map<String, String> getQueryParam5(DateQuery dateQuery, String brandcode, String anaitemname, String version) {
         Map<String, String> result = new HashMap<>();
         result.put("brandcode", brandcode);
         result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
-        result.put("source", "三回收");
+        if ("12.0".equals(version)) {
+            result.put("source", "1#-2#");
+            result.put("unitno", "JH12");
+        } else if ("67.0".equals(version)) {
+            result.put("source", "6#-7#");
+            result.put("unitno", "JH67");
+        } else {
+            result.put("source", "4#-5#");
+            result.put("unitno", "JH45");
+        }
         return result;
     }
 
@@ -277,7 +286,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
     }
 
     public List<CellData> mapDataHandler4x(String url, int startRow, DateQuery dateQuery, String jhno) {
-        Map<String, String> queryParam = getQueryParam5(dateQuery, jhno);
+        Map<String, String> queryParam = getQueryParam6(dateQuery, jhno);
         String result = httpUtil.get(url, queryParam);
         List<Double> list = new ArrayList<>();
         List<CellData> cellDataList = new ArrayList<>();
@@ -384,7 +393,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam5(DateQuery dateQuery, String cokeNo) {
+    protected Map<String, String> getQueryParam6(DateQuery dateQuery, String cokeNo) {
         Map<String, String> result = new HashMap<>();
         if (DateUtil.getFormatDateTime(dateQuery.getEndTime(), "HH").equals("08")) {
             result.put("shift", "1");
