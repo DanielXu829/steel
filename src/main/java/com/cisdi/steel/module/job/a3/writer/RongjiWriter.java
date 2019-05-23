@@ -54,7 +54,7 @@ public class RongjiWriter extends AbstractExcelReadWriter {
                     version = "6.0";
                 }
                 for (DateQuery item : dateQueries) {
-                    List<CellData> cellDataList = this.mapDataHandler1(columns, item, index, sheetName, version, beginTime);
+                    List<CellData> cellDataList = this.mapDataHandler1(columns, item, index, sheetName, version, beginTime, date.getRecordDate());
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
 
@@ -63,16 +63,20 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    protected JSONObject getQueryParam1(DateQuery dateQuery) {
+    protected JSONObject getQueryParam1(DateQuery dateQuery, Date recordDate) {
+        long time = dateQuery.getEndTime().getTime();
+        if (time > recordDate.getTime()) {
+            time = recordDate.getTime();
+        }
         JSONObject result = new JSONObject();
         result.put("start", dateQuery.getStartTime().getTime());
-        result.put("end", dateQuery.getEndTime().getTime());
+        result.put("end", time);
         return result;
     }
 
-    protected List<CellData> mapDataHandler1(List<String> columns, DateQuery dateQuery, int index, String sheetName, String version, Date beginTime) {
+    protected List<CellData> mapDataHandler1(List<String> columns, DateQuery dateQuery, int index, String sheetName, String version, Date beginTime, Date recordDate) {
         List<CellData> cellDataList = new ArrayList<>();
-        JSONObject queryParam = this.getQueryParam1(dateQuery);
+        JSONObject queryParam = this.getQueryParam1(dateQuery, recordDate);
         queryParam.put("itemNames", columns);
         ArrayList<String> list = new ArrayList<>();
         String url = getUrl(version);
@@ -124,25 +128,41 @@ public class RongjiWriter extends AbstractExcelReadWriter {
         for (int i = 0; i < size; i++) {
             JSONObject jsonObject = data.getJSONObject(i);
             Long clock = jsonObject.getLong("clock");
+            String workShift = jsonObject.getString("workShift");
             String bz = "";
-            if (Objects.nonNull(clock)) {
-                Date date = new Date(clock);
-                String hh = DateUtil.getFormatDateTime(date, "HH");
-                Integer h = Integer.valueOf(hh);
-                if (h.intValue() >= 0 && h < 8) {
-                    bz = "夜班";
-                } else if (h.intValue() >= 8 && h < 16) {
-                    bz = "白班";
-                } else if (h.intValue() >= 16 && h < 24) {
+            if (StringUtils.isNotBlank(workShift)) {
+                if ("1".equals(workShift)) {
                     bz = "中班";
+                } else if ("2".equals(workShift)) {
+                    bz = "夜班";
+                } else if ("3".equals(workShift)) {
+                    bz = "白班";
                 }
             }
+
+            String workTeam = jsonObject.getString("workTeam");
+            String team = "";
+            if (StringUtils.isNotBlank(workTeam)) {
+                if ("A".equals(workTeam)) {
+                    team = "甲";
+                } else if ("B".equals(workTeam)) {
+                    team = "乙";
+                } else if ("C".equals(workTeam)) {
+                    team = "丙";
+                } else if ("D".equals(workTeam)) {
+                    team = "丁";
+                }
+            }
+
+            String name = jsonObject.getString("name");
 
             JSONObject values = jsonObject.getJSONObject("values");
             Map<String, Object> innerMap = values.getInnerMap();
             if (innerMap.size() > 0) {
-                ExcelWriterUtil.addCellData(cellDataList, index, 0, clock);
-                ExcelWriterUtil.addCellData(cellDataList, index, 10, bz);
+                ExcelWriterUtil.addCellData(cellDataList, index, 2, clock);
+                ExcelWriterUtil.addCellData(cellDataList, index, 12, bz);
+                ExcelWriterUtil.addCellData(cellDataList, index, 0, team);
+                ExcelWriterUtil.addCellData(cellDataList, index, 1, name);
                 for (int j = 1; j < columns.size(); j++) {
                     Object o = innerMap.get(columns.get(j));
                     ExcelWriterUtil.addCellData(cellDataList, index, j, o);
