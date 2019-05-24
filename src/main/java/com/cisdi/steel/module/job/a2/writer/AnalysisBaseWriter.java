@@ -72,9 +72,14 @@ public class AnalysisBaseWriter extends BaseJhWriter {
                 } else {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
-                        int rowIndex = j + 1;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        if (item.getRecordDate().before(new Date())) {
+                            int rowIndex = j + 1;
+                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                        } else {
+                            break;
+                        }
+
                     }
                 }
             }
