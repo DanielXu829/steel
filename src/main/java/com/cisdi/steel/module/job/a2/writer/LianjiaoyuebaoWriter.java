@@ -172,13 +172,13 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
         if ("12.0".equals(version)) {
-            result.put("source", "1#-2#");
+            result.put("source", "1#-2#焦炉");
             result.put("unitno", "JH12");
         } else if ("67.0".equals(version)) {
-            result.put("source", "6#-7#");
+            result.put("source", "6#-7#焦炉");
             result.put("unitno", "JH67");
         } else {
-            result.put("source", "4#-5#");
+            result.put("source", "4#-5#焦炉");
             result.put("unitno", "JH45");
         }
         return result;

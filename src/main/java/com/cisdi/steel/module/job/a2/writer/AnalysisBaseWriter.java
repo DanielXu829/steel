@@ -138,21 +138,21 @@ public class AnalysisBaseWriter extends BaseJhWriter {
         result.put("anaitemname", anaitemname);
         if ("12.0".equals(version)) {
             if(StringUtils.isBlank(source)){
-                result.put("source", "1#-2#");
+                result.put("source", "1#-2#焦炉");
             }else {
                 result.put("source", source);
             }
             result.put("unitno", "JH12");
         } else if ("67.0".equals(version)) {
             if(StringUtils.isBlank(source)){
-                result.put("source", "6#-7#");
+                result.put("source", "6#-7#焦炉");
             }else {
                 result.put("source", source);
             }
             result.put("unitno", "JH67");
         } else {
             if(StringUtils.isBlank(source)){
-                result.put("source", "4#-5#");
+                result.put("source", "4#-5#焦炉");
             }else {
                 result.put("source", source);
             }
