@@ -151,6 +151,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                     || JobEnum.sj_gycanshutotal.getCode().equals(reportIndex.getReportCategoryCode())
             ) {
                 boolean f = dealGongyi(report.getRecordDate(), reportIndex.getRecordDate());
+                if (f) {
+                    reportIndex.setName(null);
+                }
                 otherHand(f, reportIndex, report, now);
             } else if (JobEnum.jh_zhibiaoguankong.getCode().equals(reportIndex.getReportCategoryCode()) || JobEnum.jh_zhuyaogycs.getCode().equals(reportIndex.getReportCategoryCode())) {
                 boolean f = dealZhibiao(report.getRecordDate(), reportIndex.getRecordDate());

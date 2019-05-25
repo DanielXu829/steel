@@ -68,10 +68,39 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
 
             if ("main".equals(sheetName)) {
                 dealPicLocation(version, date, sheetName, workbook, picTime + "", sheet);
+                dealNote(version, date.getRecordDate(), sheet);
             }
 
         }
         return workbook;
+    }
+
+    /**
+     * 处理异常说明
+     *
+     * @param version
+     * @param picDate
+     * @param sheet
+     */
+    private void dealNote(String version, Date picDate, Sheet sheet) {
+        String dateTime = DateUtil.getFormatDateTime(picDate, "yyyy-MM-dd HH:00:00");
+//        dateTime="2019-5-25 15:00:00";
+        String s = httpUtil.get(getUrl8(version, dateTime));
+        if (StringUtils.isNotBlank(s)) {
+            JSONObject jsonObject = JSONObject.parseObject(s);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray jsonArray = jsonObject.getJSONArray("rows");
+                if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
+                    JSONObject object = jsonArray.getJSONObject(0);
+                    String noteParam = object.getString("noteParam");
+                    String noteAna = object.getString("noteAna");
+                    List<CellData> results = new ArrayList<>();
+                    ExcelWriterUtil.addCellData(results, 9, 2, noteParam);
+                    ExcelWriterUtil.addCellData(results, 15, 2, noteAna);
+                    ExcelWriterUtil.setCellValue(sheet, results);
+                }
+            }
+        }
     }
 
     protected List<CellData> mapDataHandler2(List<String> columns, DateQuery dateQuery, int index, String sheetName, String version) {
@@ -181,6 +210,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
 //        queryParam.put("picDate", "2019-05-24");
         queryParam.put("picLocation", picLocation);
         queryParam.put("picTime", picTime);
+//        queryParam.put("picTime", "15");
         String s = httpUtil.get(getUrl5(version), queryParam);
         String picUrl = null;
         String picEvaluate = "";
@@ -274,6 +304,15 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/tagReport/" + reportCode;
+        }
+    }
+
+    private String getUrl8(String version, String noteDate) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/publishNote/selectByKey?noteDate=" + noteDate;
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/publishNote/selectByKey?noteDate=" + noteDate;
         }
     }
 }
