@@ -147,7 +147,12 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             reportIndex.setCreateTime(now);
             this.save(reportIndex);
         } else {
-            if (JobEnum.jh_zhibiaoguankong.getCode().equals(reportIndex.getReportCategoryCode()) || JobEnum.jh_zhuyaogycs.getCode().equals(reportIndex.getReportCategoryCode())) {
+            if (JobEnum.sj_liushaogycanshu.getCode().equals(reportIndex.getReportCategoryCode())
+                    || JobEnum.sj_gycanshutotal.getCode().equals(reportIndex.getReportCategoryCode())
+            ) {
+                boolean f = dealGongyi(report.getRecordDate(), reportIndex.getRecordDate());
+                otherHand(f, reportIndex, report, now);
+            } else if (JobEnum.jh_zhibiaoguankong.getCode().equals(reportIndex.getReportCategoryCode()) || JobEnum.jh_zhuyaogycs.getCode().equals(reportIndex.getReportCategoryCode())) {
                 boolean f = dealZhibiao(report.getRecordDate(), reportIndex.getRecordDate());
                 otherHand(f, reportIndex, report, now);
             } else {
