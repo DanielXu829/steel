@@ -41,6 +41,9 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
             Sheet sheet = workbook.getSheetAt(i);
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
+            int picTime = -1;
+            int currDateTime = Integer.valueOf(DateUtil.getFormatDateTime(date.getRecordDate(), "HH"));
+            picTime = currDateTime;
             if (sheetSplit.length == 4) {
                 String main1 = sheetSplit[1];
                 String lastExt = sheetSplit[3];
@@ -49,10 +52,8 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
                 }
                 // 获取的对应的策略
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-
                 if ("4hour".equals(lastExt)) {
                     List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                    int currDateTime = Integer.valueOf(DateUtil.getFormatDateTime(date.getRecordDate(), "HH"));
                     int index = 4;
                     Map<String, Object> map = dealFourDate(currDateTime, dateQueries);
                     Object dateQ = map.get("dateQ");
@@ -108,6 +109,9 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
+            if ("汇报".equals(sheetName)) {
+                dealPicLocation(date, sheetName, workbook, picTime + "", sheet);
+            }
         }
         return workbook;
     }
@@ -144,200 +148,72 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
         return map;
     }
 
-    protected JSONObject getQueryParam1(DateQuery dateQuery) {
-        JSONObject result = new JSONObject();
-        result.put("method", "avg");
-        result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -1), DateUtil.fullFormat));
-        result.put("end", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getEndTime(), -1), DateUtil.fullFormat));
-        return result;
-    }
-
     protected List<CellData> mapDataHandler1(List<String> columns, DateQuery dateQuery, int index, String sheetName, String version) {
         List<CellData> cellDataList = new ArrayList<>();
         int rowIndex = (index - 4) + 1;
-        JSONObject queryParam = this.getQueryParam1(dateQuery);
-        Map<String, String> queryParam2 = new HashMap<>();
-        String url = getUrl(version);
-        queryParam.put("tagNames", columns);
-        queryParam2.put("brandCode", "sinter");
-        if ("_5main2_day_4hour".equals(sheetName) || "_6main5_day_4hour".equals(sheetName)) {
-            queryParam.put("method", "min,max");
-            url = getUrl2(version);
-        } else if ("_5main3_day_4hour".equals(sheetName) || "_6main6_day_4hour".equals(sheetName)) {
-            queryParam.remove("method");
-            queryParam.remove("tagNames");
-            queryParam.put("itemNames", columns);
-            queryParam.put("brandCode", "sinter");
-            queryParam.put("type", "LC");
-            url = getUrl3(version);
+        String reportCode = "";
+        if ("_5main1_day_4hour".equals(sheetName) || "_6main4_day_4hour".equals(sheetName)) {
+            reportCode = "process_param_4h";
+        } else {
+            reportCode = "sinter_quality_4h";
         }
-
-        SerializeConfig serializeConfig = new SerializeConfig();
-        String jsonString = JSONObject.toJSONString(queryParam, serializeConfig);
-
-
-        String result = "";
-        if ("_5main3_day_4hour".equals(sheetName) || "_6main6_day_4hour".equals(sheetName)) {
+        String url = getUrl7(version, reportCode);
+        String result = httpUtil.get(url);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject obj = JSONObject.parseObject(result);
+        JSONArray data = obj.getJSONArray("data");
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        int size = data.size();
+        for (int i = 0; i < size; i++) {
+            JSONObject map = data.getJSONObject(i);
             int columnIndex = 0;
             for (String column : columns) {
                 if (StringUtils.isBlank(column)) {
                     continue;
                 }
-                int row = rowIndex;
-                queryParam2.remove("type");
-                queryParam2.put("anaItemName", column);
-                result = httpUtil.get(url, queryParam2);
-                JSONObject obj = JSONObject.parseObject(result);
+                if (Objects.nonNull(map)) {
+                    String tagName = map.getString("tagName");
+                    if (tagName.equals(column)) {
+                        String val1 = map.getString("unit");
 
-                queryParam2.remove("anaItemName");
-                queryParam2.put("type", "ALL");
+                        Double str1 = map.getDouble("low");
+                        Double str2 = map.getDouble("up");
 
-                String url1 = getUrl4(version);
-                if ("RDI+3.15".equals(column)) {
-                    queryParam.put("type", "LM");
-                    jsonString = JSONObject.toJSONString(queryParam, serializeConfig);
-                }
-                String result1 = httpUtil.postJsonParams(url1, jsonString);
-                JSONObject obj1 = JSONObject.parseObject(result1);
-
-                JSONObject data = obj.getJSONObject("data");
-                JSONObject data1 = obj1.getJSONObject("data");
-
-                if (Objects.isNull(data)) {
-                    continue;
-                }
-
-                String str1 = data.getString("lowerlimit");
-                String str2 = data.getString("upperlimit");
-
-                String val1 = "";
-                if (Objects.isNull(str1) && Objects.nonNull(str2)) {
-                    val1 = "<" + str2;
-                } else if (Objects.nonNull(str1) && Objects.isNull(str2)) {
-                    val1 = ">" + str1;
-                } else if (Objects.nonNull(str1) && Objects.nonNull(str2)) {
-                    val1 = str1 + "～" + str2;
-                }
-
-
-                String val2 = "";
-                String val3 = "正常";
-
-                if (Objects.nonNull(data1) && !data1.isEmpty()) {
-                    double a1 = 0;
-                    double a2 = 0;
-                    if (StringUtils.isNotBlank(str1)) {
-                        a1 = Double.valueOf(str1);
-                    }
-                    if (StringUtils.isNotBlank(str2)) {
-                        a2 = Double.valueOf(str2);
-
-                    }
-
-                    if (data1.containsKey(column)) {
-                        double o = data1.getDouble(column);
-                        val2 = o + "";
-                        if (o < a1) {
-                            val3 = "偏低";
-                        } else if (o > a2) {
-                            val3 = "偏高";
+                        String val2 = "";
+                        if (Objects.isNull(str1) && Objects.nonNull(str2)) {
+                            val2 = "<" + str2;
+                        } else if (Objects.nonNull(str1) && Objects.isNull(str2)) {
+                            val2 = ">" + str1;
+                        } else if (Objects.nonNull(str1) && Objects.nonNull(str2)) {
+                            val2 = str1 + "～" + str2;
                         }
+
+
+                        Double val3 = map.getDouble("val");
+
+                        String val4 = "";
+                        //状态评价（-1偏低，0正常，1偏高）
+                        if (Objects.nonNull(val3) && Objects.nonNull(str1) && Objects.nonNull(str2)) {
+                            if (val3.doubleValue() < str1.doubleValue()) {
+                                val4 = "偏低";
+                            } else if (val3.doubleValue() >= str1.doubleValue() && val3.doubleValue() <= str2.doubleValue()) {
+                                val4 = "正常";
+                            } else if (val3.doubleValue() > str2.doubleValue()) {
+                                val4 = "偏高";
+                            }
+                        }
+                        int row = rowIndex;
+                        ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val1);
+                        ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val2);
+                        ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val3);
+                        ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val4);
                     }
                 }
-
-                ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val1);
-                ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val2);
-                ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val3);
-
                 columnIndex++;
-            }
-            return cellDataList;
-        } else {
-            result = httpUtil.postJsonParams(url, jsonString);
-        }
-
-        if (StringUtils.isBlank(result)) {
-            return null;
-        }
-        JSONObject obj = JSONObject.parseObject(result);
-        Object data1 = obj.get("data");
-
-        if (data1 instanceof JSONObject) {
-            if ("_5main2_day_4hour".equals(sheetName) || "_6main5_day_4hour".equals(sheetName)) {
-                JSONObject data = obj.getJSONObject("data");
-                if (Objects.isNull(data)) {
-                    return null;
-                }
-                int columnIndex = 0;
-                for (String column : columns) {
-                    if (StringUtils.isBlank(column)) {
-                        continue;
-                    }
-                    JSONObject jsonObject = data.getJSONObject(column);
-                    if (Objects.isNull(jsonObject)) {
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, "");
-                    } else {
-                        Double min = jsonObject.getDouble("min");
-                        Double max = jsonObject.getDouble("max");
-                        String val = min.doubleValue() + "～" + max.doubleValue();
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex++, val);
-                    }
-                }
-            }
-        } else {
-            JSONArray data = obj.getJSONArray("data");
-            if (Objects.isNull(data)) {
-                return null;
-            }
-            int size = data.size();
-            for (int i = 0; i < size; i++) {
-                JSONObject map = data.getJSONObject(i);
-                int columnIndex = 0;
-                for (String column : columns) {
-                    if (StringUtils.isBlank(column)) {
-                        continue;
-                    }
-                    if (Objects.nonNull(map)) {
-                        String tagName = map.getString("tagName");
-                        if (tagName.equals(column)) {
-                            String val1 = map.getString("unit");
-
-                            Double str1 = map.getDouble("low");
-                            Double str2 = map.getDouble("up");
-
-                            String val2 = "";
-                            if (Objects.isNull(str1) && Objects.nonNull(str2)) {
-                                val2 = "<" + str2;
-                            } else if (Objects.nonNull(str1) && Objects.isNull(str2)) {
-                                val2 = ">" + str1;
-                            } else if (Objects.nonNull(str1) && Objects.nonNull(str2)) {
-                                val2 = str1 + "～" + str2;
-                            }
-
-
-                            Double val3 = map.getDouble("val");
-
-                            Integer str4 = map.getInteger("status");
-                            String val4 = "";
-                            //状态评价（-1偏低，0正常，1偏高）
-                            if (Objects.nonNull(str4)) {
-                                if (str4.intValue() == -1) {
-                                    val4 = "偏低";
-                                } else if (str4.intValue() == 0) {
-                                    val4 = "正常";
-                                } else if (str4.intValue() == 1) {
-                                    val4 = "偏高";
-                                }
-                            }
-                            int row = rowIndex;
-                            ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val1);
-                            ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val2);
-                            ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val3);
-                            ExcelWriterUtil.addCellData(cellDataList, row++, columnIndex, val4);
-                        }
-                    }
-                    columnIndex++;
-                }
             }
         }
         return cellDataList;
@@ -413,21 +289,31 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
     /**
      * 将图片写入到对应位置
      *
-     * @param version
      * @param date
      * @param sheetName
      * @param workbook
      * @param picTime
      */
-    private void dealPicLocation(String version, DateQuery date, String sheetName, Workbook workbook, String picTime) {
-        byte[] inputStream = dealPicture(version, date.getRecordDate(), "1", picTime);
+    private void dealPicLocation(DateQuery date, String sheetName, Workbook workbook, String picTime, Sheet sheet) {
+        byte[] inputStream = dealPicture("6.0", date.getRecordDate(), "1", picTime, sheet);
         if (Objects.nonNull(inputStream)) {
-            ExcelWriterUtil.setImg(workbook, inputStream, sheetName, 18, 25, 3, 4);
+            ExcelWriterUtil.setImg(workbook, inputStream, sheetName, 19, 25, 3, 4);
         }
 
-        byte[] inputStream2 = dealPicture(version, date.getRecordDate(), "6", picTime);
+        byte[] inputStream2 = dealPicture("6.0", date.getRecordDate(), "6", picTime, sheet);
         if (Objects.nonNull(inputStream2)) {
-            ExcelWriterUtil.setImg(workbook, inputStream2, sheetName, 18, 25, 8, 9);
+            ExcelWriterUtil.setImg(workbook, inputStream2, sheetName, 19, 25, 8, 9);
+        }
+
+
+        byte[] inputStream3 = dealPicture("5.0", date.getRecordDate(), "1", picTime, sheet);
+        if (Objects.nonNull(inputStream3)) {
+            ExcelWriterUtil.setImg(workbook, inputStream3, sheetName, 60, 66, 3, 4);
+        }
+
+        byte[] inputStream4 = dealPicture("5.0", date.getRecordDate(), "6", picTime, sheet);
+        if (Objects.nonNull(inputStream4)) {
+            ExcelWriterUtil.setImg(workbook, inputStream4, sheetName, 60, 66, 8, 9);
         }
     }
 
@@ -440,14 +326,15 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
      * @param picTime
      * @return
      */
-    private byte[] dealPicture(String version, Date picDate, String picLocation, String picTime) {
+    private byte[] dealPicture(String version, Date picDate, String picLocation, String picTime, Sheet sheet) {
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("picDate", DateUtil.getFormatDateTime(picDate, DateUtil.yyyyMMddFormat));
-//        queryParam.put("picDate", "2019-04-09");
+//        queryParam.put("picDate", "2019-05-24");
         queryParam.put("picLocation", picLocation);
         queryParam.put("picTime", picTime);
         String s = httpUtil.get(getUrl5(version), queryParam);
         String picUrl = null;
+        String picEvaluate = "";
         if (StringUtils.isNotBlank(s)) {
             JSONObject jsonObject = JSONObject.parseObject(s);
             if (Objects.nonNull(jsonObject)) {
@@ -455,50 +342,35 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
                 if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
                     JSONObject object = jsonArray.getJSONObject(0);
                     picUrl = object.getString("picUrl");
+                    if (StringUtils.isNotBlank(picUrl)) {
+                        String[] split = picUrl.split("/");
+                        picUrl = split[split.length - 1];
+
+                    }
+                    picEvaluate = object.getString("picEvaluate");
                 }
             }
+        }
+        if (StringUtils.isNotBlank(picEvaluate)) {
+            List<CellData> results = new ArrayList<>();
+            int r = 25;
+            if ("5.0".equals(version)) {
+                r = 66;
+            } else if ("6.0".equals(version)) {
+                r = 25;
+            }
+            int c = 2;
+            if ("1".equals(picLocation)) {
+                c = 2;
+            } else if ("6".equals(picLocation)) {
+                c = 7;
+            }
+            ExcelWriterUtil.addCellData(results, r, c, picEvaluate);
+            ExcelWriterUtil.setCellValue(sheet, results);
         }
 
         byte[] strem = httpUtil.getStrem(getUrl6(version) + picUrl, null);
         return strem;
-    }
-
-    private String getUrl(String version) {
-        if ("5.0".equals(version)) {
-            return httpProperties.getUrlApiSJOne() + "/tagValues/latestAndStatus";
-        } else {
-            // "6.0".equals(version) 默认
-            return httpProperties.getUrlApiSJTwo() + "/tagValues/latestAndStatus";
-        }
-    }
-
-    private String getUrl2(String version) {
-        if ("5.0".equals(version)) {
-            return httpProperties.getUrlApiSJOne() + "/tagValueActions";
-        } else {
-            // "6.0".equals(version) 默认
-            return httpProperties.getUrlApiSJTwo() + "/tagValueActions";
-        }
-    }
-
-    private String getUrl3(String version) {
-        if ("5.0".equals(version)) {
-            return httpProperties.getUrlApiSJOne() + "/analysisMapsByCodeAndItem";
-        } else {
-            // "6.0".equals(version) 默认
-            return httpProperties.getUrlApiSJTwo() + "/analysisMapsByCodeAndItem";
-        }
-    }
-
-    private String getUrl4(String version) {
-        if ("5.0".equals(version)) {
-//            return httpProperties.getUrlApiSJOne() + "/analysis/anaItemKeyVal";
-            return httpProperties.getUrlApiSJOne() + "/anaLatestValue/sampleTime";
-        } else {
-            // "6.0".equals(version) 默认
-//            return httpProperties.getUrlApiSJTwo() + "/analysis/anaItemKeyVal";
-            return httpProperties.getUrlApiSJTwo() + "/anaLatestValue/sampleTime";
-        }
     }
 
     private String getUrl6(String version) {
@@ -535,6 +407,15 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/tagValue/" + tagName;
+        }
+    }
+
+    private String getUrl7(String version, String reportCode) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/tagReport/" + reportCode;
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/tagReport/" + reportCode;
         }
     }
 }
