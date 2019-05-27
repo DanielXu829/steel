@@ -190,8 +190,8 @@ public class GongyikaExecute extends AbstractJobExecuteExecute {
                             if (Objects.nonNull(paramId)) {
                                 for (int j = 0; j < ids1.size(); j++) {
                                     if (paramId.longValue() == ids1.get(j).longValue()) {
-                                        Object targetVal = jsonObject.get("targetVal");
-                                        Object controlRange = jsonObject.get("controlRange");
+                                        Object targetVal = jsonObject.get("low");
+                                        Object controlRange = jsonObject.get("up");
                                         ExcelWriterUtil.addCellData(cellDataList, i, 13, targetVal);
                                         ExcelWriterUtil.addCellData(cellDataList, i, 14, controlRange);
                                     }
