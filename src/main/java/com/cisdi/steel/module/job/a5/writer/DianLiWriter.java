@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.a5.writer;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -15,6 +16,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,6 +60,9 @@ public class DianLiWriter extends AbstractExcelReadWriter {
             DateQueryUtil.buildJiePaiLing(dateList, DateQueryUtil.getMonthSomeTime(date.getRecordDate(), 8), 0);
             DateQueryUtil.buildJiePaiLing(dateList, DateQueryUtil.getMonthSomeTime(date.getRecordDate(), 15), 0);
             DateQueryUtil.buildJiePaiLing(dateList, DateQueryUtil.getMonthSomeTime(date.getRecordDate(), 22), 0);
+
+            Date monthEndTime = DateQueryUtil.getMonthEndTime(date.getRecordDate());
+            DateQueryUtil.buildJiePaiLing(dateList, DateQueryUtil.getMonthSomeTime(DateUtil.addDays(monthEndTime, 1), 1), 0);
         } else if (code.equals(JobEnum.nj_jidu_year.getCode())) {
             List<DateQuery> dateQueries = DateQueryUtil.buildYearMonthEach(date.getRecordDate());
             dateQueries.forEach(dateQuery -> {
