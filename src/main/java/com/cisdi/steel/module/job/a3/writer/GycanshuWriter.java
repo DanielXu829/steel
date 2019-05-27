@@ -92,12 +92,14 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
                 JSONArray jsonArray = jsonObject.getJSONArray("rows");
                 if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
                     JSONObject object = jsonArray.getJSONObject(0);
-                    String noteParam = object.getString("noteParam");
-                    String noteAna = object.getString("noteAna");
-                    List<CellData> results = new ArrayList<>();
-                    ExcelWriterUtil.addCellData(results, 9, 2, noteParam);
-                    ExcelWriterUtil.addCellData(results, 15, 2, noteAna);
-                    ExcelWriterUtil.setCellValue(sheet, results);
+                    if (Objects.nonNull(object)) {
+                        String noteParam = object.getString("noteParam");
+                        String noteAna = object.getString("noteAna");
+                        List<CellData> results = new ArrayList<>();
+                        ExcelWriterUtil.addCellData(results, 9, 2, noteParam);
+                        ExcelWriterUtil.addCellData(results, 15, 2, noteAna);
+                        ExcelWriterUtil.setCellValue(sheet, results);
+                    }
                 }
             }
         }
