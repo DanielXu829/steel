@@ -104,6 +104,9 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
                             String jhno = "CO6";
+                            if("12.0".equals(version)){
+                                jhno = "CO1";
+                            }
                             List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
@@ -116,6 +119,9 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
                             String jhno = "CO7";
+                            if("12.0".equals(version)){
+                                jhno = "CO2";
+                            }
                             List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;

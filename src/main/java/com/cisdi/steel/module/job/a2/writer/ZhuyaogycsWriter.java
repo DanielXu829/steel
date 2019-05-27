@@ -91,7 +91,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     Double cellDataList = this.mapDataHandler3(getUrl6(), dateQuery, shiftNum);
                     setSheetValue(sheet, 1, 0, cellDataList);
                 } else if ("luwen".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler4(getUrl7(), dateQuery, columns, shiftNum);
+                    List<CellData> cellDataList = this.mapDataHandler4(getUrl7(), dateQuery, columns);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("jtcl".equals(sheetSplit[1])) {
                     Date dateBeginTime = DateUtil.getDateBeginTime(dateQuery.getRecordDate());
@@ -115,11 +115,8 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         rowNum++;
                     }
-                } else if ("peimeicsnow".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler7(getUrl9(), dateQuery, sheet,1);
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                } else if ("peimeicsed".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler7(getUrl9(), dateQuery, sheet,2);
+                } else if ("peimeicsnowed".equals(sheetSplit[1])) {
+                    List<CellData> cellDataList = this.mapDataHandler7(getUrl13(), sheet, 1);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }else if ("kankavg".equals(sheetSplit[1])) {
                     List<CellData> cellDataList = this.mapDataHandler10(getUrl11(), dateQuery,shiftNum+"");
@@ -261,7 +258,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return ganxi;
     }
 
-    protected List<CellData> mapDataHandler4(String url, DateQuery dateQuery, List<String> columns, int shiftNum) {
+    protected List<CellData> mapDataHandler4(String url, DateQuery dateQuery, List<String> columns) {
         Map<String, String> queryParam = getQueryParam6(dateQuery, 1, "CO6", 1);
         Map<String, String> queryParam1 = getQueryParam6(dateQuery, 1, "CO6", 2);
         Map<String, String> queryParam2 = getQueryParam6(dateQuery, 1, "CO7", 1);
@@ -418,83 +415,32 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return cellData;
     }
 
-    protected List<CellData> mapDataHandler7(String url, DateQuery dateQuery, Sheet sheet,int len) {
+    protected List<CellData> mapDataHandler7(String url, Sheet sheet, int len) {
         List<CellData> cellDataList = new ArrayList<>();
-        dateQuery.setRecordDate(DateUtil.addDays(dateQuery.getRecordDate(),-2));
-        Map<String, String> queryParam = getQueryParam9(dateQuery);
-        String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
-            return null;
-        }
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        if (Objects.isNull(jsonObject)) {
-            return null;
-        }
-        JSONObject data = jsonObject.getJSONObject("data");
-        if (Objects.isNull(data)) {
-            return null;
-        }
-        Set<String> strings = data.keySet();
-        String[] list = new String[strings.size()];
-        int k = 0;
-        for (String key : strings) {
-            list[k] = key;
-            k++;
-        }
-        Arrays.sort(list);
-        String keyNow = list[list.length - len];
-        if(len==2){
-            String key = list[list.length - 1];
-            JSONArray arrNow = data.getJSONArray(key);
-            for (int i = 2; i <=list.length ; i++) {
-                String keyed = list[list.length - i];
-                Boolean bl=false;
-                JSONArray arrEd = data.getJSONArray(keyed);
-                if(arrEd.size()!=arrNow.size()){
-                    keyNow=keyed;
-                    break;
-                }else {
-                    for (int j = 0; j < arrNow.size(); j++) {
-                        JSONObject objNow= arrNow.getJSONObject(j);
-                        String nameNow = objNow.getString("coalTypeDescr");
-                        String ratioNow = objNow.getString("dryMatchRatio");
-                        int num=0;
-                        for (int m = 0; m < arrNow.size(); m++){
-                            JSONObject objEd = arrEd.getJSONObject(m);
-                            String nameEd = objEd.getString("coalTypeDescr");
-                            String ratioEd = objEd.getString("dryMatchRatio");
-                            if(nameNow.equals(nameEd)){
-                                num+=1;
-                                if(ratioNow.equals(ratioEd)==false){
-                                    keyNow=keyed;
-                                    bl=true;
-                                    break;
-                                }
-                            }
+        String result = httpUtil.get(url);
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if(Objects.nonNull(jsonObject)){
+                JSONArray rows = jsonObject.getJSONArray("rows");
+                for (int i = 0; i < rows.size(); i++) {
+                    JSONArray jsonArray = rows.getJSONArray(i);
+                    for (int j = 0; j < jsonArray.size(); j++) {
+                        JSONObject jsonObject1 =  jsonArray.getJSONObject(j);
+                        String recTime = jsonObject1.getString("recTime");
+                        String descr = jsonObject1.getString("descr");
+                        Double planRate = jsonObject1.getDouble("planRate");
+                        if(i==0){
+                            ExcelWriterUtil.addCellData(cellDataList, 1, j, recTime);
+                            ExcelWriterUtil.addCellData(cellDataList, 2, j, descr);
+                            ExcelWriterUtil.addCellData(cellDataList, 3, j, planRate);
+                        }else {
+                            ExcelWriterUtil.addCellData(cellDataList, 4, j, recTime);
+                            ExcelWriterUtil.addCellData(cellDataList, 5, j, descr);
+                            ExcelWriterUtil.addCellData(cellDataList, 6, j, planRate);
                         }
-                        if (bl) {
-                            break;
-                        }
-                        if(num==0){
-                            keyNow=keyed;
-                            bl=true;
-                            break;
-                        }
-                    }
-                    if (bl) {
-                        break;
                     }
                 }
             }
-        }
-        Row row = sheet.createRow(3);
-        row.createCell(0).setCellValue(DateUtil.getFormatDateTime(new Date(Long.valueOf(keyNow)), "yyyy/MM/dd"));
-        row.getCell(0).setCellType(CellType.STRING);
-        JSONArray arrNow = data.getJSONArray(keyNow);
-        for (int i = 0; i < arrNow.size(); i++) {
-            JSONObject jsonObject1 = arrNow.getJSONObject(i);
-            ExcelWriterUtil.addCellData(cellDataList, 1, i, jsonObject1.getString("coalTypeDescr"));
-            ExcelWriterUtil.addCellData(cellDataList, 2, i, jsonObject1.getString("dryMatchRatio"));
         }
         return cellDataList;
     }
@@ -521,7 +467,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
                         if (Objects.nonNull(obj)) {
                             if("CO6".equals(cokeNo)){
-                                k2=obj.getDouble("k2");
+                                k2 = obj.getDouble("k3");
                                 kAvg6=obj.getDouble("shiftKAvg");
                                 kAn6=obj.getDouble("shiftKan");
                             }else if("CO7".equals(cokeNo)){
@@ -640,12 +586,6 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam9(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        result.put("date", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
-        return result;
-    }
-
     protected Map<String, String> getQueryParam10(DateQuery dateQuery, String shift, String cokeNo) {
         Map<String, String> result = new HashMap<>();
         result.put("date", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd hh:mm:ss"));
@@ -706,10 +646,6 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getKlineStatistics";
     }
 
-    private String getUrl9() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingParameter/getHistoryByDateTime";
-    }
-
     protected String getUrl10() {
         return httpProperties.getUrlApiJHOne() + "/thermalRegulation/getCurrentByDate";
     }
@@ -718,8 +654,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 
-
     protected String getUrl12() {
         return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    }
+
+    protected String getUrl13() {
+        return httpProperties.getUrlApiJHOne() + "/coalBlendingParameter/getNowAndEd";
     }
 }

@@ -59,7 +59,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                 } else if ("lianjiao".equals(sheetSplit[1])) {
                     for (int j = 0; j < size; j++) {
                         int rowIndex = 1 + j;
-                        List<CellData> cellData = this.valHandler1(getUrl6(version), rowIndex, dateQueries.get(j));
+                        List<CellData> cellData = this.valHandler1(getUrl6(version), rowIndex, dateQueries.get(j),version);
                         ExcelWriterUtil.setCellValue(sheet, cellData);
                     }
                 } else if ("tag".equals(sheetSplit[1])) {
@@ -167,12 +167,20 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return crushingFineness;
     }
 
-    public List<CellData> valHandler1(String url, int rowIndex, DateQuery dateQuery) {
+    public List<CellData> valHandler1(String url, int rowIndex, DateQuery dateQuery,String version) {
         String[] shifts = {1 + "", 2 + "", 3 + ""};
         String[] coke = {"CO6", "CO7"};
+        String jhNo="CO6";
+        if("12.0".equals(version)){
+            coke[0] = "CO1";
+            coke[1] = "CO2";
+            jhNo="CO1";
+        }
         List<Double> list = new ArrayList<>();
         List<CellData> cellDataList = new ArrayList<>();
         Double k2 = 0.0;
+        Double k1 = 0.0;
+        Double k3 = 0.0;
         Double km = 0.0;
         Double kAvg = 0.0;
         Double kAn = 0.0;
@@ -196,7 +204,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         }
         for (int i = 0; i <shifts.length ; i++) {
             String shift = shifts[i];
-            Map<String, String> queryParam = getQueryParam4(dateQuery, shift, "CO6");
+            Map<String, String> queryParam = getQueryParam4(dateQuery, shift, jhNo);
             String result = httpUtil.get(url, queryParam);
             if (StringUtils.isNotBlank(result)) {
                 JSONObject jsonObject = JSONObject.parseObject(result);
@@ -206,13 +214,17 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                         JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
                         if (Objects.nonNull(obj)) {
                             k2 += obj.getDouble("k2");
+                            k1 += obj.getDouble("k1");
+                            k3 += obj.getDouble("k3");
                             km += obj.getDouble("kM");
                         }
                     }
                 }
             }
         }
+        list.add(k1/3);
         list.add(k2/3);
+        list.add(k3/3);
         list.add(km/3);
         list.add(kAvg/2);
         list.add(kAn/2);
