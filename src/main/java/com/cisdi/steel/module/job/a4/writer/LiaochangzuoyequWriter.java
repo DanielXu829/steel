@@ -402,7 +402,7 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
         Map<String, String> result = new HashMap<>();
         result.put("shiftNo", dealShiftNo(dateQuery.getRecordDate()));
 //        result.put("shiftNo", "1");
-        result.put("shiftday", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
+        result.put("shiftDay", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
 //        result.put("shiftDay", "20190526");
         return result;
     }
