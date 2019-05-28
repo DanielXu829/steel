@@ -254,7 +254,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam4(DateQuery dateQuery, String shift, String cokeNo) {
         Map<String, String> result = new HashMap<>();
         Date date = DateUtil.addDays(dateQuery.getRecordDate(), -1);
-        result.put("date", DateUtil.getFormatDateTime(date, "yyyy/MM/dd hh:mm:ss"));
+        result.put("date", DateUtil.getFormatDateTime(date, "yyyy/MM/dd 00:00:00"));
         result.put("shift", shift);
         result.put("cokeNo", cokeNo);
         return result;

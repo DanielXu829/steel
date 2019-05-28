@@ -408,7 +408,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         } else {
             result.put("shift", "3");
         }
-        result.put("date", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd hh:mm:ss"));
+        result.put("date", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd 00:00:00"));
         result.put("cokeNo", cokeNo);
         return result;
     }
