@@ -49,6 +49,8 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
                     url = getUrl1();
                 } else if ("_acsReportStrtStp_month_all".equals(sheetName)) {
                     url = getUrl2();
+                } else if ("_acsMonthTagValue_month_all".equals(sheetName)) {
+                    url = getUrl3();
                 }
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<Cell> columns = PoiCustomUtil.getFirstRowCel(sheet);
@@ -100,6 +102,10 @@ public class YasuoKongQiWriter extends AbstractExcelReadWriter {
 
     private String getUrl2() {
         return httpProperties.getUrlApiNJOne() + "/acsACMTagStrtstpTimesValues";
+    }
+
+    private String getUrl3() {
+        return httpProperties.getUrlApiNJOne() + "/AcsMonthTagValues";
     }
 
 }
