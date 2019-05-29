@@ -50,12 +50,13 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                 String shift = "";
                 String shiftDate = "";
                 int shiftNum = 0;
-                if (DateUtil.isEffectiveDate(date.getRecordDate(), dateQueries.get(0).getStartTime(), dateQueries.get(0).getEndTime())) {
+                Date date1 = DateUtil.addHours(date.getRecordDate(), -1);
+                if (DateUtil.isEffectiveDate(date1, dateQueries.get(0).getStartTime(), dateQueries.get(0).getEndTime())) {
                     dateQuery = dateQueries.get(0);
                     shift = "夜班";
                     shiftDate = "00:00";
                     shiftNum = 1;
-                } else if (DateUtil.isEffectiveDate(date.getRecordDate(), dateQueries.get(1).getStartTime(), dateQueries.get(1).getEndTime())) {
+                } else if (DateUtil.isEffectiveDate(date1, dateQueries.get(1).getStartTime(), dateQueries.get(1).getEndTime())) {
                     dateQuery = dateQueries.get(1);
                     shift = "白班";
                     shiftDate = "08:00";
