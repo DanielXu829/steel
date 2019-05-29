@@ -33,6 +33,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = "67.0";
+        try {
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -46,7 +51,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 String shift = "";
                 String shiftDate = "";
                 int shiftNum = 0;
-                Date date2 = DateUtil.addHours(date.getRecordDate(), -1);
+                Date date2 = DateUtil.addMinute(date.getRecordDate(), -30);
                 if (DateUtil.isEffectiveDate(date2, dateQueries.get(0).getStartTime(), dateQueries.get(0).getEndTime())) {
                     dateQuery = dateQueries.get(0);
                     shift = "夜班";
@@ -68,7 +73,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     for (int k = 0; k < columns.size(); k++) {
                         if (StringUtils.isNotBlank(columns.get(k))) {
                             String[] split = columns.get(k).split("/");
-                            Double cellDataList = mapDataHandlerx(getUrlx(), split[0], split[1],dateQuery);
+                            Double cellDataList = mapDataHandlerx(getUrlx(version), split[0], split[1], dateQuery);
                             setSheetValue(sheet, rowIndex, k, cellDataList);
                         }
                     }
@@ -80,31 +85,31 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     row.createCell(3).setCellValue(shiftDate);
                     row.getCell(3).setCellType(CellType.STRING);
 
-                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl12(), columns, dateQuery);
+                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl12(version), columns, dateQuery);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("crushing".equals(sheetSplit[1])) {
-                    Double cellDataList = this.valHandler(getUrl4(), dateQuery);
+                    Double cellDataList = this.valHandler(getUrl4(version), dateQuery);
                     setSheetValue(sheet, 1, 0, cellDataList);
                 } else if ("actual".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler2(getUrl5(), columns, 1, dateQuery, shiftNum);
+                    List<CellData> cellDataList = this.mapDataHandler2(getUrl5(version), columns, 1, dateQuery, shiftNum);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("yield".equals(sheetSplit[1])) {
-                    Double cellDataList = this.mapDataHandler3(getUrl6(), dateQuery, shiftNum);
+                    Double cellDataList = this.mapDataHandler3(getUrl6(version), dateQuery, shiftNum, version);
                     setSheetValue(sheet, 1, 0, cellDataList);
                 } else if ("luwen".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler4(getUrl7(), dateQuery, columns);
+                    List<CellData> cellDataList = this.mapDataHandler4(getUrl7(version), dateQuery, columns, version);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("jtcl".equals(sheetSplit[1])) {
                     Date dateBeginTime = DateUtil.getDateBeginTime(dateQuery.getRecordDate());
                     int rowNum = 1;
                     for (int j = 1; j < 8; j++) {
                         Date date1 = DateUtil.addDays(dateBeginTime, j - 7);
-                        Double cellDataList = this.mapDataHandler5(getUrl6(), date1);
+                        Double cellDataList = this.mapDataHandler5(getUrl6(version), date1);
                         setSheetValue(sheet, rowNum, 0, cellDataList);
                         rowNum++;
                     }
                 } else if ("standard".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler9(getUrl10(), columns, date, 1);
+                    List<CellData> cellDataList = this.mapDataHandler9(getUrl10(version), columns, date, 1);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("kstatis".equals(sheetSplit[1])) {
                     Date dateBeginTime = DateUtil.getDateBeginTime(dateQuery.getRecordDate());
@@ -112,15 +117,15 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     for (int j = 1; j < 8; j++) {
                         Date start = DateUtil.addDays(dateBeginTime, j - 7);
                         Date end = DateUtil.addDays(dateBeginTime, j - 6);
-                        List<CellData> cellDataList = this.mapDataHandler6(getUrl8(), columns, start, end, rowNum);
+                        List<CellData> cellDataList = this.mapDataHandler6(getUrl8(version), columns, start, end, rowNum);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         rowNum++;
                     }
                 } else if ("peimeicsnowed".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler7(getUrl13(), sheet, 1);
+                    List<CellData> cellDataList = this.mapDataHandler7(getUrl13(version), sheet, 1);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }else if ("kankavg".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler10(getUrl11(), dateQuery,shiftNum+"");
+                    List<CellData> cellDataList = this.mapDataHandler10(getUrl11(version), dateQuery, shiftNum + "",version);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else {
                     Date startTime = dateQuery.getStartTime();
@@ -133,7 +138,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         row.getCell(0).setCellType(CellType.STRING);
 
                         String time1 = DateUtil.getFormatDateTime(DateUtil.addMinute(startTime, j), "yyyy/MM/dd HH:mm:ss");
-                        Double cellDataList = this.mapDataHandler8(getUrl3(), time1);
+                        Double cellDataList = this.mapDataHandler8(getUrl3(version), time1);
                         setSheetValue(sheet, j + 1, 1, cellDataList);
                     }
                 }
@@ -230,7 +235,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return crushingFineness;
     }
 
-    protected Double mapDataHandler3(String url, DateQuery dateQuery, int shiftNum) {
+    protected Double mapDataHandler3(String url, DateQuery dateQuery, int shiftNum, String version) {
         Map<String, String> queryParam = getQueryParam5(dateQuery, shiftNum);
         String result = httpUtil.get(url, queryParam);
         Double ganxi = 0.0;
@@ -245,11 +250,14 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 }
             } else {
                 Map<String, String> queryParam1 = getQueryParam5x();
-                String result1 = httpUtil.get(getUrl6x(), queryParam1);
+                String result1 = httpUtil.get(getUrl6x(version), queryParam1);
                 if (StringUtils.isBlank(result1)) {
                     return null;
                 }
                 JSONArray array1 = JSONObject.parseArray(result1);
+                if(Objects.isNull(array1)||array1.size()==0){
+                    return null;
+                }
                 JSONObject jsonObject1 = array1.getJSONObject(0);
                 Double backn5x = jsonObject1.getDouble("backn5");
                 Double backn6x = jsonObject1.getDouble("backn6");
@@ -259,11 +267,25 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return ganxi;
     }
 
-    protected List<CellData> mapDataHandler4(String url, DateQuery dateQuery, List<String> columns) {
-        Map<String, String> queryParam = getQueryParam6(dateQuery, 1, "CO6", 1);
-        Map<String, String> queryParam1 = getQueryParam6(dateQuery, 1, "CO6", 2);
-        Map<String, String> queryParam2 = getQueryParam6(dateQuery, 1, "CO7", 1);
-        Map<String, String> queryParam3 = getQueryParam6(dateQuery, 1, "CO7", 2);
+    protected List<CellData> mapDataHandler4(String url, DateQuery dateQuery, List<String> columns, String version) {
+        String JHNo = "CO6";
+        String JHNo1 = "CO7";
+        String name1 = "CO61";
+        String name2 = "CO62";
+        String name3 = "CO71";
+        String name4 = "CO72";
+        if ("12.0".equals(version)) {
+            JHNo = "CO1";
+            JHNo1 = "CO2";
+            name1 = "CO11";
+            name2 = "CO12";
+            name3 = "CO21";
+            name4 = "CO22";
+        }
+        Map<String, String> queryParam = getQueryParam6(dateQuery, 1, JHNo, 1);
+        Map<String, String> queryParam1 = getQueryParam6(dateQuery, 1, JHNo, 2);
+        Map<String, String> queryParam2 = getQueryParam6(dateQuery, 1, JHNo1, 1);
+        Map<String, String> queryParam3 = getQueryParam6(dateQuery, 1, JHNo1, 2);
         String result = httpUtil.get(url, queryParam);
         String result1 = httpUtil.get(url, queryParam1);
         String result2 = httpUtil.get(url, queryParam2);
@@ -331,10 +353,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 a3++;
             }
         }
-        map.put("CO61", CO61 / a);
-        map.put("CO62", CO62 / a1);
-        map.put("CO71", CO71 / a2);
-        map.put("CO72", CO72 / a3);
+
+        map.put(name1, CO61 / a);
+        map.put(name2, CO62 / a1);
+        map.put(name3, CO71 / a2);
+        map.put(name4, CO72 / a3);
 
         List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, 1, map);
         return cellData;
@@ -350,7 +373,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(array)) {
             return null;
         }
+        if(Objects.isNull(array)||array.size()==0){
+            return null;
+        }
         JSONObject jsonObject = array.getJSONObject(0);
+
         Map<String, Object> innerMap = jsonObject.getInnerMap();
         List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, rowBatch, innerMap);
         return cellData;
@@ -447,8 +474,16 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     }
 
 
-    public List<CellData> mapDataHandler10(String url, DateQuery dateQuery, String shift) {
+    public List<CellData> mapDataHandler10(String url, DateQuery dateQuery, String shift,String version) {
         String[] coke = {"CO6", "CO7"};
+        String jhNo1="CO6";
+        String jhNo2="CO7";
+        if("12.0".equals(version)){
+            coke[0]="CO1";
+            coke[1]="CO2";
+            jhNo1="CO1";
+            jhNo2="CO2";
+        }
         List<Double> list = new ArrayList<>();
         List<CellData> cellDataList = new ArrayList<>();
         Double k2 = 0.0;
@@ -467,11 +502,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     if (Objects.nonNull(data)) {
                         JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
                         if (Objects.nonNull(obj)) {
-                            if("CO6".equals(cokeNo)){
+                            if(jhNo1.equals(cokeNo)){
                                 k2 = obj.getDouble("k3");
                                 kAvg6=obj.getDouble("shiftKAvg");
                                 kAn6=obj.getDouble("shiftKan");
-                            }else if("CO7".equals(cokeNo)){
+                            }else if(jhNo2.equals(cokeNo)){
                                 kAvg7=obj.getDouble("shiftKAvg");
                                 kAn7=obj.getDouble("shiftKan");
                             }
@@ -615,51 +650,51 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     }
 
 
-    private String getUrlx() {
-        return httpProperties.getUrlApiJHOne() + "/analyses/getIfAnaitemLatest";
+    private String getUrlx(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemLatest";
     }
 
-    private String getUrl3() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
+    private String getUrl3(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 
-    private String getUrl4() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getParticleDistributionLatest";
+    private String getUrl4(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getParticleDistributionLatest";
     }
 
-    private String getUrl5() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    private String getUrl5(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
     }
 
-    private String getUrl6() {
-        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
+    private String getUrl6(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
     }
 
-    private String getUrl6x() {
-        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getCokeActuPerfLastest";
+    private String getUrl6x(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getCokeActuPerfLastest";
     }
 
-    private String getUrl7() {
-        return httpProperties.getUrlApiJHOne() + "/tmmirbtmpDataTable/selectByDateAndShift";
+    private String getUrl7(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/tmmirbtmpDataTable/selectByDateAndShift";
     }
 
-    private String getUrl8() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getKlineStatistics";
+    private String getUrl8(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokeActualPerformance/getKlineStatistics";
     }
 
-    protected String getUrl10() {
-        return httpProperties.getUrlApiJHOne() + "/thermalRegulation/getCurrentByDate";
+    protected String getUrl10(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/thermalRegulation/getCurrentByDate";
     }
 
-    private String getUrl11() {
-        return httpProperties.getUrlApiJHOne() + "/dayTemperatureStatistics/selectByDateAndShift";
+    private String getUrl11(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 
-    protected String getUrl12() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    protected String getUrl12(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
-    protected String getUrl13() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingParameter/getNowAndEd";
+    protected String getUrl13(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingParameter/getNowAndEd";
     }
 }

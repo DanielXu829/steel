@@ -50,7 +50,7 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                 String shift = "";
                 String shiftDate = "";
                 int shiftNum = 0;
-                Date date1 = DateUtil.addHours(date.getRecordDate(), -1);
+                Date date1 = DateUtil.addMinute(date.getRecordDate(), -30);
                 if (DateUtil.isEffectiveDate(date1, dateQueries.get(0).getStartTime(), dateQueries.get(0).getEndTime())) {
                     dateQuery = dateQueries.get(0);
                     shift = "夜班";

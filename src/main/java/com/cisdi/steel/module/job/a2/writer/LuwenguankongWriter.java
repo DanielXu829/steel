@@ -48,6 +48,11 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = "67.0";
+        try {
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -60,7 +65,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
-                    List<CellData> cellDataList = mapDataHandler(this.rowIndex, getUrl(), columns, item);
+                    List<CellData> cellDataList = mapDataHandler(getUrl(version), columns, item,version);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
@@ -68,7 +73,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    protected List<CellData> mapDataHandler(int rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery,String version) {
 
         List<CellData> cellDataList = new ArrayList<>();
 
@@ -98,7 +103,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
                     if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
                         for (int j = 0; j < jsonArray.size(); j++) {
                             //3.该点名其他时间值关联上一个时间点值
-                            dealPart1(jsonArray, col, cellDataList, this.rowIndex, index, j);
+                            dealPart1(jsonArray, col, cellDataList, this.rowIndex, index, j,version);
                             this.rowIndex += 1;
                         }
                     }
@@ -164,7 +169,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
      * @param index        当前列
      * @param row          当前数据数组的角标
      */
-    private void dealPart1(JSONArray jsonArray, String col, List<CellData> cellDataList, int rowIndex, int index, int row) {
+    private void dealPart1(JSONArray jsonArray, String col, List<CellData> cellDataList, int rowIndex, int index, int row,String version) {
         //1.获取该点名最早的一个值
         JSONObject child = jsonArray.getJSONObject(row);
         //2.查找该最早时的前一个值
@@ -172,7 +177,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         Integer before = null;
         //处理每一个点名的第一个数值关联
         if (row == 0) {
-            before = dealPart(clock, col);
+            before = dealPart(clock, col,version);
         } else {
             JSONObject fir = jsonArray.getJSONObject(row - 1);
             if (Objects.nonNull(fir)) {
@@ -203,7 +208,7 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         //处理班组
         String bz = "";
         Map<String, String> queryParam2 = getQueryParam2(clock, shiftNum);
-        String result = httpUtil.get(getUrl2(), queryParam2);
+        String result = httpUtil.get(getUrl2(version), queryParam2);
         if (StringUtils.isNotBlank(result)) {
             JSONArray array = JSONObject.parseArray(result);
             if (Objects.nonNull(array) && array.size() != 0) {
@@ -233,9 +238,9 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
      * @param tagName
      * @return
      */
-    private Integer dealPart(Date date, String tagName) {
+    private Integer dealPart(Date date, String tagName,String version) {
         Map<String, String> queryParam = getQueryParam1(date, tagName);
-        String result = httpUtil.get(getUrl1(), queryParam);
+        String result = httpUtil.get(getUrl1(version), queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
         }
@@ -276,16 +281,16 @@ public class LuwenguankongWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    protected String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
-    protected String getUrl1() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValLastestByDate";
+    protected String getUrl1(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValLastestByDate";
     }
 
-    protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    protected String getUrl2(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
     }
 
 }
