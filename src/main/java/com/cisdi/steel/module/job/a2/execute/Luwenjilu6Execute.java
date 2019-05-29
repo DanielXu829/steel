@@ -85,6 +85,8 @@ public class Luwenjilu6Execute extends AbstractJobExecuteExecute {
                 path = "/u01/templates/焦化/CK12-炼焦-1#炉温记录报表（日）copy.xlsx";
             } else if ("67.0".equals(version)) {
                 path = "/u01/templates/焦化/CK67-炼焦-6#炉温记录报表（日）copy.xlsx";
+            }else if ("45.0".equals(version)) {
+                path = "/u01/templates/焦化/CK67-炼焦-4#炉温记录报表（日）copy.xlsx";
             }
             FileUtils.copyFile(path, writerExcelDTO.getTemplate().getTemplatePath());
         } else {

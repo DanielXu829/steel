@@ -180,6 +180,10 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
              coke[0] = "CO1";
              coke[1] = "CO2";
              jhNo="CO1";
+        }else if("45.0".equals(version)){
+            coke[0] = "CO4";
+            coke[1] = "CO5";
+            jhNo="CO4";
         }
         List<Double> list = new ArrayList<>();
         List<CellData> cellDataList = new ArrayList<>();

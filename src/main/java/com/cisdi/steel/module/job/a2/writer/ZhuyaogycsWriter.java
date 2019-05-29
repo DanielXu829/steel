@@ -73,7 +73,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     for (int k = 0; k < columns.size(); k++) {
                         if (StringUtils.isNotBlank(columns.get(k))) {
                             String[] split = columns.get(k).split("/");
-                            Double cellDataList = mapDataHandlerx(getUrlx(version), split[0], split[1], dateQuery);
+                            Double cellDataList = mapDataHandlerx(getUrlx(version), split[0], split[1], dateQuery,version);
                             setSheetValue(sheet, rowIndex, k, cellDataList);
                         }
                     }
@@ -158,11 +158,17 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return data;
     }
 
-    protected Double mapDataHandlerx(String url, String brandcode, String anaitemname,DateQuery dateQuery) {
+    protected Double mapDataHandlerx(String url, String brandcode, String anaitemname,DateQuery dateQuery,String version) {
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("brandcode", brandcode);
         queryParam.put("anaitemname", anaitemname);
-        queryParam.put("unitCode", "JH67");
+        String code="JH67";
+        if("12.0".equals(version)){
+            code="JH12";
+        }else if("45.0".equals(version)){
+            code="JH45";
+        }
+        queryParam.put("unitCode",code );
         queryParam.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -281,6 +287,13 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             name2 = "CO12";
             name3 = "CO21";
             name4 = "CO22";
+        }else if("45.0".equals(version)){
+            JHNo = "CO4";
+            JHNo1 = "CO5";
+            name1 = "CO41";
+            name2 = "CO42";
+            name3 = "CO51";
+            name4 = "CO52";
         }
         Map<String, String> queryParam = getQueryParam6(dateQuery, 1, JHNo, 1);
         Map<String, String> queryParam1 = getQueryParam6(dateQuery, 1, JHNo, 2);
@@ -483,6 +496,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             coke[1]="CO2";
             jhNo1="CO1";
             jhNo2="CO2";
+        }else if("5.0".equals(version)){
+            coke[0]="CO4";
+            coke[1]="CO5";
+            jhNo1="CO4";
+            jhNo2="CO5";
         }
         List<Double> list = new ArrayList<>();
         List<CellData> cellDataList = new ArrayList<>();

@@ -55,6 +55,9 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
             if ("12.0".equals(version)) {
                 sheetName1 = "2炉焦侧炉温管控";
                 sheetName2 = "2炉机侧炉温管控";
+            } else if ("45.0".equals(version)) {
+                sheetName1 = "5炉焦侧炉温管控";
+                sheetName2 = "5炉机侧炉温管控";
             }
             if (sheetName1.equals(sheetName)) {
                 int rowNum = 5;
@@ -98,6 +101,8 @@ public class Luwenjilu7Writer extends AbstractExcelReadWriter {
         String jhNo = "CO7";
         if ("12.0".equals(version)) {
             jhNo = "CO2";
+        } else if ("45.0".equals(version)) {
+            jhNo = "CO5";
         }
         List<CellData> cellData1 = mapDataHandler(4, getUrl(version), rowCelVal1, jhNo, dateQuery);
         ExcelWriterUtil.setCellValue(sheet, cellData1);
