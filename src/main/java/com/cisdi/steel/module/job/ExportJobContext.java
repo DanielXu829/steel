@@ -71,6 +71,7 @@ public class ExportJobContext {
                             .jobEnum(abstractExportJob.getCurrentJob())
                             .jobExecuteEnum(JobExecuteEnum.manual)
                             .dateQuery(dateQuery)
+                            .indexId(indexId)
                             .build();
                     abstractExportJob.getCurrentJobExecute().execute(jobExecuteInfo);
                 }

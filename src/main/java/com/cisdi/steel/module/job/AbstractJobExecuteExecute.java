@@ -134,7 +134,8 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                         .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
                         .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
                         .setCurrDate(dateQuery.getRecordDate())
-                        .setRecordDate(dateQuery.getRecordDate());
+                        .setRecordDate(dateQuery.getRecordDate())
+                        .setId(jobExecuteInfo.getIndexId());
 
                 this.replaceTemplatePath(reportIndex, template);
                 // 4、5填充数据
@@ -213,6 +214,9 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                 || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan6.getCode().equals(code)) {
             // yyyy-MM-dd_HH_mm
             datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
+        } else if (StringUtils.isNotBlank(code) && JobEnum.sj_liushaogycanshu.getCode().equals(code)
+                || StringUtils.isNotBlank(code) && JobEnum.sj_gycanshutotal.getCode().equals(code)) {
+            datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
         }
         return templateName + "_" + datePart + "." + fileExtension;
     }

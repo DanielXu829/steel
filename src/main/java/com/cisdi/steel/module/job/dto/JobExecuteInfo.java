@@ -39,4 +39,9 @@ public class JobExecuteInfo implements Serializable {
      * 如果为null 表示 查询当前时间
      */
     private DateQuery dateQuery;
+
+    /**
+     * 重新生成时报表ID
+     */
+    private Long indexId;
 }
