@@ -496,7 +496,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             coke[1]="CO2";
             jhNo1="CO1";
             jhNo2="CO2";
-        }else if("5.0".equals(version)){
+        }else if("45.0".equals(version)){
             coke[0]="CO4";
             coke[1]="CO5";
             jhNo1="CO4";
