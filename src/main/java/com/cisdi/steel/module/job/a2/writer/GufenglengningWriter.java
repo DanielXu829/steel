@@ -46,12 +46,12 @@ public class GufenglengningWriter extends BaseJhWriter {
             // 以下划线开头的sheet 表示 隐藏表  待处理
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
-            int k = 1;
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = new ArrayList<>();
                 String no = "";
+                int size = dateQueries.size();
                 if ("_gfln2_day_hour".equals(sheetName)) {
                     Row row1 = sheet.getRow(0);
                     Row row2 = sheet.getRow(1);
@@ -64,34 +64,27 @@ public class GufenglengningWriter extends BaseJhWriter {
                     String cellValue1 = PoiCellUtil.getCellValue(cell1);
                     String cellValue2 = PoiCellUtil.getCellValue(cell2);
                     String cellValue3 = PoiCellUtil.getCellValue(cell3);
-                    DateQuery dateQuery = dateQueries.get(0);
-                    double a1 = getCellValue(dateQuery, cellValue1,version);
-                    double a2 = getCellValue(dateQuery, cellValue2,version);
-                    double a3 = getCellValue(dateQuery, cellValue3,version);
-                    double max = (a1 > a2) ? a1 : a2;
-                    max = (max > a3) ? max : a3;
-                    if (max == a1) {
-                        columns = PoiCustomUtil.getRowCelVal(sheet, 0);
-                        no = "A";
-                    } else if (max == a2) {
-                        columns = PoiCustomUtil.getRowCelVal(sheet, 1);
-                        no = "B";
-                    } else {
-                        columns = PoiCustomUtil.getRowCelVal(sheet, 2);
-                        no = "C";
-                    }
-
-                    k = 3;
-                } else {
-                    columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                }
-                int size = dateQueries.size();
-                for (int j = 0; j < size; j++) {
-                    DateQuery item = dateQueries.get(j);
-                    int rowIndex = j + k;
-                    List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
-                    if ("_gfln2_day_hour".equals(sheetName)) {
-                        if (item.getRecordDate().before(new Date())) {
+                    // DateQuery dateQuery = dateQueries.get(0);
+                    for (int j = 0; j < dateQueries.size(); j++) {
+                        DateQuery dateQuery = dateQueries.get(j);
+                        double a1 = getCellValue(dateQuery, cellValue1, version);
+                        double a2 = getCellValue(dateQuery, cellValue2, version);
+                        double a3 = getCellValue(dateQuery, cellValue3, version);
+                        double max = (a1 > a2) ? a1 : a2;
+                        max = (max > a3) ? max : a3;
+                        if (max == a1) {
+                            columns = PoiCustomUtil.getRowCelVal(sheet, 0);
+                            no = "A";
+                        } else if (max == a2) {
+                            columns = PoiCustomUtil.getRowCelVal(sheet, 1);
+                            no = "B";
+                        } else {
+                            columns = PoiCustomUtil.getRowCelVal(sheet, 2);
+                            no = "C";
+                        }
+                        int rowIndex = j + 3;
+                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, dateQuery);
+                        if (dateQuery.getRecordDate().before(new Date())) {
                             Row row = sheet.getRow(rowIndex);
                             if (Objects.isNull(row)) {
                                 row = sheet.createRow(rowIndex);
@@ -102,8 +95,16 @@ public class GufenglengningWriter extends BaseJhWriter {
                             }
                             cell.setCellValue(no);
                         }
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                } else if ("_gfln1_day_hour".equals(sheetName)){
+                    columns = PoiCustomUtil.getFirstRowCelVal(sheet);
+                    for (int j = 0; j < size; j++) {
+                        DateQuery item = dateQueries.get(j);
+                        int rowIndex = j + 1;
+                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, item);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    }
                 }
             }
         }
@@ -111,22 +112,22 @@ public class GufenglengningWriter extends BaseJhWriter {
     }
 
     private double getCellValue(DateQuery dateQuery, String cellValue,String version) {
-        double data = 0;
+        double val = 0;
         Map<String, String> queryParam = getQueryParam(dateQuery);
-        queryParam.put("tagName", cellValue);
+        queryParam.put("tagNames", cellValue);
         String result = httpUtil.get(getUrl(version), queryParam);
         if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
-                JSONArray rows = jsonObject.getJSONArray("rows");
-                if (Objects.nonNull(rows) && rows.size() != 0) {
-                    JSONObject obj = rows.getJSONObject(0);
-                    if (Objects.nonNull(obj)) {
-                        data = obj.getDouble("val");
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    JSONArray array = data.getJSONArray(cellValue);
+                    if (Objects.nonNull(array) && array.size() > 0) {
+                        val = array.getJSONObject(array.size() - 1).getDouble("val");
                     }
                 }
             }
         }
-        return data;
+        return val;
     }
 }
