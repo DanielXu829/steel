@@ -70,6 +70,8 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                     int rowBatch = 1;
                     int flag = 1;
                     //获取对应的请求接口地址
+                    JSONObject sortMap = new JSONObject();
+                    sortMap.put("recordDate", "DESC");
                     //工作流水账
                     if (JobEnum.sj_gongzuoliushuizhang.getCode().equals(excelDTO.getJobEnum().getCode())
                             || JobEnum.sj_gongzuoliushuizhang6.getCode().equals(excelDTO.getJobEnum().getCode())) {
@@ -89,6 +91,7 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                         url = getUrl4(version);
                         rowBatch = 3;
                         flag = 2;
+                        sortMap.put("recordDate", "ASC");
                     } else if (JobEnum.sj_gyijiancha_month.getCode().equals(excelDTO.getJobEnum().getCode())) {
                         url = getUrl5(version);
                         rowBatch = 7;
@@ -97,12 +100,7 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                     List<JSONObject> clauses = new ArrayList<>();
                     dealClauses(clauses, "recordDate", ">=", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
                     dealClauses(clauses, "recordDate", "<=", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
-
                     query.put("clauses", clauses);
-
-                    JSONObject sortMap = new JSONObject();
-                    sortMap.put("recordDate", "desc");
-
                     query.put("sortMap", sortMap);
 
                     List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);

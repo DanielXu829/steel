@@ -154,13 +154,17 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
         List<CellData> cellDataList = new ArrayList<>();
         int rowIndex = (index - 4) + 1;
         String reportCode = "";
+        String url = "";
+        String result = null;
         if ("_5main1_day_4hour".equals(sheetName) || "_6main4_day_4hour".equals(sheetName)) {
             reportCode = "process_param_4h";
+            Map param = dealParam(dateQuery);
+            url = getUrl7(version, reportCode);
+            result = httpUtil.get(url, param);
         } else {
-            reportCode = "sinter_quality_4h";
+            url = getUrl10(version, dateQuery.getEndTime().getTime());
+            result = httpUtil.get(url);
         }
-        String url = getUrl7(version, reportCode);
-        String result = httpUtil.get(url);
         if (StringUtils.isBlank(result)) {
             return null;
         }
@@ -179,7 +183,8 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
                 }
                 if (Objects.nonNull(map)) {
                     String tagName = map.getString("tagName");
-                    if (tagName.equals(column)) {
+                    String anaItemName = map.getString("anaItemName");
+                    if ((StringUtils.isNotBlank(tagName) && tagName.equals(column)) || (StringUtils.isNotBlank(anaItemName) && anaItemName.equals(column))) {
                         String val1 = map.getString("unit");
 
                         Double str1 = map.getDouble("low");
@@ -411,6 +416,13 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
         return strem;
     }
 
+    private Map dealParam(DateQuery dateQuery) {
+        Map map = new HashMap();
+        map.put("startTime", DateUtil.addHours(dateQuery.getStartTime(), -1).getTime());
+        map.put("endTime", DateUtil.addHours(dateQuery.getEndTime(), -1).getTime());
+        return map;
+    }
+
     private String getUrl6(String version) {
         if ("5.0".equals(version)) {
             // http://10.11.11.27:9001/getPictures?picDate=2019-04-09&picLocation=1&picTime=15
@@ -463,6 +475,15 @@ public class GycanshuTotalWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/publishNote/selectByKey?noteDate=" + noteDate;
+        }
+    }
+
+    private String getUrl10(String version, Long time) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/ana/sinterQuality4h?time=" + time;
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/ana/sinterQuality4h?time=" + time;
         }
     }
 }
