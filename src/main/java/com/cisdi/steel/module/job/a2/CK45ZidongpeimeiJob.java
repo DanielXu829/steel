@@ -2,14 +2,12 @@ package com.cisdi.steel.module.job.a2;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a2.execute.BaseJhExecute;
-import com.cisdi.steel.module.job.a2.execute.GufenglengningExecute;
+import com.cisdi.steel.module.job.a2.execute.CK12ZidongpeimeiExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * CK45鼓风冷凝报表
  * <p>Description:         </p>
  * <p>email: ypasdf@163.com</p>
  * <p>Copyright: Copyright (c) 2018</p>
@@ -19,18 +17,18 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class CK45GufenglengningJob extends AbstractExportJob {
+public class CK45ZidongpeimeiJob extends AbstractExportJob {
 
     @Autowired
-    private GufenglengningExecute gufenglengningExecute;
+    private CK12ZidongpeimeiExecute ck12ZidongpeimeiExecute;
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.jh_ck45gufenglengning;
+        return JobEnum.jh_ck45zidongpeimei;
     }
 
     @Override
     public IJobExecute getCurrentJobExecute() {
-        return gufenglengningExecute;
+        return ck12ZidongpeimeiExecute;
     }
 }

@@ -50,6 +50,17 @@ public class TestJob2 extends SteelApplicationTests {
     }
 
     /**
+     * 自动配煤CK45
+     */
+    @Autowired
+    private CK45ZidongpeimeiJob ck45ZidongpeimeiJob;
+
+    @Test
+    public void test666() {
+        ck45ZidongpeimeiJob.execute(null);
+    }
+
+    /**
      * 粉碎细度
      */
     @Autowired
