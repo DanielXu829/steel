@@ -191,8 +191,8 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
             int rowIndex = 1;
             for (int j = 0; j < monthDayEach.size(); j++) {
                 DateQuery dateQuery = monthDayEach.get(j);
+                int r = rowIndex;
                 for (int i = 0; i < rows.size(); i++) {
-                    int r = rowIndex;
                     JSONObject jsonObject1 = rows.getJSONObject(i);
                     if (Objects.nonNull(jsonObject1)) {
                         String recordDate = jsonObject1.getString("recordDate");
