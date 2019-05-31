@@ -83,8 +83,8 @@ public class GufenglengningWriter extends BaseJhWriter {
                             no = "C";
                         }
                         int rowIndex = j + 3;
-                        List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, dateQuery);
                         if (dateQuery.getRecordDate().before(new Date())) {
+                            List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl(version), columns, dateQuery);
                             Row row = sheet.getRow(rowIndex);
                             if (Objects.isNull(row)) {
                                 row = sheet.createRow(rowIndex);
@@ -94,8 +94,8 @@ public class GufenglengningWriter extends BaseJhWriter {
                                 cell = row.createCell(32);
                             }
                             cell.setCellValue(no);
+                            ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         }
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("_gfln1_day_hour".equals(sheetName)){
                     columns = PoiCustomUtil.getFirstRowCelVal(sheet);
