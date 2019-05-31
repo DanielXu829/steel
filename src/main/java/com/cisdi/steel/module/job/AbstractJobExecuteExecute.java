@@ -214,8 +214,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                 || StringUtils.isNotBlank(code) && JobEnum.gl_peiliaodan6.getCode().equals(code)) {
             // yyyy-MM-dd_HH_mm
             datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
-        } else if (StringUtils.isNotBlank(code) && JobEnum.sj_liushaogycanshu.getCode().equals(code)
-                || StringUtils.isNotBlank(code) && JobEnum.sj_gycanshutotal.getCode().equals(code)) {
+        } else if (StringUtils.isNotBlank(code) && JobEnum.sj_liushaogycanshu.getCode().equals(code)) {
             datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
         }
         return templateName + "_" + datePart + "." + fileExtension;
