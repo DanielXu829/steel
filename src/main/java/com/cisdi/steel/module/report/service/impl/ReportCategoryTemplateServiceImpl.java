@@ -64,7 +64,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     }
 
     @Override
-    public List<ReportCategoryTemplate> selectTemplateInfo(String code, String lang) {
+    public List<ReportCategoryTemplate> selectTemplateInfo(String code, String lang, String sequence) {
         if (StringUtils.isBlank(code)) {
             throw new BusinessException("生成模板编码不能为空");
         }
@@ -80,6 +80,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
 //        );
         wrapper.eq(ReportCategoryTemplate::getReportCategoryCode, code);
         wrapper.eq(StringUtils.isNotBlank(lang), ReportCategoryTemplate::getTemplateLang, lang);
+        wrapper.eq(StringUtils.isNotBlank(sequence), ReportCategoryTemplate::getSequence, sequence);
         // 查询生效的数据
         wrapper.eq(ReportCategoryTemplate::getForbid, Constants.NO);
         return this.list(wrapper);

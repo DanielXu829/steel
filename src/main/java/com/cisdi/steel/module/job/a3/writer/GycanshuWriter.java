@@ -41,7 +41,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
 
             int picTime = -1;
-            int currDateTime = Integer.valueOf(DateUtil.getFormatDateTime(date.getRecordDate(), "HH"));
+            int currDateTime = Integer.valueOf(DateUtil.getFormatDateTime(DateUtil.addHours(date.getRecordDate(), -1), "HH"));
             picTime = currDateTime;
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略

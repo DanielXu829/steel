@@ -44,4 +44,9 @@ public class JobExecuteInfo implements Serializable {
      * 重新生成时报表ID
      */
     private Long indexId;
+
+    /**
+     * 序号
+     */
+    private String sequence;
 }

@@ -32,7 +32,7 @@ public interface ReportCategoryTemplateService extends IBaseService<ReportCatego
      * @param lang 所属语言
      * @return 结果
      */
-    List<ReportCategoryTemplate> selectTemplateInfo(String code, String lang);
+    List<ReportCategoryTemplate> selectTemplateInfo(String code, String lang,String sequence);
 
     /**
      * 插入数据

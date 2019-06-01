@@ -102,7 +102,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 2
         this.checkParameter(jobExecuteInfo);
         // 3
-        List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
+        List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum(), jobExecuteInfo.getSequence());
         for (ReportCategoryTemplate template : templates) {
             Date date = new Date();
             DateQuery dateQuery = new DateQuery(date, date, date);
@@ -181,11 +181,11 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * @param jobEnum 任务标识
      * @return 模板信息
      */
-    protected List<ReportCategoryTemplate> getTemplateInfo(JobEnum jobEnum) {
+    protected List<ReportCategoryTemplate> getTemplateInfo(JobEnum jobEnum, String sequence) {
         // 1、获取需要生成的语言
         String lang = sysConfigService.selectActionByCode(Constants.LANGUAGE_CODE);
         // 2、获取需要生成的模板信息
-        List<ReportCategoryTemplate> templates = templateService.selectTemplateInfo(jobEnum.getCode(), lang);
+        List<ReportCategoryTemplate> templates = templateService.selectTemplateInfo(jobEnum.getCode(), lang, sequence);
         if (Objects.isNull(templates) || templates.isEmpty()) {
             this.handlerException(jobEnum.getName() + "-->数据库中没有对应的模板" + jobEnum.getCode());
         }

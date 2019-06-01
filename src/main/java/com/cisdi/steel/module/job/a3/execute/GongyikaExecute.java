@@ -309,7 +309,7 @@ public class GongyikaExecute extends AbstractJobExecuteExecute {
     }
 
     private Workbook handlerFileWorkHook(JobEnum jobEnum) {
-        List<ReportCategoryTemplate> templateInfo = getTemplateInfo(jobEnum);
+        List<ReportCategoryTemplate> templateInfo = getTemplateInfo(jobEnum,null);
         try {
             return WorkbookFactory.create(new File(templateInfo.get(0).getTemplatePath()));
         } catch (IOException | InvalidFormatException e) {

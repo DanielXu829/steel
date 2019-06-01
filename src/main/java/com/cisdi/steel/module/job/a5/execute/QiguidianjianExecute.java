@@ -48,7 +48,7 @@ public class QiguidianjianExecute extends AbstractJobExecuteExecute {
 
     @Override
     protected void executeDetail(JobExecuteInfo jobExecuteInfo) {
-        List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum());
+        List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum(),null);
         for (ReportCategoryTemplate template : templates) {
             DateQuery dateQuery = getDateQuery(jobExecuteInfo);
             try {
