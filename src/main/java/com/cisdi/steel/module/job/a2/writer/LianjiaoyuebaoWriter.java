@@ -106,6 +106,8 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                             String jhno = "CO6";
                             if("12.0".equals(version)){
                                 jhno = "CO1";
+                            }else if("45.0".equals(version)){
+                                jhno = "CO4";
                             }
                             List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -121,6 +123,8 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                             String jhno = "CO7";
                             if("12.0".equals(version)){
                                 jhno = "CO2";
+                            }else if("45.0".equals(version)){
+                                jhno = "CO5";
                             }
                             List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -261,7 +265,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
     }
 
     public List<CellData> mapDataHandler3(String url, List<String> columns,int rowBatch,DateQuery dateQuery,int startRow) {
-        Map<String, String> queryParam = getQueryParam2(dateQuery);
+        Map<String, String> queryParam = getQueryParam2x(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -381,6 +385,15 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         Map<String, String> result = new HashMap<>();
        // result.put("startDate",DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("datetime", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("currentPage", "1");
+        result.put("pageSize", "1");
+        return result;
+    }
+
+    protected Map<String, String> getQueryParam2x(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("startDate",DateUtil.getFormatDateTime(dateQuery.getStartTime(),"yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(),"yyyy/MM/dd HH:mm:ss"));
         result.put("currentPage", "1");
         result.put("pageSize", "1");
         return result;
