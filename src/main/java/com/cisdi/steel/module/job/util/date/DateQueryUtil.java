@@ -94,6 +94,18 @@ public class DateQueryUtil {
         return queryList;
     }
 
+    public static List<DateQuery> buildStartAndEndDayHourEach(Date start, Date end) {
+        Date dateBeginTime = DateUtil.getDateBeginTime(start);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date temp = dateBeginTime;
+        while (temp.before(end)) {
+            DateQuery query = DateQueryUtil.buildHour(temp);
+            queryList.add(query);
+            temp = DateUtil.addHours(temp, 1);
+        }
+        return queryList;
+    }
+
     public static void main(String[] args) {
         List<DateQuery> dateQueries = buildYearDayEach(new Date());
         dateQueries.forEach(System.out::println);
@@ -223,6 +235,20 @@ public class DateQueryUtil {
         DateQuery dateQuery = buildMonth(date);
         Date startTime = dateQuery.getStartTime();
         long betweenDays = DateUtil.getBetweenDays(startTime, date);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date currentDate = startTime;
+        for (int i = 0; i <= betweenDays; i++) {
+            DateQuery query = buildToday(currentDate);
+            queryList.add(query);
+            currentDate = DateUtil.addDays(currentDate, 1);
+        }
+        return queryList;
+    }
+
+    public static List<DateQuery> buildStartAndEndDayEach(Date start, Date end) {
+        DateQuery dateQuery = buildMonth(start);
+        Date startTime = dateQuery.getStartTime();
+        long betweenDays = DateUtil.getBetweenDays(startTime, end);
         List<DateQuery> queryList = new ArrayList<>();
         Date currentDate = startTime;
         for (int i = 0; i <= betweenDays; i++) {

@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.a1.writer;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.ExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -12,6 +13,7 @@ import com.cisdi.steel.module.job.strategy.date.DateStrategy;
 import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -74,25 +76,55 @@ public class XiaoHaoDayWriter extends ExcelReadWriter {
         List<Long> list = new ArrayList<>(set);
         Collections.sort(list);
 
-        for (int k = 0; k < list.size(); k++) {
-            Long key = list.get(k);
-            Map<String, Object> map = result.get(key);
-            for (int i = 0; i < firstRowCelVal.size(); i++) {
-                String val = firstRowCelVal.get(i);
-                if (StringUtils.isBlank(val)) {
-                    continue;
+        List<DateQuery> dayEach = DateQueryUtil.buildStartAndEndDayEach(new Date(Long.valueOf(queryList.get(0).getQueryStartTime())),
+                new Date(Long.valueOf(queryList.get(0).getQueryEndTime())));
+        int rowIndex = 1;
+        for (int i = 0; i < dayEach.size(); i++) {
+            DateQuery query = dayEach.get(i);
+            Date recordDate = query.getRecordDate();
+            for (int k = 0; k < list.size(); k++) {
+                boolean flag = false;
+                Long tempTime = list.get(k);
+                String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd 00:00:00");
+                Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                if (date.getTime() == recordDate.getTime()) {
+                    Map<String, Object> map = result.get(tempTime);
+                    for (int j = 0; j < firstRowCelVal.size(); j++) {
+                        String val = firstRowCelVal.get(j);
+                        if (StringUtils.isBlank(val)) {
+                            continue;
+                        }
+                        if (map.containsKey(val)) {
+                            Object o = map.get(val);
+                            ExcelWriterUtil.addCellData(resultData, rowIndex, j, o);
+                            flag = true;
+                        }
+                    }
                 }
-                if (map.containsKey(val)) {
-                    new Date(key);
-                    Calendar calendar=Calendar.getInstance();
-                    calendar.setTime(new Date(key));
-                    int rowIndex = calendar.get(Calendar.DATE);
-                    Object o = map.get(val);
-                    ExcelWriterUtil.addCellData(resultData, rowIndex, i, o);
-//                    ExcelWriterUtil.addCellData(resultData, k+1, i, o);
+                if (flag) {
+                    break;
                 }
             }
+            rowIndex += 1;
         }
+//        for (int k = 0; k < list.size(); k++) {
+//            Long key = list.get(k);
+//            Map<String, Object> map = result.get(key);
+//            for (int i = 0; i < firstRowCelVal.size(); i++) {
+//                String val = firstRowCelVal.get(i);
+//                if (StringUtils.isBlank(val)) {
+//                    continue;
+//                }
+//                if (map.containsKey(val)) {
+//                    Calendar calendar=Calendar.getInstance();
+//                    calendar.setTime(new Date(key));
+//                    int rowIndex = calendar.get(Calendar.DATE);
+//                    Object o = map.get(val);
+//                    ExcelWriterUtil.addCellData(resultData, rowIndex, i, o);
+////                    ExcelWriterUtil.addCellData(resultData, k+1, i, o);
+//                }
+//            }
+//        }
         return SheetRowCellData.builder()
                 .sheet(sheet)
                 .workbook(workbook)
@@ -103,6 +135,7 @@ public class XiaoHaoDayWriter extends ExcelReadWriter {
     private void requestData(String url, String category, DateQuery dateQuery, Map<Long, Map<String, Object>> result) {
         url = url + "/anaChargeValue/range";
         Map<String, String> queryParam = dateQuery.getQueryParam();
+
         queryParam.put("granularity", "day");
         queryParam.put("type", "LC");
 
