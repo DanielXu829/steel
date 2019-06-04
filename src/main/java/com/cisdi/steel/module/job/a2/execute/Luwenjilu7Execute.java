@@ -80,11 +80,11 @@ public class Luwenjilu7Execute extends AbstractJobExecuteExecute {
         if (!formatDateTime1.equals(formatDateTime)) {
             String path ="";
             if ("12.0".equals(version)) {
-                path = "/u01/templates/焦化/CK12-炼焦-2#炉温记录报表（日）copy.xlsx";
+                path = "/u01/templates/焦化12/CK12-炼焦-1#炉温记录报表（日）copy.xlsx";
             } else if ("67.0".equals(version)) {
                 path = "/u01/templates/焦化/CK67-炼焦-7#炉温记录报表（日）copy.xlsx";
             } else if ("45.0".equals(version)) {
-                path = "/u01/templates/焦化/CK45-炼焦-5#炉温记录报表（日）copy.xlsx";
+                path = "/u01/templates/焦化45/CK45-炼焦-5#炉温记录报表（日）copy.xlsx";
             }
             FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
             //FileUtils.copyFile("D:\\template\\焦化\\CK67-炼焦-7#炉温记录报表（日）copy.xlsx",writerExcelDTO.getTemplate().getTemplatePath());

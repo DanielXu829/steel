@@ -156,6 +156,7 @@ public enum JobEnum {
     yl_chejianshengchanyunxing("ygl_chejianshengchanyunxing", "原料车间生产运行记录表"),
     yl_chejianshengchanjiaoban("ygl_chejianshengchanjiaoban", "原料车间生产交班表"),
     ygl_liaochangzuoyequ("ygl_liaochangzuoyequ", "料场作业区班报"),
+    ygl_gongliaozhunshihua("ygl_gongliaozhunshihua", "供料准时化横班统计报表"),
 
     // 能介
     nj_qiguidianjian("nj_qiguidianjian", "气柜点检表"),

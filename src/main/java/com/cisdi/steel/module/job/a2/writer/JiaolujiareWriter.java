@@ -107,19 +107,19 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam(DateQuery dateQuery,String jhNo) {
         Map<String, String> result = new HashMap<>();
         if("6.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-25);
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),5);
             result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }else if("7.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-10);
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),20);
             result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }else if("1.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-10);
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-6);
             result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }else if("2.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-1);
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),10);
             result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }

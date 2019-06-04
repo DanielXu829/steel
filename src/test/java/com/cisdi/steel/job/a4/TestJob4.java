@@ -155,4 +155,15 @@ public class TestJob4 extends SteelApplicationTests {
     public void test14() {
         liaochangzuoyequJob.execute(null);
     }
+
+    /**
+     * 供料准时化横班统计报表
+     */
+    @Autowired
+    private GongliaoZhunShiHuaJob gongliaoZhunShiHuaJob;
+
+    @Test
+    public void test15() {
+        gongliaoZhunShiHuaJob.execute(null);
+    }
 }
