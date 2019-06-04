@@ -104,9 +104,13 @@ public class ChartFactory {
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
+        int batch = 2;
+        if (categories.length > 1000) {
+            batch = 2000;
+        }
         for (int i = 0; i < categories.length; i++) {
             Object s = categories[i];
-            if (i % 2 == 0) {
+            if (i % batch == 0) {
                 chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.black);
             } else {
                 // 设置背景色为白色

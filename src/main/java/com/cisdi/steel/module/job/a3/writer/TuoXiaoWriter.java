@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.a3.writer;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -276,10 +277,16 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                     }
 
                     for (int j = 0; j < all.size(); j++) {
-                        long time = all.get(j).getEndTime().getTime();
+                        Date time = all.get(j).getEndTime();
+                        String dateTime1 = DateUtil.getFormatDateTime(time, DateUtil.fullFormat);
                         Object v = "";
                         for (int m = 0; m < list.length; m++) {
-                            if (time == list[m].longValue()) {
+                            Date date = new Date(list[m]);
+                            String dateTime2 = DateUtil.getFormatDateTime(date, DateUtil.fullFormat);
+                            Date hours = DateUtil.addHours(date, 1);
+                            String dateTime3 = DateUtil.getFormatDateTime(hours, DateUtil.fullFormat);
+
+                            if (dateTime1.equals(dateTime2) || dateTime1.equals(dateTime3)) {
                                 Object o = innerMap.get(String.valueOf(list[m]));
                                 v = o;
                                 break;
@@ -318,10 +325,16 @@ public class TuoXiaoWriter extends AbstractExcelReadWriter {
                     }
 
                     for (int j = 0; j < all.size(); j++) {
-                        long time = all.get(j).getStartTime().getTime();
+                        Date time = all.get(j).getEndTime();
+                        String dateTime1 = DateUtil.getFormatDateTime(time, DateUtil.fullFormat);
                         Object v = "";
                         for (int m = 0; m < list.length; m++) {
-                            if (time == list[m].longValue()) {
+                            Date date = new Date(list[m]);
+                            String dateTime2 = DateUtil.getFormatDateTime(date, DateUtil.fullFormat);
+                            Date hours = DateUtil.addHours(date, 1);
+                            String dateTime3 = DateUtil.getFormatDateTime(hours, DateUtil.fullFormat);
+
+                            if (dateTime1.equals(dateTime2) || dateTime1.equals(dateTime3)) {
                                 Object o = innerMap.get(String.valueOf(list[m]));
                                 v = o;
                                 break;

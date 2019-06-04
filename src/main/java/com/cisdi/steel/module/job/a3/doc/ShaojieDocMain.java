@@ -51,7 +51,7 @@ public class ShaojieDocMain {
     public void mainJob() {
         Date date = new Date();
         mainDeal(version5, date);
-        mainDeal(version6, date);
+//        mainDeal(version6, date);
         log.error("烧结word生成完毕！");
     }
 
@@ -78,14 +78,18 @@ public class ShaojieDocMain {
                 dataList.add(map);
             } else {
                 // 7
-                commPart1(o, result, "attr2", "attr3", "attr4", "attr5");
-                commPart1(o, result, "attr6", "attr7", "attr8", "attr9");
-
-                commPart1(o, result, "attr11", "attr12", "attr13", "attr14");
-                commPart1(o, result, "attr15", "attr16", "attr17", "attr18");
-
-                commPart1(o, result, "attr20", "attr21", "attr22", "attr23");
-                commPart1(o, result, "attr24", "attr25", "attr26", "attr27");
+                if (i == 7)
+                    commPart1(o, result, "attr2", "attr3", "attr4", "attr5");
+                if (i == 8)
+                    commPart1(o, result, "attr6", "attr7", "attr8", "attr9");
+                if (i == 9)
+                    commPart1(o, result, "attr11", "attr12", "attr13", "attr14");
+                if (i == 10)
+                    commPart1(o, result, "attr15", "attr16", "attr17", "attr18");
+                if (i == 11)
+                    commPart1(o, result, "attr20", "attr21", "attr22", "attr23");
+                if (i == 12)
+                    commPart1(o, result, "attr24", "attr25", "attr26", "attr27");
             }
         }
 
