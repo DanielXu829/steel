@@ -74,6 +74,9 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                     jk = 3;
                     flag = 1;
                     rowBatch = 24;
+                } else if ("_cfyc_month_day".equals(sheetName)) {
+                    jk = 4;
+                    rowBatch = 24;
                 }
                 for (DateQuery item : dateQueries) {
                     List<CellData> cellDataList = mapDataHandler(columns, item, index, version, flag, jk);
@@ -120,6 +123,24 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                 return null;
             }
             return dealSub2(columns, data2, dateQuery, index);
+        } else if (jk == 4) {
+            Map<String, String> map = new HashMap<>();
+            map.put("pageSize", Integer.MAX_VALUE + "");
+            map.put("startTime", dateQuery.getQueryStartTime().toString());
+            map.put("endTime", dateQuery.getQueryEndTime().toString());
+            result = httpUtil.get(getUrl3(version), map);
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONArray data2 = jsonObject.getJSONArray("data");
+            if (Objects.isNull(data2) || data2.size() == 0) {
+                return null;
+            }
+            return dealSub3(columns, data2, dateQuery, index);
         }
 
         return dealSub1(result, columns, dateQuery, index, t);
@@ -236,6 +257,33 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    private List<CellData> dealSub3(List<String> columns, JSONArray data, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indexs = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            Date startTime = dayHourEach.get(i).getEndTime();
+            String formatDateTime = DateUtil.getFormatDateTime(startTime, DateUtil.fullFormat);
+            for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+                String cell = columns.get(columnIndex);
+                if (StringUtils.isNotBlank(cell)) {
+                    for (int j = 0; j < data.size(); j++) {
+                        JSONObject jsonObject = data.getJSONObject(j);
+                        if (Objects.nonNull(jsonObject)) {
+                            String calTime = jsonObject.getString("calTime");
+                            if (formatDateTime.equals(calTime)) {
+                                ExcelWriterUtil.addCellData(resultList, indexs, columnIndex, jsonObject.get(cell));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            indexs++;
+        }
+        return resultList;
+    }
+
 
     public List<CellData> handlerRowData(List<String> columns, int starRow, Map<String, Object> rowData, DateQuery dateQuery) {
         List<CellData> resultData = new ArrayList<>();
@@ -321,6 +369,16 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/analysisValues/sampleTime";
+        }
+    }
+
+
+    private String getUrl3(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/componentPrediction";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/componentPrediction";
         }
     }
 }
