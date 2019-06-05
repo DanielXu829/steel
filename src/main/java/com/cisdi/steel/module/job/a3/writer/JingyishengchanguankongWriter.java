@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.a3.writer;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
@@ -77,6 +78,9 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                 } else if ("_cfyc_month_day".equals(sheetName)) {
                     jk = 4;
                     rowBatch = 24;
+                } else if ("_tzyy_month_day".equals(sheetName)) {
+                    jk = 5;
+                    rowBatch = 24;
                 }
                 for (DateQuery item : dateQueries) {
                     List<CellData> cellDataList = mapDataHandler(columns, item, index, version, flag, jk);
@@ -141,9 +145,45 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                 return null;
             }
             return dealSub3(columns, data2, dateQuery, index);
+        } else if (jk == 5) {
+            JSONObject query = new JSONObject();
+            List<JSONObject> clauses = new ArrayList<>();
+            dealClauses(clauses, "recodeDate", ">=", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
+            dealClauses(clauses, "recodeDate", "<=", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
+
+            JSONObject sortMap = new JSONObject();
+            sortMap.put("recodeDate", "DESC");
+
+            query.put("clauses", clauses);
+            query.put("sortMap", sortMap);
+
+            SerializeConfig serializeConfig = new SerializeConfig();
+            String jsonString = JSONObject.toJSONString(query, serializeConfig);
+            result = httpUtil.postJsonParams(getUrl4(version), jsonString);
+
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONArray data2 = jsonObject.getJSONArray("rows");
+            if (Objects.isNull(data2) || data2.size() == 0) {
+                return null;
+            }
+            return dealSub4(columns, data2, dateQuery, index);
         }
 
         return dealSub1(result, columns, dateQuery, index, t);
+    }
+
+    private void dealClauses(List<JSONObject> clauses, String column, String operation, String value) {
+        JSONObject clause = new JSONObject();
+        clause.put("column", column);
+        clause.put("operation", operation);
+        clause.put("value", value);
+        clauses.add(clause);
     }
 
     private List<CellData> dealSub1(String result, List<String> columns, DateQuery dateQuery, int index, int t) {
@@ -284,6 +324,33 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
+    private List<CellData> dealSub4(List<String> columns, JSONArray data, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indexs = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            Date startTime = dayHourEach.get(i).getEndTime();
+            String formatDateTime = DateUtil.getFormatDateTime(startTime, DateUtil.fullFormat);
+            for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+                String cell = columns.get(columnIndex);
+                if (StringUtils.isNotBlank(cell)) {
+                    for (int j = 0; j < data.size(); j++) {
+                        JSONObject jsonObject = data.getJSONObject(j);
+                        if (Objects.nonNull(jsonObject)) {
+                            String recodeDate = jsonObject.getString("recodeDate");
+                            if (formatDateTime.equals(recodeDate)) {
+                                ExcelWriterUtil.addCellData(resultList, indexs, columnIndex, jsonObject.get(cell));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            indexs++;
+        }
+        return resultList;
+    }
+
 
     public List<CellData> handlerRowData(List<String> columns, int starRow, Map<String, Object> rowData, DateQuery dateQuery) {
         List<CellData> resultData = new ArrayList<>();
@@ -379,6 +446,16 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/componentPrediction";
+        }
+    }
+
+
+    private String getUrl4(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/leanAdjust/select";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/leanAdjust/select";
         }
     }
 }
