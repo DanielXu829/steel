@@ -197,14 +197,25 @@ public class TestJob3 extends SteelApplicationTests {
     }
 
     /**
-     * 缓料情况记录表
+     * 缓5料情况记录表
      */
     @Autowired
     private Gongzuohuancun5Job gongzuohuancun5Job;
 
     @Test
-    public void test17() {
+    public void test174() {
         gongzuohuancun5Job.execute(null);
+    }
+
+    /**
+     * 6缓料情况记录表
+     */
+    @Autowired
+    private Gongzuohuancun6Job gongzuohuancun6Job;
+
+    @Test
+    public void test17() {
+        gongzuohuancun6Job.execute(null);
     }
 
     /**
