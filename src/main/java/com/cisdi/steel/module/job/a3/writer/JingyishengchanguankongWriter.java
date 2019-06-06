@@ -84,6 +84,9 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                 } else if ("_rlcf_month_day".equals(sheetName)) {
                     jk = 6;
                     rowBatch = 1;
+                } else if ("_duihao_month_day".equals(sheetName)) {
+                    jk = 7;
+                    rowBatch = 24;
                 }
                 for (DateQuery item : dateQueries) {
                     List<CellData> cellDataList = mapDataHandler(columns, item, index, version, flag, jk);
@@ -108,8 +111,29 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         String result = "";
         if (jk == 1) {
             result = getTagValues(getUrl(version), dateQuery, columns);
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONObject data = jsonObject.getJSONObject("data");
+            return dealSub1(data, columns, dateQuery, index, t);
         } else if (jk == 2) {
             result = getTagValues(getUrl1(version), dateQuery, columns);
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONArray rows = jsonObject.getJSONArray("rows");
+            if (Objects.nonNull(rows) && rows.size() > 0) {
+                JSONObject object = rows.getJSONObject(0);
+               return dealSub1(object, columns, dateQuery, index, t);
+            }
         } else if (jk == 3) {
             Map<String, String> map = new HashMap<>();
             map.put("brandCode", "ore_blending");
@@ -190,9 +214,27 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                 return null;
             }
             return dealSub5(columns, data2);
+        } else if (jk == 7) {
+            Map<String, String> map = new HashMap<>();
+            map.put("category", "H");
+            map.put("reportId", "114");
+            map.put("startTime", dateQuery.getQueryStartTime().toString());
+            map.put("endTime", dateQuery.getQueryEndTime().toString());
+            result = httpUtil.get(getUrl6(version), map);
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONArray data2 = jsonObject.getJSONArray("data");
+            if (Objects.isNull(data2) || data2.size() == 0) {
+                return null;
+            }
+            return dealSub6(columns, data2, dateQuery, index);
         }
-
-        return dealSub1(result, columns, dateQuery, index, t);
+        return null;
     }
 
     private void dealClauses(List<JSONObject> clauses, String column, String operation, String value) {
@@ -203,56 +245,53 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         clauses.add(clause);
     }
 
-    private List<CellData> dealSub1(String result, List<String> columns, DateQuery dateQuery, int index, int t) {
+    private List<CellData> dealSub1(JSONObject obj, List<String> columns, DateQuery dateQuery, int index, int t) {
         List<CellData> resultList = new ArrayList<>();
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject obj = JSONObject.parseObject(result);
-            obj = obj.getJSONObject("data");
-            if (Objects.nonNull(obj)) {
-                for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
-                    int indexs = index;
-                    String cell = columns.get(columnIndex);
-                    if (StringUtils.isNotBlank(cell)) {
-                        JSONObject data = obj.getJSONObject(cell);
-                        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
-                        if (t == 2) {
-                            dayHourEach = DateQueryUtil.buildDay8HourEach(dateQuery.getRecordDate());
-                        }
-                        for (int i = 0; i < dayHourEach.size(); i++) {
-                            Object v = "";
-                            if (Objects.nonNull(data)) {
-                                Map<String, Object> innerMap = data.getInnerMap();
-                                Set<String> keySet = innerMap.keySet();
-                                Long[] list = new Long[keySet.size()];
-                                int k = 0;
-                                for (String key : keySet) {
-                                    list[k] = Long.valueOf(key);
-                                    k++;
-                                }
-                                Arrays.sort(list);
-                                Date startTime = dayHourEach.get(i).getEndTime();
-                                for (int j = 0; j < list.length; j++) {
-                                    Long tempTime = list[j];
-                                    String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
-                                    Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+        if (Objects.nonNull(obj)) {
+            for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+                int indexs = index;
+                String cell = columns.get(columnIndex);
+                if (StringUtils.isNotBlank(cell)) {
+                    JSONObject data = obj.getJSONObject(cell);
+                    List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+                    if (t == 2) {
+                        dayHourEach = DateQueryUtil.buildDay8HourEach(dateQuery.getRecordDate());
+                    }
+                    for (int i = 0; i < dayHourEach.size(); i++) {
+                        Object v = "";
+                        if (Objects.nonNull(data)) {
+                            Map<String, Object> innerMap = data.getInnerMap();
+                            Set<String> keySet = innerMap.keySet();
+                            Long[] list = new Long[keySet.size()];
+                            int k = 0;
+                            for (String key : keySet) {
+                                list[k] = Long.valueOf(key);
+                                k++;
+                            }
+                            Arrays.sort(list);
+                            Date startTime = dayHourEach.get(i).getEndTime();
+                            for (int j = 0; j < list.length; j++) {
+                                Long tempTime = list[j];
+                                String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                                Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
 
-                                    String formatDateTime1 = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:mm:00");
-                                    Date date1 = DateUtil.strToDate(formatDateTime1, DateUtil.fullFormat);
-                                    Long betweenMin = DateUtil.getBetweenMin(date1, startTime);
-                                    long abs = Math.abs(betweenMin);
+                                String formatDateTime1 = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:mm:00");
+                                Date date1 = DateUtil.strToDate(formatDateTime1, DateUtil.fullFormat);
+                                Long betweenMin = DateUtil.getBetweenMin(date1, startTime);
+                                long abs = Math.abs(betweenMin);
 
-                                    if (date.getTime() == startTime.getTime() || abs == 1) {
-                                        v = data.get(tempTime + "");
-                                        break;
-                                    }
+                                if (date.getTime() == startTime.getTime() || abs == 1) {
+                                    v = data.get(tempTime + "");
+                                    break;
                                 }
                             }
-                            ExcelWriterUtil.addCellData(resultList, indexs++, columnIndex, v);
                         }
+                        ExcelWriterUtil.addCellData(resultList, indexs++, columnIndex, v);
                     }
                 }
             }
         }
+
         return resultList;
     }
 
@@ -417,6 +456,33 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
+    private List<CellData> dealSub6(List<String> columns, JSONArray data, DateQuery dateQuery, int index) {
+        List<CellData> resultList = new ArrayList<>();
+        List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+        int indexs = index;
+        for (int i = 0; i < dayHourEach.size(); i++) {
+            Date startTime = dayHourEach.get(i).getEndTime();
+            String formatDateTime = DateUtil.getFormatDateTime(startTime, DateUtil.fullFormat);
+            for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+                String cell = columns.get(columnIndex);
+                if (StringUtils.isNotBlank(cell)) {
+                    for (int j = 0; j < data.size(); j++) {
+                        JSONObject jsonObject = data.getJSONObject(j);
+                        if (Objects.nonNull(jsonObject)) {
+                            String calTime = jsonObject.getString("clock");
+                            if (formatDateTime.equals(calTime)) {
+                                ExcelWriterUtil.addCellData(resultList, indexs, columnIndex, jsonObject.get(cell));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            indexs++;
+        }
+        return resultList;
+    }
+
 
     public List<CellData> handlerRowData(List<String> columns, int starRow, Map<String, Object> rowData, DateQuery dateQuery) {
         List<CellData> resultData = new ArrayList<>();
@@ -531,6 +597,15 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/materialMap/SJ6";
+        }
+    }
+
+    private String getUrl6(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/overview/1/2147483647";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/overview/1/2147483647";
         }
     }
 }
