@@ -81,6 +81,9 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                 } else if ("_tzyy_month_day".equals(sheetName)) {
                     jk = 5;
                     rowBatch = 24;
+                } else if ("_rlcf_month_day".equals(sheetName)) {
+                    jk = 6;
+                    rowBatch = 1;
                 }
                 for (DateQuery item : dateQueries) {
                     List<CellData> cellDataList = mapDataHandler(columns, item, index, version, flag, jk);
@@ -173,6 +176,20 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                 return null;
             }
             return dealSub4(columns, data2, dateQuery, index);
+        } else if (jk == 6) {
+            result = httpUtil.get(getUrl5(version));
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONArray data2 = jsonObject.getJSONArray("data");
+            if (Objects.isNull(data2) || data2.size() == 0) {
+                return null;
+            }
+            return dealSub5(columns, data2);
         }
 
         return dealSub1(result, columns, dateQuery, index, t);
@@ -351,6 +368,55 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
+    private List<CellData> dealSub5(List<String> columns, JSONArray data) {
+        List<CellData> resultList = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            JSONObject object = data.getJSONObject(i);
+            String materialtype = object.getString("materialtype");
+            //焦粉
+            if ("coke".equals(materialtype)) {
+                JSONArray items = object.getJSONArray("items");
+                for (int j = 0; j < items.size(); j++) {
+                    JSONObject itemsJSONObject = items.getJSONObject(j);
+                    if (Objects.nonNull(itemsJSONObject)) {
+                        String anaitemname = itemsJSONObject.getString("anaitemname");
+                        if (columns.get(0).equals(anaitemname)) {
+                            Object value = itemsJSONObject.get("defaultValue");
+                            ExcelWriterUtil.addCellData(resultList, 1, 0, value);
+                        } else if (columns.get(1).equals(anaitemname)) {
+                            Object value = itemsJSONObject.get("defaultValue");
+                            ExcelWriterUtil.addCellData(resultList, 1, 1, value);
+                        } else if (columns.get(2).equals(anaitemname)) {
+                            Object value = itemsJSONObject.get("defaultValue");
+                            ExcelWriterUtil.addCellData(resultList, 1, 2, value);
+                        }
+                    }
+                }
+            }
+            //煤粉
+            if ("coal".equals(materialtype)) {
+                JSONArray items = object.getJSONArray("items");
+                for (int j = 0; j < items.size(); j++) {
+                    JSONObject itemsJSONObject = items.getJSONObject(j);
+                    if (Objects.nonNull(itemsJSONObject)) {
+                        String anaitemname = itemsJSONObject.getString("anaitemname");
+                        if (columns.get(0).equals(anaitemname)) {
+                            Object value = itemsJSONObject.get("defaultValue");
+                            ExcelWriterUtil.addCellData(resultList, 1, 4, value);
+                        } else if (columns.get(1).equals(anaitemname)) {
+                            Object value = itemsJSONObject.get("defaultValue");
+                            ExcelWriterUtil.addCellData(resultList, 1, 5, value);
+                        } else if (columns.get(2).equals(anaitemname)) {
+                            Object value = itemsJSONObject.get("defaultValue");
+                            ExcelWriterUtil.addCellData(resultList, 1, 6, value);
+                        }
+                    }
+                }
+            }
+        }
+        return resultList;
+    }
+
 
     public List<CellData> handlerRowData(List<String> columns, int starRow, Map<String, Object> rowData, DateQuery dateQuery) {
         List<CellData> resultData = new ArrayList<>();
@@ -456,6 +522,15 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
         } else {
             // "6.0".equals(version) 默认
             return httpProperties.getUrlApiSJTwo() + "/leanAdjust/select";
+        }
+    }
+
+    private String getUrl5(String version) {
+        if ("5.0".equals(version)) {
+            return httpProperties.getUrlApiSJOne() + "/materialMap/SJ5";
+        } else {
+            // "6.0".equals(version) 默认
+            return httpProperties.getUrlApiSJTwo() + "/materialMap/SJ6";
         }
     }
 }

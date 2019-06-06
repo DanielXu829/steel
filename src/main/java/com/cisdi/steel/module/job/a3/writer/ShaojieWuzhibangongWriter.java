@@ -98,8 +98,16 @@ public class ShaojieWuzhibangongWriter extends AbstractExcelReadWriter {
                         flag = 3;
                     }
                     List<JSONObject> clauses = new ArrayList<>();
-                    dealClauses(clauses, "recordDate", ">=", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
-                    dealClauses(clauses, "recordDate", "<=", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
+                    if (!(JobEnum.sj_huanliaoqingkuang5_month.getCode().equals(excelDTO.getJobEnum().getCode())
+                            || JobEnum.sj_huanliaoqingkuang6_month.getCode().equals(excelDTO.getJobEnum().getCode()))) {
+                        dealClauses(clauses, "recordDate", ">=", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
+                        dealClauses(clauses, "recordDate", "<=", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
+                    } else {
+                        sortMap.remove("recordDate");
+                        dealClauses(clauses, "startTime", ">=", DateUtil.getFormatDateTime(dateQuery.getStartTime(), DateUtil.fullFormat));
+                        dealClauses(clauses, "startTime", "<=", DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat));
+                        sortMap.put("startTime", "desc");
+                    }
                     query.put("clauses", clauses);
                     query.put("sortMap", sortMap);
 
