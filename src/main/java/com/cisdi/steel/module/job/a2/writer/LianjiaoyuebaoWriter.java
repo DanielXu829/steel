@@ -58,7 +58,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            if(dateQueries1.get(k).getRecordDate().before(new Date())){
+                            if(dateQueries1.get(k).getRecordDate().after(new Date())){
                                 break;
                             }
                             List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl1(version), columns, dateQueries1.get(k));
@@ -72,7 +72,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            if(dateQueries1.get(k).getRecordDate().before(new Date())){
+                            if(dateQueries1.get(k).getRecordDate().after(new Date())){
                                 break;
                             }
                             List<CellData> cellDataList = this.mapDataHandler2(getUrl2(version), columns, 1, dateQueries1.get(k), startRow);
@@ -87,7 +87,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            if(dateQueries1.get(k).getRecordDate().before(new Date())){
+                            if(dateQueries1.get(k).getRecordDate().after(new Date())){
                                 break;
                             }
                             List<CellData> cellDataList = this.mapDataHandler3(getUrl3(version), columns, 1, dateQueries1.get(k), startRow);
@@ -101,7 +101,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            if(dateQueries1.get(k).getRecordDate().before(new Date())){
+                            if(dateQueries1.get(k).getRecordDate().after(new Date())){
                                 break;
                             }
                             List<CellData> cellDataList = this.mapDataHandler4(getUrl4(version), columns, 1,dateQueries1.get(k),startRow);
@@ -115,7 +115,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            if(dateQueries1.get(k).getRecordDate().before(new Date())){
+                            if(dateQueries1.get(k).getRecordDate().after(new Date())){
                                 break;
                             }
                             String jhno = "CO6";
@@ -135,7 +135,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int k = 0; k < dateQueries1.size(); k++) {
-                            if(dateQueries1.get(k).getRecordDate().before(new Date())){
+                            if(dateQueries1.get(k).getRecordDate().after(new Date())){
                                 break;
                             }
                             String jhno = "CO7";
@@ -155,7 +155,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                         DateQuery item = dateQueries.get(j);
                         List<DateQuery> dateQueries1 = DateQueryUtil.buildDay8HourEach(item.getRecordDate());
                         for (int m = 0; m < dateQueries1.size(); m++) {
-                            if(dateQueries1.get(m).getRecordDate().before(new Date())){
+                            if(dateQueries1.get(m).getRecordDate().after(new Date())){
                                 break;
                             }
                             for (int k = 0; k < columns.size(); k++) {

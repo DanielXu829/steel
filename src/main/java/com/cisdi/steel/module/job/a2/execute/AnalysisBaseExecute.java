@@ -7,6 +7,8 @@ import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * 检化验基础
  * <p>Description:         </p>
@@ -32,7 +34,10 @@ public class AnalysisBaseExecute extends AbstractJobExecuteExecute {
     public void execute(JobExecuteInfo jobExecuteInfo) {
         //生成今天的
         super.execute(jobExecuteInfo);
-        //生成昨天的
-        super.executeDateParam(jobExecuteInfo, -1);
+        Long indexId = jobExecuteInfo.getIndexId();
+        if(Objects.isNull(indexId)){
+            //生成昨天的
+            super.executeDateParam(jobExecuteInfo, -1);
+        }
     }
 }

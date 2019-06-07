@@ -59,6 +59,15 @@ public class GongLiaoZhunShiHuaWriter extends AbstractExcelReadWriter {
                 } else if ("lumpore".equals(sheetSplit[1])) {
                     List<CellData> cellDataList = mapDataHandler(getUrl2(), dateQuery, columns);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }else if ("sinterban".equals(sheetSplit[1])) {
+                    List<CellData> cellDataList = mapDataHandler2(getUrl5(), dateQuery, columns);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }else if ("cokeban".equals(sheetSplit[1])) {
+                    List<CellData> cellDataList = mapDataHandler2(getUrl6(), dateQuery, columns);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }else if ("lumporeban".equals(sheetSplit[1])) {
+                    List<CellData> cellDataList = mapDataHandler2(getUrl7(), dateQuery, columns);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
         }
@@ -104,6 +113,47 @@ public class GongLiaoZhunShiHuaWriter extends AbstractExcelReadWriter {
                         JSONObject object = data.getJSONObject(i);
                         List<JSONObject> list = new ArrayList();
                         String key = object.getString("SHIFT_DAY") + object.getString("SHIFT_NO");
+                        if (Objects.isNull(maps.get(key))) {
+                            list.add(object);
+                            maps.put(key, list);
+                        } else {
+                            list.addAll(maps.get(key));
+                            list.add(object);
+                            maps.put(key, list);
+                        }
+                    }
+                    Set<Map.Entry<String, List<JSONObject>>> set = maps.entrySet();
+                    Iterator<Map.Entry<String, List<JSONObject>>> iterator = set.iterator();
+                    int num = 1;
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, List<JSONObject>> next = iterator.next();
+                        List<JSONObject> value = next.getValue();
+                        Map<String, Object> mapValue = getMapValue(value);
+                        List<CellData> cellDataList = ExcelWriterUtil.handlerRowData(columns, num, mapValue);
+                        cellData.addAll(cellDataList);
+                        num += 1;
+                    }
+                }
+            }
+        }
+
+        return cellData;
+    }
+
+    protected List<CellData> mapDataHandler2(String url, DateQuery dateQuery, List<String> columns) {
+        Map<String, String> queryParam = this.getQueryParam(dateQuery);
+        String result = httpUtil.get(url, queryParam);
+        List<CellData> cellData = new ArrayList<>();
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray data = jsonObject.getJSONArray("data");
+                if (Objects.nonNull(data) && data.size() > 0) {
+                    LinkedHashMap<String, List<JSONObject>> maps = new LinkedHashMap<>();
+                    for (int i = 0; i < data.size(); i++) {
+                        JSONObject object = data.getJSONObject(i);
+                        List<JSONObject> list = new ArrayList();
+                        String key = object.getString("SHIFT_TEAM");
                         if (Objects.isNull(maps.get(key))) {
                             list.add(object);
                             maps.put(key, list);
@@ -327,6 +377,18 @@ public class GongLiaoZhunShiHuaWriter extends AbstractExcelReadWriter {
 
     private String getUrl4() {
         return httpProperties.getUrlApiYGLOne() + "/reportManager/feedLPinPrice";
+    }
+
+    private String getUrl5() {
+        return httpProperties.getUrlApiYGLOne() + "/reportManager/feedSinterBan";
+    }
+
+    private String getUrl6() {
+        return httpProperties.getUrlApiYGLOne() + "/reportManager/feedCokeBan";
+    }
+
+    private String getUrl7() {
+        return httpProperties.getUrlApiYGLOne() + "/reportManager/feedLumpOreBan";
     }
 
 }

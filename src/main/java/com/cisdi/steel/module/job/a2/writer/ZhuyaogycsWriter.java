@@ -522,11 +522,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         if (Objects.nonNull(obj)) {
                             if(jhNo1.equals(cokeNo)){
                                 k2 = obj.getDouble("k3");
-                                kAvg6=obj.getDouble("shiftKAvg");
-                                kAn6=obj.getDouble("shiftKan");
+                                kAvg6=obj.getDouble("dayKAvg");
+                                kAn6=obj.getDouble("dayKan");
                             }else if(jhNo2.equals(cokeNo)){
-                                kAvg7=obj.getDouble("shiftKAvg");
-                                kAn7=obj.getDouble("shiftKan");
+                                kAvg7=obj.getDouble("dayKAvg");
+                                kAn7=obj.getDouble("dayKan");
                             }
                         }
                     }
