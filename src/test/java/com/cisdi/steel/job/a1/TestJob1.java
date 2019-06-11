@@ -409,7 +409,7 @@ public class TestJob1 extends SteelApplicationTests {
     }
 
     /**
-     * 高炉炉缸冷却壁进出水日报
+     * 高炉冷却壁水温差日报
      */
     @Autowired
     private GaoLuluganglengquebiDayJob gaoLuluganglengquebiDayJob;
@@ -421,7 +421,7 @@ public class TestJob1 extends SteelApplicationTests {
 
 
     /**
-     * 高炉炉缸冷却壁进出水月报
+     * 高炉冷却壁水温差水月报
      */
     @Autowired
     private GaoLuluganglengquebiMonthJob gaoLuluganglengquebiMonthJob;
