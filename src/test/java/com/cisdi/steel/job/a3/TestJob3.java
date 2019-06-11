@@ -251,4 +251,15 @@ public class TestJob3 extends SteelApplicationTests {
         zhibiaoyunxingJob5.execute(null);
     }
 
+    /**
+     * 烧结能源消耗
+     */
+    @Autowired
+    private ShaojieNengyuanxiaohaoJob shaojieNengyuanxiaohaoJob;
+
+    @Test
+    public void test21() {
+        shaojieNengyuanxiaohaoJob.execute(null);
+    }
+
 }
