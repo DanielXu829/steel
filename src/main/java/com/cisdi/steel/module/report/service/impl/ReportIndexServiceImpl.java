@@ -152,9 +152,6 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                     || JobEnum.sj_gycanshutotal.getCode().equals(reportIndex.getReportCategoryCode())
             ) {
                 boolean f = dealGongyi(report.getRecordDate(), reportIndex.getRecordDate());
-                if (f) {
-                    reportIndex.setName(null);
-                }
                 otherHand(f, reportIndex, report, now);
             } else if (JobEnum.jh_zhuyaogycs.getCode().equals(reportIndex.getReportCategoryCode())
                     || JobEnum.ygl_liaochangzuoyequ.getCode().equals(reportIndex.getReportCategoryCode())
@@ -165,6 +162,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             } else {
                 if (!reportIndex.getPath().equals(report.getPath())) {
                     FileUtils.deleteFile(report.getPath());
+                }
+                if (Objects.nonNull(reportIndex.getId())) {
+                    reportIndex.setName(null);
                 }
                 reportIndex.setId(report.getId());
                 this.updateById(reportIndex);
@@ -179,6 +179,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         } else {
             if (!reportIndex.getPath().equals(report.getPath())) {
                 FileUtils.deleteFile(report.getPath());
+            }
+            if (Objects.nonNull(reportIndex.getId())) {
+                reportIndex.setName(null);
             }
             reportIndex.setId(report.getId());
             this.updateById(reportIndex);
