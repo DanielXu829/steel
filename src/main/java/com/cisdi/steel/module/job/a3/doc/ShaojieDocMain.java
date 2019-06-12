@@ -51,7 +51,7 @@ public class ShaojieDocMain {
     public void mainJob() {
         Date date = new Date();
         mainDeal(version5, date);
-//        mainDeal(version6, date);
+        mainDeal(version6, date);
         log.error("烧结word生成完毕！");
     }
 
