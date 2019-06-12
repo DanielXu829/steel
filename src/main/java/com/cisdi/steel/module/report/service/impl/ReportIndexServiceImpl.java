@@ -142,6 +142,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         if (Objects.isNull(report)
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.jh_ck12zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.jh_ck45zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan7.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan6.getCode().equals(reportIndex.getReportCategoryCode())) {
@@ -292,6 +293,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         if (Objects.isNull(report) || Objects.isNull(report.getPath())
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.jh_ck12zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
+                || JobEnum.jh_ck45zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan6.getCode().equals(reportIndex.getReportCategoryCode())
                 || JobEnum.gl_peiliaodan7.getCode().equals(reportIndex.getReportCategoryCode())
