@@ -63,8 +63,13 @@ public class TuoliuTuoxiaoYearWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int rowBatch, String sheetName) {
         JSONObject query = new JSONObject();
+        Date date = new Date();
+        if (dateQuery.getQueryEndTime() > date.getTime()) {
+            query.put("end", date.getTime());
+        } else {
+            query.put("end", dateQuery.getQueryEndTime());
+        }
         query.put("start", dateQuery.getQueryStartTime());
-        query.put("end", dateQuery.getQueryEndTime());
         query.put("tagNames", columns);
 
         SerializeConfig serializeConfig = new SerializeConfig();
@@ -102,7 +107,8 @@ public class TuoliuTuoxiaoYearWriter extends AbstractExcelReadWriter {
                     }
                     Arrays.sort(list);
 
-                    List<DateQuery> dateQueries = DateQueryUtil.buildYearDayEach(dateQuery.getRecordDate());
+//                    List<DateQuery> dateQueries = DateQueryUtil.buildYearDayEach(dateQuery.getRecordDate());
+                    List<DateQuery> dateQueries = DateQueryUtil.buildMonthDayEach(dateQuery.getRecordDate());
 
                     for (int j = 0; j < dateQueries.size(); j++) {
                         long time = dateQueries.get(j).getStartTime().getTime();
