@@ -83,14 +83,14 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler3(rowIndex, getUrl2(), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler3(rowIndex, getUrl2(), item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("shizhong".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler4(rowIndex, getUrl1(), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler4(getUrl5(), columns, 1, item, rowIndex);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 }else if ("yield".equals(sheetSplit[1])) {
@@ -348,7 +348,7 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected List<CellData> mapDataHandler3(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler3(Integer rowIndex, String url, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam3(dateQuery);
         List<CellData> cellDataList = new ArrayList<>();
         String result = httpUtil.get(url, queryParam);
@@ -372,47 +372,19 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected List<CellData> mapDataHandler4(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam2(dateQuery);
-        List<CellData> cellDataList = new ArrayList<>();
-        String column = columns.get(0);
-        queryParam.put("tagNames", column);
+    public List<CellData> mapDataHandler4(String url, List<String> columns, int rowBatch, DateQuery dateQuery, int startRow) {
+        Map<String, String> queryParam = getQueryParame4(dateQuery);
         String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject jsonObject = JSONObject.parseObject(result);
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject data = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(data)) {
-                    JSONArray jsonArray = data.getJSONArray(column);
-                    if (Objects.nonNull(jsonArray) && jsonArray.size() != 0) {
-                        Double val = 0.0;
-                        for (int i = 0; i < jsonArray.size(); i++) {
-                            JSONObject obj = jsonArray.getJSONObject(i);
-                            String clock = obj.getString("clock");
-                            Date date = DateUtil.strToDate(clock, DateUtil.fullFormat);
-                            Map<String, String> queryParam4 = getQueryParam4(date);
-                            String s = httpUtil.get(getUrl(), queryParam4);
-                            if (StringUtils.isNotBlank(s)) {
-                                JSONObject jsonObject1 = JSONObject.parseObject(s);
-                                if (Objects.nonNull(jsonObject1)) {
-                                    JSONArray arr1 = jsonObject1.getJSONArray("rows");
-                                    if (Objects.nonNull(arr1) && arr1.size() != 0) {
-                                        JSONObject job1 = arr1.getJSONObject(0);
-                                        if (Objects.isNull(job1)) {
-                                            continue;
-                                        }
-                                        val += job1.getDouble("val");
-                                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, val);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        if (StringUtils.isBlank(result)) {
+            return null;
         }
-        return cellDataList;
+        JSONArray objects = JSONObject.parseArray(result);
+        if (Objects.isNull(objects) || objects.size() == 0) {
+            return null;
+        }
+        return handlerJsonArray(columns, rowBatch, objects, startRow);
     }
+
 
     protected List<CellData> mapDataHandler5(Integer rowIndex, String url, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam5(dateQuery);
@@ -458,10 +430,18 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+
     protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
+    protected Map<String, String> getQueryParame4(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss"));
+        result.put("shift", "3");
         return result;
     }
 
@@ -473,12 +453,6 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam4(Date date) {
-        Map<String, String> result = new HashMap<>();
-        result.put("time", DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:00"));
-        result.put("tagName", "CK67_L1R_CB_CBAmtTol_1m_max");
-        return result;
-    }
 
     protected Map<String, String> getQueryParam5(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
@@ -512,5 +486,9 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
 
     protected String getUrl4() {
         return httpProperties.getUrlApiJHOne() + "/thermalRegulation/getCurrentByDate";
+    }
+
+    protected String getUrl5() {
+        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
     }
 }
