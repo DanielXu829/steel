@@ -47,8 +47,14 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
 //                List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                List<CellData> cellDataList = mapDataHandler(url, date);
-                ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                if("tag".equals(sheetSplit[1])){
+                    List<CellData> cellDataList = mapDataHandler(url, date);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }else {
+                    List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
+                    List<CellData> cellDataList = mapDataHandler2(getUrl1(),columns);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }
             }
         }
         return workbook;
@@ -66,6 +72,27 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
             return null;
         }
         return handlerJsonArray(data);
+    }
+
+    protected List<CellData> mapDataHandler2(String url,List<String> columns) {
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("typename", "1");
+        String result = httpUtil.get(url, queryParam);
+        List<CellData> cellDataList = new ArrayList<>();
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray arr = jsonObject.getJSONArray("data");
+                if(Objects.nonNull(arr)&&arr.size()>0){
+                    for (int i = 0; i <arr.size() ; i++) {
+                        JSONObject data = arr.getJSONObject(i);
+                        List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, i+1, data);
+                        cellDataList.addAll(cellDataList1);
+                    }
+                }
+            }
+        }
+        return cellDataList;
     }
 
     protected List<CellData> handlerJsonArray(JSONObject data) {
@@ -429,6 +456,9 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
 
     private String getUrl() {
         return httpProperties.getUrlApiYGLOne() + "/reportManager/materialYardShiftReport";
+    }
+    private String getUrl1() {
+        return httpProperties.getUrlApiYGLOne() + "/materialmanagercontroller/findbyshiftday";
     }
 
 }

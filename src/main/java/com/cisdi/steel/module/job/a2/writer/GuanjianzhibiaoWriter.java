@@ -199,8 +199,20 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                     if (Objects.nonNull(data)) {
                         JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
                         if (Objects.nonNull(obj)) {
-                            kAvg += obj.getDouble("dayKAvg");
-                            kAn += obj.getDouble("dayKan");
+                            if(kAvg==0){
+                                kAvg = obj.getDouble("dayKAvg");
+                            }else {
+                                if(kAvg<obj.getDouble("dayKAvg")){
+                                    kAvg = obj.getDouble("dayKAvg");
+                                }
+                            }
+                            if(kAn==0){
+                                kAn = obj.getDouble("dayKan");
+                            }else {
+                                if(kAn<obj.getDouble("dayKan")){
+                                    kAn = obj.getDouble("dayKan");
+                                }
+                            }
                         }
                     }
                 }
@@ -230,8 +242,8 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         list.add(k2/3);
         list.add(k3/3);
         list.add(km/3);
-        list.add(kAvg/2);
-        list.add(kAn/2);
+        list.add(kAvg);
+        list.add(kAn);
         for (int i = 0; i <list.size() ; i++) {
             Double val = list.get(i);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
