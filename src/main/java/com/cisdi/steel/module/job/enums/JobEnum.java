@@ -67,13 +67,14 @@ public enum JobEnum {
     gl_6gyicanshu_export("gl_6gyicanshu_export", "6高炉工艺参数导出"),
     gl_7gyicanshu_export("gl_7gyicanshu_export", "7高炉工艺参数导出"),
     gl_8gyicanshu_export("gl_8gyicanshu_export", "8高炉工艺参数导出"),
-    gl_lglqbjcs_day("gl_lglqbjcs_day", "高炉炉缸冷却壁进出水日报"),
-    gl_lglqbjcs_month("gl_lglqbjcs_month", "高炉炉缸冷却壁进出水月报"),
+    gl_lglqbjcs_day("gl_lglqbjcs_day", "高炉冷却壁水温差日报"),
+    gl_lglqbjcs_month("gl_lglqbjcs_month", "高炉冷却壁水温差月报"),
     gl_lqbjcs_month("gl_lqbjcs_month", "高炉冷却壁进出水量月报"),
 
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "配煤-自动配煤报表（班）"),
     jh_ck12zidongpeimei("jh_ck12zidongpeimei", "CK12-配煤-自动配煤报表（班）"),
+    jh_ck12zidongpeimeinew("jh_ck12zidongpeimeinew", "CK12-配煤-自动配煤报表（班）-New"),
     jh_ck45zidongpeimei("jh_ck45zidongpeimei", "CK45-配煤-自动配煤报表"),
     jh_fensuixidu("jh_fensuixidu", "配煤-粉碎细度报表（月）"),
     jh_cdqcaozuoa("jh_cdqcaozuoa", "干熄焦-CDQ操作运行报表A（日）"),

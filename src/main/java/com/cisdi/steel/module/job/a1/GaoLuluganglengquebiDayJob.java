@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 高炉炉缸冷却壁进出水日报
+ * 高炉冷却壁水温差日报
  */
 @Component
 public class GaoLuluganglengquebiDayJob extends AbstractExportJob {
