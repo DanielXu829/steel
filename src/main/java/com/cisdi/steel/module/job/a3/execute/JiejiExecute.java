@@ -7,6 +7,8 @@ import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * 5#、6#烧结机生产日报
  * <p>Description:         </p>
@@ -33,6 +35,8 @@ public class JiejiExecute extends AbstractJobExecuteExecute {
         //生成今天的
         super.execute(jobExecuteInfo);
         //生成
-        super.executeDateParam(jobExecuteInfo, -1);
+        if (Objects.isNull(jobExecuteInfo.getIndexId())) {
+            super.executeDateParam(jobExecuteInfo, -1);
+        }
     }
 }

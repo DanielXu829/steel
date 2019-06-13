@@ -86,7 +86,7 @@ public class ChutiezonglanWriter extends AbstractExcelReadWriter {
                                 JSONObject p = jsonObject.getJSONObject(par);
                                 Long o = p.getLong(ch);
                                 String url1 = api + "/tap/sg/package";
-                                if ("_tag2".equals(sheetName)) {
+                                if ("_tag2_month_all".equals(sheetName) || "_tag2_day_all".equals(sheetName)) {
                                     url1 = api + "/tap/sg/mud";
                                 }
                                 String s1 = httpUtil.get(url1, null);

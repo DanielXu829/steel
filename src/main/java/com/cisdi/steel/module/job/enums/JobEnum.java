@@ -112,6 +112,8 @@ public enum JobEnum {
     jh_ck45meiqihuishou2("jh_ck45meiqihuishou2", "CK45-化产-余热煤气回收(二)"),
     jh_ck45zkcaozuo1("jh_ck45zkcaozuo1", "CK45-化产-中控操作(一)"),
     jh_ck45zkcaozuo2("jh_ck45zkcaozuo2", "CK45-化产-中控操作(二)"),
+    jh_ck12beimeixieche("jh_ck12beimeixieche", "CK12-备煤-备煤卸车统计"),
+    jh_jiaoluyoukucaozuo("jh_jiaoluyoukucaozuo", "CK67-化产-焦炉油库操作记录表"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫系统运行日报"),
@@ -141,6 +143,7 @@ public enum JobEnum {
     sj_wuzhituoliu_month("sj_wuzhituoliu_month", "56脱硫运行记录"),
     sj_gyijiancha_month("sj_gyijiancha_month", "工艺检查项目"),
     sj_zhibiaoyunxing_day("sj_zhibiaoyunxing_day", "指标运行记录"),
+    sj_nengyuanxiaohao_month("sj_nengyuanxiaohao_month", "烧结公辅能源消耗及成本统计表"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),

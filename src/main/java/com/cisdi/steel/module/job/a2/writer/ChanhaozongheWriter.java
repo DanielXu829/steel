@@ -439,7 +439,7 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
-                Double backn1 = jsonObject.getDouble("backn1");
+                Double backn1 = jsonObject.getDouble("backn2");
                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0,backn1);
             }
         }
