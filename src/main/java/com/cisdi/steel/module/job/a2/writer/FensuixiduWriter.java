@@ -39,6 +39,11 @@ public class FensuixiduWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = "67.0";
+        try {
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -51,7 +56,7 @@ public class FensuixiduWriter extends AbstractExcelReadWriter {
                 // 粉碎
                 if ("crushing".equals(name)) {
                     List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                    List<CellData> cellDataList = this.mapDataHandler(getUrlTwo(), columns, date, 1);
+                    List<CellData> cellDataList = this.mapDataHandler(getUrlTwo(version), columns, date, 1);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
@@ -89,8 +94,8 @@ public class FensuixiduWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private String getUrlTwo() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/particleDistributionByDate";
+    private String getUrlTwo(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/particleDistributionByDate";
     }
 
 }
