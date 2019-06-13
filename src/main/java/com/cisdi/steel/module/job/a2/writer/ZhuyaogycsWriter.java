@@ -181,10 +181,12 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             queryParam1.put("brandcode", brandcode);
             queryParam1.put("anaitemname", "LD40-60");
             queryParam1.put("unitCode",code);
+            queryParam1.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
             Map<String, String> queryParam2 = new HashMap<>();
             queryParam2.put("brandcode", brandcode);
             queryParam2.put("anaitemname", "LD60-80");
             queryParam2.put("unitCode",code);
+            queryParam2.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
             String result1 = httpUtil.get(url, queryParam1);
             String result2 = httpUtil.get(url, queryParam2);
             if (StringUtils.isBlank(result1) || StringUtils.isBlank(result2)) {
