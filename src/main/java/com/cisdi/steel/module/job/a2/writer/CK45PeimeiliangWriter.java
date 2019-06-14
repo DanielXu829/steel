@@ -196,7 +196,7 @@ public class CK45PeimeiliangWriter extends AbstractExcelReadWriter {
             if(i1<12){
                 ban="夜班";
             }
-            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 10, ban);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 20, ban);
             cellDataList.addAll(cellDataList1);
         }
         return cellDataList;

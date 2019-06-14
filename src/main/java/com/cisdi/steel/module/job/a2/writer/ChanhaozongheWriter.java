@@ -34,6 +34,11 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = "67.0";
+        try {
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -48,56 +53,63 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("tag".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler6(rowIndex, getUrl1(), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler6(rowIndex, getUrl1(version), columns, item);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    }
+                } else if ("code".equals(sheetSplit[1])) {
+                    for (int k = 0; k < size; k++) {
+                        DateQuery item = dateQueries.get(k);
+                        int rowIndex = k + 1;
+                        List<CellData> cellDataList = this.mapDataHandler8(rowIndex, getUrl6(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("ther".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler7(rowIndex, getUrl4(), item);
+                        List<CellData> cellDataList = this.mapDataHandler7(rowIndex, getUrl4(version), item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("tagday0".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler2(rowIndex, getUrl1(), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler2(rowIndex, getUrl1(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("taghe".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler1(rowIndex, getUrl(), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler1(rowIndex, getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("reval".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler3(rowIndex, getUrl2(), item);
+                        List<CellData> cellDataList = this.mapDataHandler3(rowIndex, getUrl2(version), item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("shizhong".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler4(getUrl5(), columns, 1, item, rowIndex);
+                        List<CellData> cellDataList = this.mapDataHandler4(getUrl5(version), columns, 1, item, rowIndex);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 }else if ("yield".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler5(rowIndex, getUrl3(), item);
+                        List<CellData> cellDataList = this.mapDataHandler5(rowIndex, getUrl3(version), item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 }
@@ -130,6 +142,30 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
+        }
+        return cellDataList;
+    }
+
+    protected List<CellData> mapDataHandler8(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+        int size = columns.size();
+        List<CellData> cellDataList = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            Double val = 0.0;
+            String column = columns.get(i);
+            for (int j = 1; j <= 3; j++) {
+                if (StringUtils.isNotBlank(column)) {
+                    Map<String, String> queryParam = getQueryParam7(dateQuery, column, j);
+                    String result = httpUtil.get(url, queryParam);
+                    if (StringUtils.isNotBlank(result)) {
+                        JSONArray array = JSONObject.parseArray(result);
+                        if (Objects.nonNull(array) && array.size() > 0) {
+                            JSONObject jsonObject = array.getJSONObject(0);
+                            val += jsonObject.getDouble("confirmWgt");
+                        }
+                    }
+                }
+            }
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
         }
         return cellDataList;
     }
@@ -468,27 +504,41 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
+    protected Map<String, String> getQueryParam7(DateQuery dateQuery, String column, int shiftNum) {
+        Map<String, String> result = new HashMap<>();
+        result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("shift", shiftNum + "");
+        String[] split = column.split("/");
+        result.put("code", split[0]);
+        result.put("flag", split[1]);
+        return result;
     }
 
-    protected String getUrl1() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getTagValue";
+    protected String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 
-    protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/cokingStatementParameter/getByDateTime";
+    protected String getUrl1(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
-    protected String getUrl3() {
-        return httpProperties.getUrlApiJHOne() + "/cokingYieldAndNumberHoles/getYieldByDate";
+    protected String getUrl2(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokingStatementParameter/getByDateTime";
     }
 
-    protected String getUrl4() {
-        return httpProperties.getUrlApiJHOne() + "/thermalRegulation/getCurrentByDate";
+    protected String getUrl3(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getYieldByDate";
     }
 
-    protected String getUrl5() {
-        return httpProperties.getUrlApiJHOne() + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    protected String getUrl4(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/thermalRegulation/getCurrentByDate";
+    }
+
+    protected String getUrl5(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokeActualPerformance/getCokeActuPerfByDateAndShift";
+    }
+
+    protected String getUrl6(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
     }
 }
