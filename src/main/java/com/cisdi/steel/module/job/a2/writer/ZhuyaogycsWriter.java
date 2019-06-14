@@ -97,7 +97,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     Double cellDataList = this.mapDataHandler3(getUrl6(version), dateQuery, shiftNum, version);
                     setSheetValue(sheet, 1, 0, cellDataList);
                 } else if ("luwen".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler4(getUrl7(version), dateQuery, columns, version);
+                    List<CellData> cellDataList = this.mapDataHandler4(getUrl7(version), dateQuery, columns, version, shiftNum);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("jtcl".equals(sheetSplit[1])) {
                     Date dateBeginTime = DateUtil.getDateBeginTime(dateQuery.getRecordDate());
@@ -122,7 +122,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         rowNum++;
                     }
                 } else if ("peimeicsnowed".equals(sheetSplit[1])) {
-                    List<CellData> cellDataList = this.mapDataHandler7(getUrl13(version), sheet, 1);
+                    List<CellData> cellDataList = this.mapDataHandler7(getUrl13(version));
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }else if ("kankavg".equals(sheetSplit[1])) {
                     List<CellData> cellDataList = this.mapDataHandler10(getUrl11(version), dateQuery, shiftNum + "",version);
@@ -277,7 +277,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return ganxi;
     }
 
-    protected List<CellData> mapDataHandler4(String url, DateQuery dateQuery, List<String> columns, String version) {
+    protected List<CellData> mapDataHandler4(String url, DateQuery dateQuery, List<String> columns, String version, int shiftNum) {
         String JHNo = "CO6";
         String JHNo1 = "CO7";
         String name1 = "CO61";
@@ -299,78 +299,87 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             name3 = "CO51";
             name4 = "CO52";
         }
-        Map<String, String> queryParam = getQueryParam6(dateQuery, 1, JHNo, 1);
-        Map<String, String> queryParam1 = getQueryParam6(dateQuery, 1, JHNo, 2);
-        Map<String, String> queryParam2 = getQueryParam6(dateQuery, 1, JHNo1, 1);
-        Map<String, String> queryParam3 = getQueryParam6(dateQuery, 1, JHNo1, 2);
-        String result = httpUtil.get(url, queryParam);
-        String result1 = httpUtil.get(url, queryParam1);
-        String result2 = httpUtil.get(url, queryParam2);
-        String result3 = httpUtil.get(url, queryParam3);
-        if (StringUtils.isBlank(result) || StringUtils.isBlank(result1) ||
-                StringUtils.isBlank(result2) || StringUtils.isBlank(result3)) {
-            return null;
-        }
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        JSONObject jsonObject1 = JSONObject.parseObject(result1);
-        JSONObject jsonObject2 = JSONObject.parseObject(result2);
-        JSONObject jsonObject3 = JSONObject.parseObject(result3);
-        if (Objects.isNull(jsonObject) || Objects.isNull(jsonObject1) ||
-                Objects.isNull(jsonObject2) || Objects.isNull(jsonObject3)) {
-            return null;
-        }
-        JSONObject data = jsonObject.getJSONObject("data");
-        JSONObject data1 = jsonObject1.getJSONObject("data");
-        JSONObject data2 = jsonObject2.getJSONObject("data");
-        JSONObject data3 = jsonObject3.getJSONObject("data");
-        if (Objects.isNull(data) || Objects.isNull(data1) ||
-                Objects.isNull(data2) || Objects.isNull(data3)) {
-            return null;
-        }
-        JSONArray arr = data.getJSONArray("TmmirbtmpDataTables");
-        JSONArray arr1 = data1.getJSONArray("TmmirbtmpDataTables");
-        JSONArray arr2 = data2.getJSONArray("TmmirbtmpDataTables");
-        JSONArray arr3 = data3.getJSONArray("TmmirbtmpDataTables");
-        if (Objects.isNull(arr) || Objects.isNull(arr1) ||
-                Objects.isNull(arr2) || Objects.isNull(arr3)) {
-            return null;
-        }
-        arr.addAll(arr1);
-        arr2.addAll(arr3);
-        Map<String, Object> map = new HashMap<>();
         Double CO61 = 0.0;
         int a = 0;
         Double CO62 = 0.0;
         int a1 = 0;
-        for (int i = 0; i < arr.size(); i++) {
-            JSONObject obj = arr.getJSONObject(i);
-            Double wd = obj.getDouble("wd");
-            int sidenum = obj.getIntValue("sidenum");
-            if (sidenum == 1) {
-                CO61 += wd;
-                a++;
-            } else if (sidenum == 2) {
-                CO62 += wd;
-                a1++;
-            }
-        }
         Double CO71 = 0.0;
         int a2 = 0;
         Double CO72 = 0.0;
         int a3 = 0;
-        for (int i = 0; i < arr2.size(); i++) {
-            JSONObject obj = arr2.getJSONObject(i);
-            Double wd = obj.getDouble("wd");
-            int sidenum = obj.getIntValue("sidenum");
-            if (sidenum == 1) {
-                CO71 += wd;
-                a2++;
-            } else if (sidenum == 2) {
-                CO72 += wd;
-                a3++;
+        for (int j = 0; j < shiftNum; j++) {
+            Map<String, String> queryParam = getQueryParam6(dateQuery, j + 1, JHNo, 1);
+            Map<String, String> queryParam1 = getQueryParam6(dateQuery, j + 1, JHNo, 2);
+            Map<String, String> queryParam2 = getQueryParam6(dateQuery, j + 1, JHNo1, 1);
+            Map<String, String> queryParam3 = getQueryParam6(dateQuery, j + 1, JHNo1, 2);
+            String result = httpUtil.get(url, queryParam);
+            String result1 = httpUtil.get(url, queryParam1);
+            String result2 = httpUtil.get(url, queryParam2);
+            String result3 = httpUtil.get(url, queryParam3);
+            if (StringUtils.isBlank(result) || StringUtils.isBlank(result1) ||
+                    StringUtils.isBlank(result2) || StringUtils.isBlank(result3)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            JSONObject jsonObject1 = JSONObject.parseObject(result1);
+            JSONObject jsonObject2 = JSONObject.parseObject(result2);
+            JSONObject jsonObject3 = JSONObject.parseObject(result3);
+            if (Objects.isNull(jsonObject) || Objects.isNull(jsonObject1) ||
+                    Objects.isNull(jsonObject2) || Objects.isNull(jsonObject3)) {
+                return null;
+            }
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONObject data1 = jsonObject1.getJSONObject("data");
+            JSONObject data2 = jsonObject2.getJSONObject("data");
+            JSONObject data3 = jsonObject3.getJSONObject("data");
+            if (Objects.isNull(data) || Objects.isNull(data1) ||
+                    Objects.isNull(data2) || Objects.isNull(data3)) {
+                return null;
+            }
+            JSONArray arr = data.getJSONArray("TmmirbtmpDataTables");
+            JSONArray arr1 = data1.getJSONArray("TmmirbtmpDataTables");
+            JSONArray arr2 = data2.getJSONArray("TmmirbtmpDataTables");
+            JSONArray arr3 = data3.getJSONArray("TmmirbtmpDataTables");
+            if (Objects.isNull(arr) || Objects.isNull(arr1) ||
+                    Objects.isNull(arr2) || Objects.isNull(arr3)) {
+                return null;
+            }
+            arr.addAll(arr1);
+            arr2.addAll(arr3);
+
+            for (int i = 0; i < arr.size(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                Double wd = obj.getDouble("wd");
+                if (Objects.nonNull(wd)) {
+                    int sidenum = obj.getIntValue("sidenum");
+                    if (sidenum == 1) {
+                        CO61 += wd;
+                        a++;
+                    } else if (sidenum == 2) {
+                        CO62 += wd;
+                        a1++;
+                    }
+                }
+
+            }
+
+            for (int i = 0; i < arr2.size(); i++) {
+                JSONObject obj = arr2.getJSONObject(i);
+                Double wd = obj.getDouble("wd");
+                if (Objects.nonNull(wd)) {
+                    int sidenum = obj.getIntValue("sidenum");
+                    if (sidenum == 1) {
+                        CO71 += wd;
+                        a2++;
+                    } else if (sidenum == 2) {
+                        CO72 += wd;
+                        a3++;
+                    }
+                }
             }
         }
 
+        Map<String, Object> map = new HashMap<>();
         map.put(name1, CO61 / a);
         map.put(name2, CO62 / a1);
         map.put(name3, CO71 / a2);
@@ -460,7 +469,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return cellData;
     }
 
-    protected List<CellData> mapDataHandler7(String url, Sheet sheet, int len) {
+    protected List<CellData> mapDataHandler7(String url) {
         List<CellData> cellDataList = new ArrayList<>();
         String result = httpUtil.get(url);
         if (StringUtils.isNotBlank(result)) {
