@@ -294,13 +294,25 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         for (DateSegment segment : segments) {
             Map<String, String> map = getQueryParamBySegment(segment);
             map.put("tagNames", tagName);
+            for (Map.Entry<String, String> kv : map.entrySet()) {
+                log.info("key:{},val:{}",kv.getKey(),kv.getValue());
+            }
             JSONObject data = getTagValues(map);
             if(null != data){
                 JSONArray arr = data.getJSONArray(tagName);
                 if (Objects.nonNull(arr) && arr.size() >1) {
                     double start = arr.getJSONObject(0).getDouble("val");
-                    double end1 = arr.getJSONObject(arr.size()-1).getDouble("val");
-                    double end2 = arr.getJSONObject(arr.size()-2).getDouble("val");
+
+                    int n=arr.size()-1;
+                    for (int m = n; m>=0 ; m--) {
+                        JSONObject o = arr.getJSONObject(m);
+                        if(o.getDouble("val")>0){
+                            n = m;
+                            break;
+                        }
+                    }
+                    double end1 = arr.getJSONObject(n).getDouble("val");
+                    double end2 = n>1 ? arr.getJSONObject(n-1).getDouble("val") : 0;
                     double end = Math.max(end1,end2);
                     sum += end-start;
                 }
@@ -353,6 +365,10 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     list.add(new DateSegment(startDate, arr.getJSONObject(arr.size()-1).getDate("clock")));
                 }
             }
+        }
+        log.info("tagName:{},size:{}",tagName,list.size());
+        for (DateSegment dateSegment : list) {
+            log.info("start:{},end:{}",dateSegment.getStartDate(),dateSegment.getEndDate());
         }
         return list;
     }
