@@ -246,7 +246,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     }
 
     protected Double mapDataHandler3(String url, DateQuery dateQuery, int shiftNum, String version) {
-        Map<String, String> queryParam = getQueryParam5(dateQuery, shiftNum);
+        Map<String, String> queryParam = getQueryParam5(dateQuery, shiftNum,version);
         String result = httpUtil.get(url, queryParam);
         Double ganxi = 0.0;
         if (StringUtils.isNotBlank(result)) {
@@ -259,7 +259,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     ganxi = backn5 / (backn5 + backn6);
                 }
             } else {
-                Map<String, String> queryParam1 = getQueryParam5x();
+                Map<String, String> queryParam1 = getQueryParam5x(version);
                 String result1 = httpUtil.get(getUrl6x(version), queryParam1);
                 if (StringUtils.isBlank(result1)) {
                     return null;
@@ -612,18 +612,30 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam5(DateQuery dateQuery, int shiftNum) {
+    protected Map<String, String> getQueryParam5(DateQuery dateQuery, int shiftNum,String version) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd 00:00:00"));
         result.put("shift", shiftNum + "");
-        result.put("code", "KH-Y");
+        String code="KH-Y";
+        if("12.0".equals(version)){
+            code="KD-Y";
+        }else if("45.0".equals(version)){
+            code="KX-Y";
+        }
+        result.put("code", code);
         result.put("flag", "O");
         return result;
     }
 
-    protected Map<String, String> getQueryParam5x() {
+    protected Map<String, String> getQueryParam5x(String version) {
         Map<String, String> result = new HashMap<>();
-        result.put("code", "KH-Y");
+        String code="KH-Y";
+        if("12.0".equals(version)){
+            code="KD-Y";
+        }else if("45.0".equals(version)){
+            code="KX-Y";
+        }
+        result.put("code", code);
         result.put("flag", "O");
         return result;
     }
