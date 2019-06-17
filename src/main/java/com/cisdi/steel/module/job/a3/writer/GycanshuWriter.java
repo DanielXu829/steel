@@ -42,7 +42,7 @@ public class GycanshuWriter extends AbstractExcelReadWriter {
 
             int picTime = -1;
             int currDateTime = Integer.valueOf(DateUtil.getFormatDateTime(DateUtil.addHours(date.getRecordDate(), -1), "HH"));
-            picTime = currDateTime;
+            picTime = Integer.valueOf(DateUtil.getFormatDateTime(date.getRecordDate(), "HH"));
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
