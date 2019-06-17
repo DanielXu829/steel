@@ -85,7 +85,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     row.createCell(3).setCellValue(shiftDate);
                     row.getCell(3).setCellType(CellType.STRING);
 
-                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl12(version), columns, dateQuery);
+                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl12(version), columns, dateQuery,shiftNum);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("crushing".equals(sheetSplit[1])) {
                     Double cellDataList = this.valHandler(getUrl4(version), dateQuery);
@@ -103,8 +103,8 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     Date dateBeginTime = DateUtil.getDateBeginTime(dateQuery.getRecordDate());
                     int rowNum = 1;
                     for (int j = 1; j < 8; j++) {
-                        Date date1 = DateUtil.addDays(dateBeginTime, j - 7);
-                        Double cellDataList = this.mapDataHandler5(getUrl6(version), date1);
+                        Date date1 = DateUtil.addDays(dateBeginTime, j - 8);
+                        Double cellDataList = this.mapDataHandler5(getUrl6(version), date1,version);
                         setSheetValue(sheet, rowNum, 0, cellDataList);
                         rowNum++;
                     }
@@ -115,8 +115,8 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     Date dateBeginTime = DateUtil.getDateBeginTime(dateQuery.getRecordDate());
                     int rowNum = 1;
                     for (int j = 1; j < 8; j++) {
-                        Date start = DateUtil.addDays(dateBeginTime, j - 7);
-                        Date end = DateUtil.addDays(dateBeginTime, j - 6);
+                        Date start = DateUtil.addDays(dateBeginTime, j - 8);
+                        Date end = DateUtil.addDays(dateBeginTime, j - 7);
                         List<CellData> cellDataList = this.mapDataHandler6(getUrl8(version), columns, start, end, rowNum);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         rowNum++;
@@ -199,9 +199,9 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return data;
     }
 
-    protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery,int shiftNum) {
         List<CellData> cellDataList = new ArrayList<>();
-        Map<String, String> queryParam = getQueryParamX(dateQuery);
+        Map<String, String> queryParam = getQueryParamX(dateQuery,shiftNum);
         queryParam.put("tagNames", columns.get(0));
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isNotBlank(result)) {
@@ -409,10 +409,10 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return cellData;
     }
 
-    protected Double mapDataHandler5(String url, Date date) {
+    protected Double mapDataHandler5(String url, Date date,String version) {
         Double val = 0.0;
         for (int i = 1; i < 4; i++) {
-            Map<String, String> queryParam = getQueryParam7(date, i);
+            Map<String, String> queryParam = getQueryParam7(date, i,version);
             String result = httpUtil.get(url, queryParam);
             if (StringUtils.isNotBlank(result)) {
                 JSONArray array = JSONObject.parseArray(result);
@@ -637,11 +637,17 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam7(Date date, int shiftNum) {
+    protected Map<String, String> getQueryParam7(Date date, int shiftNum,String version) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(date, "yyyy/MM/dd 00:00:00"));
         result.put("shift", shiftNum + "");
-        result.put("code", "KH-Y");
+        String code="KH-Y";
+        if("12.0".equals(version)){
+            code="KD-Y";
+        }else if("45.0".equals(version)){
+            code="KX-Y";
+        }
+        result.put("code", code);
         result.put("flag", "O");
         return result;
     }
@@ -661,10 +667,17 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParamX(DateQuery dateQuery) {
+    protected Map<String, String> getQueryParamX(DateQuery dateQuery,int shiftNum) {
         Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        Date startTime = dateQuery.getStartTime();
+        Date endTime = dateQuery.getEndTime();
+        if(shiftNum==1){
+            endTime=DateUtil.addHours(endTime,1);
+        }else if(shiftNum==2){
+            startTime=DateUtil.addHours(startTime,-1);
+        }
+        result.put("startDate", DateUtil.getFormatDateTime(startTime, "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(endTime, "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
