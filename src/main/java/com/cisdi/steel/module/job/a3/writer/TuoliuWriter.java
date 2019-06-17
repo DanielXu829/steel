@@ -138,7 +138,7 @@ public class TuoliuWriter extends AbstractExcelReadWriter {
                         double min = jsonObject.getDouble("min");
                         v = max + "/" + min;
                     } else if ("_6tuoliutuoxiaosum_day_hour".equals(sheetName)) {
-                        double sum = jsonObject.getDouble("sum");
+                        double sum = jsonObject.getDouble("SUM");
                         v = sum;
                     }
 
