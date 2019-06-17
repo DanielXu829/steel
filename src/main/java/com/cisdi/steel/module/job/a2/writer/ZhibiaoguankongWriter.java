@@ -218,24 +218,13 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                                     kAn = obj.getDouble("dayKan");
                                 }
                             }
+                            if (jhNo.equals(cokeNo)) {
+                                k2 = obj.getDouble("k2");
+                                k1 = obj.getDouble("k1");
+                                k3 = obj.getDouble("k3");
+                                km = obj.getDouble("kM");
+                            }
                         }
-                    }
-                }
-            }
-        }
-        Map<String, String> queryParam = getQueryParam4(dateQuery, shift, jhNo);
-        String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject jsonObject = JSONObject.parseObject(result);
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject data = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(data)) {
-                    JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
-                    if (Objects.nonNull(obj)) {
-                        k2 = obj.getDouble("k2");
-                        k1 = obj.getDouble("k1");
-                        k3 = obj.getDouble("k3");
-                        km = obj.getDouble("kM");
                     }
                 }
             }

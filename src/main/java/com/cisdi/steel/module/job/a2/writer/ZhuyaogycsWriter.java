@@ -55,17 +55,17 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 if (DateUtil.isEffectiveDate(date2, dateQueries.get(0).getStartTime(), dateQueries.get(0).getEndTime())) {
                     dateQuery = dateQueries.get(0);
                     shift = "夜班";
-                    shiftDate = "00:00";
+                    shiftDate = "08:00";
                     shiftNum = 1;
                 } else if (DateUtil.isEffectiveDate(date2, dateQueries.get(1).getStartTime(), dateQueries.get(1).getEndTime())) {
                     dateQuery = dateQueries.get(1);
                     shift = "白班";
-                    shiftDate = "08:00";
+                    shiftDate = "16:00";
                     shiftNum = 2;
                 } else {
                     dateQuery = dateQueries.get(2);
                     shift = "中班";
-                    shiftDate = "16:00";
+                    shiftDate = "00:00";
                     shiftNum = 3;
                 }
                 int rowIndex = 1;
