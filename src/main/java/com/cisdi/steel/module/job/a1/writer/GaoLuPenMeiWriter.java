@@ -168,7 +168,7 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                             v = jsonObject.get(columns.get(k));
                             if ("tankweight".equals(columns.get(k))) {
                                 String o = jsonObject.getString(columns.get(k));
-                                if (StringUtils.isNotBlank(o)) {
+                                if (Objects.nonNull(o) && StringUtils.isNotBlank(o)) {
                                     try {
                                         v = new BigDecimal(o);
                                     } catch (Exception e) {
