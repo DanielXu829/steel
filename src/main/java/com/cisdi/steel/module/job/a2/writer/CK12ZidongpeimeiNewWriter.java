@@ -38,7 +38,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
 
     private static final Map<String, String> pd2mtTagNames = new HashMap<>();
     private static final Map<String, Integer> lz2pd = new HashMap<>();
-    private final Map<String, List<DateSegment>> pdRunSegments = new HashMap<>();
+    private Map<String, List<DateSegment>> pdRunSegments = new HashMap<>();
 
     static{
         int[] piDai = {214,215,216,217};
@@ -153,9 +153,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
 //                    shiftStart = DateUtil.addHours(shiftStart, offsetHours);
 //                    shiftEnd = DateUtil.addHours(shiftEnd, offsetHours);
 
-                    if(pdRunSegments.isEmpty()){
-                        pdRunSegments.putAll(getDateSegment());
-                    }
+                    pdRunSegments = getDateSegment();
 
                     int rowIndex = 50;
                     Row row = sheet.createRow(rowIndex);
