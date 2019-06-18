@@ -100,6 +100,7 @@ public enum JobEnum {
     jh_jlguanjianzhibiao("jh_jlguanjianzhibiao", "炼焦-6#-7#焦炉关键指标统计"),
     jh_peimeiliang("jh_peimeiliang", "配煤-配煤量月报表"),
     jh_ck45peimeiliang("jh_ck45peimeiliang", "CK45-配煤-配煤量月报表"),
+    jh_ck12peimeiliang("jh_ck12peimeiliang", "CK12-配煤-配煤量月报表"),
     jh_zhibiaoguankong("jh_zhibiaoguankong", "炼焦-6#-7#焦炉关键指标管控"),
     jh_zhuyaogycs("jh_zhuyaogycs", "炼焦-主要工艺参数"),
     jh_luwenguankong("jh_luwenguankong", "炼焦-炉温管控"),

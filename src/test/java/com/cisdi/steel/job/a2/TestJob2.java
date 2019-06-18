@@ -331,6 +331,17 @@ public class TestJob2 extends SteelApplicationTests {
     }
 
     /**
+     * CK12配煤量月
+     */
+    @Autowired
+    private CK12PeimeiliangJob ck12PeimeiliangJob;
+
+    @Test
+    public void test2777() {
+        ck12PeimeiliangJob.execute(null);
+    }
+
+    /**
      * 指标管控
      */
     @Autowired
