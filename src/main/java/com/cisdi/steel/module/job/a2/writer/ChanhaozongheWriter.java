@@ -492,7 +492,7 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam5(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("date", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("date", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
