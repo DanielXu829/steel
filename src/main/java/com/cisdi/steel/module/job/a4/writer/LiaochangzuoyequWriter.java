@@ -47,13 +47,13 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
-//                List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                if("tag".equals(sheetSplit[1])){
-                    List<CellData> cellDataList = mapDataHandler(url, date);
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                }else {
+                if ("tag".equals(sheetSplit[1])) {
                     List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                    List<CellData> cellDataList = mapDataHandler2(getUrl1(),columns);
+                    List<CellData> cellDataList = mapDataHandler(url, date, columns);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                } else {
+                    List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
+                    List<CellData> cellDataList = mapDataHandler2(getUrl1(), columns);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
@@ -61,7 +61,7 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
-    protected List<CellData> mapDataHandler(String url, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(String url, DateQuery dateQuery, List<String> columns) {
         Map<String, String> queryParam = this.getQueryParam(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -72,10 +72,10 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(data)) {
             return null;
         }
-        return handlerJsonArray(data);
+        return handlerJsonArray(data, columns);
     }
 
-    protected List<CellData> mapDataHandler2(String url,List<String> columns) {
+    protected List<CellData> mapDataHandler2(String url, List<String> columns) {
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("typename", "1");
         String result = httpUtil.get(url, queryParam);
@@ -84,10 +84,10 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
                 JSONArray arr = jsonObject.getJSONArray("data");
-                if(Objects.nonNull(arr)&&arr.size()>0){
-                    for (int i = 0; i <arr.size() ; i++) {
+                if (Objects.nonNull(arr) && arr.size() > 0) {
+                    for (int i = 0; i < arr.size(); i++) {
                         JSONObject data = arr.getJSONObject(i);
-                        List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, i+1, data);
+                        List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, i + 1, data);
                         cellDataList.addAll(cellDataList1);
                     }
                 }
@@ -96,10 +96,10 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected List<CellData> handlerJsonArray(JSONObject data) {
+    protected List<CellData> handlerJsonArray(JSONObject data, List<String> columns) {
         List<CellData> cellDataList = new ArrayList<>();
         //主要设备运行情况 0 1 2 3
-        dealardDev(cellDataList, data);
+        dealardDev(cellDataList, data, columns);
 
         //单种配料料仓 5 6 7
         dealBinLevelTrBH(cellDataList, data);
@@ -387,7 +387,7 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
      * @param cellDataList
      * @param data
      */
-    private void dealardDev(List<CellData> cellDataList, JSONObject data) {
+    private void dealardDev(List<CellData> cellDataList, JSONObject data, List<String> columns) {
         JSONArray yardDev = data.getJSONArray("yardDev");
         if (Objects.nonNull(yardDev) && yardDev.size() > 0) {
             Map<String, Map> key = new HashMap();
@@ -413,23 +413,23 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
             }
 
             Set<String> keySet = key.keySet();
-
             int r = 0;
-            for (String k : keySet) {
-                //设备名称
-                ExcelWriterUtil.addCellData(cellDataList, r, 0, k);
-                Map<String, String> map = key.get(k);
-                if (Objects.nonNull(map)) {
-                    //堆料时间(分)
-                    ExcelWriterUtil.addCellData(cellDataList, r, 1, map.get("S"));
-                    //直拨时间(分)
-                    ExcelWriterUtil.addCellData(cellDataList, r, 2, map.get("D"));
-                    //取料时间(分)
-                    ExcelWriterUtil.addCellData(cellDataList, r, 3, map.get("R"));
+            for (String col : columns) {
+                if (StringUtils.isNotBlank(col)) {
+                    //设备名称
+                    ExcelWriterUtil.addCellData(cellDataList, r, 0, col);
+                    Map<String, String> map = key.get(col);
+                    if (Objects.nonNull(map)) {
+                        //堆料时间(分)
+                        ExcelWriterUtil.addCellData(cellDataList, r, 1, map.get("S"));
+                        //直拨时间(分)
+                        ExcelWriterUtil.addCellData(cellDataList, r, 2, map.get("D"));
+                        //取料时间(分)
+                        ExcelWriterUtil.addCellData(cellDataList, r, 3, map.get("R"));
+                    }
+                    r++;
                 }
-                r++;
             }
-
         }
     }
 
@@ -439,8 +439,8 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
         Map<String, String> result = new HashMap<>();
         //result.put("shiftNo", dealShiftNo(dateQuery.getRecordDate()));
         result.put("shiftNo", "1");
-     //   result.put("shiftDay", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
-       result.put("shiftDay", "20190610");
+        //   result.put("shiftDay", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
+        result.put("shiftDay", "20190610");
         return result;
     }
 
@@ -467,6 +467,7 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
     private String getUrl() {
         return httpProperties.getUrlApiYGLOne() + "/reportManager/materialYardShiftReport";
     }
+
     private String getUrl1() {
         return httpProperties.getUrlApiYGLOne() + "/materialmanagercontroller/findbyshiftday";
     }
