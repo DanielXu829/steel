@@ -271,7 +271,11 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 JSONObject jsonObject1 = array1.getJSONObject(0);
                 Double backn5x = jsonObject1.getDouble("backn5");
                 Double backn6x = jsonObject1.getDouble("backn6");
-                ganxi = backn5x / (backn5x + backn6x);
+                if(backn5x==0){
+                    ganxi=0.0;
+                }else {
+                    ganxi = backn5x / (backn5x + backn6x);
+                }
             }
         }
         return ganxi;
