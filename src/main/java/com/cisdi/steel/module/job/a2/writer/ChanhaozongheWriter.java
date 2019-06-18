@@ -105,7 +105,7 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                         List<CellData> cellDataList = this.mapDataHandler4(getUrl5(version), columns, 1, item, rowIndex);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
-                }else if ("yield".equals(sheetSplit[1])) {
+                } else if ("yield".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
@@ -426,11 +426,11 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         Map<String, String> queryParam = getQueryParam5(dateQuery);
         List<CellData> cellDataList = new ArrayList<>();
         String result = httpUtil.get(url, queryParam);
-        if(StringUtils.isNotBlank(result)){
+        if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
-            if(Objects.nonNull(jsonObject)){
+            if (Objects.nonNull(jsonObject)) {
                 JSONObject data = jsonObject.getJSONObject("data");
-                if(Objects.nonNull(data)){
+                if (Objects.nonNull(data)) {
                     Double currentYield = data.getDouble("currentYield");
                     ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, currentYield);
                 }
@@ -447,8 +447,8 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
         if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
-                Double backn1 = jsonObject.getDouble("backn2");
-                ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0,backn1);
+                String backn1 = jsonObject.getString("back1");
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, backn1);
             }
         }
         return cellDataList;
@@ -492,7 +492,7 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam5(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("date", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("date", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
