@@ -478,11 +478,21 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                 JSONArray rows = jsonObject.getJSONArray("rows");
                 for (int i = 0; i < rows.size(); i++) {
                     JSONArray jsonArray = rows.getJSONArray(i);
+                    Map<String,Object> map=new HashMap<>();
+                    List<JSONObject> list=new ArrayList<>();
                     for (int j = 0; j < jsonArray.size(); j++) {
                         JSONObject jsonObject1 =  jsonArray.getJSONObject(j);
-                        String recTime = jsonObject1.getString("recTime");
                         String descr = jsonObject1.getString("descr");
+                        if(Objects.isNull(map.get(descr))){
+                            list.add(jsonObject1);
+                            map.put(descr,jsonObject1);
+                        }
+                    }
+                    for (int j = 0; j < list.size(); j++) {
+                        JSONObject jsonObject1 =  list.get(j);
+                        String recTime = jsonObject1.getString("recTime");
                         Double planRate = jsonObject1.getDouble("planRate");
+                        String descr = jsonObject1.getString("descr");
                         if(i==0){
                             ExcelWriterUtil.addCellData(cellDataList, 1, j, recTime);
                             ExcelWriterUtil.addCellData(cellDataList, 2, j, descr);

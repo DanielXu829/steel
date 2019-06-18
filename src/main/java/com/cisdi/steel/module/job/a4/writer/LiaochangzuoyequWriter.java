@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 
@@ -146,11 +147,15 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
                 //累计发料湿吨
                 String pileSendWetWgt = object.getString("pileSendWetWgt");
                 //当班发料时间
-                String shiftSendTime = object.getString("shiftSendTime");
+                Double shiftSendTime = object.getDouble("shiftSendTime");
                 //累计发料时间
-                String pileSendTime = object.getString("pileSendTime");
+                Double pileSendTime = object.getDouble("pileSendTime");
                 //预计发堆班次
                 String shiftNo = object.getString("shiftNo");
+                //预计封堆班数
+                String closureShiftCount = object.getString("closureShiftCount");
+                //预计发料班数
+                String sendShiftCount = object.getString("sendShiftCount");
                 //大堆或直拨
                 String sendTag = object.getString("sendTag");
 
@@ -163,7 +168,9 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.addCellData(cellDataList, 3, c, shiftSendTime);
                         ExcelWriterUtil.addCellData(cellDataList, 4, c, pileSendTime);
                         ExcelWriterUtil.addCellData(cellDataList, 5, c, shiftNo);
-                        ExcelWriterUtil.addCellData(cellDataList, 6, c, sendTag);
+                        ExcelWriterUtil.addCellData(cellDataList, 6, c, closureShiftCount);
+                        ExcelWriterUtil.addCellData(cellDataList, 7, c, sendShiftCount);
+                        ExcelWriterUtil.addCellData(cellDataList, 8, c, sendTag);
                         index5++;
                     } else if ("YL6".equals(unitNo)) {
                         int c = index6 + 40;
@@ -173,7 +180,9 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.addCellData(cellDataList, 3, c, shiftSendTime);
                         ExcelWriterUtil.addCellData(cellDataList, 4, c, pileSendTime);
                         ExcelWriterUtil.addCellData(cellDataList, 5, c, shiftNo);
-                        ExcelWriterUtil.addCellData(cellDataList, 6, c, sendTag);
+                        ExcelWriterUtil.addCellData(cellDataList, 6, c, closureShiftCount);
+                        ExcelWriterUtil.addCellData(cellDataList, 7, c, sendShiftCount);
+                        ExcelWriterUtil.addCellData(cellDataList, 8, c, sendTag);
                         index6++;
                     }
                 }
@@ -214,9 +223,9 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
                 //本堆累计层数
                 String pileFactLayer = object.getString("pileFactLayer");
                 //当班堆料时间
-                String shiftDate = object.getString("shiftDate");
+                BigDecimal shiftDate = object.getBigDecimal("shiftRunTime");
                 //累计堆料时间
-                String pileDate = object.getString("shiftDate");
+                BigDecimal pileDate = object.getBigDecimal("pileRunTime");
                 //预计封堆班次
                 String shiftNo = object.getString("shiftNo");
 
@@ -404,6 +413,7 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
             }
 
             Set<String> keySet = key.keySet();
+
             int r = 0;
             for (String k : keySet) {
                 //设备名称
@@ -427,10 +437,10 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        result.put("shiftNo", dealShiftNo(dateQuery.getRecordDate()));
-//        result.put("shiftNo", "1");
-        result.put("shiftDay", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
-//        result.put("shiftDay", "20190526");
+        //result.put("shiftNo", dealShiftNo(dateQuery.getRecordDate()));
+        result.put("shiftNo", "1");
+     //   result.put("shiftDay", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
+       result.put("shiftDay", "20190610");
         return result;
     }
 
