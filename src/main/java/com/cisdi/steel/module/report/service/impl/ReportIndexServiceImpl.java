@@ -140,13 +140,13 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
 
         if (Objects.isNull(report)
-                || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.jh_ck12zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.jh_ck12zidongpeimeinew.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.jh_ck45zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.gl_peiliaodan7.getCode().equals(reportIndex.getReportCategoryCode())
-                || JobEnum.gl_peiliaodan6.getCode().equals(reportIndex.getReportCategoryCode())) {
+                || (Objects.isNull(reportIndex.getId()) && JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode()))
+                || (Objects.isNull(reportIndex.getId()) && JobEnum.jh_ck12zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode()))
+                || (Objects.isNull(reportIndex.getId()) && JobEnum.jh_ck12zidongpeimeinew.getCode().equals(reportIndex.getReportCategoryCode()))
+                || (Objects.isNull(reportIndex.getId()) && JobEnum.jh_ck45zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode()))
+                || (Objects.isNull(reportIndex.getId()) && JobEnum.gl_peiliaodan.getCode().equals(reportIndex.getReportCategoryCode()))
+                || (Objects.isNull(reportIndex.getId()) && JobEnum.gl_peiliaodan7.getCode().equals(reportIndex.getReportCategoryCode()))
+                || (Objects.isNull(reportIndex.getId()) && JobEnum.gl_peiliaodan6.getCode().equals(reportIndex.getReportCategoryCode()))) {
             reportIndex.setCreateTime(now);
             this.save(reportIndex);
         } else {
