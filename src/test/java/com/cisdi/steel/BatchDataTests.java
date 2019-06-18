@@ -135,7 +135,7 @@ public class BatchDataTests extends SteelApplicationTests {
      */
     @Test
     public void test3333() {
-        JobKey jobKey = JobKey.jobKey(JobEnum.ygl_liaochangzuoyequ.getCode(), jobGroup);
+        JobKey jobKey = JobKey.jobKey("ygl_chengpincang", jobGroup);
         try {
             scheduler.deleteJob(jobKey);
         } catch (SchedulerException e) {

@@ -83,7 +83,7 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                     row.getCell(2).setCellType(CellType.STRING);
                     row.createCell(3).setCellValue(shiftDate);
                     row.getCell(3).setCellType(CellType.STRING);
-                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl5(version), columns, dateQuery);
+                    List<CellData> cellDataList = mapDataHandler1(rowIndex, getUrl5(version), columns, dateQuery,shiftNum);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
@@ -115,9 +115,9 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery,int shiftNum) {
         List<CellData> cellDataList = new ArrayList<>();
-        Map<String, String> queryParam = getQueryParamX(dateQuery);
+        Map<String, String> queryParam = getQueryParamX(dateQuery,shiftNum);
         queryParam.put("tagNames", columns.get(0));
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isNotBlank(result)) {
@@ -218,24 +218,13 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                                     kAn = obj.getDouble("dayKan");
                                 }
                             }
+                            if (jhNo.equals(cokeNo)) {
+                                k2 = obj.getDouble("k2");
+                                k1 = obj.getDouble("k1");
+                                k3 = obj.getDouble("k3");
+                                km = obj.getDouble("kM");
+                            }
                         }
-                    }
-                }
-            }
-        }
-        Map<String, String> queryParam = getQueryParam4(dateQuery, shift, jhNo);
-        String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject jsonObject = JSONObject.parseObject(result);
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject data = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(data)) {
-                    JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
-                    if (Objects.nonNull(obj)) {
-                        k2 = obj.getDouble("k2");
-                        k1 = obj.getDouble("k1");
-                        k3 = obj.getDouble("k3");
-                        km = obj.getDouble("kM");
                     }
                 }
             }
@@ -269,10 +258,17 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParamX(DateQuery dateQuery) {
+    protected Map<String, String> getQueryParamX(DateQuery dateQuery,int shiftNum) {
         Map<String, String> result = new HashMap<>();
-        result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        Date startTime = dateQuery.getStartTime();
+        Date endTime = dateQuery.getEndTime();
+        if(shiftNum==1){
+            endTime=DateUtil.addHours(endTime,1);
+        }else if(shiftNum==2){
+            startTime=DateUtil.addHours(startTime,-1);
+        }
+        result.put("startDate", DateUtil.getFormatDateTime(startTime, "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(endTime, "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 

@@ -39,17 +39,6 @@ public class TestJob2 extends SteelApplicationTests {
     }
 
     /**
-     * 自动配煤CK12
-     */
-    @Autowired
-    private CK12ZidongpeimeiJob ck12ZidongpeimeiJob;
-
-    @Test
-    public void test66() {
-        ck12ZidongpeimeiJob.execute(null);
-    }
-
-    /**
      * 自动配煤CK12-New
      */
     @Autowired

@@ -31,7 +31,7 @@ import java.util.*;
 @SuppressWarnings("ALL")
 @Component
 @Slf4j
-public class CK12ZidongpeimeiWriter extends AbstractExcelReadWriter {
+public class CK45ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
     public Double compareTagVal(String tagName, DateQuery dateQuery,String version) {
         HashMap<String, String> map = new HashMap<>();
@@ -104,10 +104,10 @@ public class CK12ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     row.createCell(0).setCellValue(shift);
                     row.getCell(0).setCellType(CellType.STRING);
 
-//                    Row row1 = sheet.createRow(33);
-//                    Double aDouble = peimeiLeiji(getUrl(version), date);
-//                    row1.createCell(0).setCellValue(aDouble);
-//                    row1.getCell(0).setCellType(CellType.NUMERIC);
+                    Row row1 = sheet.createRow(33);
+                    Double aDouble = peimeiLeiji(getUrl(version), date);
+                    row1.createCell(0).setCellValue(aDouble);
+                    row1.getCell(0).setCellType(CellType.NUMERIC);
 
                     Double yiedNum = this.mapDataHandler1(shiftNum, getUrl4(version), date);
                     Row row2 = sheet.createRow(30);
@@ -134,7 +134,7 @@ public class CK12ZidongpeimeiWriter extends AbstractExcelReadWriter {
         dateQuery.setStartTime(startTime);
         Map<String, String> queryParam = getQueryParamX1(dateQuery);
         List<CellData> cellDataList = new ArrayList<>();
-        String tagName = "CK67_L1R_CB_CBAmtTol_1m_evt";
+        String tagName = "CK45_L1R_CB_CBAmtTol_evt";
         queryParam.put("tagNames", tagName);
         String result = httpUtil.get(url, queryParam);
         Double val = 0.0;
