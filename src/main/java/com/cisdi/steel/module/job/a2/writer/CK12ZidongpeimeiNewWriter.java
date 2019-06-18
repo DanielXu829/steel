@@ -113,8 +113,8 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         //测试时的偏移，发布时要去掉
-        int offsetHours = -4;
-        date.setRecordDate(DateUtil.addHours(date.getRecordDate(), offsetHours));
+//        int offsetHours = -4;
+//        date.setRecordDate(DateUtil.addHours(date.getRecordDate(), offsetHours));
 
         Date recordDate = date.getRecordDate();
 
