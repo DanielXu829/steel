@@ -36,8 +36,11 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
     private Date shiftEnd;
     private String version;
 
+    // 皮带对应的tag点
     private static final Map<String, String> pd2mtTagNames = new HashMap<>();
+    // 料嘴对应的皮带
     private static final Map<String, Integer> lz2pd = new HashMap<>();
+    // 皮带的运行时段
     private Map<String, List<DateSegment>> pdRunSegments = new HashMap<>();
 
     static{
@@ -194,10 +197,35 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
 
                     List<CellData> cellDataList = this.handlerData(date, sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
+
+                    // 煤种
+                    initCoalSiloName(sheet, recordDate);
                 }
             }
         }
         return workbook;
+    }
+
+    private void initCoalSiloName(Sheet sheet, Date recordDate){
+        Map<String, String> queryParam = getQueryParam3(recordDate);
+        String result = httpUtil.get(getUrl2(), queryParam);
+        if (StringUtils.isBlank(result)) {
+            return;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (Objects.isNull(data)) {
+            return;
+        }
+        Map<String, Object> innerMap = data.getInnerMap();
+        Set<String> strings = innerMap.keySet();
+        List<CellData> cellDataList = new ArrayList<>();
+        int row = 19;
+        for (int j = 0; j < strings.size(); j++) {
+            String s = "coalSiloName" + (j + 1);
+            ExcelWriterUtil.addCellData(cellDataList, row, j, innerMap.get(s).toString());
+        }
+        ExcelWriterUtil.setCellValue(sheet, cellDataList);
     }
 
     private Double peimeiLeiji(String url, DateQuery dateQuery, String tagName) {
@@ -517,6 +545,12 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    private Map<String, String> getQueryParam3(Date date) {
+        Map<String, String> result = new HashMap<>();
+        result.put("dateTime", DateUtil.getFormatDateTime(date, "yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
     private Map<String, String> getQueryParam4(Integer shiftNum, Date date) {
         Map<String, String> result = new HashMap<>();
         result.put("dateTime", DateUtil.getFormatDateTime(date, "yyyy/MM/dd 00:00:00"));
@@ -530,6 +564,9 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
+    private String getUrl2() {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getCoalSiloName";
+    }
     private String getUrl3(String version) {
         return httpProperties.getJHUrlVersion(version) + "/manufacturingState/getTagValue";
     }
