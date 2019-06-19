@@ -167,10 +167,10 @@ public class GaoLuPenMeiWriter extends AbstractExcelReadWriter {
                         if (dayHourEach.get(i).getStartTime().getTime() == workdate) {
                             v = jsonObject.get(columns.get(k));
                             if ("tankweight".equals(columns.get(k))) {
-                                String o = jsonObject.getString(columns.get(k));
-                                if (Objects.nonNull(o) && StringUtils.isNotBlank(o)) {
+                                Object o = jsonObject.get(columns.get(k));
+                                if (Objects.nonNull(o)) {
                                     try {
-                                        v = new BigDecimal(o);
+                                        v = new BigDecimal(o.toString());
                                     } catch (Exception e) {
                                         log.error("喷煤罐重转换异常：>>>>>>>>" + e.getMessage());
                                     }
