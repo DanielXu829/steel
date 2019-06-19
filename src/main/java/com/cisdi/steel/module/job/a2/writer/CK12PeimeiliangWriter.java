@@ -112,7 +112,10 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
                     Map<String, Object> innerMap = data.getInnerMap();
                     Set<String> strings = innerMap.keySet();
                     for (String key : strings) {
-                        meiName.add(innerMap.get(key).toString());
+                        String val = innerMap.get(key).toString();
+                        if (StringUtils.isNotBlank(val)) {
+                            meiName.add(val);
+                        }
                     }
                 }
             }
@@ -197,9 +200,9 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
         CaseInsensitiveMap<String, Object> rowDataMap = new CaseInsensitiveMap<>(rowData);
         for (int columnIndex = 0; columnIndex < size; columnIndex++) {
             String column = columns.get(columnIndex);
-//            if (StringUtils.isBlank(column)) {
-//                continue;
-//            }
+            if (StringUtils.isBlank(column)) {
+                continue;
+            }
             Object value = rowDataMap.get(column);
             ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
         }
@@ -214,9 +217,19 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
     }
 
     protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        String start = DateUtil.getFormatDateTime(DateQueryUtil.getMonthStartTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
+        String start = "";
+        Date monthStartTime = DateQueryUtil.getMonthStartTime(dateQuery.getRecordDate());
+        Calendar cal = Calendar.getInstance();
+        cal.set(2019,5,18,0,0,0);
+        if(monthStartTime.before(cal.getTime())){
+            start = DateUtil.getFormatDateTime(cal.getTime(), "yyyy/MM/dd HH:mm:ss");
+        }else{
+            start = DateUtil.getFormatDateTime(monthStartTime, "yyyy/MM/dd HH:mm:ss");
+        }
+
         String end = DateUtil.getFormatDateTime(DateQueryUtil.getMonthEndTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
+
+        Map<String, String> result = new HashMap<>();
         result.put("startDate", start);
         result.put("endDate", end);
         result.put("tagName", "CK12_L1R_CB_CBReset_4_report");
