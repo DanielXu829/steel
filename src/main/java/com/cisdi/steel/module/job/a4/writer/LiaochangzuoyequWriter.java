@@ -437,10 +437,10 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
-        //result.put("shiftNo", dealShiftNo(dateQuery.getRecordDate()));
-        result.put("shiftNo", "1");
-        //   result.put("shiftDay", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
-        result.put("shiftDay", "20190610");
+        result.put("shiftNo", dealShiftNo(dateQuery.getRecordDate()));
+//        result.put("shiftNo", "1");
+        result.put("shiftDay", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyyMMdd"));
+//        result.put("shiftDay", "20190610");
         return result;
     }
 
