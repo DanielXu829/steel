@@ -125,6 +125,10 @@ public class CK45ZidongpeimeiWriter extends AbstractExcelReadWriter {
                     cellDataList.addAll(cellDataList1);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
 //                    }
+                }else {
+                    List<String> firstColumnCellVal = PoiCustomUtil.getFirstRowCelVal(sheet);
+                    List<CellData> cellData = this.mapDataHandler3(getUrl2(version), firstColumnCellVal, 1, date);
+                    ExcelWriterUtil.setCellValue(sheet, cellData);
                 }
             }
         }
@@ -343,6 +347,21 @@ public class CK45ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return confirmWgt;
     }
 
+    protected List<CellData> mapDataHandler3(String url, List<String> columns, int rowBatch, DateQuery dateQuery) {
+        Map<String, String> queryParam = getQueryParam6(dateQuery);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        int startRow = 1;
+        return ExcelWriterUtil.handlerRowData(columns, startRow, data);
+    }
+
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getRecordDate(), -10), "yyyy/MM/dd HH:mm:ss"));
@@ -400,6 +419,12 @@ public class CK45ZidongpeimeiWriter extends AbstractExcelReadWriter {
         }
         result.put("date", DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(date), DateUtil.fullFormat));
         result.put("shiftNo", shiftNo + "");
+        return result;
+    }
+
+    protected Map<String, String> getQueryParam6(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("dateTime", DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 
