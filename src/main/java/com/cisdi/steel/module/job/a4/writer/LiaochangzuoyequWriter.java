@@ -226,8 +226,8 @@ public class LiaochangzuoyequWriter extends AbstractExcelReadWriter {
                 BigDecimal shiftDate = object.getBigDecimal("shiftRunTime");
                 //累计堆料时间
                 BigDecimal pileDate = object.getBigDecimal("pileRunTime");
-                //预计封堆班次
-                String shiftNo = object.getString("shiftNo");
+                //预计封堆班数
+                String shiftNo = object.getString("closureShiftCount");
 
                 if (StringUtils.isNotBlank(unitNo)) {
                     if ("YL5".equals(unitNo)) {

@@ -88,7 +88,7 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
                         int rowIndex = k + 1;
-                        List<CellData> cellDataList = this.mapDataHandler1(rowIndex, getUrl(version), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler1(rowIndex, getUrl1(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 } else if ("reval".equals(sheetSplit[1])) {
@@ -250,79 +250,32 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
     }
 
     protected List<CellData> mapDataHandler1(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam1(dateQuery);
-        Map<String, String> queryParam1 = getQueryParam1(dateQuery);
-        Map<String, String> queryParam2 = getQueryParam1(dateQuery);
-        Map<String, String> queryParam3 = getQueryParam1(dateQuery);
+        Map<String, String> queryParam = getQueryParam1x(dateQuery);
         int size = columns.size();
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             String column = columns.get(i);
             if (StringUtils.isNotBlank(column)) {
                 String[] split = column.split(",");
-                if (split.length == 2) {
-                    queryParam.put("tagName", split[0]);
-                    queryParam1.put("tagName", split[1]);
+                Double val = 0.0;
+                for (int j = 0; j < split.length; j++) {
+                    queryParam.put("tagNames", split[j]);
                     String result = httpUtil.get(url, queryParam);
-                    String result1 = httpUtil.get(url, queryParam1);
-                    if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)) {
+                    if (StringUtils.isNotBlank(result)) {
                         JSONObject jsonObject = JSONObject.parseObject(result);
-                        JSONObject jsonObject1 = JSONObject.parseObject(result1);
-                        if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject1)) {
-                            JSONArray arr = jsonObject.getJSONArray("rows");
-                            JSONArray arr1 = jsonObject1.getJSONArray("rows");
-                            if (Objects.nonNull(arr) && arr.size() != 0
-                                    && Objects.nonNull(arr1) && arr1.size() != 0) {
-                                JSONObject job = arr.getJSONObject(0);
-                                JSONObject job1 = arr1.getJSONObject(0);
-                                if (Objects.isNull(job) || Objects.isNull(job1)) {
-                                    continue;
+                        if (Objects.nonNull(jsonObject)) {
+                            JSONObject data = jsonObject.getJSONObject("data");
+                            if (Objects.nonNull(data)) {
+                                JSONArray arr = data.getJSONArray(split[j]);
+                                if (Objects.nonNull(arr) && arr.size() != 0) {
+                                    JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
+                                    val += jsonObject1.getDouble("val");
                                 }
-                                double val = job1.getDouble("val") + job.getDouble("val");
-                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
-                            }
-                        }
-                    }
-                } else if (split.length == 4) {
-                    queryParam.put("tagName", split[0]);
-                    queryParam1.put("tagName", split[1]);
-                    queryParam2.put("tagName", split[2]);
-                    queryParam3.put("tagName", split[3]);
-                    String result = httpUtil.get(url, queryParam);
-                    String result1 = httpUtil.get(url, queryParam1);
-                    String result2 = httpUtil.get(url, queryParam2);
-                    String result3 = httpUtil.get(url, queryParam3);
-                    if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)
-                            && StringUtils.isNotBlank(result2) && StringUtils.isNotBlank(result3)) {
-                        JSONObject jsonObject = JSONObject.parseObject(result);
-                        JSONObject jsonObject1 = JSONObject.parseObject(result1);
-                        JSONObject jsonObject2 = JSONObject.parseObject(result2);
-                        JSONObject jsonObject3 = JSONObject.parseObject(result3);
-                        if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject1)
-                                && Objects.nonNull(jsonObject2) && Objects.nonNull(jsonObject3)) {
-                            JSONArray arr = jsonObject.getJSONArray("rows");
-                            JSONArray arr1 = jsonObject1.getJSONArray("rows");
-                            JSONArray arr2 = jsonObject2.getJSONArray("rows");
-                            JSONArray arr3 = jsonObject3.getJSONArray("rows");
-                            if (Objects.nonNull(arr) && arr.size() != 0
-                                    && Objects.nonNull(arr1) && arr1.size() != 0
-                                    && Objects.nonNull(arr2) && arr2.size() != 0
-                                    && Objects.nonNull(arr3) && arr3.size() != 0) {
-                                JSONObject job = arr.getJSONObject(0);
-                                JSONObject job1 = arr1.getJSONObject(0);
-                                JSONObject job2 = arr2.getJSONObject(0);
-                                JSONObject job3 = arr3.getJSONObject(0);
-                                if (Objects.isNull(job) || Objects.isNull(job1)
-                                        || Objects.isNull(job2) || Objects.isNull(job3)) {
-                                    continue;
-                                }
-                                double val = job1.getDouble("val") + job.getDouble("val")
-                                        + job2.getDouble("val") + job3.getDouble("val");
-                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                             }
                         }
                     }
                 }
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
             }
         }
         return cellDataList;
@@ -463,6 +416,13 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
     protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
         result.put("time", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        return result;
+    }
+
+    protected Map<String, String> getQueryParam1x(DateQuery dateQuery) {
+        Map<String, String> result = new HashMap<>();
+        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(dateQuery.getEndTime(), -10), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
         return result;
     }
 

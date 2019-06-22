@@ -473,4 +473,15 @@ public class TestJob2 extends SteelApplicationTests {
     public void test39() {
         ck45Zkcaozuo2Job.execute(null);
     }
+
+    /**
+     * 煤气单耗
+     */
+    @Autowired
+    private MeiQiDanHaoAJob meiQiDanHaoAJob;
+
+    @Test
+    public void test40() {
+        meiQiDanHaoAJob.execute(null);
+    }
 }
