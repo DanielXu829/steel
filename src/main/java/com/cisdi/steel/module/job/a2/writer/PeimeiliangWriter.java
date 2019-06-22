@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -40,6 +41,11 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        String version = "67.0";
+        try {
+            version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+        }
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
@@ -52,7 +58,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 DateQuery dateQuery = dateQueries.get(0);
                 if (this.columns.size() == 0) {
-                    Set<String> strings = mapDataHandler(getUrl2(), dateQuery);
+                    Set<String> strings = mapDataHandler(getUrl2(version), dateQuery, version);
                     columns = new ArrayList<>(strings);
                 }
                 if ("name".equals(sheetSplit[1])) {
@@ -64,7 +70,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                 } else {
                     for (int j = 0; j < size; j++) {
                         int rowIndex = 10 + j;
-                        List<CellData> cellData = mapDataHandler2(getUrl2(), columns, dateQueries.get(j), rowIndex, sheet);
+                        List<CellData> cellData = mapDataHandler2(getUrl2(version), columns, dateQueries.get(j), rowIndex, sheet, version);
                         ExcelWriterUtil.setCellValue(sheet, cellData);
                     }
                 }
@@ -87,8 +93,8 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
     }
 
 
-    protected Set<String> mapDataHandler(String url, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam1(dateQuery);
+    protected Set<String> mapDataHandler(String url, DateQuery dateQuery, String version) {
+        Map<String, String> queryParam = getQueryParam1(dateQuery, version);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -104,7 +110,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
             String clock = jsonObject1.getString("clock");
             String date = DateUtil.getFormatDateTime(DateUtil.strToDate(clock, DateUtil.fullFormat), "yyyy/MM/dd HH:mm:ss");
             Map<String, String> queryParam1 = getQueryParam(date);
-            String result1 = httpUtil.get(getUrl(), queryParam1);
+            String result1 = httpUtil.get(getUrl(version), queryParam1);
             if (StringUtils.isNotBlank(result)) {
                 JSONObject jsonObject2 = JSONObject.parseObject(result1);
                 if (Objects.nonNull(jsonObject2)) {
@@ -120,8 +126,8 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
         return meiName;
     }
 
-    protected List<CellData> mapDataHandler2(String url, List<String> columns, DateQuery dateQuery, int rowIndex, Sheet sheet) {
-        Map<String, String> queryParam = getQueryParam2(dateQuery);
+    protected List<CellData> mapDataHandler2(String url, List<String> columns, DateQuery dateQuery, int rowIndex, Sheet sheet, String version) {
+        Map<String, String> queryParam = getQueryParam2(dateQuery, version);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -137,7 +143,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
             String clock = jsonObject1.getString("clock");
             String date = DateUtil.getFormatDateTime(DateUtil.strToDate(clock, DateUtil.fullFormat), "yyyy/MM/dd HH:mm:ss");
             Map<String, String> queryParam1 = getQueryParam(date);
-            String result1 = httpUtil.get(getUrl(), queryParam1);
+            String result1 = httpUtil.get(getUrl(version), queryParam1);
             List<String> nameList = new ArrayList<>();
             if (StringUtils.isNotBlank(result)) {
                 JSONObject jsonObject2 = JSONObject.parseObject(result1);
@@ -145,9 +151,18 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                     JSONObject data = jsonObject2.getJSONObject("data");
                     Map<String, Object> innerMap = data.getInnerMap();
                     Set<String> strings = innerMap.keySet();
-                    for (int j = 0; j < strings.size(); j++) {
+                    int size = strings.size();
+                    if ("45.0".equals(version)) {
+                        if (size < 8) {
+                            size = 8;
+                        }
+                    }
+                    for (int j = 0; j < size; j++) {
                         String s = "coalSiloName" + (j + 1);
-                        nameList.add(innerMap.get(s).toString());
+                        Object o = innerMap.get(s);
+                        if (Objects.nonNull(o)) {
+                            nameList.add(o.toString());
+                        }
                     }
                     String date1 = DateUtil.getFormatDateTime(DateUtil.strToDate(clock, DateUtil.fullFormat), "yyyy/MM/dd HH:mm:00");
                     for (int j = 0; j < nameList.size(); j++) {
@@ -157,7 +172,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                         for (int k = 0; k < rowCelVal.size(); k++) {
                             String tagName = rowCelVal.get(k);
                             Map<String, String> queryParam3 = getQueryParam3(date1, tagName);
-                            String result2 = httpUtil.get(getUrl3(), queryParam3);
+                            String result2 = httpUtil.get(getUrl3(version), queryParam3);
                             if (StringUtils.isNotBlank(result2)) {
                                 JSONObject jsonObject3 = JSONObject.parseObject(result2);
                                 if (Objects.nonNull(jsonObject3)) {
@@ -165,7 +180,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                                     if (Objects.nonNull(rows3) && rows3.size() > 0) {
                                         JSONObject obj = rows3.getJSONObject(0);
                                         if (Objects.nonNull(obj)) {
-                                            Double val1 = obj.getDouble("val");
+                                            BigDecimal val1 = obj.getBigDecimal("val");
                                             if (Objects.nonNull(val1)) {
                                                 val += val1.doubleValue();
                                             }
@@ -213,21 +228,29 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam1(DateQuery dateQuery) {
+    protected Map<String, String> getQueryParam1(DateQuery dateQuery, String version) {
         Map<String, String> result = new HashMap<>();
         String start = DateUtil.getFormatDateTime(DateQueryUtil.getMonthStartTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
         String end = DateUtil.getFormatDateTime(DateQueryUtil.getMonthEndTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
         result.put("startDate", start);
         result.put("endDate", end);
-        result.put("tagName", "CK67_L1R_CB_CBReset_4_report");
+        String name = "CK67_L1R_CB_CBReset_4_report";
+        if ("45.0".equals(version)) {
+            name = "CK45_L1R_CB_CBReset_4_report";
+        }
+        result.put("tagName", name);
         return result;
     }
 
-    protected Map<String, String> getQueryParam2(DateQuery dateQuery) {
+    protected Map<String, String> getQueryParam2(DateQuery dateQuery, String version) {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("tagName", "CK67_L1R_CB_CBReset_4_report");
+        String name = "CK67_L1R_CB_CBReset_4_report";
+        if ("45.0".equals(version)) {
+            name = "CK45_L1R_CB_CBReset_4_report";
+        }
+        result.put("tagName", name);
         return result;
     }
 
@@ -238,15 +261,15 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected String getUrl() {
-        return httpProperties.getUrlApiJHOne() + "/jhTagValue/getCoalSiloName";
+    protected String getUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getCoalSiloName";
     }
 
-    protected String getUrl2() {
-        return httpProperties.getUrlApiJHOne() + "/manufacturingState/getTagValue";
+    protected String getUrl2(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/manufacturingState/getTagValue";
     }
 
-    protected String getUrl3() {
-        return httpProperties.getUrlApiJHOne() + "/coalBlendingStatus/getVauleByNameAndTime";
+    protected String getUrl3(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getVauleByNameAndTime";
     }
 }
