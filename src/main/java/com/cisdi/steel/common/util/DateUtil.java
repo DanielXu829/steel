@@ -157,6 +157,19 @@ public class DateUtil {
     }
 
     /**
+     * 字符串转字符串
+     *
+     * @param str     需要转换的字符串
+     * @param oldFormat 日期格式
+     * @param newFormat 日期格式
+     * @return 结果 null 表示格式错误 或者 正确的时间
+     */
+    public static String strToStr(String str, String oldFormat, String newFormat) {
+        Date date = strToDate(str, oldFormat);
+        return (null == date) ? null : DateFormatUtils.format(date, newFormat);
+    }
+
+    /**
      * 得到指定时间的时间日期格式
      *
      * @param date   指定的时间
