@@ -12,7 +12,6 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
@@ -42,6 +41,8 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
     private static final Map<String, Integer> lz2pd = new HashMap<>();
     // 皮带的运行时段
     private Map<String, List<DateSegment>> pdRunSegments = new HashMap<>();
+    // 甲乙丙班月累计
+    private Map<Integer, Double> teamTotal = new HashMap<>();
 
     static{
         int[] piDai = {214,215,216,217};
@@ -95,7 +96,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         String time = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:00");
 //        map.put("startDate", time);
 //        map.put("endDate", time);
-        String s = httpUtil.get(getUrl3(version), map);
+        String s = httpUtil.get(getUrl3(), map);
         Double val = null;
         if (StringUtils.isNotBlank(s)) {
             JSONObject jsonObject = JSONObject.parseObject(s);
@@ -167,7 +168,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     row.createCell(0).setCellValue(shift);
                     row.getCell(0).setCellType(CellType.STRING);
 
-                    String url = getUrl4(version);
+                    String url = getUrl4();
                     // 焦油渣 当班
                     Double yiedNum = this.mapDataHandler2(url, shiftCur, getTodayBegin(recordDate), recordDate);
                     Row row2 = sheet.createRow(++rowIndex);
@@ -181,7 +182,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     row3.createCell(0).setCellValue(yiedNumLeiji);
                     row3.getCell(0).setCellType(CellType.NUMERIC);
 
-                    url = getUrl(version);
+                    url = getUrl();
                     String[] peimei = {"CK12_L1R_CB_CBAmtTol1_evt","CK12_L1R_CB_CBAmtTol2_evt"};
                     // 配煤量1# 月累计
                     Row row4 = sheet.createRow(++rowIndex);
@@ -194,6 +195,13 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     Double double5 = peimeiLeiji(url, date,peimei[1]);
                     row5.createCell(0).setCellValue(double5);
                     row5.getCell(0).setCellType(CellType.NUMERIC);
+
+                    // 配煤量 甲乙丙班月累计
+                    Row row6 = sheet.createRow(++rowIndex);
+                    for (Map.Entry<Integer, Double> entry : teamTotal.entrySet()) {
+                        row6.createCell(entry.getKey()).setCellValue(entry.getValue());
+                        row6.getCell(entry.getKey()).setCellType(CellType.NUMERIC);
+                    }
 
                     List<CellData> cellDataList = this.handlerData(date, sheet);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -234,7 +242,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         Map<String, String> queryParam = getQueryParamX1(dateQuery);
         queryParam.put("tagNames", tagName);
         String result = httpUtil.get(url, queryParam);
-        Double val = 0.0;
+        Double total = 0.0;
         if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
@@ -245,14 +253,35 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                         for (int i = 0; i < arr.size(); i++) {
                             JSONObject jsonObject1 = arr.getJSONObject(i);
                             if (jsonObject1.getDouble("val") > 0) {
-                                val += jsonObject1.getDouble("val");
+                                String clock = jsonObject1.getString("clock");
+                                Double val = jsonObject1.getDouble("val");
+                                shiftTotal(clock,val);
+                                total += val;
                             }
                         }
                     }
                 }
             }
         }
-        return val;
+        return total;
+    }
+
+    private void shiftTotal(String clock, Double val){
+        Date tmp = DateUtil.strToDate(clock, DateUtil.fullFormat);
+        String date = DateUtil.getFormatDateTime(tmp, "yyyy-MM-dd 00:00:00");
+        String shiftNo = (tmp.getHours()<=10) ? "1" : "2";
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("date",date);
+        queryParam.put("shiftNo",shiftNo);
+        JSONArray data = getDataArray(getUrl5(), queryParam);
+        if (Objects.nonNull(data) && data.size() != 0) {
+            Integer teamNo = data.getJSONObject(0).getInteger("WORK_TEAM");
+            Double v= teamTotal.get(teamNo);
+            if(null != v){
+                val += v;
+            }
+            teamTotal.put(teamNo, val);
+        }
     }
 
     private List<CellData> handlerData(DateQuery dateQuery, Sheet sheet) {
@@ -282,7 +311,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
 
                         Map<String, String> map = getQueryParam(dateQuery);
                         map.put("tagNames", cellValue);
-                        JSONObject data = getTagValues(map);
+                        JSONObject data = getDataObject(getUrl(), map);
                         if(null != data){
                             JSONArray arr = data.getJSONArray(cellValue);
                             if (Objects.nonNull(arr) && arr.size() != 0) {
@@ -315,16 +344,35 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
     }
 
     /**
-     * 查询tag值
+     * 返回data
      * @param map
      * @return
      */
-    private JSONObject getTagValues(Map<String, String > map){
-        String result = httpUtil.get(getUrl(version), map);
+    private JSONObject getDataObject(String url, Map<String, String > map){
+        String result = httpUtil.get(url, map);
         if (StringUtils.isNotBlank(result)) {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
                 JSONObject data = jsonObject.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    return data;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 返回data
+     * @param map
+     * @return
+     */
+    private JSONArray getDataArray(String url, Map<String, String > map){
+        String result = httpUtil.get(url, map);
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray data = jsonObject.getJSONArray("data");
                 if (Objects.nonNull(data)) {
                     return data;
                 }
@@ -343,7 +391,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
             for (Map.Entry<String, String> kv : map.entrySet()) {
                 log.info("key:{},val:{}",kv.getKey(),kv.getValue());
             }
-            JSONObject data = getTagValues(map);
+            JSONObject data = getDataObject(getUrl(), map);
             if(null != data){
                 JSONArray arr = data.getJSONArray(tagName);
                 if (Objects.nonNull(arr) && arr.size() >1) {
@@ -390,7 +438,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         List<DateSegment> list = new ArrayList<>();
         Map<String, String> map = getQueryParamByShift();
         map.put("tagNames", tagName);
-        JSONObject data = getTagValues(map);
+        JSONObject data = getDataObject(getUrl(), map);
         if(null != data){
             JSONArray arr = data.getJSONArray(tagName);
             if (Objects.nonNull(arr) && arr.size() != 0) {
@@ -560,19 +608,24 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    private String getUrl(String version) {
+    private String getUrl() {
         return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
     private String getUrl2() {
         return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getCoalSiloName";
     }
-    private String getUrl3(String version) {
+
+    private String getUrl3() {
         return httpProperties.getJHUrlVersion(version) + "/manufacturingState/getTagValue";
     }
 
-    private String getUrl4(String version) {
+    private String getUrl4() {
         return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
+    }
+
+    private String getUrl5() {
+        return httpProperties.getJHUrlVersion(version) + "/getShiftTeamByDateAndNo";
     }
 
 }
