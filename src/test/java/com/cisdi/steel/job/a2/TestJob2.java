@@ -319,16 +319,6 @@ public class TestJob2 extends SteelApplicationTests {
         peimeiliangJob.execute(null);
     }
 
-    /**
-     * CK45配煤量月
-     */
-    @Autowired
-    private CK45PeimeiliangJob ck45PeimeiliangJob;
-
-    @Test
-    public void test277() {
-        ck45PeimeiliangJob.execute(null);
-    }
 
     /**
      * CK12配煤量月
@@ -339,6 +329,17 @@ public class TestJob2 extends SteelApplicationTests {
     @Test
     public void test2777() {
         ck12PeimeiliangJob.execute(null);
+    }
+
+    /**
+     * CK45配煤量月
+     */
+    @Autowired
+    private CK45PeimeiliangJob ck45PeimeiliangJob;
+
+    @Test
+    public void test277() {
+        ck45PeimeiliangJob.execute(null);
     }
 
     /**

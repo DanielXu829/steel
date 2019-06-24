@@ -393,7 +393,7 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam5(Date date) {
         Map<String, String> result = new HashMap<>();
-        String hh = DateUtil.getFormatDateTime(date, "hh");
+        String hh = DateUtil.getFormatDateTime(date, "HH");
         int hourNum = Integer.parseInt(hh);
         int shiftNo = 0;
         if (hourNum <= 11) {
