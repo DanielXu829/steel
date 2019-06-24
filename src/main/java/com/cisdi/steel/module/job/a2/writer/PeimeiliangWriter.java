@@ -234,9 +234,9 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
         String end = DateUtil.getFormatDateTime(DateQueryUtil.getMonthEndTime(dateQuery.getRecordDate()), "yyyy/MM/dd HH:mm:ss");
         result.put("startDate", start);
         result.put("endDate", end);
-        String name = "CK67_L1R_CB_CBReset_4_report";
+        String name = "CK67_L1R_CB_CBAmtTol_1m_evt";
         if ("45.0".equals(version)) {
-            name = "CK45_L1R_CB_CBReset_4_report";
+            name = "CK45_L1R_CB_CBAmtTol_evt";
         }
         result.put("tagName", name);
         return result;
@@ -246,9 +246,9 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
-        String name = "CK67_L1R_CB_CBReset_4_report";
+        String name = "CK67_L1R_CB_CBAmtTol_1m_evt";
         if ("45.0".equals(version)) {
-            name = "CK45_L1R_CB_CBReset_4_report";
+            name = "CK45_L1R_CB_CBAmtTol_evt";
         }
         result.put("tagName", name);
         return result;
