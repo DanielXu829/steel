@@ -161,6 +161,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     }
 
                     pdRunSegments = getDateSegment();
+                    teamTotal.clear();
 
                     // 班次
                     int rowIndex = 50;
