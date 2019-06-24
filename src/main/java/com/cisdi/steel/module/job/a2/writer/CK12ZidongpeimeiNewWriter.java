@@ -231,7 +231,9 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         int row = 19;
         for (int j = 0; j < strings.size(); j++) {
             String s = "coalSiloName" + (j + 1);
-            ExcelWriterUtil.addCellData(cellDataList, row, j, innerMap.get(s).toString());
+            if(innerMap.containsKey(s)){
+                ExcelWriterUtil.addCellData(cellDataList, row, j, innerMap.get(s).toString());
+            }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
     }

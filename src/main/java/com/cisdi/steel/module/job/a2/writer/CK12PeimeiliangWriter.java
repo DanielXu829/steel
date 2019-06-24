@@ -150,7 +150,9 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
                     Set<String> strings = innerMap.keySet();
                     for (int j = 0; j < strings.size(); j++) {
                         String s = "coalSiloName" + (j + 1);
-                        nameList.add(innerMap.get(s).toString());
+                        if(innerMap.containsKey(s)){
+                            nameList.add(innerMap.get(s).toString());
+                        }
                     }
                     String date1 = DateUtil.getFormatDateTime(DateUtil.strToDate(clock, DateUtil.fullFormat), "yyyy/MM/dd HH:mm:00");
                     for (int j = 0; j < nameList.size(); j++) {
