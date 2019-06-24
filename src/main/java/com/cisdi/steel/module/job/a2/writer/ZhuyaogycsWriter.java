@@ -163,12 +163,16 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         queryParam.put("brandcode", brandcode);
         queryParam.put("anaitemname", anaitemname);
         String code="JH67";
+        String source="6#-7#焦炉";
         if("12.0".equals(version)){
             code="JH12";
+            source="1#-2#焦炉";
         }else if("45.0".equals(version)){
             code="JH45";
+            source="4#-5#焦炉";
         }
         queryParam.put("unitCode",code);
+        queryParam.put("source",source);
         queryParam.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
