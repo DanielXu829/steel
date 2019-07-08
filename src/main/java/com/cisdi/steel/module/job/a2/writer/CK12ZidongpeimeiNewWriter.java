@@ -414,14 +414,14 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                         Date endDate = n>1 ? arr.getJSONObject(n-1).getDate("clock") : startDate;
                         log.info("CB:startDate:{},endDate:{}", DateUtil.getFormatDateTime(startDate,DateUtil.yyyyMMddHHmm), DateUtil.getFormatDateTime(endDate,DateUtil.yyyyMMddHHmm));
                         for (Date date : CBReset) {
-                            if(date.after(startDate)&&date.before(endDate)){
+                            if(date.after(startDate)&&date.before(endDate)){// 清零点在运行段之间
                                 int pos = getPosByDate(startDate,0, date);
-                                if(pos > arr.size()-1){
+                                if(pos > arr.size()-1){// 越界，说明步长不一致
                                     log.info("CB:{},pos:{},maxPos:{}", DateUtil.getFormatDateTime(date,DateUtil.yyyyMMddHHmm),pos,arr.size()-1);
                                     continue;
                                 }
                                 double tmp = arr.getJSONObject(pos).getDouble("val");
-                                if((tmp - end) > 0.01){
+                                if(Math.abs(tmp - end) > 0.01){
                                     log.info("CB:{},tmp:{}", DateUtil.getFormatDateTime(date,DateUtil.yyyyMMddHHmm),tmp);
                                     sum += tmp;
                                 }
