@@ -498,8 +498,11 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
             for (int i = 0; i < rows.size(); i++) {
                 JSONObject jsonObject1 = rows.getJSONObject(i);
                 String clock = jsonObject1.getString("clock");
-                list.add(DateUtil.strToDate(clock, DateUtil.yyyyMMddHHmm));
+                list.add(DateUtil.strToDate(clock, DateUtil.fullFormat, DateUtil.yyyyMMddHHmm));
             }
+        }
+        for (Date date : list) {
+            log.info("CBReset:{}",date);
         }
         return list;
     }

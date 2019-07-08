@@ -170,6 +170,19 @@ public class DateUtil {
     }
 
     /**
+     * 字符串转日期
+     *
+     * @param str     需要转换的字符串
+     * @param oldFormat 日期格式
+     * @param newFormat 日期格式
+     * @return 结果 null 表示格式错误 或者 正确的时间
+     */
+    public static Date strToDate(String str, String oldFormat, String newFormat) {
+        String s = strToStr(str, oldFormat, newFormat);
+        return (null == s) ? null : strToDate(s, newFormat);
+    }
+
+    /**
      * 得到指定时间的时间日期格式
      *
      * @param date   指定的时间
