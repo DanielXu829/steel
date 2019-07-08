@@ -492,8 +492,8 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
     private List<Date> getCBReset() {
         List<Date> list = new ArrayList<>();
         Map<String, String> map = getQueryParamByShift();
-        map.put("tagNames", "CK12_L1R_CB_CBReset_4_report");
-        JSONArray rows = getRowsObject(getUrl(), map);
+        map.put("tagName", "CK12_L1R_CB_CBReset_4_report");
+        JSONArray rows = getRowsObject(getUrl3(), map);
         if (null != rows) {
             for (int i = 0; i < rows.size(); i++) {
                 JSONObject jsonObject1 = rows.getJSONObject(i);
