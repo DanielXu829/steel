@@ -409,10 +409,10 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     double end2 = n>1 ? arr.getJSONObject(n-1).getDouble("val") : 0;
                     double end = Math.max(end1,end2);
                     sum += end-start;
-                    if(CBReset.size()>1){// 清零点超过1个，说明中途清零过
+                    if(CBReset.size()>0){// 清零点超过0个，说明中途清零过
                         Date startDate = arr.getJSONObject(0).getDate("clock");
                         Date endDate = n>1 ? arr.getJSONObject(n-1).getDate("clock") : startDate;
-                        log.info("startDate:{},endDate:{}", DateUtil.getFormatDateTime(startDate,DateUtil.yyyyMMddHHmm), DateUtil.getFormatDateTime(endDate,DateUtil.yyyyMMddHHmm));
+                        log.info("CB:startDate:{},endDate:{}", DateUtil.getFormatDateTime(startDate,DateUtil.yyyyMMddHHmm), DateUtil.getFormatDateTime(endDate,DateUtil.yyyyMMddHHmm));
                         for (Date date : CBReset) {
                             if(date.after(startDate)&&date.before(endDate)){
                                 int pos = getPosByDate(startDate,0, date);
@@ -421,8 +421,10 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                                     continue;
                                 }
                                 double tmp = arr.getJSONObject(pos).getDouble("val");
-                                log.info("CB:{},tmp:{}", DateUtil.getFormatDateTime(date,DateUtil.yyyyMMddHHmm),tmp);
-                                sum += tmp;
+                                if((tmp - end) > 0.01){
+                                    log.info("CB:{},tmp:{}", DateUtil.getFormatDateTime(date,DateUtil.yyyyMMddHHmm),tmp);
+                                    sum += tmp;
+                                }
                             }
                         }
                     }
@@ -495,7 +497,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         map.put("tagName", "CK12_L1R_CB_CBReset_4_report");
         JSONArray rows = getRowsObject(getUrl3(), map);
         if (null != rows) {
-            for (int i = 0; i < rows.size(); i++) {
+            for (int i = 0; i < rows.size()-1; i++) {// 默认升序，忽略最后一个清零点
                 JSONObject jsonObject1 = rows.getJSONObject(i);
                 String clock = jsonObject1.getString("clock");
                 list.add(DateUtil.strToDate(clock, DateUtil.fullFormat, DateUtil.yyyyMMddHHmm));
