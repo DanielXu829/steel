@@ -28,7 +28,6 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
 
     private static final String CBShiftRunTime = "CBShiftRunTime";
     private static final String CBShiftAmt = "CBShiftAmt";
-    private static final String CBAcTol = "CBAcTol";
     private static final int workStartTimeoffset = -60;
     private static final int workHours = 12;
     private Date shiftStart;
@@ -41,6 +40,8 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
     private static final Map<String, Integer> lz2pd = new HashMap<>();
     // 皮带的运行时段
     private Map<String, List<DateSegment>> pdRunSegments = new HashMap<>();
+    // 清零时刻
+    private List<Date> CBReset = null;
     // 甲乙丙班月累计
     private Map<Integer, Double> teamTotal = new HashMap<>();
 
@@ -90,28 +91,6 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         return (a & 1) == 1;
     }
 
-    private Double compareTagVal(String tagName, DateQuery dateQuery,String version) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("tagName", tagName);
-        String time = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy/MM/dd HH:mm:00");
-//        map.put("startDate", time);
-//        map.put("endDate", time);
-        String s = httpUtil.get(getUrl3(), map);
-        Double val = null;
-        if (StringUtils.isNotBlank(s)) {
-            JSONObject jsonObject = JSONObject.parseObject(s);
-            if (Objects.nonNull(jsonObject)) {
-                JSONArray rows = jsonObject.getJSONArray("rows");
-                if (Objects.nonNull(rows) && rows.size() > 0) {
-                    JSONObject tagValue = rows.getJSONObject(0);
-                    val = tagValue.getDouble("val");
-                }
-            }
-
-        }
-        return val;
-    }
-
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -135,8 +114,6 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
-                // 获取的对应的策略
-                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, recordDate);
                 String name = sheetSplit[1];
                 // 自动配煤
                 if ("auto".equals(name)) {
@@ -161,6 +138,7 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     }
 
                     pdRunSegments = getDateSegment();
+                    CBReset = getCBReset();
                     teamTotal.clear();
 
                     // 班次
@@ -366,6 +344,25 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 返回rows
+     * @param map
+     * @return
+     */
+    private JSONArray getRowsObject(String url, Map<String, String > map){
+        String result = httpUtil.get(url, map);
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.nonNull(jsonObject)) {
+                JSONArray rows = jsonObject.getJSONArray("rows");
+                if (Objects.nonNull(rows)) {
+                    return rows;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 返回data
      * @param map
      * @return
@@ -412,12 +409,34 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     double end2 = n>1 ? arr.getJSONObject(n-1).getDouble("val") : 0;
                     double end = Math.max(end1,end2);
                     sum += end-start;
+                    if(CBReset.size()>1){// 清零点超过1个，说明中途清零过
+                        Date startDate = arr.getJSONObject(0).getDate("clock");
+                        Date endDate = n>1 ? arr.getJSONObject(n-1).getDate("clock") : startDate;
+                        log.info("startDate:{},endDate:{}", DateUtil.getFormatDateTime(startDate,DateUtil.yyyyMMddHHmm), DateUtil.getFormatDateTime(endDate,DateUtil.yyyyMMddHHmm));
+                        for (Date date : CBReset) {
+                            if(date.after(startDate)&&date.before(endDate)){
+                                int pos = getPosByDate(startDate,0, date);
+                                if(pos > arr.size()-1){
+                                    log.info("CB:{},pos:{},maxPos:{}", DateUtil.getFormatDateTime(date,DateUtil.yyyyMMddHHmm),pos,arr.size()-1);
+                                    continue;
+                                }
+                                double tmp = arr.getJSONObject(pos).getDouble("val");
+                                log.info("CB:{},tmp:{}", DateUtil.getFormatDateTime(date,DateUtil.yyyyMMddHHmm),tmp);
+                                sum += tmp;
+                            }
+                        }
+                    }
                 }
             }
         }
         if(sum != 0){
             cellDataList.add(new CellData(row+1, col, sum));
         }
+    }
+
+    private Integer getPosByDate(Date startDate,int startPos, Date date){
+        int minutes = (int)(date.getTime()-startDate.getTime())/(1000*60);
+        return startPos+minutes;
     }
 
     /**
@@ -466,6 +485,21 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         log.info("tagName:{},size:{}",tagName,list.size());
         for (DateSegment dateSegment : list) {
             log.info("start:{},end:{}",dateSegment.getStartDate(),dateSegment.getEndDate());
+        }
+        return list;
+    }
+
+    private List<Date> getCBReset() {
+        List<Date> list = new ArrayList<>();
+        Map<String, String> map = getQueryParamByShift();
+        map.put("tagNames", "CK12_L1R_CB_CBReset_4_report");
+        JSONArray rows = getRowsObject(getUrl(), map);
+        if (null != rows) {
+            for (int i = 0; i < rows.size(); i++) {
+                JSONObject jsonObject1 = rows.getJSONObject(i);
+                String clock = jsonObject1.getString("clock");
+                list.add(DateUtil.strToDate(clock, DateUtil.yyyyMMddHHmm));
+            }
         }
         return list;
     }
