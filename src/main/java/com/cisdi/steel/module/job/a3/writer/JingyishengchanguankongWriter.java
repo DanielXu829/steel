@@ -29,6 +29,7 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 @Component
 public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
 
@@ -95,6 +96,9 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                     List<CellData> cellDataList = mapDataHandler(columns, item, index, version, flag, jk);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     index += rowBatch;
+                    if((jk == 1)&&(flag == 2)&&(item.getStartTime().getDate() == 1)){
+                        index++;
+                    }
                 }
             }
         }
@@ -113,7 +117,15 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
     protected List<CellData> mapDataHandler(List<String> columns, DateQuery dateQuery, int index, String version, int t, int jk) {
         String result = "";
         if (jk == 1) {
-            result = getTagValues(getUrl(version), dateQuery, columns);
+            if((t == 2)&&(dateQuery.getStartTime().getDate() == 1)){// 班次数据，增加上个月最后一班数据
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateQuery.getStartTime());
+                cal.add(Calendar.HOUR_OF_DAY,-8);//8小时
+                DateQuery tmp = new DateQuery(cal.getTime(),dateQuery.getEndTime(),dateQuery.getRecordDate());
+                result = getTagValues(getUrl(version), tmp, columns);
+            }else{
+                result = getTagValues(getUrl(version), dateQuery, columns);
+            }
             if (StringUtils.isBlank(result)) {
                 return null;
             }
@@ -280,6 +292,14 @@ public class JingyishengchanguankongWriter extends AbstractExcelReadWriter {
                     List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
                     if (t == 2) {
                         dayHourEach = DateQueryUtil.buildDay8HourEach(dateQuery.getRecordDate());
+                        if(dateQuery.getStartTime().getDate() == 1){// 班次数据，增加上个月最后一班数据
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(dateQuery.getStartTime());
+                            cal.add(Calendar.HOUR_OF_DAY,-8);//8小时
+                            Date beginTime = cal.getTime();
+                            Date endTime = dateQuery.getStartTime();
+                            dayHourEach.add(0,new DateQuery(beginTime, endTime, beginTime));
+                        }
                     }
                     for (int i = 0; i < dayHourEach.size(); i++) {
                         Object v = "";

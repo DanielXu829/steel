@@ -25,6 +25,7 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 @Component
 public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
 
@@ -159,9 +160,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     }
 
     protected Double mapDataHandlerx(String url, String brandcode, String anaitemname,DateQuery dateQuery,String version) {
-        Map<String, String> queryParam = new HashMap<>();
-        queryParam.put("brandcode", brandcode);
-        queryParam.put("anaitemname", anaitemname);
+        Double data = 0d;
         String code="JH67";
         String source="6#-7#焦炉";
         if("12.0".equals(version)){
@@ -171,25 +170,18 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             code="JH45";
             source="4#-5#焦炉";
         }
-        queryParam.put("unitCode",code);
-        queryParam.put("source",source);
-        queryParam.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
-        String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
-            return null;
-        }
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        Double data = jsonObject.getDouble("data");
         if ("48MM".equals(anaitemname)) {
             Map<String, String> queryParam1 = new HashMap<>();
             queryParam1.put("brandcode", brandcode);
             queryParam1.put("anaitemname", "LD40-60");
             queryParam1.put("unitCode",code);
+            queryParam1.put("source",source);
             queryParam1.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
             Map<String, String> queryParam2 = new HashMap<>();
             queryParam2.put("brandcode", brandcode);
             queryParam2.put("anaitemname", "LD60-80");
             queryParam2.put("unitCode",code);
+            queryParam2.put("source",source);
             queryParam2.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
             String result1 = httpUtil.get(url, queryParam1);
             String result2 = httpUtil.get(url, queryParam2);
@@ -199,6 +191,19 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             JSONObject jsonObject1 = JSONObject.parseObject(result1);
             JSONObject jsonObject2 = JSONObject.parseObject(result2);
             data = jsonObject1.getDouble("data") + jsonObject2.getDouble("data");
+        } else {
+            Map<String, String> queryParam = new HashMap<>();
+            queryParam.put("brandcode", brandcode);
+            queryParam.put("anaitemname", anaitemname);
+            queryParam.put("unitCode",code);
+            queryParam.put("source",source);
+            queryParam.put("time", DateUtil.getFormatDateTime(dateQuery.getRecordDate(),"yyyy/MM/dd hh:mm:ss"));
+            String result = httpUtil.get(url, queryParam);
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            data = jsonObject.getDouble("data");
         }
         return data;
     }

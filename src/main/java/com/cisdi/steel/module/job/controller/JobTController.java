@@ -128,6 +128,7 @@ public class JobTController {
             if (StringUtils.isBlank(code)) {
                 writer.write(JSONObject.toJSONString(ApiUtil.fail("编码不能为空")));
             }
+            Thread.sleep(50*1000);// 延迟50s执行
             String path = exportJobContext.execute(code);
             if (StringUtils.isNotBlank(path)) {
                 FileUtils.downFile(new File(path), request, response, FileUtil.getFileName(path));
