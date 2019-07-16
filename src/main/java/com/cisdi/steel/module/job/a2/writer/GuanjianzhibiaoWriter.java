@@ -28,6 +28,7 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 @Component
 public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
     @Override
@@ -190,7 +191,7 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         Double kAn = 0.0;
         for (int i = 0; i < coke.length; i++) {
             String cokeNo = coke[i];
-            Map<String, String> queryParam = getQueryParam4(dateQuery, 1+"", cokeNo);
+            Map<String, String> queryParam = getQueryParam4(dateQuery, 3+"", cokeNo);
             String result = httpUtil.get(url, queryParam);
             if (StringUtils.isNotBlank(result)) {
                 JSONObject jsonObject = JSONObject.parseObject(result);
