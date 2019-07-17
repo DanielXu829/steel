@@ -31,6 +31,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
 
     private List<String> columns = new ArrayList<>();
