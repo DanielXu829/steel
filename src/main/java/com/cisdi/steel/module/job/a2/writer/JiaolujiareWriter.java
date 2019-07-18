@@ -27,6 +27,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class JiaolujiareWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -120,6 +121,14 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }else if("2.0".equals(jhNo)){
             Date date=DateUtil.addMinute(dateQuery.getRecordDate(),10);
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
+            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
+        }else if("4.0".equals(jhNo)){
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-20);
+            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
+            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
+        }else if("5.0".equals(jhNo)){
+            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-5);
             result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-5),"yyyy/MM/dd HH:mm:ss"));
             result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
         }

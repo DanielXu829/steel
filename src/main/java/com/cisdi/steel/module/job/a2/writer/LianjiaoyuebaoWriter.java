@@ -30,6 +30,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -124,7 +125,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                             }else if("45.0".equals(version)){
                                 jhno = "CO4";
                             }
-                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
+                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno, version);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
                         }
@@ -144,7 +145,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                             }else if("45.0".equals(version)){
                                 jhno = "CO5";
                             }
-                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno);
+                            List<CellData> cellDataList = this.mapDataHandler4x(getUrl6(version), startRow, dateQueries1.get(k), jhno, version);
                             ExcelWriterUtil.setCellValue(sheet, cellDataList);
                             startRow++;
                         }
@@ -336,7 +337,7 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
         return handlerJsonArray(columns, rowBatch, objects, startRow);
     }
 
-    public List<CellData> mapDataHandler4x(String url, int startRow, DateQuery dateQuery, String jhno) {
+    public List<CellData> mapDataHandler4x(String url, int startRow, DateQuery dateQuery, String jhno, String version) {
         Map<String, String> queryParam = getQueryParam6(dateQuery, jhno);
         String result = httpUtil.get(url, queryParam);
         List<Double> list = new ArrayList<>();
@@ -357,9 +358,9 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                     JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
                     if (Objects.nonNull(obj)) {
                         daykAvg = obj.getDouble("dayKAvg");
-                        k1 = obj.getDouble("k1");
-                        k2 = obj.getDouble("k2");
-                        k3 = obj.getDouble("k3");
+//                        k1 = obj.getDouble("k1");
+//                        k2 = obj.getDouble("k2");
+//                        k3 = obj.getDouble("k3");
                         daykAn = obj.getDouble("dayKan");
                         shiftkAvg = obj.getDouble("shiftKAvg");
                         shiftkAn = obj.getDouble("shiftKan");
@@ -368,6 +369,23 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                 }
             }
         }
+
+        // k1、k2、k3从宝信的表中采集
+        String tmpUrl = getUrl4(version);
+        queryParam.remove("cokeNo");
+        String tmpResult = httpUtil.get(tmpUrl, queryParam);
+        if (StringUtils.isNotBlank(tmpResult)) {
+            JSONArray arr = JSONObject.parseArray(tmpResult);
+            if (Objects.nonNull(arr) && arr.size() > 0) {
+                JSONObject obj = arr.getJSONObject(0);
+                if (Objects.nonNull(obj)) {
+                    k1 = obj.getDouble("k1");
+                    k2 = obj.getDouble("k2");
+                    k3 = obj.getDouble("k3");
+                }
+            }
+        }
+
         list.add(shiftkAn);
         list.add(daykAn);
         list.add(shiftkAvg);

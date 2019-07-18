@@ -223,7 +223,8 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
             String shift = shifts[i];
             // k1、k2、k3从宝信的表中采集
             String tmpUrl = getUrl5(version);
-            Map<String, String> tmpQueryParam = getQueryParam3(dateQuery, shift);
+            Map<String, String> tmpQueryParam = getQueryParam4(dateQuery, shift, null);
+            tmpQueryParam.remove("cokeNo");
             String tmpResult = httpUtil.get(tmpUrl, tmpQueryParam);
             if (StringUtils.isNotBlank(tmpResult)) {
                 JSONArray arr = JSONObject.parseArray(tmpResult);
@@ -280,15 +281,6 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         result.put("start", DateUtil.getFormatDateTime(DateUtil.addHours(dateQuery.getStartTime(), -8), "yyyy/MM/dd HH:mm:ss"));
         result.put("end", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("type", "avg");
-        return result;
-    }
-
-
-    protected Map<String, String> getQueryParam3(DateQuery dateQuery, String shift) {
-        Map<String, String> result = new HashMap<>();
-        Date date = DateUtil.addDays(dateQuery.getRecordDate(), -1);
-        result.put("date", DateUtil.getFormatDateTime(date, "yyyy/MM/dd 00:00:00"));
-        result.put("shift", shift);
         return result;
     }
 
