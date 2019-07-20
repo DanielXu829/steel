@@ -257,11 +257,12 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
         JSONArray data = getDataArray(getUrl5(), queryParam);
         if (Objects.nonNull(data) && data.size() != 0) {
             Integer teamNo = data.getJSONObject(0).getInteger("WORK_TEAM");
-            Double v= teamTotal.get(teamNo);
-            if(null != v){
-                val += v;
+            Double v = teamTotal.get(teamNo);
+            if(null == v){
+                v = 0.0;
             }
-            teamTotal.put(teamNo, val);
+            v += val;
+            teamTotal.put(teamNo, v);
         }
     }
 
