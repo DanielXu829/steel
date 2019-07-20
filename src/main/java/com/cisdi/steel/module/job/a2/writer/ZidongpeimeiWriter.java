@@ -59,6 +59,12 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date.getRecordDate());
+        cal.add(Calendar.MINUTE, -1);
+        date.setRecordDate(cal.getTime());
+
         String[] tagNamesIf = {"CK67_L1R_CB_CBAmtTol_1m_max", "CK67_L1R_CB_CBAcTol_1m_avg"};
         Double max = compareTagVal(tagNamesIf[0], date);
         Double avg = compareTagVal(tagNamesIf[1], date);
