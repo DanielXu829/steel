@@ -391,12 +391,18 @@ public class ZidongpeimeiWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected Map<String, String> getQueryParam5(Date tmp) {
+    protected Map<String, String> getQueryParam5(Date date) {
         Map<String, String> result = new HashMap<>();
-        String date = DateUtil.getFormatDateTime(tmp, "yyyy-MM-dd 00:00:00");
-        String shiftNo = (tmp.getHours()<=10) ? "1" : "2";
-        result.put("date", date);
-        result.put("shiftNo", shiftNo);
+        String hh = DateUtil.getFormatDateTime(date, "HH");
+        int hourNum = Integer.parseInt(hh);
+        int shiftNo = 0;
+        if (hourNum <= 11) {
+            shiftNo = 1;
+        } else {
+            shiftNo = 2;
+        }
+        result.put("date", DateUtil.getFormatDateTime(DateUtil.getDateBeginTime(date), DateUtil.fullFormat));
+        result.put("shiftNo", shiftNo + "");
         return result;
     }
 
