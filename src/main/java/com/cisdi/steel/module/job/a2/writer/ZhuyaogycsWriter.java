@@ -460,6 +460,13 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> mapDataHandler6(String url, List<String> columns, Date start, Date end, int rowBatch, String version) {
         String[] coke = {"CO6", "CO7"};
+        if("12.0".equals(version)){
+            coke[0]="CO1";
+            coke[1]="CO2";
+        }else if("45.0".equals(version)){
+            coke[0]="CO4";
+            coke[1]="CO5";
+        }
         String shift = "3";
         Map<String, Object> innerMap = new HashMap<>();
         for (int i = 0; i < coke.length; i++) {
