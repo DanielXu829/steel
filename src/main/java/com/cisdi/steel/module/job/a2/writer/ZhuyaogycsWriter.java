@@ -488,7 +488,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
             if (Objects.isNull(dayTemperatureStatistics)) {
                 return null;
             }
-            if("CO6".equals(cokeNo)){
+            if("CO6".equals(cokeNo) || "CO4".equals(cokeNo) || "CO1".equals(cokeNo)){
                 innerMap.put("no1FurnaceKAvg",dayTemperatureStatistics.getDouble("dayKAvg"));
                 innerMap.put("no1FurnaceKAn",dayTemperatureStatistics.getDouble("dayKan"));
             }else {
