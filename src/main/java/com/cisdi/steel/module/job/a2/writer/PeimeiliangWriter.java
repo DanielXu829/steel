@@ -32,6 +32,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class PeimeiliangWriter extends AbstractExcelReadWriter {
 
     private List<String> columns = new ArrayList<>();
@@ -58,7 +59,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 DateQuery dateQuery = dateQueries.get(0);
                 if (this.columns.size() == 0) {
-                    Set<String> strings = mapDataHandler(getUrl2(version), dateQuery, version);
+                    ArrayList<String> strings = mapDataHandler(getUrl2(version), dateQuery, version);
                     columns = new ArrayList<>(strings);
                 }
                 if ("name".equals(sheetSplit[1])) {
@@ -93,7 +94,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
     }
 
 
-    protected Set<String> mapDataHandler(String url, DateQuery dateQuery, String version) {
+    protected ArrayList<String> mapDataHandler(String url, DateQuery dateQuery, String version) {
         Map<String, String> queryParam = getQueryParam1(dateQuery, version);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -104,7 +105,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(rows)) {
             return null;
         }
-        HashSet<String> meiName = new HashSet<>();
+        ArrayList<String> meiName = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             JSONObject jsonObject1 = rows.getJSONObject(i);
             String clock = jsonObject1.getString("clock");
@@ -118,7 +119,12 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                     Map<String, Object> innerMap = data.getInnerMap();
                     Set<String> strings = innerMap.keySet();
                     for (String key : strings) {
-                        meiName.add(innerMap.get(key).toString());
+                        String val = innerMap.get(key).toString();
+                        if (StringUtils.isNotBlank(val)) {
+                            if(!meiName.contains(val)){
+                                meiName.add(val);
+                            }
+                        }
                     }
                 }
             }

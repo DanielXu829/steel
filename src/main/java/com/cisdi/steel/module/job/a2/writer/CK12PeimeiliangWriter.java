@@ -53,7 +53,7 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 DateQuery dateQuery = dateQueries.get(0);
                 if (this.columns.size() == 0) {
-                    Set<String> strings = mapDataHandler(getUrl2(), dateQuery);
+                    ArrayList<String> strings = mapDataHandler(getUrl2(), dateQuery);
                     columns = new ArrayList<>(strings);
                 }
                 if ("name".equals(sheetSplit[1])) {
@@ -88,7 +88,7 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
     }
 
 
-    protected Set<String> mapDataHandler(String url, DateQuery dateQuery) {
+    protected ArrayList<String> mapDataHandler(String url, DateQuery dateQuery) {
         Map<String, String> queryParam = getQueryParam1(dateQuery);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
@@ -99,7 +99,7 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
         if (Objects.isNull(rows)) {
             return null;
         }
-        HashSet<String> meiName = new HashSet<>();
+        ArrayList<String> meiName = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             JSONObject jsonObject1 = rows.getJSONObject(i);
             String clock = jsonObject1.getString("clock");
@@ -115,7 +115,9 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
                     for (String key : strings) {
                         String val = innerMap.get(key).toString();
                         if (StringUtils.isNotBlank(val)) {
-                            meiName.add(val);
+                            if(!meiName.contains(val)){
+                                meiName.add(val);
+                            }
                         }
                     }
                 }
@@ -235,7 +237,7 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", start);
         result.put("endDate", end);
-        result.put("tagName", "CK12_L1R_CB_CBReset_4_report");
+        result.put("tagName", "CK12_L1R_CB_CBAmtTol1_evt");
         return result;
     }
 
@@ -243,7 +245,7 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
         Map<String, String> result = new HashMap<>();
         result.put("startDate", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endDate", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
-        result.put("tagName", "CK12_L1R_CB_CBReset_4_report");
+        result.put("tagName", "CK12_L1R_CB_CBAmtTol1_evt");
         return result;
     }
 
