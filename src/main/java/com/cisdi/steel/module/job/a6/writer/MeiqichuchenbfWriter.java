@@ -29,6 +29,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -49,7 +50,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 if ("tag".equals(sheetSplit[1])) {
                     for (int rowNum = 0; rowNum < size; rowNum++) {
                         DateQuery dateQuery = dateQueries.get(rowNum);
-                        List<CellData> cellValInfoList = eachData(columns, getUrl(version), dateQuery);
+                        List<CellData> cellValInfoList = eachData(columns, getUrl(version), dateQuery, rowNum);
                         ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
                     }
                 } else if ("maxmin".equals(sheetSplit[1])) {
@@ -109,47 +110,35 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
         return handlerJsonArray(columns, rowBatch, r, startRow);
     }
 
-    private List<CellData> eachData(List<String> columns, String url,DateQuery dateQuery) {
+    private List<CellData> eachData(List<String> columns, String url,DateQuery dateQuery,int rowNum) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("starttime", dateQuery.getStartTime());
-        jsonObject.put("endtime", dateQuery.getEndTime());
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateQuery.getStartTime());
+        cal.add(Calendar.SECOND, -30);
+        jsonObject.put("starttime", cal.getTime());
+        cal.add(Calendar.SECOND, 60);
+        jsonObject.put("endtime", cal.getTime());
         jsonObject.put("tagnames", columns);
 
         String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
         JSONObject obj = JSONObject.parseObject(result);
         obj = obj.getJSONObject("data");
         List<CellData> resultList = new ArrayList<>();
+        int rowIndex = rowNum + 1;
         for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
-            int indexs = 1;
             String cell = columns.get(columnIndex);
             if (StringUtils.isNotBlank(cell)) {
                 JSONObject data = obj.getJSONObject(cell);
-                List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
-                for (int i = 0; i < dayHourEach.size(); i++) {
-                    Object v = "";
-                    if (Objects.nonNull(data)) {
-                        Map<String, Object> innerMap = data.getInnerMap();
-                        Set<String> keySet = innerMap.keySet();
-                        Long[] list = new Long[keySet.size()];
-                        int k = 0;
-                        for (String key : keySet) {
-                            list[k] = Long.valueOf(key);
-                            k++;
-                        }
-                        Arrays.sort(list);
-                        Date startTime = dayHourEach.get(i).getStartTime();
-
-                        for (int j = 0; j < list.length; j++) {
-                            Long tempTime = list[j];
-                            String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
-                            Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
-                            if (date.getTime() == startTime.getTime()) {
-                                v = data.get(tempTime + "");
-                                break;
-                            }
-                        }
+                String v = "";
+                if (Objects.nonNull(data)) {
+                    Map<String, Object> innerMap = data.getInnerMap();
+                    Set<String> keySet = innerMap.keySet();
+                    for (String key : keySet) {
+                        v = innerMap.get(key).toString();
+                        ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, v);
+                        break;
                     }
-                    ExcelWriterUtil.addCellData(resultList, indexs++, columnIndex, v);
                 }
             }
         }
