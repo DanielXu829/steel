@@ -118,7 +118,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                     for (int j = 1; j < 8; j++) {
                         Date start = DateUtil.addDays(dateBeginTime, j - 8);
                         Date end = DateUtil.addDays(dateBeginTime, j - 7);
-                        List<CellData> cellDataList = this.mapDataHandler6(getUrl8(version), columns, start, end, rowNum);
+                        List<CellData> cellDataList = this.mapDataHandler6(getUrl8(version), columns, start, end, rowNum, version);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                         rowNum++;
                     }
@@ -458,25 +458,37 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
-    protected List<CellData> mapDataHandler6(String url, List<String> columns, Date start, Date end, int rowBatch) {
-        Map<String, String> queryParam = getQueryParam8(start, end);
-        String result = httpUtil.get(url, queryParam);
-        if (StringUtils.isBlank(result)) {
-            return null;
+    protected List<CellData> mapDataHandler6(String url, List<String> columns, Date start, Date end, int rowBatch, String version) {
+        String[] coke = {"CO6", "CO7"};
+        String shift = "3";
+        Map<String, Object> innerMap = new HashMap<>();
+        for (int i = 0; i < coke.length; i++) {
+            String cokeNo = coke[i];
+            Map<String, String> queryParam = getQueryParam11(start, shift, cokeNo);
+            String result = httpUtil.get(url, queryParam);
+            if (StringUtils.isBlank(result)) {
+                return null;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONObject data = jsonObject.getJSONObject("data");
+            if (Objects.isNull(data)) {
+                return null;
+            }
+            JSONObject dayTemperatureStatistics = data.getJSONObject("DayTemperatureStatistics");
+            if (Objects.isNull(dayTemperatureStatistics)) {
+                return null;
+            }
+            if("CO6".equals(cokeNo)){
+                innerMap.put("no1FurnaceKAvg",dayTemperatureStatistics.getDouble("dayKAvg"));
+                innerMap.put("no1FurnaceKAn",dayTemperatureStatistics.getDouble("dayKan"));
+            }else {
+                innerMap.put("no2FurnaceKAvg",dayTemperatureStatistics.getDouble("dayKAvg"));
+                innerMap.put("no2FurnaceKAn",dayTemperatureStatistics.getDouble("dayKan"));
+            }
         }
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        if (Objects.isNull(jsonObject)) {
-            return null;
-        }
-        JSONObject data = jsonObject.getJSONObject("data");
-        if (Objects.isNull(data)) {
-            return null;
-        }
-        JSONObject yesterdayAvg = data.getJSONObject("yesterdayAvg");
-        if (Objects.isNull(yesterdayAvg)) {
-            return null;
-        }
-        Map<String, Object> innerMap = yesterdayAvg.getInnerMap();
         innerMap.put("date", DateUtil.getFormatDateTime(start, "yyyy/MM/dd"));
         List<CellData> cellData = ExcelWriterUtil.handlerRowData(columns, rowBatch, innerMap);
         return cellData;
@@ -702,6 +714,14 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam11(Date date, String shift, String cokeNo) {
+        Map<String, String> result = new HashMap<>();
+        result.put("date", DateUtil.getFormatDateTime(date, "yyyy/MM/dd 00:00:00"));
+        result.put("shift", shift);
+        result.put("cokeNo", cokeNo);
+        return result;
+    }
+
     protected Map<String, String> getQueryParamX(DateQuery dateQuery,int shiftNum) {
         Map<String, String> result = new HashMap<>();
         Date startTime = dateQuery.getStartTime();
@@ -758,7 +778,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
     }
 
     private String getUrl8(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/cokeActualPerformance/getKlineStatistics";
+        return httpProperties.getJHUrlVersion(version) + "/dayTemperatureStatistics/selectByDateAndShift";
     }
 
     protected String getUrl10(String version) {
