@@ -196,8 +196,8 @@ public class GongyiLuruExecute extends AbstractJobExecuteExecute {
                     JSONObject jsonObject = importantParameters.getJSONObject(i);
                     if (Objects.nonNull(jsonObject)) {
                         Object importantParaName = jsonObject.get("importantParaName");
-                        Object min = jsonObject.get("min");
-                        Object max = jsonObject.get("max");
+                        Object min = jsonObject.get("textMin");
+                        Object max = jsonObject.get("textMax");
                         Object actionVolume = jsonObject.get("actionVolume");
 
                         ExcelWriterUtil.addCellData(cellDataList, (i + 4), 0, importantParaName);
