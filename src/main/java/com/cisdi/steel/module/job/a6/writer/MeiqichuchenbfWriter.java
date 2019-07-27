@@ -48,10 +48,18 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
                 if ("tag".equals(sheetSplit[1])) {
-                    for (int rowNum = 0; rowNum < size; rowNum++) {
-                        DateQuery dateQuery = dateQueries.get(rowNum);
-                        List<CellData> cellValInfoList = eachData(columns, getUrl(version), dateQuery, rowNum);
-                        ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
+                    if("all".equals(sheetSplit[3])){
+                        for (int rowNum = 0; rowNum < size; rowNum++) {
+                            DateQuery dateQuery = dateQueries.get(rowNum);
+                            List<CellData> cellValInfoList = eachData(columns, getUrl(version), dateQuery);
+                            ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
+                        }
+                    }else if("hour".equals(sheetSplit[3])){
+                        for (int rowNum = 0; rowNum < size; rowNum++) {
+                            DateQuery dateQuery = dateQueries.get(rowNum);
+                            List<CellData> cellValInfoList = eachData(columns, getUrl(version), dateQuery, rowNum);
+                            ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
+                        }
                     }
                 } else if ("maxmin".equals(sheetSplit[1])) {
                     int index = 1;
@@ -108,6 +116,53 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
         }
         int startRow = 1;
         return handlerJsonArray(columns, rowBatch, r, startRow);
+    }
+
+    private List<CellData> eachData(List<String> columns, String url,DateQuery dateQuery) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("starttime", dateQuery.getStartTime());
+        jsonObject.put("endtime", dateQuery.getEndTime());
+        jsonObject.put("tagnames", columns);
+
+        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+        JSONObject obj = JSONObject.parseObject(result);
+        obj = obj.getJSONObject("data");
+        List<CellData> resultList = new ArrayList<>();
+        for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+            int indexs = 1;
+            String cell = columns.get(columnIndex);
+            if (StringUtils.isNotBlank(cell)) {
+                JSONObject data = obj.getJSONObject(cell);
+                List<DateQuery> dayHourEach = DateQueryUtil.buildDayHourEach(dateQuery.getRecordDate());
+                for (int i = 0; i < dayHourEach.size(); i++) {
+                    Object v = "";
+                    if (Objects.nonNull(data)) {
+                        Map<String, Object> innerMap = data.getInnerMap();
+                        Set<String> keySet = innerMap.keySet();
+                        Long[] list = new Long[keySet.size()];
+                        int k = 0;
+                        for (String key : keySet) {
+                            list[k] = Long.valueOf(key);
+                            k++;
+                        }
+                        Arrays.sort(list);
+                        Date startTime = dayHourEach.get(i).getStartTime();
+
+                        for (int j = 0; j < list.length; j++) {
+                            Long tempTime = list[j];
+                            String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                            Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                            if (date.getTime() == startTime.getTime()) {
+                                v = data.get(tempTime + "");
+                                break;
+                            }
+                        }
+                    }
+                    ExcelWriterUtil.addCellData(resultList, indexs++, columnIndex, v);
+                }
+            }
+        }
+        return resultList;
     }
 
     private List<CellData> eachData(List<String> columns, String url,DateQuery dateQuery,int rowNum) {
