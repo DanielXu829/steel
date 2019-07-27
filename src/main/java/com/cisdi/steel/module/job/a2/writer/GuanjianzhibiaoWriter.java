@@ -221,22 +221,22 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         }
         for (int i = 0; i <shifts.length ; i++) {
             String shift = shifts[i];
-            // k1、k2、k3从宝信的表中采集
-            String tmpUrl = getUrl5(version);
-            Map<String, String> tmpQueryParam = getQueryParam4(dateQuery, shift, null);
-            tmpQueryParam.remove("cokeNo");
-            String tmpResult = httpUtil.get(tmpUrl, tmpQueryParam);
-            if (StringUtils.isNotBlank(tmpResult)) {
-                JSONArray arr = JSONObject.parseArray(tmpResult);
-                if (Objects.nonNull(arr) && arr.size() > 0) {
-                    JSONObject obj = arr.getJSONObject(0);
-                    if (Objects.nonNull(obj)) {
-                        k1 += obj.getDouble("k1");
-                        k2 += obj.getDouble("k2");
-                        k3 += obj.getDouble("k3");
-                    }
-                }
-            }
+//            // k1、k2、k3从宝信的表中采集
+//            String tmpUrl = getUrl5(version);
+//            Map<String, String> tmpQueryParam = getQueryParam4(dateQuery, shift, null);
+//            tmpQueryParam.remove("cokeNo");
+//            String tmpResult = httpUtil.get(tmpUrl, tmpQueryParam);
+//            if (StringUtils.isNotBlank(tmpResult)) {
+//                JSONArray arr = JSONObject.parseArray(tmpResult);
+//                if (Objects.nonNull(arr) && arr.size() > 0) {
+//                    JSONObject obj = arr.getJSONObject(0);
+//                    if (Objects.nonNull(obj)) {
+//                        k1 += obj.getDouble("k1");
+//                        k2 += obj.getDouble("k2");
+//                        k3 += obj.getDouble("k3");
+//                    }
+//                }
+//            }
 
             Map<String, String> queryParam = getQueryParam4(dateQuery, shift, jhNo);
             String result = httpUtil.get(url, queryParam);
@@ -247,9 +247,9 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                     if (Objects.nonNull(data)) {
                         JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
                         if (Objects.nonNull(obj)) {
-//                            k2 += obj.getDouble("k2");
-//                            k1 += obj.getDouble("k1");
-//                            k3 += obj.getDouble("k3");
+                            k2 += obj.getDouble("k2");
+                            k1 += obj.getDouble("k1");
+                            k3 += obj.getDouble("k3");
                             km += obj.getDouble("kM");
                         }
                     }

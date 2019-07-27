@@ -358,9 +358,9 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
                     JSONObject obj = data.getJSONObject("DayTemperatureStatistics");
                     if (Objects.nonNull(obj)) {
                         daykAvg = obj.getDouble("dayKAvg");
-//                        k1 = obj.getDouble("k1");
-//                        k2 = obj.getDouble("k2");
-//                        k3 = obj.getDouble("k3");
+                        k1 = obj.getDouble("k1");
+                        k2 = obj.getDouble("k2");
+                        k3 = obj.getDouble("k3");
                         daykAn = obj.getDouble("dayKan");
                         shiftkAvg = obj.getDouble("shiftKAvg");
                         shiftkAn = obj.getDouble("shiftKan");
@@ -370,21 +370,21 @@ public class LianjiaoyuebaoWriter extends AbstractExcelReadWriter {
             }
         }
 
-        // k1、k2、k3从宝信的表中采集
-        String tmpUrl = getUrl4(version);
-        queryParam.remove("cokeNo");
-        String tmpResult = httpUtil.get(tmpUrl, queryParam);
-        if (StringUtils.isNotBlank(tmpResult)) {
-            JSONArray arr = JSONObject.parseArray(tmpResult);
-            if (Objects.nonNull(arr) && arr.size() > 0) {
-                JSONObject obj = arr.getJSONObject(0);
-                if (Objects.nonNull(obj)) {
-                    k1 = obj.getDouble("k1");
-                    k2 = obj.getDouble("k2");
-                    k3 = obj.getDouble("k3");
-                }
-            }
-        }
+//        // k1、k2、k3从宝信的表中采集
+//        String tmpUrl = getUrl4(version);
+//        queryParam.remove("cokeNo");
+//        String tmpResult = httpUtil.get(tmpUrl, queryParam);
+//        if (StringUtils.isNotBlank(tmpResult)) {
+//            JSONArray arr = JSONObject.parseArray(tmpResult);
+//            if (Objects.nonNull(arr) && arr.size() > 0) {
+//                JSONObject obj = arr.getJSONObject(0);
+//                if (Objects.nonNull(obj)) {
+//                    k1 = obj.getDouble("k1");
+//                    k2 = obj.getDouble("k2");
+//                    k3 = obj.getDouble("k3");
+//                }
+//            }
+//        }
 
         list.add(shiftkAn);
         list.add(daykAn);

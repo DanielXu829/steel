@@ -194,22 +194,22 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
         Double km = 0.0;
         Double kAvg = 0.0;
         Double kAn = 0.0;
-        // k1、k2、k3从宝信的表中采集
-        String tmpUrl = getUrl4(version);
-        Map<String, String> tmpQueryParam = getQueryParam4(dateQuery, shift, null);
-        tmpQueryParam.remove("cokeNo");
-        String tmpResult = httpUtil.get(tmpUrl, tmpQueryParam);
-        if (StringUtils.isNotBlank(tmpResult)) {
-            JSONArray arr = JSONObject.parseArray(tmpResult);
-            if (Objects.nonNull(arr) && arr.size() > 0) {
-                JSONObject obj = arr.getJSONObject(0);
-                if (Objects.nonNull(obj)) {
-                    k1 = obj.getDouble("k1");
-                    k2 = obj.getDouble("k2");
-                    k3 = obj.getDouble("k3");
-                }
-            }
-        }
+//        // k1、k2、k3从宝信的表中采集
+//        String tmpUrl = getUrl4(version);
+//        Map<String, String> tmpQueryParam = getQueryParam4(dateQuery, shift, null);
+//        tmpQueryParam.remove("cokeNo");
+//        String tmpResult = httpUtil.get(tmpUrl, tmpQueryParam);
+//        if (StringUtils.isNotBlank(tmpResult)) {
+//            JSONArray arr = JSONObject.parseArray(tmpResult);
+//            if (Objects.nonNull(arr) && arr.size() > 0) {
+//                JSONObject obj = arr.getJSONObject(0);
+//                if (Objects.nonNull(obj)) {
+//                    k1 = obj.getDouble("k1");
+//                    k2 = obj.getDouble("k2");
+//                    k3 = obj.getDouble("k3");
+//                }
+//            }
+//        }
         for (int i = 0; i < coke.length; i++) {
             String cokeNo = coke[i];
             Map<String, String> queryParam = getQueryParam4(dateQuery, shift, cokeNo);
@@ -236,9 +236,9 @@ public class ZhibiaoguankongWriter extends AbstractExcelReadWriter {
                                 }
                             }
                             if (jhNo.equals(cokeNo)) {
-//                                k2 = obj.getDouble("k2");
-//                                k1 = obj.getDouble("k1");
-//                                k3 = obj.getDouble("k3");
+                                k2 = obj.getDouble("k2");
+                                k1 = obj.getDouble("k1");
+                                k3 = obj.getDouble("k3");
                                 km = obj.getDouble("kM");
                             }
                         }
