@@ -34,6 +34,7 @@ import java.util.List;
 
 @Component
 @Slf4j
+@SuppressWarnings("ALL")
 public class ShaoJieMain2 {
 
     @Autowired
@@ -188,14 +189,13 @@ public class ShaoJieMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
-
+        String[] yLabels = {"",""};
 
         int[] stack = {1};
         int[] ystack = {1};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 1, 300, 600, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg1", image1);

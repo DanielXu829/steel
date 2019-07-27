@@ -38,6 +38,7 @@ import java.util.Vector;
  * @author chenchangwen
  * @since:2014-2-18
  */
+@SuppressWarnings("ALL")
 public class ChartUtils {
     private static String NO_DATA_MSG = "数据加载失败";
     private static Font FONT = new Font("宋体", Font.PLAIN, 12);
@@ -183,7 +184,7 @@ public class ChartUtils {
     public static void setLineRender(CategoryPlot plot,
                                      boolean isShowDataLabels, boolean isShapesVisible, CategoryLabelPositions positions,
                                      double rangIndex, double rangEnd, double rangIndex2, double rangEnd2, double rangIndex3, double rangEnd3, int y2,
-                                     DefaultCategoryDataset dataset2, DefaultCategoryDataset dataset3, DefaultCategoryDataset dataset4, DefaultCategoryDataset dataset5, int stack[], int[] ystack) {
+                                     DefaultCategoryDataset dataset2,String[] yLabels, DefaultCategoryDataset dataset3, DefaultCategoryDataset dataset4, DefaultCategoryDataset dataset5, int stack[], int[] ystack) {
         CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
         categoryaxis.setCategoryLabelPositions(positions);
         categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
@@ -249,6 +250,7 @@ public class ChartUtils {
             axis2.setLabelPaint(Color.BLUE);
             axis2.setTickLabelPaint(Color.BLUE);
             axis2.setRange(rangIndex2, rangEnd2);
+            axis2.setLabel(yLabels[1]);
             if (ystack[0] == 1 && ystack[1] == 1) {
                 axis2.setVisible(false);
             }
@@ -296,6 +298,7 @@ public class ChartUtils {
             axis3.setLabelPaint(Color.BLUE);
             axis3.setTickLabelPaint(Color.BLUE);
             axis3.setRange(rangIndex3, rangEnd3);
+            axis3.setLabel(yLabels[2]);
             if (ystack[0] == 1 && ystack[1] == 1) {
                 axis3.setVisible(true);
             } else {

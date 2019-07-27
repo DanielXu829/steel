@@ -45,13 +45,13 @@ public class ChartFactory {
      *
      * @param title             折线图的标题
      * @param categoryAxisLabel x轴标题
-     * @param valueAxisLabel    y轴标题
+     * @param yLabels    y轴标题
      * @param series            数据
      * @param categories        类别
      * @return
      */
     public static JFreeChart createLineChart(String title,
-                                             String categoryAxisLabel, String valueAxisLabel,
+                                             String categoryAxisLabel, String[] yLabels,
                                              List<Vector<Serie>> series, Object[] categories, CategoryLabelPositions positions, boolean show,
                                              double rangIndex, double rangEnd, double rangIndex2, double rangEnd2, double rangIndex3, double rangEnd3, int y2, int[] stack, int[] ystack) {
         // 1：创建数据集合
@@ -63,38 +63,22 @@ public class ChartFactory {
         DefaultCategoryDataset dataset5 = null;
 
 
-        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, valueAxisLabel, dataset);
+        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, yLabels[0], dataset);
         if (stack[0] == 2) {
-            chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, valueAxisLabel, dataset);
+            chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, yLabels[0], dataset);
         }
 
-        if (y2 == 2) {
-            dataset2 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(1), categories);
-        } else if (y2 == 3) {
-            dataset2 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(1), categories);
-            dataset3 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(2), categories);
-        } else if (y2 == 4) {
-            dataset2 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(1), categories);
-            dataset3 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(2), categories);
-
-            dataset4 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(3), categories);
-        } else if (y2 == 5) {
-            dataset2 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(1), categories);
-            dataset3 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(2), categories);
-
-            dataset4 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(3), categories);
-
-            dataset5 = ChartUtils
-                    .createDefaultCategoryDataset(series.get(4), categories);
+        if (y2 >= 2) {
+            dataset2 = ChartUtils.createDefaultCategoryDataset(series.get(1), categories);
+        }
+        if (y2 >= 3) {
+            dataset3 = ChartUtils.createDefaultCategoryDataset(series.get(2), categories);
+        }
+        if (y2 >= 4) {
+            dataset4 = ChartUtils.createDefaultCategoryDataset(series.get(3), categories);
+        }
+        if (y2 >= 5) {
+            dataset5 = ChartUtils.createDefaultCategoryDataset(series.get(4), categories);
         }
 
         LegendTitle legend = chart.getLegend(); // 设置图例的字体
@@ -117,7 +101,7 @@ public class ChartFactory {
                 chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.white);
             }
         }
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, dataset3, dataset4, dataset5, stack, ystack);//
+        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, yLabels, dataset3, dataset4, dataset5, stack, ystack);//
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
         ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染

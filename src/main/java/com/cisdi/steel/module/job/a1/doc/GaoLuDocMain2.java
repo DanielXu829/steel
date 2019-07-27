@@ -32,6 +32,7 @@ import java.util.List;
 
 @Component
 @Slf4j
+@SuppressWarnings("ALL")
 public class GaoLuDocMain2 {
 
     @Autowired
@@ -82,7 +83,7 @@ public class GaoLuDocMain2 {
 //        dealPart8(version, L8);
         dealPart9(version, L9);
         dealPart10(version, L10);
-        dealPart11(version, L11);
+        dealPart11(version, L11);// 已完成
         dealPart12(version, L12);
         dealPart13(version, L13);
 
@@ -670,7 +671,7 @@ public class GaoLuDocMain2 {
         return data;
     }
 
-    private void dealPart1(String version, String[] tagNames) {
+    private void  dealPart1(String version, String[] tagNames) {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects3 = doubles.get(1).toArray();
@@ -704,15 +705,15 @@ public class GaoLuDocMain2 {
         vectors.add(series3);
 
         String title1 = "";
-        String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String categoryAxisLabel1 = "";
+        String[] yLabels = {"产量(t)","燃料比(kg/t)"};
 
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 300, 600, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg1", image1);
@@ -767,13 +768,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"焦比(kg/t)","煤比(kg/t)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 300, 600, tagNames.length - 1, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg2", image1);
@@ -828,13 +829,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"A烧结矿(%)","P球团(%)","B块矿(%)"};
 
         int[] stack = {1, 1, 1};
         int[] ystack = {1, 2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, min3, max3, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg3", image1);
@@ -881,13 +882,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"M40","M10"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg4", image1);
@@ -936,13 +937,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"CSR","CRI"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
@@ -987,19 +988,19 @@ public class GaoLuDocMain2 {
         vectors.add(series1);
         vectors.add(series2);
 
-        result.put("part12", getLastVal(objects1));
-        result.put("part13", getLastVal(objects2));
+        result.put("part12", getLastDoubleVal(objects1));
+        result.put("part13", getLastDoubleVal(objects2));
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"Ad(%)","S(%)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 0.122, 0.1295, 0.00738, 0.00741, 10, 15, tagNames.length, stack, ystack);
+                categoryAxisLabel1, yLabels, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg6", image1);
     }
@@ -1036,14 +1037,14 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"TFe(%)","FeO(%)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 55.8, 56.8, 8.0, 8.6, 0, 1, tagNames.length, stack, ystack);
+                categoryAxisLabel1, yLabels, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg7", image1);
     }
@@ -1099,13 +1100,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"风量(m3/min)","风压(kpa)","压差(kpa)"};
 
         int[] stack = {1, 1, 2};
         int[] ystack = {1, 2, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 5000, 6000, 100, 450, 100, 450, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg8", image1);
@@ -1143,18 +1144,18 @@ public class GaoLuDocMain2 {
         vectors.add(series1);
         vectors.add(series2);
 
-        result.put("part18", getLastVal(objects1));
-        result.put("part19", getLastVal(objects2));
+        result.put("part18", getLastDoubleVal(objects1));
+        result.put("part19", getLastDoubleVal(objects2));
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"Ad(%)","S(%)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg9", image1);
@@ -1196,13 +1197,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"风量(m3/min)","氧量(m3/h)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 300, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg10", image1);
@@ -1213,7 +1214,7 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         int xc = 1;
-        if (!"7.0".equals(version)) {
+        if ("8.0".equals(version)) {
             xc = 1000;
         }
         objects1 = dealData(objects1, xc);
@@ -1248,13 +1249,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"风压(kpa)","顶压(kpa)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg11", image1);
@@ -1296,13 +1297,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 1000, 5000, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg12", image1);
@@ -1344,13 +1345,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg13", image1);
@@ -1392,13 +1393,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg14", image1);
@@ -1441,13 +1442,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg15", image1);
@@ -1490,13 +1491,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg16", image1);
@@ -1543,13 +1544,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg16", image1);
@@ -1662,13 +1663,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1};
         int[] ystack = {1};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 100, 0, 1, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg18", image1);
@@ -1712,13 +1713,13 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String valueAxisLabel1 = null;
+        String[] yLabels = {"",""};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, valueAxisLabel1, vectors,
+                categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 1, 2, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg17", image1);
@@ -1835,6 +1836,19 @@ public class GaoLuDocMain2 {
         if (Objects.nonNull(o)) {
             Double v = (Double) o;
             v1 = v.intValue();
+        }
+        return v1;
+    }
+
+    private Object getLastDoubleVal(Object[] objects1) {
+        if (Objects.isNull(objects1) || objects1.length == 0) {
+            return null;
+        }
+        Object o = objects1[objects1.length - 2];
+        Object v1 = 0.0;
+        if (Objects.nonNull(o)) {
+            Double v = (Double) o;
+            v1 = v.doubleValue();
         }
         return v1;
     }
