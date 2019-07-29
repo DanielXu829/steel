@@ -139,7 +139,7 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
                         row.getCell(0).setCellType(CellType.STRING);
 
                         String time1 = DateUtil.getFormatDateTime(DateUtil.addMinute(startTime, j), "yyyy/MM/dd HH:mm:ss");
-                        Double cellDataList = this.mapDataHandler8(getUrl3(version), time1);
+                        Double cellDataList = this.mapDataHandler8(getUrl3(version), time1,version);
                         setSheetValue(sheet, j + 1, 1, cellDataList);
                     }
                 }
@@ -600,9 +600,15 @@ public class ZhuyaogycsWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    protected Double mapDataHandler8(String url, String time) {
+    protected Double mapDataHandler8(String url, String time, String version) {
         Map<String, String> queryParam = getQueryParam2(time);
-        queryParam.put("tagName", "CK67_L1R_CDQ_ARA_31101BHH2O_1m_avg");
+        if ("12.0".equals(version)) {
+            queryParam.put("tagName", "CK12_L1R_CDQ_AT20101B_U_1m_avg");
+        } else if ("67.0".equals(version)) {
+            queryParam.put("tagName", "CK67_L1R_CDQ_ARA_31101BHH2O_1m_avg");
+        }else if ("45.0".equals(version)) {
+            queryParam.put("tagName", "CK45_L1R_CDQ_AT10101B_U_1m_avg");
+        }
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
