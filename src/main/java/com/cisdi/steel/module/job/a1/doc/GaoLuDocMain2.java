@@ -83,15 +83,15 @@ public class GaoLuDocMain2 {
 //        dealPart8(version, L8);
         dealPart9(version, L9);
         dealPart10(version, L10);
-        dealPart11(version, L11);// 已完成
+        dealPart11(version, L11);
         dealPart12(version, L12);
         dealPart13(version, L13);
 
         if ("6.0".equals(version) || "7.0".equals(version)) {
             dealPart16_2(version, L16);
         } else if ("8.0".equals(version)) {
-            dealPart14(version, L14);
-            dealPart15(version, L15);
+//            dealPart14(version, L14);
+//            dealPart15(version, L15);
             dealPart16(version, L16);
         }
         dealPart17(version, L17);
@@ -1266,7 +1266,7 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
-        objects1 = dealData(objects1, 100);
+//        objects1 = dealData(objects1, 100);
         /**
          * W
          * Z
@@ -1284,8 +1284,8 @@ public class GaoLuDocMain2 {
         vectors.add(series1);
         vectors.add(series2);
 
-        result.put("part24", getLastVal(objects1));
-        result.put("part25", getLastVal(objects2));
+        result.put("part24", getLastDoubleVal(objects1));
+        result.put("part25", getLastDoubleVal(objects2));
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
@@ -1297,7 +1297,7 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
+        String[] yLabels = {"W","Z"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
@@ -1345,7 +1345,7 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
+        String[] yLabels = {"CCT1(℃)","W4(℃)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
@@ -1491,7 +1491,7 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
+        String[] yLabels = {"总热负荷(MJ*10/h)","煤气利用率(%)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
@@ -1544,7 +1544,7 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
+        String[] yLabels = {"总热负荷(MJ*10/h)","煤气利用率(%)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
@@ -1663,7 +1663,7 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
+        String[] yLabels = {"PT(℃)",""};
 
         int[] stack = {1};
         int[] ystack = {1};
@@ -1707,13 +1707,13 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.1;
         Double min2 = data2.get(1) * 0.9;
 
-        result.put("part34", getLastVal(objects1));
-        result.put("part35", getLastVal(objects2));
+        result.put("part34", getLastDoubleVal(objects1));
+        result.put("part35", getLastDoubleVal(objects2));
 
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
+        String[] yLabels = {"Si(%)","S(%)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
