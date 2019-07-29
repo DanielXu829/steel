@@ -147,7 +147,9 @@ public class MeiQiDanHaoWriter extends AbstractExcelReadWriter {
                                             JSONObject data1 = obj.getJSONObject("data");
                                             if (Objects.nonNull(data1)) {
                                                 Double currentYield = data1.getDouble("currentYield");
-                                                danhao = danhao.add(new BigDecimal(val).multiply(new BigDecimal(num)).divide(new BigDecimal(currentYield), 6, BigDecimal.ROUND_HALF_UP));
+                                                if(null != currentYield){
+                                                    danhao = danhao.add(new BigDecimal(val).multiply(new BigDecimal(num)).divide(new BigDecimal(currentYield), 6, BigDecimal.ROUND_HALF_UP));
+                                                }
                                             }
                                         }
                                     }
@@ -298,7 +300,7 @@ public class MeiQiDanHaoWriter extends AbstractExcelReadWriter {
     }
 
     protected String getUrl1(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getYieldByDate";
+        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getYieldByDateNew";
     }
 
     protected String getUrl2(String version) {
