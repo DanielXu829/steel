@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
+import com.cisdi.steel.module.job.dto.CellData;
+import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,22 +16,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 管控指标
- * <p>Description:         </p>
- * <p>email: ypasdf@163.com</p>
- * <p>Copyright: Copyright (c) 2018</p>
- * <P>Date: 2018/11/12 </P>
- *
- * @author leaf
- * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class GuankongzhibiaoWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -36,62 +30,94 @@ public class GuankongzhibiaoWriter extends AbstractExcelReadWriter {
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
-        String url = httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
+        String url = httpProperties.getGlUrlVersion(version) + "/indicators/overview/"+date.getRecordDate().getTime();
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
             String sheetName = sheet.getSheetName();
-            String[] sheetSplit = sheetName.split("_");
-            if (sheetSplit.length == 4) {
-                // 获取的对应的策略
-                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                List<String> columns = PoiCustomUtil.getFirstColumnCellVal(sheet);
-                DateQuery item = dateQueries.get(0);
-                for (int j = 0; j < columns.size(); j++) {
-                    if (StringUtils.isNotBlank(columns.get(j))) {
-                        Double cellDataList = mapDataHandler(url, columns.get(j), item);
-                        setSheetValue(sheet, j, 1, cellDataList);
-                    }
-                }
+            if (sheetName.contains("管控指标")) {
+                handlerFileData(workbook,sheet,url);
             }
         }
         return workbook;
     }
 
-    protected void setSheetValue(Sheet sheet, Integer rowNum, Integer columnNum, Object obj) {
-        Row row = sheet.getRow(rowNum);
-        if (Objects.isNull(row)) {
-            row = sheet.createRow(rowNum);
-        }
-        Cell cell = row.getCell(columnNum);
-        if (Objects.isNull(cell)) {
-            cell = row.createCell(columnNum);
-        }
-        PoiCustomUtil.setCellValue(cell, obj);
-    }
+    private void handlerFileData(Workbook workbook, Sheet sheet, String url) {
+        List<CellData> cellDataList = new ArrayList<>();
 
-    protected Double mapDataHandler(String url, String tagName, DateQuery dateQuery) {
-        Map<String, String> queryParam = getQueryParam(dateQuery);
-        queryParam.put("tagname", tagName);
-        String result = httpUtil.get(url, queryParam);
-        BigDecimal val = BigDecimal.ZERO;
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject jsonObject = JSONObject.parseObject(result);
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject data = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(data)) {
-                    val = data.getBigDecimal("val");
+        String s = httpUtil.get(url, null);
+        if (StringUtils.isBlank(s)) {
+            return;
+        }
+        JSONObject object = JSONObject.parseObject(s);
+        JSONObject data = object.getJSONObject("data");
+
+        if (Objects.nonNull(data)) {
+            Map<String, Object> innerMap = data.getInnerMap();
+            Set<String> keySet = innerMap.keySet();
+            Integer[] list = new Integer[keySet.size()];
+            int i = 0;
+            for (String key : keySet) {
+                list[i++] = Integer.valueOf(key);
+            }
+            Arrays.sort(list);
+            String ptTarget = "";
+            String siTarget = "";
+            int row = 2;
+            for (Integer key : list) {
+                if(key > 900){
+                    continue;
+                }
+                JSONObject tmp = data.getJSONObject(key+"");
+                if (Objects.nonNull(tmp)) {
+                    //项目
+                    String item = tmp.getString("item");
+                    //目标
+                    String target = tmp.getString("target");
+
+                    switch (item){
+                        case "铁水PT(℃)":
+                            ptTarget = target;
+                            break;
+                        case "铁水PT命中率":
+                            item = item + "(" + ptTarget + ")";
+                            break;
+                        case "铁水Si目标值":
+                            siTarget = target;
+                            break;
+                        case "铁水Si小于目标值":
+                            String[] siTargets = siTarget.split("-");
+                            item = item + "(" + siTargets[0] + ")";
+                            break;
+                        case "铁水Si命中率":
+                            item = item + "(" + siTarget + ")";
+                            break;
+                    }
+
+                    //昨日实际
+                    Object day = tmp.get("day");
+                    //昨日对比目标
+                    Object dayDevi = tmp.get("dayDevi");
+                    //本月累计
+                    Object month = tmp.get("month");
+                    //本月对比目标
+                    Object monthDevi = tmp.get("monthDevi");
+
+                    ExcelWriterUtil.addCellData(cellDataList, row, 1, item);
+                    ExcelWriterUtil.addCellData(cellDataList, row, 2, target);
+                    ExcelWriterUtil.addCellData(cellDataList, row, 3, day);
+                    ExcelWriterUtil.addCellData(cellDataList, row, 4, dayDevi);
+                    ExcelWriterUtil.addCellData(cellDataList, row, 5, month);
+                    ExcelWriterUtil.addCellData(cellDataList, row, 6, monthDevi);
+                    row++;
                 }
             }
         }
-        return val.doubleValue();
-    }
 
-    @Override
-    protected Map<String, String> getQueryParam(DateQuery dateQuery) {
-        Map<String, String> result = new HashMap<>();
-        result.put("time", dateQuery.getRecordDate().getTime() + "");
-        return result;
+        SheetRowCellData.builder()
+                .cellDataList(cellDataList)
+                .sheet(sheet)
+                .workbook(workbook)
+                .build().allValueWriteExcel();
     }
-
 }
