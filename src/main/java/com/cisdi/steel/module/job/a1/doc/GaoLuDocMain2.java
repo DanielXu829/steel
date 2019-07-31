@@ -10,14 +10,19 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,6 +31,7 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
@@ -47,9 +53,150 @@ public class GaoLuDocMain2 {
     @Autowired
     private ReportIndexMapper reportIndexMapper;
 
-    private String version6 = "6.0";
-    private String version7 = "7.0";
-    private String version8 = "8.0";
+    private static String version6 = "6.0";
+    private static String version7 = "7.0";
+    private static String version8 = "8.0";
+
+    private static Map<String,Map<String,Map<String,String>>> TAG_NAMES = new HashMap<>();
+    private static String MUBIAO = "mubiao";
+    private static String ZHONGDIAN = "zhongdian";
+    private static String ZHATIE = "zhatie";
+    private static String CAOYEZHUNQUELV = "caoyezhunquelv";
+
+    static{
+        char[] sanjiaoP = {916,80};
+        char[] co = {951,67,79};
+        String sjPStr = new String(sanjiaoP);
+        String coStr = new String(co);
+
+
+        // 8高炉
+        Map<String,Map<String,String>> tg8 = new HashMap<>();
+        Map<String,String> mubiao8 = new HashMap<>();
+        mubiao8.put("班料批","BF8_L2C_BT_ChargeCount_8h");
+        mubiao8.put("湿度","BF8_L2C_BD_BH_1d_avg");
+        mubiao8.put("BV","BF8_L2C_BD_HotBlastFlow_1d_avg");
+        mubiao8.put("BP","BF8_L2C_BD_ColdBlastPress_1d_avg");
+        mubiao8.put(sjPStr,"BF8_L2C_BD_Pressdiff_1d_avg");
+        mubiao8.put("TP","BF8_L2C_BD_TopPress_1d_avg");
+        mubiao8.put("PT","BF8_L2C_HMTemp_1d_avg");
+        mubiao8.put("FR","BF8_L2M_BX_FuelRate_1d_cur");
+        tg8.put(MUBIAO,mubiao8);
+
+        Map<String,String> zhongdian8 = new HashMap<>();
+        zhongdian8.put("透气性","BF8_L2C_BD_K_1d_avg");
+        zhongdian8.put("Q值","BF8_L2C_BD_WT6_Q_1d_avg");
+        zhongdian8.put("CCT2","BF8_L2C_BD_CCT_1d_avg");
+        zhongdian8.put("W4","BF8_L2M_PCT_1d_avg");
+        zhongdian8.put("料速","BF8_L2M_ChargeRate_1d_avg");
+        zhongdian8.put("铁口深度","BF8_L2C_CH_TapDepth");
+        zhongdian8.put("PT","BF8_L2C_HMTemp_1d_avg");
+        zhongdian8.put(sjPStr,"BF8_L2C_BD_Pressdiff_1d_avg");
+        zhongdian8.put(coStr,"BF8_L2C_TP_GasUtilization_1d_avg");
+        tg8.put(ZHONGDIAN,zhongdian8);
+
+        Map<String,String> zhatie8 = new HashMap<>();
+        zhatie8.put("铁口深度","BF8_L2C_CH_TapDepth");
+        zhatie8.put("见渣率","BF8_L2C_CH_SlagPercent");
+        zhatie8.put("铁水温度","BF8_L2C_HMTemp_1d_avg");
+        zhatie8.put("铁水Si","BF8_L2C_AnalysisSiValue_1d_avg");
+        zhatie8.put("铁水S","BF8_L2C_AnalysisSValue_1d_avg");
+        zhatie8.put("炉渣碱度","BF8_L2C_AnalysisRValue_1d_avg");
+        tg8.put(ZHATIE,zhatie8);
+
+        Map<String,String> caoye8 = new HashMap<>();
+        caoye8.put("产量","BF8_L2M_BX_HM_confirmWgt_evt");
+        caoye8.put("燃料比","BF8_L2M_BX_FuelRate_1d_cur");
+        caoye8.put("煤气利用率","BF8_L2C_TP_GasUtilization_1d_avg");
+        caoye8.put("压差","BF8_L2C_BD_Pressdiff_1d_avg");
+        tg8.put(CAOYEZHUNQUELV,caoye8);
+
+        // 7高炉
+        Map<String,Map<String,String>> tg7 = new HashMap<>();
+        Map<String,String> mubiao7 = new HashMap<>();
+        mubiao7.put("班料批","BF7_L2C_BT_ChargeCount_8h");
+        mubiao7.put("湿度","BF7_L2C_BD_BH_1d_avg");
+        mubiao7.put("BV","BF7_L2C_BD_ColdBlastFlow_1d_avg");
+        mubiao7.put("BP","BF7_L2C_BD_ColdWindPress2_1d_avg");
+        mubiao7.put(sjPStr,"BF7_L2M_PressDiff_1d_avg");
+        mubiao7.put("TP","BF7_L2C_TP_TopPress_1d_avg");
+        mubiao7.put("PT","BF7_L2M_HMTemp_1d_avg");
+        mubiao7.put("FR","BF7_L2M_BX_FuelRate_1d_cur");
+        tg7.put(MUBIAO,mubiao7);
+
+        Map<String,String> zhongdian7 = new HashMap<>();
+        zhongdian7.put("透气性","BF7_L2C_BD_K_1d_avg");
+        zhongdian7.put("Q值","BF7_L2C_BD_WT6_Q_1d_avg");
+        zhongdian7.put("CCT2","BF7_L2C_BD_CCTCenterTemp_1d_avg");
+        zhongdian7.put("W4","BF7_L2M_PCT_1d_avg");
+        zhongdian7.put("料速","BF7_L2M_ChargeRate_1d_avg");
+        zhongdian7.put("铁口深度","BF7_L2C_CH_TapDepth");
+        zhongdian7.put("PT","BF7_L2M_HMTemp_1d_avg");
+        zhongdian7.put(sjPStr,"BF7_L2M_PressDiff_1d_avg");
+        zhongdian7.put(coStr,"BF7_L2M_GasUtilization_1d_avg");
+        tg7.put(ZHONGDIAN,zhongdian7);
+
+        Map<String,String> zhatie7 = new HashMap<>();
+        zhatie7.put("铁口深度","BF7_L2C_CH_TapDepth");
+        zhatie7.put("见渣率","BF8_L2C_CH_SlagPercent");
+        zhatie7.put("铁水温度","BF7_L2M_HMTemp_1d_avg");
+        zhatie7.put("铁水Si","BF7_L2C_AnalysisSiValue_1d_avg");
+        zhatie7.put("铁水S","BF7_L2C_AnalysisSValue_1d_avg");
+        zhatie7.put("炉渣碱度","BF7_L2C_AnalysisRValue_1d_avg");
+        tg7.put(ZHATIE,zhatie7);
+
+        Map<String,String> caoye7 = new HashMap<>();
+        caoye7.put("产量","BF7_L2M_BX_HM_confirmWgt_evt");
+        caoye7.put("燃料比","BF7_L2M_BX_FuelRate_1d_cur");
+        caoye7.put("煤气利用率","BF7_L2M_GasUtilization_1d_avg");
+        caoye7.put("压差","BF7_L2M_PressDiff_1d_avg");
+        tg7.put(CAOYEZHUNQUELV,caoye7);
+
+        // 6高炉
+        Map<String,Map<String,String>> tg6 = new HashMap<>();
+        Map<String,String> mubiao6 = new HashMap<>();
+        mubiao6.put("班料批","BF6_L2C_BT_ChargeCount_8h");
+        mubiao6.put("湿度","BF6_L2C_BD_BH_1d_avg");
+        mubiao6.put("BV","BF6_L2C_BD_ActBlastFlow_1d_avg");
+        mubiao6.put("BP","BF6_L2C_BD_ColdBlastPress_1d_avg");
+        mubiao6.put(sjPStr,"BF6_L2C_BD_Pressdiff_1d_avg");
+        mubiao6.put("TP","BF6_L2C_BD_MaxTopPress_1d_avg");
+        mubiao6.put("PT","BF6_L2C_HMTemp_1d_avg");
+        mubiao6.put("FR","BF6_L2M_BX_FuelRate_1d_cur");
+        tg6.put(MUBIAO,mubiao6);
+
+        Map<String,String> zhongdian6 = new HashMap<>();
+        zhongdian6.put("透气性","BF6_L2C_BD_K_1d_avg");
+        zhongdian6.put("Q值","BF6_L2C_BD_WT6_Q_1d_avg");
+        zhongdian6.put("CCT2","BF6_L2M_CCT_1d_avg");
+        zhongdian6.put("W4","BF6_L2M_PCT_1d_avg");
+        zhongdian6.put("料速","BF6_L2M_ChargeRate_1d_avg");
+        zhongdian6.put("铁口深度","BF6_L2C_CH_TapDepth");
+        zhongdian6.put("PT","BF6_L2C_HMTemp_1d_avg");
+        zhongdian6.put(sjPStr,"BF6_L2C_BD_Pressdiff_1d_avg");
+        zhongdian6.put(coStr,"BF6_L2C_BD_GasUtilization_1d_avg");
+        tg6.put(ZHONGDIAN,zhongdian6);
+
+        Map<String,String> zhatie6 = new HashMap<>();
+        zhatie6.put("铁口深度","BF6_L2C_CH_TapDepth");
+        zhatie6.put("见渣率","BF6_L2C_CH_SlagPercent");
+        zhatie6.put("铁水温度","BF6_L2C_HMTemp_1d_avg");
+        zhatie6.put("铁水Si","BF6_L2C_AnalysisSiValue_1d_avg");
+        zhatie6.put("铁水S","BF6_L2C_AnalysisSValue_1d_avg");
+        zhatie6.put("炉渣碱度","BF6_L2C_AnalysisRValue_1d_avg");
+        tg6.put(ZHATIE,zhatie6);
+
+        Map<String,String> caoye6 = new HashMap<>();
+        caoye6.put("产量","BF6_L2M_BX_HM_confirmWgt_evt");
+        caoye6.put("燃料比","BF6_L2M_BX_FuelRate_1d_cur");
+        caoye6.put("煤气利用率","BF6_L2C_BD_GasUtilization_1d_avg");
+        caoye6.put("压差","BF6_L2C_BD_Pressdiff_1d_avg");
+        tg6.put(CAOYEZHUNQUELV,caoye6);
+
+        TAG_NAMES.put(version8,tg8);
+        TAG_NAMES.put(version7,tg7);
+        TAG_NAMES.put(version6,tg6);
+    }
 
     @Scheduled(cron = "0 31 6 * * ?")
     public void mainTask() {
@@ -79,8 +226,6 @@ public class GaoLuDocMain2 {
         dealPart5(version, L5);
         dealPart6(version, L6);
         dealPart7(version, L7);
-//
-//        dealPart8(version, L8);
         dealPart9(version, L9);
         dealPart10(version, L10);
         dealPart11(version, L11);
@@ -90,15 +235,17 @@ public class GaoLuDocMain2 {
         if ("6.0".equals(version) || "7.0".equals(version)) {
             dealPart16_2(version, L16);
         } else if ("8.0".equals(version)) {
-//            dealPart14(version, L14);
-//            dealPart15(version, L15);
             dealPart16(version, L16);
         }
-        dealPart17(version, L17);
         dealPart18(version, L18);
         dealPart19(version, L19);
 
         dealPart20(version);
+        dealCaoZuoFangZhen(version);
+        dealZhaTie(version);
+        dealCaoYeZhunQueLv(version);
+        dealTodayCaoZuoFangZhen(version);
+
         comm(version, jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + name + "高炉操业会议纪要（实施版）.docx");
     }
 
@@ -252,7 +399,6 @@ public class GaoLuDocMain2 {
     List<String> dateList = new ArrayList<>();
 
     private List<List<Double>> part1(String version, String[] tagNames, int scale) {
-
         categoriesList.clear();
         dateList.clear();
 
@@ -263,13 +409,11 @@ public class GaoLuDocMain2 {
 
         List<List<Double>> doubles = new ArrayList<>();
 
-
         while (beginDate.before(date1)) {
             categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
             dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
             beginDate = DateUtil.addDays(beginDate, 1);
         }
-
 
         JSONObject jsonObject = dataHttp(tagNames, start, date, version);
         if (Objects.nonNull(jsonObject)) {
@@ -307,9 +451,7 @@ public class GaoLuDocMain2 {
                 doubles.add(a);
             }
         }
-
         return doubles;
-
     }
 
     private List<List<Double>> part2(String version, String[] tagNames) {
@@ -318,11 +460,9 @@ public class GaoLuDocMain2 {
         Date dateBeginTime = DateUtil.getDateBeginTime(date);
         Date dateEndTime = DateUtil.getDateEndTime(date);
 
-
         List<List<Double>> doubles = new ArrayList<>();
 
         JSONObject jsonObject = dataHttp(tagNames, dateBeginTime, dateEndTime, version);
-
 
         for (String tagName : tagNames) {
             List<Double> a = new ArrayList<>();
@@ -357,9 +497,28 @@ public class GaoLuDocMain2 {
                 doubles.add(a);
             }
         }
-
         return doubles;
+    }
 
+    private Map<String, Double> partTagValueLatest(String version, String className) {
+        Date date = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,30);
+        cal.set(Calendar.SECOND,0);
+        date = cal.getTime();
+
+        Map<String,String> tagNames = TAG_NAMES.get(version).get(className);
+        Map<String, Double> vals = new HashMap<>();
+        for (Map.Entry<String, String> kv : tagNames.entrySet()) {
+            JSONObject jsonObject = dataHttp(kv.getValue(), date, version);
+            if (Objects.nonNull(jsonObject)) {
+                Double val = jsonObject.getDouble("val");
+                vals.put(kv.getKey(), val);
+            }
+        }
+        return vals;
     }
 
     private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
@@ -372,7 +531,6 @@ public class GaoLuDocMain2 {
         Date start = beginDate;
 
         List<List<Double>> doubles = new ArrayList<>();
-
 
         while (beginDate.before(date1)) {
             categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
@@ -521,13 +679,10 @@ public class GaoLuDocMain2 {
             }
             result.add(rd);
         }
-
         return result;
-
     }
 
     private List<Map<String, Object>> part4(String version) {
-
         Date date = new Date();
         Date beginDate = DateUtil.addDays(date, -1);
 
@@ -551,71 +706,204 @@ public class GaoLuDocMain2 {
                     k++;
                 }
                 Arrays.sort(list);
-
-
                 for (int i = 0; i < list.length; i++) {
                     Map<String, Object> cAngle = new HashMap<>();
                     Map<String, Object> cRound = new HashMap<>();
                     Map<String, Object> oAngle = new HashMap<>();
                     Map<String, Object> oRound = new HashMap<>();
 
-                    int index = 1;
-                    int useCIndex = 1;
-                    int useOIndex = 1;
+                    String formatDateTime = DateUtil.getFormatDateTime(new Date(list[i]), "yyyy-MM-dd HH:mm");
+                    cAngle.put("a0", formatDateTime);
+                    cRound.put("a0", "");
+                    oAngle.put("a0", "");
+                    oRound.put("a0", "");
+                    cAngle.put("type", "C");
+                    cRound.put("type", "C");
+                    oAngle.put("type", "O");
+                    oRound.put("type", "O");
 
+                    BuLiaoDTO[] cTmp = new BuLiaoDTO[11];
+                    BuLiaoDTO[] oTmp = new BuLiaoDTO[11];
                     JSONArray jsonArray = (JSONArray) innerMap.get(list[i] + "");
                     for (int j = 0; j < jsonArray.size(); j++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(j);
+
+                        int seq = jsonObject.getIntValue("seq");
                         String typ = jsonObject.getString("typ");
                         String angle = jsonObject.getString("angle");
                         String round = jsonObject.getString("round");
-                        String formatDateTime = DateUtil.getFormatDateTime(new Date(list[i]), "yyyy-MM-dd HH:mm");
-
-                        if (!"0.0".equals(angle) && !"0.0".equals(round)) {
-                            if ("C".equals(typ)) {
-                                if (index % 4 == 0) {
-                                    cAngle.put("a0", formatDateTime);
-                                }
-                                cAngle.put("a" + useCIndex, angle);
-                                cRound.put("a" + useCIndex, round);
-                                cAngle.put("type", typ);
-                                cRound.put("a0", "");
-                                cRound.put("type", typ);
-                                useCIndex++;
-                            } else if ("O".equals(typ)) {
-                                oAngle.put("a" + useOIndex, angle);
-                                oRound.put("a" + useOIndex, round);
-                                oAngle.put("a0", "");
-                                oAngle.put("type", typ);
-                                oRound.put("a0", "");
-                                oRound.put("type", typ);
-                                useOIndex++;
-                            }
+                        if ("C".equals(typ)) {
+                            cTmp[seq-1] = new BuLiaoDTO(angle,round);
+                        } else if ("O".equals(typ)) {
+                            oTmp[seq-1] = new BuLiaoDTO(angle,round);
                         }
-                        index++;
                     }
 
-                    for (int m = useCIndex; m < 12; m++) {
-                        cAngle.put("a" + m, "");
-                        cRound.put("a" + m, "");
-                    }
-
-                    for (int n = useOIndex; n < 12; n++) {
-                        oAngle.put("a" + n, "");
-                        oRound.put("a" + n, "");
-                    }
+                    dealBuliao(cAngle, cRound, cTmp);
+                    dealBuliao(oAngle, oRound, oTmp);
 
                     result.add(cAngle);
                     result.add(cRound);
                     result.add(oAngle);
                     result.add(oRound);
                 }
-
             }
             beginDate = DateUtil.addDays(beginDate, 1);
         }
         return result;
+    }
 
+    private void partCaoZuoFangZhen(String version) {
+        List<Map<String, Object>> sheet15 = new ArrayList<>();
+        List<Map<String, Object>> sheet16 = new ArrayList<>();
+
+        //填充实际值
+        Map<String, Double> mubiao = partTagValueLatest(version,MUBIAO);
+        Map<String, Double> zhongdian = partTagValueLatest(version,ZHONGDIAN);
+
+        // 填充前半部分，并计算偏差和完成率
+        JSONObject data = dataHttpCaoZuoFangZhen(version);
+        if (Objects.nonNull(data)) {
+            JSONArray goalParameters = data.getJSONArray("goalParameters");
+            if (Objects.nonNull(goalParameters) && goalParameters.size() > 0) {
+                for (int i = 0; i < goalParameters.size(); i++) {
+                    JSONObject jsonObject = goalParameters.getJSONObject(i);
+                    if (Objects.nonNull(jsonObject)) {
+                        Map<String, Object> tmp = new HashMap<>();
+                        // 参数
+                        String goalParaName = jsonObject.getString("goalParaName");
+                        // 目标值
+                        String goalParaValue = jsonObject.getString("goalParaValue");
+                        // 实际值
+                        Double realValue = mubiao.get(goalParaName);
+                        // 偏差
+                        Double pc = null;
+                        // 完成率
+                        Double wcl = null;
+
+                        if(null != realValue){
+                        }
+                        tmp.put("goalParaName", goalParaName);
+                        tmp.put("goalParaValue", goalParaValue);
+                        tmp.put("realValue", realValue);
+                        tmp.put("pc", pc);
+                        tmp.put("wcl", wcl);
+
+                        sheet15.add(tmp);
+                    }
+                }
+            }
+
+            JSONArray importantParameters = data.getJSONArray("importantParameters");
+            if (Objects.nonNull(importantParameters) && importantParameters.size() > 0) {
+                for (int i = 0; i < importantParameters.size(); i++) {
+                    JSONObject jsonObject = importantParameters.getJSONObject(i);
+                    if (Objects.nonNull(jsonObject)) {
+                        Map<String, Object> tmp = new HashMap<>();
+                        // 参数
+                        Object importantParaName = jsonObject.get("importantParaName");
+                        // 下限
+                        Object textMin = jsonObject.get("textMin");
+                        // 上限
+                        Object textMax = jsonObject.get("textMax");
+                        // 实际值
+                        Double realValue = zhongdian.get(importantParaName);
+                        // 偏差
+                        Double pc = null;
+                        // 完成率
+                        Double wcl = null;
+
+                        if(null != realValue){
+                        }
+                        tmp.put("importantParaName", importantParaName);
+                        tmp.put("textMin", textMin);
+                        tmp.put("textMax", textMax);
+                        tmp.put("realValue", realValue);
+                        tmp.put("pc", pc);
+                        tmp.put("wcl", wcl);
+                        sheet16.add(tmp);
+                    }
+                }
+            }
+        }
+
+        result.put("sheet15", sheet15);
+        result.put("sheet16", sheet16);
+    }
+
+    private void partCaoYeZhunQueLv(String version) {
+        //填充实际值
+        Map<String, Double> caoye = partTagValueLatest(version,CAOYEZHUNQUELV);
+
+        result.putAll(caoye);
+    }
+
+    private void partTodayCaoZuoFangZhen(String version) {
+        List<Map<String, Object>> sheet18 = new ArrayList<>();
+        List<Map<String, Object>> sheet19 = new ArrayList<>();
+
+        JSONObject data = dataHttpCaoZuoFangZhen(version);
+        if (Objects.nonNull(data)) {
+            JSONArray goalParameters = data.getJSONArray("goalParameters");
+            if (Objects.nonNull(goalParameters) && goalParameters.size() > 0) {
+                for (int i = 0; i < goalParameters.size(); i++) {
+                    JSONObject jsonObject = goalParameters.getJSONObject(i);
+                    if (Objects.nonNull(jsonObject)) {
+                        Map<String, Object> tmp = new HashMap<>();
+                        // 参数
+                        String goalParaName = jsonObject.getString("goalParaName");
+                        // 单位
+                        String goalCompany = jsonObject.getString("goalCompany");
+                        // 目标值
+                        String goalParaValue = jsonObject.getString("goalParaValue");
+                        tmp.put("goalParaName", goalParaName);
+                        tmp.put("goalCompany", goalCompany);
+                        tmp.put("goalParaValue", goalParaValue);
+                        sheet18.add(tmp);
+                    }
+                }
+            }
+
+            JSONArray importantParameters = data.getJSONArray("importantParameters");
+            if (Objects.nonNull(importantParameters) && importantParameters.size() > 0) {
+                for (int i = 0; i < importantParameters.size(); i++) {
+                    JSONObject jsonObject = importantParameters.getJSONObject(i);
+                    if (Objects.nonNull(jsonObject)) {
+                        Map<String, Object> tmp = new HashMap<>();
+                        // 参数
+                        Object importantParaName = jsonObject.get("importantParaName");
+                        // 下限
+                        Object textMin = jsonObject.get("textMin");
+                        // 上限
+                        Object textMax = jsonObject.get("textMax");
+                        // 动作量
+                        Object actionVolume = jsonObject.get("actionVolume");
+                        tmp.put("importantParaName", importantParaName);
+                        tmp.put("textMin", textMin);
+                        tmp.put("textMax", textMax);
+                        tmp.put("ttt", actionVolume);
+                        sheet19.add(tmp);
+                    }
+                }
+            }
+        }
+
+        result.put("sheet18", sheet18);
+        result.put("sheet19", sheet19);
+    }
+
+    private void dealBuliao(Map<String, Object> angle, Map<String, Object> round, BuLiaoDTO[] tmp) {
+        int m = 1;
+        for (BuLiaoDTO bl : tmp) {
+            if(null == bl){
+                continue;
+            }
+            if(!"0.0".equals(bl.getRound())){
+                angle.put("a" + m, bl.getAngle());
+                round.put("a" + m, bl.getRound());
+                m++;
+            }
+        }
     }
 
     private List<Double> part5(String version) {
@@ -634,13 +922,16 @@ public class GaoLuDocMain2 {
             list.add(aggl.doubleValue());
             list.add(r.doubleValue());
         }
-
         return list;
     }
 
 
+    /**
+     * 提取最小最大值
+     * @param objects
+     * @return
+     */
     private List<Double> dealList(Object[] objects) {
-
         List data = new ArrayList();
 
         double max = 0;
@@ -802,7 +1093,6 @@ public class GaoLuDocMain2 {
         Double max3 = data3.get(0) * 1.2;
         Double min3 = data3.get(1) * 0.8;
 
-
         /**
          * A烧结矿
          * B块矿
@@ -874,11 +1164,9 @@ public class GaoLuDocMain2 {
         Vector<Serie> series2 = new Vector<Serie>();
         series2.add(new Serie("M10", objects2));
 
-
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
         vectors.add(series2);
-
 
         String title1 = "";
         String categoryAxisLabel1 = null;
@@ -902,7 +1190,6 @@ public class GaoLuDocMain2 {
         List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
-
 
 //        result.put("part7", objects1[objects1.length - 2]);
 //        result.put("part8", objects2[objects2.length - 2]);
@@ -1060,56 +1347,6 @@ public class GaoLuDocMain2 {
             objects4[i] = o;
         }
         return objects4;
-    }
-
-    private void dealPart8(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames, 1);
-        Object[] objects1 = doubles.get(0).toArray();
-        Object[] objects2 = doubles.get(1).toArray();
-        Object[] objects3 = doubles.get(2).toArray();
-        Object[] objects4 = dealData(objects2, 1000);
-
-        List<List<Double>> doubles2 = part2(version, tagNames);
-        result.put("part15", doubles2.get(0).get(0).intValue());
-        result.put("part16", Double.valueOf(doubles2.get(1).get(0) * 1000).intValue());
-        result.put("part17", doubles2.get(2).get(0).intValue());
-
-        /**
-         * 风量BF8_L2C_BD_HotBlastFlow_1d_avg
-         * 风压BF8_L2C_BD_ColdBlastPress_1d_avg
-         * 压差BF8_L2C_BD_Pressdiff_1d_avg
-         *
-         */
-        // 标注类别
-        Vector<Serie> series1 = new Vector<Serie>();
-        // 柱子名称：柱子所有的值集合
-        series1.add(new Serie("风量", objects1));
-
-        // 标注类别
-        Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("风压", objects4));
-
-        // 标注类别
-        Vector<Serie> series3 = new Vector<Serie>();
-        series3.add(new Serie("压差", objects3));
-
-        List<Vector<Serie>> vectors = new ArrayList<>();
-        vectors.add(series1);
-        vectors.add(series2);
-        vectors.add(series3);
-
-        String title1 = "";
-        String categoryAxisLabel1 = null;
-        String[] yLabels = {"风量(m3/min)","风压(kpa)","压差(kpa)"};
-
-        int[] stack = {1, 1, 2};
-        int[] ystack = {1, 2, 2};
-
-        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, 5000, 6000, 100, 450, 100, 450, tagNames.length, stack, ystack);
-        WordImageEntity image1 = image(Chart1);
-        result.put("jfreechartImg8", image1);
     }
 
     private void dealPart9(String version, String[] tagNames) {
@@ -1357,104 +1594,6 @@ public class GaoLuDocMain2 {
         result.put("jfreechartImg13", image1);
     }
 
-    private void dealPart14(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames, 1);
-        Object[] objects1 = doubles.get(0).toArray();
-        Object[] objects2 = doubles.get(1).toArray();
-
-        /**
-         * B1-B3
-         * S1-S3
-         */
-        // 标注类别
-        Vector<Serie> series1 = new Vector<Serie>();
-        // 柱子名称：柱子所有的值集合
-        series1.add(new Serie("B1-B3", objects1));
-
-        // 标注类别
-        Vector<Serie> series2 = new Vector<Serie>();
-        // 柱子名称：柱子所有的值集合
-        series2.add(new Serie("S1-S3", objects2));
-
-        List<Vector<Serie>> vectors = new ArrayList<>();
-        vectors.add(series1);
-        vectors.add(series2);
-
-        result.put("part28", getLastVal(objects1));
-        result.put("part29", getLastVal(objects2));
-
-        List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.2;
-        Double min1 = data.get(1) * 0.8;
-
-        List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0) * 1.2;
-        Double min2 = data2.get(1) * 0.8;
-
-        String title1 = "";
-        String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
-
-        int[] stack = {1, 1};
-        int[] ystack = {1, 2};
-
-        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 180, tagNames.length, stack, ystack);
-        WordImageEntity image1 = image(Chart1);
-        result.put("jfreechartImg14", image1);
-    }
-
-    private void dealPart15(String version, String[] tagNames) {
-        List<List<Double>> doubles = part1(version, tagNames, 1);
-        Object[] objects1 = doubles.get(0).toArray();
-        Object[] objects2 = doubles.get(1).toArray();
-
-
-        /**
-         * S4-S6
-         * R1-R3
-         */
-
-        // 标注类别
-        Vector<Serie> series1 = new Vector<Serie>();
-        series1.add(new Serie("S4-S6", objects1));
-
-        // 标注类别
-        Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("R1-R3", objects2));
-
-        List<Vector<Serie>> vectors = new ArrayList<>();
-        vectors.add(series1);
-        vectors.add(series2);
-
-
-        result.put("part30", getLastVal(objects1));
-        result.put("part31", getLastVal(objects2));
-
-        List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.2;
-        Double min1 = data.get(1) * 0.8;
-
-        List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0) * 1.2;
-        Double min2 = data2.get(1) * 0.8;
-
-        String title1 = "";
-        String categoryAxisLabel1 = null;
-        String[] yLabels = {"",""};
-
-        int[] stack = {1, 1};
-        int[] ystack = {1, 2};
-
-        JFreeChart Chart1 = ChartFactory.createLineChart(title1,
-                categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
-        WordImageEntity image1 = image(Chart1);
-        result.put("jfreechartImg15", image1);
-
-    }
-
     private void dealPart16(String version, String[] tagNames) {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
@@ -1557,89 +1696,6 @@ public class GaoLuDocMain2 {
 
     }
 
-    private void dealPart17(String version, String[] tagNames) {
-        Map<String, Double> map = new HashMap();
-        map.put("cz1", 5750.00);
-        map.put("cz2", 385.00);
-        map.put("cz3", 170.00);
-        map.put("cz4", 1800.00);
-        map.put("cz5", 1180.00);
-        map.put("cz6", 10.00);
-        map.put("cz7", 220.00);
-        map.put("cz8", 520.00);
-        map.put("cz9", 20.00);
-        map.put("cz10", 5.00);
-        map.put("cz11", 75.00);
-        map.put("cz12", 80.00);
-        map.put("cz13", 4.60);
-        map.put("cz14", 90.00);
-        map.put("cz15", 20.00);
-        map.put("cz16", 1.25);
-        map.put("cz17", 144.00);
-        map.put("cz18", 240.00);
-        map.put("cz19", 115.00);
-        map.put("cz20", 2200.00);
-
-
-        List<Double> part5 = part5(version);
-        Double a = 0.0;
-        Double b = 0.0;
-        if (part5.size() > 0) {
-            a = part5.get(0).doubleValue() * 100;
-            b = part5.get(1).doubleValue();
-        }
-        result.put("cz12", a.intValue() + "%");
-        result.put("pc12", (a.intValue() - 80) + "%");
-
-        BigDecimal decimal = new BigDecimal(b);
-        BigDecimal subtract1 = decimal.subtract(new BigDecimal(1.25));
-        decimal = decimal.setScale(2, BigDecimal.ROUND_HALF_UP);
-        subtract1 = subtract1.setScale(2, BigDecimal.ROUND_HALF_UP);
-        result.put("cz16", decimal);
-        result.put("pc16", subtract1);
-
-
-        List<List<Double>> doubles2 = part2(version, tagNames);
-        for (int i = 0; i < doubles2.size(); i++) {
-            Double aDouble = doubles2.get(i).get(0);
-            BigDecimal bigDecimal = new BigDecimal(aDouble);
-            Double aDouble1 = map.get("cz" + (i + 1));
-            BigDecimal bigDecimal1 = new BigDecimal(aDouble1);
-            BigDecimal subtract = bigDecimal.subtract(bigDecimal1);
-            if (i == 0 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6 || i == 7 || i == 17 || i == 19) {
-                bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
-                result.put("cz" + (i + 1), bigDecimal.intValue());
-
-                subtract = subtract.setScale(2, BigDecimal.ROUND_HALF_UP);
-                result.put("pc" + (i + 1), subtract.intValue());
-            }
-
-            if (i == 12 || i == 13 || i == 14 || i == 18) {
-                bigDecimal = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP);
-                result.put("cz" + (i + 1), bigDecimal);
-
-                subtract = subtract.setScale(1, BigDecimal.ROUND_HALF_UP);
-                result.put("pc" + (i + 1), subtract);
-            }
-
-            if (i == 1) {
-                bigDecimal = bigDecimal.multiply(new BigDecimal(1000)).setScale(2, BigDecimal.ROUND_HALF_UP);
-                result.put("cz" + (i + 1), bigDecimal.intValue());
-
-                subtract = bigDecimal1.subtract(bigDecimal);
-                result.put("pc" + (i + 1), subtract.intValue());
-            }
-
-            if (i == 8 || i == 9 || i == 10 || i == 16) {
-                bigDecimal = bigDecimal.multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
-                result.put("cz" + (i + 1), bigDecimal.intValue() + "%");
-
-                subtract = bigDecimal1.subtract(bigDecimal);
-                result.put("pc" + (i + 1), subtract.intValue() + "%");
-            }
-        }
-    }
-
     private void dealPart18(String version, String[] tagNames) {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
@@ -1710,7 +1766,6 @@ public class GaoLuDocMain2 {
         result.put("part34", getLastDoubleVal(objects1));
         result.put("part35", getLastDoubleVal(objects2));
 
-
         String title1 = "";
         String categoryAxisLabel1 = null;
         String[] yLabels = {"Si(%)","S(%)"};
@@ -1731,6 +1786,22 @@ public class GaoLuDocMain2 {
         result.put("sheet14", maps);
     }
 
+    private void dealCaoZuoFangZhen(String version) {
+        partCaoZuoFangZhen(version);
+    }
+
+    private void dealZhaTie(String version) {
+//        partZhaTie(version);
+    }
+
+    private void dealCaoYeZhunQueLv(String version) {
+        partCaoYeZhunQueLv(version);
+    }
+
+    private void dealTodayCaoZuoFangZhen(String version) {
+        partTodayCaoZuoFangZhen(version);
+    }
+
     private JSONObject dataHttp(String[] tagNames, Date beginDate, Date endDate, String version) {
         JSONObject query = new JSONObject();
         query.put("starttime", beginDate.getTime());
@@ -1739,6 +1810,16 @@ public class GaoLuDocMain2 {
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String results = httpUtil.postJsonParams(getUrl(version), jsonString);
+        JSONObject jsonObject = JSONObject.parseObject(results);
+        JSONObject data = jsonObject.getJSONObject("data");
+        return data;
+    }
+
+    private JSONObject dataHttp(String tagName, Date date, String version) {
+        Map<String, String> map = new HashMap<>();
+        map.put("time", date.getTime()+"");
+        map.put("tagname", tagName);
+        String results = httpUtil.get(getUrlTagValueLatest(version), map);
         JSONObject jsonObject = JSONObject.parseObject(results);
         JSONObject data = jsonObject.getJSONObject("data");
         return data;
@@ -1783,6 +1864,23 @@ public class GaoLuDocMain2 {
         return data;
     }
 
+
+    /**
+     * 查询操作方针数据
+     * @param version
+     * @return
+     */
+    private JSONObject dataHttpCaoZuoFangZhen(String version) {
+        String url = getUrl4(version);
+        String s = httpUtil.get(url, null);
+        if (StringUtils.isBlank(s)) {
+            return null;
+        }
+        JSONObject object = JSONObject.parseObject(s);
+        JSONObject data = object.getJSONObject("data");
+        return data;
+    }
+
     private void comm(String version, String path) {
         //文档所有日期
         dealDate(result);
@@ -1795,6 +1893,15 @@ public class GaoLuDocMain2 {
             }
 
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
+            List<XWPFTable> tt = doc.getTables();
+            String[] needMerges = {"sheet15","sheet16"};
+            for (String needMerge : needMerges) {
+                for (XWPFTable table : tt) {
+                    if(table.getText().contains(needMerge)){
+                        mergeCellsVertically(table,table.getRow(0).getTableCells().size()-1,1,table.getRows().size()-1);
+                    }
+                }
+            }
             String fileName = sqquence + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "操业会议纪要（实施版）.docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
@@ -1817,6 +1924,50 @@ public class GaoLuDocMain2 {
         }
     }
 
+    /***
+     * 跨列合并
+     * @param table
+     * @param row 所合并的行
+     * @param fromCell  起始列
+     * @param toCell   终止列
+     */
+    private void mergeCellsHorizontal(XWPFTable table, int row, int fromCell, int toCell) {
+        for (int cellIndex = fromCell; cellIndex <= toCell; cellIndex++) {
+            XWPFTableCell cell = table.getRow(row).getCell(cellIndex);
+            if (cellIndex == fromCell) {
+                // The first merged cell is set with RESTART merge value
+                cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.RESTART);
+            } else {
+                // Cells which join (merge) the first one, are set with CONTINUE
+                cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.CONTINUE);
+            }
+        }
+    }
+
+    /***
+     *  跨行合并
+     * @param table
+     * @param col  合并列
+     * @param fromRow 起始行
+     * @param toRow   终止行
+     */
+    private void mergeCellsVertically(XWPFTable table, int col, int fromRow, int toRow) {
+        for (int rowIndex = fromRow; rowIndex <= toRow; rowIndex++) {
+            XWPFTableCell cell = table.getRow(rowIndex).getCell(col);
+            if (rowIndex == fromRow) {
+                // The first merged cell is set with RESTART merge value
+                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.RESTART);
+            } else {
+                // Cells which join (merge) the first one, are set with CONTINUE
+                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.CONTINUE);
+            }
+        }
+    }
+
+    /**
+     * 文档的日期字符串
+     * @param map
+     */
     private void dealDate(HashMap<String, Object> map) {
         Date date = new Date();
         String date1 = DateUtil.getFormatDateTime(date, "yyyy年MM月dd日 HH:mm");
@@ -1827,6 +1978,11 @@ public class GaoLuDocMain2 {
         map.put("date2", date2);
     }
 
+    /**
+     * 提取int类型的val
+     * @param objects1
+     * @return
+     */
     private Object getLastVal(Object[] objects1) {
         if (Objects.isNull(objects1) || objects1.length == 0) {
             return null;
@@ -1840,6 +1996,11 @@ public class GaoLuDocMain2 {
         return v1;
     }
 
+    /**
+     * 提取double类型的val
+     * @param objects1
+     * @return
+     */
     private Object getLastDoubleVal(Object[] objects1) {
         if (Objects.isNull(objects1) || objects1.length == 0) {
             return null;
@@ -1893,6 +2054,31 @@ public class GaoLuDocMain2 {
         return httpProperties.getGlUrlVersion(version) + "/anaChargeValue/range";
     }
 
+    /**
+     * 操作方针
+     *
+     * @param version
+     * @return
+     */
+    private String getUrl4(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/process/findNewestFormData";
+    }
+
+    /**
+     * tag点最新值
+     *
+     * @param version
+     * @return
+     */
+    private String getUrlTagValueLatest(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
+    }
+
+    /**
+     * 生成图片
+     * @param chart
+     * @return
+     */
     private WordImageEntity image(JFreeChart chart) {
         WordImageEntity image = new WordImageEntity();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
