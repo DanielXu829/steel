@@ -61,15 +61,15 @@ public class GaoLuDocMain2 {
     private static String MUBIAO = "mubiao";
     private static String ZHONGDIAN = "zhongdian";
     private static String ZHATIE = "zhatie";
+    private static String ZHATIEFANWEI = "zhatiefanwei";
     private static String CAOYEZHUNQUELV = "caoyezhunquelv";
+    private static Map<String,String> caoyefanwei = new HashMap<>();
+    private static char[] sanjiaoP = {916,80};
+    private static char[] co = {951,67,79};
+    private static final String sjPStr = new String(sanjiaoP);
+    private static final String coStr = new String(co);
 
     static{
-        char[] sanjiaoP = {916,80};
-        char[] co = {951,67,79};
-        String sjPStr = new String(sanjiaoP);
-        String coStr = new String(co);
-
-
         // 8高炉
         Map<String,Map<String,String>> tg8 = new HashMap<>();
         Map<String,String> mubiao8 = new HashMap<>();
@@ -103,6 +103,15 @@ public class GaoLuDocMain2 {
         zhatie8.put("铁水S","BF8_L2C_AnalysisSValue_1d_avg");
         zhatie8.put("炉渣碱度","BF8_L2C_AnalysisRValue_1d_avg");
         tg8.put(ZHATIE,zhatie8);
+
+        Map<String,String> zhatiefanwei8 = new HashMap<>();
+        zhatiefanwei8.put("铁口深度","3400-3800");
+        zhatiefanwei8.put("见渣率","90-100");
+        zhatiefanwei8.put("铁水温度","1500-1525");
+        zhatiefanwei8.put("铁水Si","0.25-0.55");
+        zhatiefanwei8.put("铁水S","0.008-0.02");
+        zhatiefanwei8.put("炉渣碱度","1.10-1.20");
+        tg8.put(ZHATIEFANWEI,zhatiefanwei8);
 
         Map<String,String> caoye8 = new HashMap<>();
         caoye8.put("产量","BF8_L2M_BX_HM_confirmWgt_evt");
@@ -145,6 +154,15 @@ public class GaoLuDocMain2 {
         zhatie7.put("炉渣碱度","BF7_L2C_AnalysisRValue_1d_avg");
         tg7.put(ZHATIE,zhatie7);
 
+        Map<String,String> zhatiefanwei7 = new HashMap<>();
+        zhatiefanwei7.put("铁口深度","3100-3400");
+        zhatiefanwei7.put("见渣率","90-100");
+        zhatiefanwei7.put("铁水温度","1490-1520");
+        zhatiefanwei7.put("铁水Si","0.25-0.55");
+        zhatiefanwei7.put("铁水S","0.008-0.02");
+        zhatiefanwei7.put("炉渣碱度","1.15-1.35");
+        tg7.put(ZHATIEFANWEI,zhatiefanwei7);
+
         Map<String,String> caoye7 = new HashMap<>();
         caoye7.put("产量","BF7_L2M_BX_HM_confirmWgt_evt");
         caoye7.put("燃料比","BF7_L2M_BX_FuelRate_1d_cur");
@@ -186,6 +204,15 @@ public class GaoLuDocMain2 {
         zhatie6.put("炉渣碱度","BF6_L2C_AnalysisRValue_1d_avg");
         tg6.put(ZHATIE,zhatie6);
 
+        Map<String,String> zhatiefanwei6 = new HashMap<>();
+        zhatiefanwei6.put("铁口深度","2700-2900");
+        zhatiefanwei6.put("见渣率","85-100");
+        zhatiefanwei6.put("铁水温度","1460-1490");
+        zhatiefanwei6.put("铁水Si","0.25-0.55");
+        zhatiefanwei6.put("铁水S","0.015-0.03");
+        zhatiefanwei6.put("炉渣碱度","1.10-1.30");
+        tg6.put(ZHATIEFANWEI,zhatiefanwei6);
+
         Map<String,String> caoye6 = new HashMap<>();
         caoye6.put("产量","BF6_L2M_BX_HM_confirmWgt_evt");
         caoye6.put("燃料比","BF6_L2M_BX_FuelRate_1d_cur");
@@ -208,6 +235,7 @@ public class GaoLuDocMain2 {
     }
 
     public void mainDeal(String version) {
+        caoyefanwei.clear();
         String name = "8";
         if ("6.0".equals(version)) {
             name = "6";
@@ -515,6 +543,7 @@ public class GaoLuDocMain2 {
             JSONObject jsonObject = dataHttp(kv.getValue(), date, version);
             if (Objects.nonNull(jsonObject)) {
                 Double val = jsonObject.getDouble("val");
+                val = (double) Math.round(val * 10) / 10;
                 vals.put(kv.getKey(), val);
             }
         }
@@ -753,6 +782,20 @@ public class GaoLuDocMain2 {
         return result;
     }
 
+    private Double decimalDouble(Double v, Integer decimal){
+        if(null == decimal){
+            return v;
+        }
+        if(null != v){
+            int tmp = 10;
+            for(;decimal>1;decimal--){
+                tmp *= 10;
+            }
+            return (double) Math.round(v * tmp) / tmp;
+        }
+        return null;
+    }
+
     private void partCaoZuoFangZhen(String version) {
         List<Map<String, Object>> sheet15 = new ArrayList<>();
         List<Map<String, Object>> sheet16 = new ArrayList<>();
@@ -761,7 +804,7 @@ public class GaoLuDocMain2 {
         Map<String, Double> mubiao = partTagValueLatest(version,MUBIAO);
         Map<String, Double> zhongdian = partTagValueLatest(version,ZHONGDIAN);
 
-        // 填充前半部分，并计算偏差和完成率
+        // 填充前半部分，并计算偏差
         JSONObject data = dataHttpCaoZuoFangZhen(version);
         if (Objects.nonNull(data)) {
             JSONArray goalParameters = data.getJSONArray("goalParameters");
@@ -774,20 +817,84 @@ public class GaoLuDocMain2 {
                         String goalParaName = jsonObject.getString("goalParaName");
                         // 目标值
                         String goalParaValue = jsonObject.getString("goalParaValue");
+                        if("FR".equals(goalParaName)){
+                            caoyefanwei.put("燃料比fw",goalParaValue);
+                        } else if(sjPStr.equals(goalParaName)){
+                            caoyefanwei.put("压差fw",goalParaValue);
+                        }
+                        //--、-、±、<、
+                        Double[] vals = new Double[2];
+                        if(goalParaValue.contains("--")){
+                            String[] strs = goalParaValue.split("--");
+                            for (int j=0; j<2; j++) {
+                                try{
+                                    vals[j] = Double.valueOf(strs[j]);
+                                }catch (Exception e){
+                                    vals[j] = 0.0;
+                                }
+                            }
+                        } else if(goalParaValue.contains("-")){
+                            String[] strs = goalParaValue.split("-");
+                            for (int j=0; j<2; j++) {
+                                try{
+                                    vals[j] = Double.valueOf(strs[j]);
+                                }catch (Exception e){
+                                    vals[j] = 0.0;
+                                }
+                            }
+                        } else if(goalParaValue.contains("±")){
+                            String[] strs = goalParaValue.split("±");
+                            for (int j=0; j<2; j++) {
+                                try{
+                                    vals[j] = Double.valueOf(strs[j]);
+                                }catch (Exception e){
+                                    vals[j] = 0.0;
+                                }
+                            }
+                            double min = vals[0]-vals[1];
+                            double max = vals[0]+vals[1];
+                            vals[0] = min;
+                            vals[1] = max;
+                        } else if(goalParaValue.contains("<")){
+                            String[] strs = goalParaValue.split("<");
+                            try{
+                                vals[1] = Double.valueOf(strs[1]);
+                            }catch (Exception e){
+                                vals[1] = 0.0;
+                            }
+                            vals[0] = vals[1];
+                        }else{
+                            try{
+                                vals[1] = Double.valueOf(goalParaValue);
+                            }catch (Exception e){
+                                vals[1] = 0.0;
+                            }
+                            vals[0] = vals[1];
+                        }
                         // 实际值
                         Double realValue = mubiao.get(goalParaName);
+                        if("8.0".equals(version)&&"BP".equals(goalParaName)){
+                            realValue *= 100;
+                        }
                         // 偏差
                         Double pc = null;
-                        // 完成率
-                        Double wcl = null;
 
                         if(null != realValue){
+                            double min = vals[0];
+                            double max = vals[1];
+                            if(realValue>max){
+                                pc = realValue-max;
+                            } else if(realValue<min){
+                                pc = realValue-min;
+                            }else{
+                                pc = 0.0;
+                            }
                         }
                         tmp.put("goalParaName", goalParaName);
                         tmp.put("goalParaValue", goalParaValue);
                         tmp.put("realValue", realValue);
+                        pc = decimalDouble(pc,3);
                         tmp.put("pc", pc);
-                        tmp.put("wcl", wcl);
 
                         sheet15.add(tmp);
                     }
@@ -801,26 +908,53 @@ public class GaoLuDocMain2 {
                     if (Objects.nonNull(jsonObject)) {
                         Map<String, Object> tmp = new HashMap<>();
                         // 参数
-                        Object importantParaName = jsonObject.get("importantParaName");
+                        String importantParaName = jsonObject.getString("importantParaName");
                         // 下限
-                        Object textMin = jsonObject.get("textMin");
+                        Double textMin = jsonObject.getDouble("textMin");
                         // 上限
-                        Object textMax = jsonObject.get("textMax");
+                        Double textMax = jsonObject.getDouble("textMax");
+                        if(coStr.equals(importantParaName)){
+                            String fw = "";
+                            if((null != textMin)&&(null != textMax)){
+                                fw = textMin+"-"+textMax;
+                            }else{
+                                if(null != textMin){
+                                    fw = textMin+"";
+                                }else{
+                                    fw = textMax+"";
+                                }
+                            }
+                            caoyefanwei.put("煤气利用率fw",fw);
+                        }
                         // 实际值
                         Double realValue = zhongdian.get(importantParaName);
                         // 偏差
                         Double pc = null;
-                        // 完成率
-                        Double wcl = null;
 
-                        if(null != realValue){
+                        if((null == textMin)&&(null != textMax)){
+                            textMin = textMax;
+                        }
+                        if((null == textMax)&&(null != textMin)){
+                            textMax = textMin;
+                        }
+
+                        if((null != textMin)&&(null != textMax)&&(null != realValue)){
+                            double min = textMin;
+                            double max = textMax;
+                            if(realValue>max){
+                                pc = realValue-max;
+                            } else if(realValue<min){
+                                pc = realValue-min;
+                            }else{
+                                pc = 0.0;
+                            }
                         }
                         tmp.put("importantParaName", importantParaName);
                         tmp.put("textMin", textMin);
                         tmp.put("textMax", textMax);
                         tmp.put("realValue", realValue);
+                        pc = decimalDouble(pc,3);
                         tmp.put("pc", pc);
-                        tmp.put("wcl", wcl);
                         sheet16.add(tmp);
                     }
                 }
@@ -831,10 +965,59 @@ public class GaoLuDocMain2 {
         result.put("sheet16", sheet16);
     }
 
+    private void partZhaTie(String version) {
+        List<Map<String, Object>> sheet17 = new ArrayList<>();
+
+        Map<String, Double> zhatie = partTagValueLatest(version,ZHATIE);
+        Map<String,String> zhatiefanwei = TAG_NAMES.get(version).get(ZHATIEFANWEI);
+        for (Map.Entry<String, String> kv : zhatiefanwei.entrySet()) {
+            Map<String, Object> tmp = new HashMap<>();
+            // 参数
+            String cs = kv.getKey();
+            // 目标值
+            String mbz = kv.getValue();
+            //-
+            Double[] vals = new Double[2];
+            if(mbz.contains("-")){
+                String[] strs = mbz.split("-");
+                for (int j=0; j<2; j++) {
+                    try{
+                        vals[j] = Double.valueOf(strs[j]);
+                    }catch (Exception e){
+                        vals[j] = 0.0;
+                    }
+                }
+            }
+            // 实际值
+            Double realValue = zhatie.get(cs);
+            // 偏差
+            Double pc = null;
+
+            if(null != realValue){
+                double min = vals[0];
+                double max = vals[1];
+                if(realValue>max){
+                    pc = realValue-max;
+                } else if(realValue<min){
+                    pc = realValue-min;
+                }else{
+                    pc = 0.0;
+                }
+            }
+            tmp.put("cs", cs);
+            tmp.put("mbz", mbz);
+            tmp.put("realValue", realValue);
+            pc = decimalDouble(pc,3);
+            tmp.put("pc", pc);
+            sheet17.add(tmp);
+        }
+        result.put("sheet17", sheet17);
+    }
+
     private void partCaoYeZhunQueLv(String version) {
         //填充实际值
         Map<String, Double> caoye = partTagValueLatest(version,CAOYEZHUNQUELV);
-
+        result.putAll(caoyefanwei);
         result.putAll(caoye);
     }
 
@@ -1191,8 +1374,6 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
-//        result.put("part7", objects1[objects1.length - 2]);
-//        result.put("part8", objects2[objects2.length - 2]);
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
         Double min1 = data.get(1) * 0.8;
@@ -1245,9 +1426,8 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
+        objects1 = getDoubleVal(objects1,100,2);
 
-//        result.put("part7", objects1[objects1.length - 2]);
-//        result.put("part8", objects2[objects2.length - 2]);
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
         Double min1 = data.get(1) * 0.8;
@@ -1354,10 +1534,6 @@ public class GaoLuDocMain2 {
         List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 100);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
-
-//        result.put("part12", objects1[objects1.length - 2]);
-//        result.put("part13", objects2[objects2.length - 2]);
-//        result.put("part14", objects3[objects3.length - 2]);
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
@@ -1503,7 +1679,9 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
-//        objects1 = dealData(objects1, 100);
+        objects1 = getDoubleVal(objects1,null,2);
+        objects2 = getDoubleVal(objects2,null,2);
+
         /**
          * W
          * Z
@@ -1791,7 +1969,7 @@ public class GaoLuDocMain2 {
     }
 
     private void dealZhaTie(String version) {
-//        partZhaTie(version);
+        partZhaTie(version);
     }
 
     private void dealCaoYeZhunQueLv(String version) {
@@ -2012,6 +2190,39 @@ public class GaoLuDocMain2 {
             v1 = v.doubleValue();
         }
         return v1;
+    }
+
+    /**
+     * 提取double类型的objects[]
+     * @param objects1
+     * @param multiple 倍数
+     * @param decimal 小数点位数
+     * @return
+     */
+    private Object[] getDoubleVal(Object[] objects1, Integer multiple, Integer decimal) {
+        if (Objects.isNull(objects1) || objects1.length == 0) {
+            return null;
+        }
+        Object[] result = new Object[objects1.length];
+        int i = 0;
+        for (Object o : objects1) {
+            Object v1 = 0.0;
+            if (Objects.nonNull(o)) {
+                Double v = (Double) o;
+                if(null != multiple){
+                    v = v*multiple;
+                }
+                if(null != decimal){
+                    int tmp = 10;
+                    for(;decimal>1;decimal--){
+                        tmp *= 10;
+                    }
+                    v = (double) Math.round(v * tmp) / tmp;
+                }
+                result[i++] = v.doubleValue();
+            }
+        }
+        return result;
     }
 
     /**
