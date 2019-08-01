@@ -52,6 +52,7 @@ public class CK12PeimeiliangWriter extends AbstractExcelReadWriter {
 //                List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
                 DateQuery dateQuery = dateQueries.get(0);
+                columns.clear();
                 if (this.columns.size() == 0) {
                     ArrayList<String> strings = mapDataHandler(getUrl2(), dateQuery);
                     columns = new ArrayList<>(strings);
