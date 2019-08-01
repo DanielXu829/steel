@@ -58,6 +58,7 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
 //                List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 int size = dateQueries.size();
                 DateQuery dateQuery = dateQueries.get(0);
+                columns.clear();
                 if (this.columns.size() == 0) {
                     ArrayList<String> strings = mapDataHandler(getUrl2(version), dateQuery, version);
                     columns = new ArrayList<>(strings);
@@ -168,6 +169,8 @@ public class PeimeiliangWriter extends AbstractExcelReadWriter {
                         Object o = innerMap.get(s);
                         if (Objects.nonNull(o)) {
                             nameList.add(o.toString());
+                        }else{
+                            nameList.add("空仓");
                         }
                     }
                     String date1 = DateUtil.getFormatDateTime(DateUtil.strToDate(clock, DateUtil.fullFormat), "yyyy/MM/dd HH:mm:00");
