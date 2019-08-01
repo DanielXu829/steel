@@ -251,9 +251,9 @@ public class ChartUtils {
             rederer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
             rederer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
 
-            rederer.setSeriesPaint(0, Color.YELLOW);
-            rederer.setSeriesPaint(1, Color.YELLOW);
-            rederer.setSeriesPaint(2, Color.YELLOW);
+            rederer.setSeriesPaint(0, Color.BLUE);
+            rederer.setSeriesPaint(1, Color.BLUE);
+            rederer.setSeriesPaint(2, Color.BLUE);
             plot.setRenderer(1, rederer);
         }
 
