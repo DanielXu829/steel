@@ -28,6 +28,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class ChanhaozongheWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -48,7 +49,13 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                int size = dateQueries.size();
+                int size = 0;
+                Date now = new Date();
+                if(date.getRecordDate().getMonth() == now.getMonth()){
+                    size = dateQueries.size()-1;
+                }else{
+                    size = dateQueries.size();
+                }
                 if ("tagcha".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
@@ -63,6 +70,16 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                         List<CellData> cellDataList = this.mapDataHandler6(rowIndex, getUrl1(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
+                    // 多查一天
+                    Date rdate = dateQueries.get(size-1).getRecordDate();
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(rdate);
+                    cal.add(Calendar.DAY_OF_MONTH, 1);
+                    Date ndate = cal.getTime();
+                    DateQuery item = new DateQuery(ndate,ndate,ndate);
+                    int rowIndex = size + 1;
+                    List<CellData> cellDataList = this.mapDataHandler6(rowIndex, getUrl1(version), columns, item);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 } else if ("code".equals(sheetSplit[1])) {
                     for (int k = 0; k < size; k++) {
                         DateQuery item = dateQueries.get(k);
