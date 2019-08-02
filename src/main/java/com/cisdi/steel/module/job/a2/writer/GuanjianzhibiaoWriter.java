@@ -70,6 +70,13 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
                         List<CellData> cellDataList = mapDataHandler(rowIndex, getUrl3(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
+                } else if ("analysis".equals(sheetSplit[1])) {
+                    for (int j = 0; j < size; j++) {
+                        DateQuery item = dateQueries.get(j);
+                        int rowIndex = j + 1;
+                        List<CellData> cellDataList = mapDataHandler8(rowIndex, columns, item, version);
+                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                    }
                 } else {
                     for (int j = 0; j < size; j++) {
                         DateQuery item = dateQueries.get(j);
@@ -269,6 +276,28 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    protected List<CellData> mapDataHandler8(int rowIndex, List<String> columns,DateQuery dateQuery,String version) {
+        List<CellData> cellDataList = new ArrayList<>();
+        int size = columns.size();
+        for (int k = 0; k < size; k++) {
+            String colName = columns.get(k);
+            if (StringUtils.isNotBlank(colName)) {
+                String[] split = colName.split("/");
+                String url = getUrl8(version);
+                Map<String, String> queryParam = getQueryParam8(dateQuery,split[0],split[1]);
+                String result = httpUtil.get(url, queryParam);
+                if (StringUtils.isBlank(result)) {
+                    return null;
+                }
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                Double data = jsonObject.getDouble("data");
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, k, data);
+            }
+        }
+        return cellDataList;
+    }
+
+
     @Override
     protected Map<String, String> getQueryParam(DateQuery dateQuery) {
         Map<String, String> result = new HashMap<>();
@@ -300,6 +329,15 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
         return result;
     }
 
+    protected Map<String, String> getQueryParam8(DateQuery dateQuery, String brandcode, String anaitemname) {
+        Map<String, String> result = new HashMap<>();
+        result.put("starttime",DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("endtime",DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("brandcode", brandcode);
+        result.put("anaitemname", anaitemname);
+        return result;
+    }
+
     private String getUrl(String version) {
         return httpProperties.getJHUrlVersion(version) + "/coalBlendingStatus/getParticleDistributionLatest";
     }
@@ -318,6 +356,10 @@ public class GuanjianzhibiaoWriter extends AbstractExcelReadWriter {
 
     protected String getUrl7(String version) {
         return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
+    }
+
+    protected String getUrl8(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/analyses/getAnaitemValAvg";
     }
 
 }
