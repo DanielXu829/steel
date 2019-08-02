@@ -188,8 +188,13 @@ public class CK45ZidongpeimeiWriter extends AbstractExcelReadWriter {
                                 if (Objects.nonNull(data)) {
                                     JSONArray arr = data.getJSONArray(cellValue);
                                     if (Objects.nonNull(arr) && arr.size() != 0) {
-                                        JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                        Double val = jsonObject1.getDouble("val");
+                                        double val = 0;
+                                        for (int m = 0; m< arr.size(); m++) {
+                                            JSONObject o = arr.getJSONObject(m);
+                                            if(o.getDouble("val")>val){
+                                                val = o.getDouble("val");
+                                            }
+                                        }
                                         Integer rowa = cell.getRowIndex() + 1;
                                         Integer col = cell.getColumnIndex();
                                         ExcelWriterUtil.addCellData(cellDataList, rowa, col, val);
