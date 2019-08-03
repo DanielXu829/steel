@@ -185,12 +185,12 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
             String cell = columns.get(columnIndex);
             if (StringUtils.isNotBlank(cell)) {
                 JSONObject data = obj.getJSONObject(cell);
-                String v = "";
+                BigDecimal v = BigDecimal.ZERO;
                 if (Objects.nonNull(data)) {
                     Map<String, Object> innerMap = data.getInnerMap();
                     Set<String> keySet = innerMap.keySet();
                     for (String key : keySet) {
-                        v = innerMap.get(key).toString();
+                        v = (BigDecimal)innerMap.get(key);
                         ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, v);
                         break;
                     }
