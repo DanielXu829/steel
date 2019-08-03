@@ -1535,6 +1535,8 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
+        objects1 = getDoubleVal(objects1,null,2);
+        objects2 = getDoubleVal(objects2,null,2);
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
         Double min1 = data.get(1) * 0.8;
@@ -1640,8 +1642,8 @@ public class GaoLuDocMain2 {
         Double min1 = data.get(1) * 0.975;
 
         List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0) * 1.055;
-        Double min2 = data2.get(1) * 0.975;
+        Double max2 = data2.get(0)* 1.055;
+        Double min2 = data2.get(1)* 0.975;
 
         /**
          * 风压
@@ -1669,7 +1671,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 180, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max1, 0, 180, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg11", image1);
     }
