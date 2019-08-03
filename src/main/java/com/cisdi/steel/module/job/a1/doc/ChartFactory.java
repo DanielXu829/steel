@@ -63,9 +63,9 @@ public class ChartFactory {
         DefaultCategoryDataset dataset5 = null;
 
 
-        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, yLabels[0], dataset);
+        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, null,null);
         if (stack[0] == 2) {
-            chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, yLabels[0], dataset);
+            chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, null,null);
         }
 
         if (y2 >= 2) {
@@ -101,10 +101,13 @@ public class ChartFactory {
                 chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.white);
             }
         }
-        ChartUtils.setLineRender(chart.getCategoryPlot(), false, false, positions, rangIndex, rangEnd, rangIndex2, rangEnd2, rangIndex3, rangEnd3, y2, dataset2, yLabels, dataset3, dataset4, dataset5, stack, ystack);//
+        double[] rangStarts = {rangIndex,rangIndex2,rangIndex3};
+        double[] rangEnds = {rangEnd,rangEnd2,rangEnd3};
+        DefaultCategoryDataset[] datasets = {dataset,dataset2,dataset3,dataset4,dataset5};
+        ChartUtils.setLineRender(chart.getCategoryPlot(), positions, rangStarts, rangEnds, y2, datasets, yLabels, stack, ystack);
         // 5:对其他部分进行渲染
         ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
-        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
+//        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
         // 设置标注无边框
 //        ChartUtils.setLegendEmptyBorder(chart);
         //设置标注不显示
