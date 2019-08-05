@@ -243,103 +243,103 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     public List<CellData> mapDataHandler2(List<String> columns, String url, DateQuery dateQuery, int index, String version) {
         List<CellData> resultList = new ArrayList<>();
-        List<String> c = new ArrayList<>();
-        c.add(columns.get(0));
-        c.add(columns.get(1));
-        JSONObject jsonObject = getQueryParam(dateQuery, c);
-
-        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject obj = JSONObject.parseObject(result);
-            obj = obj.getJSONObject("data");
-
-            JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
-            JSONObject jsonObject2 = obj.getJSONObject(columns.get(1));
-            if (Objects.nonNull(jsonObject1) && Objects.nonNull(jsonObject2)) {
-                Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
-                Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
-                Set<String> keyset = innerMap1.keySet();
-                List<Integer> list1 = new ArrayList<>();
-                Long[] dateSort = new Long[keyset.size()];
-                int k = 0;
-                for (String key : keyset) {
-                    Object o = innerMap1.get(key);
-                    BigDecimal o1 = (BigDecimal) o;
-                    list1.add(o1.intValue());
-                    dateSort[k] = Long.valueOf(key);
-                    k++;
-                }
-                // 按照顺序排序
-                Arrays.sort(dateSort);
-
-                Set<String> keyset2 = innerMap2.keySet();
-                List<Integer> list2 = new ArrayList<>();
-                Long[] dateSort2 = new Long[keyset2.size()];
-                int l = 0;
-                for (String key : keyset2) {
-                    Object o = innerMap2.get(key);
-                    BigDecimal o1 = (BigDecimal) o;
-                    list2.add(o1.intValue());
-                    dateSort2[l] = Long.valueOf(key);
-                    l++;
-                }
-                // 按照顺序排序
-                Arrays.sort(dateSort2);
-
-                int indexkey = -1;
-                for (int i = 0; i < list1.size(); i++) {
-                    if (list1.get(i) * list2.get(i) == 1) {
-                        indexkey = i;
-                        break;
-                    }
-                }
-
-                String indextime = "";
-//                Object[] objects = keyset2.toArray();
-                for (int i = 0; i < dateSort2.length; i++) {
-                    if (i == indexkey) {
-                        indextime = String.valueOf(dateSort2[i]);
-                        break;
-                    }
-                }
-
-                if (StringUtils.isNotBlank(indextime)) {
-                    ExcelWriterUtil.addCellData(resultList, index, 1, Long.valueOf(indextime));
-                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
-                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
-
-                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
-                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
-
-                    int indexkey2 = -1;
-                    for (int i = indexkey; i < list1.size(); i++) {
-                        if (list1.get(i) * list2.get(i) == 0) {
-                            indexkey2 = i;
-                            break;
-                        }
-                    }
-
-                    String indextime2 = "";
-                    //  Object[] objects2 = keyset2.toArray();
-                    for (int i = 0; i < dateSort2.length; i++) {
-                        if (i == indexkey2) {
-                            indextime2 = String.valueOf(dateSort2[i]);
-                            break;
-                        }
-                    }
-
-                    if (StringUtils.isNotBlank(indextime2)) {
-                        Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), 1);
-                        Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5), 1);
-
-                        ExcelWriterUtil.addCellData(resultList, index, 4, o4);
-                        ExcelWriterUtil.addCellData(resultList, index, 5, o5);
-                    }
-                }
-
-            }
-
-        }
+//        List<String> c = new ArrayList<>();
+//        c.add(columns.get(0));
+//        c.add(columns.get(1));
+//        JSONObject jsonObject = getQueryParam(dateQuery, c);
+//
+//        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+//        if (StringUtils.isNotBlank(result)) {
+//            JSONObject obj = JSONObject.parseObject(result);
+//            obj = obj.getJSONObject("data");
+//
+//            JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
+//            JSONObject jsonObject2 = obj.getJSONObject(columns.get(1));
+//            if (Objects.nonNull(jsonObject1) && Objects.nonNull(jsonObject2)) {
+//                Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
+//                Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
+//                Set<String> keyset = innerMap1.keySet();
+//                List<Integer> list1 = new ArrayList<>();
+//                Long[] dateSort = new Long[keyset.size()];
+//                int k = 0;
+//                for (String key : keyset) {
+//                    Object o = innerMap1.get(key);
+//                    BigDecimal o1 = (BigDecimal) o;
+//                    list1.add(o1.intValue());
+//                    dateSort[k] = Long.valueOf(key);
+//                    k++;
+//                }
+//                // 按照顺序排序
+//                Arrays.sort(dateSort);
+//
+//                Set<String> keyset2 = innerMap2.keySet();
+//                List<Integer> list2 = new ArrayList<>();
+//                Long[] dateSort2 = new Long[keyset2.size()];
+//                int l = 0;
+//                for (String key : keyset2) {
+//                    Object o = innerMap2.get(key);
+//                    BigDecimal o1 = (BigDecimal) o;
+//                    list2.add(o1.intValue());
+//                    dateSort2[l] = Long.valueOf(key);
+//                    l++;
+//                }
+//                // 按照顺序排序
+//                Arrays.sort(dateSort2);
+//
+//                int indexkey = -1;
+//                for (int i = 0; i < list1.size(); i++) {
+//                    if (list1.get(i) * list2.get(i) == 1) {
+//                        indexkey = i;
+//                        break;
+//                    }
+//                }
+//
+//                String indextime = "";
+////                Object[] objects = keyset2.toArray();
+//                for (int i = 0; i < dateSort2.length; i++) {
+//                    if (i == indexkey) {
+//                        indextime = String.valueOf(dateSort2[i]);
+//                        break;
+//                    }
+//                }
+//
+//                if (StringUtils.isNotBlank(indextime)) {
+//                    ExcelWriterUtil.addCellData(resultList, index, 1, Long.valueOf(indextime));
+//                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
+//                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
+//
+//                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
+//                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
+//
+//                    int indexkey2 = -1;
+//                    for (int i = indexkey; i < list1.size(); i++) {
+//                        if (list1.get(i) * list2.get(i) == 0) {
+//                            indexkey2 = i;
+//                            break;
+//                        }
+//                    }
+//
+//                    String indextime2 = "";
+//                    //  Object[] objects2 = keyset2.toArray();
+//                    for (int i = 0; i < dateSort2.length; i++) {
+//                        if (i == indexkey2) {
+//                            indextime2 = String.valueOf(dateSort2[i]);
+//                            break;
+//                        }
+//                    }
+//
+//                    if (StringUtils.isNotBlank(indextime2)) {
+//                        Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), 1);
+//                        Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5), 1);
+//
+//                        ExcelWriterUtil.addCellData(resultList, index, 4, o4);
+//                        ExcelWriterUtil.addCellData(resultList, index, 5, o5);
+//                    }
+//                }
+//
+//            }
+//
+//        }
 
         return resultList;
     }
@@ -347,126 +347,134 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     public List<CellData> mapDataHandler4(List<String> columns, String url, DateQuery dateQuery, int index, String version) {
         List<CellData> resultList = new ArrayList<>();
-        List<String> c = new ArrayList<>();
-        c.add(columns.get(0));
-        c.add(columns.get(1));
-        JSONObject jsonObject = getQueryParam(dateQuery, c);
-
-        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject obj = JSONObject.parseObject(result);
-            obj = obj.getJSONObject("data");
-
-            JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
-            JSONObject jsonObject2 = obj.getJSONObject(columns.get(1));
-            if (Objects.nonNull(jsonObject1) && Objects.nonNull(jsonObject2)) {
-                Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
-                Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
-                Set<String> keyset = innerMap1.keySet();
-                List<Integer> list1 = new ArrayList<>();
-                Long[] dateSort = new Long[keyset.size()];
-                int k = 0;
-                for (String key : keyset) {
-                    Object o = innerMap1.get(key);
-                    BigDecimal o1 = (BigDecimal) o;
-                    list1.add(o1.intValue());
-                    dateSort[k] = Long.valueOf(key);
-                    k++;
-                }
-                // 按照顺序排序
-                Arrays.sort(dateSort);
-
-                Set<String> keyset2 = innerMap2.keySet();
-                List<Integer> list2 = new ArrayList<>();
-                Long[] dateSort2 = new Long[keyset2.size()];
-                int l = 0;
-                for (String key : keyset2) {
-                    Object o = innerMap2.get(key);
-                    BigDecimal o1 = (BigDecimal) o;
-                    list2.add(o1.intValue());
-                    dateSort2[l] = Long.valueOf(key);
-                    l++;
-                }
-                // 按照顺序排序
-                Arrays.sort(dateSort2);
-
-                int indexkey = -1;
-                for (int i = 0; i < list1.size(); i++) {
-                    if (list1.get(i) * list2.get(i) == 1) {
-                        indexkey = i;
-                        break;
-                    }
-                }
-
-                String indextime = "";
-//                Object[] objects = keyset2.toArray();
-                for (int i = 0; i < dateSort2.length; i++) {
-                    if (i == indexkey) {
-                        indextime = String.valueOf(dateSort2[i]);
-                        break;
-                    }
-                }
-
-                if (StringUtils.isNotBlank(indextime)) {
-                    ExcelWriterUtil.addCellData(resultList, index, 1, Long.valueOf(indextime));
-                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
-                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
-                    Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), -1);
-                    Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5), -1);
-                    Object o6 = dealPart1(getUrl3(version), indextime, columns.get(6), -1);
-
-                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
-                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
-                    ExcelWriterUtil.addCellData(resultList, index, 4, o4);
-                    ExcelWriterUtil.addCellData(resultList, index, 5, o5);
-                    ExcelWriterUtil.addCellData(resultList, index, 6, o6);
-
-                    int indexkey2 = -1;
-                    for (int i = indexkey; i < list1.size(); i++) {
-                        if (list1.get(i) * list2.get(i) == 0) {
-                            indexkey2 = i;
-                            break;
-                        }
-                    }
-
-                    String indextime2 = "";
-                    //  Object[] objects2 = keyset2.toArray();
-                    for (int i = 0; i < dateSort2.length; i++) {
-                        if (i == indexkey2) {
-                            indextime2 = String.valueOf(dateSort2[i]);
-                            break;
-                        }
-                    }
-
-                    if (StringUtils.isNotBlank(indextime2)) {
-                        Object o7 = dealPart1(getUrl3(version), indextime, columns.get(7), 1);
-                        Object o8 = dealPart1(getUrl3(version), indextime, columns.get(8), 1);
-                        Object o9 = dealPart1(getUrl3(version), indextime, columns.get(9), 1);
-                        Object o10 = dealPart1(getUrl3(version), indextime, columns.get(10), 1);
-                        Object o11 = dealPart1(getUrl3(version), indextime, columns.get(11), 1);
-
-
-                        ExcelWriterUtil.addCellData(resultList, index, 7, o7);
-                        ExcelWriterUtil.addCellData(resultList, index, 8, o8);
-                        ExcelWriterUtil.addCellData(resultList, index, 9, o9);
-                        ExcelWriterUtil.addCellData(resultList, index, 10, o10);
-                        ExcelWriterUtil.addCellData(resultList, index, 11, o11);
-                    }
-                }
-
-            }
-
-        }
+//        List<String> c = new ArrayList<>();
+//        c.add(columns.get(0));
+//        c.add(columns.get(1));
+//        JSONObject jsonObject = getQueryParam(dateQuery, c);
+//
+//        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
+//        if (StringUtils.isNotBlank(result)) {
+//            JSONObject obj = JSONObject.parseObject(result);
+//            obj = obj.getJSONObject("data");
+//
+//            JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
+//            JSONObject jsonObject2 = obj.getJSONObject(columns.get(1));
+//            if (Objects.nonNull(jsonObject1) && Objects.nonNull(jsonObject2)) {
+//                Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
+//                Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
+//                Set<String> keyset = innerMap1.keySet();
+//                List<Integer> list1 = new ArrayList<>();
+//                Long[] dateSort = new Long[keyset.size()];
+//                int k = 0;
+//                for (String key : keyset) {
+//                    Object o = innerMap1.get(key);
+//                    BigDecimal o1 = (BigDecimal) o;
+//                    list1.add(o1.intValue());
+//                    dateSort[k] = Long.valueOf(key);
+//                    k++;
+//                }
+//                // 按照顺序排序
+//                Arrays.sort(dateSort);
+//
+//                Set<String> keyset2 = innerMap2.keySet();
+//                List<Integer> list2 = new ArrayList<>();
+//                Long[] dateSort2 = new Long[keyset2.size()];
+//                int l = 0;
+//                for (String key : keyset2) {
+//                    Object o = innerMap2.get(key);
+//                    BigDecimal o1 = (BigDecimal) o;
+//                    list2.add(o1.intValue());
+//                    dateSort2[l] = Long.valueOf(key);
+//                    l++;
+//                }
+//                // 按照顺序排序
+//                Arrays.sort(dateSort2);
+//
+//                int indexkey = -1;
+//                for (int i = 0; i < list1.size(); i++) {
+//                    if (list1.get(i) * list2.get(i) == 1) {
+//                        indexkey = i;
+//                        break;
+//                    }
+//                }
+//
+//                String indextime = "";
+////                Object[] objects = keyset2.toArray();
+//                for (int i = 0; i < dateSort2.length; i++) {
+//                    if (i == indexkey) {
+//                        indextime = String.valueOf(dateSort2[i]);
+//                        break;
+//                    }
+//                }
+//
+//                if (StringUtils.isNotBlank(indextime)) {
+//                    ExcelWriterUtil.addCellData(resultList, index, 1, Long.valueOf(indextime));
+//                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
+//                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
+//                    Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), -1);
+//                    Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5), -1);
+//                    Object o6 = dealPart1(getUrl3(version), indextime, columns.get(6), -1);
+//
+//                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
+//                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
+//                    ExcelWriterUtil.addCellData(resultList, index, 4, o4);
+//                    ExcelWriterUtil.addCellData(resultList, index, 5, o5);
+//                    ExcelWriterUtil.addCellData(resultList, index, 6, o6);
+//
+//                    int indexkey2 = -1;
+//                    for (int i = indexkey; i < list1.size(); i++) {
+//                        if (list1.get(i) * list2.get(i) == 0) {
+//                            indexkey2 = i;
+//                            break;
+//                        }
+//                    }
+//
+//                    String indextime2 = "";
+//                    //  Object[] objects2 = keyset2.toArray();
+//                    for (int i = 0; i < dateSort2.length; i++) {
+//                        if (i == indexkey2) {
+//                            indextime2 = String.valueOf(dateSort2[i]);
+//                            break;
+//                        }
+//                    }
+//
+//                    if (StringUtils.isNotBlank(indextime2)) {
+//                        Object o7 = dealPart1(getUrl3(version), indextime, columns.get(7), 1);
+//                        Object o8 = dealPart1(getUrl3(version), indextime, columns.get(8), 1);
+//                        Object o9 = dealPart1(getUrl3(version), indextime, columns.get(9), 1);
+//                        Object o10 = dealPart1(getUrl3(version), indextime, columns.get(10), 1);
+//                        Object o11 = dealPart1(getUrl3(version), indextime, columns.get(11), 1);
+//
+//
+//                        ExcelWriterUtil.addCellData(resultList, index, 7, o7);
+//                        ExcelWriterUtil.addCellData(resultList, index, 8, o8);
+//                        ExcelWriterUtil.addCellData(resultList, index, 9, o9);
+//                        ExcelWriterUtil.addCellData(resultList, index, 10, o10);
+//                        ExcelWriterUtil.addCellData(resultList, index, 11, o11);
+//                    }
+//                }
+//
+//            }
+//
+//        }
 
         return resultList;
     }
 
+    private static final int MINUTE = 1*60*1000;
 
     public List<CellData> mapDataHandler3(List<String> columns, String url, DateQuery dateQuery, int index, String version) {
+        // 每小时+前一分钟+后一分钟
+        DateQuery tmp = new DateQuery(null,dateQuery.getEndTime(),dateQuery.getRecordDate());
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateQuery.getStartTime());
+        cal.add(Calendar.MINUTE,-1);
+        tmp.setStartTime(cal.getTime());
+
         List<CellData> resultList = new ArrayList<>();
         List<String> c = new ArrayList<>();
         c.add(columns.get(0));
-        JSONObject jsonObject = getQueryParam(dateQuery, c);
+        JSONObject jsonObject = getQueryParam(tmp, c);
         String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
         if (StringUtils.isNotBlank(result)) {
             JSONObject obj = JSONObject.parseObject(result);
@@ -474,79 +482,65 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
             JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
             if (Objects.nonNull(jsonObject1)) {
                 Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
-                Set<String> keyset = innerMap1.keySet();
-                List<Integer> list1 = new ArrayList<>();
-                Long[] dateSort = new Long[keyset.size()];
-                int k = 0;
-                for (String key : keyset) {
-                    Object o = innerMap1.get(key);
-                    BigDecimal o1 = (BigDecimal) o;
-                    list1.add(o1.intValue());
-                    dateSort[k] = Long.valueOf(key);
-                    k++;
-                }
-                // 按照顺序排序
-                Arrays.sort(dateSort);
-                int indexkey = -1;
-                for (int i = 0; i < list1.size(); i++) {
-                    if (list1.get(i) == 1) {
-                        indexkey = i;
-                        break;
+                // 0分
+                Long startTime = tmp.getQueryStartTime()+MINUTE;
+                // 一开始就是0，找开始时间点，找不到说明本小时未开启，结束；
+                // +如果找到，就看本小时是否结束。
+
+                // 一开始就是1，找结束时间点，找不到说明本小时未结束，结束；
+                // +如果找到，就结束。
+                int begin = ((BigDecimal)innerMap1.get(startTime+"")).intValue();
+
+                Long startIndex = null;
+                Long endIndex = null;
+                if(begin == 0){// 未开始
+                    while (innerMap1.containsKey(startTime+"")) {// 找开始时间点
+                        if(((BigDecimal)innerMap1.get(startTime+"")).intValue() == 1){
+                            startIndex = startTime;
+                            break;
+                        }
+                        startTime += MINUTE;
+                    }
+                    if(null != startIndex){// 找到开始时间点,找结束时间点
+                        while (innerMap1.containsKey(startTime+"")) {
+                            if(((BigDecimal)innerMap1.get(startTime+"")).intValue() == 0){
+                                endIndex = startTime;
+                                break;
+                            }
+                            startTime += MINUTE;
+                        }
+                    }
+                }else{// 已开始，找结束时间点
+                    while (innerMap1.containsKey(startTime+"")) {
+                        if(((BigDecimal)innerMap1.get(startTime+"")).intValue() == 0){
+                            endIndex = startTime;
+                            break;
+                        }
+                        startTime += MINUTE;
                     }
                 }
 
-                String indextime = "";
-                //  Object[] objects = keyset.toArray();
-                for (int i = 0; i < dateSort.length; i++) {
-                    if (i == indexkey) {
-                        indextime = String.valueOf(dateSort[i]);
-                        break;
-                    }
-                }
-
-                if (StringUtils.isNotBlank(indextime)) {
-                    ExcelWriterUtil.addCellData(resultList, index, 0, Long.valueOf(indextime));
-                    Object o1 = dealPart1(getUrl3(version), indextime, columns.get(1), -1);
-                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
+                if (null != startIndex) {
+                    ExcelWriterUtil.addCellData(resultList, index, 0, startIndex);
+                    BigDecimal o1 = (BigDecimal)dealPart1(getUrl3(version), startIndex, columns.get(1), -1);
+                    BigDecimal o2 = (BigDecimal)dealPart1(getUrl3(version), startIndex, columns.get(2), -1);
                     ExcelWriterUtil.addCellData(resultList, index, 1, o1);
                     ExcelWriterUtil.addCellData(resultList, index, 2, o2);
-
-                    int indexkey2 = -1;
-                    for (int i = indexkey; i < list1.size(); i++) {
-                        if (list1.get(i) == 0) {
-                            indexkey2 = i;
-                            break;
-                        }
-                    }
-
-                    String indextime2 = "";
-                    // Object[] objects2 = keyset.toArray();
-                    for (int i = 0; i < dateSort.length; i++) {
-                        if (i == indexkey2) {
-                            indextime2 = String.valueOf(dateSort[i]);
-                            break;
-                        }
-                    }
-
-                    if (StringUtils.isNotBlank(indextime2)) {
-                        Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), 1);
-                        Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), 1);
-
-                        ExcelWriterUtil.addCellData(resultList, index, 3, o3);
-                        ExcelWriterUtil.addCellData(resultList, index, 4, o4);
-                    }
                 }
-
-
+                if (null != endIndex) {
+                    BigDecimal o3 = (BigDecimal)dealPart1(getUrl3(version), endIndex, columns.get(3), 1);
+                    BigDecimal o4 = (BigDecimal)dealPart1(getUrl3(version), endIndex, columns.get(4), 1);
+                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
+                    ExcelWriterUtil.addCellData(resultList, index, 4, o4);
+                }
             }
         }
 
         return resultList;
     }
 
-    private Object dealPart1(String url, String indextime, String tagName, int min) {
-        long value = Long.valueOf(indextime);
-        Date date = new Date(value);
+    private Object dealPart1(String url, Long indextime, String tagName, int min) {
+        Date date = new Date(indextime);
         Date curr = DateUtil.addMinute(date, min);
         Object v = null;
         Map<String, String> queryParam = new HashMap<>();
