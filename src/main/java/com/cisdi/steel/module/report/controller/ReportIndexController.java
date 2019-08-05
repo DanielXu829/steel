@@ -3,10 +3,14 @@ package com.cisdi.steel.module.report.controller;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.ExportJobContext;
+import com.cisdi.steel.module.job.config.HttpProperties;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
@@ -21,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * <p>Description: 报表文件-索引 前端控制器 </p>
@@ -33,6 +37,10 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/report/reportIndex")
 public class ReportIndexController {
+    @Autowired
+    protected HttpUtil httpUtil;
+    @Autowired
+    protected HttpProperties httpProperties;
 
     /**
      * 构造器注入
@@ -80,6 +88,33 @@ public class ReportIndexController {
         if(StringUtils.isNotBlank(report.getPath())){
             FileUtils.deleteFile(report.getPath());
         }
+
+        String code = report.getReportCategoryCode();
+        Date createTime = report.getCreateTime();
+        String version = "";
+        List<String> tagNames = new ArrayList<>();
+        if(JobEnum.jh_zidongpeimei.getCode().equals(code)){
+            version = "67.0";
+            tagNames.add("CK67_L1R_CB_CBAmtTol_1m_evt");
+        } else if(JobEnum.jh_ck12zidongpeimeinew.getCode().equals(code)){
+            version = "12.0";
+            tagNames.add("CK12_L1R_CB_CBAmtTol1_evt");
+            tagNames.add("CK12_L1R_CB_CBAmtTol2_evt");
+        } else if(JobEnum.jh_ck45zidongpeimei.getCode().equals(code)){
+            version = "45.0";
+            tagNames.add("CK45_L1R_CB_CBAmtTol_evt");
+        }
+
+        String url = httpProperties.getJHUrlVersion(version) + "/jhTagValue/deleteTagValueByDate";
+        // 去删除对应时间的班总配煤量evt点的值
+        Map<String, String> map = new HashMap<>();
+        map.put("startTime", DateUtil.getFormatDateTime(DateUtil.addMinute(createTime, -2), "yyyy/MM/dd HH:mm:ss"));
+        map.put("endTime", DateUtil.getFormatDateTime(DateUtil.addMinute(createTime, 1), "yyyy/MM/dd HH:mm:ss"));
+        for (String tagName : tagNames) {
+            map.put("tagName", tagName);
+            httpUtil.get(url, map);
+        }
+
         return baseService.deleteRecord(baseId);
     }
 
