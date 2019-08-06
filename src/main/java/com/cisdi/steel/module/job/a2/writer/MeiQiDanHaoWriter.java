@@ -54,7 +54,7 @@ public class MeiQiDanHaoWriter extends AbstractExcelReadWriter {
                 item.setStartTime(DateUtil.addDays(item.getStartTime(),-1));
                 item.setEndTime(DateUtil.addMinute(DateUtil.addDays(item.getEndTime(), -1),-50));
                 DateQuery dateQuery = new DateQuery(new Date());
-                Date date1 = DateUtil.addDays(item.getStartTime(), -7);
+                Date date1 = DateQueryUtil.getMonthStartTime(item.getStartTime());
                 dateQuery.setRecordDate(date1);
                 dateQuery.setStartTime(date1);
                 dateQuery.setEndTime(item.getStartTime());
