@@ -139,7 +139,6 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
 
                     pdRunSegments = getDateSegment();
                     CBReset = getCBReset();
-                    teamTotal.clear();
 
                     // 班次
                     int rowIndex = 50;
@@ -164,22 +163,31 @@ public class CK12ZidongpeimeiNewWriter extends AbstractExcelReadWriter {
                     url = getUrl();
                     String[] peimei = {"CK12_L1R_CB_CBAmtTol1_evt","CK12_L1R_CB_CBAmtTol2_evt"};
                     // 配煤量1# 月累计
+                    teamTotal.clear();
                     Row row4 = sheet.createRow(++rowIndex);
                     Double double4 = peimeiLeiji(url, date, peimei[0]);
                     row4.createCell(0).setCellValue(double4);
                     row4.getCell(0).setCellType(CellType.NUMERIC);
 
+                    // 配煤量1# 甲乙丙班月累计
+                    Row peimei1ban = sheet.createRow(++rowIndex);
+                    for (Map.Entry<Integer, Double> entry : teamTotal.entrySet()) {
+                        peimei1ban.createCell(entry.getKey()).setCellValue(entry.getValue());
+                        peimei1ban.getCell(entry.getKey()).setCellType(CellType.NUMERIC);
+                    }
+
                     // 配煤量2# 月累计
+                    teamTotal.clear();
                     Row row5 = sheet.createRow(++rowIndex);
                     Double double5 = peimeiLeiji(url, date,peimei[1]);
                     row5.createCell(0).setCellValue(double5);
                     row5.getCell(0).setCellType(CellType.NUMERIC);
 
-                    // 配煤量 甲乙丙班月累计
-                    Row row6 = sheet.createRow(++rowIndex);
+                    // 配煤量2# 甲乙丙班月累计
+                    Row peimei2ban = sheet.createRow(++rowIndex);
                     for (Map.Entry<Integer, Double> entry : teamTotal.entrySet()) {
-                        row6.createCell(entry.getKey()).setCellValue(entry.getValue());
-                        row6.getCell(entry.getKey()).setCellType(CellType.NUMERIC);
+                        peimei2ban.createCell(entry.getKey()).setCellValue(entry.getValue());
+                        peimei2ban.getCell(entry.getKey()).setCellType(CellType.NUMERIC);
                     }
 
                     List<CellData> cellDataList = this.handlerData(date, sheet);
