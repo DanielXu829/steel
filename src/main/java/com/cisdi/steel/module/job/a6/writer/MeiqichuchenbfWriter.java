@@ -241,123 +241,43 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
         return resultList;
     }
 
-    public List<CellData> mapDataHandler4(List<String> columns, String url, DateQuery dateQuery, int index, String version) {
-        List<CellData> resultList = new ArrayList<>();
-//        List<String> c = new ArrayList<>();
-//        c.add(columns.get(0));
-//        c.add(columns.get(1));
-//        JSONObject jsonObject = getQueryParam(dateQuery, c);
-//
-//        String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
-//        if (StringUtils.isNotBlank(result)) {
-//            JSONObject obj = JSONObject.parseObject(result);
-//            obj = obj.getJSONObject("data");
-//
-//            JSONObject jsonObject1 = obj.getJSONObject(columns.get(0));
-//            JSONObject jsonObject2 = obj.getJSONObject(columns.get(1));
-//            if (Objects.nonNull(jsonObject1) && Objects.nonNull(jsonObject2)) {
-//                Map<String, Object> innerMap1 = jsonObject1.getInnerMap();
-//                Map<String, Object> innerMap2 = jsonObject2.getInnerMap();
-//                Set<String> keyset = innerMap1.keySet();
-//                List<Integer> list1 = new ArrayList<>();
-//                Long[] dateSort = new Long[keyset.size()];
-//                int k = 0;
-//                for (String key : keyset) {
-//                    Object o = innerMap1.get(key);
-//                    BigDecimal o1 = (BigDecimal) o;
-//                    list1.add(o1.intValue());
-//                    dateSort[k] = Long.valueOf(key);
-//                    k++;
-//                }
-//                // 按照顺序排序
-//                Arrays.sort(dateSort);
-//
-//                Set<String> keyset2 = innerMap2.keySet();
-//                List<Integer> list2 = new ArrayList<>();
-//                Long[] dateSort2 = new Long[keyset2.size()];
-//                int l = 0;
-//                for (String key : keyset2) {
-//                    Object o = innerMap2.get(key);
-//                    BigDecimal o1 = (BigDecimal) o;
-//                    list2.add(o1.intValue());
-//                    dateSort2[l] = Long.valueOf(key);
-//                    l++;
-//                }
-//                // 按照顺序排序
-//                Arrays.sort(dateSort2);
-//
-//                int indexkey = -1;
-//                for (int i = 0; i < list1.size(); i++) {
-//                    if (list1.get(i) * list2.get(i) == 1) {
-//                        indexkey = i;
-//                        break;
-//                    }
-//                }
-//
-//                String indextime = "";
-////                Object[] objects = keyset2.toArray();
-//                for (int i = 0; i < dateSort2.length; i++) {
-//                    if (i == indexkey) {
-//                        indextime = String.valueOf(dateSort2[i]);
-//                        break;
-//                    }
-//                }
-//
-//                if (StringUtils.isNotBlank(indextime)) {
-//                    ExcelWriterUtil.addCellData(resultList, index, 1, Long.valueOf(indextime));
-//                    Object o2 = dealPart1(getUrl3(version), indextime, columns.get(2), -1);
-//                    Object o3 = dealPart1(getUrl3(version), indextime, columns.get(3), -1);
-//                    Object o4 = dealPart1(getUrl3(version), indextime, columns.get(4), -1);
-//                    Object o5 = dealPart1(getUrl3(version), indextime, columns.get(5), -1);
-//                    Object o6 = dealPart1(getUrl3(version), indextime, columns.get(6), -1);
-//
-//                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
-//                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
-//                    ExcelWriterUtil.addCellData(resultList, index, 4, o4);
-//                    ExcelWriterUtil.addCellData(resultList, index, 5, o5);
-//                    ExcelWriterUtil.addCellData(resultList, index, 6, o6);
-//
-//                    int indexkey2 = -1;
-//                    for (int i = indexkey; i < list1.size(); i++) {
-//                        if (list1.get(i) * list2.get(i) == 0) {
-//                            indexkey2 = i;
-//                            break;
-//                        }
-//                    }
-//
-//                    String indextime2 = "";
-//                    //  Object[] objects2 = keyset2.toArray();
-//                    for (int i = 0; i < dateSort2.length; i++) {
-//                        if (i == indexkey2) {
-//                            indextime2 = String.valueOf(dateSort2[i]);
-//                            break;
-//                        }
-//                    }
-//
-//                    if (StringUtils.isNotBlank(indextime2)) {
-//                        Object o7 = dealPart1(getUrl3(version), indextime, columns.get(7), 1);
-//                        Object o8 = dealPart1(getUrl3(version), indextime, columns.get(8), 1);
-//                        Object o9 = dealPart1(getUrl3(version), indextime, columns.get(9), 1);
-//                        Object o10 = dealPart1(getUrl3(version), indextime, columns.get(10), 1);
-//                        Object o11 = dealPart1(getUrl3(version), indextime, columns.get(11), 1);
-//
-//
-//                        ExcelWriterUtil.addCellData(resultList, index, 7, o7);
-//                        ExcelWriterUtil.addCellData(resultList, index, 8, o8);
-//                        ExcelWriterUtil.addCellData(resultList, index, 9, o9);
-//                        ExcelWriterUtil.addCellData(resultList, index, 10, o10);
-//                        ExcelWriterUtil.addCellData(resultList, index, 11, o11);
-//                    }
-//                }
-//
-//            }
-//
-//        }
+    private static final int MINUTE = 1*60*1000;
 
-        return resultList;
+    /**
+     * 反吹是否开始
+     * @param version
+     * @param val
+     * @return
+     */
+    private Boolean isFCBegin(String version, int val){
+        Boolean isBegin = false;
+        switch(version){
+            case "7.0":
+                isBegin = val < 15;
+                break;
+            default:// 6/8
+                isBegin = val > 0;
+        }
+        return isBegin;
     }
 
-    private static final int MINUTE = 1*60*1000;
+    /**
+     * 反吹是否结束
+     * @param version
+     * @param val
+     * @return
+     */
+    private Boolean isFCEnd(String version, int val){
+        Boolean isEnd = false;
+        switch(version){
+            case "7.0":
+                isEnd = (val == 15);
+                break;
+            default:// 6/8
+                isEnd = (val == 0);
+        }
+        return isEnd;
+    }
 
     public List<CellData> mapDataHandler3(List<String> columns, String url, DateQuery dateQuery, int index, String version) {
         // 每小时+前一分钟+后一分钟
@@ -394,7 +314,8 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 if(begin == 0){// 未开始
                     while (startTime<=endTime) {// 找开始时间点
                         if(innerMap1.containsKey(startTime+"")){
-                            if(((BigDecimal)innerMap1.get(startTime+"")).intValue() > 0){
+                            int val = ((BigDecimal)innerMap1.get(startTime+"")).intValue();
+                            if(isFCBegin(version,val)){
                                 startIndex = startTime;
                                 break;
                             }
@@ -404,7 +325,8 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     if(null != startIndex){// 找到开始时间点,找结束时间点
                         while (startTime<=endTime) {
                             if(innerMap1.containsKey(startTime+"")){
-                                if(((BigDecimal)innerMap1.get(startTime+"")).intValue() == 0){
+                                int val = ((BigDecimal)innerMap1.get(startTime+"")).intValue();
+                                if(isFCEnd(version,val)){
                                     endIndex = startTime;
                                     break;
                                 }
@@ -415,7 +337,8 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 }else{// 已开始，找结束时间点
                     while (startTime<=endTime) {
                         if(innerMap1.containsKey(startTime+"")){
-                            if(((BigDecimal)innerMap1.get(startTime+"")).intValue() == 0){
+                            int val = ((BigDecimal)innerMap1.get(startTime+"")).intValue();
+                            if(isFCEnd(version,val)){
                                 endIndex = startTime;
                                 break;
                             }
@@ -426,21 +349,62 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
                 if (null != startIndex) {
                     ExcelWriterUtil.addCellData(resultList, index, 0, startIndex);
-                    BigDecimal o1 = (BigDecimal)dealPart1(getUrl3(version), startIndex, columns.get(1), -1);
-                    BigDecimal o2 = (BigDecimal)dealPart1(getUrl3(version), startIndex, columns.get(2), -1);
-                    ExcelWriterUtil.addCellData(resultList, index, 1, o1);
-                    ExcelWriterUtil.addCellData(resultList, index, 2, o2);
+                    String getValUrl = getUrl3(version);
+                    Integer[] colIndex = isYaChaBefore(version);
+                    writeVal(getValUrl,resultList,index,colIndex,columns,startIndex,-1);
                 }
                 if (null != endIndex) {
-                    BigDecimal o3 = (BigDecimal)dealPart1(getUrl3(version), endIndex, columns.get(3), 1);
-                    BigDecimal o4 = (BigDecimal)dealPart1(getUrl3(version), endIndex, columns.get(4), 1);
-                    ExcelWriterUtil.addCellData(resultList, index, 3, o3);
-                    ExcelWriterUtil.addCellData(resultList, index, 4, o4);
+                    String getValUrl = getUrl3(version);
+                    Integer[] colIndex = isYaChaAfter(version);
+                    writeVal(getValUrl,resultList,index,colIndex,columns,endIndex,1);
                 }
             }
         }
 
         return resultList;
+    }
+
+    /**
+     * 压差前计算列
+     * @param version
+     * @param val
+     * @return
+     */
+    private Integer[] isYaChaBefore(String version){
+        Integer[] colIndex = null;
+        switch(version){
+            case "7.0":
+                colIndex = new Integer[]{1,2,3,4,5};
+                break;
+            default:// 6/8
+                colIndex = new Integer[]{1,2};
+        }
+        return colIndex;
+    }
+
+    /**
+     * 压差后计算列
+     * @param version
+     * @param val
+     * @return
+     */
+    private Integer[] isYaChaAfter(String version){
+        Integer[] colIndex = null;
+        switch(version){
+            case "7.0":
+                colIndex = new Integer[]{6,7,8,9,10};
+                break;
+            default:// 6/8
+                colIndex = new Integer[]{3,4};
+        }
+        return colIndex;
+    }
+
+    private void writeVal(String url, List<CellData> resultList, Integer rowIndex, Integer[] colIndex, List<String> columns, Long time, int min){
+        for (Integer col : colIndex) {
+            BigDecimal o1 = (BigDecimal)dealPart1(url, time, columns.get(col), min);
+            ExcelWriterUtil.addCellData(resultList, rowIndex, col, o1);
+        }
     }
 
     private Object dealPart1(String url, Long indextime, String tagName, int min) {
