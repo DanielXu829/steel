@@ -186,7 +186,7 @@ public class MeiQiDanHaoWriter extends AbstractExcelReadWriter {
             Map<String, String> queryParam = getQueryParam2(dateQuery, brandcode, anaitemname);
             String format= DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
             String now = DateUtil.getFormatDateTime(new Date(), "yyyy-MM-dd");
-            if(i==1&&format.equals(now)){
+            if((i>0)&&format.equals(now)){
                 queryParam = getQueryParam4(dateQuery,version, brandcode, anaitemname);
                 url=getUrl6(version);
             }
