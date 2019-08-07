@@ -213,10 +213,12 @@ public class MeiQiDanHaoWriter extends AbstractExcelReadWriter {
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (Objects.nonNull(jsonObject)) {
                 Double data = jsonObject.getDouble("data");
-                if (url.equals(getUrl4(version))) {
-                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, 9, data);
-                } else {
-                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, 8, data);
+                if((null != data)&&(!Double.isNaN(data))){
+                    if (url.equals(getUrl4(version))) {
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 9, data);
+                    } else {
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 8, data);
+                    }
                 }
             }
         }
