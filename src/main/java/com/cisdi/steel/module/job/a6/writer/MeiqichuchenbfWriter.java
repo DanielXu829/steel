@@ -81,7 +81,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                     int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
                         DateQuery eachDate = dateQueries.get(rowNum);
-                        List<CellData> cellValInfoList = mapDataHandler4(columns, getUrl(version), eachDate, index, version);
+                        List<CellData> cellValInfoList = mapDataHandler3(columns, getUrl(version), eachDate, index, version);
                         ExcelWriterUtil.setCellValue(sheet, cellValInfoList);
                         index++;
                     }
