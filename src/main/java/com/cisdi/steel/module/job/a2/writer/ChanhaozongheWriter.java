@@ -402,7 +402,9 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
                 JSONObject data = jsonObject.getJSONObject("data");
                 if (Objects.nonNull(data)) {
                     Double currentYield = data.getDouble("currentYield");
-                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, currentYield);
+                    if(null != currentYield){
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, currentYield);
+                    }
                 }
             }
         }
@@ -504,7 +506,7 @@ public class ChanhaozongheWriter extends AbstractExcelReadWriter {
     }
 
     protected String getUrl3(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getYieldByDate";
+        return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getYieldByDateNew";
     }
 
     protected String getUrl4(String version) {
