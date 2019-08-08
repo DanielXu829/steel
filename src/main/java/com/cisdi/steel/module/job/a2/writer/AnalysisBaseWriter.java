@@ -28,6 +28,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class AnalysisBaseWriter extends BaseJhWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -136,6 +137,7 @@ public class AnalysisBaseWriter extends BaseJhWriter {
         result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("anaitemname", anaitemname);
+        result.put("sample_enter_no", "QMIR21PFY");
         if ("12.0".equals(version)) {
             if(StringUtils.isBlank(source)){
                 result.put("source", "1#-2#焦炉");
@@ -183,7 +185,7 @@ public class AnalysisBaseWriter extends BaseJhWriter {
 
 
     protected String getUrl2(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemValByCodeOrSource";
+        return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemValByCode_no";
     }
 
 
