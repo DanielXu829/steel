@@ -1193,7 +1193,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 300, 600, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg1", image1);
     }
@@ -1254,7 +1254,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 300, 600, tagNames.length - 1, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length - 1, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg2", image1);
     }
@@ -1365,7 +1365,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg4", image1);
     }
@@ -1417,7 +1417,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
     }
@@ -1472,7 +1472,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 10, 15, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg6", image1);
     }
@@ -1516,7 +1516,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg7", image1);
     }
@@ -1576,7 +1576,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg9", image1);
     }
@@ -1624,7 +1624,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 300, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg10", image1);
     }
@@ -1676,7 +1676,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max1, 0, 180, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max1, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg11", image1);
     }
@@ -1726,7 +1726,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 1000, 5000, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg12", image1);
     }
@@ -1774,7 +1774,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 180, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg13", image1);
     }
@@ -1822,7 +1822,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg16", image1);
 
@@ -1875,7 +1875,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg16", image1);
 
@@ -1911,7 +1911,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 100, 0, 1, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 0, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg18", image1);
 
@@ -1960,7 +1960,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 1, 2, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg17", image1);
 
