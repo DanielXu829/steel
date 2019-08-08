@@ -350,7 +350,7 @@ public class GaoLuDocMain2 {
     }
 
     private void dealTagName8() {
-        L1 = new String[]{"BF8_L2C_BD_ProductionSum_1d_cur", "BF8_L2C_MES_CON_FR_1d_avg"};
+        L1 = new String[]{"BF8_L2M_BX_HM_confirmWgt_evt", "BF8_L2C_MES_CON_FR_1d_avg"};
         L2 = new String[]{"BF8_L2M_BX_CokeRate_1d_cur", "BF8_L2M_BX_NTCokeRate_1d_cur", "BF8_L2C_MES_CON_PCI_1d_avg"};
         L3 = new String[]{"BF8_L2M_SinterRatio_1d_avg", "BF8_L2M_PelletsRatio_1d_avg", "BF8_L2M_LumporeRatio_1d_avg"};
         L4 = new String[]{"M40", "M10"};
@@ -2173,10 +2173,17 @@ public class GaoLuDocMain2 {
             return null;
         }
         Object o = objects1[objects1.length - 1];
-        Object v1 = 0.0;
+        int v1 = 0;
         if (Objects.nonNull(o)) {
             Double v = (Double) o;
             v1 = v.intValue();
+        }
+        if(0 == v1){
+            o = objects1[objects1.length - 2];
+            if (Objects.nonNull(o)) {
+                Double v = (Double) o;
+                v1 = v.intValue();
+            }
         }
         return v1;
     }
@@ -2191,10 +2198,17 @@ public class GaoLuDocMain2 {
             return null;
         }
         Object o = objects1[objects1.length - 1];
-        Object v1 = 0.0;
+        Double v1 = 0.0;
         if (Objects.nonNull(o)) {
             Double v = (Double) o;
             v1 = v.doubleValue();
+        }
+        if(0.0 == v1){
+            o = objects1[objects1.length - 2];
+            if (Objects.nonNull(o)) {
+                Double v = (Double) o;
+                v1 = v;
+            }
         }
         return v1;
     }
