@@ -1188,9 +1188,13 @@ public class GaoLuDocMain2 {
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
 
-        result.put("part5", getLastVal(objects1));
-        result.put("part6", getLastVal(objects2));
-        result.put("part7", getLastVal(objects3));
+        objects1 = getDoubleVal(objects1,null,2);
+        objects2 = getDoubleVal(objects2,null,2);
+        objects3 = getDoubleVal(objects3,null,2);
+
+        result.put("part5", getLastDoubleVal(objects1));
+        result.put("part6", getLastDoubleVal(objects2));
+        result.put("part7", getLastDoubleVal(objects3));
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
@@ -1251,6 +1255,9 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
+        objects1 = getDoubleVal(objects1,null,1);
+        objects2 = getDoubleVal(objects2,null,1);
+
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
         Double min1 = data.get(1) * 0.8;
@@ -1259,8 +1266,8 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.2;
         Double min2 = data2.get(1) * 0.8;
 
-        result.put("part8", getLastVal(objects1));
-        result.put("part9", getLastVal(objects2));
+        result.put("part8", getLastDoubleVal(objects1));
+        result.put("part9", getLastDoubleVal(objects2));
 
         /**
          *   M40
@@ -1401,10 +1408,18 @@ public class GaoLuDocMain2 {
     }
 
     private void dealPart7(String version, String[] tagNames) {
-        String[] cBrandCodes = {"5_SJK_SINTER", "6_SJK_SINTER"};
+        String[] cBrandCodes = null;
+        if(version.equals("8.0")){
+            cBrandCodes = new String[]{"6_SJK_SINTER"};
+        }else{
+            cBrandCodes = new String[]{"5_SJK_SINTER"};
+        }
         List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 100);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
+
+        objects1 = getDoubleVal(objects1,null,2);
+        objects2 = getDoubleVal(objects2,null,2);
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.06;
@@ -1427,8 +1442,8 @@ public class GaoLuDocMain2 {
         vectors.add(series1);
         vectors.add(series2);
 
-        result.put("part14", getLastVal(objects1));
-        result.put("part15", getLastVal(objects2));
+        result.put("part14", getLastDoubleVal(objects1));
+        result.put("part15", getLastDoubleVal(objects2));
 
         String title1 = "";
         String categoryAxisLabel1 = null;
@@ -2149,22 +2164,25 @@ public class GaoLuDocMain2 {
         }
         Object[] result = new Object[objects1.length];
         int i = 0;
+
+        int scale = 1;
+        if(null != decimal){
+            for(;decimal>0;decimal--){
+                scale *= 10;
+            }
+        }
         for (Object o : objects1) {
-            Object v1 = 0.0;
+            Double v = 0.0;
             if (Objects.nonNull(o)) {
-                Double v = (Double) o;
+                v = (Double) o;
                 if(null != multiple){
                     v = v*multiple;
                 }
                 if(null != decimal){
-                    int tmp = 10;
-                    for(;decimal>1;decimal--){
-                        tmp *= 10;
-                    }
-                    v = (double) Math.round(v * tmp) / tmp;
+                    v = (double) Math.round(v * scale) / scale;
                 }
-                result[i++] = v.doubleValue();
             }
+            result[i++] = v;
         }
         return result;
     }
