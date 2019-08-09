@@ -144,7 +144,7 @@ public class GaoLuDocMain2 {
 
         Map<String,String> zhatie7 = new HashMap<>();
         zhatie7.put("铁口深度","BF7_L2C_CH_TapDepth");
-        zhatie7.put("见渣率","BF8_L2C_CH_SlagPercent");
+        zhatie7.put("见渣率","BF7_L2C_CH_SlagPercent");
         zhatie7.put("铁水温度","BF7_L2M_HMTemp_1d_avg");
         zhatie7.put("铁水Si","BF7_L2C_AnalysisSiValue_1d_avg");
         zhatie7.put("铁水S","BF7_L2C_AnalysisSValue_1d_avg");
@@ -306,11 +306,11 @@ public class GaoLuDocMain2 {
         L6 = new String[]{"Ad", "S"};
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
-        L10 = new String[]{"BF7_L2C_BD_ColdBlastFlow_1h_avg", "BF7_L2C_BD_OxygenFlow_1d_avg"};
+        L10 = new String[]{"BF7_L2C_BD_ColdBlastFlow_1h_avg", "BF7_L2C_BD_OxygenFlow1_1d_avg"};
         L11 = new String[]{"BF7_L2C_BD_ColdWindPress2_1d_avg", "BF7_L2C_TP_TopPress_1d_avg"};
         L12 = new String[]{"BF7_L2C_BD_PeripheralAirflowFinger_1d_avg", "BF7_L2C_BD_CentralAirFinger_1d_avg"};
         L13 = new String[]{"BF7_L2C_BD_CCTCenterTemp_1d_avg", "BF7_L2M_PCT_1d_avg"};
-        L16 = new String[]{"BF7_L2C_BD_WT6_Q_1d_avg", "BF7_L2C_BD_GasUtilization_1d_avg"};
+        L16 = new String[]{"BF7_L2C_BD_WT6_Q_1d_avg", "BF7_L2M_GasUtilization_1d_avg"};
         L18 = new String[]{"BF7_L2M_HMTemp_1d_avg"};
         L19 = new String[]{"BF7_L2C_AnalysisSiValue_1d_avg", "BF7_L2C_AnalysisSValue_1d_avg"};
     }
@@ -325,7 +325,7 @@ public class GaoLuDocMain2 {
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
         L10 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_OxygenFlow_1d_avg"};
-        L11 = new String[]{"BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_TopPress2_1d_avg"};
+        L11 = new String[]{"BF8_L2C_BD_ColdBlastPress_1d_avg", "BF8_L2C_BD_TopPress_1d_avg"};
         L12 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
         L13 = new String[]{"BF8_L2C_BD_CCT_1d_avg", "BF8_L2M_PCT_1d_avg"};
         L16 = new String[]{"BF8_L2C_BD_WT6_Q_1d_avg", "BF8_L2C_TP_GasUtilization_1d_avg"};
@@ -1473,7 +1473,14 @@ public class GaoLuDocMain2 {
     }
 
     private void dealPart9(String version, String[] tagNames) {
-        String[] cBrandCodes = {"4_ZMHPCM_COAL"};
+        String[] cBrandCodes = null;
+        if(version.equals("6.0")){
+            cBrandCodes = new String[]{"2_ZMHPCM_COAL"};
+        }else if(version.equals("7.0")){
+            cBrandCodes = new String[]{"3_ZMHPCM_COAL"};
+        }else if(version.equals("8.0")){
+            cBrandCodes = new String[]{"4_ZMHPCM_COAL"};
+        }
         List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 100);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
@@ -1524,6 +1531,9 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
+        if(version.equals("7.0")){
+            objects2 = getDoubleVal(objects2,1000,0);
+        }
 
         result.put("part20", getLastVal(objects1));
         result.put("part21", getLastVal(objects2));
@@ -1722,6 +1732,8 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
+        objects2 = getDoubleVal(objects2,null,2);
+
         /**
          * 总热负荷
          * 煤气利用率
@@ -1741,7 +1753,7 @@ public class GaoLuDocMain2 {
         vectors.add(series2);
 
         result.put("part32", getLastVal(objects1));
-        result.put("part33", getLastVal(objects2));
+        result.put("part33", getLastDoubleVal(objects2));
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.1;
@@ -1770,11 +1782,7 @@ public class GaoLuDocMain2 {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
-        int xc = 1;
-        if ("7.0".equals(version)) {
-            xc = 100;
-        }
-        objects2 = dealData(objects2, xc);
+        objects2 = getDoubleVal(objects2,null,2);
 
         /**总热负荷
          * 煤气利用率
@@ -1794,7 +1802,7 @@ public class GaoLuDocMain2 {
         vectors.add(series2);
 
         result.put("part33", getLastVal(objects1));
-        result.put("part37", getLastVal(objects2));
+        result.put("part37", getLastDoubleVal(objects2));
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
@@ -1859,6 +1867,9 @@ public class GaoLuDocMain2 {
         List<List<Double>> doubles = part1(version, tagNames, 1);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
+
+        objects1 = getDoubleVal(objects1,null,2);
+        objects2 = getDoubleVal(objects2,null,3);
 
         /**
          * Si
@@ -2167,7 +2178,8 @@ public class GaoLuDocMain2 {
 
         int scale = 1;
         if(null != decimal){
-            for(;decimal>0;decimal--){
+            int m = decimal;
+            for(;m>0;m--){
                 scale *= 10;
             }
         }
@@ -2259,8 +2271,8 @@ public class GaoLuDocMain2 {
             chart.getRenderingHints().put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
             chart.getPlot().setBackgroundAlpha(0.1f);
             chart.getPlot().setNoDataMessage("当前没有有效的数据");
-            ChartUtilities.writeChartAsJPEG(baos, chart, 600, 300);
-            image.setHeight(350);
+            ChartUtilities.writeChartAsJPEG(baos, chart, 600, 290);
+            image.setHeight(300);
             image.setWidth(650);
             image.setData(baos.toByteArray());
             image.setType(WordImageEntity.Data);
