@@ -14,8 +14,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 @EnableAsync
 public class SteelApplication {
-    Thread t = new Thread();
-
     public static void main(String[] args) {
         SpringApplication.run(SteelApplication.class, args);
     }
