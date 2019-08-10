@@ -46,7 +46,7 @@ public class AnalysisBaseWriter extends BaseJhWriter {
             // 以下划线开头的sheet 表示 隐藏表  待处理
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
-            if(sheetName.contains("粗苯蒸馏")||sheetName.contains("硫铵")||sheetName.contains("蒸氨")||sheetName.contains("终冷洗苯")){
+            if(sheetName.contains("粗苯蒸馏")||sheetName.contains("硫铵")||sheetName.contains("蒸氨")||sheetName.contains("终冷洗苯")||sheetName.contains("脱硫解吸")){
                 isFind = true;
             }
             if (sheetSplit.length == 4) {
