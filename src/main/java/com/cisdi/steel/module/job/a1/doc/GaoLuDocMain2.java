@@ -415,6 +415,9 @@ public class GaoLuDocMain2 {
                             }
                         }
                         if (Objects.nonNull(v)) {
+                            if(v<0){
+                                v = 0.0;
+                            }
                             a.add(v * scale);
                         } else {
                             a.add(v);
@@ -1106,6 +1109,28 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.2;
         Double min2 = data2.get(1) * 0.8;
 
+        switch (version){
+            case "6.0":
+                min1 = 0.0;
+                max1 = 5000.0;
+                min2 = 300.0;
+                max2 = 800.0;
+                break;
+            case "7.0":
+                min1 = 0.0;
+                max1 = 9000.0;
+                min2 = 350.0;
+                max2 = 800.0;
+                break;
+            case "8.0":
+                min1 = 0.0;
+                max1 = 10000.0;
+                min2 = 400.0;
+                max2 = 600.0;
+                break;
+            default:
+        }
+
         /**
          * 产量
          * 燃料比
@@ -1164,6 +1189,28 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.2;
         Double min2 = data2.get(1) * 0.8;
 
+        switch (version){
+            case "6.0":
+                min1 = 200.0;
+                max1 = 650.0;
+                min2 = 100.0;
+                max2 = 190.0;
+                break;
+            case "7.0":
+                min1 = 200.0;
+                max1 = 470.0;
+                min2 = 100.0;
+                max2 = 190.0;
+                break;
+            case "8.0":
+                min1 = 200.0;
+                max1 = 470.0;
+                min2 = 100.0;
+                max2 = 190.0;
+                break;
+            default:
+        }
+
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
         vectors.add(series3);
@@ -1207,6 +1254,34 @@ public class GaoLuDocMain2 {
         List<Double> data3 = dealList(objects3);
         Double max3 = data3.get(0) * 1.2;
         Double min3 = data3.get(1) * 0.8;
+
+        switch (version){
+            case "6.0":
+                min1 = 45.0;
+                max1 = 85.0;
+                min2 = 0.0;
+                max2 = 10.0;
+                min3 = 15.0;
+                max3 = 40.0;
+                break;
+            case "7.0":
+                min1 = 45.0;
+                max1 = 85.0;
+                min2 = 0.0;
+                max2 = 10.0;
+                min3 = 10.0;
+                max3 = 30.0;
+                break;
+            case "8.0":
+                min1 = 45.0;
+                max1 = 85.0;
+                min2 = 6.0;
+                max2 = 16.0;
+                min3 = 8.0;
+                max3 = 20.0;
+                break;
+            default:
+        }
 
         /**
          * A烧结矿
@@ -1429,6 +1504,28 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.2;
         Double min2 = data2.get(1) * 0.8;
 
+        switch (version){
+            case "6.0":
+                min1 = 55.0;
+                max1 = 58.0;
+                min2 = 7.5;
+                max2 = 10.5;
+                break;
+            case "7.0":
+                min1 = 55.0;
+                max1 = 58.0;
+                min2 = 7.5;
+                max2 = 10.5;
+                break;
+            case "8.0":
+                min1 = 55.0;
+                max1 = 58.0;
+                min2 = 7.5;
+                max2 = 10.5;
+                break;
+            default:
+        }
+
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
@@ -1495,6 +1592,28 @@ public class GaoLuDocMain2 {
         Double max2 = data2.get(0) * 1.2;
         Double min2 = data2.get(1) * 0.8;
 
+        switch (version){
+            case "6.0":
+                min1 = 9.0;
+                max1 = 12.5;
+                min2 = 0.3;
+                max2 = 0.65;
+                break;
+            case "7.0":
+                min1 = 7.5;
+                max1 = 11.0;
+                min2 = 0.3;
+                max2 = 0.65;
+                break;
+            case "8.0":
+                min1 = 7.5;
+                max1 = 11.0;
+                min2 = 0.3;
+                max2 = 0.65;
+                break;
+            default:
+        }
+
 
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
@@ -1532,7 +1651,7 @@ public class GaoLuDocMain2 {
         Object[] objects2 = doubles.get(1).toArray();
 
         if(version.equals("7.0")){
-            objects2 = getDoubleVal(objects2,1000,0);
+            objects2 = getDoubleVal(objects2,10000,0);
         }
 
         result.put("part20", getLastVal(objects1));
@@ -1591,12 +1710,34 @@ public class GaoLuDocMain2 {
         result.put("part23", getLastVal(objects2));
 
         List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.055;
+        Double max1 = data.get(0) * 1.035;
         Double min1 = data.get(1) * 0.975;
 
         List<Double> data2 = dealList(objects2);
-        Double max2 = data2.get(0)* 1.055;
+        Double max2 = 260.0;
         Double min2 = data2.get(1)* 0.975;
+
+        switch (version){
+            case "6.0":
+                min1 = 0.0;
+                max1 = 450.0;
+                min2 = 0.0;
+                max2 = 180.0;
+                break;
+            case "7.0":
+                min1 = 0.0;
+                max1 = 500.0;
+                min2 = 0.0;
+                max2 = 500.0;
+                break;
+            case "8.0":
+                min1 = 0.0;
+                max1 = 500.0;
+                min2 = 0.0;
+                max2 = 500.0;
+                break;
+            default:
+        }
 
         /**
          * 风压
@@ -1624,7 +1765,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max1, 0, 0, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg11", image1);
     }
@@ -2193,8 +2334,8 @@ public class GaoLuDocMain2 {
                 if(null != decimal){
                     v = (double) Math.round(v * scale) / scale;
                 }
+                result[i++] = v;
             }
-            result[i++] = v;
         }
         return result;
     }
