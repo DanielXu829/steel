@@ -40,11 +40,15 @@ public class AnalysisBaseWriter extends BaseJhWriter {
         }catch(Exception e){
         }
         int numberOfSheets = workbook.getNumberOfSheets();
+        boolean isFind = false;
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表  待处理
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
+            if(sheetName.contains("粗苯蒸馏")||sheetName.contains("硫铵")||sheetName.contains("蒸氨")||sheetName.contains("终冷洗苯")){
+                isFind = true;
+            }
             if (sheetSplit.length == 4) {
                 // 获取的对应的策略
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
@@ -57,11 +61,23 @@ public class AnalysisBaseWriter extends BaseJhWriter {
                             if (StringUtils.isNotBlank(columns.get(k))) {
                                 String[] split = columns.get(k).split("/");
                                 int rowIndex = 1 + j;
-                                if (split.length == 2) {
-                                    Double cellDataList = mapDataHandler2(getUrl2(version), item, split[0], split[1],"", version);
+                                if(isFind){
+                                    String sampleEnterNo = split[split.length-1];
+                                    if (split.length == 3) {
+                                        Double cellDataList = mapDataHandler2(getUrl3(version), item, split[0], split[1],sampleEnterNo,"", version);
+                                        setSheetValue(sheet, rowIndex, k, cellDataList);
+                                    } else if (split.length == 4) {
+                                        Double cellDataList = mapDataHandler2(getUrl3(version), item, split[0], split[1], sampleEnterNo,split[2],version);
+                                        setSheetValue(sheet, rowIndex, k, cellDataList);
+                                    } else {
+                                        Double cellDataList = mapDataHandler4(getUrl4(version), item, split[0], split[1]);
+                                        setSheetValue(sheet, rowIndex, k, cellDataList);
+                                    }
+                                } else if (split.length == 2) {
+                                    Double cellDataList = mapDataHandler2(getUrl2(version), item, split[0], split[1],null,"", version);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 } else if (split.length == 3) {
-                                    Double cellDataList = mapDataHandler2(getUrl2(version), item, split[0], split[1], split[2],version);
+                                    Double cellDataList = mapDataHandler2(getUrl2(version), item, split[0], split[1], null,split[2],version);
                                     setSheetValue(sheet, rowIndex, k, cellDataList);
                                 } else {
                                     Double cellDataList = mapDataHandler4(getUrl4(version), item, split[0], split[1]);
@@ -100,8 +116,8 @@ public class AnalysisBaseWriter extends BaseJhWriter {
         PoiCustomUtil.setCellValue(cell, obj);
     }
 
-    protected Double mapDataHandler2(String url, DateQuery dateQuery, String brandcode, String anaitemname,String source, String version) {
-        Map<String, String> queryParam = getQueryParam2(dateQuery, brandcode, anaitemname, source,version);
+    protected Double mapDataHandler2(String url, DateQuery dateQuery, String brandcode, String anaitemname,String sampleEnterNo,String source, String version) {
+        Map<String, String> queryParam = getQueryParam2(dateQuery, brandcode, anaitemname,sampleEnterNo, source,version);
         String result = httpUtil.get(url, queryParam);
         if (StringUtils.isBlank(result)) {
             return null;
@@ -131,13 +147,15 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     }
 
 
-    protected Map<String, String> getQueryParam2(DateQuery dateQuery, String brandcode, String anaitemname,String source, String version) {
+    protected Map<String, String> getQueryParam2(DateQuery dateQuery, String brandcode, String anaitemname,String sampleEnterNo,String source, String version) {
         Map<String, String> result = new HashMap<>();
-        result.put("brandcode", brandcode);
         result.put("starttime", DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy/MM/dd HH:mm:ss"));
         result.put("endtime", DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy/MM/dd HH:mm:ss"));
+        result.put("brandcode", brandcode);
         result.put("anaitemname", anaitemname);
-        result.put("sample_enter_no", "QMIR21PFY");
+        if(null != sampleEnterNo){
+            result.put("sample_enter_no", sampleEnterNo);
+        }
         if ("12.0".equals(version)) {
             if(StringUtils.isBlank(source)){
                 result.put("source", "1#-2#焦炉");
@@ -184,10 +202,13 @@ public class AnalysisBaseWriter extends BaseJhWriter {
     }
 
 
-    protected String getUrl2(String version) {
+    protected String getUrl3(String version) {
         return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemValByCode_no";
     }
 
+    protected String getUrl2(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/analyses/getIfAnaitemValByCodeOrSource";
+    }
 
     protected String getUrl4(String version) {
         return httpProperties.getJHUrlVersion(version) + "/cokingYieldAndNumberHoles/getCokeActuPerfByDateAndShiftAndCode";
