@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>Description: 分类模板配置 服务实现类 </p>
@@ -45,6 +46,8 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     @Autowired
     private QuartzMapper quartzMapper;
 
+    @Autowired
+    private ReportCategoryTemplateMapper reportCategoryTemplateMapper;
     @Override
     public ApiResult pageList(ReportCategoryTemplateQuery query) {
         LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
@@ -56,6 +59,10 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportCategoryTemplate::getSequence, query.getSequence());
         }
         List<ReportCategoryTemplate> list = list(wrapper);
+        if(StringUtils.isNotBlank(query.getSequence()) && ("焦化12".equals(query.getSequence()) || "焦化45".equals(query.getSequence())
+            || "焦化67".equals(query.getSequence()))){
+            list = list.stream().sorted((a,b) ->Integer.valueOf(a.getAttr2()) - Integer.valueOf(b.getAttr2())).collect(Collectors.toList());
+        }
         list.forEach(reportCategoryTemplate -> {
             QuartzEntity quartzEntity = quartzMapper.selectQuartzByCode(reportCategoryTemplate.getReportCategoryCode());
             reportCategoryTemplate.setQuartzEntity(quartzEntity);
