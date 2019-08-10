@@ -3,10 +3,7 @@ package com.cisdi.steel.module.job.a1.doc;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.CategoryLabelPositions;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.*;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
@@ -283,8 +280,8 @@ public class ChartUtils {
         plot.setRangeGridlinePaint(new Color(192, 192, 192));
         plot.setRangeGridlineStroke(new BasicStroke(1));
 
-        plot.getRangeAxis().setUpperMargin(0.1);// 设置顶部Y坐标轴间距,防止数据无法显示
-        plot.getRangeAxis().setLowerMargin(0.1);// 设置底部Y坐标轴间距
+//        plot.getRangeAxis().setUpperMargin(0.1);// 设置顶部Y坐标轴间距,防止数据无法显示
+//        plot.getRangeAxis().setLowerMargin(0.1);// 设置底部Y坐标轴间距
 
     }
 
