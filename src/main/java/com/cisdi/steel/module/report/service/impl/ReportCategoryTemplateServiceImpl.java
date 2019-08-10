@@ -60,7 +60,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
         }
         List<ReportCategoryTemplate> list = list(wrapper);
         if(StringUtils.isNotBlank(query.getSequence()) && ("焦化12".equals(query.getSequence()) || "焦化45".equals(query.getSequence())
-            || "焦化67".equals(query.getSequence()))){
+            || "焦化".equals(query.getSequence()))){
             list = list.stream().sorted((a,b) ->Integer.valueOf(a.getAttr2()) - Integer.valueOf(b.getAttr2())).collect(Collectors.toList());
         }
         list.forEach(reportCategoryTemplate -> {
