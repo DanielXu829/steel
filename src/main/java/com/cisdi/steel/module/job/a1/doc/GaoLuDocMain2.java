@@ -247,9 +247,7 @@ public class GaoLuDocMain2 {
         dealPart1(version, L1);
         dealPart2(version, L2);
         dealPart3(version, L3);
-        dealPart4(version, L4);
-        dealPart5(version, L5);
-        dealPart6(version, L6);
+        dealPart456(version, L4);
         dealPart7(version, L7);
         dealPart9(version, L9);
         dealPart10(version, L10);
@@ -283,9 +281,7 @@ public class GaoLuDocMain2 {
         L1 = new String[]{"BF6_L2M_BX_HM_confirmWgt_evt", "BF6_L2C_MES_CON_FR_1d_avg"};
         L2 = new String[]{"BF6_L2C_MES_CR_1d_avg", "BF6_L2C_MES_CON_PCI_1d_avg"};
         L3 = new String[]{"BF6_L2M_SinterRatio_1d_avg", "BF6_L2M_PelletsRatio_1d_avg", "BF6_L2M_LumporeRatio_1d_avg"};
-        L4 = new String[]{"M40", "M10"};
-        L5 = new String[]{"CSR", "CRI"};
-        L6 = new String[]{"Ad", "S"};
+        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "S"};
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
         L10 = new String[]{"BF6_L2C_BD_ActBlastFlow_1d_avg", "BF6_L2C_BD_OxygenFlow_1d_avg"};
@@ -301,9 +297,7 @@ public class GaoLuDocMain2 {
         L1 = new String[]{"BF7_L2M_BX_HM_confirmWgt_evt", "BF7_L2C_MES_CON_FR_1d_avg"};
         L2 = new String[]{"BF7_L2C_MES_CR_1d_avg", "BF7_L2C_MES_CON_PCI_1d_avg"};
         L3 = new String[]{"BF7_L2M_SinterRatio_1d_avg", "BF7_L2M_PelletsRatio_1d_avg", "BF7_L2M_LumporeRatio_1d_avg"};
-        L4 = new String[]{"M40", "M10"};
-        L5 = new String[]{"CSR", "CRI"};
-        L6 = new String[]{"Ad", "S"};
+        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "S"};
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
         L10 = new String[]{"BF7_L2C_BD_ColdBlastFlow_1h_avg", "BF7_L2C_BD_OxygenFlow1_1d_avg"};
@@ -319,9 +313,7 @@ public class GaoLuDocMain2 {
         L1 = new String[]{"BF8_L2M_BX_HM_confirmWgt_evt", "BF8_L2C_MES_CON_FR_1d_avg"};
         L2 = new String[]{"BF8_L2C_MES_CR_1d_avg", "BF8_L2C_MES_CON_PCI_1d_avg"};
         L3 = new String[]{"BF8_L2M_SinterRatio_1d_avg", "BF8_L2M_PelletsRatio_1d_avg", "BF8_L2M_LumporeRatio_1d_avg"};
-        L4 = new String[]{"M40", "M10"};
-        L5 = new String[]{"CSR", "CRI"};
-        L6 = new String[]{"Ad", "S"};
+        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "S"};
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
         L10 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_OxygenFlow_1d_avg"};
@@ -345,8 +337,6 @@ public class GaoLuDocMain2 {
     private String[] L2 = null;
     private String[] L3 = null;
     private String[] L4 = null;
-    private String[] L5 = null;
-    private String[] L6 = null;
     private String[] L7 = null;
     private String[] L9 = null;
     private String[] L10 = null;
@@ -496,6 +486,132 @@ public class GaoLuDocMain2 {
             }
         }
         return vals;
+    }
+
+    private List<List<Double>> partJHY(String version, String[] tagNames, String type, int[] scales) {
+        categoriesList.clear();
+        dateList.clear();
+        List<List<Double>> doubles = new ArrayList<>();
+
+        // 构造起始时间
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(now);
+        cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,0);
+        cal.set(Calendar.SECOND,0);
+        cal.set(Calendar.MILLISECOND,0);
+        now = cal.getTime();
+        Date endDate = now;
+        Date startDate = DateUtil.addDays(endDate, -30);
+
+        // 上料记录
+        List<ShangLiaoDTO> sl = new ArrayList<>();
+
+        // 是否只用了一种物料
+        boolean isOnlyOne = false;
+        List<String> brandCodes = dataHttpBrandCode(version,startDate,endDate,"COKE");
+        if(brandCodes.size() == 1){
+            isOnlyOne = true;
+            sl.add(new ShangLiaoDTO(brandCodes.get(0),startDate,endDate));
+        }
+
+        // 轮询
+        Date index = startDate;
+        cal.setTime(index);
+        String brandCode = null;
+        while (index.before(endDate)) {
+            // 拼接x坐标轴
+            categoriesList.add(DateUtil.getFormatDateTime(index, "MM月dd日"));
+            dateList.add(DateUtil.getFormatDateTime(index, DateUtil.yyyyMMddFormat));
+
+            // 递增日期
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            Date next = cal.getTime();
+
+            if(!isOnlyOne){ // 上了多种料
+                // 轮询每天的焦炭种类
+                List<String> todayBrandCodes = dataHttpBrandCode(version,index,next,"COKE");
+                String nextBrandCode = todayBrandCodes.get(0);
+                if(null == brandCode){ // 第一天的物料代码
+                    brandCode = nextBrandCode;
+                }else if(!brandCode.equals(nextBrandCode)){ // 说明换料了
+                    sl.add(new ShangLiaoDTO(brandCode,startDate,next));
+                    startDate = next;
+                    brandCode = null;
+                }
+            }
+            index = next;
+        }
+        if(!isOnlyOne){
+            sl.add(new ShangLiaoDTO(brandCode,startDate,endDate));
+        }
+
+        // <tagName,<日期，具体值list>>
+        Map<String,Map<String,List<Double>>> tagMap = new HashMap<>();
+        for (String tagName : tagNames) {
+            tagMap.put(tagName,new HashMap<>());
+        }
+
+        // 开始查询
+        for (ShangLiaoDTO slDTO : sl) {
+            JSONArray jsonArray = dataHttp1(slDTO.getBrandCode(), type, slDTO.getStartDate(), slDTO.getEndDate(), version);
+
+            for (int i = 0; i < jsonArray.size(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (null != jsonObject) {
+                    JSONObject analysis = jsonObject.getJSONObject("analysis");
+                    long sampletime = analysis.getLong("sampletime");
+                    Date dd = new Date(sampletime);
+                    String sampleDate = DateUtil.getFormatDateTime(dd, DateUtil.yyyyMMddFormat);
+                    JSONObject values = jsonObject.getJSONObject("values");
+                    Map<String, Object> innerMap = values.getInnerMap();
+                    for (String tagName : tagNames) {
+                        if(innerMap.containsKey(tagName)){
+                            Double val = null;
+                            Object v = innerMap.get(tagName);
+                            if(v instanceof BigDecimal){
+                                val = ((BigDecimal)v).doubleValue();
+                            }else if(v instanceof Integer){
+                                val = ((Integer)v).doubleValue();
+                            }
+
+                            if(null != val){
+                                Map<String,List<Double>> valMap = tagMap.get(tagName);
+                                List<Double> valList = valMap.get(sampleDate);
+                                if(null == valList){
+                                    valList = new ArrayList<>();
+                                    valMap.put(sampleDate,valList);
+                                }
+                                valList.add(val);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 计算最终值
+        int i = 0;
+        for (String tagName : tagNames) {
+            List<Double> list = new ArrayList<>();
+            Map<String,List<Double>> valMap = tagMap.get(tagName);
+            for (String date : dateList) {
+                List<Double> valList = valMap.get(date);
+                if((null == valList)||valList.isEmpty()){
+                    list.add(0.0);
+                    continue;
+                }
+                Double sum = 0.0;
+                for (Double val : valList) {
+                    sum += val;
+                }
+                list.add(sum*scales[i]/valList.size());
+            }
+            doubles.add(list);
+            i++;
+        }
+        return doubles;
     }
 
     private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
@@ -1321,15 +1437,21 @@ public class GaoLuDocMain2 {
         result.put("jfreechartImg3", image1);
     }
 
-    private void dealPart4(String version, String[] tagNames) {
-        String[] cBrandCodes = {"1_2_LYJJ_COKE",
-                "WGYJJT_COKE",
-                "6_7_LYJJ_COKE",
-                "4_5_LYJJ_COKE"};
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 1);
+    private void dealPart456(String version, String[] tagNames){
+        int[] scales = {1,1,1,1,1,1};
+        List<List<Double>> doubles = partJHY(version, tagNames, "ALL", scales);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
+        Object[] objects3 = doubles.get(2).toArray();
+        Object[] objects4 = doubles.get(3).toArray();
+        Object[] objects5 = doubles.get(4).toArray();
+        Object[] objects6 = doubles.get(5).toArray();
+        dealPart4(objects1,objects2);
+        dealPart5(objects3,objects4);
+        dealPart6(objects5,objects6);
+    }
 
+    private void dealPart4(Object[] objects1, Object[] objects2) {
         objects1 = getDoubleVal(objects1,null,1);
         objects2 = getDoubleVal(objects2,null,1);
 
@@ -1370,20 +1492,12 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, yLabels.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg4", image1);
     }
 
-    private void dealPart5(String version, String[] tagNames) {
-        String[] cBrandCodes = {"1_2_LYJJ_COKE",
-                "WGYJJT_COKE",
-                "6_7_LYJJ_COKE",
-                "4_5_LYJJ_COKE"};
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 1);
-        Object[] objects1 = doubles.get(0).toArray();
-        Object[] objects2 = doubles.get(1).toArray();
-
+    private void dealPart5(Object[] objects1, Object[] objects2) {
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
         Double min1 = data.get(1) * 0.8;
@@ -1422,20 +1536,12 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, yLabels.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
     }
 
-    private void dealPart6(String version, String[] tagNames) {
-        String[] cBrandCodes = {"1_2_LYJJ_COKE",
-                "WGYJJT_COKE",
-                "6_7_LYJJ_COKE",
-                "4_5_LYJJ_COKE"};
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 1);
-        Object[] objects1 = doubles.get(0).toArray();
-        Object[] objects2 = doubles.get(1).toArray();
-
+    private void dealPart6(Object[] objects1, Object[] objects2) {
         objects1 = getDoubleVal(objects1,100,2);
 
         List<Double> data = dealList(objects1);
@@ -1477,7 +1583,7 @@ public class GaoLuDocMain2 {
 
         JFreeChart Chart1 = ChartFactory.createLineChart(title1,
                 categoryAxisLabel1, yLabels, vectors,
-                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, tagNames.length, stack, ystack);
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, yLabels.length, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg6", image1);
     }
@@ -2139,6 +2245,32 @@ public class GaoLuDocMain2 {
         return data;
     }
 
+    /**
+     * 查询每天的用料类型（一天可能有多种，但只返回第一种）
+     * @param version
+     * @param startTime
+     * @param endTime
+     * @param type
+     * @return
+     */
+    private List<String> dataHttpBrandCode(String version,Date startTime, Date endTime,String type) {
+        List<String> result = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
+        map.put("startTime", DateUtil.getFormatDateTime(startTime, DateUtil.fullFormat));
+        map.put("endTime", DateUtil.getFormatDateTime(endTime, DateUtil.fullFormat));
+        map.put("type", type);
+        String results = httpUtil.get(getBrandCodes(version), map);
+        JSONObject jsonObject = JSONObject.parseObject(results);
+        if(null != jsonObject){
+            JSONArray data = jsonObject.getJSONArray("data");
+            if(null!= data){
+                for (Object o : data) {
+                    result.add(String.valueOf(o));
+                }
+            }
+        }
+        return result;
+    }
 
     /**
      * 查询操作方针数据
@@ -2398,6 +2530,15 @@ public class GaoLuDocMain2 {
      */
     private String getUrlTagValueLatest(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
+    }
+
+    /**
+     * 获取高炉焦炭或者烧结上料的种类
+     * @param version
+     * @return
+     */
+    private String getBrandCodes(String version){
+        return httpProperties.getGlUrlVersion(version) + "/brandCodes/getBrandCodes";
     }
 
     /**
