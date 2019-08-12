@@ -466,7 +466,7 @@ public class GaoLuDocMain2 {
         return doubles;
     }
 
-    private Map<String, Double> partTagValueLatest(String version, String className) {
+    private Map<String, Double> partTagValueLatest(String version, String className, Map<String,Integer> decimalMap) {
         Date date = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -481,7 +481,11 @@ public class GaoLuDocMain2 {
             JSONObject jsonObject = dataHttp(kv.getValue(), date, version);
             if (Objects.nonNull(jsonObject)) {
                 Double val = jsonObject.getDouble("val");
-                val = (double) Math.round(val * 10) / 10;
+                int decimal = 1;
+                if(null != decimalMap){
+                    decimal = decimalMap.getOrDefault(kv.getKey(),1);
+                }
+                val = decimalDouble(val,decimal);
                 vals.put(kv.getKey(), val);
             }
         }
@@ -532,7 +536,7 @@ public class GaoLuDocMain2 {
             if(!isOnlyOne){ // 上了多种料
                 // 轮询每天的焦炭种类
                 List<String> todayBrandCodes = dataHttpBrandCode(version,index,next,"COKE");
-                String nextBrandCode = todayBrandCodes.get(0);
+                String nextBrandCode = todayBrandCodes.get(todayBrandCodes.size()-1);
                 if(null == brandCode){ // 第一天的物料代码
                     brandCode = nextBrandCode;
                 }else if(!brandCode.equals(nextBrandCode)){ // 说明换料了
@@ -847,17 +851,18 @@ public class GaoLuDocMain2 {
     }
 
     private Double decimalDouble(Double v, Integer decimal){
+        if(null == v){
+            return null;
+        }
         if(null == decimal){
             return v;
         }
-        if(null != v){
-            int tmp = 10;
-            for(;decimal>1;decimal--){
-                tmp *= 10;
-            }
-            return (double) Math.round(v * tmp) / tmp;
+        int scale = 1;
+        int m = decimal;
+        for(;m>0;m--){
+            scale *= 10;
         }
-        return null;
+        return (double) Math.round(v * scale) / scale;
     }
 
     private void partCaoZuoFangZhen(String version) {
@@ -865,8 +870,8 @@ public class GaoLuDocMain2 {
         List<Map<String, Object>> sheet16 = new ArrayList<>();
 
         //填充实际值
-        Map<String, Double> mubiao = partTagValueLatest(version,MUBIAO);
-        Map<String, Double> zhongdian = partTagValueLatest(version,ZHONGDIAN);
+        Map<String, Double> mubiao = partTagValueLatest(version,MUBIAO,null);
+        Map<String, Double> zhongdian = partTagValueLatest(version,ZHONGDIAN,null);
 
         // 填充前半部分，并计算偏差
         JSONObject data = dataHttpCaoZuoFangZhen(version);
@@ -1031,8 +1036,10 @@ public class GaoLuDocMain2 {
 
     private void partZhaTie(String version) {
         List<Map<String, Object>> sheet17 = new ArrayList<>();
-
-        Map<String, Double> zhatie = partTagValueLatest(version,ZHATIE);
+        Map<String,Integer> decimalMap = new HashMap<>();
+        decimalMap.put("铁水S",3);
+        decimalMap.put("铁水Si",2);
+        Map<String, Double> zhatie = partTagValueLatest(version,ZHATIE,decimalMap);
         Map<String,String> zhatiefanwei = TAG_NAMES.get(version).get(ZHATIEFANWEI);
         for (Map.Entry<String, String> kv : zhatiefanwei.entrySet()) {
             Map<String, Object> tmp = new HashMap<>();
@@ -1080,7 +1087,7 @@ public class GaoLuDocMain2 {
 
     private void partCaoYeZhunQueLv(String version) {
         //填充实际值
-        Map<String, Double> caoye = partTagValueLatest(version,CAOYEZHUNQUELV);
+        Map<String, Double> caoye = partTagValueLatest(version,CAOYEZHUNQUELV,null);
         result.putAll(caoyefanwei);
         result.putAll(caoye);
     }
@@ -1356,8 +1363,8 @@ public class GaoLuDocMain2 {
         objects3 = getDoubleVal(objects3,null,2);
 
         result.put("part5", getLastDoubleVal(objects1));
-        result.put("part6", getLastDoubleVal(objects2));
-        result.put("part7", getLastDoubleVal(objects3));
+        result.put("part6", getLastDoubleVal(objects3));
+        result.put("part7", getLastDoubleVal(objects2));
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
@@ -1412,11 +1419,11 @@ public class GaoLuDocMain2 {
 
         // 标注类别
         Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("P球团", objects2));
+        series2.add(new Serie("B球团", objects2));
 
         // 标注类别
         Vector<Serie> series3 = new Vector<Serie>();
-        series3.add(new Serie("B块矿", objects3));
+        series3.add(new Serie("P块矿", objects3));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
@@ -1425,7 +1432,7 @@ public class GaoLuDocMain2 {
 
         String title1 = "";
         String categoryAxisLabel1 = null;
-        String[] yLabels = {"A烧结矿(%)","P球团(%)","B块矿(%)"};
+        String[] yLabels = {"A烧结矿(%)","B球团(%)","P块矿(%)"};
 
         int[] stack = {1, 1, 1};
         int[] ystack = {1, 2, 2};
