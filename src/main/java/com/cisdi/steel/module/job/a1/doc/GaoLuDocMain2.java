@@ -1028,7 +1028,20 @@ public class GaoLuDocMain2 {
                     }
                 }
             }
+
+            JSONObject tagetParameters = data.getJSONObject("tagetParameters");
+            if(null != tagetParameters){
+                String remark = tagetParameters.getString("remarks");
+                remark = remark.replaceAll("</p>","")
+                        .replaceAll("<p>","")
+                        .replaceAll("</ol>","")
+                        .replaceAll("<ol>","")
+                        .replaceAll("</li>","")
+                        .replaceAll("<li>","");
+                result.put("caoyeRemark", remark);
+            }
         }
+
 
         result.put("sheet15", sheet15);
         result.put("sheet16", sheet16);
@@ -1550,6 +1563,7 @@ public class GaoLuDocMain2 {
 
     private void dealPart6(Object[] objects1, Object[] objects2) {
         objects1 = getDoubleVal(objects1,100,2);
+        objects2 = getDoubleVal(objects2,100,2);
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
