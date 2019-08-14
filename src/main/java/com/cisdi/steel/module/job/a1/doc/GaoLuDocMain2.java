@@ -779,6 +779,8 @@ public class GaoLuDocMain2 {
         return result;
     }
 
+    private static final int MINUS = 60*1000;
+
     private List<Map<String, Object>> part4(String version) {
         Date date = new Date();
         Date beginDate = DateUtil.addDays(date, -1);
@@ -803,7 +805,16 @@ public class GaoLuDocMain2 {
                     k++;
                 }
                 Arrays.sort(list);
+                Long preTime = null;
                 for (int i = 0; i < list.length; i++) {
+                    if(null == preTime){
+                        preTime = list[i];
+                    }else if(list[i]-preTime<=(MINUS*11)){
+                        continue;
+                    }else{
+                        preTime = null;
+                    }
+
                     Map<String, Object> cAngle = new HashMap<>();
                     Map<String, Object> cRound = new HashMap<>();
                     Map<String, Object> oAngle = new HashMap<>();
