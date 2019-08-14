@@ -30,6 +30,7 @@ import java.util.*;
  * @version 1.0
  */
 @Component
+@SuppressWarnings("ALL")
 public class GongLiaoZhunShiHuaWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -68,6 +69,9 @@ public class GongLiaoZhunShiHuaWriter extends AbstractExcelReadWriter {
                 }else if ("lumporeban".equals(sheetSplit[1])) {
                     List<CellData> cellDataList = mapDataHandler2(getUrl7(), dateQuery, columns);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }else if ("price".equals(sheetSplit[1])) {
+                    List<CellData> cellDataList = getShiftElectricPrice(getUrl8(), dateQuery, columns);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
         }
@@ -98,6 +102,36 @@ public class GongLiaoZhunShiHuaWriter extends AbstractExcelReadWriter {
         return data;
     }
 
+    protected List<CellData> getShiftElectricPrice(String url, DateQuery dateQuery, List<String> columns) {
+        List<CellData> cellData = new ArrayList<>();
+        Map<String, String> queryParam = this.getQueryParam(dateQuery);
+        JSONArray data = getHttpData(url,queryParam);
+        if ((null != data) && data.size() > 0) {
+            List<CellData> cellDataList = new ArrayList<>();
+            for (int i = 0; i < data.size(); i++) {
+                JSONObject object = data.getJSONObject(i);
+                int rowIndex = i+1;
+                int colIndex = 0;
+                for (String colName : columns) {
+                    Double val = object.getDouble(colName);
+                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, colIndex++, val);
+                }
+            }
+            cellData.addAll(cellDataList);
+        }
+        return cellData;
+    }
+
+    protected JSONArray getHttpData(String url, Map<String, String> queryParam) {
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (null != jsonObject) {
+                return jsonObject.getJSONArray("data");
+            }
+        }
+        return null;
+    }
 
     protected List<CellData> mapDataHandler(String url, DateQuery dateQuery, List<String> columns) {
         Map<String, String> queryParam = this.getQueryParam(dateQuery);
@@ -389,6 +423,10 @@ public class GongLiaoZhunShiHuaWriter extends AbstractExcelReadWriter {
 
     private String getUrl7() {
         return httpProperties.getUrlApiYGLOne() + "/reportManager/feedLumpOreBan";
+    }
+
+    private String getUrl8() {
+        return httpProperties.getUrlApiYGLOne() + "/reportManager/getShiftElectricPrice";
     }
 
 }
