@@ -48,45 +48,33 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
             if (sheetSplit.length == 4) {
                 List<DateQuery> dateQueries = null;
                 // 获取的对应的策略
-                if(("4.0".equals(jhNo)||"5.0".equals(jhNo))){
-                    dateQueries = new ArrayList<>();
-                    Calendar cal = Calendar.getInstance();
-                    // 以查询时间为基准
-                    cal.setTime(date.getRecordDate());
-                    // 清零秒
-                    cal.set(Calendar.SECOND,0);
-                    // 当天23:59
-                    cal.set(Calendar.HOUR_OF_DAY,23);
-                    cal.set(Calendar.MINUTE,59);
-                    Date endTime = cal.getTime();
-                    // 前一天23:30
-                    cal.add(Calendar.DAY_OF_MONTH,-1);
-                    cal.set(Calendar.HOUR_OF_DAY,23);
-                    cal.set(Calendar.MINUTE,30);
-                    Date beginTime = cal.getTime();
+                dateQueries = new ArrayList<>();
+                Calendar cal = Calendar.getInstance();
+                // 以查询时间为基准
+                cal.setTime(date.getRecordDate());
+                // 清零秒
+                cal.set(Calendar.SECOND,0);
+                // 当天23:59
+                cal.set(Calendar.HOUR_OF_DAY,23);
+                cal.set(Calendar.MINUTE,59);
+                Date endTime = cal.getTime();
+                // 前一天23:30
+                cal.add(Calendar.DAY_OF_MONTH,-1);
+                cal.set(Calendar.HOUR_OF_DAY,23);
+                cal.set(Calendar.MINUTE,30);
+                Date beginTime = cal.getTime();
 
-                    // 归零
-                    Date huanxiang = getHuanXiangDate(version,jhNo);
-                    cal.set(Calendar.MINUTE,huanxiang.getMinutes());
-                    while(cal.getTime().after(beginTime)) {
-                        cal.add(Calendar.MINUTE,-30);
-                    }
-                    // 轮询计算
-                    while(cal.getTime().before(endTime)) {
-                        Date recordDate = cal.getTime();
-                        dateQueries.add(new DateQuery(null,null,recordDate));
-                        cal.add(Calendar.MINUTE,30);
-                    }
-                }else{
-                    dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                    Date date1 = DateUtil.addDays(dateQueries.get(0).getRecordDate(), -1);
-                    String formatDateTime = DateUtil.getFormatDateTime(date1, DateUtil.yyyyMMddFormat);
-                    Date date2 = DateUtil.strToDate(formatDateTime + " 23:30:00", DateUtil.fullFormat);
-                    DateQuery dateQuery = new DateQuery(dateQueries.get(0).getRecordDate());
-                    dateQuery.setRecordDate(date2);
-                    dateQuery.setStartTime(date2);
-                    dateQuery.setEndTime(DateUtil.getTodayBeginTime());
-                    dateQueries.add(0,dateQuery);
+                // 归零
+                Date huanxiang = getHuanXiangDate(version,jhNo);
+                cal.set(Calendar.MINUTE,huanxiang.getMinutes());
+                while(cal.getTime().after(beginTime)) {
+                    cal.add(Calendar.MINUTE,-30);
+                }
+                // 轮询计算
+                while(cal.getTime().before(endTime)) {
+                    Date recordDate = cal.getTime();
+                    dateQueries.add(new DateQuery(null,null,recordDate));
+                    cal.add(Calendar.MINUTE,30);
                 }
 
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
@@ -140,37 +128,9 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
 
     protected Map<String, String> getQueryParam(DateQuery dateQuery,String jhNo) {
         Map<String, String> result = new HashMap<>();
-        if("6.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-25);
-            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
-            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-        }else if("7.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-10);
-            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
-            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-        }else if("1.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-5);
-            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
-            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-        }else if("2.0".equals(jhNo)){
-            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),10);
-            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
-            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-        }else{
-            Date date = dateQuery.getRecordDate();
-            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
-            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-        }
-//        else if("4.0".equals(jhNo)){
-////            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-20);
-//            Date date = dateQuery.getRecordDate();
-//            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
-//            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-//        }else if("5.0".equals(jhNo)){
-//            Date date=DateUtil.addMinute(dateQuery.getRecordDate(),-15);
-//            result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
-//            result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
-//        }
+        Date date = dateQuery.getRecordDate();
+        result.put("startDate", DateUtil.getFormatDateTime(DateUtil.addMinute(date,-1),"yyyy/MM/dd HH:mm:ss"));
+        result.put("endDate", DateUtil.getFormatDateTime(date,"yyyy/MM/dd HH:mm:ss"));
        return result;
     }
 
@@ -202,10 +162,22 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
         String url =  httpProperties.getJHUrlVersion(version) + "/huanxiangxinhao/selectHuanXiangDate";
         String param = "?num=";
         switch (jhNo){
+            case "1.0":
+                param += "0";
+                break;
+            case "2.0":
+                param += "1";
+                break;
             case "4.0":
                 param += "0";
                 break;
             case "5.0":
+                param += "1";
+                break;
+            case "6.0":
+                param += "0";
+                break;
+            case "7.0":
                 param += "1";
                 break;
         }
