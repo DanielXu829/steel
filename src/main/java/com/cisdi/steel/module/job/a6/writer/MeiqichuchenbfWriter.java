@@ -70,6 +70,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                         index++;
                     }
                 } else if ("fanchui6".equals(sheetSplit[1])) {
+                    realVersion = "6.0";
                     int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
                         DateQuery eachDate = dateQueries.get(rowNum);
@@ -78,6 +79,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                         index++;
                     }
                 } else if ("fanchui7".equals(sheetSplit[1])) {
+                    realVersion = "7.0";
                     int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
                         DateQuery eachDate = dateQueries.get(rowNum);
@@ -86,6 +88,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                         index++;
                     }
                 } else if ("fanchui8".equals(sheetSplit[1])) {
+                    realVersion = "8.0";
                     int index = 1;
                     for (int rowNum = 0; rowNum < size; rowNum++) {
                         DateQuery eachDate = dateQueries.get(rowNum);
@@ -98,6 +101,8 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
         }
         return workbook;
     }
+
+    private String realVersion = "";
 
     public List<CellData> mapDataHandler(List<String> columns, String url, DateQuery dateQuery, int rowBatch) {
         Map<String, String> queryParam = getQueryParam(dateQuery);
@@ -245,13 +250,12 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     /**
      * 反吹是否开始
-     * @param version
      * @param val
      * @return
      */
-    private Boolean isFCBegin(String version, int val){
+    private Boolean isFCBegin(int val){
         Boolean isBegin = false;
-        switch(version){
+        switch(realVersion){
             case "7.0":
                 isBegin = val < 15;
                 break;
@@ -263,13 +267,12 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     /**
      * 反吹是否结束
-     * @param version
      * @param val
      * @return
      */
-    private Boolean isFCEnd(String version, int val){
+    private Boolean isFCEnd(int val){
         Boolean isEnd = false;
-        switch(version){
+        switch(realVersion){
             case "7.0":
                 isEnd = (val == 15);
                 break;
@@ -311,11 +314,11 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
                 Long startIndex = null;
                 Long endIndex = null;
-                if(begin == 0){// 未开始
+                if(isFCEnd(begin)){ // 未开始
                     while (startTime<=endTime) {// 找开始时间点
                         if(innerMap1.containsKey(startTime+"")){
                             int val = ((BigDecimal)innerMap1.get(startTime+"")).intValue();
-                            if(isFCBegin(version,val)){
+                            if(isFCBegin(val)){
                                 startIndex = startTime;
                                 break;
                             }
@@ -326,7 +329,7 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                         while (startTime<=endTime) {
                             if(innerMap1.containsKey(startTime+"")){
                                 int val = ((BigDecimal)innerMap1.get(startTime+"")).intValue();
-                                if(isFCEnd(version,val)){
+                                if(isFCEnd(val)){
                                     endIndex = startTime;
                                     break;
                                 }
@@ -334,11 +337,11 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                             startTime += MINUTE;
                         }
                     }
-                }else{// 已开始，找结束时间点
+                }else{ // 已开始，找结束时间点
                     while (startTime<=endTime) {
                         if(innerMap1.containsKey(startTime+"")){
                             int val = ((BigDecimal)innerMap1.get(startTime+"")).intValue();
-                            if(isFCEnd(version,val)){
+                            if(isFCEnd(val)){
                                 endIndex = startTime;
                                 break;
                             }
@@ -350,12 +353,12 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
                 if (null != startIndex) {
                     ExcelWriterUtil.addCellData(resultList, index, 0, startIndex);
                     String getValUrl = getUrl3(version);
-                    Integer[] colIndex = isYaChaBefore(version);
+                    Integer[] colIndex = isYaChaBefore();
                     writeVal(getValUrl,resultList,index,colIndex,columns,startIndex,-1);
                 }
                 if (null != endIndex) {
                     String getValUrl = getUrl3(version);
-                    Integer[] colIndex = isYaChaAfter(version);
+                    Integer[] colIndex = isYaChaAfter();
                     writeVal(getValUrl,resultList,index,colIndex,columns,endIndex,1);
                 }
             }
@@ -366,13 +369,11 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     /**
      * 压差前计算列
-     * @param version
-     * @param val
      * @return
      */
-    private Integer[] isYaChaBefore(String version){
+    private Integer[] isYaChaBefore(){
         Integer[] colIndex = null;
-        switch(version){
+        switch(realVersion){
             case "7.0":
                 colIndex = new Integer[]{1,2,3,4,5};
                 break;
@@ -384,13 +385,11 @@ public class MeiqichuchenbfWriter extends AbstractExcelReadWriter {
 
     /**
      * 压差后计算列
-     * @param version
-     * @param val
      * @return
      */
-    private Integer[] isYaChaAfter(String version){
+    private Integer[] isYaChaAfter(){
         Integer[] colIndex = null;
-        switch(version){
+        switch(realVersion){
             case "7.0":
                 colIndex = new Integer[]{6,7,8,9,10};
                 break;
