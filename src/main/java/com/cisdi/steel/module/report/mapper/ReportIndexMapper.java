@@ -65,7 +65,7 @@ public interface ReportIndexMapper extends BaseMapper<ReportIndex> {
      * @param endTime
      * @return
      */
-    List<ReportIndex> queryReport(@Param("code") String code, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
+    List<ReportIndex> queryReport(@Param("code") String code, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
     /**
      * 查询本月报表

@@ -85,7 +85,7 @@
         WHERE
             is_hidden = '0'
             AND report_category_code = #{code}
-            AND create_time between  #{startTime} and #{endTime}
+            AND create_time between  from_unixtime(#{startTime}) and from_unixtime(#{endTime})
         ORDER BY
             create_time
     </select>

@@ -790,10 +790,13 @@ public class GaoLuDocMain2 {
         cal.set(Calendar.HOUR_OF_DAY,0);
         cal.set(Calendar.MINUTE,0);
         cal.set(Calendar.SECOND,0);
+        // 今天零点
         Date dayEnd = cal.getTime();
         cal.add(Calendar.DAY_OF_MONTH,-1);
+        // 昨天零点
         Date daySatrt = cal.getTime();
 
+        // 报表code码
         String code = "";
         switch (version){
             case "6.0":
@@ -806,54 +809,58 @@ public class GaoLuDocMain2 {
                 code = JobEnum.gl_peiliaodan.getCode();
                 break;
         }
-        List<ReportIndex> reportList = reportIndexMapper.queryReport(code,daySatrt,dayEnd);
+        // 昨天的配料单
+        Long startTime = daySatrt.getTime()/1000;
+        Long endTime = dayEnd.getTime()/1000;
+        List<ReportIndex> reportList = reportIndexMapper.queryReport(code,startTime,endTime);
         for (ReportIndex report : reportList) {
-            JSONObject data = getLastRound(report.getCreateTime(), version);
-            if ((null != data)&&(!data.isEmpty())) {
-                Map<String, Object> innerMap = data.getInnerMap();
-                Set<String> keys = innerMap.keySet();
-                for (String key : keys) {
-
-                    Map<String, Object> cAngle = new HashMap<>();
-                    Map<String, Object> cRound = new HashMap<>();
-                    Map<String, Object> oAngle = new HashMap<>();
-                    Map<String, Object> oRound = new HashMap<>();
-
-                    String formatDateTime = DateUtil.getFormatDateTime(report.getCreateTime(), "yyyy-MM-dd HH:mm");
-                    cAngle.put("a0", formatDateTime);
-                    cRound.put("a0", "");
-                    oAngle.put("a0", "");
-                    oRound.put("a0", "");
-                    cAngle.put("type", "C");
-                    cRound.put("type", "C");
-                    oAngle.put("type", "O");
-                    oRound.put("type", "O");
-
-                    BuLiaoDTO[] cTmp = new BuLiaoDTO[11];
-                    BuLiaoDTO[] oTmp = new BuLiaoDTO[11];
-                    JSONArray jsonArray = (JSONArray) innerMap.get(key);
-                    for (int j = 0; j < jsonArray.size(); j++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(j);
-
-                        int seq = jsonObject.getIntValue("seq");
-                        String typ = jsonObject.getString("typ");
-                        String angle = jsonObject.getString("angle");
-                        String round = jsonObject.getString("round");
-                        if ("C".equals(typ)) {
-                            cTmp[seq-1] = new BuLiaoDTO(angle,round);
-                        } else if ("O".equals(typ)) {
-                            oTmp[seq-1] = new BuLiaoDTO(angle,round);
-                        }
+            // 配料单的生成时间往前推，最近一条布料详情
+            JSONArray arr = getLastRound(report.getCreateTime(), version);
+            if ((null != arr)&&(arr.size() != 0)) {
+                // C的角度和圈数
+                Map<String, Object> cAngle = new HashMap<>();
+                Map<String, Object> cRound = new HashMap<>();
+                // O的角度和圈数
+                Map<String, Object> oAngle = new HashMap<>();
+                Map<String, Object> oRound = new HashMap<>();
+                // 默认值填充
+                String formatDateTime = DateUtil.getFormatDateTime(report.getCreateTime(), "yyyy-MM-dd HH:mm");
+                cAngle.put("a0", formatDateTime);
+                cRound.put("a0", "");
+                oAngle.put("a0", "");
+                oRound.put("a0", "");
+                cAngle.put("type", "C");
+                cRound.put("type", "C");
+                oAngle.put("type", "O");
+                oRound.put("type", "O");
+                // c有值的索引值
+                int c = 1;
+                // o有值的索引值
+                int o = 1;
+                for (int i = 0; i<arr.size() ;i++) {
+                    JSONObject jsonObject = arr.getJSONObject(i);
+                    // 圈数为0的角度，不显示
+                    Double round = jsonObject.getDouble("round");
+                    if(round == 0){
+                        continue;
                     }
 
-                    dealBuliao(cAngle, cRound, cTmp);
-                    dealBuliao(oAngle, oRound, oTmp);
-
-                    result.add(cAngle);
-                    result.add(cRound);
-                    result.add(oAngle);
-                    result.add(oRound);
+                    String typ = jsonObject.getString("typ");
+                    Double angle = jsonObject.getDouble("angle");
+                    if ("C".equals(typ)) {
+                        cAngle.put("a"+c, angle);
+                        cRound.put("a"+c, round);
+                        c++;
+                    } else if ("O".equals(typ)) {
+                        oAngle.put("a"+o, angle);
+                        oRound.put("a"+o, round);
+                        o++;
+                    }
                 }
+                result.add(cAngle);
+                result.add(cRound);
+                result.add(oAngle);
+                result.add(oRound);
             }
         }
         return result;
@@ -2248,15 +2255,15 @@ public class GaoLuDocMain2 {
         return data;
     }
 
-    private JSONObject getLastRound(Date time, String version) {
-        JSONObject data = null;
+    private JSONArray getLastRound(Date time, String version) {
+        JSONArray data = null;
         Map<String, String> map = new HashMap<>();
         map.put("time", time.getTime() + "");
         map.put("calcModel", "forward");
         String results = httpUtil.get(getUrl2(version), map);
         if (StringUtils.isNotBlank(results)) {
             JSONObject jsonObject = JSONObject.parseObject(results);
-            data = jsonObject.getJSONObject("data");
+            data = jsonObject.getJSONArray("data");
         }
         return data;
     }
