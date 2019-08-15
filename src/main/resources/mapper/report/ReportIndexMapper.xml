@@ -78,6 +78,18 @@
         </where>
     </select>
 
+    <select id="queryReport" resultMap="BaseResultMap">
+        SELECT *
+        FROM
+            `report_index`
+        WHERE
+            is_hidden = '0'
+            AND report_category_code = #{code}
+            AND create_time between  #{startTime} and #{endTime}
+        ORDER BY
+            create_time
+    </select>
+
     <select id="queryReportMonth" resultMap="BaseResultMap">
         SELECT
         *

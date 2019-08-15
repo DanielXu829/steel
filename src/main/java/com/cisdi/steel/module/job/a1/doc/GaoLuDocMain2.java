@@ -782,45 +782,44 @@ public class GaoLuDocMain2 {
     private static final int MINUS = 60*1000;
 
     private List<Map<String, Object>> part4(String version) {
-        Date date = new Date();
-        Date beginDate = DateUtil.addDays(date, -1);
-
         List<Map<String, Object>> result = new ArrayList<>();
-        while (beginDate.before(date)) {
-            String dateTime = DateUtil.getFormatDateTime(beginDate, "yyyy-MM-dd 00:00:00");
-            String dateTime1 = DateUtil.getFormatDateTime(beginDate, "yyyy-MM-dd 24:00:00");
 
-            Date date1 = DateUtil.strToDate(dateTime, DateUtil.fullFormat);
-            Date date2 = DateUtil.strToDate(dateTime1, DateUtil.fullFormat);
-            JSONObject data = dataHttp2(date1, date2, version);
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(now);
+        cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,0);
+        cal.set(Calendar.SECOND,0);
+        Date dayEnd = cal.getTime();
+        cal.add(Calendar.DAY_OF_MONTH,-1);
+        Date daySatrt = cal.getTime();
 
-            if (Objects.nonNull(data)) {
+        String code = "";
+        switch (version){
+            case "6.0":
+                code = JobEnum.gl_peiliaodan6.getCode();
+                break;
+            case "7.0":
+                code = JobEnum.gl_peiliaodan7.getCode();
+                break;
+            case "8.0":
+                code = JobEnum.gl_peiliaodan.getCode();
+                break;
+        }
+        List<ReportIndex> reportList = reportIndexMapper.queryReport(code,daySatrt,dayEnd);
+        for (ReportIndex report : reportList) {
+            JSONObject data = getLastRound(report.getCreateTime(), version);
+            if ((null != data)&&(!data.isEmpty())) {
                 Map<String, Object> innerMap = data.getInnerMap();
                 Set<String> keys = innerMap.keySet();
-
-                Long[] list = new Long[keys.size()];
-                int k = 0;
                 for (String key : keys) {
-                    list[k] = Long.valueOf(key);
-                    k++;
-                }
-                Arrays.sort(list);
-                Long preTime = null;
-                for (int i = 0; i < list.length; i++) {
-                    if(null == preTime){
-                        preTime = list[i];
-                    }else if(list[i]-preTime<=(MINUS*11)){
-                        continue;
-                    }else{
-                        preTime = null;
-                    }
 
                     Map<String, Object> cAngle = new HashMap<>();
                     Map<String, Object> cRound = new HashMap<>();
                     Map<String, Object> oAngle = new HashMap<>();
                     Map<String, Object> oRound = new HashMap<>();
 
-                    String formatDateTime = DateUtil.getFormatDateTime(new Date(list[i]), "yyyy-MM-dd HH:mm");
+                    String formatDateTime = DateUtil.getFormatDateTime(report.getCreateTime(), "yyyy-MM-dd HH:mm");
                     cAngle.put("a0", formatDateTime);
                     cRound.put("a0", "");
                     oAngle.put("a0", "");
@@ -832,7 +831,7 @@ public class GaoLuDocMain2 {
 
                     BuLiaoDTO[] cTmp = new BuLiaoDTO[11];
                     BuLiaoDTO[] oTmp = new BuLiaoDTO[11];
-                    JSONArray jsonArray = (JSONArray) innerMap.get(list[i] + "");
+                    JSONArray jsonArray = (JSONArray) innerMap.get(key);
                     for (int j = 0; j < jsonArray.size(); j++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(j);
 
@@ -856,7 +855,6 @@ public class GaoLuDocMain2 {
                     result.add(oRound);
                 }
             }
-            beginDate = DateUtil.addDays(beginDate, 1);
         }
         return result;
     }
@@ -2250,11 +2248,10 @@ public class GaoLuDocMain2 {
         return data;
     }
 
-    private JSONObject dataHttp2(Date beginDate, Date endDate, String version) {
+    private JSONObject getLastRound(Date time, String version) {
         JSONObject data = null;
         Map<String, String> map = new HashMap<>();
-        map.put("startTime", beginDate.getTime() + "");
-        map.put("endTime", endDate.getTime() + "");
+        map.put("time", time.getTime() + "");
         map.put("calcModel", "forward");
         String results = httpUtil.get(getUrl2(version), map);
         if (StringUtils.isNotBlank(results)) {
@@ -2531,7 +2528,7 @@ public class GaoLuDocMain2 {
      * @return
      */
     private String getUrl2(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/burden/round/range";
+        return httpProperties.getGlUrlVersion(version) + "/burden/round/last";
     }
 
     /**

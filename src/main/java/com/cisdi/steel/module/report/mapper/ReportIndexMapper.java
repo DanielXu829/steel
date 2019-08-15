@@ -6,6 +6,7 @@ import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -56,6 +57,15 @@ public interface ReportIndexMapper extends BaseMapper<ReportIndex> {
      * @return
      */
     List<ReportIndex> queryReportToday(ReportIndexQuery reportIndexQuery);
+
+    /**
+     * 查询指定报表
+     * @param code
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<ReportIndex> queryReport(@Param("code") String code, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
     /**
      * 查询本月报表
