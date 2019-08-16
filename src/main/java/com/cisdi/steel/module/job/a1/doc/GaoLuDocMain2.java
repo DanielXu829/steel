@@ -225,6 +225,7 @@ public class GaoLuDocMain2 {
     @Scheduled(cron = "0 31 6 * * ?")
     public void mainTask() {
         result = new HashMap<>();
+        initDateTime();
         mainDeal(version6);
         mainDeal(version7);
         mainDeal(version8);
@@ -360,25 +361,47 @@ public class GaoLuDocMain2 {
 
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
+    private Date startTime = null;
+    private Date endTime = null;
+
+
+    /**
+     * 构造起始时间
+     */
+    private void initDateTime(){
+        // 当前时间点
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(now);
+        cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,0);
+        cal.set(Calendar.SECOND,0);
+        cal.set(Calendar.MILLISECOND,0);
+        // 今日零点，作为结束时间点
+        Date endDate = cal.getTime();
+        // 前推30天，作为开始时间点
+        cal.add(Calendar.DAY_OF_MONTH,-30);
+        Date startDate = cal.getTime();
+
+        startTime = startDate;
+        endTime = endDate;
+
+        // 轮询
+        while (startDate.before(endDate)) {
+            // 拼接x坐标轴
+            categoriesList.add(DateUtil.getFormatDateTime(startDate, "MM月dd日"));
+            dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
+
+            // 递增日期
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            startDate = cal.getTime();
+        }
+    }
 
     private List<List<Double>> part1(String version, String[] tagNames, int scale) {
-        categoriesList.clear();
-        dateList.clear();
-
-        Date date = new Date();
-        Date date1 = DateUtil.addDays(date, 1);
-        Date beginDate = DateUtil.addDays(date1, -30);
-        Date start = beginDate;
-
         List<List<Double>> doubles = new ArrayList<>();
 
-        while (beginDate.before(date1)) {
-            categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
-            dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
-            beginDate = DateUtil.addDays(beginDate, 1);
-        }
-
-        JSONObject jsonObject = dataHttp(tagNames, start, date, version);
+        JSONObject jsonObject = dataHttp(tagNames, startTime, endTime, version);
         if (Objects.nonNull(jsonObject)) {
             for (String tagName : tagNames) {
                 List<Double> a = new ArrayList<>();
@@ -420,52 +443,6 @@ public class GaoLuDocMain2 {
         return doubles;
     }
 
-    private List<List<Double>> part2(String version, String[] tagNames) {
-        Date date = new Date();
-        date = DateUtil.addDays(date, -1);
-        Date dateBeginTime = DateUtil.getDateBeginTime(date);
-        Date dateEndTime = DateUtil.getDateEndTime(date);
-
-        List<List<Double>> doubles = new ArrayList<>();
-
-        JSONObject jsonObject = dataHttp(tagNames, dateBeginTime, dateEndTime, version);
-
-        for (String tagName : tagNames) {
-            List<Double> a = new ArrayList<>();
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject tagObject = jsonObject.getJSONObject(tagName);
-                if (Objects.nonNull(tagObject)) {
-                    Map<String, Object> innerMap = tagObject.getInnerMap();
-                    Set<String> keySet = innerMap.keySet();
-                    Long[] list = new Long[keySet.size()];
-                    int k = 0;
-                    for (String key : keySet) {
-                        list[k] = Long.valueOf(key);
-                        k++;
-                    }
-                    Arrays.sort(list);
-
-                    Double v = 0.00;
-                    for (Long li : list) {
-                        BigDecimal vv = (BigDecimal) innerMap.get(li + "");
-                        v += vv.doubleValue();
-                    }
-                    if (Objects.nonNull(v)) {
-                        v = v / list.length;
-                    }
-                    a.add(v);
-                } else {
-                    a.add(0.00);
-                }
-                doubles.add(a);
-            } else {
-                a.add(0.00);
-                doubles.add(a);
-            }
-        }
-        return doubles;
-    }
-
     private Map<String, Double> partTagValueLatest(String version, String className, Map<String,Integer> decimalMap) {
         Date date = new Date();
         Calendar cal = Calendar.getInstance();
@@ -493,8 +470,6 @@ public class GaoLuDocMain2 {
     }
 
     private List<List<Double>> partJHY(String version, String[] tagNames, String type, int[] scales) {
-        categoriesList.clear();
-        dateList.clear();
         List<List<Double>> doubles = new ArrayList<>();
 
         // 构造起始时间
@@ -525,9 +500,6 @@ public class GaoLuDocMain2 {
         cal.setTime(index);
         String brandCode = null;
         while (index.before(endDate)) {
-            // 拼接x坐标轴
-            categoriesList.add(DateUtil.getFormatDateTime(index, "MM月dd日"));
-            dateList.add(DateUtil.getFormatDateTime(index, DateUtil.yyyyMMddFormat));
 
             // 递增日期
             cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -619,8 +591,8 @@ public class GaoLuDocMain2 {
     }
 
     private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
-        categoriesList.clear();
-        dateList.clear();
+        List<String> dateListTmp = new ArrayList<>();
+        dateListTmp.addAll(dateList);
 
         Date date = new Date();
         Date date1 = DateUtil.addDays(date, 1);
@@ -628,12 +600,6 @@ public class GaoLuDocMain2 {
         Date start = beginDate;
 
         List<List<Double>> doubles = new ArrayList<>();
-
-        while (beginDate.before(date1)) {
-            categoriesList.add(DateUtil.getFormatDateTime(beginDate, "MM月dd日"));
-            dateList.add(DateUtil.getFormatDateTime(beginDate, DateUtil.yyyyMMddFormat));
-            beginDate = DateUtil.addDays(beginDate, 1);
-        }
         for (String cBrandCode : cBrandCodes) {
             List<Double> csrR = new ArrayList<>();
             List<Double> m40R = new ArrayList<>();
@@ -641,7 +607,7 @@ public class GaoLuDocMain2 {
             List<Double> a4R = new ArrayList<>();
 
             JSONArray jsonArray = dataHttp1(cBrandCode, type, start, date, version);
-            for (String da : dateList) {
+            for (String da : dateListTmp) {
                 List<BigDecimal> csr = new ArrayList<>();
                 List<BigDecimal> m40 = new ArrayList<>();
                 List<BigDecimal> ad = new ArrayList<>();
@@ -769,9 +735,9 @@ public class GaoLuDocMain2 {
                 if (Objects.nonNull(x) && x.doubleValue() != 0.0) {
                     rd.add(x * scale);
                 } else {
-                    if (i < dateList.size()) {
-                        dateList.remove(i);
-                    }
+//                    if (i < dateListTmp.size()) {
+//                        dateListTmp.remove(i);
+//                    }
                 }
             }
             result.add(rd);
@@ -2493,8 +2459,8 @@ public class GaoLuDocMain2 {
             }
         }
         for (Object o : objects1) {
-            Double v = 0.0;
-            if (Objects.nonNull(o)) {
+            Double v = null;
+            if (null != o) {
                 v = (Double) o;
                 if(null != multiple){
                     v = v*multiple;
@@ -2502,8 +2468,8 @@ public class GaoLuDocMain2 {
                 if(null != decimal){
                     v = (double) Math.round(v * scale) / scale;
                 }
-                result[i++] = v;
             }
+            result[i++] = v;
         }
         return result;
     }
