@@ -290,7 +290,7 @@ public class GaoLuDocMain2 {
         L12 = new String[]{"BF6_L2C_BD_W_1d_avg", "BF6_L2C_BD_Z_1d_avg"};
         L13 = new String[]{"BF6_L2M_CCT_1d_avg", "BF6_L2M_PCT_1d_avg"};
         L16 = new String[]{"BF6_L2C_BD_WT6_Q_1d_avg", "BF6_L2C_BD_GasUtilization_1d_avg"};
-        L18 = new String[]{"BF6_L2C_HMTemp_1d_avg"};
+        L18 = new String[]{"BF6_L2M_HMTemp_1d_avg"};
         L19 = new String[]{"BF6_L2C_AnalysisSiValue_1d_avg", "BF6_L2C_AnalysisSValue_1d_avg"};
     }
 
@@ -322,7 +322,7 @@ public class GaoLuDocMain2 {
         L12 = new String[]{"BF8_L2C_BD_W_1d_avg", "BF8_L2C_BD_Z_1d_avg"};
         L13 = new String[]{"BF8_L2C_BD_CCT_1d_avg", "BF8_L2M_PCT_1d_avg"};
         L16 = new String[]{"BF8_L2C_BD_WT6_Q_1d_avg", "BF8_L2C_TP_GasUtilization_1d_avg"};
-        L18 = new String[]{"BF8_L2C_HMTemp_1d_avg"};
+        L18 = new String[]{"BF8_L2M_HMTemp_1d_avg"};
         L19 = new String[]{"BF8_L2C_AnalysisSiValue_1d_avg", "BF8_L2C_AnalysisSValue_1d_avg"};
     }
 
@@ -361,6 +361,7 @@ public class GaoLuDocMain2 {
 
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
+    List<String> longTimeList = new ArrayList<>();
     private Date startTime = null;
     private Date endTime = null;
 
@@ -391,6 +392,7 @@ public class GaoLuDocMain2 {
             // 拼接x坐标轴
             categoriesList.add(DateUtil.getFormatDateTime(startDate, "MM月dd日"));
             dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
+            longTimeList.add(startDate.getTime()+"");
 
             // 递增日期
             cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -404,40 +406,23 @@ public class GaoLuDocMain2 {
         JSONObject jsonObject = dataHttp(tagNames, startTime, endTime, version);
         if (Objects.nonNull(jsonObject)) {
             for (String tagName : tagNames) {
-                List<Double> a = new ArrayList<>();
+                List<Double> vals = new ArrayList<>();
                 JSONObject tagObject = jsonObject.getJSONObject(tagName);
-                if (Objects.nonNull(tagObject)) {
+                if (null != tagObject) {
                     Map<String, Object> innerMap = tagObject.getInnerMap();
-                    Set<String> keySet = innerMap.keySet();
-                    Long[] list = new Long[keySet.size()];
-                    int k = 0;
-                    for (String key : keySet) {
-                        list[k] = Long.valueOf(key);
-                        k++;
-                    }
-                    Arrays.sort(list);
-                    for (String da : dateList) {
-                        Double v = null;
-                        for (Long li : list) {
-                            Date dd = new Date(Long.valueOf(li));
-                            String fomDate = DateUtil.getFormatDateTime(dd, DateUtil.yyyyMMddFormat);
-                            if (fomDate.equals(da)) {
-                                BigDecimal vv = (BigDecimal) innerMap.get(li + "");
-                                v = vv.doubleValue();
-                                break;
+                    for (String time : longTimeList) {
+                        Double val = null;
+                        BigDecimal big = (BigDecimal) innerMap.get(time);
+                        if(null != big){
+                            val = big.doubleValue();
+                            if(val <0){
+                                val = 0.0;
                             }
                         }
-                        if (Objects.nonNull(v)) {
-                            if(v<0){
-                                v = 0.0;
-                            }
-                            a.add(v * scale);
-                        } else {
-                            a.add(v);
-                        }
+                        vals.add(val);
                     }
                 }
-                doubles.add(a);
+                doubles.add(vals);
             }
         }
         return doubles;
@@ -472,17 +457,8 @@ public class GaoLuDocMain2 {
     private List<List<Double>> partJHY(String version, String[] tagNames, String type, int[] scales) {
         List<List<Double>> doubles = new ArrayList<>();
 
-        // 构造起始时间
-        Date now = new Date();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(now);
-        cal.set(Calendar.HOUR_OF_DAY,0);
-        cal.set(Calendar.MINUTE,0);
-        cal.set(Calendar.SECOND,0);
-        cal.set(Calendar.MILLISECOND,0);
-        now = cal.getTime();
-        Date endDate = now;
-        Date startDate = DateUtil.addDays(endDate, -30);
+        Date startDate = startTime;
+        Date endDate = endTime;
 
         // 上料记录
         List<ShangLiaoDTO> sl = new ArrayList<>();
@@ -497,10 +473,10 @@ public class GaoLuDocMain2 {
 
         // 轮询
         Date index = startDate;
+        Calendar cal = Calendar.getInstance();
         cal.setTime(index);
         String brandCode = null;
         while (index.before(endDate)) {
-
             // 递增日期
             cal.add(Calendar.DAY_OF_MONTH, 1);
             Date next = cal.getTime();
@@ -594,11 +570,6 @@ public class GaoLuDocMain2 {
         List<String> dateListTmp = new ArrayList<>();
         dateListTmp.addAll(dateList);
 
-        Date date = new Date();
-        Date date1 = DateUtil.addDays(date, 1);
-        Date beginDate = DateUtil.addDays(date1, -30);
-        Date start = beginDate;
-
         List<List<Double>> doubles = new ArrayList<>();
         for (String cBrandCode : cBrandCodes) {
             List<Double> csrR = new ArrayList<>();
@@ -606,7 +577,7 @@ public class GaoLuDocMain2 {
             List<Double> adR = new ArrayList<>();
             List<Double> a4R = new ArrayList<>();
 
-            JSONArray jsonArray = dataHttp1(cBrandCode, type, start, date, version);
+            JSONArray jsonArray = dataHttp1(cBrandCode, type, startTime, endTime, version);
             for (String da : dateListTmp) {
                 List<BigDecimal> csr = new ArrayList<>();
                 List<BigDecimal> m40 = new ArrayList<>();
@@ -1140,40 +1111,6 @@ public class GaoLuDocMain2 {
         result.put("sheet18", sheet18);
         result.put("sheet19", sheet19);
     }
-
-    private void dealBuliao(Map<String, Object> angle, Map<String, Object> round, BuLiaoDTO[] tmp) {
-        int m = 1;
-        for (BuLiaoDTO bl : tmp) {
-            if(null == bl){
-                continue;
-            }
-            if(!"0.0".equals(bl.getRound())){
-                angle.put("a" + m, bl.getAngle());
-                round.put("a" + m, bl.getRound());
-                m++;
-            }
-        }
-    }
-
-    private List<Double> part5(String version) {
-        List<Double> list = new ArrayList<>();
-        Date date = new Date();
-        date = DateUtil.addDays(date, -1);
-        Date dateBeginTime = DateUtil.getDateBeginTime(date);
-        Date dateEndTime = DateUtil.getDateEndTime(date);
-        JSONArray jsonArray = dataHttp3(dateBeginTime, dateEndTime, version);
-        if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
-            JSONObject object = jsonArray.getJSONObject(0);
-            JSONObject values = object.getJSONObject("values");
-            BigDecimal aggl = values.getBigDecimal("Aggl");
-            BigDecimal r = values.getBigDecimal("R");
-
-            list.add(aggl.doubleValue());
-            list.add(r.doubleValue());
-        }
-        return list;
-    }
-
 
     /**
      * 提取最小最大值
@@ -2231,19 +2168,6 @@ public class GaoLuDocMain2 {
             JSONObject jsonObject = JSONObject.parseObject(results);
             data = jsonObject.getJSONArray("data");
         }
-        return data;
-    }
-
-    private JSONArray dataHttp3(Date beginDate, Date endDate, String version) {
-        Map<String, String> map = new HashMap<>();
-        map.put("starttime", beginDate.getTime() + "");
-        map.put("endtime", endDate.getTime() + "");
-        map.put("category", "ALL");
-        map.put("granularity", "day");
-        map.put("type", "LC");
-        String results = httpUtil.get(getUrl3(version), map);
-        JSONObject jsonObject = JSONObject.parseObject(results);
-        JSONArray data = jsonObject.getJSONArray("data");
         return data;
     }
 
