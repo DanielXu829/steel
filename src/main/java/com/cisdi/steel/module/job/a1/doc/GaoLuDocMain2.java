@@ -417,6 +417,8 @@ public class GaoLuDocMain2 {
                             val = big.doubleValue();
                             if(val <0){
                                 val = 0.0;
+                            }else{
+                                val *= scale;
                             }
                         }
                         vals.add(val);
@@ -454,9 +456,13 @@ public class GaoLuDocMain2 {
         return vals;
     }
 
-    private List<List<Double>> partJHY(String version, String[] tagNames, String type, int[] scales) {
-        List<List<Double>> doubles = new ArrayList<>();
-
+    /**
+     * 获取一段时间内，每段的上料类型
+     * @param version
+     * @param type coke:焦炭
+     * @return
+     */
+    private List<ShangLiaoDTO> getShangLiaoList(String version,String type){
         Date startDate = startTime;
         Date endDate = endTime;
 
@@ -465,7 +471,7 @@ public class GaoLuDocMain2 {
 
         // 是否只用了一种物料
         boolean isOnlyOne = false;
-        List<String> brandCodes = dataHttpBrandCode(version,startDate,endDate,"COKE");
+        List<String> brandCodes = dataHttpBrandCode(version,startDate,endDate,type);
         if(brandCodes.size() == 1){
             isOnlyOne = true;
             sl.add(new ShangLiaoDTO(brandCodes.get(0),startDate,endDate));
@@ -483,7 +489,7 @@ public class GaoLuDocMain2 {
 
             if(!isOnlyOne){ // 上了多种料
                 // 轮询每天的焦炭种类
-                List<String> todayBrandCodes = dataHttpBrandCode(version,index,next,"COKE");
+                List<String> todayBrandCodes = dataHttpBrandCode(version,index,next,type);
                 String nextBrandCode = todayBrandCodes.get(todayBrandCodes.size()-1);
                 if(null == brandCode){ // 第一天的物料代码
                     brandCode = nextBrandCode;
@@ -498,7 +504,10 @@ public class GaoLuDocMain2 {
         if(!isOnlyOne){
             sl.add(new ShangLiaoDTO(brandCode,startDate,endDate));
         }
+        return sl;
+    }
 
+    private List<List<Double>> partJHY(String version, String[] tagNames, List<ShangLiaoDTO> sl, int[] scales) {
         // <tagName,<日期，具体值list>>
         Map<String,Map<String,List<Double>>> tagMap = new HashMap<>();
         for (String tagName : tagNames) {
@@ -507,7 +516,7 @@ public class GaoLuDocMain2 {
 
         // 开始查询
         for (ShangLiaoDTO slDTO : sl) {
-            JSONArray jsonArray = dataHttp1(slDTO.getBrandCode(), type, slDTO.getStartDate(), slDTO.getEndDate(), version);
+            JSONArray jsonArray = dataHttp1(slDTO.getBrandCode(), slDTO.getStartDate(), slDTO.getEndDate(), version);
 
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -544,6 +553,7 @@ public class GaoLuDocMain2 {
         }
 
         // 计算最终值
+        List<List<Double>> doubles = new ArrayList<>();
         int i = 0;
         for (String tagName : tagNames) {
             List<Double> list = new ArrayList<>();
@@ -566,155 +576,155 @@ public class GaoLuDocMain2 {
         return doubles;
     }
 
-    private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
-        List<String> dateListTmp = new ArrayList<>();
-        dateListTmp.addAll(dateList);
-
-        List<List<Double>> doubles = new ArrayList<>();
-        for (String cBrandCode : cBrandCodes) {
-            List<Double> csrR = new ArrayList<>();
-            List<Double> m40R = new ArrayList<>();
-            List<Double> adR = new ArrayList<>();
-            List<Double> a4R = new ArrayList<>();
-
-            JSONArray jsonArray = dataHttp1(cBrandCode, type, startTime, endTime, version);
-            for (String da : dateListTmp) {
-                List<BigDecimal> csr = new ArrayList<>();
-                List<BigDecimal> m40 = new ArrayList<>();
-                List<BigDecimal> ad = new ArrayList<>();
-                List<BigDecimal> a4 = new ArrayList<>();
-
-                BigDecimal a = BigDecimal.ZERO;
-                BigDecimal b = BigDecimal.ZERO;
-                BigDecimal c = BigDecimal.ZERO;
-                BigDecimal d = BigDecimal.ZERO;
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    if (Objects.nonNull(jsonObject)) {
-                        JSONObject analysis = jsonObject.getJSONObject("analysis");
-                        long sampletime = analysis.getLong("sampletime");
-                        Date dd = new Date(sampletime);
-                        String fomDate = DateUtil.getFormatDateTime(dd, DateUtil.yyyyMMddFormat);
-
-                        if (da.equals(fomDate)) {
-                            JSONObject object = jsonObject.getJSONObject("values");
-                            Map<String, Object> innerMap = object.getInnerMap();
-                            Object o = innerMap.get(tagNames[0]);
-                            Object o1 = null;
-                            Object o2 = null;
-                            Object o3 = null;
-                            if (tagNames.length > 1) {
-                                o1 = innerMap.get(tagNames[1]);
-                            }
-                            if (tagNames.length > 2) {
-                                o2 = innerMap.get(tagNames[2]);
-                            }
-                            if (tagNames.length > 3) {
-                                o3 = innerMap.get(tagNames[3]);
-                            }
-                            if (Objects.nonNull(o)) {
-                                BigDecimal v = dealType(o);
-                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-                                    csr.add(v);
-                                    a = a.add(v);
-                                }
-                            }
-                            if (Objects.nonNull(o1)) {
-                                BigDecimal v = dealType(o1);
-                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-                                    m40.add(v);
-                                    b = b.add(v);
-                                }
-                            }
-                            if (Objects.nonNull(o2)) {
-                                BigDecimal v = dealType(o2);
-                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-                                    ad.add(v);
-                                    c = c.add(v);
-                                }
-                            }
-                            if (Objects.nonNull(o3)) {
-                                BigDecimal v = dealType(o3);
-                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-                                    a4.add(v);
-                                    d = d.add(v);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (csr.size() != 0) {
-                    a = a.divide(new BigDecimal(csr.size()), 6, BigDecimal.ROUND_HALF_UP);
-                }
-                a.setScale(6, BigDecimal.ROUND_HALF_UP);
-                csrR.add(a.doubleValue());
-
-                if (m40.size() != 0) {
-                    b = b.divide(new BigDecimal(m40.size()), 6, BigDecimal.ROUND_HALF_UP);
-                }
-                b.setScale(6, BigDecimal.ROUND_HALF_UP);
-                m40R.add(b.doubleValue());
-
-                if (ad.size() != 0) {
-                    c = c.divide(new BigDecimal(ad.size()), 6, BigDecimal.ROUND_HALF_UP);
-                }
-                c.setScale(6, BigDecimal.ROUND_HALF_UP);
-                adR.add(c.doubleValue());
-
-                if (a4.size() != 0) {
-                    d = d.divide(new BigDecimal(a4.size()), 6, BigDecimal.ROUND_HALF_UP);
-                }
-                d.setScale(6, BigDecimal.ROUND_HALF_UP);
-                a4R.add(d.doubleValue());
-            }
-            doubles.add(csrR);
-            if (tagNames.length > 1) {
-                doubles.add(m40R);
-            }
-            if (tagNames.length > 2) {
-                doubles.add(adR);
-            }
-            if (tagNames.length > 3) {
-                doubles.add(a4R);
-            }
-        }
-        List<List<Double>> result = new ArrayList<>();
-
-        for (int j = 0; j < tagNames.length; j++) {
-            List<Double> rd = new ArrayList<>();
-            List<Double> doubles1 = doubles.get(j);
-            for (int i = 0; i < doubles1.size(); i++) {
-                int size = 1;
-                Double aDouble = doubles.get(j).get(i);
-                Double bDouble = 0.0;
-                if ((j + tagNames.length) < doubles.size()) {
-                    bDouble = doubles.get(j + tagNames.length).get(i);
-                }
-                Double cDouble = 0.0;
-                if ((j + 2 * tagNames.length) < doubles.size()) {
-                    cDouble = doubles.get(j + 2 * tagNames.length).get(i);
-                }
-
-                if (bDouble.doubleValue() != 0.0) {
-                    size++;
-                }
-                if (cDouble.doubleValue() != 0.0) {
-                    size++;
-                }
-                Double x = (aDouble + bDouble + cDouble) / size;
-
-                if (Objects.nonNull(x) && x.doubleValue() != 0.0) {
-                    rd.add(x * scale);
-                } else {
-//                    if (i < dateListTmp.size()) {
-//                        dateListTmp.remove(i);
+//    private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
+//        List<String> dateListTmp = new ArrayList<>();
+//        dateListTmp.addAll(dateList);
+//
+//        List<List<Double>> doubles = new ArrayList<>();
+//        for (String cBrandCode : cBrandCodes) {
+//            List<Double> csrR = new ArrayList<>();
+//            List<Double> m40R = new ArrayList<>();
+//            List<Double> adR = new ArrayList<>();
+//            List<Double> a4R = new ArrayList<>();
+//
+//            JSONArray jsonArray = dataHttp1(cBrandCode, startTime, endTime, version);
+//            for (String da : dateListTmp) {
+//                List<BigDecimal> csr = new ArrayList<>();
+//                List<BigDecimal> m40 = new ArrayList<>();
+//                List<BigDecimal> ad = new ArrayList<>();
+//                List<BigDecimal> a4 = new ArrayList<>();
+//
+//                BigDecimal a = BigDecimal.ZERO;
+//                BigDecimal b = BigDecimal.ZERO;
+//                BigDecimal c = BigDecimal.ZERO;
+//                BigDecimal d = BigDecimal.ZERO;
+//                for (int i = 0; i < jsonArray.size(); i++) {
+//                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+//                    if (Objects.nonNull(jsonObject)) {
+//                        JSONObject analysis = jsonObject.getJSONObject("analysis");
+//                        long sampletime = analysis.getLong("sampletime");
+//                        Date dd = new Date(sampletime);
+//                        String fomDate = DateUtil.getFormatDateTime(dd, DateUtil.yyyyMMddFormat);
+//
+//                        if (da.equals(fomDate)) {
+//                            JSONObject object = jsonObject.getJSONObject("values");
+//                            Map<String, Object> innerMap = object.getInnerMap();
+//                            Object o = innerMap.get(tagNames[0]);
+//                            Object o1 = null;
+//                            Object o2 = null;
+//                            Object o3 = null;
+//                            if (tagNames.length > 1) {
+//                                o1 = innerMap.get(tagNames[1]);
+//                            }
+//                            if (tagNames.length > 2) {
+//                                o2 = innerMap.get(tagNames[2]);
+//                            }
+//                            if (tagNames.length > 3) {
+//                                o3 = innerMap.get(tagNames[3]);
+//                            }
+//                            if (Objects.nonNull(o)) {
+//                                BigDecimal v = dealType(o);
+//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+//                                    csr.add(v);
+//                                    a = a.add(v);
+//                                }
+//                            }
+//                            if (Objects.nonNull(o1)) {
+//                                BigDecimal v = dealType(o1);
+//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+//                                    m40.add(v);
+//                                    b = b.add(v);
+//                                }
+//                            }
+//                            if (Objects.nonNull(o2)) {
+//                                BigDecimal v = dealType(o2);
+//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+//                                    ad.add(v);
+//                                    c = c.add(v);
+//                                }
+//                            }
+//                            if (Objects.nonNull(o3)) {
+//                                BigDecimal v = dealType(o3);
+//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
+//                                    a4.add(v);
+//                                    d = d.add(v);
+//                                }
+//                            }
+//                        }
 //                    }
-                }
-            }
-            result.add(rd);
-        }
-        return result;
-    }
+//                }
+//                if (csr.size() != 0) {
+//                    a = a.divide(new BigDecimal(csr.size()), 6, BigDecimal.ROUND_HALF_UP);
+//                }
+//                a.setScale(6, BigDecimal.ROUND_HALF_UP);
+//                csrR.add(a.doubleValue());
+//
+//                if (m40.size() != 0) {
+//                    b = b.divide(new BigDecimal(m40.size()), 6, BigDecimal.ROUND_HALF_UP);
+//                }
+//                b.setScale(6, BigDecimal.ROUND_HALF_UP);
+//                m40R.add(b.doubleValue());
+//
+//                if (ad.size() != 0) {
+//                    c = c.divide(new BigDecimal(ad.size()), 6, BigDecimal.ROUND_HALF_UP);
+//                }
+//                c.setScale(6, BigDecimal.ROUND_HALF_UP);
+//                adR.add(c.doubleValue());
+//
+//                if (a4.size() != 0) {
+//                    d = d.divide(new BigDecimal(a4.size()), 6, BigDecimal.ROUND_HALF_UP);
+//                }
+//                d.setScale(6, BigDecimal.ROUND_HALF_UP);
+//                a4R.add(d.doubleValue());
+//            }
+//            doubles.add(csrR);
+//            if (tagNames.length > 1) {
+//                doubles.add(m40R);
+//            }
+//            if (tagNames.length > 2) {
+//                doubles.add(adR);
+//            }
+//            if (tagNames.length > 3) {
+//                doubles.add(a4R);
+//            }
+//        }
+//        List<List<Double>> result = new ArrayList<>();
+//
+//        for (int j = 0; j < tagNames.length; j++) {
+//            List<Double> rd = new ArrayList<>();
+//            List<Double> doubles1 = doubles.get(j);
+//            for (int i = 0; i < doubles1.size(); i++) {
+//                int size = 1;
+//                Double aDouble = doubles.get(j).get(i);
+//                Double bDouble = 0.0;
+//                if ((j + tagNames.length) < doubles.size()) {
+//                    bDouble = doubles.get(j + tagNames.length).get(i);
+//                }
+//                Double cDouble = 0.0;
+//                if ((j + 2 * tagNames.length) < doubles.size()) {
+//                    cDouble = doubles.get(j + 2 * tagNames.length).get(i);
+//                }
+//
+//                if (bDouble.doubleValue() != 0.0) {
+//                    size++;
+//                }
+//                if (cDouble.doubleValue() != 0.0) {
+//                    size++;
+//                }
+//                Double x = (aDouble + bDouble + cDouble) / size;
+//
+//                if (Objects.nonNull(x) && x.doubleValue() != 0.0) {
+//                    rd.add(x * scale);
+//                } else {
+////                    if (i < dateListTmp.size()) {
+////                        dateListTmp.remove(i);
+////                    }
+//                }
+//            }
+//            result.add(rd);
+//        }
+//        return result;
+//    }
 
     private static final int MINUS = 60*1000;
 
@@ -1378,7 +1388,8 @@ public class GaoLuDocMain2 {
 
     private void dealPart456(String version, String[] tagNames){
         int[] scales = {1,1,1,1,1,1};
-        List<List<Double>> doubles = partJHY(version, tagNames, "ALL", scales);
+        List<ShangLiaoDTO> sl = getShangLiaoList(version,"COKE");
+        List<List<Double>> doubles = partJHY(version, tagNames, sl, scales);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         Object[] objects3 = doubles.get(2).toArray();
@@ -1529,13 +1540,19 @@ public class GaoLuDocMain2 {
     }
 
     private void dealPart7(String version, String[] tagNames) {
-        String[] cBrandCodes = null;
+        String brandCode = null;
         if(version.equals("8.0")){
-            cBrandCodes = new String[]{"6_SJK_SINTER"};
+            brandCode = "6_SJK_SINTER";
         }else{
-            cBrandCodes = new String[]{"5_SJK_SINTER"};
+            brandCode = "5_SJK_SINTER";
         }
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 100);
+        int[] scales = {100,100};
+        Date startDate = startTime;
+        Date endDate = endTime;
+        List<ShangLiaoDTO> sl = new ArrayList<>();
+        sl.add(new ShangLiaoDTO(brandCode,startDate,endDate));
+
+        List<List<Double>> doubles = partJHY(version, tagNames, sl, scales);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
@@ -1616,15 +1633,21 @@ public class GaoLuDocMain2 {
     }
 
     private void dealPart9(String version, String[] tagNames) {
-        String[] cBrandCodes = null;
+        String brandCode = null;
         if(version.equals("6.0")){
-            cBrandCodes = new String[]{"2_ZMHPCM_COAL"};
+            brandCode = "2_ZMHPCM_COAL";
         }else if(version.equals("7.0")){
-            cBrandCodes = new String[]{"3_ZMHPCM_COAL"};
-        }else if(version.equals("8.0")){
-            cBrandCodes = new String[]{"4_ZMHPCM_COAL"};
+            brandCode = "3_ZMHPCM_COAL";
+        }else{
+            brandCode = "4_ZMHPCM_COAL";
         }
-        List<List<Double>> doubles = part3(version, tagNames, cBrandCodes, "ALL", 100);
+        int[] scales = {100,100};
+        Date startDate = startTime;
+        Date endDate = endTime;
+        List<ShangLiaoDTO> sl = new ArrayList<>();
+        sl.add(new ShangLiaoDTO(brandCode,startDate,endDate));
+
+        List<List<Double>> doubles = partJHY(version, tagNames, sl, scales);
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
 
@@ -2146,12 +2169,12 @@ public class GaoLuDocMain2 {
         return data;
     }
 
-    private JSONArray dataHttp1(String brandCode, String type, Date beginDate, Date endDate, String version) {
+    private JSONArray dataHttp1(String brandCode, Date beginDate, Date endDate, String version) {
         Map<String, String> map = new HashMap<>();
         map.put("starttime", beginDate.getTime() + "");
         map.put("endtime", endDate.getTime() + "");
         map.put("brandcode", brandCode);
-        map.put("type", type);
+        map.put("type", "ALL");
         String results = httpUtil.get(getUrl1(version), map);
         JSONObject jsonObject = JSONObject.parseObject(results);
         JSONArray data = jsonObject.getJSONArray("data");

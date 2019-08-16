@@ -95,10 +95,10 @@ public class ChartFactory {
         for (int i = 0; i < categories.length; i++) {
             Object s = categories[i];
             if (i % batch == 0) {
-                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.black);
+                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.white);
             } else {
                 // 设置背景色为白色
-                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.white);
+                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.black);
             }
         }
         double[] rangStarts = {rangIndex,rangIndex2,rangIndex3};
