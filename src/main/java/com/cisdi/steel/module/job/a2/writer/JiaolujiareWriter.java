@@ -67,8 +67,14 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
                 // 归零
                 Date huanxiang = getHuanXiangDate(version,jhNo);
                 cal.set(Calendar.MINUTE,huanxiang.getMinutes());
+                // 接口返回的时间-5分钟，是真正的换向时间
+                cal.add(Calendar.MINUTE,-5);
                 while(cal.getTime().after(beginTime)) {
                     cal.add(Calendar.MINUTE,-30);
+                }
+                // 2#特殊，再加30分钟
+                if("2.0".equals(jhNo)){
+                    cal.add(Calendar.MINUTE,30);
                 }
                 // 轮询计算
                 while(cal.getTime().before(endTime)) {
