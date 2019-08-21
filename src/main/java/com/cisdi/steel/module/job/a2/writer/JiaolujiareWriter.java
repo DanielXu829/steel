@@ -66,9 +66,17 @@ public class JiaolujiareWriter extends AbstractExcelReadWriter {
 
                 // 归零
                 Date huanxiang = getHuanXiangDate(version,jhNo);
-                cal.set(Calendar.MINUTE,huanxiang.getMinutes());
+                Calendar hx = Calendar.getInstance();
+                hx.setTime(huanxiang);
                 // 接口返回的时间-5分钟，是真正的换向时间
-                cal.add(Calendar.MINUTE,-5);
+                hx.add(Calendar.MINUTE,-5);
+                // 4号炉在05分换向，而且时间会浮动，如果时间准确，此处理需去掉
+                if("4.0".equals(jhNo)){
+                    hx.add(Calendar.MINUTE,2);
+//                    hx.add(Calendar.SECOND,30);
+                }
+
+                cal.set(Calendar.MINUTE,hx.get(Calendar.MINUTE));
                 while(cal.getTime().after(beginTime)) {
                     cal.add(Calendar.MINUTE,-30);
                 }

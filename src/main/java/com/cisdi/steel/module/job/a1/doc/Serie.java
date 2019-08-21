@@ -41,9 +41,13 @@ public class Serie implements Serializable {
     public Serie(String name, Object[] array) {
         this.name = name;
         if (array != null) {
+            // 数据预处理，空值取前一次值
+            // 如果jfreechart的折线图可以实现跳过空值继续连线，此处可以去掉
+            Object val = null;
             data = new Vector<Object>(array.length);
             for (int i = 0; i < array.length; i++) {
-                data.add(array[i]);
+                val = (null == array[i]) ? val : array[i];
+                data.add(val);
             }
         }
     }

@@ -282,7 +282,7 @@ public class GaoLuDocMain2 {
         L1 = new String[]{"BF6_L2M_BX_HM_confirmWgt_evt", "BF6_L2C_MES_CON_FR_1d_avg"};
         L2 = new String[]{"BF6_L2C_MES_CR_1d_avg", "BF6_L2C_MES_CON_PCI_1d_avg"};
         L3 = new String[]{"BF6_L2M_SinterRatio_1d_avg", "BF6_L2M_PelletsRatio_1d_avg", "BF6_L2M_LumporeRatio_1d_avg"};
-        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "S"};
+        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "Std"};
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
         L10 = new String[]{"BF6_L2C_BD_ActBlastFlow_1d_avg", "BF6_L2C_BD_OxygenFlow_1d_avg"};
@@ -298,7 +298,7 @@ public class GaoLuDocMain2 {
         L1 = new String[]{"BF7_L2M_BX_HM_confirmWgt_evt", "BF7_L2C_MES_CON_FR_1d_avg"};
         L2 = new String[]{"BF7_L2C_MES_CR_1d_avg", "BF7_L2C_MES_CON_PCI_1d_avg"};
         L3 = new String[]{"BF7_L2M_SinterRatio_1d_avg", "BF7_L2M_PelletsRatio_1d_avg", "BF7_L2M_LumporeRatio_1d_avg"};
-        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "S"};
+        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "Std"};
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
         L10 = new String[]{"BF7_L2C_BD_ColdBlastFlow_1h_avg", "BF7_L2C_BD_OxygenFlow1_1d_avg"};
@@ -314,7 +314,7 @@ public class GaoLuDocMain2 {
         L1 = new String[]{"BF8_L2M_BX_HM_confirmWgt_evt", "BF8_L2C_MES_CON_FR_1d_avg"};
         L2 = new String[]{"BF8_L2C_MES_CR_1d_avg", "BF8_L2C_MES_CON_PCI_1d_avg"};
         L3 = new String[]{"BF8_L2M_SinterRatio_1d_avg", "BF8_L2M_PelletsRatio_1d_avg", "BF8_L2M_LumporeRatio_1d_avg"};
-        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "S"};
+        L4 = new String[]{"M40", "M10", "CSR", "CRI", "Ad", "Std"};
         L7 = new String[]{"TFe", "FeO"};
         L9 = new String[]{"Ad", "S"};
         L10 = new String[]{"BF8_L2C_BD_HotBlastFlow_1d_avg", "BF8_L2C_BD_OxygenFlow_1d_avg"};
@@ -390,7 +390,7 @@ public class GaoLuDocMain2 {
         // 轮询
         while (startDate.before(endDate)) {
             // 拼接x坐标轴
-            categoriesList.add(DateUtil.getFormatDateTime(startDate, "MM月dd日"));
+            categoriesList.add(DateUtil.getFormatDateTime(startDate, "MM-dd"));
             dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
             longTimeList.add(startDate.getTime()+"");
 
@@ -416,7 +416,7 @@ public class GaoLuDocMain2 {
                         if(null != big){
                             val = big.doubleValue();
                             if(val <0){
-                                val = 0.0;
+                                val = null;
                             }else{
                                 val *= scale;
                             }
@@ -561,7 +561,7 @@ public class GaoLuDocMain2 {
             for (String date : dateList) {
                 List<Double> valList = valMap.get(date);
                 if((null == valList)||valList.isEmpty()){
-                    list.add(0.0);
+                    list.add(null);
                     continue;
                 }
                 Double sum = 0.0;
@@ -575,156 +575,6 @@ public class GaoLuDocMain2 {
         }
         return doubles;
     }
-
-//    private List<List<Double>> part3(String version, String[] tagNames, String[] cBrandCodes, String type, int scale) {
-//        List<String> dateListTmp = new ArrayList<>();
-//        dateListTmp.addAll(dateList);
-//
-//        List<List<Double>> doubles = new ArrayList<>();
-//        for (String cBrandCode : cBrandCodes) {
-//            List<Double> csrR = new ArrayList<>();
-//            List<Double> m40R = new ArrayList<>();
-//            List<Double> adR = new ArrayList<>();
-//            List<Double> a4R = new ArrayList<>();
-//
-//            JSONArray jsonArray = dataHttp1(cBrandCode, startTime, endTime, version);
-//            for (String da : dateListTmp) {
-//                List<BigDecimal> csr = new ArrayList<>();
-//                List<BigDecimal> m40 = new ArrayList<>();
-//                List<BigDecimal> ad = new ArrayList<>();
-//                List<BigDecimal> a4 = new ArrayList<>();
-//
-//                BigDecimal a = BigDecimal.ZERO;
-//                BigDecimal b = BigDecimal.ZERO;
-//                BigDecimal c = BigDecimal.ZERO;
-//                BigDecimal d = BigDecimal.ZERO;
-//                for (int i = 0; i < jsonArray.size(); i++) {
-//                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-//                    if (Objects.nonNull(jsonObject)) {
-//                        JSONObject analysis = jsonObject.getJSONObject("analysis");
-//                        long sampletime = analysis.getLong("sampletime");
-//                        Date dd = new Date(sampletime);
-//                        String fomDate = DateUtil.getFormatDateTime(dd, DateUtil.yyyyMMddFormat);
-//
-//                        if (da.equals(fomDate)) {
-//                            JSONObject object = jsonObject.getJSONObject("values");
-//                            Map<String, Object> innerMap = object.getInnerMap();
-//                            Object o = innerMap.get(tagNames[0]);
-//                            Object o1 = null;
-//                            Object o2 = null;
-//                            Object o3 = null;
-//                            if (tagNames.length > 1) {
-//                                o1 = innerMap.get(tagNames[1]);
-//                            }
-//                            if (tagNames.length > 2) {
-//                                o2 = innerMap.get(tagNames[2]);
-//                            }
-//                            if (tagNames.length > 3) {
-//                                o3 = innerMap.get(tagNames[3]);
-//                            }
-//                            if (Objects.nonNull(o)) {
-//                                BigDecimal v = dealType(o);
-//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-//                                    csr.add(v);
-//                                    a = a.add(v);
-//                                }
-//                            }
-//                            if (Objects.nonNull(o1)) {
-//                                BigDecimal v = dealType(o1);
-//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-//                                    m40.add(v);
-//                                    b = b.add(v);
-//                                }
-//                            }
-//                            if (Objects.nonNull(o2)) {
-//                                BigDecimal v = dealType(o2);
-//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-//                                    ad.add(v);
-//                                    c = c.add(v);
-//                                }
-//                            }
-//                            if (Objects.nonNull(o3)) {
-//                                BigDecimal v = dealType(o3);
-//                                if (v.compareTo(BigDecimal.ZERO) > 0) {
-//                                    a4.add(v);
-//                                    d = d.add(v);
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//                if (csr.size() != 0) {
-//                    a = a.divide(new BigDecimal(csr.size()), 6, BigDecimal.ROUND_HALF_UP);
-//                }
-//                a.setScale(6, BigDecimal.ROUND_HALF_UP);
-//                csrR.add(a.doubleValue());
-//
-//                if (m40.size() != 0) {
-//                    b = b.divide(new BigDecimal(m40.size()), 6, BigDecimal.ROUND_HALF_UP);
-//                }
-//                b.setScale(6, BigDecimal.ROUND_HALF_UP);
-//                m40R.add(b.doubleValue());
-//
-//                if (ad.size() != 0) {
-//                    c = c.divide(new BigDecimal(ad.size()), 6, BigDecimal.ROUND_HALF_UP);
-//                }
-//                c.setScale(6, BigDecimal.ROUND_HALF_UP);
-//                adR.add(c.doubleValue());
-//
-//                if (a4.size() != 0) {
-//                    d = d.divide(new BigDecimal(a4.size()), 6, BigDecimal.ROUND_HALF_UP);
-//                }
-//                d.setScale(6, BigDecimal.ROUND_HALF_UP);
-//                a4R.add(d.doubleValue());
-//            }
-//            doubles.add(csrR);
-//            if (tagNames.length > 1) {
-//                doubles.add(m40R);
-//            }
-//            if (tagNames.length > 2) {
-//                doubles.add(adR);
-//            }
-//            if (tagNames.length > 3) {
-//                doubles.add(a4R);
-//            }
-//        }
-//        List<List<Double>> result = new ArrayList<>();
-//
-//        for (int j = 0; j < tagNames.length; j++) {
-//            List<Double> rd = new ArrayList<>();
-//            List<Double> doubles1 = doubles.get(j);
-//            for (int i = 0; i < doubles1.size(); i++) {
-//                int size = 1;
-//                Double aDouble = doubles.get(j).get(i);
-//                Double bDouble = 0.0;
-//                if ((j + tagNames.length) < doubles.size()) {
-//                    bDouble = doubles.get(j + tagNames.length).get(i);
-//                }
-//                Double cDouble = 0.0;
-//                if ((j + 2 * tagNames.length) < doubles.size()) {
-//                    cDouble = doubles.get(j + 2 * tagNames.length).get(i);
-//                }
-//
-//                if (bDouble.doubleValue() != 0.0) {
-//                    size++;
-//                }
-//                if (cDouble.doubleValue() != 0.0) {
-//                    size++;
-//                }
-//                Double x = (aDouble + bDouble + cDouble) / size;
-//
-//                if (Objects.nonNull(x) && x.doubleValue() != 0.0) {
-//                    rd.add(x * scale);
-//                } else {
-////                    if (i < dateListTmp.size()) {
-////                        dateListTmp.remove(i);
-////                    }
-//                }
-//            }
-//            result.add(rd);
-//        }
-//        return result;
-//    }
 
     private static final int MINUS = 60*1000;
 
@@ -1496,8 +1346,8 @@ public class GaoLuDocMain2 {
         objects2 = getDoubleVal(objects2,100,2);
 
         List<Double> data = dealList(objects1);
-        Double max1 = data.get(0) * 1.2;
-        Double min1 = data.get(1) * 0.8;
+        Double max1 = 13.5;
+        Double min1 = 10.0;
 
         List<Double> data2 = dealList(objects2);
         Double max2 = data2.get(0) * 1.1;
@@ -2250,7 +2100,7 @@ public class GaoLuDocMain2 {
 
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
             List<XWPFTable> tt = doc.getTables();
-            String[] needMerges = {"sheet15","sheet16"};
+            String[] needMerges = {"sheet15","sheet16","sheet17"};
             for (String needMerge : needMerges) {
                 for (XWPFTable table : tt) {
                     if(table.getText().contains(needMerge)){
