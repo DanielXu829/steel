@@ -45,7 +45,7 @@ spring:
         # 开启线程配置
         properties.org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool
         # 线程的数量
-        org.quartz.threadPool.threadCount: 10
+        org.quartz.threadPool.threadCount: 66
         # 线程的优先级
         org.quartz.threadPool.threadPriority: 5
         # 是否初始化线程
