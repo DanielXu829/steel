@@ -62,9 +62,9 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
         String name = record.getName();
         LambdaQueryWrapper<ReportCategory> wrapper = new QueryWrapper<ReportCategory>().lambda();
         if (StringUtils.isNotBlank(name)) {
-            if ("焦化".equals(name)) {
-                name = "焦化67";
-            }
+//            if ("焦化".equals(name)) {
+//                name = "焦化67";
+//            }
             wrapper.like(true, ReportCategory::getRemark, name);
         }
         wrapper.orderByAsc(ReportCategory::getSort);

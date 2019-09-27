@@ -226,8 +226,8 @@ public class GaoLuDocMain2 {
     public void mainTask() {
         result = new HashMap<>();
         initDateTime();
-        mainDeal(version6);
-        mainDeal(version7);
+//        mainDeal(version6);
+//        mainDeal(version7);
         mainDeal(version8);
         log.error("高炉word生成完毕！");
     }

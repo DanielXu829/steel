@@ -50,7 +50,7 @@ public class ShaojieDocMain {
     //    @Scheduled(cron = "0 0/1 * * * ?")
     public void mainJob() {
         Date date = new Date();
-        mainDeal(version5, date);
+//        mainDeal(version5, date);
         mainDeal(version6, date);
         log.error("烧结word生成完毕！");
     }
