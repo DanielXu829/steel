@@ -222,7 +222,7 @@ public class GaoLuDocMain2 {
         TAG_NAMES.put(version6,tg6);
     }
 
-    @Scheduled(cron = "0 31 6 * * ?")
+    @Scheduled(cron = "0 31 10 * * ?")
     public void mainTask() {
         result = new HashMap<>();
         initDateTime();
@@ -490,6 +490,9 @@ public class GaoLuDocMain2 {
             if(!isOnlyOne){ // 上了多种料
                 // 轮询每天的焦炭种类
                 List<String> todayBrandCodes = dataHttpBrandCode(version,index,next,type);
+                if(todayBrandCodes.isEmpty()){
+                    continue;
+                }
                 String nextBrandCode = todayBrandCodes.get(todayBrandCodes.size()-1);
                 if(null == brandCode){ // 第一天的物料代码
                     brandCode = nextBrandCode;
@@ -755,13 +758,13 @@ public class GaoLuDocMain2 {
                         }
                         // 实际值
                         Double realValue = mubiao.get(goalParaName);
-                        if("8.0".equals(version)&&"BP".equals(goalParaName)){
-                            realValue *= 100;
-                        }
                         // 偏差
                         Double pc = null;
 
                         if(null != realValue){
+                            if("8.0".equals(version)&&"BP".equals(goalParaName)){
+                                realValue *= 100;
+                            }
                             double min = vals[0];
                             double max = vals[1];
                             if(realValue>max){
@@ -771,6 +774,9 @@ public class GaoLuDocMain2 {
                             }else{
                                 pc = 0.0;
                             }
+                        }else{
+                            realValue = 0.0;
+                            pc = 0.0;
                         }
                         tmp.put("goalParaName", goalParaName);
                         tmp.put("goalParaValue", goalParaValue);
@@ -1153,6 +1159,12 @@ public class GaoLuDocMain2 {
         objects1 = getDoubleVal(objects1,null,2);
         objects2 = getDoubleVal(objects2,null,2);
         objects3 = getDoubleVal(objects3,null,2);
+        if((null == objects1)||(null == objects2)||(null == objects3)||(objects1.length == 0)||(objects2.length == 0)||(objects3.length == 0)){
+            result.put("part5", 0);
+            result.put("part6", 0);
+            result.put("part7", 0);
+            return;
+        }
 
         result.put("part5", getLastDoubleVal(objects1));
         result.put("part6", getLastDoubleVal(objects3));
@@ -1254,6 +1266,11 @@ public class GaoLuDocMain2 {
     private void dealPart4(Object[] objects1, Object[] objects2) {
         objects1 = getDoubleVal(objects1,null,1);
         objects2 = getDoubleVal(objects2,null,1);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part8", 0);
+            result.put("part9", 0);
+            return;
+        }
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
@@ -1344,6 +1361,11 @@ public class GaoLuDocMain2 {
     private void dealPart6(Object[] objects1, Object[] objects2) {
         objects1 = getDoubleVal(objects1,100,2);
         objects2 = getDoubleVal(objects2,100,2);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part12", 0);
+            result.put("part13", 0);
+            return;
+        }
 
         List<Double> data = dealList(objects1);
         Double max1 = 13.5;
@@ -1408,6 +1430,11 @@ public class GaoLuDocMain2 {
 
         objects1 = getDoubleVal(objects1,null,2);
         objects2 = getDoubleVal(objects2,null,2);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part14", 0);
+            result.put("part15", 0);
+            return;
+        }
 
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.06;
@@ -1503,6 +1530,12 @@ public class GaoLuDocMain2 {
 
         objects1 = getDoubleVal(objects1,null,2);
         objects2 = getDoubleVal(objects2,null,2);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part18", 0);
+            result.put("part19", 0);
+            return;
+        }
+
         List<Double> data = dealList(objects1);
         Double max1 = data.get(0) * 1.2;
         Double min1 = data.get(1) * 0.8;
@@ -1571,6 +1604,11 @@ public class GaoLuDocMain2 {
 
         if(version.equals("7.0")){
             objects2 = getDoubleVal(objects2,10000,0);
+        }
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part20", 0);
+            result.put("part21", 0);
+            return;
         }
 
         result.put("part20", getLastVal(objects1));
@@ -1696,6 +1734,11 @@ public class GaoLuDocMain2 {
 
         objects1 = getDoubleVal(objects1,null,2);
         objects2 = getDoubleVal(objects2,null,2);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part24", 0);
+            result.put("part25", 0);
+            return;
+        }
 
         /**
          * W
@@ -1793,6 +1836,11 @@ public class GaoLuDocMain2 {
         Object[] objects2 = doubles.get(1).toArray();
 
         objects2 = getDoubleVal(objects2,null,2);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part32", 0);
+            result.put("part33", 0);
+            return;
+        }
 
         /**
          * 总热负荷
@@ -1843,6 +1891,11 @@ public class GaoLuDocMain2 {
         Object[] objects1 = doubles.get(0).toArray();
         Object[] objects2 = doubles.get(1).toArray();
         objects2 = getDoubleVal(objects2,null,2);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part33", 0);
+            result.put("part37", 0);
+            return;
+        }
 
         /**总热负荷
          * 煤气利用率
@@ -1930,6 +1983,11 @@ public class GaoLuDocMain2 {
 
         objects1 = getDoubleVal(objects1,null,2);
         objects2 = getDoubleVal(objects2,null,3);
+        if((null == objects1)||(null == objects2)||(objects1.length == 0)||(objects2.length == 0)){
+            result.put("part34", 0);
+            result.put("part35", 0);
+            return;
+        }
 
         /**
          * Si
@@ -2097,6 +2155,7 @@ public class GaoLuDocMain2 {
             } else if ("7.0".equals(version)) {
                 sqquence = "7高炉";
             }
+            log.info(path);
 
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
             List<XWPFTable> tt = doc.getTables();
@@ -2191,7 +2250,7 @@ public class GaoLuDocMain2 {
      */
     private Object getLastVal(Object[] objects1) {
         if (Objects.isNull(objects1) || objects1.length == 0) {
-            return null;
+            return 0;
         }
         Object o = objects1[objects1.length - 1];
         int v1 = 0;

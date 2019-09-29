@@ -70,12 +70,12 @@ http:
    urlApiGLTwo: http://10.64.11.203:9001
 #   urlApiGLThree: http://10.64.11.204:9001
 #   urlApiNJOne: http://10.64.11.220:8080
-#   urlApiJHOne:  http://10.64.11.207:8080
+   urlApiJHOne:  http://10.64.11.209:8099
 #   urlApiJHTwo:  http://10.64.11.208:8080
-   urlApiJHThree:  http://10.64.11.209:8099
+#   urlApiJHThree:  http://10.64.11.207:8080
 #   urlApiYGLOne: http://10.64.11.210:8181
-   urlApiSJOne: http://10.64.11.205:9001
-#   urlApiSJTwo: http://10.64.11.206:9001
+   urlApiSJTwo: http://10.64.11.205:9001
+#   urlApiSJOne: http://10.64.11.206:9001
 
 # mybatis-plus
 mybatis-plus:

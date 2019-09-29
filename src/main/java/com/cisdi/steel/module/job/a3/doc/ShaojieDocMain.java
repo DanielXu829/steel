@@ -43,22 +43,22 @@ public class ShaojieDocMain {
     @Autowired
     private ReportIndexMapper reportIndexMapper;
 
-    private String version6 = "6.0";
+    private String version4 = "4.0";
     private String version5 = "5.0";
 
-    @Scheduled(cron = "0 30 6 * * ?")
+    @Scheduled(cron = "0 30 10 * * ?")
     //    @Scheduled(cron = "0 0/1 * * * ?")
     public void mainJob() {
         Date date = new Date();
 //        mainDeal(version5, date);
-        mainDeal(version6, date);
+        mainDeal(version4, date);
         log.error("烧结word生成完毕！");
     }
 
 
     public void mainTask(Date date) {
-        mainDeal(version5, date);
-        mainDeal(version6, date);
+//        mainDeal(version5, date);
+        mainDeal(version4, date);
         log.error("烧结word生成完毕！");
     }
 
@@ -206,94 +206,94 @@ public class ShaojieDocMain {
                     };
         } else {
             /**
-             * ST6_L1R_SIN_DelAmtUse_1d_avg
-             * ST6_L1R_OB_CoReFineUseP_1d_avg
-             * ST6_L1R_OB_DustUseP_1d_avg
-             * ST6_L1R_SIN_MI202_1d_avg
-             * ST6_L1R_SIN_LI3031_1d_avg
-             * ST6_L1R_SIN_TIC351PVIN_1d_avg
-             * ST6_L1R_SIN_SiMaRunVel_1d_avg
-             * ST6_L1R_SIN_TI300B_1d_avg
-             * ST6_L1R_SIN_TI300A_1d_avg
-             * ST6_L1R_SIN_DL424B_1d_avg
-             * ST6_L1R_SIN_DL424A_1d_avg
-             * ST6_L1R_SIN_BtpPoS_1d_avg
-             * ST6_L1R_SIN_BtpPoN_1d_avg
+             * ST4_L1R_SIN_DelAmtUse_1d_avg
+             * ST4_L1R_OB_CoReFineUseP_1d_avg
+             * ST4_L1R_OB_DustUseP_1d_avg
+             * ST4_L1R_SIN_MI202_1d_avg
+             * ST4_L1R_SIN_LI3031_1d_avg
+             * ST4_L1R_SIN_TIC351PVIN_1d_avg
+             * ST4_L1R_SIN_SiMaRunVel_1d_avg
+             * ST4_L1R_SIN_TI300B_1d_avg
+             * ST4_L1R_SIN_TI300A_1d_avg
+             * ST4_L1R_SIN_DL424B_1d_avg
+             * ST4_L1R_SIN_DL424A_1d_avg
+             * ST4_L1R_SIN_BtpPoS_1d_avg
+             * ST4_L1R_SIN_BtpPoN_1d_avg
              */
             L1 = new String[]
                     {
-                            "ST6_L1R_SIN_DelAmtUse_1d_avg",
-                            "ST6_L1R_OB_CoReFineUseP_1d_avg",
-                            "ST6_L1R_OB_DustUseP_1d_avg",
-                            "ST6_L1R_SIN_MI202_1d_avg",
-                            "ST6_L1R_SIN_LI3031_1d_avg",
-                            "ST6_L1R_SIN_TIC351PVIN_1d_avg",
-                            "ST6_L1R_SIN_SiMaRunVel_1d_avg",
-                            "ST6_L1R_SIN_TI300B_1d_avg",
-                            "ST6_L1R_SIN_TI300A_1d_avg",
-                            "ST6_L1R_SIN_DL424B_1d_avg",
-                            "ST6_L1R_SIN_DL424A_1d_avg",
-                            "ST6_L1R_SIN_BtpPoS_1d_avg",
-                            "ST6_L1R_SIN_BtpPoN_1d_avg"
+                            "ST4_L1R_SIN_DelAmtUse_1d_avg",
+                            "ST4_L1R_OB_CoReFineUseP_1d_avg",
+                            "ST4_L1R_OB_DustUseP_1d_avg",
+                            "ST4_L1R_SIN_MI202_1d_avg",
+                            "ST4_L1R_SIN_LI3031_1d_avg",
+                            "ST4_L1R_SIN_TIC351PVIN_1d_avg",
+                            "ST4_L1R_SIN_SiMaRunVel_1d_avg",
+                            "ST4_L1R_SIN_TI300B_1d_avg",
+                            "ST4_L1R_SIN_TI300A_1d_avg",
+                            "ST4_L1R_SIN_DL424B_1d_avg",
+                            "ST4_L1R_SIN_DL424A_1d_avg",
+                            "ST4_L1R_SIN_BtpPoS_1d_avg",
+                            "ST4_L1R_SIN_BtpPoN_1d_avg"
                     };
             /**
-             * ST6_MESR_SIN_SinterDayThY_1d_cur
+             * ST4_MESR_SIN_SinterDayThY_1d_cur
              *
-             * ST6_MESR_SIN_SinterTFe_1d_avg
-             * ST6_MESR_SIN_SinterFeO_1d_avg
-             * ST6_MESR_SIN_SinterMgAlRatio_1d_avg
-             * ST6_MESR_SIN_SinterTumIx_1d_avg
-             * ST6_MESR_SIN_SinterScrIx_1d_avg
-             * ST6_MESR_SIN_Sinter5to10mm_1d_avg
-             * ST6_MESR_SIN_Sinter10to40mm_1d_avg
-             * ST6_MESR_SIN_SinterH40mm_1d_avg
-             * ST6_MESR_SIN_SinterMeanSize_1d_avg
-             * ST6_MESR_SIN_SinterRDIH3p15_1d_avg
+             * ST4_MESR_SIN_SinterTFe_1d_avg
+             * ST4_MESR_SIN_SinterFeO_1d_avg
+             * ST4_MESR_SIN_SinterMgAlRatio_1d_avg
+             * ST4_MESR_SIN_SinterTumIx_1d_avg
+             * ST4_MESR_SIN_SinterScrIx_1d_avg
+             * ST4_MESR_SIN_Sinter5to10mm_1d_avg
+             * ST4_MESR_SIN_Sinter10to40mm_1d_avg
+             * ST4_MESR_SIN_SinterH40mm_1d_avg
+             * ST4_MESR_SIN_SinterMeanSize_1d_avg
+             * ST4_MESR_SIN_SinterRDIH3p15_1d_avg
              */
             L2 = new String[]
                     {
-                            "ST6_MESR_SIN_SinterDayThY_1d_cur",
+                            "ST4_MESR_SIN_SinterDayThY_1d_cur",
                             "",
-                            "ST6_MESR_SIN_SinterTFe_1d_avg",
-                            "ST6_MESR_SIN_SinterFeO_1d_avg",
-                            "ST6_MESR_SIN_SinterMgAlRatio_1d_avg",
-                            "ST6_MESR_SIN_SinterTumIx_1d_avg",
-                            "ST6_MESR_SIN_SinterScrIx_1d_avg",
-                            "ST6_MESR_SIN_Sinter5to10mm_1d_avg",
-                            "ST6_MESR_SIN_Sinter10to40mm_1d_avg",
-                            "ST6_MESR_SIN_SinterH40mm_1d_avg",
-                            "ST6_MESR_SIN_SinterMeanSize_1d_avg",
-                            "ST6_MESR_SIN_SinterRDIH3p15_1d_avg",
+                            "ST4_MESR_SIN_SinterTFe_1d_avg",
+                            "ST4_MESR_SIN_SinterFeO_1d_avg",
+                            "ST4_MESR_SIN_SinterMgAlRatio_1d_avg",
+                            "ST4_MESR_SIN_SinterTumIx_1d_avg",
+                            "ST4_MESR_SIN_SinterScrIx_1d_avg",
+                            "ST4_MESR_SIN_Sinter5to10mm_1d_avg",
+                            "ST4_MESR_SIN_Sinter10to40mm_1d_avg",
+                            "ST4_MESR_SIN_SinterH40mm_1d_avg",
+                            "ST4_MESR_SIN_SinterMeanSize_1d_avg",
+                            "ST4_MESR_SIN_SinterRDIH3p15_1d_avg",
                     };
 
             /**
-             * ST6_L1R_OB_FuelUseP_1d_avg
-             * ST6_L1R_OB_CoReFineUseP_1d_avg
-             * ST6_L1R_SIN_13DustInstanAmt_1d_avg
-             * ST6_L1R_SIN_MI202_1d_avg
-             * ST6_L1R_SIN_LI3031_1d_avg
-             * ST6_L1R_SIN_TIC351PVIN_1d_avg
-             ST6_L1R_SIN_SiMaRunVel_1d_avg
-             ST6_L1R_SIN_VerSinVel_1d_avg
-             * ST6_L1R_SIN_TI300B_1d_avg
-             * ST6_L1R_SIN_TI300A_1d_avg
-             * ST6_L1R_SIN_BtpTeNS_1d_avg
-             * ST6_L1R_SIN_BtpPoNS_1d_avg
+             * ST4_L1R_OB_FuelUseP_1d_avg
+             * ST4_L1R_OB_CoReFineUseP_1d_avg
+             * ST4_L1R_SIN_13DustInstanAmt_1d_avg
+             * ST4_L1R_SIN_MI202_1d_avg
+             * ST4_L1R_SIN_LI3031_1d_avg
+             * ST4_L1R_SIN_TIC351PVIN_1d_avg
+             ST4_L1R_SIN_SiMaRunVel_1d_avg
+             ST4_L1R_SIN_VerSinVel_1d_avg
+             * ST4_L1R_SIN_TI300B_1d_avg
+             * ST4_L1R_SIN_TI300A_1d_avg
+             * ST4_L1R_SIN_BtpTeNS_1d_avg
+             * ST4_L1R_SIN_BtpPoNS_1d_avg
              */
             L3 = new String[]
                     {
-                            "ST6_L1R_OB_FuelUseP_1d_avg",
-                            "ST6_L1R_OB_CoReFineUseP_1d_avg",
-                            "ST6_L1R_SIN_13DustInstanAmt_1d_avg",
-                            "ST6_L1R_SIN_MI202_1d_avg",
-                            "ST6_L1R_SIN_LI3031_1d_avg",
-                            "ST6_L1R_SIN_TIC351PVIN_1d_avg",
-                            "ST6_L1R_SIN_SiMaRunVel_1d_avg",
-                            "ST6_L1R_SIN_VerSinVel_1d_avg",
-                            "ST6_L1R_SIN_TI300B_1d_avg",
-                            "ST6_L1R_SIN_TI300A_1d_avg",
-                            "ST6_L1R_SIN_BtpTeNS_1d_avg",
-                            "ST6_L1R_SIN_BtpPoNS_1d_avg"
+                            "ST4_L1R_OB_FuelUseP_1d_avg",
+                            "ST4_L1R_OB_CoReFineUseP_1d_avg",
+                            "ST4_L1R_SIN_13DustInstanAmt_1d_avg",
+                            "ST4_L1R_SIN_MI202_1d_avg",
+                            "ST4_L1R_SIN_LI3031_1d_avg",
+                            "ST4_L1R_SIN_TIC351PVIN_1d_avg",
+                            "ST4_L1R_SIN_SiMaRunVel_1d_avg",
+                            "ST4_L1R_SIN_VerSinVel_1d_avg",
+                            "ST4_L1R_SIN_TI300B_1d_avg",
+                            "ST4_L1R_SIN_TI300A_1d_avg",
+                            "ST4_L1R_SIN_BtpTeNS_1d_avg",
+                            "ST4_L1R_SIN_BtpPoNS_1d_avg"
                     };
         }
 
@@ -922,12 +922,13 @@ public class ShaojieDocMain {
         result.put("sheet6", list5);
 
         try {
-            String name = "六烧";
-            String sqquence = "6烧结";
+            String name = "四烧";
+            String sqquence = "4烧结";
             if (path.contains("五烧")) {
                 name = "五烧";
                 sqquence = "5烧结";
             }
+            log.info(path);
 
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
             List<XWPFParagraph> paragraphs = doc.getParagraphs();
