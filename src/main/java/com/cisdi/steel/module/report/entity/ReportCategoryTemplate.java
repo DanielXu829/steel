@@ -131,4 +131,19 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
         return this.id;
     }
 
+    /**
+     * 修改reportIndex时，
+     * 关闭reportIndex的时间，
+     * 与下次job定时执行时间相差超过字段所对应的时间戳，
+     * 就自动触发一次job
+     */
+    @TableField("makeup_interval")
+    private int makeupInterval;
+
+    /**
+     * 0代表选择配置cron，1代表手动输入cron
+     */
+    @TableField("cron_setting_method")
+    private int cronSettingMethod;
+
 }

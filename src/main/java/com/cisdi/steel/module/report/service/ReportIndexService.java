@@ -6,6 +6,8 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * <p>Description: 报表文件-索引 服务类 </p>
  * <P>Date: 2018-10-24 </P>
@@ -80,4 +82,14 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
      * @return 生成文件位置 or null
      */
     ReportIndex existTemplate1(ReportIndex reportIndex);
+
+    /**
+     * 通过编码查询模板信息
+     *
+     * @param code 编码
+     * @param sequence 工序
+     * @param editStatus 是否被锁定状态
+     * @return List<ReportIndex>
+     */
+    ReportIndex getReportIndexInfo(String code, String sequence, int editStatus);
 }

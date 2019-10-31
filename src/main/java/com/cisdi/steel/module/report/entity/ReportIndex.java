@@ -102,4 +102,9 @@ public class ReportIndex extends Model<ReportIndex> {
         return this.id;
     }
 
+    /**
+     * reportIndex是否被锁住，0代表没有被锁住，1代表被锁住
+     */
+    @TableField("edit_status")
+    private int editStatus;
 }

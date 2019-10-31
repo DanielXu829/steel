@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
+import com.cisdi.steel.common.constant.Constants;
+import com.cisdi.steel.common.exception.BusinessException;
 import com.cisdi.steel.common.exception.LeafException;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
@@ -14,6 +16,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
@@ -314,7 +317,6 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         return null;
     }
 
-
     @Override
     public ReportIndex existTemplate1(ReportIndex reportIndex) {
         ReportIndex report = null;
@@ -335,6 +337,18 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             }
         }
         return null;
+    }
+
+    @Override
+    public ReportIndex getReportIndexInfo(String code, String sequence, int editStatus) {
+        LambdaQueryWrapper<ReportIndex> wrapper = new QueryWrapper<ReportIndex>().lambda();
+        wrapper.eq(ReportIndex::getReportCategoryCode, code);
+        wrapper.eq(StringUtils.isNotBlank(sequence), ReportIndex::getSequence, sequence);
+        wrapper.eq(ReportIndex::getEditStatus, editStatus);
+        wrapper.orderByDesc(ReportIndex::getCreateTime);
+        wrapper.last("limit 1");
+
+        return this.getOne(wrapper);
     }
 
 }
