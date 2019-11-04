@@ -205,11 +205,17 @@ public class DocumentManager {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
     }
 
-    public static String GetCallback(String fileName) {
+    /**
+     *
+     * @param fileName
+     * @param reportId 用于onlyoffice编辑保存的时候来获取reportIndex
+     * @return url
+     */
+    public static String GetCallback(String fileName, String reportId) {
         String serverPath = GetServerUrl();
         String hostAddress = CurUserHostAddress(null);
         try {
-            String query = "?type=track&filePath=" + URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8.toString()) + "&userAddress=" + hostAddress;
+            String query = "?type=track&filePath=" + URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8.toString()) + "&userAddress=" + hostAddress + "&id=" + reportId;
             return serverPath + "/onlyoffice/save" + query;
         } catch (UnsupportedEncodingException e) {
             return "";

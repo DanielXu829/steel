@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.quartz.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -93,4 +94,17 @@ public class QuartzEntity {
      * 延迟单位
      */
     private String buildDelayUnit;
+
+    /**
+     * 修改reportIndex时，
+     * 关闭reportIndex的时间，
+     * 与下次job定时执行时间相差超过字段所对应的时间戳，
+     * 就自动触发一次job
+     */
+    private int makeupInterval;
+
+    /**
+     * 0代表选择配置cron，1代表手动输入cron
+     */
+    private int cronSettingMethod;
 }

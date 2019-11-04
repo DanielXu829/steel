@@ -65,7 +65,7 @@ public class FileModel {
         editorConfig = new EditorConfig();
         if (!DocumentManager.GetEditedExts().contains(FileUtility.GetFileExtension(fileName)))
             editorConfig.mode = "view";
-        editorConfig.callbackUrl = DocumentManager.GetCallback(fileName);
+        editorConfig.callbackUrl = DocumentManager.GetCallback(fileName, "0");
         editorConfig.user.id = userId;
 
         editorConfig.customization.goback.url = DocumentManager.GetServerUrl() + "/IndexServlet";

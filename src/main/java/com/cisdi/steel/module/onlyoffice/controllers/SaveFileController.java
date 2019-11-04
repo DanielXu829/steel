@@ -1,8 +1,28 @@
 package com.cisdi.steel.module.onlyoffice.controllers;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cisdi.steel.common.constant.Constants;
+import com.cisdi.steel.common.enums.EditStatusEnum;
+import com.cisdi.steel.common.resp.ApiResult;
+import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.common.util.JsonUtil;
+import com.cisdi.steel.module.quartz.entity.QuartzEntity;
+import com.cisdi.steel.module.quartz.service.QuartzService;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.report.service.ReportIndexService;
+import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.*;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.quartz.impl.triggers.CronTriggerImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -40,30 +61,97 @@ public class SaveFileController {
      *
      * @throws Exception
      */
+    private final ReportIndexService baseService;
+
+    private final ReportCategoryTemplateService reportCategoryTemplateService;
+
+    private final Scheduler scheduler;
+
+    @Autowired
+    private QuartzService quartzService;
+
+    @Autowired
+    protected SysConfigService sysConfigService;
+
+    @Autowired
+    public SaveFileController(Scheduler scheduler, ReportIndexService baseService, ReportCategoryTemplateService reportCategoryTemplateService) {
+        this.baseService = baseService;
+        this.scheduler = scheduler;
+        this.reportCategoryTemplateService = reportCategoryTemplateService;
+    }
+
     @RequestMapping("/onlyoffice/save")
     public void saveFile(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
+
+         /*
+            0 - no document with the key identifier could be found,
+            1 - document is being edited,
+            2 - document is ready for saving,
+            3 - document saving error has occurred,
+            4 - document is closed with no changes,
+            6 - document is being edited, but the current document state is saved,
+            7 - error has occurred while force saving the document.
+         * */
         System.out.println("===saveeditedfile------------");
+
         try {
             writer = response.getWriter();
             Scanner scanner = new Scanner(request.getInputStream()).useDelimiter("\\A");
             String body = scanner.hasNext() ? scanner.next() : "";
             JSONObject jsonObj = JsonUtil.jsonToObject(body, JSONObject.class);
             System.out.println("===saveeditedfile:" + jsonObj.get("status"));
-            /*
-                0 - no document with the key identifier could be found,
-                1 - document is being edited,
-                2 - document is ready for saving,
-                3 - document saving error has occurred,
-                4 - document is closed with no changes,
-                6 - document is being edited, but the current document state is saved,
-                7 - error has occurred while force saving the document.
-             * */
+
+            Integer status = (Integer) jsonObj.get("status");
+
+            // 获取保存的reportIndex的主键
+            String reportId = "";
+            if (request.getParameterMap().containsKey("id")) {
+                reportId = request.getParameter("id");
+
+                if (reportId != "") {
+                    // 当status为2或4，将editStatus改为0
+                    if (status == 2 || status == 4) {
+                        ReportIndex report = baseService.getById(reportId);
+
+                        if (report != null) {
+                            EditStatusEnum editStatus = EditStatusEnum.Release;
+                            report.setEditStatus(editStatus.getEditStatus());
+                            // 更新reportIndex的editStatus字段
+                            ApiResult result = baseService.updateRecord(report);
+
+                            // 获取jobName
+                            String categoryCode = report.getReportCategoryCode();
+                            QuartzEntity quartzEntity = quartzService.selectQuartzByCode(categoryCode);
+
+                            // 获取language
+                            String lang = sysConfigService.selectActionByCode(Constants.LANGUAGE_CODE);
+
+                            // 获取reportTemplate
+                            List<ReportCategoryTemplate> templates = reportCategoryTemplateService.selectTemplateInfo(report.getReportCategoryCode(), lang, report.getSequence());
+
+                            // 根据templates中的makeupInterval判断是否触发job
+                            boolean isTrigger = this.isTriggerJob(templates);
+
+                            if (isTrigger) {
+                                log.info("触发任务");
+                                try {
+                                    JobKey key = new JobKey(quartzEntity.getJobName(), quartzEntity.getJobGroup());
+                                    scheduler.triggerJob(key);
+                                } catch (SchedulerException e) {
+                                    log.error("触发任务报错", e);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             String filePath = "";
             if (request.getParameterMap().containsKey("filePath")) {
                 filePath = request.getParameter("filePath");
             }
-            Integer status = (Integer) jsonObj.get("status");
+
             //强制保存时 回调修改文件
             if (status.intValue() == 6) {
                 /*
@@ -105,4 +193,49 @@ public class SaveFileController {
         writer.write("{\"error\":0}");
 //        writer.print("<script language='javascript'>alert(\"保存成功"  + "\");</script>");
     }
+
+    /**
+     * 根据makeupInterval判断是否触发job
+     * @param templates
+     * @return boolean
+     */
+    private boolean isTriggerJob(List<ReportCategoryTemplate> templates) {
+        long nextTriggerTime = 0L;
+        long currentTime = 0L;
+        int makeupInterval = 5;
+        long timeStamp = 0L;
+        Date currentDate = new Date();
+        boolean isTrigger = false;
+
+        try {
+            CronTriggerImpl cronTriggerImpl = new CronTriggerImpl();
+
+            if (templates != null && templates.size() > 0) {
+                ReportCategoryTemplate reportTemplate = templates.get(0);
+                cronTriggerImpl.setCronExpression(reportTemplate.getCron());
+                makeupInterval = reportTemplate.getMakeupInterval();
+            }
+
+            // 获取makeupInterval对应的时间戳
+            timeStamp = makeupInterval * 60 * 1000;
+
+            // 获取此job下次执行时间
+            List<Date> dates = TriggerUtils.computeFireTimes(cronTriggerImpl, null, 1);
+            Date nextDate = new Date();
+            if (dates != null && dates.size() > 0) {
+                nextDate = dates.get(0);
+            }
+
+            // 如果下次定时任务执行时间 - 当前时间 > makeupInterval 对应的时间，则表示需要触发一次job
+            nextTriggerTime = nextDate.getTime();
+            currentTime = currentDate.getTime();
+            isTrigger = nextTriggerTime - currentTime > timeStamp;
+
+        } catch (ParseException e) {
+            log.error("根据makeupInterval判断是否触发job执行出现错误", e);
+        }
+
+        return isTrigger;
+    }
+
 }

@@ -153,7 +153,9 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
                 .setBuildUnit(entity.getBuildUnit())
                 .setBuildDelay(entity.getBuildDelay())
                 .setBuildDelayUnit(entity.getBuildDelayUnit())
-                .setCron(entity.getCronExpression());
+                .setCron(entity.getCronExpression())
+                .setMakeupInterval(entity.getMakeupInterval())
+                .setCronSettingMethod(entity.getCronSettingMethod());
         this.updateById(reportCategoryTemplate);
     }
 

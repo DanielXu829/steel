@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job;
 
 import com.cisdi.steel.common.constant.Constants;
+import com.cisdi.steel.common.enums.EditStatusEnum;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
@@ -104,49 +105,54 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         // 3
         List<ReportCategoryTemplate> templates = getTemplateInfo(jobExecuteInfo.getJobEnum(), jobExecuteInfo.getSequence());
         for (ReportCategoryTemplate template : templates) {
-            Date date = new Date();
-            DateQuery dateQuery = new DateQuery(date, date, date);
-            try {
-                if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
-                    dateQuery = jobExecuteInfo.getDateQuery();
+
+            // 如果最新的报表被锁住，将不执行
+            boolean isLocked = this.isLocked(template);
+            if (!isLocked) {
+                Date date = new Date();
+                DateQuery dateQuery = new DateQuery(date, date, date);
+                try {
+                    if (Objects.nonNull(jobExecuteInfo.getDateQuery())) {
+                        dateQuery = jobExecuteInfo.getDateQuery();
+                    }
+                    if (Objects.isNull(dateQuery.getDelay()) || dateQuery.getDelay()) {
+                        // 处理延迟问题
+                        dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
+                    }
+
+                    ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
+                    // 参数缺一不可
+                    WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
+                            .startTime(new Date())
+                            .jobEnum(jobExecuteInfo.getJobEnum())
+                            .jobExecuteEnum(jobExecuteInfo.getJobExecuteEnum())
+                            .dateQuery(dateQuery)
+                            .template(template)
+                            .excelPathInfo(excelPathInfo)
+                            .build();
+
+                    ReportIndex reportIndex = new ReportIndex();
+                    reportIndex.setSequence(template.getSequence())
+                            .setReportCategoryCode(template.getReportCategoryCode())
+                            .setName(excelPathInfo.getFileName())
+                            .setPath(excelPathInfo.getSaveFilePath())
+                            .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
+                            .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
+                            .setCurrDate(dateQuery.getRecordDate())
+                            .setRecordDate(dateQuery.getRecordDate())
+                            .setId(jobExecuteInfo.getIndexId());
+
+                    this.replaceTemplatePath(reportIndex, template);
+                    // 4、5填充数据
+                    Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
+                    // 6、生成文件
+                    this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
+
+                    // 7、插入索引
+                    reportIndexService.insertReportRecord(reportIndex);
+                } catch (Exception e) {
+                    log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage(), e);
                 }
-                if (Objects.isNull(dateQuery.getDelay()) || dateQuery.getDelay()) {
-                    // 处理延迟问题
-                    dateQuery = DateQueryUtil.handlerDelay(dateQuery, template.getBuildDelay(), template.getBuildDelayUnit());
-                }
-
-                ExcelPathInfo excelPathInfo = this.getPathInfoByTemplate(template, dateQuery);
-                // 参数缺一不可
-                WriterExcelDTO writerExcelDTO = WriterExcelDTO.builder()
-                        .startTime(new Date())
-                        .jobEnum(jobExecuteInfo.getJobEnum())
-                        .jobExecuteEnum(jobExecuteInfo.getJobExecuteEnum())
-                        .dateQuery(dateQuery)
-                        .template(template)
-                        .excelPathInfo(excelPathInfo)
-                        .build();
-
-                ReportIndex reportIndex = new ReportIndex();
-                reportIndex.setSequence(template.getSequence())
-                        .setReportCategoryCode(template.getReportCategoryCode())
-                        .setName(excelPathInfo.getFileName())
-                        .setPath(excelPathInfo.getSaveFilePath())
-                        .setIndexLang(LanguageEnum.getByLang(template.getTemplateLang()).getName())
-                        .setIndexType(ReportTemplateTypeEnum.getType(template.getTemplateType()).getCode())
-                        .setCurrDate(dateQuery.getRecordDate())
-                        .setRecordDate(dateQuery.getRecordDate())
-                        .setId(jobExecuteInfo.getIndexId());
-
-                this.replaceTemplatePath(reportIndex, template);
-                // 4、5填充数据
-                Workbook workbook = getCurrentExcelWriter().writerExcelExecute(writerExcelDTO);
-                // 6、生成文件
-                this.createFile(workbook, excelPathInfo, writerExcelDTO, dateQuery);
-
-                // 7、插入索引
-                reportIndexService.insertReportRecord(reportIndex);
-            } catch (Exception e) {
-                log.error(jobExecuteInfo.getJobEnum().getName() + "-->生成模板失败" + e.getMessage(), e);
             }
         }
     }
@@ -191,7 +197,6 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         }
         return templates;
     }
-
 
     /**
      * 获取处理后的文件名
@@ -340,5 +345,46 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         }
         FileUtils.deleteFile(writerExcelDTO.getTemplate().getTemplatePath());
         FileUtils.copyFile(srcUrl, writerExcelDTO.getTemplate().getTemplatePath());
+    }
+
+    /**
+     *
+     * @param reportTemplate
+     * @return isLocked 是否锁住
+     */
+    private boolean isLocked(ReportCategoryTemplate reportTemplate) {
+        // 默认没有被锁住
+        boolean isLocked = false;
+
+        if (reportTemplate != null) {
+            String reportCategoryCode = reportTemplate.getReportCategoryCode();
+            String sequence = reportTemplate.getSequence();
+            Date lastLockedCreateTime = null;
+            Date lastUnLockedCreateTime = null;
+
+            EditStatusEnum editStatusEnum= EditStatusEnum.Locked;
+            int editStatus =  editStatusEnum.getEditStatus();
+            // 查询被锁住的最新报表
+            ReportIndex reportIndexLocked = reportIndexService.getReportIndexInfo(reportCategoryCode, sequence, editStatus);
+            if (reportIndexLocked != null) {
+                lastLockedCreateTime = reportIndexLocked.getCreateTime();
+            }
+
+            editStatusEnum= EditStatusEnum.Release;
+            editStatus =  editStatusEnum.getEditStatus();
+            // 查询所有没有被锁住的最新报表
+            ReportIndex reportIndexUnLocked = reportIndexService.getReportIndexInfo(reportCategoryCode, sequence, editStatus);
+            if (reportIndexUnLocked != null) {
+                lastUnLockedCreateTime = reportIndexUnLocked.getCreateTime();
+            }
+            // 根据最新被锁住的报表创建时间与最新没有被锁住的报表创建时间做对比，判断最新报表是否被锁住
+            if (lastLockedCreateTime != null) {
+                if (lastUnLockedCreateTime != null) {
+                    isLocked = lastLockedCreateTime.after(lastUnLockedCreateTime);
+                }
+            }
+        }
+
+        return isLocked;
     }
 }
