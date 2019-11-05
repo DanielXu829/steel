@@ -107,4 +107,9 @@ public class QuartzEntity {
      * 0代表选择配置cron，1代表手动输入cron
      */
     private int cronSettingMethod;
+
+    /**
+     * 用于回显cron表达式的配置项
+     */
+    private String cronJsonString;
 }

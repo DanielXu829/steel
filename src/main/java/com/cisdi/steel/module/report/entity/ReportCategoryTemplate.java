@@ -146,4 +146,10 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
     @TableField("cron_setting_method")
     private int cronSettingMethod;
 
+    /**
+     * 用于回显cron表达式的配置项
+     */
+    @TableField("cron_json_string")
+    private String cronJsonString;
+
 }
