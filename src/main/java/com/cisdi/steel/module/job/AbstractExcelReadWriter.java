@@ -61,7 +61,6 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
         return workbook;
     }
 
-
     /**
      * 获取操作的文件
      *
@@ -122,7 +121,6 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
         DateQuery dateQuery = dateStrategy.handlerDate(date);
         return optionsStrategy.execute(dateQuery);
     }
-
 
     /**
      * 同样处理 方式
@@ -224,5 +222,53 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
         }
     }
 
+    /**
+     * 重载mapDataHandler方法，处理成map类型的数据
+     * @param url        对应的url
+     * @param columns    别名列
+     * @param tagColumns tag点列
+     * @param dateQuery  查询条件
+     * @param rowBatch   每一个map对应几行数据
+     * @return 所有单元格
+     */
+    protected List<CellData> mapDataHandler(String url, List<String> columns, List<String> tagColumns, DateQuery dateQuery, int rowBatch) {
+        Map<String, String> queryParam = getQueryParam(dateQuery);
+        String result = httpUtil.get(url, queryParam);
+        if (StringUtils.isBlank(result)) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONArray data = jsonObject.getJSONArray("data");
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        int startRow = 1;
 
+        return handlerJsonArray(columns, tagColumns, rowBatch, data, startRow);
+    }
+
+    /**
+     * 重载handlerJsonArray方法，处理返回的json格式
+     *
+     * @param columns  列名
+     * @param rowBatch 占用多少行
+     * @param tagColumns tag点列
+     * @param data     数据
+     * @param startRow 开始行
+     * @return 所有单元格
+     */
+    protected List<CellData> handlerJsonArray(List<String> columns, List<String> tagColumns, int rowBatch, JSONArray data, int startRow) {
+        List<CellData> cellDataList = new ArrayList<>();
+        int size = data.size();
+        for (int i = 0; i < size; i++) {
+            JSONObject map = data.getJSONObject(i);
+            if (Objects.nonNull(map)) {
+                List<CellData> cellDataList1 = ExcelWriterUtil.handlerRowData(columns, tagColumns, startRow, map);
+                cellDataList.addAll(cellDataList1);
+            }
+            startRow += rowBatch;
+        }
+
+        return cellDataList;
+    }
 }

@@ -11,10 +11,8 @@ import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.poi.ss.usermodel.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * excel 写入的工具类
@@ -214,5 +212,129 @@ public class ExcelWriterUtil {
         // 插入图片
         drawing.createPicture(anchor, pictureIdx);
 
+    }
+
+    /**
+     * 重载handlerRowData方法 处理每一行数据
+     * 列名格式为 aasdf/asdf 下划线分隔
+     *
+     * @param columns tag点的别名列
+     * @param tagColumns tag点名列
+     * @param starRow 开始行
+     * @param rowData 每一行对应的数据
+     * @return List<CellData>
+     */
+    public static List<CellData> handlerRowData(List<String> columns, List<String> tagColumns, int starRow, Map<String, Object> rowData) {
+        List<CellData> resultData = new ArrayList<>();
+        int size = columns.size();
+        // 忽略大小写
+        CaseInsensitiveMap<String, Object> rowDataMap = new CaseInsensitiveMap<>(rowData);
+        for (int columnIndex = 0; columnIndex < size; columnIndex++) {
+            String column = columns.get(columnIndex);
+            if (StringUtils.isBlank(column)) {
+                continue;
+            }
+            column = getMatchTagName(column, tagColumns);
+            if (!column.contains("/")) {
+                Object value = rowDataMap.get(column);
+                ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
+            } else {
+                String[] split = column.split("/");
+                String key = split[0];
+                String keyChild = split[1];
+                Object o = rowDataMap.get(key);
+                if (o instanceof JSONObject) {
+                    JSONObject object = (JSONObject) o;
+                    CaseInsensitiveMap<String, Object> map = new CaseInsensitiveMap<>(object);
+                    Object value = map.get(keyChild);
+                    if (null == value) {
+                        value = "";
+                    }
+                    ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
+                } else if (o instanceof JSONArray) {
+                    JSONArray jsonArray = (JSONArray) o;
+                    int childIndex = starRow;
+                    for (Object obj : jsonArray) {
+                        JSONObject item = (JSONObject) obj;
+                        CaseInsensitiveMap<String, Object> map = new CaseInsensitiveMap<>(item);
+                        Object value = map.get(keyChild);
+                        if (null == value) {
+                            value = "";
+                        }
+                        ExcelWriterUtil.addCellData(resultData, childIndex++, columnIndex, value);
+                    }
+                } else if (o instanceof Map) {
+                    Map<String, Object> object = (Map<String, Object>) o;
+                    Object value = object.get(keyChild);
+                    if (null == value) {
+                        value = "";
+                    }
+                    ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, value);
+                } else {
+                    if (null == o) {
+                        o = "";
+                    }
+                    ExcelWriterUtil.addCellData(resultData, starRow, columnIndex, o);
+                }
+            }
+        }
+
+        return resultData;
+    }
+
+    /**
+     * 通过tag点别名找到tag点
+     * @param column tag点的别名
+     * @param tagColumns 所有tag点别名对应的tag点
+     * @return tag点
+     */
+    public static String getMatchTagName(String column, List<String> tagColumns) {
+        if (Objects.nonNull(tagColumns) && tagColumns.size() > 0) {
+            for (String tagColumn : tagColumns) {
+                String noPrefixTagColumn = column.substring(3);
+                if (tagColumn.indexOf(noPrefixTagColumn) != -1) {
+                    return tagColumn;
+                }
+            }
+        }
+
+        return column;
+    }
+
+    /**
+     * 处理一个别名对应多个tag点的问题
+     * @param executeWay 处理方法
+     * @param specialValues 被处理的List
+     * @return
+     */
+    public static double executeSpecialList(String executeWay, List<Double> specialValues) {
+        double val = 0.0d;
+
+        if (executeWay != "" && Objects.nonNull(specialValues) && specialValues.size() > 0) {
+            switch (executeWay) {
+                case "max":
+                    val = specialValues.stream().mapToDouble(Double :: doubleValue).max().getAsDouble();
+                    break;
+                case "min":
+                    val = specialValues.stream().mapToDouble(Double :: doubleValue).min().getAsDouble();
+                    break;
+                case "avg":
+                    val = specialValues.stream().mapToDouble(Double :: doubleValue).average().getAsDouble();
+                    break;
+                case "sum":
+                    // 解决sum求和时，使用double可能造成精度损失问题，使用BigDecimal处理
+                    for (Double item: specialValues) {
+                        BigDecimal p1 = new BigDecimal(Double.toString(item));
+                        BigDecimal p2 = new BigDecimal(Double.toString(val));
+                        val = p1.add(p2).doubleValue();
+                    }
+                    break;
+                default:
+                    // 默认求list中最大值
+                    val = specialValues.stream().mapToDouble(Double :: doubleValue).max().getAsDouble();
+            }
+        }
+
+        return val;
     }
 }
