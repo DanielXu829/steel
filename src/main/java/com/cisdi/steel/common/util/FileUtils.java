@@ -1,5 +1,6 @@
 package com.cisdi.steel.common.util;
 
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipFile;
@@ -14,9 +15,7 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author chen
@@ -1087,5 +1086,52 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
             saveFile.mkdirs();
         }
         return parentPath + File.separator + fileName;
+    }
+
+    /**
+     * 通过文件路径直接修改文件名
+     *
+     * @param filePath    需要修改的文件的完整路径
+     * @return 新文件的路径
+     */
+    public static String fixFileName(String filePath) {
+        File file = new File(filePath);
+
+        // 判断原文件是否存在（防止文件名冲突）
+        if (!file.exists()) {
+            return null;
+        }
+
+        // 原文件名和当前时间组成新文件名
+        String newFileName = StringPool.EMPTY;
+        if (file.exists()) {
+            String fileName = file.getName();
+            String[] fileNames = fileName.split("\\.");
+            String currentTimeString = DateUtil.getFormatDateTime(new Date(), DateUtil.fullChineseFormat);
+            newFileName = fileNames[0] + "-" + currentTimeString + "-delete";
+        }
+        newFileName = newFileName.trim();
+
+        // 文件名不能为空
+        if ("".equals(newFileName) || newFileName == null)
+            return null;
+        String newFilePath = null;
+        // 判断是否为文件夹
+        if (file.isDirectory()) {
+            newFilePath = filePath.substring(0, filePath.lastIndexOf("/")) + "/" + newFileName;
+        } else {
+            newFilePath = filePath.substring(0, filePath.lastIndexOf("/")) + "/" + newFileName
+                    + filePath.substring(filePath.lastIndexOf("."));
+        }
+        File newFile = new File(newFilePath);
+        try {
+            // 修改文件名
+            file.renameTo(newFile);
+        } catch (Exception e) {
+            logger.error("修改文件名失败", e);
+            return null;
+        }
+
+        return newFilePath;
     }
 }
