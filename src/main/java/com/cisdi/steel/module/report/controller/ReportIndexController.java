@@ -86,7 +86,7 @@ public class ReportIndexController {
     public ApiResult deleteById(@RequestBody BaseId baseId) {
         ReportIndex report = baseService.getById(baseId);
         if(StringUtils.isNotBlank(report.getPath())){
-            FileUtils.deleteFile(report.getPath());
+            FileUtils.fixFileName(report.getPath());
         }
 
         String code = report.getReportCategoryCode();

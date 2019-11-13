@@ -92,3 +92,27 @@ END $$
 DELIMITER ;
 
 call Add_Column_Cron_Json_String_To_Report_Category_Template();
+
+
+-- ----------------------------
+-- Add column del_flag to report_inedx table
+-- ----------------------------
+drop procedure if exists Add_Column_Del_Flag_To_Report_Index;
+
+DELIMITER $$
+CREATE PROCEDURE Add_Column_Del_Flag_To_Report_Index()
+BEGIN
+    DECLARE _count INT;
+    SET _count = (  SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_SCHEMA = 'steel_linux' AND
+                     TABLE_NAME = 'report_  index' AND
+                            COLUMN_NAME = 'del_flag');
+    IF _count = 0 THEN
+        ALTER TABLE steel_linux.report_index
+            ADD COLUMN del_flag INT NOT NULL DEFAULT 0;
+    END IF;
+END $$
+DELIMITER ;
+
+call Add_Column_Del_Flag_To_Report_Index();

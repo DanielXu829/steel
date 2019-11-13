@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.report.entity;
 
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -107,4 +108,11 @@ public class ReportIndex extends Model<ReportIndex> {
      */
     @TableField("edit_status")
     private int editStatus;
+
+    /**
+     * 逻辑删除 0表示未删除 1表示删除
+     */
+    @TableLogic(value = "0", delval = "1")
+    @TableField("del_flag")
+    private String delFlag;
 }
