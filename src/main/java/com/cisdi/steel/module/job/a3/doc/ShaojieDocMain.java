@@ -46,7 +46,7 @@ public class ShaojieDocMain {
     private String version4 = "4.0";
     private String version5 = "5.0";
 
-    @Scheduled(cron = "0 30 10 * * ?")
+    @Scheduled(cron = "0 40 14 * * ?")
     //    @Scheduled(cron = "0 0/1 * * * ?")
     public void mainJob() {
         Date date = new Date();
@@ -105,7 +105,7 @@ public class ShaojieDocMain {
         if ("5.0".equals(version)) {
             comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "五烧每日操业会-设计版v1.docx");
         } else {
-            comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "六烧每日操业会-设计版v1.docx");
+            comm(jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "四烧每日操业会-设计版v1.docx");
         }
     }
 
@@ -941,6 +941,7 @@ public class ShaojieDocMain {
             String fileName = name + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "每日操业会 - 设计版v1.docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
+            log.info(filePath);
             doc.write(fos);
             fos.close();
 

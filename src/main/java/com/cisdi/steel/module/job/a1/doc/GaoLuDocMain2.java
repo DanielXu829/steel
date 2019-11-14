@@ -222,7 +222,7 @@ public class GaoLuDocMain2 {
         TAG_NAMES.put(version6,tg6);
     }
 
-    @Scheduled(cron = "0 31 10 * * ?")
+    @Scheduled(cron = "0 40 14 * * ?")
     public void mainTask() {
         result = new HashMap<>();
         initDateTime();
@@ -2113,8 +2113,8 @@ public class GaoLuDocMain2 {
     private List<String> dataHttpBrandCode(String version,Date startTime, Date endTime,String type) {
         List<String> result = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
-        map.put("startTime", DateUtil.getFormatDateTime(startTime, DateUtil.fullFormat));
-        map.put("endTime", DateUtil.getFormatDateTime(endTime, DateUtil.fullFormat));
+        map.put("startTime", startTime.getTime()+"");
+        map.put("endTime", endTime.getTime()+"");
         map.put("type", type);
         String results = httpUtil.get(getBrandCodes(version), map);
         JSONObject jsonObject = JSONObject.parseObject(results);
@@ -2169,6 +2169,7 @@ public class GaoLuDocMain2 {
             }
             String fileName = sqquence + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "操业会议纪要（实施版）.docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
+            log.info(filePath);
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
