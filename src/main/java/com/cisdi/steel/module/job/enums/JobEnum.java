@@ -70,6 +70,9 @@ public enum JobEnum {
     gl_lglqbjcs_day("gl_lglqbjcs_day", "高炉冷却壁水温差日报"),
     gl_lglqbjcs_month("gl_lglqbjcs_month", "高炉冷却壁水温差月报"),
     gl_lqbjcs_month("gl_lqbjcs_month", "高炉冷却壁进出水量月报"),
+    gl_lukuangxiaoshi8("gl_lukuangxiaoshi8","8高炉小时炉况输入表"),
+    gl_pengmeifengkoudashi8("gl_pengmeifengkoudashi8","8高炉喷煤风口大事记报表"),
+    gl_bianliaojilu8("gl_bianliaojilu8","8高炉变料记录报表"),
 
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "配煤-自动配煤报表（班）"),
