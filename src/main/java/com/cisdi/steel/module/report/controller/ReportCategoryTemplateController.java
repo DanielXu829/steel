@@ -23,7 +23,7 @@ import java.util.Objects;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/report/reportCategoryTemplate")
+@RequestMapping("/reportCategoryTemplate")
 public class ReportCategoryTemplateController {
 
     /**

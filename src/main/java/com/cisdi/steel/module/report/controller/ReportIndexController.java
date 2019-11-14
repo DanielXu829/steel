@@ -35,7 +35,7 @@ import java.util.*;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/report/reportIndex")
+@RequestMapping("/reportIndex")
 public class ReportIndexController {
     @Autowired
     protected HttpUtil httpUtil;
