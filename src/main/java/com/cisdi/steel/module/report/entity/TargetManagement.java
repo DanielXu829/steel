@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>Description: 指标管理 实体类 </p>
@@ -34,8 +35,8 @@ public class TargetManagement extends Model<TargetManagement>{
     /**
      * 父编号,用于构造节点树
      */
-    @TableField("father_id")
-    private Long fatherId;
+    @TableField("parent_id")
+    private Long parentId;
 
     /**
      * 指标名
@@ -89,6 +90,12 @@ public class TargetManagement extends Model<TargetManagement>{
      */
     @TableField("is_leaf")
     private int isLeaf;
+
+    /**
+     * 子节点
+     */
+    @TableField(exist = false)
+    private List<TargetManagement> childList;
 
     @Override
     protected Serializable pkVal() {
