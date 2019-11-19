@@ -32,4 +32,12 @@ public interface ReportCategoryService extends IBaseService<ReportCategory> {
      */
     ReportPathDTO selectReportInfoByCode(String code);
 
+    /**
+     * 插入数据
+     *
+     * @param record 数据
+     * @param sequence 单个工序
+     * @return
+     */
+    ApiResult insertRecord(ReportCategory record, String sequence);
 }

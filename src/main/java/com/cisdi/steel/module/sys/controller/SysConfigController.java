@@ -42,7 +42,6 @@ public class SysConfigController {
         return baseService.pageList(sysConfigQuery);
     }
 
-
     /**
      * 更新
      */
@@ -53,7 +52,6 @@ public class SysConfigController {
         }
         return baseService.updateRecord(record);
     }
-
 
     /**
      * 系统参数

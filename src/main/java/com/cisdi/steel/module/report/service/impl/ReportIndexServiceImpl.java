@@ -22,6 +22,8 @@ import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import com.cisdi.steel.module.report.service.ReportIndexService;
+import com.cisdi.steel.module.sys.entity.SysConfig;
+import com.cisdi.steel.module.sys.mapper.SysConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,16 +50,26 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
     @Autowired
     private ReportIndexMapper reportIndexMapper;
 
-    @Override
-    public ApiResult upload(MultipartFile file) {
-        String fileExtension = FileUtils.getFileExtension(file.getOriginalFilename());
-        String templatePath = jobProperties.getTempPath();
-        String date = DateUtil.getFormatDateTime(new Date(), DateUtil.NO_SEPARATOR);
-        String fileName = "demo" + date + "." + fileExtension;
+    @Autowired
+    private SysConfigMapper sysConfigMapper;
 
-        String savePath = templatePath + File.separator + fileName;
-        // 保存文件
-        FileUtils.saveFileToDisk(file, savePath);
+    @Override
+    public ApiResult upload(MultipartFile file, String reportCategoryCode) {
+         String savePath = StringUtils.EMPTY;
+        if (Objects.nonNull(file)) {
+            String fileNames = file.getOriginalFilename();
+            // 通过reportCategoryCode查询暂时存储路径
+            LambdaQueryWrapper<SysConfig> wrapper = new QueryWrapper<SysConfig>().lambda();
+            wrapper.eq(SysConfig::getCode, reportCategoryCode);
+            wrapper.eq(SysConfig::getClassName, "code2path");
+            SysConfig sysConfig = sysConfigMapper.selectOne(wrapper);
+            if (Objects.nonNull(sysConfig)) {
+                savePath = sysConfig.getAction() + File.separator + fileNames;
+            }
+
+            // 保存文件
+            FileUtils.saveFileToDisk(file, savePath);
+        }
         return ApiUtil.success(savePath);
     }
 

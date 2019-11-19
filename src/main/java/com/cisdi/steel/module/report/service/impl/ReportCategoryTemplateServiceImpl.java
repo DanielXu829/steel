@@ -19,6 +19,8 @@ import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.sys.entity.SysConfig;
+import com.cisdi.steel.module.sys.mapper.SysConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,9 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
 
     @Autowired
     private QuartzMapper quartzMapper;
+
+    @Autowired
+    private SysConfigMapper sysConfigMapper;
 
     @Autowired
     private ReportCategoryTemplateMapper reportCategoryTemplateMapper;
@@ -96,22 +101,32 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     @Override
     @Transactional(rollbackFor = LeafException.class)
     public ApiResult insertRecord(ReportCategoryTemplate record) {
-        //ReportPathDTO reportPathDTO = reportCategoryService.selectReportInfoByCode(record.getReportCategoryCode());
+        if (Objects.nonNull(record)) {
+            File file = new File(record.getTemplatePath());
+            String fileExtension = FileUtils.getFileExtension(file.getName());
 
-        File file = new File(record.getTemplatePath());
+            // 在Sysconfig表中查询存储路径
+            LambdaQueryWrapper<SysConfig> wrapper = new QueryWrapper<SysConfig>().lambda();
+            wrapper.eq(SysConfig::getCode, record.getReportCategoryCode());
+            wrapper.eq(SysConfig::getClassName, "code2path");
+            SysConfig sysConfig = sysConfigMapper.selectOne(wrapper);
+            String templatePath = jobProperties.getTemplatePath();
+            if (Objects.nonNull(sysConfig)) {
+                templatePath = sysConfig.getName();
+            }
 
-        String fileExtension = FileUtils.getFileExtension(file.getName());
-        String templatePath = jobProperties.getTemplatePath();
-        String date = DateUtil.getFormatDateTime(new Date(), DateUtil.NO_SEPARATOR);
-        String fileName = record.getTemplateName() + date + "." + fileExtension;
+            // 组装文件名
+            String fileName = record.getTemplateName() + "." + fileExtension;
 
-        String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getTemplateLang());
-        // 保存文件
-        FileUtils.copyFile(record.getTemplatePath(), savePath);
-        file.delete();
+            String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getTemplateLang());
+            // 保存文件
+            FileUtils.copyFile(record.getTemplatePath(), savePath);
+            file.delete();
 
-        record.setTemplatePath(savePath);
-        this.save(record);
+            record.setTemplatePath(savePath);
+            this.save(record);
+        }
+
         return ApiUtil.success();
     }
 
