@@ -138,11 +138,11 @@ public class ReportIndexController {
      * @return 成功不反回错误信息
      */
     @PostMapping(value = "/upload")
-    public ApiResult upload(MultipartFile file) {
+    public ApiResult upload(MultipartFile file, String reportCategoryCode) {
         if (Objects.isNull(file) || file.getSize() < 0) {
             return ApiUtil.fail("文件不能为空");
         }
-        return baseService.upload(file);
+        return baseService.upload(file, reportCategoryCode);
     }
 
     /**

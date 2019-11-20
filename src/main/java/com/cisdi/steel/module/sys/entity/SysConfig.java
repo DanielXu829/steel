@@ -44,6 +44,10 @@ public class SysConfig extends Model<SysConfig> {
      */
     private String name;
 
+    /**
+     * 编码与值的对应关系
+     */
+    private String className;
 
     @Override
     protected Serializable pkVal() {

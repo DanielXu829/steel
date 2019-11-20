@@ -48,8 +48,8 @@ public class ReportCategoryController {
      * 插入
      */
     @PostMapping(value = "/insert")
-    public ApiResult insertRecord(@RequestBody ReportCategory record) {
-        return baseService.insertRecord(record);
+    public ApiResult insertRecord(@RequestBody ReportCategory record, String sequence) {
+        return baseService.insertRecord(record, sequence);
     }
 
     /**
