@@ -54,18 +54,12 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
     private SysConfigMapper sysConfigMapper;
 
     @Override
-    public ApiResult upload(MultipartFile file, String reportCategoryCode) {
-         String savePath = StringUtils.EMPTY;
+    public ApiResult upload(MultipartFile file) {
+        String savePath = StringUtils.EMPTY;
         if (Objects.nonNull(file)) {
+            String templatePath = jobProperties.getTempPath();
             String fileNames = file.getOriginalFilename();
-            // 通过reportCategoryCode查询暂时存储路径
-            LambdaQueryWrapper<SysConfig> wrapper = new QueryWrapper<SysConfig>().lambda();
-            wrapper.eq(SysConfig::getCode, reportCategoryCode);
-            wrapper.eq(SysConfig::getClassName, "code2path");
-            SysConfig sysConfig = sysConfigMapper.selectOne(wrapper);
-            if (Objects.nonNull(sysConfig)) {
-                savePath = sysConfig.getAction() + File.separator + fileNames;
-            }
+            savePath = templatePath + File.separator + fileNames;
 
             // 保存文件
             FileUtils.saveFileToDisk(file, savePath);

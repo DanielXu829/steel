@@ -31,7 +31,7 @@ public interface ReportIndexService extends IBaseService<ReportIndex> {
      * @param file 需要上传的文件
      * @return 返回文件的保存目录
      */
-    ApiResult upload(MultipartFile file, String reportCategoryCode);
+    ApiResult upload(MultipartFile file);
 
     /**
      * 分页列表

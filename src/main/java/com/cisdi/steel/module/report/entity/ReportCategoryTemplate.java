@@ -152,4 +152,15 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
     @TableField("cron_json_string")
     private String cronJsonString;
 
+    /**
+     * 用于生成reportCategory
+     */
+    @TableField(exist = false)
+    private Long categoryParentId;
+
+    /**
+     * reportCategory表中name字段
+     */
+    @TableField(exist = false)
+    private String categoryName;
 }

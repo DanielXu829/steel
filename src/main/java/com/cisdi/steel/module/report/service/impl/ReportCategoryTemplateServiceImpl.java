@@ -14,8 +14,10 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.mapper.QuartzMapper;
+import com.cisdi.steel.module.report.entity.ReportCategory;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
+import com.cisdi.steel.module.report.mapper.ReportCategoryMapper;
 import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
@@ -52,6 +54,9 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     private SysConfigMapper sysConfigMapper;
 
     @Autowired
+    private ReportCategoryMapper reportCategoryMapper;
+
+    @Autowired
     private ReportCategoryTemplateMapper reportCategoryTemplateMapper;
     @Override
     public ApiResult pageList(ReportCategoryTemplateQuery query) {
@@ -71,6 +76,16 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
         list.forEach(reportCategoryTemplate -> {
             QuartzEntity quartzEntity = quartzMapper.selectQuartzByCode(reportCategoryTemplate.getReportCategoryCode());
             reportCategoryTemplate.setQuartzEntity(quartzEntity);
+
+            // 获取categoryParentId，categoryName
+            String code = reportCategoryTemplate.getReportCategoryCode();
+            LambdaQueryWrapper<ReportCategory> reportWrapper = new QueryWrapper<ReportCategory>().lambda();
+            reportWrapper.eq(ReportCategory::getCode, code);
+            ReportCategory reportCategory = reportCategoryMapper.selectOne(reportWrapper);
+            long categoryParentId = reportCategory.getParentId();
+            ReportCategory parentReportCategory = reportCategoryMapper.selectById(categoryParentId);
+            reportCategoryTemplate.setCategoryParentId(categoryParentId);
+            reportCategoryTemplate.setCategoryName(parentReportCategory.getName());
         });
         return ApiUtil.success(list);
     }
@@ -105,15 +120,13 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             File file = new File(record.getTemplatePath());
             String fileExtension = FileUtils.getFileExtension(file.getName());
 
-            // 在Sysconfig表中查询存储路径
-            LambdaQueryWrapper<SysConfig> wrapper = new QueryWrapper<SysConfig>().lambda();
-            wrapper.eq(SysConfig::getCode, record.getReportCategoryCode());
-            wrapper.eq(SysConfig::getClassName, "code2path");
-            SysConfig sysConfig = sysConfigMapper.selectOne(wrapper);
+            // 通过CategoryParentId查询report_category对象,获取categoryName
+            ReportCategory reportCategory = reportCategoryMapper.selectById(record.getCategoryParentId());
+            String categoryName = reportCategory.getName();
+
+            // 获取templatePath
             String templatePath = jobProperties.getTemplatePath();
-            if (Objects.nonNull(sysConfig)) {
-                templatePath = sysConfig.getName();
-            }
+            templatePath = templatePath + File.separator + record.getSequence() + File.separator + categoryName;
 
             // 组装文件名
             String fileName = record.getTemplateName() + "." + fileExtension;
@@ -124,6 +137,30 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             file.delete();
 
             record.setTemplatePath(savePath);
+
+            //先通过CategoryCode查询category
+            LambdaQueryWrapper<ReportCategory> categoryWrapper = new QueryWrapper<ReportCategory>().lambda();
+            categoryWrapper.eq(ReportCategory::getCode, record.getReportCategoryCode());
+            ReportCategory oldReportCategory = reportCategoryMapper.selectOne(categoryWrapper);
+            if (Objects.nonNull(oldReportCategory)) {
+                oldReportCategory.setParentId(record.getCategoryParentId());
+                oldReportCategory.setName(record.getTemplateName());
+                oldReportCategory.setRemark(record.getSequence());
+                oldReportCategory.setLeafNode("1");
+                oldReportCategory.setDelFlag("0");
+                reportCategoryMapper.updateById(oldReportCategory);
+            } else {
+                // 向report_category表插入一条数据，做为当前模板的Category
+                ReportCategory newReportCategory = new ReportCategory();
+                newReportCategory.setParentId(record.getCategoryParentId());
+                newReportCategory.setName(record.getTemplateName());
+                newReportCategory.setCode(record.getReportCategoryCode());
+                newReportCategory.setRemark(record.getSequence());
+                newReportCategory.setLeafNode("1");
+                newReportCategory.setDelFlag("0");
+                reportCategoryMapper.insert(newReportCategory);
+            }
+
             this.save(record);
         }
 
@@ -134,24 +171,38 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     public ApiResult updateRecord(ReportCategoryTemplate record) {
         File file = new File(record.getTemplatePath());
         if (file.exists()) {
-            LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
-            wrapper.select(ReportCategoryTemplate::getTemplatePath);
-            wrapper.eq(ReportCategoryTemplate::getId, record.getId());
-            ReportCategoryTemplate one = this.getOne(wrapper);
+            // 修改模板对应的category
+            long categoryParentId = record.getCategoryParentId();
+            LambdaQueryWrapper<ReportCategory> categoryWrapper = new QueryWrapper<ReportCategory>().lambda();
+            categoryWrapper.eq(ReportCategory::getCode, record.getReportCategoryCode());
+            ReportCategory reportCategory = reportCategoryMapper.selectOne(categoryWrapper);
+            reportCategory.setParentId(categoryParentId);
+            reportCategoryMapper.updateById(reportCategory);
 
-            if (!one.getTemplatePath().equals(record.getTemplatePath())) {
-                String fileExtension = FileUtils.getFileExtension(file.getName());
-                String templatePath = jobProperties.getTemplatePath();
-                String date = DateUtil.getFormatDateTime(new Date(), DateUtil.NO_SEPARATOR);
-                String fileName = one.getTemplateName() + date + "." + fileExtension;
+            String fileExtension = FileUtils.getFileExtension(file.getName());
+            ReportCategory parentIdReportCategory = reportCategoryMapper.selectById(categoryParentId);
+            String categoryName = parentIdReportCategory.getName();
 
-                String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getTemplateLang());
+            // 获取templatePath
+            String templatePath = jobProperties.getTemplatePath();
+            templatePath = templatePath + File.separator + record.getSequence() + File.separator + categoryName;
 
-                FileUtils.copyFile(record.getTemplatePath(), savePath);
-                file.delete();
+            // 组装文件名
+            String fileName = record.getTemplateName() + "." + fileExtension;
 
-                record.setTemplatePath(savePath);
+            String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getTemplateLang());
+
+            // 如果有相同路径文件存在，需先删除此文件
+            File oldFile = new File(savePath);
+            if (oldFile.exists()) {
+                oldFile.delete();
             }
+
+            // 保存文件
+            FileUtils.copyFile(record.getTemplatePath(), savePath);
+            file.delete();
+
+            record.setTemplatePath(savePath);
         }
         this.updateById(record);
         return ApiUtil.success();
