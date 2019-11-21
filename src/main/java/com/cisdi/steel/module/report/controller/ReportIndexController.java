@@ -134,15 +134,15 @@ public class ReportIndexController {
     /**
      * 文件上传
      *
-     * @param file 需要上传的文件
+     * @param files 需要上传的文件
      * @return 成功不反回错误信息
      */
     @PostMapping(value = "/upload")
-    public ApiResult upload(MultipartFile file) {
-        if (Objects.isNull(file) || file.getSize() < 0) {
+    public ApiResult upload(MultipartFile files) {
+        if (Objects.isNull(files) || files.getSize() < 0) {
             return ApiUtil.fail("文件不能为空");
         }
-        return baseService.upload(file);
+        return baseService.upload(files);
     }
 
     /**
