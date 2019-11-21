@@ -77,7 +77,7 @@ public class TargetManagementController {
     }
 
     /**
-     * 删除所有节点
+     * 递归删除当前节点下的所有节点
      */
     @PostMapping(value = "/deleteCurrentTarget")
     public ApiResult deleteCurrentTarget(@RequestBody TargetManagement record) {

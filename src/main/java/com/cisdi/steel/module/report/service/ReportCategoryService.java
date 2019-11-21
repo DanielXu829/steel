@@ -23,6 +23,12 @@ public interface ReportCategoryService extends IBaseService<ReportCategory> {
      */
     ApiResult<List<ReportCategory>> selectAllCategory(ReportCategory record);
 
+    /**
+     * 查询报表分类，无叶子节点
+     *
+     * @return 所有菜单
+     */
+    ApiResult<List<ReportCategory>> selectAllCategoryNoLeaf(ReportCategory record);
 
     /**
      * 查询 生成模板需要的信息
@@ -40,4 +46,11 @@ public interface ReportCategoryService extends IBaseService<ReportCategory> {
      * @return
      */
     ApiResult insertRecord(ReportCategory record, String sequence);
+
+    /**
+     * 递归删除当前节点
+     * @param record
+     * @return
+     */
+    ApiResult deleteCurrentTarget(ReportCategory record);
 }

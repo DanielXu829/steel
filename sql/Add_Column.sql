@@ -116,27 +116,3 @@ END $$
 DELIMITER ;
 
 call Add_Column_Del_Flag_To_Report_Index();
-
-
--- ----------------------------
--- Add column class_name to sys_config table
--- ----------------------------
-drop procedure if exists Add_Column_Class_Name_To_Sys_Config;
-
-DELIMITER $$
-CREATE PROCEDURE Add_Column_Class_Name_To_Sys_Config()
-BEGIN
-    DECLARE _count INT;
-    SET _count = (  SELECT COUNT(*)
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_SCHEMA = 'steel_linux' AND
-                     TABLE_NAME = 'sys_config' AND
-                            COLUMN_NAME = 'class_name');
-    IF _count = 0 THEN
-        ALTER TABLE steel_linux.sys_config
-            ADD COLUMN class_name VARCHAR(50);
-    END IF;
-END $$
-DELIMITER ;
-
-call Add_Column_Class_Name_To_Sys_Config();

@@ -36,6 +36,11 @@ public class ReportCategoryController {
         return baseService.selectAllCategory(record);
     }
 
+    @PostMapping(value = "/allCategoryNoLeaf")
+    public ApiResult selectAllCategoryNoLeaf(@RequestBody ReportCategory record) {
+        return baseService.selectAllCategoryNoLeaf(record);
+    }
+
     /**
      * 列表
      */
@@ -76,4 +81,11 @@ public class ReportCategoryController {
         return baseService.deleteRecord(baseId);
     }
 
+    /**
+     * 递归删除当前节点下的所有节点
+     */
+    @PostMapping(value = "/deleteCurrentTarget")
+    public ApiResult deleteCurrentTarget(@RequestBody ReportCategory record) {
+        return baseService.deleteCurrentTarget(record);
+    }
 }

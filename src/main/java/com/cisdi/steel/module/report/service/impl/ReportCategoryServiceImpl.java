@@ -19,6 +19,8 @@ import com.cisdi.steel.module.sys.mapper.SysConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.CollectionUtils;
+
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,22 +58,6 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
                 return ApiUtil.fail("编码不能为空");
             }
             this.checkReportCategoryCode(record);
-            long parentId = record.getParentId();
-            // 获得父节点的name
-            ReportCategory parentReportCategory = reportCategoryMapper.selectById(parentId);
-            String sequenceParent = parentReportCategory.getName();
-
-            // 组装模板暂时存储路径和模板存储路径
-            String templatePath = jobProperties.getTemplatePath();
-            String tempPath = jobProperties.getTempPath();
-            String actionPath = tempPath + File.separator + sequence  + File.separator + sequenceParent;
-            String namePath = templatePath + File.separator + sequence + File.separator + sequenceParent;
-            SysConfig sysConfig = new SysConfig();
-            sysConfig.setCode(record.getCode());
-            sysConfig.setAction(actionPath);
-            sysConfig.setName(namePath);
-            sysConfig.setClassName("code2path");
-            sysConfigMapper.insert(sysConfig);
         }
 
         return super.insertRecord(record);
@@ -109,6 +95,19 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
     }
 
     @Override
+    public ApiResult<List<ReportCategory>> selectAllCategoryNoLeaf(ReportCategory record) {
+        String name = record.getName();
+        LambdaQueryWrapper<ReportCategory> wrapper = new QueryWrapper<ReportCategory>().lambda();
+        if (StringUtils.isNotBlank(name)) {
+            wrapper.like(true, ReportCategory::getRemark, name);
+        }
+        wrapper.orderByAsc(ReportCategory::getSort);
+        List<ReportCategory> list = this.list(wrapper);
+        List<ReportCategory> reportCategories = ReportCategoryUtil.list2TreeConverterNoLeaf(list, Constants.PARENT_ID);
+        return ApiUtil.success(reportCategories);
+    }
+
+    @Override
     public ReportPathDTO selectReportInfoByCode(String code) {
         LambdaQueryWrapper<ReportCategory> wrapper = new QueryWrapper<ReportCategory>().lambda();
         wrapper.select(ReportCategory::getParentId, ReportCategory::getName);
@@ -142,5 +141,61 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
         ReportPathDTO reportPathDTO = new ReportPathDTO();
         reportPathDTO.setPath(builder.toString());
         return reportPathDTO;
+    }
+
+    /**
+     * 递归删除当前节点下的所有节点
+     * @param record
+     * @return
+     */
+    @Override
+    public ApiResult deleteCurrentTarget(ReportCategory record) {
+        if (Objects.nonNull(record)) {
+            long id = record.getId();
+            List<ReportCategory> list = this.list(null);
+            List<ReportCategory> reportCategorys = ReportCategoryUtil.list2TreeConverter(list, id);
+            this.deleteTargetTree(reportCategorys, list);
+        }
+        // 删除所有子节点后，删除此节点
+        this.removeById(record.getId());
+
+        return ApiUtil.success();
+    }
+
+    /**
+     * 删除节点和该节点下面所有的子节点
+     * @param reportCategorys
+     * @param list
+     * @return
+     */
+    public void deleteTargetTree(List<ReportCategory> reportCategorys, List<ReportCategory> list) {
+        for (ReportCategory reportCategory : reportCategorys) {
+            removeTargetReportCategory(list, reportCategory);
+        }
+    }
+
+    /**
+     * 递归删除节点
+     * @param list
+     * @param t
+     */
+    public void removeTargetReportCategory(List<ReportCategory> list, ReportCategory t) {
+        // 直接在数据库中删除数据
+        this.removeById(t.getId());
+
+        // 如果不是叶子节点，则需要删除该节点下面所有的节点
+        if ("0".equals(t.getLeafNode())) {
+            //只能获取当前t节点的子节点集,并不是所有子节点集
+            List<ReportCategory> childsList = ReportCategoryUtil.getChildList(list, t);
+            //迭代子集对象集
+            //遍历完,则退出递归
+            for (ReportCategory nextChild : childsList) {
+                //判断子集对象是否还有子节点
+                if (!CollectionUtils.isEmpty(childsList)) {
+                    //有下一个子节点,继续递归
+                    removeTargetReportCategory(list, nextChild);
+                }
+            }
+        }
     }
 }
