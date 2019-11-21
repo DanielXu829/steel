@@ -61,6 +61,12 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             String fileNames = file.getOriginalFilename();
             savePath = templatePath + File.separator + fileNames;
 
+            // 如果有相同路径的文件存在，直接删除原文件
+            File oldFile = new File(savePath);
+            if (oldFile.exists()) {
+                oldFile.delete();
+            }
+
             // 保存文件
             FileUtils.saveFileToDisk(file, savePath);
         }

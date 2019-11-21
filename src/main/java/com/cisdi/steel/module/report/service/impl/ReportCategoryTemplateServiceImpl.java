@@ -130,12 +130,17 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
 
             // 组装文件名
             String fileName = record.getTemplateName() + "." + fileExtension;
-
             String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getTemplateLang());
+
+            // 如果有相同路径文件存在，需先删除此文件
+            File oldFile = new File(savePath);
+            if (oldFile.exists()) {
+                oldFile.delete();
+            }
+
             // 保存文件
             FileUtils.copyFile(record.getTemplatePath(), savePath);
             file.delete();
-
             record.setTemplatePath(savePath);
 
             //先通过CategoryCode查询category
@@ -189,7 +194,6 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
 
             // 组装文件名
             String fileName = record.getTemplateName() + "." + fileExtension;
-
             String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getTemplateLang());
 
             // 如果有相同路径文件存在，需先删除此文件
