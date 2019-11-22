@@ -127,6 +127,6 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
+        return httpProperties.getJHUrlVersion(version) + "/glTagValue/getTagValue";
     }
 }

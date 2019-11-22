@@ -128,6 +128,6 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
+        return httpProperties.getJHUrlVersion(version) + "/glTagValue/getTagValue";
     }
 }
