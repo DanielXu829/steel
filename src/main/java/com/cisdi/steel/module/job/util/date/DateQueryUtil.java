@@ -35,6 +35,34 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建一个当天的 开始 时间---结束时间，延迟到第二天5分钟
+     * 如 时间：2018-12-20 10:32:55
+     * recordDate=2018-12-20 10:32:55,startTime=2018-12-20 00:00:00,endTime=2018-12-21 00:00:00
+     *
+     * @return 结果
+     */
+    public static DateQuery buildTodayDelayFiveMinute(Date date) {
+        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        Date todayEndTime = DateUtil.getDateEndTime(date);
+        todayEndTime = DateUtil.addMinute(todayEndTime, 5);
+        return new DateQuery(todayBeginTime, todayEndTime, date);
+    }
+
+    /**
+     * 构建一个当天的 开始 时间---结束时间
+     * 如 时间：2019-11-20 10:32:55
+     * recordDate=2019-11-20 10:32:55,startTime=2019-11-20 00:00:00,endTime=2019-11-21 00:20:00
+     *
+     * @return 结果
+     */
+    public static DateQuery buildTodayDelayTwentyMin(Date date) {
+        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        Date todayEndTime = DateUtil.getDateEndTime(date);
+        todayEndTime = DateUtil.addMinute(todayEndTime, 20);
+        return new DateQuery(todayBeginTime, todayEndTime, date);
+    }
+
+    /**
      * 返回一小时范围
      * 当前一个小时时间段
      *
