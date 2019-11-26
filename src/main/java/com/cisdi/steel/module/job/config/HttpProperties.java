@@ -53,6 +53,11 @@ public class HttpProperties {
     private String urlApiJHThree;
 
     /**
+     * 910焦化的接口地址
+     */
+    private String urlApiJHFour;
+
+    /**
      * 能介的接口地址
      */
     private String urlApiNJOne;
@@ -72,6 +77,12 @@ public class HttpProperties {
      */
     private String urlApiSJTwo;
 
+    /**
+     * 4号烧结
+     * @param version
+     * @return
+     */
+    private String urlApiSJThree;
 
     public String getGlUrlVersion(String version) {
         if ("6.0".equals(version)) {
@@ -93,8 +104,10 @@ public class HttpProperties {
             return urlApiJHTwo;
         } else if ("67.0".equals(version)) {
             return urlApiJHOne;
-        }else if ("45.0".equals(version)) {
+        } else if ("45.0".equals(version)) {
             return urlApiJHThree;
+        } else if ("910.0".equals(version)) {
+            return urlApiJHFour;
         }
         return urlApiGLOne;
     }

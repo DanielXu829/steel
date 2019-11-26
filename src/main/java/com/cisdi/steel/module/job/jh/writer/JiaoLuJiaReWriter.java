@@ -9,6 +9,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -42,7 +43,7 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
         // 获取sheet的数量
         int numberOfSheets = workbook.getNumberOfSheets();
         // 从模板中获取version
-        String version ="67.0";
+        String version ="910.0";
         try{
             version = PoiCustomUtil.getSheetCellVersion(workbook);
         }catch(Exception e){
@@ -57,7 +58,8 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
             if (sheetSplit.length == 4) {
                 // 调用父类AbstractExcelReadWriter 的方法， 获取的对应的时间策略。
                 // 有需求，可以自己组装dateQueries
-                List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+                //List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+                List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourEach(date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 // 拿到别名对应的tag点
@@ -67,13 +69,13 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
-                    if (item.getRecordDate().before(new Date())) {
+                    //if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
                         List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, tagColumns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    } else {
-                        break;
-                    }
+                    //} else {
+                        //break;
+                    //}
                 }
             }
         }
@@ -100,20 +102,20 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
-                    queryParam.put("tagNames", column);
-                    String result = httpUtil.get(url, queryParam);
+                    //queryParam.put("tagNames", column);
+                    String result = httpUtil.get(url + column, queryParam);
                     if (StringUtils.isNotBlank(result)) {
                         JSONObject jsonObject = JSONObject.parseObject(result);
                         if (Objects.nonNull(jsonObject)) {
-                            JSONObject data = jsonObject.getJSONObject("data");
-                            if (Objects.nonNull(data)) {
-                                JSONArray arr = data.getJSONArray(column);
+                            JSONArray arr = jsonObject.getJSONArray("data");
+                            //if (Objects.nonNull(data)) {
+                                //JSONArray arr = data.getJSONArray(column);
                                 if (Objects.nonNull(arr) && arr.size() !=0) {
                                     JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                    Double val = jsonObject1.getDouble("val");
+                                    Double val = jsonObject1.getDouble("value");
                                     ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                                 }
-                            }
+                            //}
                         }
                     }
                 }
@@ -129,7 +131,8 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
+        return httpProperties.getJHUrlVersion(version) + "/cache/getTagValuesByRange/";
+        //return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
     }
 
 }
