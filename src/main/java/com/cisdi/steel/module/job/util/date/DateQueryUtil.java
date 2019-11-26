@@ -160,6 +160,32 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建每2小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay2HourEach(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginSixTime = DateUtil.getDateBeginTimeOfSix(date);
+        for (int i = 0; i < 9; i++) {
+            Date previous = DateUtil.addHours(dateBeginSixTime, 2);
+            queryList.add(new DateQuery(dateBeginSixTime, previous, dateBeginSixTime));
+            dateBeginSixTime = previous;
+        }
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        for (int i = 0; i < 3; i++) {
+            Date previous = DateUtil.addHours(dateBeginTime, 2);
+            queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
+            dateBeginTime = previous;
+        }
+        return queryList;
+    }
+
+    /**
      * 构建每4小时时间段
      *
      * @param date 指定时间

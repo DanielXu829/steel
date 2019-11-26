@@ -1,4 +1,4 @@
-package com.cisdi.steel.module.job.sj.write;
+package com.cisdi.steel.module.job.sj.writer;
 
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -18,12 +18,16 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
 public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
+
     @Autowired
     private TargetManagementMapper targetManagementMapper;
 
@@ -87,7 +91,7 @@ public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
                         if (j == 0) {
                             queryParam = this.getQueryParam(dateQueries.get(j));
                             queryParam.put("tagNames", value);
-//                            apiResult = httpUtil.get(url, queryParam);
+                            // apiResult = httpUtil.get(url, queryParam);
                             apiResult = "{'data': {'value': '0'}}";
                             JSONObject jsonObject = JSONObject.parseObject(apiResult);
                             if (Objects.nonNull(jsonObject)) {
@@ -100,7 +104,7 @@ public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
                         } else if (j == 1) {
                             queryParam = this.getQueryParam(dateQueries.get(j));
                             queryParam.put("tagNames", value);
-//                            apiResult = httpUtil.get(url, queryParam);
+                            // apiResult = httpUtil.get(url, queryParam);
                             apiResult = "{'data': {'value': '1'}}";
                             JSONObject jsonObject = JSONObject.parseObject(apiResult);
                             if (Objects.nonNull(jsonObject)) {
@@ -139,8 +143,6 @@ public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getSJUrlVersion(version) + "/glTagValue/getTagValue";
+        return httpProperties.getUrlApiSJThree() + "/glTagValue/getTagValue";
     }
 }
-
-
