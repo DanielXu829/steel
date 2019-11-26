@@ -35,7 +35,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         List<DateQuery> dateQueries = null;
         int numberOfNames = workbook.getNumberOfSheets();
 
-        String version ="8.0";
+        String version = "8.0";
         try{
             version = PoiCustomUtil.getSheetCellVersion(workbook);
         }catch(Exception e){

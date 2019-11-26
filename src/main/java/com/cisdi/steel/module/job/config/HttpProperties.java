@@ -33,6 +33,11 @@ public class HttpProperties {
     private String urlApiGLThree;
 
     /**
+     * 8高炉 Cache
+     */
+    private String urlApiGLFour;
+
+    /**
      * 67焦化的接口地址
      */
     private String urlApiJHOne;
@@ -77,6 +82,10 @@ public class HttpProperties {
             return urlApiGLThree;
         }
         return urlApiGLOne;
+    }
+
+    public String getGLCache() {
+        return urlApiGLFour;
     }
 
     public String getJHUrlVersion(String version) {
