@@ -15,7 +15,7 @@ import java.util.Date;
  * @version 1.0
  */
 @Component
-public class DayTwoStrategy implements DateStrategy {
+public class DayTwentyDelayStrategy implements DateStrategy {
     @Override
     public String getKey() {
         return "daytwo";

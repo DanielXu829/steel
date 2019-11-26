@@ -49,7 +49,7 @@ public class DateQueryUtil {
     }
 
     /**
-     * 构建一个当天的 开始 时间---结束时间
+     * 构建一个当天的 开始 时间---结束时间， 延迟到第二天20分钟
      * 如 时间：2019-11-20 10:32:55
      * recordDate=2019-11-20 10:32:55,startTime=2019-11-20 00:00:00,endTime=2019-11-21 00:20:00
      *
@@ -200,6 +200,26 @@ public class DateQueryUtil {
         return queryList;
     }
 
+    /**
+     * 构建每12小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay12HourEach(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        for (int i = 0; i < 2; i++) {
+            Date previous = DateUtil.addHours(dateBeginTime, 12);
+            queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
+            dateBeginTime = previous;
+        }
+
+        return queryList;
+    }
 
     /**
      * 构建不规则时间段
