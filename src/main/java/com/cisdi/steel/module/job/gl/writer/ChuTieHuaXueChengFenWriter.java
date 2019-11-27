@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -55,6 +56,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         // 获取第一个sheet,往第一个sheet中填充数据, 第4行 为标记项(在excel中设置为隐藏)
         Sheet sheet = workbook.getSheetAt(0);
         int itemRowNum = 3;
+        sheet.getRow(itemRowNum).setZeroHeight(true);
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         for (DateQuery dateQuery : dateQueries) {
             if (itemNameList != null && !itemNameList.isEmpty()) {
@@ -97,12 +99,15 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             JSONObject jsonObject = JSONObject.parseObject(data);
             if (Objects.nonNull(jsonObject)) {
                 JSONArray dataArray = jsonObject.getJSONArray("data");
-                if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
-                    for (int i = 0; i < dataArray.size(); i++) {
+                int arraySize = dataArray.size();
+                if (Objects.nonNull(dataArray) && arraySize != 0) {
+                    for (int i = 0; i < arraySize; i++) {
                         // 半个小时一条数据
                         JSONObject dataObj = dataArray.getJSONObject(i);
                         if (Objects.nonNull(dataObj)) {
                             JSONObject valueObj = dataObj.getJSONObject("values");
+                            JSONObject analysisObj = dataObj.getJSONObject("analysis");
+
                             if (Objects.nonNull(valueObj)) {
                                 // 遍历标记行所有的单元格
                                 for (int j = 0; j < itemNameList.size(); j++) {
@@ -112,8 +117,12 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
                                         if (itemName.indexOf(prefix) >= 0) {
                                             String itemNameTrue = itemName.substring(prefix.length());
                                             Double cellValue = valueObj.getDouble(itemNameTrue);
-                                            Integer row = itemRowNum + 1 + i;
+                                            Long timeValue = analysisObj.getLong("clock");
+                                            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                                            String time = sdf.format(new Date(timeValue));
+                                            Integer row = itemRowNum + arraySize - i;
                                             Integer col = j;
+                                            ExcelWriterUtil.addCellData(cellDataList, row, 1, time);
                                             ExcelWriterUtil.addCellData(cellDataList, row, col, cellValue);
                                         }
                                     }

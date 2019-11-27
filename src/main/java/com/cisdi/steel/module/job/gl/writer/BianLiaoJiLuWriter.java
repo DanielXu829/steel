@@ -105,8 +105,8 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
-                    String apiUrl = url + column;
-                    String result = httpUtil.get(apiUrl, queryParam);
+                    queryParam.put("tagname", column);
+                    String result = httpUtil.get(url, queryParam);
                     if (StringUtils.isNotBlank(result)) {
                         JSONObject jsonObject = JSONObject.parseObject(result);
                         if (Objects.nonNull(jsonObject)) {
@@ -116,7 +116,7 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
                                 for (int j = 0; j < arraySize; j++) {
                                     JSONObject dataObj = dataArray.getJSONObject(j);
                                     if (Objects.nonNull(dataObj)) {
-                                        Double cellValue = dataObj.getDouble("value");
+                                        Double cellValue = dataObj.getDouble("val");
                                         ExcelWriterUtil.addCellData(cellDataList, arraySize - j, i, cellValue);
                                     }
                                 }
@@ -136,7 +136,6 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl() {
-//        return httpProperties.getJHUrlVersion(version) + "/glTagValue/getTagValue";
-        return httpProperties.getGLCache() + "/cache/getTagValuesByRange/";
+        return httpProperties.getUrlApiGLTwo() + "/tagValues";
     }
 }
