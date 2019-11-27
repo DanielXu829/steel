@@ -40,7 +40,7 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
         // 获取sheet的数量
         int numberOfSheets = workbook.getNumberOfSheets();
         // 从模板中获取version
-        String version ="67.0";
+        String version ="8.0";
         try{
             version = PoiCustomUtil.getSheetCellVersion(workbook);
         }catch(Exception e){
@@ -63,7 +63,7 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(getUrl(), columns, tagColumns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, tagColumns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -130,7 +130,7 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
      * @param version
      * @return
      */
-    protected String getUrl() {
-        return httpProperties.getUrlApiGLTwo() + "/tagValues";
+    protected String getUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tagValues";
     }
 }

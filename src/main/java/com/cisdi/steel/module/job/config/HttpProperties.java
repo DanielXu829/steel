@@ -33,11 +33,6 @@ public class HttpProperties {
     private String urlApiGLThree;
 
     /**
-     * 8高炉 Cache
-     */
-    private String urlApiGLFour;
-
-    /**
      * 67焦化的接口地址
      */
     private String urlApiJHOne;
@@ -51,11 +46,6 @@ public class HttpProperties {
      * 45焦化的接口地址
      */
     private String urlApiJHThree;
-
-    /**
-     * 910焦化的接口地址
-     */
-    private String urlApiJHFour;
 
     /**
      * 能介的接口地址
@@ -87,16 +77,12 @@ public class HttpProperties {
     public String getGlUrlVersion(String version) {
         if ("6.0".equals(version)) {
             return urlApiGLOne;
-        } else if ("8.0".equals(version)) {
+        } else if ("8.0".equals(version) || "910.0".equals(version)) {
             return urlApiGLTwo;
         }else if ("7.0".equals(version)) {
             return urlApiGLThree;
         }
         return urlApiGLOne;
-    }
-
-    public String getGLCache() {
-        return urlApiGLFour;
     }
 
     public String getJHUrlVersion(String version) {
@@ -106,9 +92,8 @@ public class HttpProperties {
             return urlApiJHOne;
         } else if ("45.0".equals(version)) {
             return urlApiJHThree;
-        } else if ("910.0".equals(version)) {
-            return urlApiJHFour;
         }
+
         return urlApiGLOne;
     }
 }

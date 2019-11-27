@@ -69,13 +69,13 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 int size = dateQueries.size();
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
-                    //if (item.getRecordDate().before(new Date())) {
+                    if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
                         List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, tagColumns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    //} else {
-                        //break;
-                    //}
+                    } else {
+                        continue;
+                    }
                 }
             }
         }
@@ -102,20 +102,17 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
-                    //queryParam.put("tagNames", column);
-                    String result = httpUtil.get(url + column, queryParam);
+                    queryParam.put("tagname", column);
+                    String result = httpUtil.get(url, queryParam);
                     if (StringUtils.isNotBlank(result)) {
                         JSONObject jsonObject = JSONObject.parseObject(result);
                         if (Objects.nonNull(jsonObject)) {
                             JSONArray arr = jsonObject.getJSONArray("data");
-                            //if (Objects.nonNull(data)) {
-                                //JSONArray arr = data.getJSONArray(column);
-                                if (Objects.nonNull(arr) && arr.size() !=0) {
-                                    JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                    Double val = jsonObject1.getDouble("value");
-                                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
-                                }
-                            //}
+                            if (Objects.nonNull(arr) && arr.size() !=0) {
+                                JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
+                                Double val = jsonObject1.getDouble("val");
+                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                            }
                         }
                     }
                 }
@@ -131,8 +128,7 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getJHUrlVersion(version) + "/cache/getTagValuesByRange/";
-        //return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getTagValue";
+        return httpProperties.getGlUrlVersion(version) + "/tagValues";
     }
 
 }
