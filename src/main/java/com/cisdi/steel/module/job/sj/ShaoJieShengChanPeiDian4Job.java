@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ShaoJieShengChanPeiDianJob4 extends AbstractExportJob {
+public class ShaoJieShengChanPeiDian4Job extends AbstractExportJob {
 
     @Autowired
     private ShaoJieShengChanPeiDianExecute shaoJieShengChanPeiDianExecute;
