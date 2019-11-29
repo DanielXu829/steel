@@ -19,4 +19,15 @@
         )
     </select>
 
+    <select id="selectTargetManagementByCondition" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
+        SELECT
+            *
+        FROM
+            target_management t
+        <where>
+            <if test="condition!=null and condition!=''">
+                CONCAT(IFNULL(t.target_name,''),IFNULL(t.written_name,''),IFNULL(t.target_formula,'')) LIKE '%' #{condition} '%'
+            </if>
+        </where>
+    </select>
 </mapper>

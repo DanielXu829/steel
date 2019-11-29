@@ -28,4 +28,11 @@ public interface TargetManagementService extends IBaseService<TargetManagement> 
      * @return 所有模板节点
      */
     ApiResult deleteCurrentTarget(TargetManagement record);
+
+    /**
+     * 模糊匹配
+     * @param condition
+     * @return
+     */
+    ApiResult selectTargetManagementByCondition(String condition);
 }
