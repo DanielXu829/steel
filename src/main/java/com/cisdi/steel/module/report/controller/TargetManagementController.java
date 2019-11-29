@@ -33,7 +33,7 @@ public class TargetManagementController {
     }
 
     @PostMapping(value = "/allTarget")
-    public ApiResult selectAllCategory(@RequestBody TargetManagement record) {
+    public ApiResult selectAllTargetManagement(@RequestBody TargetManagement record) {
         return baseService.selectAllTargetManagement(record);
     }
 

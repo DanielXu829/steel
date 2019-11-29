@@ -1,5 +1,7 @@
 package com.cisdi.steel.module.report.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.resp.ApiResult;
@@ -29,7 +31,9 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
 
     @Override
     public ApiResult<List<TargetManagement>> selectAllTargetManagement(TargetManagement record) {
-        List<TargetManagement> list = this.list(null);
+        LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
+        wrapper.orderByAsc(TargetManagement::getWrittenName);
+        List<TargetManagement> list = this.list(wrapper);
         List<TargetManagement> targetManagements = TargetManagementUtil.list2TreeConverter(list, record.getParentId());
         return ApiUtil.success(targetManagements);
     }
