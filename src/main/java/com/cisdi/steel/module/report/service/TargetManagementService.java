@@ -35,4 +35,18 @@ public interface TargetManagementService extends IBaseService<TargetManagement> 
      * @return
      */
     ApiResult selectTargetManagementByCondition(String condition);
+
+    /**
+     * 重写插入数据
+     * @param record 数据
+     * @return
+     */
+    ApiResult insertRecord(TargetManagement record);
+
+    /**
+     * 重写更新数据
+     * @param record 数据
+     * @return
+     */
+    ApiResult updateRecord(TargetManagement record);
 }

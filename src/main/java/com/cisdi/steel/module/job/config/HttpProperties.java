@@ -92,8 +92,17 @@ public class HttpProperties {
             return urlApiJHOne;
         } else if ("45.0".equals(version)) {
             return urlApiJHThree;
+        } else if ("910.0".equals(version)) {
+            return urlApiJHOne;
         }
 
         return urlApiGLOne;
+    }
+
+    public String getSJUrlVersion(String version) {
+        if ("4.0".equals(version)) {
+            return urlApiSJThree;
+        }
+        return urlApiSJThree;
     }
 }

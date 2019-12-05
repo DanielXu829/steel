@@ -120,14 +120,14 @@ public class ShaoJieFenXiDocMain {
     private void dealTagName() {
         L1 = new String[]
                 {
-                        "ST4_L1R_SIN_SiMaRunVel_1d_cur",
-                        "ST4_L1R_SIN_DelAmtUse_1d_cur",
-                        "ST4_L1R_SIN_1MainChiFlTe_1d_cur",
-                        "ST4_L1R_SIN_1MainChiFlPI_1d_cur",
-                        "ST4_L1R_SIN_2MainChiFlTe_1d_cur",
-                        "ST4_L1R_SIN_2MainChiFlPI_1d_cur",
-                        "ST4_L1R_SIN_1stMixAddActFl_1d_cur",
-                        "ST4_L1R_SIN_2ndMixAddActFl_1d_cur"
+                        "ST4_L1R_SIN_SiMaRunVel_1d_avg",
+                        "ST4_L1R_SIN_DelAmtUse_1d_avg",
+                        "ST4_L1R_SIN_1MainChiFlTe_1d_avg",
+                        "ST4_L1R_SIN_1MainChiFlPI_1d_avg",
+                        "ST4_L1R_SIN_2MainChiFlTe_1d_avg",
+                        "ST4_L1R_SIN_2MainChiFlPI_1d_avg",
+                        "ST4_L1R_SIN_1stMixAddActFl_1d_avg",
+                        "ST4_L1R_SIN_2ndMixAddActFl_1d_avg"
                 };
     }
 

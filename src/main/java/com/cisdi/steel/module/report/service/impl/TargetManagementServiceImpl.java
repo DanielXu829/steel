@@ -2,6 +2,7 @@ package com.cisdi.steel.module.report.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.resp.ApiResult;
@@ -10,6 +11,8 @@ import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.TargetManagementService;
 import com.cisdi.steel.module.report.util.TargetManagementUtil;
+import org.apache.poi.util.StringUtil;
+import org.omg.CORBA.Object;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -56,6 +59,52 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
     public ApiResult selectTargetManagementByCondition(String condition) {
         List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementByCondition(condition);
         return ApiUtil.success(targetManagements);
+    }
+
+    @Override
+    public ApiResult insertRecord(TargetManagement record) {
+        if (Objects.nonNull(record)) {
+            String targetName = record.getTargetName();
+            if (!StringPool.EMPTY.equals(targetName) && targetName.startsWith("ZP") &&record.getIsLeaf() == 1) {
+                LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
+                wrapper.eq(TargetManagement::getTargetName, targetName);
+                List<TargetManagement> list = targetManagementMapper.selectList(wrapper);
+                if (Objects.isNull(list) || list.size() < 1) {
+                    this.save(record);
+                } else {
+                    return ApiUtil.fail("新增失败，tag别点重复");
+                }
+            } else {
+                this.save(record);
+            }
+
+            return ApiUtil.success();
+        }
+
+        return ApiUtil.fail();
+    }
+
+    @Override
+    public ApiResult updateRecord(TargetManagement record) {
+        if (Objects.nonNull(record)) {
+            String targetName = record.getTargetName();
+            if (!StringPool.EMPTY.equals(targetName) && targetName.startsWith("ZP") &&record.getIsLeaf() == 1) {
+                LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
+                wrapper.eq(TargetManagement::getTargetName, targetName);
+                List<TargetManagement> list = targetManagementMapper.selectList(wrapper);
+                if (Objects.isNull(list) || list.size() < 1) {
+                    this.updateById(record);
+                } else {
+                    return ApiUtil.fail("更新失败，tag别点重复");
+                }
+            } else {
+                this.updateById(record);
+            }
+
+            return ApiUtil.success();
+        }
+
+        return ApiUtil.fail();
     }
 
     /**

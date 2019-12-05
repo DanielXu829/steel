@@ -70,7 +70,7 @@ http:
    urlApiGLTwo: http://10.64.11.203:9001
 #   urlApiGLThree: http://10.64.11.204:9001
 #   urlApiNJOne: http://10.64.11.220:8080
-   urlApiJHOne:  http://10.64.11.209:8099
+   urlApiJHOne:  http://10.11.11.10:9001
 #   urlApiJHTwo:  http://10.64.11.208:8080
 #   urlApiJHThree:  http://10.64.11.207:8080
 #   urlApiYGLOne: http://10.64.11.210:8181
