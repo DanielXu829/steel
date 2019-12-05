@@ -102,7 +102,8 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
-                    queryParam.put("tagname", column);
+                    //queryParam.put("tagname", column);
+                    queryParam.put("tagNames", column);
                     String result = httpUtil.get(url, queryParam);
                     if (StringUtils.isNotBlank(result)) {
                         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -128,7 +129,7 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/tagValues";
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getNewTagValue";
     }
 
 }

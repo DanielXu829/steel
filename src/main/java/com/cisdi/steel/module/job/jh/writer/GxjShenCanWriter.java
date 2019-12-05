@@ -94,7 +94,10 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
      */
     protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, List<String> tagColumns, DateQuery dateQuery) {
         // 调用父类AbstractExcelReadWriter 的方法，获得queryParam，有需求，可以直接重写
-        Map<String, String> queryParam = this.getQueryParam(dateQuery);
+        //Map<String, String> queryParam = this.getQueryParam(dateQuery);
+        Map<String, String> queryParam = new HashMap<String, String>();
+        queryParam.put("startDate", String.valueOf(dateQuery.getQueryStartTime()));
+        queryParam.put("endDate", String.valueOf(dateQuery.getQueryEndTime()));
         List<CellData> cellDataList = new ArrayList<>();
         if (Objects.nonNull(columns)) {
             int size = columns.size();
@@ -111,7 +114,8 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
                         String executeWay = columnSplit[0];
                         int columnSplitSize = columnSplit.length;
                         for (int k = 1; k < columnSplitSize; k++) {
-                            queryParam.put("tagname", columnSplit[k]);
+                            //queryParam.put("tagname", columnSplit[k]);
+                            queryParam.put("tagNames", columnSplit[k]);
                             String result = httpUtil.get(url, queryParam);
                             if (StringUtils.isNotBlank(result)) {
                                 JSONObject jsonObject = JSONObject.parseObject(result);
@@ -129,7 +133,8 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
                         Double executeVal = ExcelWriterUtil.executeSpecialList(executeWay, specialValues);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, executeVal);
                     } else {
-                        queryParam.put("tagname", column);
+                        //queryParam.put("tagname", column);
+                        queryParam.put("tagNames", column);
                         String result = httpUtil.get(url, queryParam);
                         if (StringUtils.isNotBlank(result)) {
                             JSONObject jsonObject = JSONObject.parseObject(result);
@@ -156,7 +161,7 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/tagValues";
+        return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getNewTagValue";
     }
 
 }
