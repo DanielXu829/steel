@@ -16,9 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -72,9 +70,12 @@ public class ShaoJieFenXiDocMain {
         dealTagName();
         JSONObject data = dataHttp(L1, DateUtil.addDays(date, -1), version);
         for (int i = 0; i < L1.length; i++) {
+            Double doubleValue = 0d;
             JSONObject valueObject = data.getJSONObject(L1[i]);
-            String value = String.valueOf(valueObject);
-            Double doubleValue = Double.parseDouble(value);
+            Map<String, Object> map = valueObject.getInnerMap();
+            for (Object object : map.values()) {
+                doubleValue = Double.parseDouble(object.toString());
+            }
             result.put("attr" + String.valueOf(i + 1), doubleValue);
         }
     }
