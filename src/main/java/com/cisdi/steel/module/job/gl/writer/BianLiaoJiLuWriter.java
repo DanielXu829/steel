@@ -59,8 +59,6 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                // 拿到别名对应的tag点
-                List<String> tagColumns = targetManagementMapper.selectTargetFormulasByTargetNames(columns);
                 // 拼装cellDataList，是直接调用，或者是重写父类AbstractExcelReadWriter 的 mapDataHandler 方法
                 // 主要是取决于获取数据的API所需要的参数
                 int size = dateQueries.size();
@@ -68,7 +66,7 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, tagColumns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -89,7 +87,7 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    protected List<CellData> mapDataHandler(String url, List<String> columns, List<String> tagColumns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery) {
         // 修改了默认的dateQuery，开始时间需要延后10分钟，例如，开始时间为00:10:00，结束时间为第二天：00:00:00，
         Date recordDate = dateQuery.getRecordDate();
         Date todayBeginTime = DateUtil.getDateBeginTime(recordDate);
@@ -104,7 +102,7 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
             for (int i = 0; i < size; i++) {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
-                    column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
+                    column = targetManagementMapper.selectTargetFormulaByTargetName(column);
                     queryParam.put("tagname", column);
                     String result = httpUtil.get(url, queryParam);
                     if (StringUtils.isNotBlank(result)) {
