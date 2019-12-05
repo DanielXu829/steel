@@ -27,6 +27,13 @@ public interface TargetManagementMapper extends BaseMapper<TargetManagement> {
     List<String> selectTargetFormulasByTargetNames(List<String> targetNames);
 
     /**
+     * 通过一个别名查询一个tag点
+     * @param targetName
+     * @return 别名对应的tag点
+     */
+    String selectTargetFormulaByTargetName(String targetName);
+
+    /**
      * 模糊查询
      * @param condition
      * @return

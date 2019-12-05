@@ -40,7 +40,7 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
         // 获取sheet的数量
         int numberOfSheets = workbook.getNumberOfSheets();
         // 从模板中获取version
-        String version ="8.0";
+        String version = "8.0";
         try{
             version = PoiCustomUtil.getSheetCellVersion(workbook);
         }catch(Exception e){
@@ -56,14 +56,12 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                // 拿到别名对应的tag点
-                List<String> tagColumns = targetManagementMapper.selectTargetFormulasByTargetNames(columns);
                 int size = dateQueries.size();
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, tagColumns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -84,7 +82,7 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    protected List<CellData> mapDataHandler(String url, List<String> columns, List<String> tagColumns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery) {
         // 修改了默认的dateQuery，开始时间为0点整，结束时间为23点整
         Date recordDate = dateQuery.getRecordDate();
         Date todayBeginTime = DateUtil.getDateBeginTime(recordDate);
@@ -99,20 +97,22 @@ public class PengMeiFengKouDaShiWriter extends AbstractExcelReadWriter {
             for (int i = 0; i < size; i++) {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
-                    column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
-                    queryParam.put("tagname", column);
-                    String result = httpUtil.get(url, queryParam);
-                    if (StringUtils.isNotBlank(result)) {
-                        JSONObject jsonObject = JSONObject.parseObject(result);
-                        if (Objects.nonNull(jsonObject)) {
-                            JSONArray dataArray = jsonObject.getJSONArray("data");
-                            int arraySize = dataArray.size();
-                            if (Objects.nonNull(dataArray) && arraySize != 0) {
-                                for (int j = 0; j < arraySize; j++) {
-                                    JSONObject dataObj = dataArray.getJSONObject(j);
-                                    if (Objects.nonNull(dataObj)) {
-                                        Double cellValue = dataObj.getDouble("val");
-                                        ExcelWriterUtil.addCellData(cellDataList, arraySize - j, i, cellValue);
+                    column = targetManagementMapper.selectTargetFormulaByTargetName(column);
+                    if (StringUtils.isNotBlank(column)) {
+                        queryParam.put("tagname", column);
+                        String result = httpUtil.get(url, queryParam);
+                        if (StringUtils.isNotBlank(result)) {
+                            JSONObject jsonObject = JSONObject.parseObject(result);
+                            if (Objects.nonNull(jsonObject)) {
+                                JSONArray dataArray = jsonObject.getJSONArray("data");
+                                int arraySize = dataArray.size();
+                                if (Objects.nonNull(dataArray) && arraySize != 0) {
+                                    for (int j = 0; j < arraySize; j++) {
+                                        JSONObject dataObj = dataArray.getJSONObject(j);
+                                        if (Objects.nonNull(dataObj)) {
+                                            Double cellValue = dataObj.getDouble("val");
+                                            ExcelWriterUtil.addCellData(cellDataList, arraySize - j, i, cellValue);
+                                        }
                                     }
                                 }
                             }

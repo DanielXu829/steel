@@ -56,6 +56,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         // 获取第一个sheet,往第一个sheet中填充数据, 第4行 为标记项(在excel中设置为隐藏)
         Sheet sheet = workbook.getSheetAt(0);
         int itemRowNum = 3;
+        // 将第4行隐藏
         sheet.getRow(itemRowNum).setZeroHeight(true);
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         for (DateQuery dateQuery : dateQueries) {

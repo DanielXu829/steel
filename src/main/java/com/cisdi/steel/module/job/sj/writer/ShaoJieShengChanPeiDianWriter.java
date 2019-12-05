@@ -90,7 +90,7 @@ public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
                     for (int j = 0; j < size; j++) {
                         if (j == 0) {
                             queryParam = this.getQueryParam(dateQueries.get(j));
-                            queryParam.put("tagNames", value);
+                            queryParam.put("tagName", value);
                             // apiResult = httpUtil.get(url, queryParam);
                             apiResult = "{'data': {'value': '0'}}";
                             JSONObject jsonObject = JSONObject.parseObject(apiResult);
@@ -143,6 +143,7 @@ public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getUrl(String version) {
-        return httpProperties.getUrlApiSJThree() + "/glTagValue/getTagValue";
+//        return httpProperties.getSJUrlVersion(version) + "/glTagValue/getTagValue";
+        return httpProperties.getSJUrlVersion(version) + "/tagValue";
     }
 }
