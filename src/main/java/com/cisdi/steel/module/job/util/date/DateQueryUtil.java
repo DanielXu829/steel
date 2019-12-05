@@ -233,9 +233,6 @@ public class DateQueryUtil {
      * @return 结果
      */
     public static List<DateQuery> buildDay12HourEach(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
         List<DateQuery> queryList = new ArrayList<>();
         Date dateBeginTime = DateUtil.getDateBeginTime(date);
         for (int i = 0; i < 2; i++) {
