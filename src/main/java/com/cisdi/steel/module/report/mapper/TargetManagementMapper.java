@@ -26,4 +26,10 @@ public interface TargetManagementMapper extends BaseMapper<TargetManagement> {
      */
     List<String> selectTargetFormulasByTargetNames(List<String> targetNames);
 
+    /**
+     * 模糊查询
+     * @param condition
+     * @return
+     */
+    List<TargetManagement> selectTargetManagementByCondition(@Param("condition") String condition);
 }

@@ -152,6 +152,32 @@ public class PoiCustomUtil {
     }
 
     /**
+     * 获取白班相对于夜班的位置(left,right,top,bottom)
+     * @param workbook  文件
+     * @return Map<String tagName, String position>
+     */
+    public static Map<String, String> getSheetDayWorkRelativePosition(Workbook workbook) {
+        Map<String, String> dayPositionMap = new HashMap<>();
+        Sheet sheet = workbook.getSheet("_dayposition");
+        int firstRowNum = sheet.getFirstRowNum();
+        int lastRowNum = sheet.getLastRowNum();
+        for (int rowNum = firstRowNum; rowNum <= lastRowNum; rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (Objects.isNull(row)) {
+                continue;
+            }
+            Cell cell = row.getCell(0);
+            String tagName = PoiCellUtil.getCellValue(cell);
+            if (StringUtils.isNotBlank(tagName)) {
+                String dayRelativePosition =  PoiCellUtil.getCellValue(sheet, rowNum, 1);
+                dayPositionMap.put(tagName, dayRelativePosition);
+            }
+        }
+
+        return dayPositionMap;
+    }
+
+    /**
      * 获取指定单元格的值
      *
      * @param filePath  文件路径

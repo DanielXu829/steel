@@ -1,5 +1,7 @@
 package com.cisdi.steel.module.report.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.resp.ApiResult;
@@ -8,6 +10,7 @@ import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.TargetManagementService;
 import com.cisdi.steel.module.report.util.TargetManagementUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -23,9 +26,14 @@ import java.util.Objects;
 @Service
 public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagementMapper, TargetManagement> implements TargetManagementService {
 
+    @Autowired
+    private TargetManagementMapper targetManagementMapper;
+
     @Override
     public ApiResult<List<TargetManagement>> selectAllTargetManagement(TargetManagement record) {
-        List<TargetManagement> list = this.list(null);
+        LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
+        wrapper.orderByAsc(TargetManagement::getWrittenName);
+        List<TargetManagement> list = this.list(wrapper);
         List<TargetManagement> targetManagements = TargetManagementUtil.list2TreeConverter(list, record.getParentId());
         return ApiUtil.success(targetManagements);
     }
@@ -42,6 +50,12 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
         this.removeById(record.getId());
 
         return ApiUtil.success();
+    }
+
+    @Override
+    public ApiResult selectTargetManagementByCondition(String condition) {
+        List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementByCondition(condition);
+        return ApiUtil.success(targetManagements);
     }
 
     /**

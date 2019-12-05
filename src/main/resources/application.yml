@@ -76,6 +76,7 @@ http:
 #   urlApiYGLOne: http://10.64.11.210:8181
    urlApiSJTwo: http://10.64.11.205:9001
 #   urlApiSJOne: http://10.64.11.206:9001
+   urlApiSJThree: http://10.64.11.205:9001
 
 # mybatis-plus
 mybatis-plus:

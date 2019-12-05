@@ -6,6 +6,7 @@ import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.service.TargetManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,7 @@ public class TargetManagementController {
     }
 
     @PostMapping(value = "/allTarget")
-    public ApiResult selectAllCategory(@RequestBody TargetManagement record) {
+    public ApiResult selectAllTargetManagement(@RequestBody TargetManagement record) {
         return baseService.selectAllTargetManagement(record);
     }
 
@@ -83,4 +84,9 @@ public class TargetManagementController {
     public ApiResult deleteCurrentTarget(@RequestBody TargetManagement record) {
         return baseService.deleteCurrentTarget(record);
     }
+
+    @GetMapping(value = "/selectTargetManagementByCondition")
+    public ApiResult selectTargetManagementByCondition(String condition) {
+        return baseService.selectTargetManagementByCondition(condition);
+    };
 }

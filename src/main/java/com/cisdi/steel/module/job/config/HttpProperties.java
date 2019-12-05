@@ -67,11 +67,17 @@ public class HttpProperties {
      */
     private String urlApiSJTwo;
 
+    /**
+     * 4号烧结
+     * @param version
+     * @return
+     */
+    private String urlApiSJThree;
 
     public String getGlUrlVersion(String version) {
         if ("6.0".equals(version)) {
             return urlApiGLOne;
-        } else if ("8.0".equals(version)) {
+        } else if ("8.0".equals(version) || "910.0".equals(version)) {
             return urlApiGLTwo;
         }else if ("7.0".equals(version)) {
             return urlApiGLThree;
@@ -84,9 +90,10 @@ public class HttpProperties {
             return urlApiJHTwo;
         } else if ("67.0".equals(version)) {
             return urlApiJHOne;
-        }else if ("45.0".equals(version)) {
+        } else if ("45.0".equals(version)) {
             return urlApiJHThree;
         }
+
         return urlApiGLOne;
     }
 }

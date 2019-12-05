@@ -35,6 +35,34 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建一个当天的 开始 时间---结束时间，延迟到第二天5分钟
+     * 如 时间：2018-12-20 10:32:55
+     * recordDate=2018-12-20 10:32:55,startTime=2018-12-20 00:00:00,endTime=2018-12-21 00:00:00
+     *
+     * @return 结果
+     */
+    public static DateQuery buildTodayDelayFiveMinute(Date date) {
+        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        Date todayEndTime = DateUtil.getDateEndTime(date);
+        todayEndTime = DateUtil.addMinute(todayEndTime, 5);
+        return new DateQuery(todayBeginTime, todayEndTime, date);
+    }
+
+    /**
+     * 构建一个当天的 开始 时间---结束时间， 延迟到第二天20分钟
+     * 如 时间：2019-11-20 10:32:55
+     * recordDate=2019-11-20 10:32:55,startTime=2019-11-20 00:00:00,endTime=2019-11-21 00:20:00
+     *
+     * @return 结果
+     */
+    public static DateQuery buildTodayDelayTwentyMin(Date date) {
+        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        Date todayEndTime = DateUtil.getDateEndTime(date);
+        todayEndTime = DateUtil.addMinute(todayEndTime, 20);
+        return new DateQuery(todayBeginTime, todayEndTime, date);
+    }
+
+    /**
      * 返回一小时范围
      * 当前一个小时时间段
      *
@@ -132,6 +160,32 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建每2小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay2HourEach(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginSixTime = DateUtil.getDateBeginTimeOfSix(date);
+        for (int i = 0; i < 9; i++) {
+            Date previous = DateUtil.addHours(dateBeginSixTime, 2);
+            queryList.add(new DateQuery(dateBeginSixTime, previous, dateBeginSixTime));
+            dateBeginSixTime = previous;
+        }
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        for (int i = 0; i < 3; i++) {
+            Date previous = DateUtil.addHours(dateBeginTime, 2);
+            queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
+            dateBeginTime = previous;
+        }
+        return queryList;
+    }
+
+    /**
      * 构建每4小时时间段
      *
      * @param date 指定时间
@@ -172,6 +226,26 @@ public class DateQueryUtil {
         return queryList;
     }
 
+    /**
+     * 构建每12小时时间段
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay12HourEach(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        for (int i = 0; i < 2; i++) {
+            Date previous = DateUtil.addHours(dateBeginTime, 12);
+            queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
+            dateBeginTime = previous;
+        }
+
+        return queryList;
+    }
 
     /**
      * 构建不规则时间段
