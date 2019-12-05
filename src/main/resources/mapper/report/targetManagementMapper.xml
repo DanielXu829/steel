@@ -19,6 +19,15 @@
         )
     </select>
 
+    <select id="selectTargetFormulaByTargetName" parameterType="String" resultType="String">
+        SELECT
+            target_formula
+        FROM
+            target_management
+        WHERE
+            target_name = #{targetName}
+    </select>
+
     <select id="selectTargetManagementByCondition" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
         SELECT
             *

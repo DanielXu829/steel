@@ -42,10 +42,10 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
         // 获取sheet的数量
         int numberOfSheets = workbook.getNumberOfSheets();
         // 从模板中获取version
-        String version ="8.0";
-        try{
+        String version = "8.0";
+        try {
             version = PoiCustomUtil.getSheetCellVersion(workbook);
-        }catch(Exception e){
+        } catch(Exception e){
             log.error("在模板中获取version失败", e);
         }
         // 循环所有sheet，操作以下划线开头，并且以下划线分割为4个字符串的sheet
@@ -60,8 +60,6 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                // 拿到别名对应的tag点
-                List<String> tagColumns = targetManagementMapper.selectTargetFormulasByTargetNames(columns);
                 // 拼装cellDataList，是直接调用，或者是重写父类AbstractExcelReadWriter 的 mapDataHandler 方法
                 // 主要是取决于获取数据的API所需要的参数
                 int size = dateQueries.size();
@@ -69,7 +67,7 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columns, tagColumns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -90,7 +88,7 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    protected List<CellData> mapDataHandler(String url, List<String> columns, List<String> tagColumns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         // 修改了默认的dateQuery，开始时间为1点整，结束时间为24点整
         Date recordDate = dateQuery.getRecordDate();
         Date todayBeginTime = DateUtil.getDateBeginTime(recordDate);
@@ -105,21 +103,29 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
             for (int i = 0; i < size; i++) {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
-                    column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
-                    String apiUrl = url + column;
-                    String result = httpUtil.get(apiUrl, queryParam);
-                    if (StringUtils.isNotBlank(result)) {
-                        JSONObject jsonObject = JSONObject.parseObject(result);
-                        if (Objects.nonNull(jsonObject)) {
-                            JSONArray dataArray = jsonObject.getJSONArray("data");
-                            int arraySize = dataArray.size();
-                            if (Objects.nonNull(dataArray) && arraySize != 0) {
-                                for (int j = 0; j < arraySize; j++) {
-                                    JSONObject dataObj = dataArray.getJSONObject(j);
-                                    if (Objects.nonNull(dataObj)) {
-                                        Double cellValue = dataObj.getDouble("value");
-                                        ExcelWriterUtil.addCellData(cellDataList, arraySize - j, i, cellValue);
+                    // 通过别名获取tag点
+                    column = targetManagementMapper.selectTargetFormulaByTargetName(column);
+                    if (StringUtils.isNotBlank(column)) {
+                        queryParam.put("tagname", column);
+                        String result = httpUtil.get(url, queryParam);
+                        if (StringUtils.isNotBlank(result)) {
+                            JSONObject jsonObject = JSONObject.parseObject(result);
+                            if (Objects.nonNull(jsonObject)) {
+                                JSONArray dataArray = jsonObject.getJSONArray("data");
+                                int arraySize = dataArray.size();
+                                if (Objects.nonNull(dataArray) && arraySize != 0) {
+                                    for (int j = 0; j < arraySize; j++) {
+                                        JSONObject dataObj = dataArray.getJSONObject(j);
+                                        if (Objects.nonNull(dataObj)) {
+                                            Double cellValue = dataObj.getDouble("val");
+                                            ExcelWriterUtil.addCellData(cellDataList, arraySize - j, i, cellValue);
+                                        }
                                     }
+//                                JSONObject dataObj = dataArray.getJSONObject(arraySize - 1);
+//                                if (Objects.nonNull(dataObj)) {
+//                                    Double cellValue = dataObj.getDouble("val");
+//                                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, cellValue);
+//                                }
                                 }
                             }
                         }
