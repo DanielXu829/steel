@@ -4,7 +4,7 @@ spring:
         name: steel
 #profile
     profiles:
-        active: local
+        active: prod
 #datasource
     datasource:
         # druid
