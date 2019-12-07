@@ -62,8 +62,6 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourEach(date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                // 拿到别名对应的tag点
-                List<String> tagColumns = targetManagementMapper.selectTargetFormulasByTargetNames(columns);
                 // 拼装cellDataList，是直接调用，或者是重写父类AbstractExcelReadWriter 的 mapDataHandler 方法
                 // 主要是取决于获取数据的API所需要的参数
                 int size = dateQueries.size();
@@ -71,7 +69,7 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, tagColumns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         continue;
@@ -92,7 +90,7 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, List<String> tagColumns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         // 调用父类AbstractExcelReadWriter 的方法，获得queryParam，有需求，可以直接重写
         //Map<String, String> queryParam = this.getQueryParam(dateQuery);
         Map<String, String> queryParam = new HashMap<String, String>();
@@ -105,7 +103,7 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     // 获取别名对应的tag点
-                    column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
+                    column = targetManagementMapper.selectTargetFormulaByTargetName(column);
                     // 可能是处理方法加tag点的组合。 e.g: max,tag1,tag2 需要根据最前面的方式做特殊处理
                     String[] columnSplit = column.split(",");
                     if (Objects.nonNull(columnSplit) && columnSplit.length > 2) {
@@ -120,11 +118,14 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
                             if (StringUtils.isNotBlank(result)) {
                                 JSONObject jsonObject = JSONObject.parseObject(result);
                                 if (Objects.nonNull(jsonObject)) {
-                                    JSONArray arr = jsonObject.getJSONArray("data");
-                                    if (Objects.nonNull(arr) && arr.size() != 0) {
-                                        JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                        Double val = jsonObject1.getDouble("val");
-                                        specialValues.add(val);
+                                    JSONObject dataObject = jsonObject.getJSONObject("data");
+                                    if (Objects.nonNull(dataObject)) {
+                                        JSONArray arr = dataObject.getJSONArray(columnSplit[k]);
+                                        if (Objects.nonNull(arr) && arr.size() != 0) {
+                                            JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
+                                            Double val = jsonObject1.getDouble("val");
+                                            specialValues.add(val);
+                                        }
                                     }
                                 }
                             }
@@ -133,17 +134,19 @@ public class GxjShenCanWriter extends AbstractExcelReadWriter {
                         Double executeVal = ExcelWriterUtil.executeSpecialList(executeWay, specialValues);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, executeVal);
                     } else {
-                        //queryParam.put("tagname", column);
                         queryParam.put("tagNames", column);
                         String result = httpUtil.get(url, queryParam);
                         if (StringUtils.isNotBlank(result)) {
                             JSONObject jsonObject = JSONObject.parseObject(result);
                             if (Objects.nonNull(jsonObject)) {
-                                JSONArray arr = jsonObject.getJSONArray("data");
-                                if (Objects.nonNull(arr) && arr.size() != 0) {
-                                    JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                    Double val = jsonObject1.getDouble("val");
-                                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                                JSONObject dataObject = jsonObject.getJSONObject("data");
+                                if (Objects.nonNull(dataObject)) {
+                                    JSONArray arr = dataObject.getJSONArray(column);
+                                    if (Objects.nonNull(arr) && arr.size() != 0) {
+                                        JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
+                                        Double val = jsonObject1.getDouble("val");
+                                        ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                                    }
                                 }
                             }
                         }

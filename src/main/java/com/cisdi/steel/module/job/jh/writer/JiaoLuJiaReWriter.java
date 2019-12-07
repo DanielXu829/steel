@@ -62,8 +62,6 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourEach(date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                // 拿到别名对应的tag点
-                List<String> tagColumns = targetManagementMapper.selectTargetFormulasByTargetNames(columns);
                 // 拼装cellDataList，是直接调用，或者是重写父类AbstractExcelReadWriter 的 mapDataHandler 方法
                 // 主要是取决于获取数据的API所需要的参数
                 int size = dateQueries.size();
@@ -71,7 +69,7 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, tagColumns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         continue;
@@ -92,27 +90,32 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, List<String> tagColumns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
         // 调用父类AbstractExcelReadWriter 的方法，获得queryParam，有需求，可以直接重写
-        Map<String, String> queryParam = this.getQueryParam(dateQuery);
+        //Map<String, String> queryParam = this.getQueryParam(dateQuery);
+        Map<String, String> queryParam = new HashMap<String, String>();
+        queryParam.put("startDate", String.valueOf(dateQuery.getQueryStartTime()));
+        queryParam.put("endDate", String.valueOf(dateQuery.getQueryEndTime()));
         List<CellData> cellDataList = new ArrayList<>();
         if (Objects.nonNull(columns)) {
             int size = columns.size();
             for (int i = 0; i < size; i++) {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
-                    column = ExcelWriterUtil.getMatchTagName(column, tagColumns);
-                    //queryParam.put("tagname", column);
+                    column = targetManagementMapper.selectTargetFormulaByTargetName(column);
                     queryParam.put("tagNames", column);
                     String result = httpUtil.get(url, queryParam);
                     if (StringUtils.isNotBlank(result)) {
                         JSONObject jsonObject = JSONObject.parseObject(result);
                         if (Objects.nonNull(jsonObject)) {
-                            JSONArray arr = jsonObject.getJSONArray("data");
-                            if (Objects.nonNull(arr) && arr.size() !=0) {
-                                JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                Double val = jsonObject1.getDouble("val");
-                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                            JSONObject dataObject = jsonObject.getJSONObject("data");
+                            if (Objects.nonNull(dataObject)) {
+                                JSONArray arr = dataObject.getJSONArray(column);
+                                if (Objects.nonNull(arr) && arr.size() != 0) {
+                                    JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
+                                    Double val = jsonObject1.getDouble("val");
+                                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
+                                }
                             }
                         }
                     }
