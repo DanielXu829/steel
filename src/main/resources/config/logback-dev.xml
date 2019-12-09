@@ -16,11 +16,11 @@
 
     <!-- 格式化输出：%d表示日期。%thread表示线程名。%-5level：级别从左显示5个字符宽度。%L行数 %msg：日志消息。%n是换行符 -->
     <!--<property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%thread] %-5level %c{36} [%L] : %msg%n"/>-->
-    <property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) %-5level %c{20}[%L]: %msg%n"/>
+    <property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) %-5level %c{100}[%L]: %msg%n"/>
     <!-- 文件输出格式 带颜色 主要是用于开发阶段颜色-->
     <!--<property name="COLOR_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %green([%thread]) %highlight(%-5level) %boldMagenta(%c{36} [%L]) : %cyan(%msg%n)"/>-->
     <property name="COLOR_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %boldMagenta(%c{20}[%L]): %cyan(%msg%n)"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %boldMagenta(%c{100}[%L]): %cyan(%msg%n)"/>
 
     <!--参数 end-->
 

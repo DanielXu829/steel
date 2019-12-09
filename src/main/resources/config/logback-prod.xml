@@ -12,7 +12,7 @@
     <!--参数 start-->
     <!--存放路径-->
     <property name="LOG_HOME" value="/u01/steel/logs"/>
-    <property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) %-5level %c{20}[%L]: %msg%n"/>
+    <property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) %-5level %c{100}[%L]: %msg%n"/>
     <!--参数 end-->
 
     <!--输出方式 start-->

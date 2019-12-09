@@ -29,7 +29,7 @@ import java.util.*;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class GxjShenCanWriter extends AbstractExcelReadWriter {
+public class GxjShengChanWriter extends AbstractExcelReadWriter {
 
     @Autowired
     private TargetManagementMapper targetManagementMapper;
