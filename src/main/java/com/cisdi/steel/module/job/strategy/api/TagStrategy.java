@@ -9,8 +9,10 @@ import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -32,9 +34,25 @@ public class TagStrategy extends AbstractApiStrategy {
         return "tag";
     }
 
+    @Autowired
+    private TargetManagementMapper targetManagementMapper;
+
     @Override
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<String> columnCells = PoiCustomUtil.getFirstRowCelVal(sheet);
+
+        // 根据别名获取tag点名
+        for (int i = 0; i < columnCells.size(); i++) {
+            if (columnCells.get(i).startsWith("ZP")) {
+                String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columnCells.get(i));
+                if (StringUtils.isBlank(tagName)) {
+                    columnCells.set(i, "");
+                } else {
+                    columnCells.set(i, tagName);
+                }
+            }
+        }
+
         String version = PoiCustomUtil.getSheetCellVersion(workbook);
         String url = httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
         List<CellData> rowCellDataList = new ArrayList<>();
@@ -47,6 +65,7 @@ public class TagStrategy extends AbstractApiStrategy {
             List<CellData> cellValInfoList = eachData(columnCells, url, eachDate.getQueryParam(), type);
             rowCellDataList.addAll(cellValInfoList);
         }
+
         return SheetRowCellData.builder()
                 .workbook(workbook)
                 .sheet(sheet)
@@ -65,6 +84,7 @@ public class TagStrategy extends AbstractApiStrategy {
         String result = httpUtil.postJsonParams(url, jsonObject.toJSONString());
         JSONObject obj = JSONObject.parseObject(result);
         obj = obj.getJSONObject("data");
+
         List<CellData> resultList = new ArrayList<>();
         for (int columnIndex = 0; columnIndex < cellList.size(); columnIndex++) {
             String cell = cellList.get(columnIndex);
@@ -86,7 +106,7 @@ public class TagStrategy extends AbstractApiStrategy {
                             int rowIndex = 1;
                             for (int j = 0; j < dayEach.size(); j++) {
                                 DateQuery query = dayEach.get(j);
-                                Date recordDate = query.getStartTime();
+                                Date recordDate = query.getEndTime();
                                 for (int i = 0; i < list.length; i++) {
                                     Long tempTime = list[i];
                                     String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
