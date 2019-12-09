@@ -7,6 +7,7 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.a1.doc.GaoLuDocMain2;
 import com.cisdi.steel.module.job.a3.doc.ShaoJieMain2;
 import com.cisdi.steel.module.job.a3.doc.ShaojieDocMain;
+import com.cisdi.steel.module.job.sj.doc.ShaoJieFenXiDocMain;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.BreakType;
@@ -63,6 +64,21 @@ public class DocTest extends SteelApplicationTests {
     public void test7() {
         long start = System.currentTimeMillis();
         shaojieDocMain.mainJob();
+        long end = System.currentTimeMillis();
+
+        System.out.println(end - start);
+    }
+
+
+    /**
+     * 测试“烧结生产分析模板”
+     */
+    @Autowired
+    private ShaoJieFenXiDocMain shaojieFenXiDocMain;
+    @Test
+    public void testShaoJieFenXi() {
+        long start = System.currentTimeMillis();
+        shaojieFenXiDocMain.mainJob();
         long end = System.currentTimeMillis();
 
         System.out.println(end - start);
