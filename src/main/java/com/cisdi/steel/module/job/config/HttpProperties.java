@@ -96,7 +96,7 @@ public class HttpProperties {
             return urlApiJHOne;
         }
 
-        return urlApiGLOne;
+        return urlApiJHOne;
     }
 
     public String getSJUrlVersion(String version) {
