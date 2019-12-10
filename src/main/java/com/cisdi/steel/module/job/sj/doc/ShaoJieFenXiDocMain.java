@@ -12,6 +12,7 @@ import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -44,6 +45,7 @@ public class ShaoJieFenXiDocMain {
      */
     private HashMap<String, Object> result = null;
 
+    @Scheduled(cron = "0 0 6 * * ?")
     public void mainJob() {
         result = new HashMap<>();
         Date date = new Date();
