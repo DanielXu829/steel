@@ -102,7 +102,7 @@ public class BatchDataTests extends SteelApplicationTests {
 
     @Test
     public void test3224() {
-        createTask(JobEnum.jh_zhuyaogycs.getCode(), jobGroup, "0 0 6 * * ? ", "");
+        createTask(JobEnum.gl_bianliaojilu8.getCode(), jobGroup, "0 0/2 * * * ? ", "");
     }
 
     /*
@@ -201,7 +201,7 @@ public class BatchDataTests extends SteelApplicationTests {
         beansOfType.forEach((k, v) -> {
             String name = v.getClass().getPackage().getName();
             // 查找a开头的包里面的类
-            if (name.startsWith("com.cisdi.steel.module.job.a")) {
+            if (name.startsWith("com.cisdi.steel.module.job.gl")) {
                 AbstractExportJob abstractExportJob = (AbstractExportJob) v;
                 SysConfig t = new SysConfig();
                 t.setCode(abstractExportJob.getCurrentJob().getCode());

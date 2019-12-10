@@ -87,19 +87,31 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         if (Objects.nonNull(jsonObject)) {
             JSONArray jsonArray = (JSONArray) jsonObject.get("data");
             if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
-                for (int i = 0; i < jsonArray.size(); i++){
+                for (int i = 0; i < jsonArray.size(); i++) {
                     // 遍历 jsonarray 数组，把每一个对象转成 json 对象
                     JSONObject json = jsonArray.getJSONObject(i);
+                    JSONObject sinterAnaTypesJson = null;
+                    JSONObject pelletsAnaTypesJson = null;
+                    JSONObject lumporeAnaTypesJson = null;
+                    if (Objects.nonNull(json)) {
+                        JSONObject categoriesJson = (JSONObject) json.get("categories");
+                        if (Objects.nonNull(categoriesJson)) {
+                            JSONObject sinterJson = (JSONObject) categoriesJson.get("SINTER");
+                            if (Objects.nonNull(sinterJson)) {
+                                sinterAnaTypesJson = (JSONObject) sinterJson.get("anaTypes");
+                            }
 
-                    JSONObject categoriesJson = (JSONObject) json.get("categories");
-                    JSONObject sinterJson = (JSONObject) categoriesJson.get("SINTER");
-                    JSONObject sinterAnaTypesJson = (JSONObject) sinterJson.get("anaTypes");
+                            JSONObject pelletsJson = (JSONObject) categoriesJson.get("PELLETS");
+                            if (Objects.nonNull(pelletsJson)) {
+                                pelletsAnaTypesJson = (JSONObject) pelletsJson.get("anaTypes");
+                            }
 
-                    JSONObject pelletsJson = (JSONObject) categoriesJson.get("PELLETS");
-                    JSONObject pelletsAnaTypesJson = (JSONObject) pelletsJson.get("anaTypes");
-
-                    JSONObject lumporeJson = (JSONObject) categoriesJson.get("LUMPORE");
-                    JSONObject lumporeAnaTypesJson = (JSONObject) lumporeJson.get("anaTypes");
+                            JSONObject lumporeJson = (JSONObject) categoriesJson.get("LUMPORE");
+                            if (Objects.nonNull(lumporeJson)) {
+                                lumporeAnaTypesJson = (JSONObject) lumporeJson.get("anaTypes");
+                            }
+                        }
+                    }
 
                     if (Objects.nonNull(columns) && !columns.isEmpty()) {
                         int size = columns.size();
@@ -111,49 +123,70 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                                 // 处理模板中sj开头的参数
                                 if ("sj".equals(columnSplit[0])) {
                                     String sjColumn = columnSplit[1];
-                                    JSONObject lpJson = (JSONObject) sinterAnaTypesJson.get("LP");
-                                    JSONObject lcJson = (JSONObject) sinterAnaTypesJson.get("LC");
-                                    JSONObject lgJson = (JSONObject) sinterAnaTypesJson.get("LG");
-                                    Object valueObject = lpJson.get(sjColumn);
-                                    if (Objects.isNull(valueObject)) {
-                                        valueObject = lcJson.get(sjColumn);
-                                        if (Objects.isNull(valueObject)) {
-                                            valueObject = lgJson.get(sjColumn);
+                                    if (Objects.nonNull(sinterAnaTypesJson)) {
+                                        JSONObject lpJson = (JSONObject) sinterAnaTypesJson.get("LP");
+                                        JSONObject lcJson = (JSONObject) sinterAnaTypesJson.get("LC");
+                                        JSONObject lgJson = (JSONObject) sinterAnaTypesJson.get("LG");
+                                        Object valueObject = null;
+                                        if (Objects.nonNull(lpJson)) {
+                                            valueObject = lpJson.get(sjColumn);
                                         }
-                                    }
-                                    if (Objects.nonNull(valueObject)) {
-                                        String value = String.valueOf(valueObject);
-                                        doubleValue = Double.parseDouble(value);
+                                        if (Objects.isNull(valueObject)) {
+                                            if (Objects.nonNull(lcJson)) {
+                                                valueObject = lcJson.get(sjColumn);
+                                                if (Objects.isNull(valueObject)) {
+                                                    if (Objects.nonNull(lgJson)) {
+                                                        valueObject = lgJson.get(sjColumn);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (Objects.nonNull(valueObject)) {
+                                            String value = String.valueOf(valueObject);
+                                            doubleValue = Double.parseDouble(value);
+                                        }
                                     }
                                     // 处理模板中qt开头的参数
                                 } else if ("qt".equals(columnSplit[0])) {
                                     String qtColumn = columnSplit[1];
-                                    JSONObject lcJson = (JSONObject) pelletsAnaTypesJson.get("LC");
-                                    JSONObject lgJson = (JSONObject) pelletsAnaTypesJson.get("LG");
-                                    Object valueObject = lcJson.get(qtColumn);
-                                    if (Objects.isNull(valueObject)) {
-                                        valueObject = lgJson.get(qtColumn);
-                                    }
-                                    if (Objects.nonNull(valueObject)) {
-                                        String value = String.valueOf(valueObject);
-                                        doubleValue = Double.parseDouble(value);
+                                    if (Objects.nonNull(pelletsAnaTypesJson)) {
+                                        JSONObject lcJson = (JSONObject) pelletsAnaTypesJson.get("LC");
+                                        JSONObject lgJson = (JSONObject) pelletsAnaTypesJson.get("LG");
+                                        Object valueObject = lcJson.get(qtColumn);
+                                        if (Objects.isNull(valueObject)) {
+                                            valueObject = lgJson.get(qtColumn);
+                                        }
+                                        if (Objects.nonNull(valueObject)) {
+                                            String value = String.valueOf(valueObject);
+                                            doubleValue = Double.parseDouble(value);
+                                        }
                                     }
                                     // 处理模板中kk开头的参数
                                 } else if ("kk".equals(columnSplit[0])) {
                                     String kkColumn = columnSplit[1];
-                                    JSONObject lpJson = (JSONObject) lumporeAnaTypesJson.get("LP");
-                                    JSONObject lcJson = (JSONObject) lumporeAnaTypesJson.get("LC");
-                                    JSONObject lgJson = (JSONObject) lumporeAnaTypesJson.get("LG");
-                                    Object valueObject = lpJson.get(kkColumn);
-                                    if (Objects.isNull(valueObject)) {
-                                        valueObject = lcJson.get(kkColumn);
-                                        if (Objects.isNull(valueObject)) {
-                                            valueObject = lgJson.get(kkColumn);
+                                    if (Objects.nonNull(lumporeAnaTypesJson)) {
+                                        JSONObject lpJson = (JSONObject) lumporeAnaTypesJson.get("LP");
+                                        JSONObject lcJson = (JSONObject) lumporeAnaTypesJson.get("LC");
+                                        JSONObject lgJson = (JSONObject) lumporeAnaTypesJson.get("LG");
+                                        Object valueObject = null;
+                                        if (Objects.nonNull(lpJson)) {
+                                            valueObject = lpJson.get(kkColumn);
                                         }
-                                    }
-                                    if (Objects.nonNull(valueObject)) {
-                                        String value = String.valueOf(valueObject);
-                                        doubleValue = Double.parseDouble(value);
+                                        if (Objects.isNull(valueObject)) {
+                                            if (Objects.nonNull(lcJson)) {
+                                                valueObject = lcJson.get(kkColumn);
+                                            }
+
+                                            if (Objects.isNull(valueObject)) {
+                                                if (Objects.nonNull(lgJson)) {
+                                                    valueObject = lgJson.get(kkColumn);
+                                                }
+                                            }
+                                        }
+                                        if (Objects.nonNull(valueObject)) {
+                                            String value = String.valueOf(valueObject);
+                                            doubleValue = Double.parseDouble(value);
+                                        }
                                     }
                                 }
                                 ExcelWriterUtil.addCellData(cellDataList, 3 + i, j, doubleValue);
