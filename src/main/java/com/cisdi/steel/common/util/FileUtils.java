@@ -66,6 +66,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
             Files.copy(file.getInputStream(), Paths.get(savePath));
             return localFile;
         } catch (IOException e) {
+            logger.error("上传到临时文件夹失败：" + e.getMessage());
             e.printStackTrace();
             return null;
         }
