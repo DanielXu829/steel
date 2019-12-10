@@ -23,6 +23,7 @@ import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.sys.entity.SysConfig;
 import com.cisdi.steel.module.sys.mapper.SysConfigMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCategoryTemplateMapper, ReportCategoryTemplate> implements ReportCategoryTemplateService {
 
 
@@ -208,6 +210,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
 
             record.setTemplatePath(savePath);
         }
+        log.error("临时目录中不存在该文件：" + record.getTemplatePath());
         this.updateById(record);
         return ApiUtil.success();
     }
