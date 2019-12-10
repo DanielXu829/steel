@@ -77,7 +77,6 @@ public class OkHttpImpl implements HttpUtil {
     public String get(String url, Map<String, String> queries) {
         String responseBody = "";
         StringBuffer sb = new StringBuffer(url);
-        log.error("blair request URL " + url);
         try {
             if (queries != null && queries.keySet().size() > 0) {
                 boolean firstFlag = true;
