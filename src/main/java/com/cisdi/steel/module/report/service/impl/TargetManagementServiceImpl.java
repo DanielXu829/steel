@@ -2,17 +2,14 @@ package com.cisdi.steel.module.report.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
-import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.TargetManagementService;
 import com.cisdi.steel.module.report.util.TargetManagementUtil;
-import org.apache.poi.util.StringUtil;
-import org.omg.CORBA.Object;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -61,18 +58,23 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
         return ApiUtil.success(targetManagements);
     }
 
+    /**
+     * 新增指标数据
+     * @param record 数据
+     * @return
+     */
     @Override
     public ApiResult insertRecord(TargetManagement record) {
-        if (Objects.nonNull(record)) {
+        if (null != record) {
             String targetName = record.getTargetName();
-            if (!StringPool.EMPTY.equals(targetName) && targetName.startsWith("ZP") &&record.getIsLeaf() == 1) {
+            if ((record.getIsLeaf() == 1) && StringUtils.isNotBlank(targetName)) {
                 LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
                 wrapper.eq(TargetManagement::getTargetName, targetName);
                 List<TargetManagement> list = targetManagementMapper.selectList(wrapper);
                 if (Objects.isNull(list) || list.size() < 1) {
                     this.save(record);
                 } else {
-                    return ApiUtil.fail("新增失败，tag别点重复");
+                    return ApiUtil.fail("新增失败，指标名重复");
                 }
             } else {
                 this.save(record);
@@ -84,21 +86,37 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
         return ApiUtil.fail();
     }
 
+    /**
+     * 更新指标数据
+     * @param record 数据
+     * @return
+     */
     @Override
     public ApiResult updateRecord(TargetManagement record) {
-        if (Objects.nonNull(record)) {
+        if (null != record) {
+            // 报错信息
+            String errMsg = null;
+            // 指标名
             String targetName = record.getTargetName();
-            if (!StringPool.EMPTY.equals(targetName) && targetName.startsWith("ZP") &&record.getIsLeaf() == 1) {
+            if ((record.getIsLeaf() == 1) && StringUtils.isNotBlank(targetName)) {
                 LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
                 wrapper.eq(TargetManagement::getTargetName, targetName);
                 List<TargetManagement> list = targetManagementMapper.selectList(wrapper);
-                if (Objects.isNull(list) || list.size() < 1) {
-                    this.updateById(record);
-                } else {
-                    return ApiUtil.fail("更新失败，tag别点重复");
+
+                if(null != list){
+                    Long id = record.getId();
+                    if((list.size() == 1)&&(!id.equals(list.get(0).getId()))){
+                        errMsg = "指标名与其他指标冲突."+id+":"+list.get(0).getId();
+                    }else if (list.size()>1){
+                        errMsg = "指标名存在多个，请清理后重试";
+                    }
                 }
-            } else {
+            }
+
+            if(null == errMsg){
                 this.updateById(record);
+            }else{
+                return ApiUtil.fail(errMsg);
             }
 
             return ApiUtil.success();
