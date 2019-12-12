@@ -101,6 +101,7 @@ public class SaveFileController {
             String body = scanner.hasNext() ? scanner.next() : "";
             JSONObject jsonObj = JsonUtil.jsonToObject(body, JSONObject.class);
             System.out.println("===saveeditedfile:" + jsonObj.get("status"));
+            System.out.println("===saveeditedfile[body]:" + body);
 
             Integer status = (Integer) jsonObj.get("status");
 
