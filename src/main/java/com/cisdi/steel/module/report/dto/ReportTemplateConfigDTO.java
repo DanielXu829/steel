@@ -13,4 +13,5 @@ import java.util.List;
 public class ReportTemplateConfigDTO {
     private ReportTemplateConfig reportTemplateConfig;
     private List<ReportTemplateTags> reportTemplateTags;
+    private String sequenceCode;
 }
