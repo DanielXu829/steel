@@ -23,6 +23,49 @@ import java.util.*;
  */
 public class PoiCustomUtil {
 
+    /**
+     * 删除excel指定行
+     */
+    public static void removeRow(Sheet sheet, int rowIndex) {
+        int lastRowNum=sheet.getLastRowNum();
+        if (rowIndex >= 0 && rowIndex < lastRowNum) {
+            //将行号为rowIndex+1一直到行号为lastRowNum的单元格全部上移一行，以便删除rowIndex行
+            sheet.shiftRows(rowIndex+1, lastRowNum,-1);
+        }
+
+        if (rowIndex == lastRowNum){
+            Row removingRow = sheet.getRow(rowIndex);
+            if(removingRow != null) {
+                sheet.removeRow(removingRow);
+            }
+        }
+    }
+
+    /**
+     * 遍历sheet, 获取第一个指定值的单元格
+     * 例如获取值为"平均"的单元格
+     */
+    public static Cell getCellByValue(Sheet sheet, String keyValue) {
+        int firstRowNum = sheet.getFirstRowNum();
+        int lastRowNum = sheet.getLastRowNum();
+        Cell cell = null;
+        for (int rowNum = firstRowNum; rowNum <= lastRowNum; rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (Objects.isNull(row)) {
+                continue;
+            }
+            short lastCellNum = row.getLastCellNum();
+            for (int colNum = 0; colNum <= lastCellNum; colNum++) {
+                cell = row.getCell(colNum);
+                String value = PoiCellUtil.getCellValue(cell);
+                if (StringUtils.isNotBlank(value) && value.equals(keyValue)) {
+                    return cell;
+                }
+            }
+        }
+
+        return null;
+    }
 
     /**
      * 获取第一行的值
