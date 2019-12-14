@@ -10,10 +10,10 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -27,6 +27,12 @@ import java.util.*;
 @SuppressWarnings("ALL")
 @Slf4j
 public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
+    // 标记行
+    private static int itemRowNum = 3;
+    // 平均值计算起始行
+    private static int beginRowNum = 4;
+    private static int leftCellColumn = 1;
+    private static int rightCellColumn = 28;
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -46,6 +52,7 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         String url = getUrl(version);
         Sheet sheet = workbook.getSheetAt(0);
         List<String> columns = PoiCustomUtil.getRowCelVal(sheet, 3);
+        sheet.getRow(3).setZeroHeight(true);
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet dateSheet = workbook.getSheetAt(i);
@@ -62,8 +69,16 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                         // 获取查询参数
                         Map<String, String> queryParam = getQueryParam(item);
                         String result = httpUtil.get(url, queryParam);
-                        JSONObject jsonObject = JSONObject.parseObject(result);
-                        List<CellData> cellDataList = this.mapDataHandler(jsonObject, columns);
+//                        JSONObject jsonObject = JSONObject.parseObject(result);
+                        JSONArray dataArray = convertJsonStringToJsonArray(result);
+                        int dataArraySize = 0;
+                        if (Objects.nonNull(dataArray)) {
+                            dataArraySize = dataArray.size();
+                        }
+                        // 表格最后一行
+                        int lastRowNum = itemRowNum + dataArraySize;
+                        setBorderStyle(workbook, sheet, lastRowNum);
+                        List<CellData> cellDataList = this.mapDataHandler(dataArray, columns);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -76,16 +91,30 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 将JSON串转换为JSON数组
+     * @param data
+     * @return
+     */
+    private JSONArray convertJsonStringToJsonArray(String data) {
+        JSONArray dataArray = null;
+        if (StringUtils.isNotBlank(data)) {
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            if (Objects.nonNull(jsonObject)) {
+                dataArray = jsonObject.getJSONArray("data");
+            }
+        }
+
+        return dataArray;
+    }
+
+    /**
      * 组装List<CellData>
      * @param jsonObject
      * @param columns
      * @return
      */
-    protected List<CellData> mapDataHandler(JSONObject jsonObject, List<String> columns) {
+    protected List<CellData> mapDataHandler(JSONArray jsonArray, List<String> columns) {
         List<CellData> cellDataList = new ArrayList<>();
-
-        if (Objects.nonNull(jsonObject)) {
-            JSONArray jsonArray = (JSONArray) jsonObject.get("data");
             if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
                 for (int i = 0; i < jsonArray.size(); i++) {
                     // 遍历 jsonarray 数组，把每一个对象转成 json 对象
@@ -93,7 +122,14 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                     JSONObject sinterAnaTypesJson = null;
                     JSONObject pelletsAnaTypesJson = null;
                     JSONObject lumporeAnaTypesJson = null;
+
                     if (Objects.nonNull(json)) {
+                        Long timeValue = json.getLong("clock");
+                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                        String time = sdf.format(new Date(timeValue));
+                        if (StringUtils.isNotBlank(time)) {
+                            ExcelWriterUtil.addCellData(cellDataList, 4 + i, 1, time);
+                        }
                         JSONObject categoriesJson = (JSONObject) json.get("categories");
                         if (Objects.nonNull(categoriesJson)) {
                             JSONObject sinterJson = (JSONObject) categoriesJson.get("SINTER");
@@ -154,7 +190,9 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                                         JSONObject lgJson = (JSONObject) pelletsAnaTypesJson.get("LG");
                                         Object valueObject = lcJson.get(qtColumn);
                                         if (Objects.isNull(valueObject)) {
-                                            valueObject = lgJson.get(qtColumn);
+                                            if (Objects.nonNull(lgJson)) {
+                                                valueObject = lgJson.get(qtColumn);
+                                            }
                                         }
                                         if (Objects.nonNull(valueObject)) {
                                             String value = String.valueOf(valueObject);
@@ -189,15 +227,76 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                                         }
                                     }
                                 }
-                                ExcelWriterUtil.addCellData(cellDataList, 3 + i, j, doubleValue);
+                                ExcelWriterUtil.addCellData(cellDataList, 4 + i, j, doubleValue);
                             }
                         }
                     }
+
                 }
+            }
+
+        return cellDataList;
+    }
+
+    /**
+     *
+     */
+    private void setBorderStyle(Workbook workbook, Sheet sheet, int lastRowNum) {
+        //设置每个单元格的四周边框
+        CellStyle cellNormalStyle = workbook.createCellStyle();
+        cellNormalStyle.setBorderRight(BorderStyle.THIN);
+        cellNormalStyle.setBorderBottom(BorderStyle.THIN);
+        for (int i = beginRowNum; i <= lastRowNum - 1; i++) {
+            for (int j = leftCellColumn; j < rightCellColumn; j++) {
+                Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), j);
+                cell.setCellStyle(cellNormalStyle);
             }
         }
 
-        return cellDataList;
+        // 最左侧列边框
+        CellStyle cellLeftStyle = workbook.createCellStyle();
+        cellLeftStyle.setBorderLeft(BorderStyle.THICK);
+        cellLeftStyle.setBorderBottom(BorderStyle.THIN);
+        cellLeftStyle.setBorderRight(BorderStyle.THIN);
+        for (int i = beginRowNum; i <= lastRowNum; i++) {
+            Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), leftCellColumn);
+            cell.setCellStyle(cellLeftStyle);
+        }
+
+        // 最右侧边框
+        CellStyle cellRightStyle = workbook.createCellStyle();
+        cellRightStyle.setBorderRight(BorderStyle.THICK);
+        cellRightStyle.setBorderBottom(BorderStyle.THIN);
+        for (int i = beginRowNum; i <= lastRowNum; i++) {
+            Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), rightCellColumn);
+            cell.setCellStyle(cellRightStyle);
+        }
+
+        // 最后一行下边框
+        CellStyle cellBottomStyle = workbook.createCellStyle();
+        cellBottomStyle.setBorderBottom(BorderStyle.THICK);
+        cellBottomStyle.setBorderRight(BorderStyle.THIN);
+        Cell cell = null;
+        for (int i = leftCellColumn; i <= rightCellColumn; i++) {
+            cell = ExcelWriterUtil.getCellOrCreate(sheet.getRow(lastRowNum), i);
+            if (i == leftCellColumn) {
+                CellStyle cellBottomLeftStyle = workbook.createCellStyle();
+                cellBottomLeftStyle.setBorderLeft(BorderStyle.THICK);
+                cellBottomLeftStyle.setBorderBottom(BorderStyle.THICK);
+                cellBottomLeftStyle.setBorderRight(BorderStyle.THIN);
+                cell.setCellStyle(cellBottomLeftStyle);
+                continue;
+            }
+            if (i == rightCellColumn) {
+                CellStyle cellBottomRightStyle = workbook.createCellStyle();
+                cellBottomRightStyle.setBorderRight(BorderStyle.THICK);
+                cellBottomRightStyle.setBorderBottom(BorderStyle.THICK);
+                cell.setCellStyle(cellBottomRightStyle);
+                continue;
+            }
+
+            cell.setCellStyle(cellBottomStyle);
+        }
     }
 
     /**
