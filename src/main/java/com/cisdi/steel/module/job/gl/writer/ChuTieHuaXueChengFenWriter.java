@@ -90,10 +90,6 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             int newAverageRowNum = itemRowNum + dataSize + 1;
             resetAverageRow(workbook, sheet, newAverageRowNum );
 
-
-            //设置边框样式
-            setBorderSytle(workbook, sheet, newAverageRowNum);
-
             // 写入数据
             if (itemNameList != null && !itemNameList.isEmpty()) {
                 for (int i = 0; i < itemNameList.size(); i++) {
@@ -119,8 +115,8 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
     /**
      * 设置边框样式
      */
-    private void setBorderSytle(Workbook workbook, Sheet sheet, int newAverageRowNum) {
-        // TODO 设置每个单元格的四周边框 right bottom
+    private void setBorderStyle(Workbook workbook, Sheet sheet, int newAverageRowNum) {
+        //设置每个单元格的四周边框
         CellStyle cellNormalStyle = workbook.createCellStyle();
         cellNormalStyle.setBorderRight(BorderStyle.THIN);
         cellNormalStyle.setBorderBottom(BorderStyle.THIN);
@@ -131,7 +127,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             }
         }
     
-        // 左边框
+        // 最左侧列边框
         CellStyle cellLeftStyle = workbook.createCellStyle();
         cellLeftStyle.setBorderLeft(BorderStyle.THICK);
         cellLeftStyle.setBorderBottom(BorderStyle.THIN);
@@ -141,7 +137,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             cell.setCellStyle(cellLeftStyle);
         }
 
-        // 右边框
+        // 最右侧边框
         CellStyle cellRightStyle = workbook.createCellStyle();
         cellRightStyle.setBorderRight(BorderStyle.THICK);
         cellRightStyle.setBorderBottom(BorderStyle.THIN);
@@ -150,7 +146,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             cell.setCellStyle(cellRightStyle);
         }
 
-        // 下边框
+        // 最后一行下边框
         CellStyle cellBottomStyle = workbook.createCellStyle();
         cellBottomStyle.setBorderBottom(BorderStyle.THICK);
         cellBottomStyle.setBorderRight(BorderStyle.THIN);
@@ -225,6 +221,9 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         CellStyle averageCellStyle = workbook.createCellStyle();
         averageCellStyle.setAlignment(HorizontalAlignment.CENTER);
         avgCell.setCellStyle(averageCellStyle);
+
+        // 设置表格边框样式
+        setBorderStyle(workbook, sheet, newAverageRowNum);
     }
 
     /**
