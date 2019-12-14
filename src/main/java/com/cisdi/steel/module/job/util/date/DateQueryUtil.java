@@ -55,10 +55,9 @@ public class DateQueryUtil {
      *
      * @return 结果
      */
-    public static DateQuery buildTodayDelayTwentyMin(Date date) {
+    public static DateQuery buildTodayNoDelay(Date date) {
         Date todayBeginTime = DateUtil.getDateBeginTime(date);
         Date todayEndTime = DateUtil.getDateEndTime(date);
-        todayEndTime = DateUtil.addMinute(todayEndTime, 20);
         return new DateQuery(todayBeginTime, todayEndTime, date);
     }
 
