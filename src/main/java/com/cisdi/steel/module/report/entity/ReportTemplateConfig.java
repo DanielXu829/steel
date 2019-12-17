@@ -40,6 +40,11 @@ public class ReportTemplateConfig extends Model<ReportTemplateConfig> {
     private String templatePath;
 
     /**
+     * 工序名称
+     */
+    private String sequenceCode;
+
+    /**
      * 时间划分方式
      */
     private Integer timeDivideType;

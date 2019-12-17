@@ -58,4 +58,14 @@ public class ReportTemplateConfigServiceTest extends SteelApplicationTests {
         ReportTemplateConfigDTO dtoById = reportTemplateConfigService.getDTOById(318L);
         System.out.println(dtoById);
     }
+
+    /**
+     * 测试通过报表配置生成模板文件
+     */
+    @Test
+    public void testGenerateTemplate() {
+        ReportTemplateConfigDTO dtoById = reportTemplateConfigService.getDTOById(318L);
+
+        reportTemplateConfigService.generateTemplate(dtoById);
+    }
 }
