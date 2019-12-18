@@ -1,10 +1,6 @@
 package com.cisdi.steel.module.job.gl;
 
-import com.cisdi.steel.module.job.AbstractExportJob;
-import com.cisdi.steel.module.job.IJobExecute;
 import com.cisdi.steel.module.job.enums.JobEnum;
-import com.cisdi.steel.module.job.gl.execute.PengMeiFengKouDaShiExecute;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,18 +11,10 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class PengMeiFengKouDaShi8Job extends AbstractExportJob {
-
-    @Autowired
-    private PengMeiFengKouDaShiExecute pengMeiFengKouDaShiExecute;
+public class PengMeiFengKouDaShi8Job extends AbstractBaseExportJob {
 
     @Override
     public JobEnum getCurrentJob() {
         return JobEnum.gl_pengmeifengkoudashi8;
-    }
-
-    @Override
-    public IJobExecute getCurrentJobExecute() {
-        return pengMeiFengKouDaShiExecute;
     }
 }

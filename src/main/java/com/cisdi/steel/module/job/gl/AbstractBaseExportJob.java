@@ -2,7 +2,6 @@ package com.cisdi.steel.module.job.gl;
 
 import com.cisdi.steel.module.job.AbstractExportJob;
 import com.cisdi.steel.module.job.IJobExecute;
-import com.cisdi.steel.module.job.a1.execute.BaseCommonGlExecute;
 import com.cisdi.steel.module.job.gl.execute.BaseGlExecute;
 import org.springframework.beans.factory.annotation.Autowired;
 
