@@ -107,8 +107,8 @@ public class SaveFileController {
 
             // 获取保存的reportIndex的主键
             String reportId = "";
-            if (request.getParameterMap().containsKey("id")) {
-                reportId = request.getParameter("id");
+            if (request.getParameterMap().containsKey("reportId")) {
+                reportId = request.getParameter("reportId");
 
                 if (reportId != "") {
                     // 当status为2或4，将editStatus改为0

@@ -215,7 +215,7 @@ public class DocumentManager {
         String serverPath = GetServerUrl();
         String hostAddress = CurUserHostAddress(null);
         try {
-            String query = "?type=track&filePath=" + URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8.toString()) + "&userAddress=" + hostAddress + "&id=" + reportId;
+            String query = "?type=track&filePath=" + URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8.toString()) + "&userAddress=" + hostAddress + "&reportId=" + reportId;
             return serverPath + "/onlyoffice/save" + query;
         } catch (UnsupportedEncodingException e) {
             return "";
