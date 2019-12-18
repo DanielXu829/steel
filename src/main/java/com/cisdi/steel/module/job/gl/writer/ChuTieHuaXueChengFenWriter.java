@@ -4,17 +4,20 @@ import cn.afterturn.easypoi.util.PoiMergeCellUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -50,10 +53,6 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        DateQuery date = this.getDateQuery(excelDTO);
-        List<DateQuery> dateQueries = null;
-        int numberOfNames = workbook.getNumberOfSheets();
-
         String version = "8.0";
         try {
             version = PoiCustomUtil.getSheetCellVersion(workbook);
@@ -61,57 +60,62 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             log.error("在模板中获取version失败", e);
         }
 
-        for (int i = 0; i < numberOfNames; i++) {
-            Sheet sheet = workbook.getSheetAt(i);
-            String sheetName = sheet.getSheetName();
-            String[] sheetSplit = sheetName.split("_");
-            if (sheetSplit.length == 4) {
-                //获取时间策略
-               dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-            }
-        }
+        DateQuery date = this.getDateQuery(excelDTO);
+        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+        Date tieLiangEndTime = new Date();
+        Date tieLiangStartTime = DateUtil.addHours(tieLiangEndTime, -24);
+        String tieLiangData = getTieLiangData(tieLiangStartTime, tieLiangEndTime, version);
+        Map<String, Double> tapNoToActWeightMap = handleTieLiangData(tieLiangData);
 
+        //        int numberOfNames = workbook.getNumberOfSheets();
+//        for (int i = 0; i < numberOfNames; i++) {
+//            Sheet sheet = workbook.getSheetAt(i);
+//            String sheetName = sheet.getSheetName();
+//            String[] sheetSplit = sheetName.split("_");
+//            if (sheetSplit.length == 4) {
+//                //获取时间策略
+//               dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+//            }
+//        }
         Sheet sheet = workbook.getSheetAt(0);
         // 将第4行（标记行）隐藏
         sheet.getRow(itemRowNum).setZeroHeight(true);
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
-        for (DateQuery dateQuery : dateQueries) {
             // 通过api获取数据
-            String shengTieData = getData("HM", dateQuery, version);
-            JSONArray shengTieDataArray = convertJsonStringToJsonArray(shengTieData);
-            String luZhaData = getData("SLAG", dateQuery, version);
-            JSONArray luZhaDataArray = convertJsonStringToJsonArray(luZhaData);
-            int shengTieArraySize = 0;
-            int luZhaArraySize = 0;
-            if (Objects.nonNull(shengTieDataArray)) {
-                shengTieArraySize = shengTieDataArray.size();
-            }
-            if (Objects.nonNull(luZhaDataArray)) {
-                luZhaArraySize = shengTieDataArray.size();
-            }
+        String shengTieData = getData("HM", dateQuery, version);
+        JSONArray shengTieDataArray = convertJsonStringToJsonArray(shengTieData);
+        String luZhaData = getData("SLAG", dateQuery, version);
+        JSONArray luZhaDataArray = convertJsonStringToJsonArray(luZhaData);
+        int shengTieArraySize = 0;
+        int luZhaArraySize = 0;
+        if (Objects.nonNull(shengTieDataArray)) {
+            shengTieArraySize = shengTieDataArray.size();
+        }
+        if (Objects.nonNull(luZhaDataArray)) {
+            luZhaArraySize = shengTieDataArray.size();
+        }
 
-            // 获取数据的行数
-            int dataSize = shengTieArraySize >= luZhaArraySize ? shengTieArraySize : luZhaArraySize;
+        // 获取数据的行数
+        int dataSize = shengTieArraySize >= luZhaArraySize ? shengTieArraySize : luZhaArraySize;
 
-            // 重新生成平均值行
-            int newAverageRowNum = itemRowNum + dataSize + 1;
-            resetAverageRow(workbook, sheet, newAverageRowNum );
+        // 重新生成平均值行
+        int newAverageRowNum = itemRowNum + dataSize + 1;
+        resetAverageRow(workbook, sheet, newAverageRowNum);
 
-            // 写入数据
-            if (itemNameList != null && !itemNameList.isEmpty()) {
-                for (int i = 0; i < itemNameList.size(); i++) {
-                    // 执行生铁成分的数据写入
-                    if ("ST_Si".equals(itemNameList.get(i))) {
-                        String shengTiePrefix = "ST_";
-                        List<CellData> cellDataList = mapDataHandler(shengTieDataArray, shengTiePrefix, itemNameList, itemRowNum, i, sheet);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    }
-                    // 执行炉渣成分的数据写入
-                    if ("LZ_SiO2".equals(itemNameList.get(i))) {
-                        String luZhaPrefix = "LZ_";
-                        List<CellData> cellDataList = mapDataHandler(luZhaDataArray, luZhaPrefix, itemNameList, itemRowNum, i, sheet);
-                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                    }
+        // 写入数据
+        if (itemNameList != null && !itemNameList.isEmpty()) {
+            for (int i = 0; i < itemNameList.size(); i++) {
+                // 执行生铁成分的数据写入
+                if ("ST_Si".equals(itemNameList.get(i))) {
+                    String shengTiePrefix = "ST_";
+                    List<CellData> cellDataList = mapDataHandler(shengTieDataArray, shengTiePrefix, itemNameList, itemRowNum, i, sheet, tapNoToActWeightMap);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                }
+                // 执行炉渣成分的数据写入
+                if ("LZ_SiO2".equals(itemNameList.get(i))) {
+                    String luZhaPrefix = "LZ_";
+                    List<CellData> cellDataList = mapDataHandler(luZhaDataArray, luZhaPrefix, itemNameList, itemRowNum, i, sheet, tapNoToActWeightMap);
+                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
         }
@@ -262,9 +266,8 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
      * @param itemColNum
      * @return
      */
-    private List<CellData> mapDataHandler(JSONArray dataArray, String prefix, List<String> itemNameList, Integer itemRowNum, Integer itemColNum, Sheet sheet) {
+    private List<CellData> mapDataHandler(JSONArray dataArray, String prefix, List<String> itemNameList, Integer itemRowNum, Integer itemColNum, Sheet sheet, Map<String, Double> tapNoToActWeightMap) {
         List<CellData> cellDataList = new ArrayList<>();
-
         if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
             int arraySize = dataArray.size();
             for (int i = 0; i < arraySize; i++) {
@@ -281,26 +284,41 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
                             if (StringUtils.isNotBlank(itemName)) {
                                 if (itemName.indexOf(prefix) >= 0) {
                                     String itemNameTrue = itemName.substring(prefix.length());
-                                    Double cellValue = valueObj.getDouble(itemNameTrue);
+                                    Double cellValue;
+                                    if ("R".equals(itemNameTrue)) {
+                                        cellValue = valueObj.getDouble("B2");
+                                    } else if ("R4".equals(itemNameTrue)) {
+                                        cellValue = valueObj.getDouble("B4");
+                                    } else {
+                                        cellValue = valueObj.getDouble(itemNameTrue);
+                                        if (cellValue != null) {
+                                            BigDecimal b1 = new BigDecimal(cellValue.toString());
+                                            BigDecimal value = b1.multiply(new BigDecimal("100"));
+                                            cellValue = value.doubleValue();
+                                        }
+                                    }
                                     // 设置时间
                                     Long timeValue = analysisObj.getLong("clock");
                                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                                     String time = sdf.format(new Date(timeValue));
                                     // 设置铁次
                                     String sampleId = analysisObj.getString("sampleid");
-                                    String[] sample = {};
+                                    String[] tapNoArray = {};
                                     if (StringUtils.isNotBlank(sampleId)) {
-                                        sample = sampleId.split("\\*");
+                                        tapNoArray = sampleId.split("\\*");
                                     }
-                                    String sampleData = null;
-                                    if (sample.length > 0) {
-                                        sampleData = sample[0];
+
+                                    String tapNo = null;
+                                    if (tapNoArray.length > 0) {
+                                        tapNo = tapNoArray[0];
                                     }
+                                    Double actWeight = tapNoToActWeightMap.get(tapNo);
                                     Integer row = itemRowNum + arraySize - i;
                                     Integer col = j;
                                     ExcelWriterUtil.addCellData(cellDataList, row, 1, time);
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, cellValue);
-                                    ExcelWriterUtil.addCellData(cellDataList, row, 2, sampleData);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, 2, tapNo);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, 3, actWeight);
                                     if ("LZ_".equals(prefix)) {
                                         calMgAL(row, sheet);
                                     }
@@ -340,6 +358,33 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         return httpUtil.get(getUrl(version), queryParam);
     }
 
+    private String getTieLiangData(Date tieLiangStartTime, Date tieLiangEndTime, String version) {
+        Map<String, String> queryParam = new HashMap();
+//        Objects.requireNonNull(getQueryStartTime()).toString()
+        queryParam.put("startTime",  Objects.requireNonNull(tieLiangStartTime.getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(tieLiangEndTime.getTime()).toString());
+        queryParam.put("pageSize", "24");
+        return httpUtil.get(getTapUrl(version), queryParam);
+    }
+
+    private Map<String, Double> handleTieLiangData(String data) {
+        Map<String, Double> tapNoToActWeightMap = new HashMap();
+        JSONArray dataArray = convertJsonStringToJsonArray(data);
+        if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
+            int arraySize = dataArray.size();
+            for (int i = 0; i < arraySize; i++) {
+                JSONObject dataObj = dataArray.getJSONObject(i);
+                if (Objects.nonNull(dataObj)) {
+                    String tapNo = dataObj.getString("tapNo");
+                    Double actWeight = dataObj.getDouble("actWeight");
+                    tapNoToActWeightMap.put(tapNo, actWeight);
+                }
+            }
+        }
+
+        return tapNoToActWeightMap;
+    }
+
     /**
      * 获取api的url
      * @param version
@@ -347,5 +392,9 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
      */
     private String getUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/analysisValues/clock";
+    }
+
+    private String getTapUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tap/detail";
     }
 }
