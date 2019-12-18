@@ -1119,9 +1119,9 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
         String newFilePath = null;
         // 判断是否为文件夹
         if (file.isDirectory()) {
-            newFilePath = filePath.substring(0, filePath.lastIndexOf("/")) + "/" + newFileName;
+            newFilePath = filePath.substring(0, filePath.lastIndexOf(File.separator)) + File.separator + newFileName;
         } else {
-            newFilePath = filePath.substring(0, filePath.lastIndexOf("/")) + "/" + newFileName
+            newFilePath = filePath.substring(0, filePath.lastIndexOf(File.separator)) + File.separator + newFileName
                     + filePath.substring(filePath.lastIndexOf("."));
         }
         File newFile = new File(newFilePath);

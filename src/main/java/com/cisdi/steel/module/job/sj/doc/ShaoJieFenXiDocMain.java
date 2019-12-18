@@ -7,8 +7,12 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.enums.SequenceEnum;
+import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +36,9 @@ public class ShaoJieFenXiDocMain {
 
     @Autowired
     private JobProperties jobProperties;
+
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
 
     private String version = "4.0";
 
@@ -91,13 +98,25 @@ public class ShaoJieFenXiDocMain {
         //文档所有日期
         dealDate(result);
         try {
-            String squence = "4烧结";
+            String sequence = "4烧结";
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
-            String fileName = squence + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "烧结生产分析.docx";
+            String fileName = sequence + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + "烧结生产分析.docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
+
+            ReportIndex reportIndex = new ReportIndex();
+            reportIndex.setCreateTime(new Date());
+            reportIndex.setUpdateTime(new Date());
+            reportIndex.setSequence(sequence);
+            reportIndex.setIndexLang("cn_zh");
+            reportIndex.setIndexType("report_day");
+            reportIndex.setRecordDate(new Date());
+            reportIndex.setName(fileName);
+            reportIndex.setReportCategoryCode(JobEnum.sj_shengchanfenxi4.getCode());
+            reportIndex.setPath(filePath);
+            reportIndexMapper.insert(reportIndex);
         } catch (Exception e) {
             log.error("生产烧结生产分析word文档失败", e);
         }
