@@ -25,6 +25,7 @@ CREATE TABLE `report_template_config`  (
   `id` bigint(30) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `template_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '模板的名称',
   `template_path` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '模板生成所在临时路径',
+  `sequence_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '工序编号',
   `time_divide_type` tinyint(4) NULL DEFAULT NULL COMMENT '时间划分方式',
   `start_timeslot` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '开始时间',
   `end_timeslot` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '结束时间',
@@ -32,7 +33,7 @@ CREATE TABLE `report_template_config`  (
   `is_add_avg` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '是否添加平均值',
   `avg_divide_type` tinyint(4) NULL DEFAULT NULL COMMENT '平均值计算方式',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 318 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表动态模板配置' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 346 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '报表动态模板配置' ROW_FORMAT = Compact;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
