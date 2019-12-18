@@ -20,10 +20,9 @@ import java.util.*;
 /**
  * 全部同一个接口 策略
  * <p>email: ypasdf@163.com</p>
- * <p>Copyright: Copyright (c) 2018</p>
- * <P>Date: 2018/11/9 </P>
+ * <p>Copyright: Copyright (c) 2019</p>
+ * <P>Date: 2019/12/16 </P>
  *
- * @author leaf
  * @version 1.0
  */
 @Component
@@ -41,7 +40,7 @@ public class TagStrategy extends AbstractApiStrategy {
     public SheetRowCellData execute(Workbook workbook, Sheet sheet, List<DateQuery> queryList) {
         List<String> columnCells = PoiCustomUtil.getFirstRowCelVal(sheet);
 
-        // 根据别名获取tag点名
+        // 根据别名获取tag点名, 没有查到也留空
         for (int i = 0; i < columnCells.size(); i++) {
             if (columnCells.get(i).startsWith("ZP")) {
                 String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columnCells.get(i));
@@ -60,9 +59,10 @@ public class TagStrategy extends AbstractApiStrategy {
         String sheetName = sheet.getSheetName();
         String[] split = sheetName.split("_");
         String type = split[2];
+        String optionType = split[3];
         for (int rowNum = 0; rowNum < size; rowNum++) {
             DateQuery eachDate = queryList.get(rowNum);
-            List<CellData> cellValInfoList = eachData(columnCells, url, eachDate.getQueryParam(), type);
+            List<CellData> cellValInfoList = eachData(columnCells, url, eachDate.getQueryParam(), type, optionType, rowNum + 1);
             rowCellDataList.addAll(cellValInfoList);
         }
 
@@ -73,7 +73,7 @@ public class TagStrategy extends AbstractApiStrategy {
                 .build();
     }
 
-    private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam, String type) {
+    private List<CellData> eachData(List<String> cellList, String url, Map<String, String> queryParam, String type, String optionType, int writeRow) {
         JSONObject jsonObject = new JSONObject();
         String starttime = queryParam.get("starttime");
         jsonObject.put("starttime", starttime);
@@ -102,40 +102,30 @@ public class TagStrategy extends AbstractApiStrategy {
                     Arrays.sort(list);
                     if (StringUtils.isNotBlank(type)) {
                         if ("day".equals(type)) {
-                            List<DateQuery> dayEach = DateQueryUtil.buildStartAndEndDayHourEach(new Date(Long.valueOf(starttime)), new Date(Long.valueOf(endtime)));
-                            int rowIndex = 1;
-                            for (int j = 0; j < dayEach.size(); j++) {
-                                DateQuery query = dayEach.get(j);
-                                Date recordDate = query.getEndTime();
-                                for (int i = 0; i < list.length; i++) {
-                                    Long tempTime = list[i];
-                                    String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
-                                    Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
-                                    if (date.getTime() == recordDate.getTime()) {
-                                        Object o = data.get(tempTime + "");
-                                        ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
-                                        break;
+                            List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(Long.valueOf(starttime)), new Date(Long.valueOf(endtime)));
+                            if ("all".equals(optionType)) {
+                                int rowIndex = 1;
+                                for (int j = 0; j < dayEach.size(); j++) {
+                                    DateQuery query = dayEach.get(j);
+                                    Date queryStartTime = query.getStartTime();
+                                    Date queryEndTime = query.getEndTime();
+                                    for (int i = 0; i < list.length; i++) {
+                                        Long tempTime = list[i];
+                                        String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                                        Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                                        if (date.after(queryStartTime) && date.before(queryEndTime)) {
+                                            Object o = data.get(tempTime + "");
+                                            ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
+                                            break;
+                                        }
                                     }
+                                     rowIndex += 1;
                                 }
-                                rowIndex += 1;
+                            } else if(optionType.indexOf("hour") > -1) {
+                                handleWriteData(dayEach, list, data, resultList, writeRow, columnIndex);
+                            } else {
+                                handleWriteData(dayEach, list, data, resultList, writeRow, columnIndex);
                             }
-//                            int size = list.length;
-//                            for (int i = 0; i < size; i++) {
-//                                Long key = list[i];
-//                                Date date = new Date(key);
-//                                Calendar calendar = Calendar.getInstance();
-//                                calendar.setTime(date);
-//                                int rowIndex = calendar.get(Calendar.HOUR_OF_DAY);
-//                                if (rowIndex == 0) {
-//                                    if (size > 1 && i == size - 1) {
-//                                        rowIndex = 24;
-//                                    } else {
-//                                        continue;
-//                                    }
-//                                }
-//                                Object o = data.get(key + "");
-//                                ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
-//                            }
                         } else if ("month".equals(type)) {
                             List<DateQuery> dayEach = DateQueryUtil.buildStartAndEndDayEach(new Date(Long.valueOf(starttime)), new Date(Long.valueOf(endtime)));
                             int rowIndex = 1;
@@ -154,15 +144,6 @@ public class TagStrategy extends AbstractApiStrategy {
                                 }
                                 rowIndex += 1;
                             }
-//                            for (Long key : list) {
-//
-//                                Date date = new Date(key);
-//                                Calendar calendar = Calendar.getInstance();
-//                                calendar.setTime(date);
-//                                int rowIndex = calendar.get(Calendar.DATE);
-//                                Object o = data.get(key + "");
-//                                ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
-//                            }
                         }
                     } else {
                         int rowIndex = 1;
@@ -171,10 +152,29 @@ public class TagStrategy extends AbstractApiStrategy {
                             ExcelWriterUtil.addCellData(resultList, rowIndex++, columnIndex, o);
                         }
                     }
-
                 }
             }
         }
+
         return resultList;
     }
+
+    private void handleWriteData(List<DateQuery> dayEach, Long[] list, JSONObject data, List<CellData> resultList, int rowIndex, int columnIndex) {
+        for (int j = 0; j < dayEach.size(); j++) {
+            DateQuery query = dayEach.get(j);
+            Date queryStartTime = query.getStartTime();
+            Date queryEndTime = query.getEndTime();
+            for (int i = 0; i < list.length; i++) {
+                Long tempTime = list[i];
+                String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                if (date.after(queryStartTime) && date.before(queryEndTime)) {
+                    Object o = data.get(tempTime + "");
+                    ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
+                    break;
+                }
+            }
+        }
+    }
+
 }

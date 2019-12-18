@@ -27,10 +27,25 @@ public class DateQueryUtil {
      *
      * @return 结果
      */
+//    public static DateQuery buildToday(Date date) {
+//        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+//        Date todayEndTime = DateUtil.getDateEndTime(date);
+//        todayEndTime = DateUtil.addMinute(todayEndTime, 50);
+//        return new DateQuery(todayBeginTime, todayEndTime, date);
+//    }
+
+    /**
+     * 构建一个当天的开始时间（23:05:00）---结束时间（23:05:00）
+     * 如 时间：2019-12-16 10:00:00
+     * recordDate=2019-12-16 10:00:00, startTime=2019-12-15 23:05:00, endTime=2019-12-16 23:05:00
+     *
+     * @return 结果
+     */
     public static DateQuery buildToday(Date date) {
         Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        todayBeginTime = DateUtil.addMinute(todayBeginTime, -55);
         Date todayEndTime = DateUtil.getDateEndTime(date);
-        todayEndTime = DateUtil.addMinute(todayEndTime, 50);
+        todayEndTime = DateUtil.addMinute(todayEndTime, -55);
         return new DateQuery(todayBeginTime, todayEndTime, date);
     }
 
@@ -121,6 +136,39 @@ public class DateQueryUtil {
         return queryList;
     }
 
+    /**
+     * 构建以传入的开始时间为起点，结束时间为最终点的，间隔为一小时的多个时间段
+     * example:
+     * 传入 (2019-12-15 23:05:00, 2019-12-16 23:05:00)
+     * 结果 23.05 ~ 00.05  00.05 ~ 01.05 ......  21.05 ~ 22.05  22.05 ~ 23.05)
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    public static List<DateQuery> buildDayHourOneEach(Date beginDate, Date endDate) {
+        List<DateQuery> queryList = new ArrayList<>();
+        Date temp = beginDate;
+        Date endTemp = null;
+        DateQuery query = null;
+        while (temp.before(endDate)) {
+            endTemp = DateUtil.addHours(temp, 1);
+            query = new DateQuery(temp, endTemp, temp);
+            queryList.add(query);
+            temp = DateUtil.addHours(temp, 1);
+        }
+
+        return queryList;
+    }
+
+    /**
+     * 构建以传入的开始时间当天的0点为起点，结束时间为最终点的，间隔为一小时的多个时间段
+     * example:
+     * 传入 (2019-12-16 01:00:00, 2019-12-17 00:00:00)
+     * 结果 00.00 ~ 01.00  01.00 ~ 02.00 ......  22.00 ~ 23.00  23.00 ~ 24.00)
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
     public static List<DateQuery> buildStartAndEndDayHourEach(Date start, Date end) {
         Date dateBeginTime = DateUtil.getDateBeginTime(start);
         List<DateQuery> queryList = new ArrayList<>();

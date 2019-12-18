@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>Description: 小时炉况执行处理类 </p>
+ * <p>Description: 变料执行处理类 </p>
  * <p>Copyright: Copyright (c) 2019 </p>
- * <P>Date: 2019/11/13 </P>
+ * <P>Date: 2019/11/14 </P>
  *
  * @version 1.0
  */
