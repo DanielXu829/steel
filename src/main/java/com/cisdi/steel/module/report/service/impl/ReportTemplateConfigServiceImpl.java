@@ -5,6 +5,7 @@ import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
@@ -46,6 +47,8 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     //点位数据占位公式
     private static final String formula = "IF(cell%=\"\",\"\",cell%)";
     private static final String[] letterArray = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+    String avarageFormulaPrefix = "IFERROR(AVERAGE(";
+    String averageFormulaSuffix =  "), \"\")";
 
     @Autowired
     private JobProperties jobProperties;
@@ -136,9 +139,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     tagsMap.put(reportTemplateTags, targetManagement);
                 }
 
-                log.debug("reportTemplateConfig：" + targetManagements.toString());
-                log.debug("targetMaps" + tagsMap.toString());
-
                 String generatedExcelFilePath = generateReportTemplateExcel(reportTemplateConfig, tagsMap);
                 log.debug("生成报表临时模板文件: " + generatedExcelFilePath);
                 return generatedExcelFilePath;
@@ -164,7 +164,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
 
         String tempPath = jobProperties.getTempPath();
         String excelFileName = new StringBuilder().append(tempPath).append(File.separator)
-                .append(reportTemplateConfig.getTemplateName()).append(System.currentTimeMillis()).append(".xlsx").toString();
+                .append(reportTemplateConfig.getTemplateName()).append("_").append(System.currentTimeMillis()).append(".xlsx").toString();
         FileOutputStream fos = new FileOutputStream(excelFileName);
         workbook.write(fos);
         fos.close();
@@ -259,18 +259,15 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             averageCell.setCellValue("平均值");
             averageCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));
 
-            //TODO 添加平均值公式
             for (int j = 0; j < tagsMapSize; j++) {
                 Cell cell = ExcelWriterUtil.getCellOrCreate(summaryRow, firstDataColumnIndex + j);
                 cell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));
-//                String columnLetter = letterArray[j];
-//                String formulaPrefix = "IFERROR(AVERAGE(";
-//                String formulaSuffix =  "), \"\")";
-//                String avgEnd = "";
-//                String avgBegin = "";
-//                String formula = formulaPrefix + avgBegin + ":" + avgEnd + formulaSuffix;
-//                cell.setCellFormula(formula);
-//                cell.setCellType(CellType.FORMULA);
+                String columnLetter = letterArray[firstDataColumnIndex + j];
+                String avgBegin = columnLetter + (firstDataRowIndex + 1);
+                String avgEnd = columnLetter + (firstDataRowIndex + maxRow);
+                String formula = avarageFormulaPrefix + avgBegin + ":" + avgEnd + averageFormulaSuffix;
+                cell.setCellFormula(formula);
+                cell.setCellType(CellType.FORMULA);
             }
         }
 
