@@ -52,7 +52,7 @@ public class ExcelStyleUtil {
     public static CellStyle getHeaderStyle(Workbook workbook) {
         CellStyle style = getBaseCellStyle(workbook);
 
-        Font font = getFont(workbook, FONT_SIZE_TWELVE, false);
+        Font font = getFont(workbook, FONT_SIZE_ELEVEN, false);
         style.setFont(font);
         //设置背景颜色
         XSSFColor color = new XSSFColor(new java.awt.Color(166, 166, 166));

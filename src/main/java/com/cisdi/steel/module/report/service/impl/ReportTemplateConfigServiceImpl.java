@@ -186,7 +186,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         int heightInPoints = 18;//普通行高度
         int heightInPointsHeader = 25;//参数表头行高度
         int heightInPointsTitle = 45;//大标题行高度
-        int cellWidth = 12 * 256;//普通列宽度
+        int cellWidth = 14 * 256;//普通列宽度
         int tagsMapSize = tagsMap.keySet().size();
         //创建第一个sheet
         Sheet firstSheet = workbook.createSheet(firstSheetName);
