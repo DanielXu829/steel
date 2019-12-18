@@ -23,8 +23,14 @@ import com.cisdi.steel.module.report.service.ReportIndexService;
 import com.cisdi.steel.module.report.util.FileNameHandlerUtil;
 import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -287,11 +293,47 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                     sheet.setSelected(false);
                 }
                 workbook.setSheetHidden(i, Workbook.SHEET_STATE_HIDDEN);
+            }else{
+//                sheet.setForceFormulaRecalculation(true);
+                int rowNum = sheet.getLastRowNum();
+                for(int r=0;r<=rowNum;r++){
+                    updateFormula(workbook,sheet,r);
+                }
             }
         }
         workbook.setForceFormulaRecalculation(true);
         workbook.write(fos);
         fos.close();
+    }
+
+    /**
+     * 更新公式
+     * @param workbook
+     * @param sheet
+     * @param row
+     */
+    private static void updateFormula(Workbook workbook,Sheet sheet,int rowNum){
+        Row row=sheet.getRow(rowNum);
+        if(null == row){
+            return;
+        }
+        Cell cell=null;
+        org.apache.poi.ss.usermodel.FormulaEvaluator eval=null;
+        if(workbook instanceof HSSFWorkbook)
+            eval=new HSSFFormulaEvaluator((HSSFWorkbook) workbook);
+        else if(workbook instanceof XSSFWorkbook)
+            eval=new XSSFFormulaEvaluator((XSSFWorkbook) workbook);
+        if(null == eval){
+            return;
+        }
+        for(int i=row.getFirstCellNum();i<row.getLastCellNum();i++){
+            cell=row.getCell(i);
+            if(null == cell){
+                continue;
+            }
+            if(cell.getCellType()==Cell.CELL_TYPE_FORMULA)
+                eval.evaluateFormulaCell(cell);
+        }
     }
 
     /**
