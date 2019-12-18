@@ -6,6 +6,7 @@ import com.cisdi.steel.module.job.dto.MetadataDTO;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,30 @@ public class PoiCustomUtil {
                 sheet.removeRow(removingRow);
             }
         }
+    }
+
+    /**
+     * 移除单元格合并
+     */
+    public static void removeMergedRegion(Sheet sheet, int row, int column) {
+        int sheetMergeCount = sheet.getNumMergedRegions(); //获取所有的单元格
+        int index = 0; //用于保存要移除的那个单元格序号
+        for (int i = 0; i < sheetMergeCount; i++) {
+            CellRangeAddress ca = sheet.getMergedRegion(i); //获取第i个单元格
+            int firstColumn = ca.getFirstColumn();
+            int lastColumn = ca.getLastColumn();
+            int firstRow = ca.getFirstRow();
+            int lastRow = ca.getLastRow();
+            if (row >= firstRow && row <= lastRow)
+            {
+                if (column >= firstColumn && column <= lastColumn)
+                {
+                    index = i;
+                }
+            }
+        }
+
+        sheet.removeMergedRegion(index);//移除合并单元格
     }
 
     /**

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -80,8 +81,14 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             JSONArray shengTieDataArray = convertJsonStringToJsonArray(shengTieData);
             String luZhaData = getData("SLAG", dateQuery, version);
             JSONArray luZhaDataArray = convertJsonStringToJsonArray(luZhaData);
-            int shengTieArraySize = shengTieDataArray.size();
-            int luZhaArraySize = luZhaDataArray.size();
+            int shengTieArraySize = 0;
+            int luZhaArraySize = 0;
+            if (Objects.nonNull(shengTieDataArray)) {
+                shengTieArraySize = shengTieDataArray.size();
+            }
+            if (Objects.nonNull(luZhaDataArray)) {
+                luZhaArraySize = shengTieDataArray.size();
+            }
 
             // 获取数据的行数
             int dataSize = shengTieArraySize >= luZhaArraySize ? shengTieArraySize : luZhaArraySize;
@@ -90,23 +97,19 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             int newAverageRowNum = itemRowNum + dataSize + 1;
             resetAverageRow(workbook, sheet, newAverageRowNum );
 
-
-            //设置边框样式
-            setBorderSytle(workbook, sheet, newAverageRowNum);
-
             // 写入数据
             if (itemNameList != null && !itemNameList.isEmpty()) {
                 for (int i = 0; i < itemNameList.size(); i++) {
                     // 执行生铁成分的数据写入
                     if ("ST_Si".equals(itemNameList.get(i))) {
                         String shengTiePrefix = "ST_";
-                        List<CellData> cellDataList = mapDataHandler(shengTieDataArray, shengTiePrefix, itemNameList, itemRowNum, i);
+                        List<CellData> cellDataList = mapDataHandler(shengTieDataArray, shengTiePrefix, itemNameList, itemRowNum, i, sheet);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                     // 执行炉渣成分的数据写入
                     if ("LZ_SiO2".equals(itemNameList.get(i))) {
                         String luZhaPrefix = "LZ_";
-                        List<CellData> cellDataList = mapDataHandler(luZhaDataArray, luZhaPrefix, itemNameList, itemRowNum, i);
+                        List<CellData> cellDataList = mapDataHandler(luZhaDataArray, luZhaPrefix, itemNameList, itemRowNum, i, sheet);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     }
                 }
@@ -119,8 +122,8 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
     /**
      * 设置边框样式
      */
-    private void setBorderSytle(Workbook workbook, Sheet sheet, int newAverageRowNum) {
-        // TODO 设置每个单元格的四周边框 right bottom
+    private void setBorderStyle(Workbook workbook, Sheet sheet, int newAverageRowNum) {
+        //设置每个单元格的四周边框
         CellStyle cellNormalStyle = workbook.createCellStyle();
         cellNormalStyle.setBorderRight(BorderStyle.THIN);
         cellNormalStyle.setBorderBottom(BorderStyle.THIN);
@@ -131,7 +134,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             }
         }
     
-        // 左边框
+        // 最左侧列边框
         CellStyle cellLeftStyle = workbook.createCellStyle();
         cellLeftStyle.setBorderLeft(BorderStyle.THICK);
         cellLeftStyle.setBorderBottom(BorderStyle.THIN);
@@ -141,7 +144,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             cell.setCellStyle(cellLeftStyle);
         }
 
-        // 右边框
+        // 最右侧边框
         CellStyle cellRightStyle = workbook.createCellStyle();
         cellRightStyle.setBorderRight(BorderStyle.THICK);
         cellRightStyle.setBorderBottom(BorderStyle.THIN);
@@ -150,7 +153,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             cell.setCellStyle(cellRightStyle);
         }
 
-        // 下边框
+        // 最后一行下边框
         CellStyle cellBottomStyle = workbook.createCellStyle();
         cellBottomStyle.setBorderBottom(BorderStyle.THICK);
         cellBottomStyle.setBorderRight(BorderStyle.THIN);
@@ -201,6 +204,9 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         for (int i = 4; i <= 22; i++) {
             row.getCell(i).setCellType(CellType.BLANK);
         }
+        // 清除合并单元格
+        PoiCustomUtil.removeMergedRegion(sheet, averageRowNum, 1);
+        // 删除平均值行
         PoiCustomUtil.removeRow(sheet, averageRowNum);
 
         Row newAverageRow = ExcelWriterUtil.getRowOrCreate(sheet, newAverageRowNum);
@@ -225,6 +231,9 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         CellStyle averageCellStyle = workbook.createCellStyle();
         averageCellStyle.setAlignment(HorizontalAlignment.CENTER);
         avgCell.setCellStyle(averageCellStyle);
+
+        // 设置表格边框样式
+        setBorderStyle(workbook, sheet, newAverageRowNum);
     }
 
     /**
@@ -253,11 +262,11 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
      * @param itemColNum
      * @return
      */
-    private List<CellData> mapDataHandler(JSONArray dataArray, String prefix, List<String> itemNameList, Integer itemRowNum, Integer itemColNum) {
+    private List<CellData> mapDataHandler(JSONArray dataArray, String prefix, List<String> itemNameList, Integer itemRowNum, Integer itemColNum, Sheet sheet) {
         List<CellData> cellDataList = new ArrayList<>();
 
-        int arraySize = dataArray.size();
-        if (Objects.nonNull(dataArray) && arraySize != 0) {
+        if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
+            int arraySize = dataArray.size();
             for (int i = 0; i < arraySize; i++) {
                 JSONObject dataObj = dataArray.getJSONObject(i);
                 if (Objects.nonNull(dataObj)) {
@@ -273,13 +282,28 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
                                 if (itemName.indexOf(prefix) >= 0) {
                                     String itemNameTrue = itemName.substring(prefix.length());
                                     Double cellValue = valueObj.getDouble(itemNameTrue);
+                                    // 设置时间
                                     Long timeValue = analysisObj.getLong("clock");
                                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                                     String time = sdf.format(new Date(timeValue));
+                                    // 设置铁次
+                                    String sampleId = analysisObj.getString("sampleid");
+                                    String[] sample = {};
+                                    if (StringUtils.isNotBlank(sampleId)) {
+                                        sample = sampleId.split("\\*");
+                                    }
+                                    String sampleData = null;
+                                    if (sample.length > 0) {
+                                        sampleData = sample[0];
+                                    }
                                     Integer row = itemRowNum + arraySize - i;
                                     Integer col = j;
                                     ExcelWriterUtil.addCellData(cellDataList, row, 1, time);
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, cellValue);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, 2, sampleData);
+                                    if ("LZ_".equals(prefix)) {
+                                        calMgAL(row, sheet);
+                                    }
                                 }
                             }
                         }
@@ -289,6 +313,17 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         }
 
         return cellDataList;
+    }
+
+    /**
+     * 设置美铝比计算公式
+     */
+    private void calMgAL(int row, Sheet sheet) {
+        String formula = "IFERROR(Q" + (row + 1) + "/" + "R" + (row + 1) + ", \"\")";
+        Row calRow = ExcelWriterUtil.getRowOrCreate(sheet, row);
+        Cell avgCell = ExcelWriterUtil.getCellOrCreate(calRow, 21);
+        avgCell.setCellFormula(formula);
+        avgCell.setCellType(CellType.FORMULA);
     }
 
     /**

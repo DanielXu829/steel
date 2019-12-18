@@ -15,14 +15,14 @@ import java.util.Date;
  * @version 1.0
  */
 @Component
-public class DayTwentyDelayStrategy implements DateStrategy {
+public class DayNoDelayStrategy implements DateStrategy {
     @Override
     public String getKey() {
-        return "daytwo";
+        return "dayno";
     }
 
     @Override
     public DateQuery handlerDate(Date date) {
-        return DateQueryUtil.buildTodayDelayTwentyMin(date);
+        return DateQueryUtil.buildTodayNoDelay(date);
     }
 }
