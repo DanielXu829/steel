@@ -43,9 +43,9 @@ public class DateQueryUtil {
      */
     public static DateQuery buildToday(Date date) {
         Date todayBeginTime = DateUtil.getDateBeginTime(date);
-        todayBeginTime = DateUtil.addMinute(todayBeginTime, -55);
+        todayBeginTime = DateUtil.addMinute(todayBeginTime, -50);
         Date todayEndTime = DateUtil.getDateEndTime(date);
-        todayEndTime = DateUtil.addMinute(todayEndTime, -55);
+        todayEndTime = DateUtil.addMinute(todayEndTime, -50);
         return new DateQuery(todayBeginTime, todayEndTime, date);
     }
 
