@@ -56,27 +56,18 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         String version = "8.0";
         try {
             version = PoiCustomUtil.getSheetCellVersion(workbook);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("在模板中获取version失败", e);
         }
 
         DateQuery date = this.getDateQuery(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+        // 当前时间的前24小时内
         Date tieLiangEndTime = new Date();
         Date tieLiangStartTime = DateUtil.addHours(tieLiangEndTime, -24);
         String tieLiangData = getTieLiangData(tieLiangStartTime, tieLiangEndTime, version);
         Map<String, Double> tapNoToActWeightMap = handleTieLiangData(tieLiangData);
 
-        //        int numberOfNames = workbook.getNumberOfSheets();
-//        for (int i = 0; i < numberOfNames; i++) {
-//            Sheet sheet = workbook.getSheetAt(i);
-//            String sheetName = sheet.getSheetName();
-//            String[] sheetSplit = sheetName.split("_");
-//            if (sheetSplit.length == 4) {
-//                //获取时间策略
-//               dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-//            }
-//        }
         Sheet sheet = workbook.getSheetAt(0);
         // 将第4行（标记行）隐藏
         sheet.getRow(itemRowNum).setZeroHeight(true);
