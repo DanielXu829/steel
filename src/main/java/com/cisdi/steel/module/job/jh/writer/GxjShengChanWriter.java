@@ -143,8 +143,7 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                                 if (Objects.nonNull(dataObject)) {
                                     JSONArray arr = dataObject.getJSONArray(column);
                                     if (Objects.nonNull(arr) && arr.size() != 0) {
-                                        JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                        Double val = jsonObject1.getDouble("val");
+                                        Double val = getLatestNonZeroValue(arr);
                                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                                     }
                                 }

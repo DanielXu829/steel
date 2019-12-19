@@ -271,4 +271,21 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
 
         return cellDataList;
     }
+
+    /**
+     * 获取最后一个非0的数值
+     * @param arr 点位值数组，时间从老到新默认排序
+     * @return
+     */
+    protected Double getLatestNonZeroValue(JSONArray arr) {
+        Double val = null;
+        for (int j = arr.size() - 1; j > 0; j--) {
+            JSONObject jsonObject1 = arr.getJSONObject(j);
+            val = jsonObject1.getDouble("val");
+            if (val != null && val != 0) {
+                break;
+            }
+        }
+        return val;
+    }
 }
