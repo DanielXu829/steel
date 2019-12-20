@@ -233,6 +233,24 @@ public class DateQueryUtil {
     }
 
     /**
+     * 从 前一天18-20、20-22、....0-2、......14-16
+     * @param date
+     * @return
+     */
+    public static List<DateQuery> buildDay2HourFromYesEighteen(Date date) {
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Date dateYestodayEighteen = DateUtil.addHours(dateBeginTime, -6);
+        for (int i = 0; i < 12; i++) {
+            Date previous = DateUtil.addHours(dateYestodayEighteen, 2);
+            queryList.add(new DateQuery(dateYestodayEighteen, previous, dateYestodayEighteen));
+            dateYestodayEighteen = previous;
+        }
+
+        return queryList;
+    }
+
+    /**
      * 构建每4小时时间段
      *
      * @param date 指定时间
