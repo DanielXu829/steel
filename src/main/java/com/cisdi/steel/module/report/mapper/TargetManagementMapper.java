@@ -34,6 +34,13 @@ public interface TargetManagementMapper extends BaseMapper<TargetManagement> {
     String selectTargetFormulaByTargetName(String targetName);
 
     /**
+     * 通过一个别名查询target
+     * @param targetName
+     * @return 别名对应的target对象
+     */
+    TargetManagement selectTargetByTargetName(String targetName);
+
+    /**
      * 模糊查询
      * @param condition
      * @return

@@ -23,7 +23,7 @@ import java.util.*;
 /**
  * <p>Description: 变料执行处理类 </p>
  * <p>Copyright: Copyright (c) 2019 </p>
- * <P>Date: 2019/11/14 </P>
+ * <P>Date: 2019/12/19 </P>
  *
  * @version 1.0
  */
@@ -50,6 +50,9 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
+                DateQuery tmp = dateQueries.get(0);
+                tmp.setStartTime(DateUtil.getDateBeginTime(tmp.getEndTime()));
+                dateQueries.set(0, tmp);
                 // 拿到tag点别名
                 List<String> columnCells = PoiCustomUtil.getFirstRowCelVal(sheet);
                 // 根据别名获取tag点名, 没有查到也留空
@@ -70,18 +73,7 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
                     DateQuery eachDate = dateQueries.get(rowNum);
                     List<CellData> cellDataList = eachData(columnCells, getUrl(version), eachDate.getQueryParam(), rowNum + 1);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                    rowCellDataList.addAll(cellValInfoList);
                 }
-//                for (int j = 0; j < size; j++) {
-//                    DateQuery item = dateQueries.get(j);
-//                    if (item.getRecordDate().before(new Date())) {
-//                        int rowIndex = j + 1;
-//                        List<CellData> cellDataList = this.mapDataHandler(getUrl(version), columnCells, item);
-//                        ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//                    } else {
-//                        break;
-//                    }
-//                }
             }
         }
 
@@ -134,9 +126,7 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
                 for (int i = 0; i < list.length; i++) {
                     Long tempTime = list[i];
                     Date date = new Date(tempTime);
-//                    String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:mm:ss");
-//                    Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
-                    if (date.after(queryStartTime) && date.before(queryEndTime)) {
+                    if ((date.getTime() >= queryStartTime.getTime()) && (date.getTime() <= queryEndTime.getTime())) {
                         doubleValue = data.getDouble(tempTime + "");
                         if (doubleValue > maxDoubleValue) {
                             maxDoubleValue = doubleValue;
@@ -148,9 +138,7 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
                 for (int i = 0; i < list.length; i++) {
                     Long tempTime = list[i];
                     Date date = new Date(tempTime);
-//                    String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
-//                    Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
-                    if (date.after(queryStartTime) && date.before(queryEndTime)) {
+                    if ((date.getTime() >= queryStartTime.getTime()) && (date.getTime() <= queryEndTime.getTime())) {
                         Object o = data.get(tempTime + "");
                         ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, o);
                         break;

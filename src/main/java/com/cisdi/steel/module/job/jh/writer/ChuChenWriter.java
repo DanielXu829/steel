@@ -4,14 +4,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
-import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -21,28 +19,17 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-/**
- * <p>Description: 干熄焦执行处理类 </p>
- * <p>Copyright: Copyright (c) 2019 </p>
- * <P>Date: 2019/11/05 </P>
- *
- * @version 1.0
- */
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class GxjShengChanWriter extends AbstractExcelReadWriter {
-
+public class ChuChenWriter extends AbstractExcelReadWriter {
     @Autowired
     private TargetManagementMapper targetManagementMapper;
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
-        // 调用父类AbstractExcelReadWriter 的方法，获得workbook对象
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        // 调用父类AbstractExcelReadWriter 的方法， 获得DateQuery对象
         DateQuery date = this.getDateQuery(excelDTO);
-        // 获取sheet的数量
         int numberOfSheets = workbook.getNumberOfSheets();
         // 从模板中获取version
         String version ="910.0";
@@ -51,27 +38,36 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
         }catch(Exception e){
             log.error("在模板中获取version失败", e);
         }
-        // 循环所有sheet，操作以下划线开头，并且以下划线分割为4个字符串的sheet
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表 待处理
             String sheetName = sheet.getSheetName();
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
-                // 调用父类AbstractExcelReadWriter 的方法， 获取的对应的时间策略。
                 // 有需求，可以自己组装dateQueries
-                //List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourEach(date.getRecordDate());
-                // 拿到tag点别名
+                List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourFromYesEighteen(date.getRecordDate());
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
-                // 拼装cellDataList，是直接调用，或者是重写父类AbstractExcelReadWriter 的 mapDataHandler 方法
-                // 主要是取决于获取数据的API所需要的参数
+                StringBuffer buffer = new StringBuffer();
+                for (int j = 0; j < columns.size(); j++) {
+                    if (columns.get(j).startsWith("ZP")) {
+                        String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
+                        if (StringUtils.isBlank(tagName)) {
+                            columns.set(j, "");
+                        } else {
+                            columns.set(j, tagName);
+                            buffer = buffer.append(columns.get(j).concat(","));
+                        }
+                    }
+                }
+                String searchParam = buffer.toString();
+                searchParam = searchParam.substring(0, searchParam.length() - 1);
                 int size = dateQueries.size();
+
                 for (int j = 0; j < size; j++) {
                     DateQuery item = dateQueries.get(j);
                     if (item.getRecordDate().before(new Date())) {
                         int rowIndex = j + 1;
-                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), columns, item);
+                        List<CellData> cellDataList = this.mapDataHandler(rowIndex, getUrl(version), searchParam, columns, item);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         continue;
@@ -92,23 +88,19 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    protected List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> columns, DateQuery dateQuery) {
-        // 调用父类AbstractExcelReadWriter 的方法，获得queryParam，有需求，可以直接重写
-        //Map<String, String> queryParam = this.getQueryParam(dateQuery);
+    protected List<CellData> mapDataHandler(Integer rowIndex, String url, String searchParam, List<String> columnCells, DateQuery dateQuery) {
         Map<String, String> queryParam = new HashMap<String, String>();
         queryParam.put("startDate", String.valueOf(dateQuery.getQueryStartTime()));
         queryParam.put("endDate", String.valueOf(dateQuery.getQueryEndTime()));
         List<CellData> cellDataList = new ArrayList<>();
-        if (Objects.nonNull(columns)) {
-            int size = columns.size();
-            for (int i = 0; i < size; i++) {
-                String column = columns.get(i);
+
+        if (Objects.nonNull(columnCells)) {
+            queryParam.put("tagNames", searchParam);
+            String result = httpUtil.get(url, queryParam);
+            result.length();
+            for (int i = 0; i < columnCells.size(); i++) {
+                String column = columnCells.get(i);
                 if (StringUtils.isNotBlank(column)) {
-                    // 获取别名对应的tag点
-                    //column = targetManagementMapper.selectTargetFormulaByTargetName(column);
-                    TargetManagement targetManagement = targetManagementMapper.selectTargetByTargetName(column);
-                    column = targetManagement.getTargetFormula();
-                    Integer scale = targetManagement.getScale();
                     // 可能是处理方法加tag点的组合。 e.g: max,tag1,tag2 需要根据最前面的方式做特殊处理
                     String[] columnSplit = column.split(",");
                     if (Objects.nonNull(columnSplit) && columnSplit.length > 2) {
@@ -119,7 +111,6 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                         for (int k = 1; k < columnSplitSize; k++) {
                             //queryParam.put("tagname", columnSplit[k]);
                             queryParam.put("tagNames", columnSplit[k]);
-                            String result = httpUtil.get(url, queryParam);
                             if (StringUtils.isNotBlank(result)) {
                                 JSONObject jsonObject = JSONObject.parseObject(result);
                                 if (Objects.nonNull(jsonObject)) {
@@ -128,10 +119,6 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                                         JSONArray arr = dataObject.getJSONArray(columnSplit[k]);
                                         if (Objects.nonNull(arr) && arr.size() != 0) {
                                             Double val = getLatestNonZeroValue(arr);
-                                            // 处理小数位
-                                            if (scale != null) {
-                                                val = NumberArithmeticUtils.roundingX(val, scale);
-                                            }
                                             specialValues.add(val);
                                         }
                                     }
@@ -143,7 +130,6 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, executeVal);
                     } else {
                         queryParam.put("tagNames", column);
-                        String result = httpUtil.get(url, queryParam);
                         if (StringUtils.isNotBlank(result)) {
                             JSONObject jsonObject = JSONObject.parseObject(result);
                             if (Objects.nonNull(jsonObject)) {
@@ -152,10 +138,6 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                                     JSONArray arr = dataObject.getJSONArray(column);
                                     if (Objects.nonNull(arr) && arr.size() != 0) {
                                         Double val = getLatestNonZeroValue(arr);
-                                        // 处理小数位
-                                        if (scale != null) {
-                                            val = NumberArithmeticUtils.roundingX(val, scale);
-                                        }
                                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                                     }
                                 }
@@ -168,7 +150,6 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
 
         return cellDataList;
     }
-
     /**
      * 通过tag点拿数据的API，路径可能会改变
      * @param version
@@ -177,5 +158,4 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
     protected String getUrl(String version) {
         return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getNewTagValue";
     }
-
 }

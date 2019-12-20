@@ -1,10 +1,7 @@
 package com.cisdi.steel.job.jh;
 
 import com.cisdi.steel.SteelApplicationTests;
-import com.cisdi.steel.module.job.jh.GxjShengChan5Job;
-import com.cisdi.steel.module.job.jh.GxjShengChan6Job;
-import com.cisdi.steel.module.job.jh.JiaoLuJiaRe10Job;
-import com.cisdi.steel.module.job.jh.JiaoLuJiaRe9Job;
+import com.cisdi.steel.module.job.jh.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,5 +49,21 @@ public class TestJh extends SteelApplicationTests {
     @Test
     public void test4() {
         jiaoLuJiaRe10Job.execute(null);
+    }
+
+    @Autowired
+    private ChuJiaoChuChenJob chuJiaoChuChenJob;
+
+    @Test
+    public void test5() {
+        chuJiaoChuChenJob.execute(null);
+    }
+
+    @Autowired
+    private GxjChuChenJob gxjChuChenJob;
+
+    @Test
+    public void test6() {
+        gxjChuChenJob.execute(null);
     }
 }

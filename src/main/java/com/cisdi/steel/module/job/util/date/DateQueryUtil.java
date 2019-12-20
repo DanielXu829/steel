@@ -43,9 +43,9 @@ public class DateQueryUtil {
      */
     public static DateQuery buildToday(Date date) {
         Date todayBeginTime = DateUtil.getDateBeginTime(date);
-        todayBeginTime = DateUtil.addMinute(todayBeginTime, -55);
+        todayBeginTime = DateUtil.addMinute(todayBeginTime, -50);
         Date todayEndTime = DateUtil.getDateEndTime(date);
-        todayEndTime = DateUtil.addMinute(todayEndTime, -55);
+        todayEndTime = DateUtil.addMinute(todayEndTime, -50);
         return new DateQuery(todayBeginTime, todayEndTime, date);
     }
 
@@ -229,6 +229,24 @@ public class DateQueryUtil {
             queryList.add(new DateQuery(dateBeginTime, previous, dateBeginTime));
             dateBeginTime = previous;
         }
+        return queryList;
+    }
+
+    /**
+     * 从 前一天18-20、20-22、....0-2、......14-16
+     * @param date
+     * @return
+     */
+    public static List<DateQuery> buildDay2HourFromYesEighteen(Date date) {
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Date dateYestodayEighteen = DateUtil.addHours(dateBeginTime, -6);
+        for (int i = 0; i < 12; i++) {
+            Date previous = DateUtil.addHours(dateYestodayEighteen, 2);
+            queryList.add(new DateQuery(dateYestodayEighteen, previous, dateYestodayEighteen));
+            dateYestodayEighteen = previous;
+        }
+
         return queryList;
     }
 
