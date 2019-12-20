@@ -28,6 +28,15 @@
             target_name = #{targetName}
     </select>
 
+    <select id="selectTargetByTargetName" parameterType="String" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
+        SELECT
+           *
+        FROM
+           target_management
+        WHERE
+           target_name = #{targetName}
+    </select>
+
     <select id="selectTargetManagementByCondition" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
         SELECT
             *

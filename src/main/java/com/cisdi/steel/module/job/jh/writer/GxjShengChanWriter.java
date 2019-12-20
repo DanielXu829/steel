@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -103,7 +105,10 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     // 获取别名对应的tag点
-                    column = targetManagementMapper.selectTargetFormulaByTargetName(column);
+                    //column = targetManagementMapper.selectTargetFormulaByTargetName(column);
+                    TargetManagement targetManagement = targetManagementMapper.selectTargetByTargetName(column);
+                    column = targetManagement.getTargetFormula();
+                    Integer scale = targetManagement.getScale();
                     // 可能是处理方法加tag点的组合。 e.g: max,tag1,tag2 需要根据最前面的方式做特殊处理
                     String[] columnSplit = column.split(",");
                     if (Objects.nonNull(columnSplit) && columnSplit.length > 2) {
@@ -122,8 +127,11 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                                     if (Objects.nonNull(dataObject)) {
                                         JSONArray arr = dataObject.getJSONArray(columnSplit[k]);
                                         if (Objects.nonNull(arr) && arr.size() != 0) {
-                                            JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
-                                            Double val = jsonObject1.getDouble("val");
+                                            Double val = getLatestNonZeroValue(arr);
+                                            // 处理小数位
+                                            if (scale != null) {
+                                                val = NumberArithmeticUtils.roundingX(val, scale);
+                                            }
                                             specialValues.add(val);
                                         }
                                     }
@@ -144,6 +152,10 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                                     JSONArray arr = dataObject.getJSONArray(column);
                                     if (Objects.nonNull(arr) && arr.size() != 0) {
                                         Double val = getLatestNonZeroValue(arr);
+                                        // 处理小数位
+                                        if (scale != null) {
+                                            val = NumberArithmeticUtils.roundingX(val, scale);
+                                        }
                                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                                     }
                                 }

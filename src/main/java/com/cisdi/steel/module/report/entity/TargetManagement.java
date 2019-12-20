@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.report.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -72,6 +73,12 @@ public class TargetManagement extends Model<TargetManagement>{
      * 单位
      */
     private String unit;
+
+    /**
+     * 默认小数位
+     */
+    @TableField(value = "scale", strategy = FieldStrategy.IGNORED)
+    private Integer scale;
 
     /**
      * 默认列宽

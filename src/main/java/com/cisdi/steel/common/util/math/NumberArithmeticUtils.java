@@ -278,6 +278,36 @@ public class NumberArithmeticUtils {
         return b.setScale(SCALE, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
+    /**
+     * 四舍五入保留x位小数
+     * @param v  原始值
+     * @param scale  保留x位小数
+     * @return
+     */
+    public static Double roundingX(Double v, int scale )
+    {
+        if (v == null) {
+            v = 0d;
+        }
+        BigDecimal b = new BigDecimal(v);
+        return b.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    /**
+     * 四舍五入保留整数
+     *
+     * @param v
+     * @return
+     */
+    public static Double rounding(Double v)
+    {
+        if (v == null) {
+            v = 0d;
+        }
+        BigDecimal b = new BigDecimal(v);
+        return b.setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
 
     /**
      * 将金额转为大写

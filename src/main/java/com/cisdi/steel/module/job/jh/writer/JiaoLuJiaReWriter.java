@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -102,7 +104,11 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
             for (int i = 0; i < size; i++) {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
-                    column = targetManagementMapper.selectTargetFormulaByTargetName(column);
+                    // 获取别名对应的tag点
+                    //column = targetManagementMapper.selectTargetFormulaByTargetName(column);
+                    TargetManagement targetManagement = targetManagementMapper.selectTargetByTargetName(column);
+                    column = targetManagement.getTargetFormula();
+                    Integer scale = targetManagement.getScale();
                     queryParam.put("tagNames", column);
                     String result = httpUtil.get(url, queryParam);
                     if (StringUtils.isNotBlank(result)) {
@@ -114,6 +120,10 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                                 if (Objects.nonNull(arr) && arr.size() != 0) {
                                     JSONObject jsonObject1 = arr.getJSONObject(arr.size() - 1);
                                     Double val = jsonObject1.getDouble("val");
+                                    // 处理小数位
+                                    if (scale != null) {
+                                        val = NumberArithmeticUtils.roundingX(val, scale);
+                                    }
                                     ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, val);
                                 }
                             }
