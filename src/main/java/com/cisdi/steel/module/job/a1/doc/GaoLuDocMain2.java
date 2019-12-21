@@ -222,7 +222,7 @@ public class GaoLuDocMain2 {
         TAG_NAMES.put(version6,tg6);
     }
 
-    @Scheduled(cron = "0 40 14 * * ?")
+    //@Scheduled(cron = "0 40 14 * * ?")
     public void mainTask() {
         result = new HashMap<>();
         initDateTime();

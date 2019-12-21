@@ -46,7 +46,7 @@ public class ShaojieDocMain {
     private String version4 = "4.0";
     private String version5 = "5.0";
 
-    @Scheduled(cron = "0 40 14 * * ?")
+    //@Scheduled(cron = "0 40 14 * * ?")
     //    @Scheduled(cron = "0 0/1 * * * ?")
     public void mainJob() {
         Date date = new Date();
