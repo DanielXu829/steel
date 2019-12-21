@@ -61,7 +61,8 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 // 调用父类AbstractExcelReadWriter 的方法， 获取的对应的时间策略。
                 // 有需求，可以自己组装dateQueries
                 //List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
-                List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourEach(date.getRecordDate());
+                //List<DateQuery>dateQueries=this.getHandlerData(sheetSplit,date.getRecordDate());
+                List<DateQuery>dateQueries=DateQueryUtil.buildDay2HourFromYesEighteen(date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 // 拼装cellDataList，是直接调用，或者是重写父类AbstractExcelReadWriter 的 mapDataHandler 方法
