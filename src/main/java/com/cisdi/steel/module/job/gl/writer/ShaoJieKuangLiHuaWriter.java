@@ -29,12 +29,12 @@ import java.util.stream.Collectors;
 @SuppressWarnings("ALL")
 @Slf4j
 public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
-    // 标记行
-    private static int itemRowNum = 3;
-    // 平均值计算起始行
-    private static int beginRowNum = 4;
-    private static int leftCellColumn = 1;
-    private static int rightCellColumn = 28;
+    private static int itemRowNum = 3; // 标记行
+    private static int beginRowNum = 4; // 数据填充起始行
+    private static int beginColumnNum = 1; // 数据填充起始列
+    private static int endColumnNum_sj = 17; // 烧结矿理化指标最后一列
+    private static int endColumnNum_qt = 5; // 球团矿理化指标最后一列
+    private static int endColumnNum_kk = 5; // 块矿理化指标最后一列
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -49,57 +49,52 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         DateQuery date = this.getDateQuery(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
 
-        Sheet sheet = workbook.getSheetAt(0);
-        List<String> columns = PoiCustomUtil.getRowCelVal(sheet, 3);
-        sheet.getRow(3).setZeroHeight(true);
+        // 第1个sheet 获取并隐藏标记行
+        Sheet sheetSinter = workbook.getSheetAt(0);
+        List<String> columnsSinter = PoiCustomUtil.getRowCelVal(sheetSinter, 3);
+        sheetSinter.getRow(itemRowNum).setZeroHeight(true);
+
+        // 第2个sheet 获取并隐藏标记行
+        Sheet sheetPellets = workbook.getSheetAt(1);
+        List<String> columnsPellets = PoiCustomUtil.getRowCelVal(sheetPellets, 3);
+        sheetPellets.getRow(itemRowNum).setZeroHeight(true);
+
+        // 第3个sheet 获取并隐藏标记行
+        Sheet sheetLumpore = workbook.getSheetAt(2);
+        List<String> columnsLumpore = PoiCustomUtil.getRowCelVal(sheetLumpore, 3);
+        sheetLumpore.getRow(itemRowNum).setZeroHeight(true);
 
         // 获取API url
-        String sinterData = getData("SINTER", dateQuery, version);
+        String sinterData = getData("S4_SINTER", dateQuery, version); // 烧结矿理化数据
         JSONArray sinterDataArray = convertJsonStringToJsonArray(sinterData);
-        String pelletsData = getData("PELLETS", dateQuery, version);
+        String pelletsData = getData("PELLETS", dateQuery, version); // 球团矿理化数据
         JSONArray pelletsDataArray = convertJsonStringToJsonArray(pelletsData);
-        String lumporeData = getData("LUMPORE", dateQuery, version);
+        String lumporeData = getData("LUMPORE", dateQuery, version);  // 块矿理化数据
         JSONArray lumporeDataArray = convertJsonStringToJsonArray(lumporeData);
-
-        int sinterDataArraySize = 0;
-        int pelletsDataArraySize = 0;
-        int lumporeDataArraySize = 0;
-
-        if (Objects.nonNull(sinterDataArray)) {
-            sinterDataArraySize = sinterDataArray.size();
-        }
-        if (Objects.nonNull(pelletsDataArray)) {
-            pelletsDataArraySize = pelletsDataArray.size();
-        }
-        if (Objects.nonNull(lumporeDataArray)) {
-            lumporeDataArraySize = lumporeDataArray.size();
-        }
 
         Map<Long, Map<String, JSONObject>> clockSinterDataMap = this.convertJsonDataToMap(sinterDataArray);
         Map<Long, Map<String, JSONObject>> clockPelletsDataMap = this.convertJsonDataToMap(pelletsDataArray);
         Map<Long, Map<String, JSONObject>> clockLumporeDataMap = this.convertJsonDataToMap(lumporeDataArray);
 
-        Long[] clockArray = getClock(sinterDataArray);
-        // 表格最后一行
-        int dataArraySize = sinterDataArraySize >= pelletsDataArraySize ? sinterDataArraySize : sinterDataArraySize;
-        dataArraySize = dataArraySize >= lumporeDataArraySize ? dataArraySize : lumporeDataArraySize;
-        int lastRowNum = itemRowNum + clockArray.length;
-        int lastRowNumOld = sheet.getLastRowNum();
-        if (lastRowNum > (lastRowNumOld - 1)) {
-            setBorderStyle(workbook, sheet, lastRowNum);
-        }
+        Long[] clockArraySinter = getClock(sinterDataArray);
+        Long[] clockArrayPellets = getClock(pelletsDataArray);
+        Long[] clockArrayLumpore = getClock(lumporeDataArray);
 
-        List<CellData> cellDataList1 = mapDataHandler1(clockSinterDataMap, columns, clockArray, "sj");
-        List<CellData> cellDataList2 = mapDataHandler1(clockPelletsDataMap, columns, clockArray, "qt");
-        List<CellData> cellDataList3 = mapDataHandler1(clockLumporeDataMap, columns, clockArray, "kk");
-        ExcelWriterUtil.setCellValue(sheet, cellDataList1);
-        ExcelWriterUtil.setCellValue(sheet, cellDataList2);
-        ExcelWriterUtil.setCellValue(sheet, cellDataList3);
+        setCellStyle(workbook, sheetSinter, clockArraySinter, beginRowNum, beginColumnNum, endColumnNum_sj);
+        setCellStyle(workbook, sheetPellets, clockArrayPellets, beginRowNum, beginColumnNum, endColumnNum_qt);
+        setCellStyle(workbook, sheetLumpore, clockArrayLumpore, beginRowNum, beginColumnNum, endColumnNum_kk);
+
+        List<CellData> cellDataListSinter = mapDataHandler(clockSinterDataMap, columnsSinter, clockArraySinter, "sj");
+        List<CellData> cellDataListPellets = mapDataHandler(clockPelletsDataMap, columnsPellets, clockArrayPellets, "qt");
+        List<CellData> cellDataListLumpore = mapDataHandler(clockLumporeDataMap, columnsLumpore, clockArrayLumpore, "kk");
+        ExcelWriterUtil.setCellValue(sheetSinter, cellDataListSinter);
+        ExcelWriterUtil.setCellValue(sheetPellets, cellDataListPellets);
+        ExcelWriterUtil.setCellValue(sheetLumpore, cellDataListLumpore);
 
         return workbook;
     }
 
-    protected List<CellData> mapDataHandler1(Map<Long, Map<String, JSONObject>> clockDataMap, List<String> columns,  Long[] clockArray, String prefix) {
+    protected List<CellData> mapDataHandler(Map<Long, Map<String, JSONObject>> clockDataMap, List<String> columns,  Long[] clockArray, String prefix) {
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < clockArray.length; i++) {
             Long clock = clockArray[i];
@@ -134,12 +129,13 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                                 String value = String.valueOf(valueObject);
                                 doubleValue = Double.parseDouble(value);
                             }
+                            ExcelWriterUtil.addCellData(cellDataList, 4 + i, j, doubleValue);
+                            // 添加时间数据
                             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                             String time = sdf.format(new Date(clock));
                             if (StringUtils.isNotBlank(time)) {
                                 ExcelWriterUtil.addCellData(cellDataList, 4 + i, 1, time);
                             }
-                            ExcelWriterUtil.addCellData(cellDataList, 4 + i, j, doubleValue);
                         }
                     }
                 }
@@ -149,11 +145,20 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-
-    private String getData(String category, DateQuery dateQuery, String version) {
+    /**
+     * 封装查询条件 并访问api获取数据
+     * @param category
+     * @param dateQuery
+     * @param version
+     * @return
+     */
+    protected String getData(String category, DateQuery dateQuery, String version) {
         Map<String, String> queryParam = this.getQueryParam(dateQuery);
         queryParam.put("category", category);
-        queryParam.put("granularity", "hour");
+        if ("PELLETS".equals(category) || "LUMPORE".equals(category)) {
+            queryParam.put("type", "LC");
+        }
+
         return httpUtil.get(getUrl(version), queryParam);
     }
 
@@ -162,7 +167,7 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
      * @param data
      * @return
      */
-    private JSONArray convertJsonStringToJsonArray(String data) {
+    protected JSONArray convertJsonStringToJsonArray(String data) {
         JSONArray dataArray = null;
         if (StringUtils.isNotBlank(data)) {
             JSONObject jsonObject = JSONObject.parseObject(data);
@@ -174,7 +179,12 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         return dataArray;
     }
 
-    private Long[] getClock(JSONArray jsonArray) {
+    /**
+     * 将数据根据时间分组，获取时间戳数组
+     * @param jsonArray
+     * @return
+     */
+    protected Long[] getClock(JSONArray jsonArray) {
         List<Long> clockList = new ArrayList();
 
         if (Objects.nonNull(jsonArray) && jsonArray.size() > 0) {
@@ -184,7 +194,7 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                 if (Objects.isNull(dataObj)) {
                     continue;
                 }
-                JSONObject analysisObj = dataObj.getJSONObject("analysisCharge");
+                JSONObject analysisObj = dataObj.getJSONObject("analysis");
                 if (Objects.isNull(analysisObj)) {
                     continue;
                 }
@@ -201,98 +211,60 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         return clockArray;
     }
 
-    private Map<Long, Map<String, JSONObject>> convertJsonDataToMap(JSONArray jsonArray) {
+    /**
+     * 将Json数组数据存入HashMap中
+     * 结构：clockDataMap(clock, dataMap)  其中dataMap(type, values);  type:LG LC LP
+     * @param jsonArray
+     * @return
+     */
+    protected Map<Long, Map<String, JSONObject>> convertJsonDataToMap(JSONArray jsonArray) {
+        // 获取时间戳作为Map的key
         Long[] clockArray = getClock(jsonArray);
         Map<Long, Map<String, JSONObject>> clockDataMap = new HashMap();
-        int arraySize = jsonArray.size();
-        Map<String, JSONObject> dataMap;
-        for (int i = 0; i < clockArray.length; i++) {
-            dataMap = new HashMap();
-            for (int j = 0; j < arraySize; j++) {
-                JSONObject dataObj = jsonArray.getJSONObject(j);
-                JSONObject analysisObj = dataObj.getJSONObject("analysisCharge");
-                JSONObject valuesObj = dataObj.getJSONObject("values");
-                Long clock = analysisObj.getLong("clock");
-                if (clockArray[i].equals(clock)) {
-                    String type = analysisObj.getString("type");
-                    dataMap.put(type, valuesObj);
+
+        if (Objects.nonNull(clockArray) && clockArray.length > 0) {
+            int arraySize = jsonArray.size();
+            Map<String, JSONObject> dataMap;
+            for (int i = 0; i < clockArray.length; i++) {
+                dataMap = new HashMap();
+                for (int j = 0; j < arraySize; j++) {
+                    JSONObject dataObj = jsonArray.getJSONObject(j);
+                    JSONObject analysisObj = dataObj.getJSONObject("analysis");
+                    JSONObject valuesObj = dataObj.getJSONObject("values");
+                    Long clock = analysisObj.getLong("clock");
+                    if (clockArray[i].equals(clock)) {
+                        String type = analysisObj.getString("type");
+                        dataMap.put(type, valuesObj);
+                    }
                 }
+
+                clockDataMap.put(clockArray[i], dataMap);
             }
-            // clockDataMap(clock, dataMap)  dataMap(type, values); type:LG LC LP
-            clockDataMap.put(clockArray[i], dataMap);
         }
 
         return clockDataMap;
     }
 
     /**
-     *
+     * 如果数据超出原本行数 则需要设置表格边框样式
+     * @param workbook
+     * @param sheet
+     * @param clockArray
      */
-    private void setBorderStyle(Workbook workbook, Sheet sheet, int lastRowNum) {
-        //设置每个单元格的四周边框
-        CellStyle cellNormalStyle = workbook.createCellStyle();
-        cellNormalStyle.setBorderRight(BorderStyle.THIN);
-        cellNormalStyle.setBorderBottom(BorderStyle.THIN);
-        for (int i = beginRowNum; i <= lastRowNum - 1; i++) {
-            for (int j = leftCellColumn; j < rightCellColumn; j++) {
-                Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), j);
-                cell.setCellStyle(cellNormalStyle);
-            }
-        }
-
-        // 最左侧列边框
-        CellStyle cellLeftStyle = workbook.createCellStyle();
-        cellLeftStyle.setBorderLeft(BorderStyle.THICK);
-        cellLeftStyle.setBorderBottom(BorderStyle.THIN);
-        cellLeftStyle.setBorderRight(BorderStyle.THIN);
-        for (int i = beginRowNum; i <= lastRowNum; i++) {
-            Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), leftCellColumn);
-            cell.setCellStyle(cellLeftStyle);
-        }
-
-        // 最右侧边框
-        CellStyle cellRightStyle = workbook.createCellStyle();
-        cellRightStyle.setBorderRight(BorderStyle.THICK);
-        cellRightStyle.setBorderBottom(BorderStyle.THIN);
-        for (int i = beginRowNum; i <= lastRowNum; i++) {
-            Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), rightCellColumn);
-            cell.setCellStyle(cellRightStyle);
-        }
-
-        // 最后一行下边框
-        CellStyle cellBottomStyle = workbook.createCellStyle();
-        cellBottomStyle.setBorderBottom(BorderStyle.THICK);
-        cellBottomStyle.setBorderRight(BorderStyle.THIN);
-        Cell cell = null;
-        for (int i = leftCellColumn; i <= rightCellColumn; i++) {
-            cell = ExcelWriterUtil.getCellOrCreate(sheet.getRow(lastRowNum), i);
-            if (i == leftCellColumn) {
-                CellStyle cellBottomLeftStyle = workbook.createCellStyle();
-                cellBottomLeftStyle.setBorderLeft(BorderStyle.THICK);
-                cellBottomLeftStyle.setBorderBottom(BorderStyle.THICK);
-                cellBottomLeftStyle.setBorderRight(BorderStyle.THIN);
-                cell.setCellStyle(cellBottomLeftStyle);
-                continue;
-            }
-            if (i == rightCellColumn) {
-                CellStyle cellBottomRightStyle = workbook.createCellStyle();
-                cellBottomRightStyle.setBorderRight(BorderStyle.THICK);
-                cellBottomRightStyle.setBorderBottom(BorderStyle.THICK);
-                cell.setCellStyle(cellBottomRightStyle);
-                continue;
-            }
-
-            cell.setCellStyle(cellBottomStyle);
+    private void setCellStyle(Workbook workbook, Sheet sheet, Long[] clockArray, int beginRowNum, int beginColumnNum, int endColumnNum) {
+        int lastRowNum = itemRowNum + clockArray.length;
+        int lastRowNumOld = sheet.getLastRowNum();
+        if (lastRowNum > (lastRowNumOld - 1)) {
+            ExcelWriterUtil.setBorderStyle(workbook, sheet, beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
         }
     }
 
     /**
-     * 组装API url
+     * 根据version获取api端口以及前面一部分路径
      * @param version
      * @return
      */
     protected String getUrl(String version) {
-        // return httpProperties.getGlUrlVersion(version) + "/analysisCharges";
-        return httpProperties.getGlUrlVersion(version) + "/anaChargeValue/byRange";
+        return httpProperties.getGlUrlVersion(version) + "/analysis/byRange";
     }
 }
