@@ -207,7 +207,10 @@ public class BatchDataTests extends SteelApplicationTests {
                 t.setCode(abstractExportJob.getCurrentJob().getCode());
                 t.setName(abstractExportJob.getCurrentJob().getName());
                 t.setAction(v.getClass().getName());
-                sysConfigs.add(t);
+
+                if(t.getCode().equals("gl_shangliaozhuangliao8")) {
+                    sysConfigs.add(t);
+                }
             }
         });
         return sysConfigs;
