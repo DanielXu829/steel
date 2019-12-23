@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /**
  * <p>Description: 烧结矿理化指标处理类 </p>
  * <p>Copyright: Copyright (c) 2019 </p>
- * <P>Date: 2019/11/22 </P>
+ * <P>Date: 2019/12/23 </P>
  *
  * @version 1.0
  */

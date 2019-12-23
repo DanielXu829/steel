@@ -72,7 +72,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         // 将第4行（标记行）隐藏
         sheet.getRow(itemRowNum).setZeroHeight(true);
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
-            // 通过api获取数据
+        // 通过api获取数据
         String shengTieData = getData("HM", dateQuery, version);
         JSONArray shengTieDataArray = convertJsonStringToJsonArray(shengTieData);
         String luZhaData = getData("SLAG", dateQuery, version);
@@ -128,7 +128,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
                 cell.setCellStyle(cellNormalStyle);
             }
         }
-    
+
         // 最左侧列边框
         CellStyle cellLeftStyle = workbook.createCellStyle();
         cellLeftStyle.setBorderLeft(BorderStyle.THICK);
@@ -351,7 +351,6 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
 
     private String getTieLiangData(Date tieLiangStartTime, Date tieLiangEndTime, String version) {
         Map<String, String> queryParam = new HashMap();
-//        Objects.requireNonNull(getQueryStartTime()).toString()
         queryParam.put("startTime",  Objects.requireNonNull(tieLiangStartTime.getTime()).toString());
         queryParam.put("endTime",  Objects.requireNonNull(tieLiangEndTime.getTime()).toString());
         queryParam.put("pageSize", "24");

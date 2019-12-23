@@ -26,6 +26,70 @@ import java.util.*;
 public class ExcelWriterUtil {
 
     /**
+     * 设置表格单元格样式（四周边框加粗）
+     * @param workbook
+     * @param sheet
+     * @param beginRowNum 最上侧边框行
+     * @param endRowNum 最下侧边框行
+     * @param beginColumnNum 最左侧边框行
+     * @param endColumnNum 最右侧边框行
+     */
+    public static void setBorderStyle(Workbook workbook, Sheet sheet, int beginRowNum, int endRowNum, int beginColumnNum, int endColumnNum) {
+        //设置每个单元格的四周边框
+        CellStyle cellNormalStyle = workbook.createCellStyle();
+        cellNormalStyle.setBorderRight(BorderStyle.THIN);
+        cellNormalStyle.setBorderBottom(BorderStyle.THIN);
+        for (int i = beginRowNum; i <= endRowNum - 1; i++) {
+            for (int j = beginColumnNum; j < endColumnNum; j++) {
+                Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), j);
+                cell.setCellStyle(cellNormalStyle);
+            }
+        }
+        // 最左侧列边框
+        CellStyle cellLeftStyle = workbook.createCellStyle();
+        cellLeftStyle.setBorderLeft(BorderStyle.THICK);
+        cellLeftStyle.setBorderBottom(BorderStyle.THIN);
+        cellLeftStyle.setBorderRight(BorderStyle.THIN);
+        for (int i = beginRowNum; i <= endRowNum; i++) {
+            Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), beginColumnNum);
+            cell.setCellStyle(cellLeftStyle);
+        }
+        // 最右侧边框
+        CellStyle cellRightStyle = workbook.createCellStyle();
+        cellRightStyle.setBorderRight(BorderStyle.THICK);
+        cellRightStyle.setBorderBottom(BorderStyle.THIN);
+        for (int i = beginRowNum; i <= endRowNum; i++) {
+            Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), endColumnNum);
+            cell.setCellStyle(cellRightStyle);
+        }
+        // 最后一行下边框
+        CellStyle cellBottomStyle = workbook.createCellStyle();
+        cellBottomStyle.setBorderBottom(BorderStyle.THICK);
+        cellBottomStyle.setBorderRight(BorderStyle.THIN);
+        Cell cell = null;
+        for (int i = beginColumnNum; i <= endColumnNum; i++) {
+            cell = ExcelWriterUtil.getCellOrCreate(sheet.getRow(endRowNum), i);
+            if (i == beginColumnNum) {
+                CellStyle cellBottomLeftStyle = workbook.createCellStyle();
+                cellBottomLeftStyle.setBorderLeft(BorderStyle.THICK);
+                cellBottomLeftStyle.setBorderBottom(BorderStyle.THICK);
+                cellBottomLeftStyle.setBorderRight(BorderStyle.THIN);
+                cell.setCellStyle(cellBottomLeftStyle);
+                continue;
+            }
+            if (i == endColumnNum) {
+                CellStyle cellBottomRightStyle = workbook.createCellStyle();
+                cellBottomRightStyle.setBorderRight(BorderStyle.THICK);
+                cellBottomRightStyle.setBorderBottom(BorderStyle.THICK);
+                cell.setCellStyle(cellBottomRightStyle);
+                continue;
+            }
+
+            cell.setCellStyle(cellBottomStyle);
+        }
+    }
+
+    /**
      * 存放的单元数据
      *
      * @param cellData 集合
