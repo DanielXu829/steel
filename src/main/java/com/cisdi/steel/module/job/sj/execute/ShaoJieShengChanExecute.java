@@ -2,7 +2,7 @@ package com.cisdi.steel.module.job.sj.execute;
 
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
-import com.cisdi.steel.module.job.sj.writer.ShaoJieShengChanPeiDianWriter;
+import com.cisdi.steel.module.job.sj.writer.ShaoJieShengChanWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Component
-public class ShaoJieShengChanPeiDianExecute extends AbstractJobExecuteExecute {
+public class ShaoJieShengChanExecute extends AbstractJobExecuteExecute {
 
     @Autowired
-    public ShaoJieShengChanPeiDianWriter shaoJieShengChanPeiDianWriter;
+    public ShaoJieShengChanWriter shaoJieShengChanWriter;
 
     @Override
     public IExcelReadWriter getCurrentExcelWriter() {
-        return shaoJieShengChanPeiDianWriter;
+        return shaoJieShengChanWriter;
     }
 
 }

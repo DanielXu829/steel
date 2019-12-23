@@ -23,7 +23,7 @@ import java.util.*;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
+public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
 
     @Autowired
     private TargetManagementMapper targetManagementMapper;
@@ -54,13 +54,13 @@ public class ShaoJieShengChanPeiDianWriter extends AbstractExcelReadWriter {
             if (sheetSplit.length == 4) {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 // 根据别名获取tag点名
-                for (int j = 0; i < columns.size(); i++) {
-                    if (columns.get(i).startsWith("ZP")) {
-                        String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(i));
+                for (int j = 0; j < columns.size(); j++) {
+                    if (columns.get(j).startsWith("ZP")) {
+                        String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
                         if (StringUtils.isBlank(tagName)) {
-                            columns.set(i, "");
+                            columns.set(j, "");
                         } else {
-                            columns.set(i, tagName);
+                            columns.set(j, tagName);
                         }
                     }
                 }
