@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -35,7 +36,7 @@ import java.util.Objects;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class ShangLiaoZhuangLiaoWriter extends AbstractExcelReadWriter {
+public class ShangLiaoZhuangLiaoWriter extends BaseShangLiaoBuLiaoWriter {
     // 标记行
     private static int itemRowNum = 2;
     // 数据开始行
@@ -251,16 +252,4 @@ public class ShangLiaoZhuangLiaoWriter extends AbstractExcelReadWriter {
         return chargeNos;
     }
 
-    /**
-     * 获取api的url
-     * @param version
-     * @return url
-     */
-    private String getPrimaryUrl(String version, Integer chargeNo) {
-        return httpProperties.getGlUrlVersion(version) + "/charge/rawdata/" + chargeNo;
-    }
-
-    private String getChargeNoUrl(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/tagValues";
-    }
 }
