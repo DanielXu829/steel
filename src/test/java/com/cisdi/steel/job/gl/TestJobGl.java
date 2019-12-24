@@ -25,6 +25,9 @@ public class TestJobGl extends SteelApplicationTests {
     @Autowired
     private ShangLiaoZhuangLiao8Job shangLiaoZhuangLiao8Job;
 
+    @Autowired
+    private BuLiaoZhiDuBianDongJiZai8Job buLiaoZhiDuBianDongJiZai8Job;
+
     @Test
     public void test1() {
         bianLiaoJiLu8Job.execute(null);
@@ -53,6 +56,11 @@ public class TestJobGl extends SteelApplicationTests {
     @Test
     public void testShangLiaoZhuangLiao8Job() {
         shangLiaoZhuangLiao8Job.execute(null);
+    }
+
+    @Test
+    public void testBuLiaoZhiDuBianDongJiZai8Job() {
+        buLiaoZhiDuBianDongJiZai8Job.execute(null);
     }
 
     @Test

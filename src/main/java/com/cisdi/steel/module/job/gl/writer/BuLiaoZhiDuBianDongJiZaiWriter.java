@@ -18,15 +18,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
- * <p>Description: 上料装料 执行处理类 </p>
+ * <p>Description: 8高炉布料制度变动记载 执行处理类 </p>
  * <p>Copyright: Copyright (c) 2019 </p>
  * <P>Date: 2019/12/23 </P>
  *
@@ -35,10 +30,14 @@ import java.util.Objects;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class ShangLiaoZhuangLiaoWriter extends AbstractExcelReadWriter {
+public class BuLiaoZhiDuBianDongJiZaiWriter extends AbstractExcelReadWriter {
     // 标记行
-    private static int itemRowNum = 2;
-    // 数据开始行
+    private static int itemRowNum = 4;
+
+    // 获取chargeNo tagname
+    private static String tagName = "BF8_L2M_SH_ChargeVariation_evt";
+
+    // 获取
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -52,15 +51,16 @@ public class ShangLiaoZhuangLiaoWriter extends AbstractExcelReadWriter {
 
         Sheet sheet = workbook.getSheetAt(0);
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
-        sheet.getRow(itemRowNum).setZeroHeight(true);//隐藏占位符行
+        //sheet.getRow(itemRowNum).setZeroHeight(true);//TODO 隐藏占位符行
 
         DateQuery date = this.getDateQuery(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
-        List<Integer> chargeNos= handleChargeNoData(dateQuery, version);
+        List<Map<String, Object>> chargeNos= handleChargeNoData(dateQuery, version, tagName);
 
         int count = 0;
         for (int i = 0; i < chargeNos.size(); i++) {
-            Integer chargeNo = chargeNos.get(i);
+            Integer chargeNo = Integer.parseInt(chargeNos.get(i).get("val").toString());
+
             // 通过api获取数据
             String chargeRawDataStr = getChargeRawData(version, chargeNo);
 
@@ -229,25 +229,26 @@ public class ShangLiaoZhuangLiaoWriter extends AbstractExcelReadWriter {
      * @param data
      * @return
      */
-    private List<Integer> handleChargeNoData(DateQuery query, String version) {
+    private List<Map<String, Object>> handleChargeNoData(DateQuery query, String version, String tagName) {
         Map<String, String> queryParam = new HashMap();
         queryParam.put("starttime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
         queryParam.put("endtime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
-        queryParam.put("tagname", "BF8_L2M_AnaChargeEnd_evt");
+        queryParam.put("tagname", tagName);
         String chargeNoData = httpUtil.get(getChargeNoUrl(version), queryParam);
 
-        List<Integer> chargeNos = new ArrayList<Integer>();
+        List<Map<String, Object>> chargeNos = new ArrayList<Map<String, Object>>();
         JSONArray dataArray = FastJSONUtil.convertJsonStringToJsonArray(chargeNoData);
         if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
             for (int i = 0; i < dataArray.size(); i++) {
                 JSONObject dataObj = dataArray.getJSONObject(i);
                 if (Objects.nonNull(dataObj) && StringUtils.isNotBlank(dataObj.getString("val"))) {
-                    chargeNos.add(dataObj.getInteger("val"));
+                    Map<String, Object> innerMap = dataObj.getInnerMap();
+                    chargeNos.add(innerMap);
                 }
             }
         }
-        // 排序
-        chargeNos.sort(Integer::compareTo);
+        // TODO 排序
+        // chargeNos.sort(COma);
         return chargeNos;
     }
 
