@@ -1,9 +1,6 @@
 package com.cisdi.steel.module.job.gl.writer;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
-import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.ChargeDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
@@ -11,11 +8,9 @@ import com.cisdi.steel.dto.response.gl.res.BatchData;
 import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
 import com.cisdi.steel.dto.response.gl.res.BatchMaterial;
 import com.cisdi.steel.dto.response.gl.res.TagValue;
-import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
-import com.cisdi.steel.module.job.util.FastJSONUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +20,11 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -161,11 +160,18 @@ public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseShangLiaoBuLiaoWriter {
                             break;
                         }
                         case "materials.brandcode" : {
-                            //c中：materials.brandcode后缀是COKE
-                            BatchMaterial batchMaterial = cMaterials.stream()
+                            //c中：materials.brandcode后缀是COKE + 第一个O中的“回用焦丁”
+                            BigDecimal coke = cMaterials.stream()
                                     .filter(p -> StringUtils.endsWith(p.getBrandcode(),"COKE"))
-                                    .collect(Collectors.toList()).get(0);
-                            ExcelWriterUtil.addCellData(cellDataList, row, col, batchMaterial.getWeightset());
+                                    .collect(Collectors.toList()).get(0).getWeightset();
+                            // 获取第一个o中的“回用焦丁”
+                            BigDecimal huiYongJiaoDing = o1Materials.stream()
+                                    .filter(p -> "回用焦丁".equals(p.getDescr()))
+                                    .collect(Collectors.toList()).get(0).getWeightset();
+
+                            double jiaoDing = coke.add(huiYongJiaoDing).doubleValue();
+
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, jiaoDing);
                             break;
                         }
                         case "矿石总量" : {
@@ -207,6 +213,7 @@ public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseShangLiaoBuLiaoWriter {
     }
 
     private String getRoundact(List<BatchDistribution> distributions) {
+        //排序, 按position倒序
         distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
         //过滤weightact不为0的值
         List<BatchDistribution> collect = distributions.stream()
