@@ -45,7 +45,7 @@ public class OkHttpImpl implements HttpUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        log.debug("GET请求URL:" + sb.toString());
+        log.debug("GET请求URL:" + sb.toString());
         Request request = new Request.Builder()
                 .url(sb.toString())
                 .build();
@@ -94,7 +94,7 @@ public class OkHttpImpl implements HttpUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        log.debug("GET请求URL:" + sb.toString());
+        log.debug("GET请求URL:" + sb.toString());
         Request request = new Request.Builder()
                 .url(sb.toString())
                 .build();
@@ -212,8 +212,8 @@ public class OkHttpImpl implements HttpUtil {
     @Override
     public String postJsonParams(String url, String jsonParams) {
         String responseBody = "";
-//        log.debug("POST请求URL：" + url);
-//        log.debug("POST请求参数：" + jsonParams);
+        log.debug("POST请求URL：" + url);
+        log.debug("POST请求参数：" + jsonParams);
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParams);
         Request request = new Request.Builder()
                 .url(url)

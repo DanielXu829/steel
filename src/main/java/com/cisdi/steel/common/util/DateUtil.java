@@ -6,9 +6,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 /**
  * <p>Description:  操作时间的工具类 </p>
@@ -88,6 +86,11 @@ public class DateUtil {
      * 几年几月几日 小时分钟
      */
     public static final String yyyyMMddHHmm = "yyyy-MM-dd HH:mm";
+
+    /**
+     * 几年几月
+     */
+    public static final String yyyyMM = "yyyy年MM月";
     /**
      * 星期
      */
@@ -860,5 +863,26 @@ public class DateUtil {
         calendar.set(Calendar.SECOND, second);
 
         return calendar.getTime();
+    }
+
+    /**
+     * 获取当月从1号开始到当前日期，每一天的开始时间00:00:00,
+     * @param date
+     * @return
+     */
+    public static List<Date> getAllDayBeginTimeInCurrentMonth(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+
+        List<Date> dates = new ArrayList<Date>();
+        // 循环遍历每一个
+        for (int i = 1; i <= dayOfMonth; i++) {
+            Calendar day = Calendar.getInstance();
+            day.set(Calendar.DAY_OF_MONTH, i);
+            dates.add(day.getTime());
+        }
+
+        return dates;
     }
 }

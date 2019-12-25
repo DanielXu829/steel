@@ -4,14 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.ChargeDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
+import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
 import com.cisdi.steel.dto.response.gl.res.TagValue;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class BaseShangLiaoBuLiaoWriter extends AbstractExcelReadWriter {
 
@@ -50,6 +49,32 @@ public abstract class BaseShangLiaoBuLiaoWriter extends AbstractExcelReadWriter 
             tagValueListDTO.getData().sort(Comparator.comparing(TagValue::getVal));
         }
         return tagValueListDTO;
+    }
+
+    protected String getRoundact(List<BatchDistribution> distributions) {
+        //排序, 按position倒序
+        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
+        //过滤weightact不为0的值
+        List<BatchDistribution> collect = distributions.stream()
+                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .collect(Collectors.toList());
+        // 拼接roundset
+        return collect.stream()
+                .map(p -> String.valueOf(p.getRoundact()))
+                .collect(Collectors.joining(""));
+    }
+
+    protected String getPosition(List<BatchDistribution> distributions) {
+        //排序, 按position倒序
+        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
+        //过滤weightact不为0的值
+        List<BatchDistribution> collect = distributions.stream()
+                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .collect(Collectors.toList());
+        // 拼接position
+        return collect.stream()
+                .map(p -> String.valueOf(p.getPosition()))
+                .collect(Collectors.joining(""));
     }
 
     /**

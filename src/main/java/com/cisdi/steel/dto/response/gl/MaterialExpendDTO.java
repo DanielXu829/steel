@@ -6,6 +6,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class materialExpendDTO {
+public class MaterialExpendDTO {
     private List<MaterialExpend> data;
 }
