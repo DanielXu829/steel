@@ -50,6 +50,34 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建某个时间的前后一分钟
+     * 如 时间：2019-12-16 10:02:13
+     * recordDate=2019-12-16 10:02:13, startTime=2019-12-16 10:01:13, endTime=2019-12-16 10:03:13
+     *
+     * @return 结果
+     */
+    public static DateQuery buildBeforeAfter1Minute(Date date) {
+        Date before1MinuteTime = DateUtil.addMinute(date, -1);
+        Date todayEndTime = DateUtil.addMinute(date, 1);
+        return new DateQuery(before1MinuteTime, todayEndTime, date);
+    }
+
+    /**
+     * 构建某个时间的不含秒时间
+     * 如 时间：2019-12-16 10:02:13
+     * recordDate=2019-12-16 10:02:13, startTime=2019-12-16 10:02:00, endTime=2019-12-16 10:02:00
+     *
+     * @return 结果
+     */
+    public static DateQuery buildDateWithoutSeconds(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return new DateQuery(cal.getTime(), cal.getTime(), date);
+    }
+
+    /**
      * 构建一个当天的 开始 时间---结束时间，延迟到第二天5分钟
      * 如 时间：2018-12-20 10:32:55
      * recordDate=2018-12-20 10:32:55,startTime=2018-12-20 00:00:00,endTime=2018-12-21 00:00:00

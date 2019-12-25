@@ -5,6 +5,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.dto.response.gl.ChargeDTO;
+import com.cisdi.steel.dto.response.gl.TagValueListDTO;
+import com.cisdi.steel.dto.response.gl.res.BatchData;
+import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
+import com.cisdi.steel.dto.response.gl.res.BatchMaterial;
+import com.cisdi.steel.dto.response.gl.res.TagValue;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -18,7 +24,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>Description: 8高炉布料制度变动记载 执行处理类 </p>
@@ -30,14 +38,18 @@ import java.util.*;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class BuLiaoZhiDuBianDongJiZaiWriter extends AbstractExcelReadWriter {
+public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseShangLiaoBuLiaoWriter {
     // 标记行
     private static int itemRowNum = 4;
 
     // 获取chargeNo tagname
     private static String tagName = "BF8_L2M_SH_ChargeVariation_evt";
 
-    // 获取
+    // 批次tagname
+    private static String piCiTagName = "BF8_L2M_SH_L1ChargeVarNo_evt";
+
+    // 基准尺 tagName
+    private static String jiZhunChiTagName = "BF8_L2C_TP_MainSetLine_1m_cur";
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -51,217 +63,172 @@ public class BuLiaoZhiDuBianDongJiZaiWriter extends AbstractExcelReadWriter {
 
         Sheet sheet = workbook.getSheetAt(0);
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
-        //sheet.getRow(itemRowNum).setZeroHeight(true);//TODO 隐藏占位符行
+        sheet.getRow(itemRowNum).setZeroHeight(true);//隐藏占位符行
 
         DateQuery date = this.getDateQuery(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
-        List<Map<String, Object>> chargeNos= handleChargeNoData(dateQuery, version, tagName);
+        TagValueListDTO tagValueListDTO = getTagValueListDTO(dateQuery, version, tagName);
 
         int count = 0;
-        for (int i = 0; i < chargeNos.size(); i++) {
-            Integer chargeNo = Integer.parseInt(chargeNos.get(i).get("val").toString());
+        for (int i = 0; i < tagValueListDTO.getData().size(); i++) {
+            TagValue tagValue = tagValueListDTO.getData().get(i);
+            BigDecimal chargeNo = tagValue.getVal();
+            Date clock = tagValue.getClock();
 
-            // 通过api获取数据
-            String chargeRawDataStr = getChargeRawData(version, chargeNo);
+            // 通过api获取chargeDTO数据
+            ChargeDTO chargeDTO = getChargeDTO(version, chargeNo.intValue());
 
-            JSONArray shangLiaoDataArray = FastJSONUtil.convertJsonStringToJsonArray(chargeRawDataStr);
-            if (CollectionUtils.isNotEmpty(shangLiaoDataArray)) {
+            if (Objects.nonNull(chargeDTO)) {
                 // 写入数据
-                List<CellData> cellDataList = mapDataHandler(shangLiaoDataArray, itemNameList, sheet, count);
+                List<CellData> cellDataList = mapDataHandler(chargeDTO, itemNameList, sheet, count, clock, version);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                count = count + shangLiaoDataArray.size();
+                count = count + 2;
             }
         }
 
-        //设置动态边框样式
-        int beginRowNum = itemRowNum + 1;
-        int lastRowNum = itemRowNum + count;
-        int beginColumnNum = 1;
-        int endColumnNum = itemNameList.size() + beginColumnNum - 2;
-        ExcelWriterUtil.setBorderStyle(workbook, sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+        // TODO 设置动态边框样式
+//        int beginRowNum = itemRowNum + 1;
+//        int lastRowNum = sheet.getLastRowNum();
+//        int beginColumnNum = 1;
+//        int endColumnNum = itemNameList.size() + beginColumnNum - 2;
+//        ExcelWriterUtil.setBorderStyle(workbook, sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+
+        // TODO 动态创建、合并单元格。
 
         return workbook;
     }
 
-    /**
-     * 解析JSON数组，封装写入数据
-     * @param data
-     * @param prefix
-     * @param itemNameList
-     * @param itemRowNum
-     * @param itemColNum
-     * @return
-     */
-    private List<CellData> mapDataHandler(JSONArray dataArray, List<String> itemNameList, Sheet sheet, Integer count) {
+    private List<CellData> mapDataHandler(ChargeDTO chargeDTO, List<String> itemNameList, Sheet sheet, int count, Date clock, String version) {
+        List<BatchData> data = chargeDTO.getData();
         List<CellData> cellDataList = new ArrayList<>();
-        for (int i = 0; i < dataArray.size(); i++) {
-            JSONObject dataObj = dataArray.getJSONObject(i);
-            if (Objects.nonNull(dataObj)) {
-                JSONObject batchIndexObj = dataObj.getJSONObject("batchIndex");
-                JSONArray materialsArray = dataObj.getJSONArray("materials");
-                Map<String, Object> batchIndexDataMap = batchIndexObj.getInnerMap();
-                int sequence = count + i + 1;
-                int row = sequence + itemRowNum;
-                // 遍历标记行所有的单元格
-                for (int j = 0; j < itemNameList.size(); j++) {
-                    // 获取标记项单元格中的值
-                    String itemName = itemNameList.get(j);
-                    int col = j;
-                    if (StringUtils.isNotBlank(itemName)) {
-                        switch (itemName) {
-                            case "sequence": {
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, sequence);
-                                break;
+        if (CollectionUtils.isNotEmpty(data)) {
+            List<BatchMaterial> cMaterials = data.get(0).getMaterials();
+            List<BatchMaterial> o1Materials = data.get(1).getMaterials();
+            List<BatchMaterial> o2Materials = data.get(2).getMaterials();
+
+            List<BatchDistribution> cDistributions = data.get(0).getDistributions();
+            List<BatchDistribution> o1Distributions = data.get(1).getDistributions();
+            List<BatchDistribution> o2Distributions = data.get(2).getDistributions();
+
+            int row = 1 + count + itemRowNum;
+            // 遍历标记行所有的单元格
+            for (int j = 0; j < itemNameList.size(); j++) {
+                // 获取标记项单元格中的值
+                String itemName = itemNameList.get(j);
+                int col = j;
+                if (StringUtils.isNotBlank(itemName)) {
+                    switch (itemName) {
+                        case "批次": {
+                            //批次：BF8_L2M_SH_L1ChargeVarNo_evt+触发点前后一分钟（触发点返回值得clock前后一分钟）
+                            DateQuery dateQuery = DateQueryUtil.buildBeforeAfter1Minute(clock);
+                            TagValueListDTO tagValueListDTO = this.getTagValueListDTO(dateQuery, version, piCiTagName);
+                            if (CollectionUtils.isNotEmpty(tagValueListDTO.getData())) {
+                                BigDecimal val = tagValueListDTO.getData().get(0).getVal();
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
-                            case "batchIndex.weighttime": {
-                                Long weightTimeInMs = (Long) batchIndexDataMap.get("weighttime");
-                                Date weightTime = new Date();
-                                weightTime.setTime(weightTimeInMs);
-                                String formatWeightTime = DateUtil.getFormatDateTime(weightTime, DateUtil.hhmmFormat);
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, formatWeightTime);
-                                break;
+                            break;
+                        }
+                        case "C":
+                        case "O":
+                        case "L":
+                        case "S": {
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, itemName);
+                            break;
+                        }
+                        case "N/A": {
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, "");
+                            break;
+                        }
+                        case "c.position": {
+                            String roundact = getRoundact(cDistributions);
+                            String position = getPosition(cDistributions);
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, position);
+                            ExcelWriterUtil.addCellData(cellDataList, row + 1, col, roundact);
+                            break;
+                        }
+                        case "o1.position": {
+                            String roundact = getRoundact(o1Distributions);
+                            String position = getPosition(o1Distributions);
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, position);
+                            ExcelWriterUtil.addCellData(cellDataList, row + 1, col, roundact);
+                            break;
+                        }
+                        case "o2.position": {
+                            String roundact = getRoundact(o2Distributions);
+                            String position = getPosition(o2Distributions);
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, position);
+                            ExcelWriterUtil.addCellData(cellDataList, row + 1, col, roundact);
+                            break;
+                        }
+                        case "materials.brandcode" : {
+                            //c中：materials.brandcode后缀是COKE
+                            BatchMaterial batchMaterial = cMaterials.stream()
+                                    .filter(p -> StringUtils.endsWith(p.getBrandcode(),"COKE"))
+                                    .collect(Collectors.toList()).get(0);
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, batchMaterial.getWeightset());
+                            break;
+                        }
+                        case "矿石总量" : {
+                            //本次o之和 - 回用焦丁
+                            BigDecimal kuangShiZongLiang = o1Materials.stream()
+                                    .filter(p -> !"回用焦丁".equals(p.getDescr()))
+                                    .map(BatchMaterial::getWeightset)
+                                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, kuangShiZongLiang.doubleValue());
+                            break;
+                        }
+                        case "小烧" : {
+                            //第二个o中：materials.brandcode后缀是SINTER
+                            BatchMaterial batchMaterial = o2Materials.stream()
+                                    .filter(p -> StringUtils.endsWith(p.getBrandcode(),"SINTER"))
+                                    .collect(Collectors.toList()).get(0);
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, batchMaterial.getWeightset());
+                            break;
+                        }
+                        case "基准尺": {
+                            //基准尺：BF8_L2C_TP_MainSetLine_1m_cur++触发点clock选取分钟，不含秒，starttime和endtime保持一致
+                            DateQuery dateQuery = DateQueryUtil.buildDateWithoutSeconds(clock);
+                            TagValueListDTO tagValueListDTO = this.getTagValueListDTO(dateQuery, version, jiZhunChiTagName);
+                            if (CollectionUtils.isNotEmpty(tagValueListDTO.getData())) {
+                                BigDecimal val = tagValueListDTO.getData().get(0).getVal();
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
-                            case "batchIndex.matrixno": {
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, batchIndexDataMap.get("matrixno"));
-                                break;
-                            }
-                            case "batchIndex.batchno": {
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, batchIndexDataMap.get("batchno"));
-                                break;
-                            }
-                            case "N/A": {
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, "");
-                                break;
-                            }
-                            case "materials.brandcode" : {
-                                //c中：materials.brandcode后缀是COKE
-                                if (i == 0) {
-                                    String val = getMaterialValue(materialsArray, "brandcode", "COKE", "weightset");
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                                }
-                                break;
-                            }
-                            case "矿石总量" : {
-                                //本次o之和 - 回用焦丁
-                                if (i > 0) {
-                                    double kuangShiZongLiang = 0;
-                                    for (int k = 0; k < materialsArray.size(); k++) {
-                                        JSONObject material = materialsArray.getJSONObject(k);
-                                        if ("回用焦丁".equals(material.getString("descr"))) {
-                                            kuangShiZongLiang = kuangShiZongLiang - material.getDoubleValue("weightset");
-                                        } else {
-                                            kuangShiZongLiang = kuangShiZongLiang + material.getDoubleValue("weightset");
-                                        }
-                                    }
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, kuangShiZongLiang);
-                                }
-                                break;
-                            }
-                            case "大烧" : {
-                                //第一个o中：materials.brandcode后缀是SINTER
-                                if (i == 1) {
-                                    String val = getMaterialValue(materialsArray, "brandcode", "SINTER", "weightset");
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                                }
-                                break;
-                            }
-                            case "小烧" : {
-                                //第二个o中：materials.brandcode后缀是SINTER
-                                if (i == 2) {
-                                    String val = getMaterialValue(materialsArray, "brandcode", "SINTER", "weightset");
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                                }
-                                break;
-                            }
-                            default: {
-                                //默认，materials中descr对应表头
-                                if (CollectionUtils.isNotEmpty(materialsArray)) {
-                                    for (int k = 0; k < materialsArray.size(); k++) {
-                                        JSONObject material = materialsArray.getJSONObject(k);
-                                        if (itemName.equals(material.getString("descr"))){
-                                            ExcelWriterUtil.addCellData(cellDataList, row, col, material.getString("weightset") );
-                                        }
-                                    }
-                                }
-                                break;
-                            }
+                            break;
+                        }
+                        default: {
+                            break;
                         }
                     }
                 }
             }
         }
-
         return cellDataList;
     }
 
-    /**
-     * 获取materials数据组指定的值
-     * @param materialsArray
-     * @param compareKey
-     * @param compareValue
-     * @param actualKey
-     * @return
-     */
-    private String getMaterialValue(JSONArray materialsArray, String compareKey, String compareValue, String actualKey) {
-        if (CollectionUtils.isNotEmpty(materialsArray)) {
-            for (int k = 0; k < materialsArray.size(); k++) {
-                JSONObject material = materialsArray.getJSONObject(k);
-                if (StringUtils.endsWith(material.getString(compareKey), compareValue)){
-                    return material.getString(actualKey);
-                }
-            }
-        }
-        return null;
+    private String getRoundact(List<BatchDistribution> distributions) {
+        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
+        //过滤weightact不为0的值
+        List<BatchDistribution> collect = distributions.stream()
+                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .collect(Collectors.toList());
+        // 拼接roundset
+        return collect.stream()
+                .map(p -> String.valueOf(p.getRoundact()))
+                .collect(Collectors.joining(""));
     }
 
-    /**
-     * 根据chargeNo获取charge raw data
-     * @param version
-     * @param chargeNo
-     * @return api数据
-     */
-    private String getChargeRawData(String version, Integer chargeNo) {
-        return httpUtil.get(getPrimaryUrl(version, chargeNo));
+    private String getPosition(List<BatchDistribution> distributions) {
+        //排序, 按position倒序
+        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
+        //过滤weightact不为0的值
+        List<BatchDistribution> collect = distributions.stream()
+                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .collect(Collectors.toList());
+        // 拼接position
+        return collect.stream()
+                .map(p -> String.valueOf(p.getPosition()))
+                .collect(Collectors.joining(""));
     }
 
-    /**
-     * 处理chargeNo 列表
-     * @param data
-     * @return
-     */
-    private List<Map<String, Object>> handleChargeNoData(DateQuery query, String version, String tagName) {
-        Map<String, String> queryParam = new HashMap();
-        queryParam.put("starttime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
-        queryParam.put("endtime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
-        queryParam.put("tagname", tagName);
-        String chargeNoData = httpUtil.get(getChargeNoUrl(version), queryParam);
-
-        List<Map<String, Object>> chargeNos = new ArrayList<Map<String, Object>>();
-        JSONArray dataArray = FastJSONUtil.convertJsonStringToJsonArray(chargeNoData);
-        if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
-            for (int i = 0; i < dataArray.size(); i++) {
-                JSONObject dataObj = dataArray.getJSONObject(i);
-                if (Objects.nonNull(dataObj) && StringUtils.isNotBlank(dataObj.getString("val"))) {
-                    Map<String, Object> innerMap = dataObj.getInnerMap();
-                    chargeNos.add(innerMap);
-                }
-            }
-        }
-        // TODO 排序
-        // chargeNos.sort(COma);
-        return chargeNos;
-    }
-
-    /**
-     * 获取api的url
-     * @param version
-     * @return url
-     */
-    private String getPrimaryUrl(String version, Integer chargeNo) {
-        return httpProperties.getGlUrlVersion(version) + "/charge/rawdata/" + chargeNo;
-    }
-
-    private String getChargeNoUrl(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/tagValues";
-    }
 }
