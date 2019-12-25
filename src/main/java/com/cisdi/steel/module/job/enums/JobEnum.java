@@ -77,6 +77,7 @@ public enum JobEnum {
     gl_chutiehuaxuechengfen8("gl_chutiehuaxuechengfen8","8高炉出铁化学成分报表"),
     gl_shangliaozhuangliao8("gl_shangliaozhuangliao8","8高炉上料装料日报表"),
     gl_buliaozhidubiandongjizai8("gl_buliaozhidubiandongjizai8","8高炉布料制度变动记载日报表"),
+    gl_luliaoxiaohao8("gl_luliaoxiaohao8","8高炉炉料消耗月报表"),
 
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "配煤-自动配煤报表（班）"),

@@ -212,30 +212,4 @@ public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseShangLiaoBuLiaoWriter {
         return cellDataList;
     }
 
-    private String getRoundact(List<BatchDistribution> distributions) {
-        //排序, 按position倒序
-        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
-        //过滤weightact不为0的值
-        List<BatchDistribution> collect = distributions.stream()
-                .filter(p -> p.getWeightset().doubleValue() > 0)
-                .collect(Collectors.toList());
-        // 拼接roundset
-        return collect.stream()
-                .map(p -> String.valueOf(p.getRoundact()))
-                .collect(Collectors.joining(""));
-    }
-
-    private String getPosition(List<BatchDistribution> distributions) {
-        //排序, 按position倒序
-        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
-        //过滤weightact不为0的值
-        List<BatchDistribution> collect = distributions.stream()
-                .filter(p -> p.getWeightset().doubleValue() > 0)
-                .collect(Collectors.toList());
-        // 拼接position
-        return collect.stream()
-                .map(p -> String.valueOf(p.getPosition()))
-                .collect(Collectors.joining(""));
-    }
-
 }
