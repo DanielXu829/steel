@@ -12,6 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class TapTPC {
     private Date clockTime;
+    private String workShift;
     private String tapno;
     private String tpcNo;
     private BigDecimal grossWt;
