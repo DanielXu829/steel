@@ -31,6 +31,7 @@ import java.util.*;
 public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     private static int shaoJieChengPinItemRowNum = 28;
     private static int yuanLiaoXingNengItemRowNum = 17;
+    private Date dateRun;
 
     @Autowired
     private TargetManagementMapper targetManagementMapper;
@@ -57,7 +58,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      */
     private Workbook getMapHandler1(WriterExcelDTO excelDTO, String version) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        DateQuery date = this.getDateQuery(excelDTO);
+        dateRun = this.getDateQuery(excelDTO).getRecordDate();
         int numberOfSheets = workbook.getNumberOfSheets();
         // 处理tag点的数据
         for (int i = 0; i < numberOfSheets; i++) {
@@ -80,7 +81,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 }
 
                 // 获取两班倒查询策略
-                List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourEach(date.getRecordDate());
+                List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourEach(dateRun);
                 for (int k = 0; k < dateQueries.size(); k++) {
                     DateQuery dateQuery = dateQueries.get(k);
                     if (dateQuery.getRecordDate().before(new Date())) {
@@ -95,7 +96,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         //  接口直接写入的数据：烧结成品质量
         Sheet sheet1 = workbook.getSheetAt(0);
         sheet1.getRow(shaoJieChengPinItemRowNum).setZeroHeight(true);
-        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(dateRun);
         List<CellData> cellDataList1  = handleShaoJieChengPinData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList1);
 
@@ -320,8 +321,21 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         list[k] = Long.valueOf(key);
                         k++;
                     }
-                    // 按照顺序排序
+                    // 按照时间顺序排序
                     Arrays.sort(list);
+
+                    if(column.indexOf("_1d_") > -1) {
+                        // 该tag点需要特殊处理, 获取当前时间，如果超过下午8点，就写入第一和第二行,如果没超过就只写第一行
+                        Date itemTime = DateUtil.addHours(DateUtil.getDateBeginTime(dateRun), 20);
+                        if (dateRun.getTime() < itemTime.getTime()) {
+                            ExcelWriterUtil.addCellData(cellDataList, 1, columnIndex, data.get(list[0]));
+                        } else {
+                            ExcelWriterUtil.addCellData(cellDataList, 1, columnIndex, data.get(list[0]));
+                            ExcelWriterUtil.addCellData(cellDataList, 2, columnIndex, data.get(list[0]));
+                        }
+                        continue;
+                    }
+
                     List<DateQuery> dayEach = DateQueryUtil.buildDay12HourEach(new Date());
                     int rowIndex = 1;
                     for (int j = 0; j < dayEach.size(); j++) {

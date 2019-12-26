@@ -72,6 +72,7 @@
         `report_index`
         <where>
             is_hidden='0'
+            AND del_flag = 0
             AND index_type IN ( 'report_day' )
             AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
             <include refid="queryLike"/>
@@ -97,6 +98,7 @@
         `report_index`
         <where>
             is_hidden='0'
+            AND del_flag = 0
             AND index_type IN ( 'report_month' )
             AND DATE_FORMAT(create_time,'%Y-%m') = #{toDay}
             <include refid="queryLike"/>
@@ -109,6 +111,7 @@
         `report_index`
         <where>
             is_hidden='0'
+            AND del_flag = 0
             AND index_type NOT IN ( 'report_month','4hour_report','report_day' )
             AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
             <include refid="queryLike"/>
