@@ -7,8 +7,6 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.dto.response.gl.TagValueListDTO;
-import com.cisdi.steel.dto.response.gl.res.TagValue;
 import com.cisdi.steel.dto.response.sj.AnaValueDTO;
 import com.cisdi.steel.dto.response.sj.res.AnalysisValue;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
@@ -51,10 +49,17 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return getMapHandler1(excelDTO, version);
     }
 
+    /**
+     * 获取写入数据
+     * @param excelDTO
+     * @param version
+     * @return
+     */
     private Workbook getMapHandler1(WriterExcelDTO excelDTO, String version) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
+        // 处理tag点的数据
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
             // 以下划线开头的sheet 表示 隐藏表 待处理
@@ -87,13 +92,14 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 }
             }
         }
-
+        //  接口直接写入的数据：烧结成品质量
         Sheet sheet1 = workbook.getSheetAt(0);
         sheet1.getRow(shaoJieChengPinItemRowNum).setZeroHeight(true);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
         List<CellData> cellDataList1  = handleShaoJieChengPinData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList1);
 
+        // 接口直接写入的数据：原料性能
         sheet1.getRow(yuanLiaoXingNengItemRowNum).setZeroHeight(true);
         List<CellData> cellDataList2  = handleYuanLiaoXingNengData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList2);
@@ -101,6 +107,13 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return workbook;
     }
 
+    /**
+     * 处理原料性能数据
+     * @param sheet1
+     * @param dateQuery
+     * @param version
+     * @return
+     */
     private List<CellData> handleYuanLiaoXingNengData(Sheet sheet1, DateQuery dateQuery, String version) {
         List<CellData> cellDataList = new ArrayList();
         List<String> materialTypeList = new ArrayList();
@@ -113,6 +126,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         materialTypeList.add("coke");
         Map<String, AnaValueDTO> dtoMap = new HashMap();
 
+        // 获取不同接口的数据(7个接口),并映射到 DTO中
         for (int i = 0; i < materialTypeList.size(); i++) {
             String data = getYuanLiaoXingNengData(dateQuery, version, materialTypeList.get(i));
             AnaValueDTO anaValueFenDTO = null;
@@ -130,8 +144,10 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         itemCategoryToName.put("返矿", "return_fine");
         itemCategoryToName.put("燃料", "coke");
 
+        // 获取标记行的数据
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, yuanLiaoXingNengItemRowNum);
         for (int j = 0; j < materialTypeList.size(); j++) {
+            // 获取excel单元格中项目的名称，来和接口进行对应
             String itemCategory = PoiCellUtil.getCellValue(sheet1, yuanLiaoXingNengItemRowNum + j + 1, 7);
             itemCategory = itemCategory.trim();
             if (StringUtils.isNotBlank(itemCategory)) {
@@ -145,20 +161,25 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         for (int i = 0; i < itemNameList.size() ; i++) {
                             String itemName = itemNameList.get(i);
                             if (StringUtils.isNotBlank(itemName)) {
+                                // 标记项以YL开头
                                 if (itemName.startsWith("YL")) {
+                                    // 将"YL_"截取掉
                                     String itemNameTrue = itemName.substring(3);
                                     List<AnalysisValue> dataList = anaValueDTO.getData();
                                     if (dataList != null && !dataList.isEmpty()) {
-                                        BigDecimal bigDecimal = new BigDecimal(0.0);
-                                        int valueNum = 0;
-                                        for (int k = 0; k < dataList.size(); k++) {
-                                            if (Objects.nonNull(dataList.get(k).getValues().get(itemNameTrue))) {
-                                                bigDecimal = bigDecimal.add(dataList.get(k).getValues().get(itemNameTrue));
-                                                valueNum += 1;
+                                        int dataSize = dataList.size();
+                                        // 如果数据不止一条，就取prodUnitCode并不为空的那一条数据
+                                        if (dataSize > 1) {
+                                            for (int k = 0; k < dataSize; k++) {
+                                                String prodUnitCode = dataList.get(k).getAnalysis().getProdUnitCode();
+                                                if (StringUtils.isNotBlank(prodUnitCode)) {
+                                                    BigDecimal bigDecimal = dataList.get(k).getValues().get(itemNameTrue);
+                                                    ExcelWriterUtil.addCellData(cellDataList, yuanLiaoXingNengItemRowNum + j + 1, i, bigDecimal);
+                                                }
                                             }
-                                        }
-                                        if (Objects.nonNull(bigDecimal) && valueNum > 0) {
-                                            bigDecimal = bigDecimal.divide(new BigDecimal(dataList.size()),2, BigDecimal.ROUND_DOWN);
+                                        } else {
+                                            // 如果只有一条，就取该条数据
+                                            BigDecimal bigDecimal = dataList.get(0).getValues().get(itemNameTrue);
                                             ExcelWriterUtil.addCellData(cellDataList, yuanLiaoXingNengItemRowNum + j + 1, i, bigDecimal);
                                         }
                                     }
@@ -173,9 +194,16 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    /**
+     * 处理烧结成品数据
+     * @param sheet1
+     * @param dateQuery
+     * @param version
+     * @return
+     */
     private List<CellData> handleShaoJieChengPinData(Sheet sheet1, DateQuery dateQuery, String version) {
         List<CellData> cellDataList = new ArrayList();
-
+        // 根据type不同(LC,LG,LP),调用三个接口
         String shaoJieChengPinLCData = getShaoJieChengPinData(dateQuery, version, "LC");
         AnaValueDTO anaValueLcDTO = null;
         if (StringUtils.isNotBlank(shaoJieChengPinLCData)) {
@@ -194,6 +222,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             anaValueLpDTO = JSON.parseObject(shaoJieChengPinLPData, AnaValueDTO.class);
         }
 
+        // 根据type不同将数据封装到map中
         Map<String, AnaValueDTO> dtoMap = new HashMap();
         dtoMap.put("LC", anaValueLcDTO);
         dtoMap.put("LG", anaValueLgDTO);
@@ -204,8 +233,8 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         for (int j = 0; j < 4; j++) {
             String id = PoiCellUtil.getCellValue(sheet1, shaoJieChengPinItemRowNum + j + 1, 1);
             // 去除小数点以及小数点后的数字
-            Integer id1 = Integer.parseInt(id.split("\\.")[0]);
-            id = id1.toString();
+            Integer idNumber = Integer.parseInt(id.split("\\.")[0]);
+            id = idNumber.toString();
             if (itemNameList != null && !itemNameList.isEmpty()) {
                 for (int i = 0; i < itemNameList.size() ; i++) {
                     String itemName = itemNameList.get(i);
@@ -215,8 +244,12 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         if (Objects.nonNull(anaValueDTO)) {
                             String itemNameTrue = itemName.substring(prefix.length() + 1);
                             for (int k = 0; k < anaValueDTO.getData().size() ; k++) {
+                                // sampleId的最后两位(如果小于10,就取最后一位)与excel中的样编号进行对应
                                 String sampleId =  anaValueDTO.getData().get(k).getAnalysis().getSampleid();
-                                sampleId = sampleId.substring(sampleId.length() - 1);
+                                sampleId = sampleId.substring(sampleId.length() - 2);
+                                if (sampleId.startsWith("0")) {
+                                    sampleId = sampleId.substring(1);
+                                }
                                 if (sampleId.equals(id)) {
                                     BigDecimal cellValue = anaValueDTO.getData().get(k).getValues().get(itemNameTrue);
                                     ExcelWriterUtil.addCellData(cellDataList, shaoJieChengPinItemRowNum + j + 1, i, cellValue);
@@ -231,6 +264,13 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    /**
+     * 处理tag点数据
+     * @param url
+     * @param columns
+     * @param dateQuery
+     * @return
+     */
     private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery) {
         JSONObject query = new JSONObject();
         Date date = new Date();
@@ -259,6 +299,13 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return handlerData(columns, data, dateQuery);
     }
 
+    /**
+     * 处理tag点数据
+     * @param columns
+     * @param jsonObject
+     * @param dateQuery
+     * @return
+     */
     private List<CellData> handlerData(List<String> columns, JSONObject jsonObject, DateQuery dateQuery) {
         List<CellData> cellDataList = new ArrayList<>();
         for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
@@ -299,6 +346,13 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+    /**
+     * 调用api获取原料性能数据
+     * @param dateQuery
+     * @param version
+     * @param materialType
+     * @return
+     */
     private String getYuanLiaoXingNengData(DateQuery dateQuery, String version, String materialType) {
         JSONObject query = new JSONObject();
         query.put("materialType", materialType);
@@ -310,6 +364,13 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return httpUtil.postJsonParams(url, jsonString);
     }
 
+    /**
+     * 调用api获取烧结成品数据
+     * @param dateQuery
+     * @param version
+     * @param type
+     * @return
+     */
     private String getShaoJieChengPinData(DateQuery dateQuery, String version, String type) {
         Map<String, String> queryParam = new HashMap();
         queryParam.put("startTime", Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
@@ -321,8 +382,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         String url = getAnalysisValuesUrl(version);
         return httpUtil.get(url, queryParam);
     }
+
     /**
-     * 通过tag点拿数据的API，路径可能会改变
+     * 通过tag点拿数据的API
      * @param version
      * @return
      */
@@ -330,10 +392,20 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return httpProperties.getSJUrlVersion(version) + "/tagValues/tagNames";
     }
 
+    /**
+     * 原料性能API
+     * @param version
+     * @return
+     */
     private String getMatAnalysisUrl(String version) {
         return httpProperties.getSJUrlVersion(version) + "/burdenMatAnalysisVal?pageSize=10&pageNum=1";
     }
 
+    /**
+     * 烧结成品API
+     * @param version
+     * @return
+     */
     private String getAnalysisValuesUrl(String version) {
         return httpProperties.getSJUrlVersion(version) + "/analysisValues/clock";
     }
