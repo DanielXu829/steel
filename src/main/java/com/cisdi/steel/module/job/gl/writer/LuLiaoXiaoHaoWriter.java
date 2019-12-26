@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -36,7 +35,7 @@ import java.util.*;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class LuLiaoXiaoHaoWriter extends BaseShangLiaoBuLiaoWriter {
+public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
     // 标记行
     private static int itemRowNum = 4;
 
@@ -299,7 +298,7 @@ public class LuLiaoXiaoHaoWriter extends BaseShangLiaoBuLiaoWriter {
         if (StringUtils.isNotBlank(anaItemValDTOStr)) {
             anaItemValDTO = JSON.parseObject(anaItemValDTOStr, AnaItemValDTO.class);
         } else {
-            log.debug(DateFormatUtils.format(date, DateUtil.MMddChineseFormat) + "的 " + anaItemName + " 为空");
+            log.warn(DateFormatUtils.format(date, DateUtil.MMddChineseFormat) + "的 " + anaItemName + " 为空");
         }
 
         return anaItemValDTO;
@@ -329,7 +328,7 @@ public class LuLiaoXiaoHaoWriter extends BaseShangLiaoBuLiaoWriter {
             if (CollectionUtils.isNotEmpty(tagValueListDTO.getData())) {
                 batchCount = tagValueListDTO.getData().get(0).getVal();
             } else {
-                log.debug(DateFormatUtils.format(date, DateUtil.MMddChineseFormat) + "的批次总数为空");
+                log.warn(DateFormatUtils.format(date, DateUtil.MMddChineseFormat) + "的批次总数为空");
             }
         }
         return batchCount;

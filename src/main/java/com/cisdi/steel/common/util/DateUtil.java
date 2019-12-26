@@ -442,6 +442,23 @@ public class DateUtil {
     }
 
     /**
+     * 得到指定日期最开始时间
+     *
+     * @param date 指定日期
+     * @return 指定日期的最开始时间  06:00:00
+     */
+    public static Date getDateBeginTimeOfTwenty(Date date) {
+        String dateString = DateFormatUtils.format(date, "yyyy-MM-dd 20:00:00");
+        Date beginTime = null;
+        try {
+            beginTime = DateUtils.parseDate(dateString, new String[]{"yyyy-MM-dd hh:mm:ss"});
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return beginTime;
+    }
+
+    /**
      * 今天 最后结束时间
      *
      * @return 今天日期最后时间 23:59:59

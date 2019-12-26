@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseShangLiaoBuLiaoWriter {
+public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseGaoLuWriter {
     // 标记行
     private static int itemRowNum = 4;
 
