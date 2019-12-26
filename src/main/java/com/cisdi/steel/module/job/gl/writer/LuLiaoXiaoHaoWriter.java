@@ -66,6 +66,13 @@ public class LuLiaoXiaoHaoWriter extends BaseShangLiaoBuLiaoWriter {
         // 填充报表主工作表数据
         mapDataHandler(sheet, version);
 
+        // 动态替换报表首行标题中的日期
+        Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, 0), 0);
+        String stringCellValue = titleCell.getStringCellValue();
+        String currentMonth = DateFormatUtils.format(new Date(), DateUtil.yyyyMM);
+        stringCellValue = stringCellValue.replaceAll("%当前月份%", currentMonth);
+        titleCell.setCellValue(stringCellValue);
+
         return workbook;
     }
 
