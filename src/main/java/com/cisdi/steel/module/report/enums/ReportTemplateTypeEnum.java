@@ -17,9 +17,9 @@ public enum ReportTemplateTypeEnum {
     report_four_hour("4hour_report", "4小时"),
     report_class("report_class", "班报表"),
     report_day("report_day", "日报表"),
-    report_week("report_week", "周表报"),
-    report_month("report_month", "月表报"),
-    report_year("report_year", "年表报");
+    report_week("report_week", "周报表"),
+    report_month("report_month", "月报表"),
+    report_year("report_year", "年报表");
 
     /**
      * 编码值
