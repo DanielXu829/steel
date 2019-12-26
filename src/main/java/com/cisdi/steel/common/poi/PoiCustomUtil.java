@@ -296,6 +296,10 @@ public class PoiCustomUtil {
                 } else if (result.toString().length() == 10) {
                     Date date = new Date(result * 1000);
                     cell.setCellValue(date);
+                } else {
+                    // 如果传递过来long数值不匹配日期的长度，则默认按数字处理
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(result.doubleValue());
                 }
             } catch (Exception e) {
                 cell.setCellType(CellType.NUMERIC);

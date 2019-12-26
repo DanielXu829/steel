@@ -12,7 +12,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class BaseShangLiaoBuLiaoWriter extends AbstractExcelReadWriter {
+public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
 
     /**
      * 根据chargeNo获取charge raw data

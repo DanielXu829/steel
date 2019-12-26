@@ -5,8 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.dto.response.gl.TagValueListDTO;
-import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -36,7 +34,7 @@ import java.util.Objects;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class ShangLiaoZhuangLiaoWriter extends BaseShangLiaoBuLiaoWriter {
+public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
     // 标记行
     private static int itemRowNum = 2;
     // 数据开始行

@@ -1,11 +1,20 @@
 package com.cisdi.steel.job.gl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.SteelApplicationTests;
+import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.gl.*;
+import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TestJobGl extends SteelApplicationTests {
+
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
 
     @Autowired
     private BianLiaoJiLu8Job bianLiaoJiLu8Job;
@@ -30,6 +39,9 @@ public class TestJobGl extends SteelApplicationTests {
 
     @Autowired
     private LuLiaoXiaoHao8Job luLiaoXiaoHao8Job;
+
+    @Autowired
+    private KaoHeYueBaoJob kaoHeYueBaoJob;
 
     @Test
     public void test1() {
@@ -69,6 +81,14 @@ public class TestJobGl extends SteelApplicationTests {
     @Test
     public void testLuLiaoXiaoHao8Job() {
         luLiaoXiaoHao8Job.execute(null);
+    }
+
+    /**
+     * 测试 8高炉考核月报表
+     */
+    @Test
+    public void testKaoHeYueBao() {
+        kaoHeYueBaoJob.execute(null);
     }
 
     @Test
