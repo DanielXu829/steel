@@ -346,7 +346,7 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
         Long dateTime = DateUtil.getDateBeginTime(date).getTime();
         queryParam.put("dateTime",  String.valueOf(dateTime));
 
-        String materialExpendUrl = httpProperties.getGlUrlVersion(version) + "/report/materialExpend";
+        String materialExpendUrl = httpProperties.getGlUrlVersion(version) + "/report/material/materialExpend";
         String materialExpendDTOStr = httpUtil.get(materialExpendUrl, queryParam);
         if (StringUtils.isNotBlank(materialExpendDTOStr)) {
             materialExpendDTO = JSON.parseObject(materialExpendDTOStr, MaterialExpendDTO.class);
