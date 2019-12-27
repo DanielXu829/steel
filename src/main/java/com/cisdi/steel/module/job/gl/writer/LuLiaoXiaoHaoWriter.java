@@ -114,13 +114,15 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                         case "IRON,Tfe": {
                             AnaItemValDTO anaChargeValue = getAnaChargeValue(version, day, "IRON", "TFe", "day");
                             if (Objects.nonNull(anaChargeValue)) {
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, anaChargeValue.getData());
+                                Double val = anaChargeValue.getData() * 100;
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
                             break;
                         }
                         case "ALL,Aggl": {
                             AnaItemValDTO anaChargeValue = getAnaChargeValue(version, day, "ALL", "Aggl", "day");
                             if (Objects.nonNull(anaChargeValue)) {
+                                Double val = anaChargeValue.getData() * 100;
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, anaChargeValue.getData());
                             }
                             break;
@@ -249,34 +251,6 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
     }
 
     /**
-     * 获取回用焦丁  元数据
-     * @param materialExpendDTO
-     * @return
-     */
-    private BigDecimal getHuiYongJiaoDing(MaterialExpendDTO materialExpendDTO) {
-        BigDecimal oCount = materialExpendDTO.getData().stream()
-                .filter(p -> StringUtils.endsWith(p.getMatCname(), "回用焦丁"))
-                .map(MaterialExpend::getWetWgt)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return oCount;
-    }
-
-    /**
-     * 获取焦炭平均批重 元数据
-     * @param materialExpendDTO
-     * @return
-     */
-    private BigDecimal getJiaoTanPingJunPiZhong(MaterialExpendDTO materialExpendDTO) {
-        BigDecimal oCount = materialExpendDTO.getData().stream()
-                .filter(p -> ("大块焦".equals(p.getMatCname()) || "小块焦".equals(p.getMatCname())))
-                .map(MaterialExpend::getWetWgt)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return oCount;
-    }
-
-    /**
      * 根据参数获取anaCharge  元数据，例如“矿石平均含铁”或“熟料率”
      * @param version
      * @param date
@@ -332,26 +306,6 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
             }
         }
         return batchCount;
-    }
-
-    /**
-     * 每日0点0分0秒获取每日炉料消耗数据，可用于月报展示
-     * @param version
-     * @param chargeNo
-     * @return api数据
-     */
-    private MaterialExpendDTO getMaterialExpendDTO(String version, Date date) {
-        MaterialExpendDTO materialExpendDTO = null;
-        Map<String, String> queryParam = new HashMap();
-        Long dateTime = DateUtil.getDateBeginTime(date).getTime();
-        queryParam.put("dateTime",  String.valueOf(dateTime));
-
-        String materialExpendUrl = httpProperties.getGlUrlVersion(version) + "/report/material/materialExpend";
-        String materialExpendDTOStr = httpUtil.get(materialExpendUrl, queryParam);
-        if (StringUtils.isNotBlank(materialExpendDTOStr)) {
-            materialExpendDTO = JSON.parseObject(materialExpendDTOStr, MaterialExpendDTO.class);
-        }
-        return materialExpendDTO;
     }
 
     /**

@@ -3,12 +3,14 @@ package com.cisdi.steel.module.job.util;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.CellValInfo;
 import com.cisdi.steel.module.job.dto.RowCellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.ss.usermodel.*;
 
 import java.math.BigDecimal;
@@ -400,5 +402,19 @@ public class ExcelWriterUtil {
         }
 
         return val;
+    }
+
+    /**
+     * 动态替换报表首行标题中的日期
+     * @param sheet
+     * @param row
+     * @param column
+     */
+    public static void replaceCurrentMonthInTitle(Sheet sheet, int row, int column) {
+        Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, row), column);
+        String stringCellValue = titleCell.getStringCellValue();
+        String currentMonth = DateFormatUtils.format(new Date(), DateUtil.yyyyMM);
+        stringCellValue = stringCellValue.replaceAll("%当前月份%", currentMonth);
+        titleCell.setCellValue(stringCellValue);
     }
 }
