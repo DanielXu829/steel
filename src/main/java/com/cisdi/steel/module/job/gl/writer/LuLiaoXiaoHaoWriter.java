@@ -113,7 +113,7 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                         }
                         case "IRON,Tfe": {
                             AnaItemValDTO anaChargeValue = getAnaChargeValue(version, day, "IRON", "TFe", "day");
-                            if (Objects.nonNull(anaChargeValue)) {
+                            if ((null != anaChargeValue)&&(null != anaChargeValue.getData())) {
                                 Double val = anaChargeValue.getData() * 100;
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
@@ -121,9 +121,9 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                         }
                         case "ALL,Aggl": {
                             AnaItemValDTO anaChargeValue = getAnaChargeValue(version, day, "ALL", "Aggl", "day");
-                            if (Objects.nonNull(anaChargeValue)) {
+                            if ((null != anaChargeValue)&&(null != anaChargeValue.getData())) {
                                 Double val = anaChargeValue.getData() * 100;
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, anaChargeValue.getData());
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
                             break;
                         }
