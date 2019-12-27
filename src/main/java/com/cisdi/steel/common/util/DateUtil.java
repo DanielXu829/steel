@@ -888,8 +888,9 @@ public class DateUtil {
      * @return
      */
     public static List<Date> getAllDayBeginTimeInCurrentMonth(Date date) {
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
         Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
+        cal.setTime(dateBeginTime);
         int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
         List<Date> dates = new ArrayList<Date>();

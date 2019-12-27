@@ -48,14 +48,21 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             log.error("在模板中获取version失败", e);
         }
 
-        Sheet sheet = workbook.getSheet("铁罐装载率");
-        // 填充报表主工作表“铁罐装载率”数据
-        mapDataHandler(sheet, version);
-
+        try {
+            Sheet sheet = workbook.getSheet("铁罐装载率");
+            // 填充报表主工作表“铁罐装载率”数据
+            mapDataHandler(sheet, version);
+        } catch (Exception e) {
+            log.error("处理 铁罐装载率 时产生错误", e);
+        }
 
         // 填充报表第二个工作表“班产燃料比”数据
-        Sheet sheet2 = workbook.getSheet("班产燃料比");
-        mapDataHandler2(sheet2, version);
+        try {
+            Sheet sheet2 = workbook.getSheet("班产燃料比");
+            mapDataHandler2(sheet2, version);
+        } catch (Exception e) {
+            log.error("处理 班产燃料比 时产生错误", e);
+        }
 
         return workbook;
     }
@@ -194,7 +201,7 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
     }
 
     /**
-     * 每日20点0分0秒获取每日炉料消耗数据，可用于月报展示
+     * 每日0点0分0秒获取每日炉料消耗数据，可用于月报展示
      * @param version
      * @param chargeNo
      * @return api数据
@@ -202,13 +209,16 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
     private TapTPCDTO getTapTPCDTO(String version, Date date) {
         TapTPCDTO tapTPCDTO = null;
         Map<String, String> queryParam = new HashMap();
-        Long dateTime = DateUtil.getDateBeginTime(date).getTime();
-        queryParam.put("dateTime",  String.valueOf(dateTime));
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        queryParam.put("dateTime",  String.valueOf(dateBeginTime.getTime()));
 
         String tapTPCUrl = httpProperties.getGlUrlVersion(version) + "/report/tap/getTapTPCByRange";
         String tapTPCDTOStr = httpUtil.get(tapTPCUrl, queryParam);
         if (StringUtils.isNotBlank(tapTPCDTOStr)) {
             tapTPCDTO = JSON.parseObject(tapTPCDTOStr, TapTPCDTO.class);
+            if (Objects.isNull(tapTPCDTO) || CollectionUtils.isEmpty(tapTPCDTO.getData())) {
+                log.warn("[{}] 的TapTPCDTO数据为空", dateBeginTime);
+            }
         }
         return tapTPCDTO;
     }
