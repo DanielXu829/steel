@@ -5,12 +5,11 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.*;
-import com.cisdi.steel.dto.response.gl.res.*;
+import com.cisdi.steel.dto.response.gl.res.MaterialExpend;
+import com.cisdi.steel.dto.response.gl.res.TapTPC;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
-import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -33,8 +32,7 @@ import java.util.*;
 @SuppressWarnings("ALL")
 @Slf4j
 public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
-    // 标记行
-    private static int itemRowNum = 3;
+
 
     /**
      * @param excelDTO 数据
@@ -50,23 +48,21 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             log.error("在模板中获取version失败", e);
         }
 
-        Sheet sheet = workbook.getSheetAt(0);
-        sheet.getRow(itemRowNum).setZeroHeight(true);
-
-        // 填充报表主工作表数据
+        Sheet sheet = workbook.getSheet("铁罐装载率");
+        // 填充报表主工作表“铁罐装载率”数据
         mapDataHandler(sheet, version);
 
-        // 动态替换报表首行标题中的日期
-        Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, 1), 1);
-        String stringCellValue = titleCell.getStringCellValue();
-        String currentMonth = DateFormatUtils.format(new Date(), DateUtil.yyyyMM);
-        stringCellValue = stringCellValue.replaceAll("%当前月份%", currentMonth);
-        titleCell.setCellValue(stringCellValue);
+
+        // 填充报表第二个工作表“班产燃料比”数据
+        Sheet sheet2 = workbook.getSheet("班产燃料比");
+        mapDataHandler2(sheet2, version);
 
         return workbook;
     }
 
     private void mapDataHandler(Sheet sheet, String version) {
+        // 标记行
+        int itemRowNum = 3;
         String defaultCellValue = "";
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
@@ -113,6 +109,88 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 1);
+        sheet.getRow(itemRowNum).setZeroHeight(true);
+    }
+
+    private void mapDataHandler2(Sheet sheet, String version) {
+        // 标记行
+        int itemRowNum = 2;
+        String defaultCellValue = "";
+        // 获取excel占位符列
+        List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
+        List<CellData> cellDataList = new ArrayList<>();
+        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
+
+        for (int i = 0; i < allDayBeginTimeInCurrentMonth.size() - 1; i++) {
+            // 通过api获取MaterialExpendDTO数据
+            Date day = allDayBeginTimeInCurrentMonth.get(i);
+            TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
+            MaterialExpendDTO materialExpendDTO = getMaterialExpendDTO(version, day, "shift");
+
+            // 计算行
+            int row = itemRowNum + 1 + i * 2;
+            // 循环列
+            for (int j = 0; j < itemNameList.size(); j++) {
+                // 获取标记项单元格中的值
+                String itemName = itemNameList.get(j);
+                int col = j;
+                if (StringUtils.isNotBlank(itemName)) {
+                    switch (itemName) {
+                        case "出铁量": {
+                            if (Objects.nonNull(tapTPCDTO) && CollectionUtils.isNotEmpty(tapTPCDTO.getData())) {
+                                BigDecimal dayShiftSumNetWgt = getSumNetWgt(tapTPCDTO, "1");
+                                if (dayShiftSumNetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, dayShiftSumNetWgt);
+                                }
+                                BigDecimal nightShiftSumNetWgt = getSumNetWgt(tapTPCDTO, "2");
+                                if (nightShiftSumNetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, nightShiftSumNetWgt);
+                                }
+                            }
+                            break;
+                        }
+                        case "焦炭": {
+                            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                                BigDecimal dayShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "1");
+                                if (dayShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, dayShiftSumWetWgt);
+                                }
+                                BigDecimal nightShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "2");
+                                if (nightShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, nightShiftSumWetWgt);
+                                }
+                            }
+                            break;
+                        }
+                        case "回用焦": {
+                            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                                BigDecimal dayShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "1");
+                                if (dayShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, dayShiftSumWetWgt);
+                                }
+                                BigDecimal nightShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "2");
+                                if (nightShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, nightShiftSumWetWgt);
+                                }
+                            }
+                            break;
+                        }
+                        case "煤量": {
+                            //TODO
+                            break;
+                        }
+
+                        default: {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 0, 0);
+        sheet.getRow(itemRowNum).setZeroHeight(true);
     }
 
     /**
@@ -124,7 +202,7 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
     private TapTPCDTO getTapTPCDTO(String version, Date date) {
         TapTPCDTO tapTPCDTO = null;
         Map<String, String> queryParam = new HashMap();
-        Long dateTime = DateUtil.getDateBeginTimeOfTwenty(date).getTime();
+        Long dateTime = DateUtil.getDateBeginTime(date).getTime();
         queryParam.put("dateTime",  String.valueOf(dateTime));
 
         String tapTPCUrl = httpProperties.getGlUrlVersion(version) + "/report/tap/getTapTPCByRange";
@@ -163,5 +241,18 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         return count;
     }
 
+    /**
+     * 计算出铁量
+     * @param tapTPCDTO
+     * @return
+     */
+    private BigDecimal getSumNetWgt(TapTPCDTO tapTPCDTO, String shift) {
+        BigDecimal sum = new BigDecimal(0);
+        sum = tapTPCDTO.getData().stream()
+                .filter(p -> (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
+                .map(TapTPC::getNetWt)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return sum;
+    }
 
 }
