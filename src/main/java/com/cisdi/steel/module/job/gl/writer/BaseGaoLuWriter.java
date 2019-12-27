@@ -6,16 +6,20 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.ChargeDTO;
 import com.cisdi.steel.dto.response.gl.MaterialExpendDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
+import com.cisdi.steel.dto.response.gl.res.BatchData;
 import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
 import com.cisdi.steel.dto.response.gl.res.MaterialExpend;
 import com.cisdi.steel.dto.response.gl.res.TagValue;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
 
     /**
@@ -29,6 +33,9 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         String chargeDTOStr = httpUtil.get(getPrimaryUrl(version, chargeNo));
         if (StringUtils.isNotBlank(chargeDTOStr)) {
             chargeDTO = JSON.parseObject(chargeDTOStr, ChargeDTO.class);
+            if (Objects.isNull(chargeDTO) || CollectionUtils.isEmpty(chargeDTO.getData())) {
+                log.warn("根据chargeNo [{}] 获取chargeDTO数据为空", chargeNo);
+            }
         }
         return chargeDTO;
     }
@@ -49,8 +56,12 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         TagValueListDTO tagValueListDTO = null;
         if (StringUtils.isNotBlank(chargeNoData)) {
             tagValueListDTO = JSON.parseObject(chargeNoData, TagValueListDTO.class);
-            // 排序，默认按chargeNo从小到大排序，即时间从老到新
-            tagValueListDTO.getData().sort(Comparator.comparing(TagValue::getVal));
+            if (Objects.isNull(tagValueListDTO) || CollectionUtils.isEmpty(tagValueListDTO.getData())) {
+                log.warn("根据tagName[{}]获取[{}]的TagValueListDTO数据为空", tagName, query.getStartTime());
+            } else {
+                // 排序，默认按chargeNo从小到大排序，即时间从老到新
+                tagValueListDTO.getData().sort(Comparator.comparing(TagValue::getVal));
+            }
         }
         return tagValueListDTO;
     }
@@ -68,8 +79,8 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     protected MaterialExpendDTO getMaterialExpendDTO(String version, Date date, String granularity) {
         MaterialExpendDTO materialExpendDTO = null;
         Map<String, String> queryParam = new HashMap();
-        Long dateTime = DateUtil.getDateBeginTime(date).getTime();
-        queryParam.put("dateTime",  String.valueOf(dateTime));
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        queryParam.put("dateTime",  String.valueOf( dateBeginTime.getTime()));
         if (StringUtils.isNotBlank(granularity)) {
             queryParam.put("granularity", granularity);
         }
@@ -78,6 +89,9 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         String materialExpendDTOStr = httpUtil.get(materialExpendUrl, queryParam);
         if (StringUtils.isNotBlank(materialExpendDTOStr)) {
             materialExpendDTO = JSON.parseObject(materialExpendDTOStr, MaterialExpendDTO.class);
+            if (Objects.isNull(materialExpendDTO) || CollectionUtils.isEmpty(materialExpendDTO.getData())) {
+                log.warn("根据granularity[{}]获取[{}]的MaterialExpendDTO数据为空", granularity, dateBeginTime);
+            }
         }
         return materialExpendDTO;
     }

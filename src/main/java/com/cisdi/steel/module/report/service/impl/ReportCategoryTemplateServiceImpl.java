@@ -209,8 +209,9 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             file.delete();
 
             record.setTemplatePath(savePath);
+        } else {
+            log.error("临时目录中不存在该文件：" + record.getTemplatePath());
         }
-        log.error("临时目录中不存在该文件：" + record.getTemplatePath());
         this.updateById(record);
         return ApiUtil.success();
     }
