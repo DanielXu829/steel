@@ -141,9 +141,12 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             }
 
             // 保存文件
-            FileUtils.copyFile(record.getTemplatePath(), savePath);
-            file.delete();
-            record.setTemplatePath(savePath);
+            if (FileUtils.copyFile(record.getTemplatePath(), savePath)) {
+                file.delete();
+                record.setTemplatePath(savePath);
+            } else {
+                return ApiUtil.fail("保存失败");
+            }
 
             //先通过CategoryCode查询category
             LambdaQueryWrapper<ReportCategory> categoryWrapper = new QueryWrapper<ReportCategory>().lambda();
@@ -198,21 +201,28 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             String fileName = record.getTemplateName() + "." + fileExtension;
             String savePath = FileUtils.getSaveFilePathNoFilePath(templatePath, fileName, record.getTemplateLang());
 
-            // 如果有相同路径文件存在，需先删除此文件
-            File oldFile = new File(savePath);
-            if (oldFile.exists()) {
-                oldFile.delete();
+            // 如果上传了文件，则将模板拷贝到模板目录，如果没有上传文件，则使用原来的模板文件
+            if (!record.getTemplatePath().equals(savePath)) {
+                // 如果有相同路径文件存在，需先删除此文件
+                File oldFile = new File(savePath);
+                if (oldFile.exists()) {
+                    oldFile.delete();
+                }
+                // 保存文件
+                if (FileUtils.copyFile(record.getTemplatePath(), savePath)) {
+                    file.delete();
+                    record.setTemplatePath(savePath);
+                } else {
+                    return ApiUtil.fail("保存失败，请重新上传模板");
+                }
             }
-
-            // 保存文件
-            FileUtils.copyFile(record.getTemplatePath(), savePath);
-            file.delete();
-
-            record.setTemplatePath(savePath);
+            
+            this.updateById(record);
         } else {
-            log.error("临时目录中不存在该文件：" + record.getTemplatePath());
+            log.error("该文件不存在：" + record.getTemplatePath() + "  模板更新失败");
+            return ApiUtil.fail("保存失败, 请重新上传模板");
         }
-        this.updateById(record);
+
         return ApiUtil.success();
     }
 
