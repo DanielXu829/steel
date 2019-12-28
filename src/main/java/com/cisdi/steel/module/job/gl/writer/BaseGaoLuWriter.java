@@ -6,14 +6,13 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.ChargeDTO;
 import com.cisdi.steel.dto.response.gl.MaterialExpendDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
-import com.cisdi.steel.dto.response.gl.res.BatchData;
-import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
-import com.cisdi.steel.dto.response.gl.res.MaterialExpend;
-import com.cisdi.steel.dto.response.gl.res.TagValue;
+import com.cisdi.steel.dto.response.gl.TapTPCDTO;
+import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -21,6 +20,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
+
+    // 获取批次总数 tagName
+    protected static String batchCountTagName = "BF8_L2C_SH_CurrentBatch_1d_max";
 
     /**
      * 根据chargeNo获取charge raw data
@@ -76,6 +78,13 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return getMaterialExpendDTO(version, date, null);
     }
 
+    /**
+     * 每日0点0分0秒获取每日炉料消耗数据，分班次返回数据，可用于月报展示
+     * @param version
+     * @param date
+     * @param granularity 默认“shift”
+     * @return
+     */
     protected MaterialExpendDTO getMaterialExpendDTO(String version, Date date, String granularity) {
         MaterialExpendDTO materialExpendDTO = null;
         Map<String, String> queryParam = new HashMap();
@@ -94,6 +103,106 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
             }
         }
         return materialExpendDTO;
+    }
+
+    /**
+     * 获取批次总数  元数据
+     * @param version
+     * @param date
+     * @param tagName
+     * @param granularity
+     * @return
+     */
+    protected BigDecimal getBatchCount(String version, Date date, String tagName, String granularity) {
+        BigDecimal batchCount = new BigDecimal(0);
+        Map<String, String> queryParam = new HashMap();
+        Long dateTime = DateUtil.getDateBeginTime(date).getTime();
+        queryParam.put("startTime",  String.valueOf(dateTime));
+        queryParam.put("endTime",  String.valueOf(dateTime));
+        queryParam.put("tagName",  tagName);
+        queryParam.put("granularity",  granularity);
+
+        String anaChargeTfeUrl = httpProperties.getGlUrlVersion(version) + "/report/tagValue/getTagValueListByRange";
+        String tagValueListDTOStr = httpUtil.get(anaChargeTfeUrl, queryParam);
+        if (StringUtils.isNotBlank(tagValueListDTOStr)) {
+            TagValueListDTO tagValueListDTO= JSON.parseObject(tagValueListDTOStr, TagValueListDTO.class);
+            if (CollectionUtils.isNotEmpty(tagValueListDTO.getData())) {
+                batchCount = tagValueListDTO.getData().get(0).getVal();
+            } else {
+                log.warn("[{}]的批次总数为空", DateFormatUtils.format(date, DateUtil.MMddChineseFormat));
+            }
+        }
+        return batchCount;
+    }
+
+    /**
+     * 每日0点0分0秒获取每日炉料消耗数据，可用于月报展示
+     * @param version
+     * @return api数据
+     */
+    protected TapTPCDTO getTapTPCDTO(String version, Date date) {
+        TapTPCDTO tapTPCDTO = null;
+        Map<String, String> queryParam = new HashMap();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        queryParam.put("dateTime",  String.valueOf(dateBeginTime.getTime()));
+
+        String tapTPCUrl = httpProperties.getGlUrlVersion(version) + "/report/tap/getTapTPCByRange";
+        String tapTPCDTOStr = httpUtil.get(tapTPCUrl, queryParam);
+        if (StringUtils.isNotBlank(tapTPCDTOStr)) {
+            tapTPCDTO = JSON.parseObject(tapTPCDTOStr, TapTPCDTO.class);
+            if (Objects.isNull(tapTPCDTO) || CollectionUtils.isEmpty(tapTPCDTO.getData())) {
+                log.warn("[{}] 的TapTPCDTO数据为空", dateBeginTime);
+            }
+        }
+        return tapTPCDTO;
+    }
+
+    /**
+     * 计算出铁量 - 净重
+     * @param tapTPCDTO
+     * @return
+     */
+    protected BigDecimal getSumNetWgt(TapTPCDTO tapTPCDTO) {
+        return getSumNetWgt(tapTPCDTO, null);
+    }
+
+    /**
+     * 计算出铁量 - 净重
+     * @param tapTPCDTO
+     * @param shift     shift (1：夜班，2：白班)
+     * @return
+     */
+    protected BigDecimal getSumNetWgt(TapTPCDTO tapTPCDTO, String shift) {
+        BigDecimal sum = new BigDecimal(0);
+        sum = tapTPCDTO.getData().stream()
+                .filter(p -> (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
+                .map(TapTPC::getNetWt)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return sum;
+    }
+
+    /**
+     * 计算出铁量 - 毛重
+     * @param tapTPCDTO
+     * @return
+     */
+    protected BigDecimal getSumGrossWgt(TapTPCDTO tapTPCDTO) {
+        return getSumGrossWgt(tapTPCDTO, null);
+    }
+
+    /**
+     * 计算出铁量 - 毛重
+     * @param tapTPCDTO
+     * @param shift shift (1：夜班，2：白班)
+     * @return
+     */
+    protected BigDecimal getSumGrossWgt(TapTPCDTO tapTPCDTO, String shift) {
+        BigDecimal sum = new BigDecimal(0);
+        sum = tapTPCDTO.getData().stream()
+                .filter(p -> (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
+                .map(TapTPC::getGrossWt)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return sum;
     }
 
     protected String getRoundact(List<BatchDistribution> distributions) {

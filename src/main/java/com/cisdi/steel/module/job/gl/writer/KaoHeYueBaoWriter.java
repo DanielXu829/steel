@@ -212,29 +212,6 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
     }
 
     /**
-     * 每日0点0分0秒获取每日炉料消耗数据，可用于月报展示
-     * @param version
-     * @param chargeNo
-     * @return api数据
-     */
-    private TapTPCDTO getTapTPCDTO(String version, Date date) {
-        TapTPCDTO tapTPCDTO = null;
-        Map<String, String> queryParam = new HashMap();
-        Date dateBeginTime = DateUtil.getDateBeginTime(date);
-        queryParam.put("dateTime",  String.valueOf(dateBeginTime.getTime()));
-
-        String tapTPCUrl = httpProperties.getGlUrlVersion(version) + "/report/tap/getTapTPCByRange";
-        String tapTPCDTOStr = httpUtil.get(tapTPCUrl, queryParam);
-        if (StringUtils.isNotBlank(tapTPCDTOStr)) {
-            tapTPCDTO = JSON.parseObject(tapTPCDTOStr, TapTPCDTO.class);
-            if (Objects.isNull(tapTPCDTO) || CollectionUtils.isEmpty(tapTPCDTO.getData())) {
-                log.warn("[{}] 的TapTPCDTO数据为空", dateBeginTime);
-            }
-        }
-        return tapTPCDTO;
-    }
-
-    /**
      * 每日0点0分0秒获取每日煤量数据
      * @param version
      * @param chargeNo
@@ -287,20 +264,6 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
                      .count();
         }
         return count;
-    }
-
-    /**
-     * 计算出铁量
-     * @param tapTPCDTO
-     * @return
-     */
-    private BigDecimal getSumNetWgt(TapTPCDTO tapTPCDTO, String shift) {
-        BigDecimal sum = new BigDecimal(0);
-        sum = tapTPCDTO.getData().stream()
-                .filter(p -> (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
-                .map(TapTPC::getNetWt)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return sum;
     }
 
     /**
