@@ -143,12 +143,12 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
         File srcFile = new File(srcFileName);
         // 判断源文件是否存在
         if (!srcFile.exists()) {
-            logger.debug("复制文件失败，源文件 " + srcFileName + " 不存在!");
+            logger.error("复制文件失败，源文件 " + srcFileName + " 不存在!");
             return false;
         }
         // 判断源文件是否是合法的文件
         else if (!srcFile.isFile()) {
-            logger.debug("复制文件失败，" + srcFileName + " 不是一个文件!");
+            logger.error("复制文件失败，" + srcFileName + " 不是一个文件!");
             return false;
         }
         File descFile = new File(descFileName);
@@ -158,11 +158,11 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
             if (coverlay) {
                 logger.debug("目标文件已存在，准备删除!");
                 if (!FileUtils.delFile(descFileName)) {
-                    logger.debug("删除目标文件 " + descFileName + " 失败!");
+                    logger.error("删除目标文件 " + descFileName + " 失败!");
                     return false;
                 }
             } else {
-                logger.debug("复制文件失败，目标文件 " + descFileName + " 已存在!");
+                logger.error("复制文件失败，目标文件 " + descFileName + " 已存在!");
                 return false;
             }
         } else {
@@ -171,7 +171,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
                 logger.debug("目标文件所在的目录不存在，创建目录!");
                 // 创建目标文件所在的目录
                 if (!descFile.getParentFile().mkdirs()) {
-                    logger.debug("创建目标文件所在的目录失败!");
+                    logger.error("创建目标文件所在的目录失败!");
                     return false;
                 }
             }
