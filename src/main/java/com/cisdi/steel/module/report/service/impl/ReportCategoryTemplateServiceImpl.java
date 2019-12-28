@@ -145,7 +145,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
                 file.delete();
                 record.setTemplatePath(savePath);
             } else {
-                return ApiUtil.fail("保存失败");
+                return ApiUtil.fail("保存失败, 请重新上传模板");
             }
 
             //先通过CategoryCode查询category
@@ -213,7 +213,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
                     file.delete();
                     record.setTemplatePath(savePath);
                 } else {
-                    return ApiUtil.fail("保存失败，请重新上传模板");
+                    return ApiUtil.fail("保存失败, 请重新上传模板");
                 }
             }
             
