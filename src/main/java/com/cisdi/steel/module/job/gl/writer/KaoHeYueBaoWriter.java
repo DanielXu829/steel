@@ -6,6 +6,7 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.*;
 import com.cisdi.steel.dto.response.gl.res.MaterialExpend;
+import com.cisdi.steel.dto.response.gl.res.ShiftTagValue;
 import com.cisdi.steel.dto.response.gl.res.TapTPC;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -146,45 +147,55 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
                     switch (itemName) {
                         case "出铁量": {
                             if (Objects.nonNull(tapTPCDTO) && CollectionUtils.isNotEmpty(tapTPCDTO.getData())) {
-                                BigDecimal dayShiftSumNetWgt = getSumNetWgt(tapTPCDTO, "1");
-                                if (dayShiftSumNetWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, dayShiftSumNetWgt);
-                                }
-                                BigDecimal nightShiftSumNetWgt = getSumNetWgt(tapTPCDTO, "2");
+                                BigDecimal nightShiftSumNetWgt = getSumNetWgt(tapTPCDTO, "1");
                                 if (nightShiftSumNetWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, nightShiftSumNetWgt);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, nightShiftSumNetWgt);
+                                }
+                                BigDecimal dayShiftSumNetWgt = getSumNetWgt(tapTPCDTO, "2");
+                                if (dayShiftSumNetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, dayShiftSumNetWgt);
                                 }
                             }
                             break;
                         }
                         case "焦炭": {
                             if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
-                                BigDecimal dayShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "1");
-                                if (dayShiftSumWetWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, dayShiftSumWetWgt);
-                                }
-                                BigDecimal nightShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "2");
+                                BigDecimal nightShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "1");
                                 if (nightShiftSumWetWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, nightShiftSumWetWgt);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, nightShiftSumWetWgt);
+                                }
+                                BigDecimal dayShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "2");
+                                if (dayShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, dayShiftSumWetWgt);
                                 }
                             }
                             break;
                         }
                         case "回用焦": {
                             if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
-                                BigDecimal dayShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "1");
-                                if (dayShiftSumWetWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, dayShiftSumWetWgt);
-                                }
-                                BigDecimal nightShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "2");
+                                BigDecimal nightShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "1");
                                 if (nightShiftSumWetWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, nightShiftSumWetWgt);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, nightShiftSumWetWgt);
+                                }
+                                BigDecimal dayShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "2");
+                                if (dayShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, dayShiftSumWetWgt);
                                 }
                             }
                             break;
                         }
                         case "煤量": {
-                            //TODO
+                            ShiftTagValueListDTO shiftTagValueListDTO = getShiftTagValueListDTO(version, day);
+                            if (Objects.nonNull(shiftTagValueListDTO) && CollectionUtils.isNotEmpty(shiftTagValueListDTO.getData())) {
+                                double nightShiftSumVal = getValSumByShift(shiftTagValueListDTO, "1");
+                                if (nightShiftSumVal > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, nightShiftSumVal);
+                                }
+                                double dayShiftSumVal = getValSumByShift(shiftTagValueListDTO, "2");
+                                if (dayShiftSumVal > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, dayShiftSumVal);
+                                }
+                            }
                             break;
                         }
 
@@ -222,6 +233,33 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         }
         return tapTPCDTO;
     }
+
+    /**
+     * 每日0点0分0秒获取每日煤量数据
+     * @param version
+     * @param chargeNo
+     * @return api数据
+     */
+    private ShiftTagValueListDTO getShiftTagValueListDTO(String version, Date date) {
+        ShiftTagValueListDTO shiftTagValueListDTO = null;
+        Map<String, String> queryParam = new HashMap();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        queryParam.put("dateTime",  String.valueOf(dateBeginTime.getTime()));
+        queryParam.put("granularity",  "hour");
+        String meiLiangTagName = "BF8_L2C_BD_PCI_1h_avg";
+        queryParam.put("tagName", meiLiangTagName);
+
+        String shiftTagValueListUrl = httpProperties.getGlUrlVersion(version) + "/report/tagValue/getValSumByShift";
+        String shiftTagValueListDTOStr = httpUtil.get(shiftTagValueListUrl, queryParam);
+        if (StringUtils.isNotBlank(shiftTagValueListDTOStr)) {
+            shiftTagValueListDTO = JSON.parseObject(shiftTagValueListDTOStr, ShiftTagValueListDTO.class);
+            if (Objects.isNull(shiftTagValueListDTO) || CollectionUtils.isEmpty(shiftTagValueListDTO.getData())) {
+                log.warn("[{}] 的ShiftTagValueListDTO数据为空", dateBeginTime);
+            }
+        }
+        return shiftTagValueListDTO;
+    }
+
 
     /**
      * 计算总罐数
@@ -262,6 +300,23 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
                 .filter(p -> (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
                 .map(TapTPC::getNetWt)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return sum;
+    }
+
+    /**
+     * 计算煤量
+     * @param shiftTagValueListDTO
+     * @param shift (1：夜班，2：白班)
+     * @return
+     */
+    private double getValSumByShift(ShiftTagValueListDTO shiftTagValueListDTO, String shift) {
+        double sum = 0;
+        ShiftTagValue shiftTagValue = shiftTagValueListDTO.getData().stream()
+                .filter(p -> (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
+                .findAny().orElse(null);
+        if (Objects.nonNull(shiftTagValue)) {
+            sum = shiftTagValue.getVal();
+        }
         return sum;
     }
 
