@@ -39,9 +39,6 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
     // 标记行
     private static int itemRowNum = 4;
 
-    // 获取批次总数 tagName
-    private static String batchCountTagName = "BF8_L2C_SH_CurrentBatch_1d_max";
-
     // 获取最新的chargeNo tagname
     private static String tagName = "BF8_L2M_SH_ChargeVariation_evt";
 
@@ -155,7 +152,10 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                         }
                         case "回用焦丁": {
                             BigDecimal huiYongJiaoDing = getHuiYongJiaoDing(materialExpendDTO);
-                            BigDecimal val = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
+                            BigDecimal val = new BigDecimal(0);
+                            if (batchCount.intValue() > 0) {
+                                val = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
+                            }
                             ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             break;
                         }
@@ -165,13 +165,19 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                             // 计算回用焦丁
                             BigDecimal huiYongJiaoDing = getHuiYongJiaoDing(materialExpendDTO);
                             BigDecimal subtract = oCount.subtract(huiYongJiaoDing);
-                            BigDecimal val = subtract.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
+                            BigDecimal val = new BigDecimal(0);
+                            if (batchCount.intValue() > 0) {
+                                val = subtract.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
+                            }
                             ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             break;
                         }
                         case "焦炭平均批重": {
                             BigDecimal jiaoTanPingJunPiZhong = getJiaoTanPingJunPiZhong(materialExpendDTO);
-                            BigDecimal val = jiaoTanPingJunPiZhong.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
+                            BigDecimal val = new BigDecimal(0);
+                            if (batchCount.intValue() > 0) {
+                                val = jiaoTanPingJunPiZhong.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
+                            }
                             ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             break;
                         }
@@ -276,36 +282,6 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
         }
 
         return anaItemValDTO;
-    }
-
-    /**
-     * 获取批次总数  元数据
-     * @param version
-     * @param date
-     * @param tagName
-     * @param granularity
-     * @return
-     */
-    private BigDecimal getBatchCount(String version, Date date, String tagName, String granularity) {
-        BigDecimal batchCount = new BigDecimal(1.0);
-        Map<String, String> queryParam = new HashMap();
-        Long dateTime = DateUtil.getDateBeginTime(date).getTime();
-        queryParam.put("startTime",  String.valueOf(dateTime));
-        queryParam.put("endTime",  String.valueOf(dateTime));
-        queryParam.put("tagName",  tagName);
-        queryParam.put("granularity",  granularity);
-
-        String anaChargeTfeUrl = httpProperties.getGlUrlVersion(version) + "/report/tagValue/getTagValueListByRange";
-        String tagValueListDTOStr = httpUtil.get(anaChargeTfeUrl, queryParam);
-        if (StringUtils.isNotBlank(tagValueListDTOStr)) {
-            TagValueListDTO tagValueListDTO= JSON.parseObject(tagValueListDTOStr, TagValueListDTO.class);
-            if (CollectionUtils.isNotEmpty(tagValueListDTO.getData())) {
-                batchCount = tagValueListDTO.getData().get(0).getVal();
-            } else {
-                log.warn(DateFormatUtils.format(date, DateUtil.MMddChineseFormat) + "的批次总数为空");
-            }
-        }
-        return batchCount;
     }
 
     /**
