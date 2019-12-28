@@ -1,8 +1,6 @@
 高炉：
     技术经济月报：写接口中
-    考核月报：第二个sheet已提供接口，待前端展示
-    煤量：http://10.11.11.4:9001/report/tagValue/getValSumByShift?dateTime=1577289600000&granularity=hour&tagName=BF8_L2C_BD_PCI_1h_avg
-    dto通用:ShiftTagValueListDTO
+    考核月报：已完成 - 提交代码至master
 
 烧结：
     烧结生产日报：空余项待补齐
