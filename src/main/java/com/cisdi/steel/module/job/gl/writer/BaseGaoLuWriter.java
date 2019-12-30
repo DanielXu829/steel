@@ -166,7 +166,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
             if (CollectionUtils.isNotEmpty(tagValueListDTO.getData())) {
                 tagValueList = tagValueListDTO.getData();
             } else {
-                log.warn("[{}]的tagValueList为空, tagName[{}], granularity[{}]", DateFormatUtils.format(query.getRecordDate(), DateUtil.MMddChineseFormat), tagName, granularity);
+                log.warn("[{}]的tagValueList为空, tagName[{}], granularity[{}]", DateFormatUtils.format(query.getRecordDate(), DateUtil.yyyyMMddChineseFormat), tagName, granularity);
             }
         }
         return tagValueList;
@@ -269,37 +269,41 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     /**
-     * 获取回用焦丁  元数据
-     * @param materialExpendDTO
+     * 获取material wetwgt 元数据
+     * @param materialExpendDTO material数据
      * @return
      */
-    protected BigDecimal getHuiYongJiaoDing(MaterialExpendDTO materialExpendDTO) {
-        return getHuiYongJiaoDing(materialExpendDTO, null);
-    }
-    protected BigDecimal getHuiYongJiaoDing(MaterialExpendDTO materialExpendDTO, String shift) {
-        BigDecimal oCount = materialExpendDTO.getData().stream()
-                .filter(p -> StringUtils.endsWith(p.getMatCname(), "回用焦丁") && (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
-                .map(MaterialExpend::getWetWgt)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return oCount;
+    protected BigDecimal getMaterialExpendWetWgt(MaterialExpendDTO materialExpendDTO) {
+        return getMaterialExpendWetWgt(materialExpendDTO, null, null);
     }
 
     /**
-     * 获取焦炭平均批重 元数据
-     * @param materialExpendDTO
+     * 获取material wetwgt 元数据
+     * @param materialExpendDTO material数据
+     * @param matCnames matCname列表，多个的值相加
      * @return
      */
-    protected BigDecimal getJiaoTanPingJunPiZhong(MaterialExpendDTO materialExpendDTO) {
-        return getJiaoTanPingJunPiZhong(materialExpendDTO, null);
+    protected BigDecimal getMaterialExpendWetWgt(MaterialExpendDTO materialExpendDTO, List<String> matCnames) {
+        return getMaterialExpendWetWgt(materialExpendDTO, matCnames, null);
     }
-    protected BigDecimal getJiaoTanPingJunPiZhong(MaterialExpendDTO materialExpendDTO, String shift) {
-        BigDecimal oCount = materialExpendDTO.getData().stream()
-                .filter(p -> ("大块焦".equals(p.getMatCname()) || "小块焦".equals(p.getMatCname())) && (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
+
+    /**
+     * 获取material wetwgt 元数据
+     * @param materialExpendDTO material数据
+     * @param matCnames matCname列表，多个的值相加
+     * @param shift shift shift (1：夜班，2：白班)
+     * @return
+     */
+    protected BigDecimal getMaterialExpendWetWgt(MaterialExpendDTO materialExpendDTO, List<String> matCnames, String shift) {
+        if (Objects.isNull(materialExpendDTO) || CollectionUtils.isEmpty(materialExpendDTO.getData())) {
+            return new BigDecimal(0.0);
+        }
+        BigDecimal sum = materialExpendDTO.getData().stream()
+                .filter(p -> (Objects.isNull(matCnames) || matCnames.contains(p.getMatCname())) && (StringUtils.isBlank(shift) || shift.equals(p.getWorkShift())))
                 .map(MaterialExpend::getWetWgt)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return oCount;
+        return sum;
     }
 
     /**

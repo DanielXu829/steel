@@ -55,6 +55,7 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             mapDataHandler(sheet, version);
         } catch (Exception e) {
             log.error("处理 铁罐装载率 时产生错误", e);
+            throw e;
         }
 
         // 填充报表第二个工作表“班产燃料比”数据
@@ -63,6 +64,7 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             mapDataHandler2(sheet2, version);
         } catch (Exception e) {
             log.error("处理 班产燃料比 时产生错误", e);
+            throw e;
         }
 
         return workbook;
@@ -117,7 +119,8 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 1);
+        Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 1, lastDay);
         sheet.getRow(itemRowNum).setZeroHeight(true);
     }
 
@@ -160,11 +163,11 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
                         }
                         case "焦炭": {
                             if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
-                                BigDecimal nightShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "1");
+                                BigDecimal nightShiftSumWetWgt = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦","大块焦"), "1");
                                 if (nightShiftSumWetWgt.doubleValue() > 0) {
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, nightShiftSumWetWgt);
                                 }
-                                BigDecimal dayShiftSumWetWgt = getJiaoTanPingJunPiZhong(materialExpendDTO, "2");
+                                BigDecimal dayShiftSumWetWgt = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦","大块焦"), "2");
                                 if (dayShiftSumWetWgt.doubleValue() > 0) {
                                     ExcelWriterUtil.addCellData(cellDataList, row + 1, col, dayShiftSumWetWgt);
                                 }
@@ -173,11 +176,11 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
                         }
                         case "回用焦": {
                             if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
-                                BigDecimal nightShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "1");
+                                BigDecimal nightShiftSumWetWgt = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("回用焦丁"), "1");
                                 if (nightShiftSumWetWgt.doubleValue() > 0) {
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, nightShiftSumWetWgt);
                                 }
-                                BigDecimal dayShiftSumWetWgt = getHuiYongJiaoDing(materialExpendDTO, "2");
+                                BigDecimal dayShiftSumWetWgt = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("回用焦丁"), "2");;
                                 if (dayShiftSumWetWgt.doubleValue() > 0) {
                                     ExcelWriterUtil.addCellData(cellDataList, row + 1, col, dayShiftSumWetWgt);
                                 }
@@ -207,7 +210,8 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 0, 0);
+        Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 0, 0, lastDay);
         sheet.getRow(itemRowNum).setZeroHeight(true);
     }
 
