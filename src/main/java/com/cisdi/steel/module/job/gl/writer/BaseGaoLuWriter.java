@@ -106,33 +106,70 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     /**
-     * 获取批次总数  元数据
+     * 获取/report/tagValue/getTagValueListByRange  元数据, 返回第一个TagValue的值, 默认值为0
      * @param version
-     * @param date
+     * @param query
      * @param tagName
      * @param granularity
      * @return
      */
-    protected BigDecimal getBatchCount(String version, Date date, String tagName, String granularity) {
-        BigDecimal batchCount = new BigDecimal(0);
-        Map<String, String> queryParam = new HashMap();
-        Long dateTime = DateUtil.getDateBeginTime(date).getTime();
-        queryParam.put("startTime",  String.valueOf(dateTime));
-        queryParam.put("endTime",  String.valueOf(dateTime));
-        queryParam.put("tagName",  tagName);
-        queryParam.put("granularity",  granularity);
+    protected BigDecimal getFirstTagValueByRange(String version, DateQuery query, String tagName, String granularity) {
+        BigDecimal value = new BigDecimal(0);
+        TagValue firstTagValueObjByRange = this.getFirstTagValueObjByRange(version, query, tagName, granularity);
+        if (Objects.nonNull(firstTagValueObjByRange)) {
+            value = firstTagValueObjByRange.getVal();
+        }
+        return value;
+    }
 
-        String anaChargeTfeUrl = httpProperties.getGlUrlVersion(version) + "/report/tagValue/getTagValueListByRange";
-        String tagValueListDTOStr = httpUtil.get(anaChargeTfeUrl, queryParam);
+    /**
+     * 获取/report/tagValue/getTagValueListByRange  元数据, 返回第一个TagValue
+     * @param version
+     * @param query
+     * @param tagName
+     * @param granularity
+     * @return
+     */
+    protected TagValue getFirstTagValueObjByRange(String version, DateQuery query, String tagName, String granularity) {
+        List<TagValue> tagValueListByRange = this.getTagValueListByRange(version, query, tagName, granularity);
+        if (CollectionUtils.isNotEmpty(tagValueListByRange)) {
+            return tagValueListByRange.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 获取/report/tagValue/getTagValueListByRange  元数据, 返回数据
+     * @param version
+     * @param query
+     * @param tagName
+     * @param granularity
+     * @return
+     */
+    protected List<TagValue> getTagValueListByRange(String version, DateQuery query, String tagName, String granularity) {
+        List<TagValue> tagValueList = new ArrayList<>();
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
+        if (StringUtils.isNotBlank(tagName)) {
+            queryParam.put("tagName", tagName);
+        }
+        if (StringUtils.isNotBlank(granularity)) {
+            queryParam.put("granularity", granularity);
+        }
+
+        String tagValueListUrl = httpProperties.getGlUrlVersion(version) + "/report/tagValue/getTagValueListByRange";
+        String tagValueListDTOStr = httpUtil.get(tagValueListUrl, queryParam);
         if (StringUtils.isNotBlank(tagValueListDTOStr)) {
             TagValueListDTO tagValueListDTO= JSON.parseObject(tagValueListDTOStr, TagValueListDTO.class);
             if (CollectionUtils.isNotEmpty(tagValueListDTO.getData())) {
-                batchCount = tagValueListDTO.getData().get(0).getVal();
+                tagValueList = tagValueListDTO.getData();
             } else {
-                log.warn("[{}]的批次总数为空", DateFormatUtils.format(date, DateUtil.MMddChineseFormat));
+                log.warn("[{}]的tagValueList为空, tagName[{}], granularity[{}]", DateFormatUtils.format(query.getRecordDate(), DateUtil.MMddChineseFormat), tagName, granularity);
             }
         }
-        return batchCount;
+        return tagValueList;
     }
 
     /**

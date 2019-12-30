@@ -356,6 +356,18 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建开始和结束时间均为某一天的起始时间00:00:00
+     *
+     * @param date
+     * @return
+     */
+    public static DateQuery buildDayWithBeginTimeForBoth(Date date) {
+        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        Date todayEndTime = DateUtil.getDateBeginTime(date);
+        return new DateQuery(todayBeginTime, todayEndTime, date);
+    }
+
+    /**
      * 构建不规则时间段
      *
      * @param date

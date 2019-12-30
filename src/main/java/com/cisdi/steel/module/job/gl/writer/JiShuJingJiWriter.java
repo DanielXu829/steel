@@ -1,14 +1,9 @@
 package com.cisdi.steel.module.job.gl.writer;
 
-import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.*;
-import com.cisdi.steel.dto.response.gl.res.BatchData;
-import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
-import com.cisdi.steel.dto.response.gl.res.MaterialExpend;
-import com.cisdi.steel.dto.response.gl.res.TagValue;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -16,8 +11,6 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -76,8 +69,13 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
         for (int i = 0; i < allDayBeginTimeInCurrentMonth.size() - 1; i++) {
             // 通过api获取tapTPCDTO和MaterialExpendDTO数据
             Date day = allDayBeginTimeInCurrentMonth.get(i);
+            DateQuery dateQuery = DateQueryUtil.buildDayWithBeginTimeForBoth(day);
             TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
+
             MaterialExpendDTO materialExpendDTO = getMaterialExpendDTO(version, day);
+            // 计算回用焦丁
+            BigDecimal huiYongJiaoDing = getHuiYongJiaoDing(materialExpendDTO);
+            BigDecimal ganJiaoLiang = getJiaoTanPingJunPiZhong(materialExpendDTO);
 
             // 计算行
             if (i > 0 && i%10 ==0) {
@@ -93,7 +91,7 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                     switch (itemName) {
                         case "批数": {
                             // 获取批次总数
-                            BigDecimal batchCount = getBatchCount(version, day, batchCountTagName, "day");
+                            BigDecimal batchCount = getFirstTagValueByRange(version, dateQuery, batchCountTagName, "day");
                             ExcelWriterUtil.addCellData(cellDataList, row, col, batchCount);
                             break;
                         }
@@ -115,6 +113,24 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                             }
                             break;
                         }
+                        case "干焦量": {
+                            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, ganJiaoLiang);
+                            }
+                            break;
+                        }
+                        case "综合干焦量": {
+                            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, ganJiaoLiang.add(huiYongJiaoDing));
+                            }
+                            break;
+                        }
+                        case "燃料比": {
+                            // 获取燃料比
+                            BigDecimal ranLiaoBi = getFirstTagValueByRange(version, dateQuery, "BF8_L2M_BX_FuelRate_1d_cur", "day");
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, ranLiaoBi);
+                            break;
+                        }
                         default: {
                             break;
                         }
@@ -124,6 +140,9 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 0);
+
+        // TODO 替换当月天数
+        // TODO 隐藏行首两行，改为隐藏一行
         sheet.getRow(itemRowNum).setZeroHeight(true);
         sheet.getRow(itemRowNum - 1).setZeroHeight(true);
     }
