@@ -336,7 +336,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         continue;
                     }
 
-                    List<DateQuery> dayEach = DateQueryUtil.buildDay12HourEach(new Date());
+                    List<DateQuery> dayEach = DateQueryUtil.buildDay12HourEach(dateRun);
                     int rowIndex = 1;
                     for (int j = 0; j < dayEach.size(); j++) {
                         DateQuery query = dayEach.get(j);

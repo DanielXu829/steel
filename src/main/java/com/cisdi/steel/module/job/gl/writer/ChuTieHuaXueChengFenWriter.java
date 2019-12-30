@@ -62,9 +62,17 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
 
         DateQuery date = this.getDateQuery(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
-        // 当前时间的前24小时内
-        Date tieLiangEndTime = new Date();
-        Date tieLiangStartTime = DateUtil.addHours(tieLiangEndTime, -24);
+        // 报表当前记录时间的前一天晚上8点到当前晚上24点，重新生成报表不会改变记录时间
+        Date tieLiangEndTime = date.getRecordDate();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(tieLiangEndTime);
+        calendar.set(Calendar.HOUR_OF_DAY, 24);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        tieLiangEndTime = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_MONTH, -2);
+        calendar.set(Calendar.HOUR, 20);
+        Date tieLiangStartTime = calendar.getTime();
         String tieLiangData = getTieLiangData(tieLiangStartTime, tieLiangEndTime, version);
         Map<String, Double> tapNoToActWeightMap = handleTieLiangData(tieLiangData);
 
@@ -72,7 +80,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
         // 将第4行（标记行）隐藏
         sheet.getRow(itemRowNum).setZeroHeight(true);
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
-            // 通过api获取数据
+        // 通过api获取数据
         String shengTieData = getData("HM", dateQuery, version);
         JSONArray shengTieDataArray = convertJsonStringToJsonArray(shengTieData);
         String luZhaData = getData("SLAG", dateQuery, version);
