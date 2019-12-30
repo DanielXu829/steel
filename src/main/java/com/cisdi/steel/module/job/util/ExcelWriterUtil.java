@@ -409,12 +409,30 @@ public class ExcelWriterUtil {
      * @param sheet
      * @param row
      * @param column
+     * @param date
      */
-    public static void replaceCurrentMonthInTitle(Sheet sheet, int row, int column) {
+    public static void replaceCurrentMonthInTitle(Sheet sheet, int row, int column, Date date) {
         Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, row), column);
         String stringCellValue = titleCell.getStringCellValue();
-        String currentMonth = DateFormatUtils.format(new Date(), DateUtil.yyyyMM);
+        String currentMonth = DateFormatUtils.format(date, DateUtil.yyyyMM);
         stringCellValue = stringCellValue.replaceAll("%当前月份%", currentMonth);
+        titleCell.setCellValue(stringCellValue);
+    }
+
+    /**
+     * 动态替换报表中的当月天数
+     * @param sheet
+     * @param row
+     * @param column
+     * @param date
+     */
+    public static void replaceDaysOfMonthInTitle(Sheet sheet, int row, int column, Date date) {
+        Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, row), column);
+        String stringCellValue = titleCell.getStringCellValue();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int currentMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        stringCellValue = stringCellValue.replaceAll("%当月天数%", String.valueOf(currentMonth));
         titleCell.setCellValue(stringCellValue);
     }
 }

@@ -51,6 +51,7 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             mapDataHandler(sheet, version);
         } catch (Exception e) {
             log.error("处理主工作表时产生错误", e);
+            throw e;
         }
 
         return workbook;
@@ -59,7 +60,7 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
     private void mapDataHandler(Sheet sheet, String version) {
         // 标记行
         int itemRowNum = 6;
-        String defaultCellValue = "";
+        BigDecimal defaultCellValue = new BigDecimal(0.0);
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
@@ -71,11 +72,20 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             Date day = allDayBeginTimeInCurrentMonth.get(i);
             DateQuery dateQuery = DateQueryUtil.buildDayWithBeginTimeForBoth(day);
             TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
-
+            //计算铁量净重
+            BigDecimal tieLiangSumNetWgt = defaultCellValue;
+            if (Objects.nonNull(tapTPCDTO) && CollectionUtils.isNotEmpty(tapTPCDTO.getData())) {
+                tieLiangSumNetWgt = getSumNetWgt(tapTPCDTO);
+            }
+            // 计算回用焦丁、焦量、小块焦、矿石重量
             MaterialExpendDTO materialExpendDTO = getMaterialExpendDTO(version, day);
-            // 计算回用焦丁
-            BigDecimal huiYongJiaoDing = getHuiYongJiaoDing(materialExpendDTO);
-            BigDecimal ganJiaoLiang = getJiaoTanPingJunPiZhong(materialExpendDTO);
+            BigDecimal huiYongJiaoDing = defaultCellValue, ganJiaoLiang = defaultCellValue, xiaoKuaiJiao = defaultCellValue, kuaiShiZhongLiang = defaultCellValue;
+            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                huiYongJiaoDing = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("回用焦丁"));
+                ganJiaoLiang = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦","大块焦"));
+                xiaoKuaiJiao = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦"));
+                kuaiShiZhongLiang = getMaterialExpendWetWgt(materialExpendDTO);
+            }
 
             // 计算行
             if (i > 0 && i%10 ==0) {
@@ -92,7 +102,9 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                         case "批数": {
                             // 获取批次总数
                             BigDecimal batchCount = getFirstTagValueByRange(version, dateQuery, batchCountTagName, "day");
-                            ExcelWriterUtil.addCellData(cellDataList, row, col, batchCount);
+                            if (batchCount.doubleValue() > 0) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, batchCount);
+                            }
                             break;
                         }
                         case "毛重": {
@@ -105,22 +117,43 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                             break;
                         }
                         case "净重": {
-                            if (Objects.nonNull(tapTPCDTO) && CollectionUtils.isNotEmpty(tapTPCDTO.getData())) {
-                                BigDecimal sumNetWgt = getSumNetWgt(tapTPCDTO);
-                                if (sumNetWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, sumNetWgt);
-                                }
+                            if (tieLiangSumNetWgt.doubleValue() > 0) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, tieLiangSumNetWgt);
+                            }
+                            break;
+                        }
+                        case "回收焦比": {
+                            // 回用焦丁 * 1000 / 铁量
+                            if (huiYongJiaoDing.doubleValue() > 0 && tieLiangSumNetWgt.doubleValue() > 0){
+                                BigDecimal huiShouJiaoDing = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(tieLiangSumNetWgt, 2, BigDecimal.ROUND_HALF_UP);
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, huiShouJiaoDing);
+                            }
+                            break;
+                        }
+                        case "小块焦比": {
+                            // 小块焦 * 1000 / 铁量
+                            if (xiaoKuaiJiao.doubleValue() > 0 && tieLiangSumNetWgt.doubleValue() > 0){
+                                BigDecimal xiaoKuaiJiaoBi = xiaoKuaiJiao.multiply(new BigDecimal(1000)).divide(tieLiangSumNetWgt, 2, BigDecimal.ROUND_HALF_UP);
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, xiaoKuaiJiaoBi);
+                            }
+                            break;
+                        }
+                        case "焦炭负荷": {
+                            // 矿石重量 /（大块焦+小块焦+回用焦丁）
+                            if (kuaiShiZhongLiang.doubleValue() > 0 && (huiYongJiaoDing.doubleValue() > 0 || ganJiaoLiang.doubleValue() > 0)){
+                                BigDecimal jiaoTanFuHe = kuaiShiZhongLiang.divide(ganJiaoLiang.add(huiYongJiaoDing), 2, BigDecimal.ROUND_HALF_UP);
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, jiaoTanFuHe);
                             }
                             break;
                         }
                         case "干焦量": {
-                            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                            if (ganJiaoLiang.doubleValue() > 0) {
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, ganJiaoLiang);
                             }
                             break;
                         }
                         case "综合干焦量": {
-                            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                            if (ganJiaoLiang.doubleValue() > 0 || huiYongJiaoDing.doubleValue() > 0) {
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, ganJiaoLiang.add(huiYongJiaoDing));
                             }
                             break;
@@ -128,7 +161,9 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                         case "燃料比": {
                             // 获取燃料比
                             BigDecimal ranLiaoBi = getFirstTagValueByRange(version, dateQuery, "BF8_L2M_BX_FuelRate_1d_cur", "day");
-                            ExcelWriterUtil.addCellData(cellDataList, row, col, ranLiaoBi);
+                            if(ranLiaoBi.doubleValue() > 0) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, ranLiaoBi);
+                            }
                             break;
                         }
                         default: {
@@ -139,9 +174,10 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 0);
-
-        // TODO 替换当月天数
+        Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        // 替换当月天数和当前月份
+        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 0, lastDay);
+        ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 4, lastDay);
         // TODO 隐藏行首两行，改为隐藏一行
         sheet.getRow(itemRowNum).setZeroHeight(true);
         sheet.getRow(itemRowNum - 1).setZeroHeight(true);

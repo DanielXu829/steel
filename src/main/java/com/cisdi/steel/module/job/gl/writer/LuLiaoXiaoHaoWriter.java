@@ -152,7 +152,7 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                             break;
                         }
                         case "回用焦丁": {
-                            BigDecimal huiYongJiaoDing = getHuiYongJiaoDing(materialExpendDTO);
+                            BigDecimal huiYongJiaoDing = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("回用焦丁"));
                             BigDecimal val = new BigDecimal(0);
                             if (batchCount.intValue() > 0) {
                                 val = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
@@ -164,7 +164,7 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                             // 计算o总量
                             BigDecimal oCount = getOCount(materialExpendDTO);
                             // 计算回用焦丁
-                            BigDecimal huiYongJiaoDing = getHuiYongJiaoDing(materialExpendDTO);
+                            BigDecimal huiYongJiaoDing = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("回用焦丁"));
                             BigDecimal subtract = oCount.subtract(huiYongJiaoDing);
                             BigDecimal val = new BigDecimal(0);
                             if (batchCount.intValue() > 0) {
@@ -174,7 +174,7 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                             break;
                         }
                         case "焦炭平均批重": {
-                            BigDecimal jiaoTanPingJunPiZhong = getJiaoTanPingJunPiZhong(materialExpendDTO);
+                            BigDecimal jiaoTanPingJunPiZhong = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦","大块焦"));
                             BigDecimal val = new BigDecimal(0);
                             if (batchCount.intValue() > 0) {
                                 val = jiaoTanPingJunPiZhong.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
