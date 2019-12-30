@@ -84,15 +84,6 @@ public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseGaoLuWriter {
             }
         }
 
-        // TODO 设置动态边框样式
-//        int beginRowNum = itemRowNum + 1;
-//        int lastRowNum = sheet.getLastRowNum();
-//        int beginColumnNum = 1;
-//        int endColumnNum = itemNameList.size() + beginColumnNum - 2;
-//        ExcelWriterUtil.setBorderStyle(workbook, sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
-
-        // TODO 动态创建、合并单元格。
-
         return workbook;
     }
 
@@ -160,16 +151,23 @@ public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseGaoLuWriter {
                         }
                         case "materials.brandcode" : {
                             //c中：materials.brandcode后缀是COKE + 第一个O中的“回用焦丁”
-                            BigDecimal coke = cMaterials.stream()
-                                    .filter(p -> StringUtils.endsWith(p.getBrandcode(),"COKE"))
-                                    .collect(Collectors.toList()).get(0).getWeightset();
+                            List<BatchMaterial> cFilteredMaterials = cMaterials.stream()
+                                    .filter(p -> StringUtils.endsWith(p.getBrandcode(), "COKE"))
+                                    .collect(Collectors.toList());
+                            BigDecimal coke = new BigDecimal(0);
+                            if (CollectionUtils.isNotEmpty(cFilteredMaterials)) {
+                                coke = cFilteredMaterials.get(0).getWeightset();
+                            }
                             // 获取第一个o中的“回用焦丁”
-                            BigDecimal huiYongJiaoDing = o1Materials.stream()
+                            BigDecimal huiYongJiaoDing = new BigDecimal(0);
+                            List<BatchMaterial> o1FilteredMaterials = o1Materials.stream()
                                     .filter(p -> "回用焦丁".equals(p.getDescr()))
-                                    .collect(Collectors.toList()).get(0).getWeightset();
+                                    .collect(Collectors.toList());
+                            if (CollectionUtils.isNotEmpty(o1FilteredMaterials)) {
+                                huiYongJiaoDing = o1FilteredMaterials.get(0).getWeightset();
+                            }
 
-                            double jiaoDing = coke.add(huiYongJiaoDing).doubleValue();
-
+                            BigDecimal jiaoDing = coke.add(huiYongJiaoDing);
                             ExcelWriterUtil.addCellData(cellDataList, row, col, jiaoDing);
                             break;
                         }
@@ -180,15 +178,19 @@ public class BuLiaoZhiDuBianDongJiZaiWriter extends BaseGaoLuWriter {
                                     .map(BatchMaterial::getWeightset)
                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                            ExcelWriterUtil.addCellData(cellDataList, row, col, kuangShiZongLiang.doubleValue());
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, kuangShiZongLiang);
                             break;
                         }
                         case "小烧" : {
                             //第二个o中：materials.brandcode后缀是SINTER
-                            BatchMaterial batchMaterial = o2Materials.stream()
-                                    .filter(p -> StringUtils.endsWith(p.getBrandcode(),"SINTER"))
-                                    .collect(Collectors.toList()).get(0);
-                            ExcelWriterUtil.addCellData(cellDataList, row, col, batchMaterial.getWeightset());
+                            List<BatchMaterial> o2FilteredMaterials = o2Materials.stream()
+                                    .filter(p -> StringUtils.endsWith(p.getBrandcode(), "SINTER"))
+                                    .collect(Collectors.toList());
+                            BigDecimal xiaoShao = new BigDecimal(0);
+                            if (CollectionUtils.isNotEmpty(o2FilteredMaterials)) {
+                                xiaoShao = o2FilteredMaterials.get(0).getWeightset();
+                            }
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, xiaoShao);
                             break;
                         }
                         case "基准尺": {

@@ -85,7 +85,8 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
             Date day = allDayBeginTimeInCurrentMonth.get(i);
             MaterialExpendDTO materialExpendDTO = getMaterialExpendDTO(version, day);
             // 获取批次总数
-            BigDecimal batchCount = getBatchCount(version, day, batchCountTagName, "day");
+            DateQuery dateQuery = DateQueryUtil.buildDayWithBeginTimeForBoth(day);
+            BigDecimal batchCount = getFirstTagValueByRange(version, dateQuery, batchCountTagName, "day");
             // 计算原料配比总量
             BigDecimal yuanLiaoPeiBiCount = getYuanLiaoPeiBiCount(materialExpendDTO);
             // 获取当天最后一条chargeNo对应的COO
