@@ -80,7 +80,7 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
 
         int fixLineCount = 0;
-        for (int i = 0; i < allDayBeginTimeInCurrentMonth.size() - 1; i++) {
+        for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
             // 通过api获取MaterialExpendDTO数据
             Date day = allDayBeginTimeInCurrentMonth.get(i);
             TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
@@ -133,7 +133,7 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         List<CellData> cellDataList = new ArrayList<>();
         List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
 
-        for (int i = 0; i < allDayBeginTimeInCurrentMonth.size() - 1; i++) {
+        for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
             // 通过api获取MaterialExpendDTO数据
             Date day = allDayBeginTimeInCurrentMonth.get(i);
             TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
