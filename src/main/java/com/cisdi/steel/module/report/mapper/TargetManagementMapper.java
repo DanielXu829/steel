@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import com.cisdi.steel.module.report.entity.TargetManagement;
 
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Description: 指标管理 Mapper 接口 </p>
@@ -46,4 +48,11 @@ public interface TargetManagementMapper extends BaseMapper<TargetManagement> {
      * @return
      */
     List<TargetManagement> selectTargetManagementByCondition(@Param("condition") String condition);
+
+    /**
+     * 查询所有的tag点
+     * @return Map<id, TargetManagement>
+     */
+    @MapKey("id")
+    Map<Long, TargetManagement> selectAllTargetManagement();
 }

@@ -48,4 +48,8 @@
             </if>
         </where>
     </select>
+
+    <select id="selectAllTargetManagement" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
+        SELECT * FROM target_management
+    </select>
 </mapper>

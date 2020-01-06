@@ -14,8 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * <p>Description: tag点别名 服务实现类 </p>
@@ -50,6 +54,39 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
         this.removeById(record.getId());
 
         return ApiUtil.success();
+    }
+
+    /**
+     * 条件查询获取树菜单
+     * @param condition
+     * @return
+     */
+    @Override
+    public ApiResult selectTargetManagementTreeByCondition(String condition) {
+        List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementByCondition(condition);
+        Map<Long, TargetManagement> allTargetManagements = targetManagementMapper.selectAllTargetManagement();
+        List<TargetManagement> targetManagementList = new ArrayList();
+        for (TargetManagement targetManagement: targetManagements){
+            Long id = targetManagement.getId();
+            targetManagementList.add(targetManagement);
+            // 如果节点id不是1，则继续获取父节点
+            while (id != 1) {
+                id = allTargetManagements.get(id).getParentId();
+                targetManagementList.add(allTargetManagements.get(id));
+            }
+        }
+
+        targetManagementList = targetManagementList.stream().collect(
+                collectingAndThen(toCollection(() -> new TreeSet<>(comparing(TargetManagement::getId))), ArrayList::new));
+        targetManagementList.sort(comparing(TargetManagement::getWrittenName));
+        List<TargetManagement> targetManagementsTree = TargetManagementUtil.list2TreeConverter(targetManagementList, 0L);
+        List<TargetManagement> itemList = targetManagementMapper.selectTargetManagementByCondition(condition);
+        itemList.sort(comparing(TargetManagement::getWrittenName));
+        Map<String, List> dataMap = new HashMap();
+        dataMap.put("itemList", itemList);
+        dataMap.put("treeData", targetManagementsTree);
+
+        return ApiUtil.success(dataMap);
     }
 
     @Override
