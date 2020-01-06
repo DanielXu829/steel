@@ -30,6 +30,13 @@ public interface TargetManagementService extends IBaseService<TargetManagement> 
     ApiResult deleteCurrentTarget(TargetManagement record);
 
     /**
+     * 模糊匹配 并返回tree数据
+     * @param condition
+     * @return
+     */
+    ApiResult selectTargetManagementTreeByCondition(String condition);
+
+    /**
      * 模糊匹配
      * @param condition
      * @return

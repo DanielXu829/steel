@@ -85,8 +85,13 @@ public class TargetManagementController {
         return baseService.deleteCurrentTarget(record);
     }
 
+    /**
+     * 条件查询获取树菜单
+     * @param condition
+     * @return
+     */
     @GetMapping(value = "/selectTargetManagementByCondition")
     public ApiResult selectTargetManagementByCondition(String condition) {
-        return baseService.selectTargetManagementByCondition(condition);
-    };
+        return baseService.selectTargetManagementTreeByCondition(condition);
+    }
 }

@@ -325,7 +325,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                     Arrays.sort(list);
 
                     if(column.indexOf("_1d_") > -1) {
-                        // 该tag点需要特殊处理, 获取当前时间，如果超过下午8点，就写入第一和第二行,如果没超过就只写第一行
+                        // 该tag点需要特殊处理, 获取当前运行时间，如果超过下午8点，就写入第一和第二行,如果没超过就只写第一行
                         Date itemTime = DateUtil.addHours(DateUtil.getDateBeginTime(dateRun), 20);
                         if (dateRun.getTime() < itemTime.getTime()) {
                             ExcelWriterUtil.addCellData(cellDataList, 1, columnIndex, data.get(list[0]));
