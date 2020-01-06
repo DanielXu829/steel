@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.gl.writer;
 
+import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
@@ -68,14 +69,15 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
 
         int fixLineCount = 0;
         for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
-            // 通过api获取tapTPCDTO和MaterialExpendDTO数据
+            // 通过api获取tapTPCDTO、MaterialExpendDTO、TapSummaryListDTO数据
             Date day = allDayBeginTimeInCurrentMonth.get(i);
             DateQuery dateQuery = DateQueryUtil.buildDayWithBeginTimeForBoth(day);
             TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
+            TapSummaryListDTO tapSummaryListDTO = getTapSummaryListDTO(version, day);
             //计算铁量净重
-            BigDecimal tieLiangSumNetWgt = defaultCellValue;
-            if (Objects.nonNull(tapTPCDTO) && CollectionUtils.isNotEmpty(tapTPCDTO.getData())) {
-                tieLiangSumNetWgt = getSumNetWgt(tapTPCDTO);
+            Double actWeight = defaultCellValue.doubleValue();
+            if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
+                actWeight = tapSummaryListDTO.getData().get(0).getActWeight();
             }
             // 计算回用焦丁、焦量、小块焦、矿石重量
             MaterialExpendDTO materialExpendDTO = getMaterialExpendDTO(version, day);
@@ -108,32 +110,32 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                             break;
                         }
                         case "毛重": {
-                            if (Objects.nonNull(tapTPCDTO) && CollectionUtils.isNotEmpty(tapTPCDTO.getData())) {
-                                BigDecimal sumGrossWgt = getSumGrossWgt(tapTPCDTO);
-                                if (sumGrossWgt.doubleValue() > 0) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, sumGrossWgt);
+                            if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
+                                Double grossWgt = tapSummaryListDTO.getData().get(0).getGrossWgt();
+                                if (Objects.nonNull(grossWgt) && grossWgt > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, grossWgt);
                                 }
                             }
                             break;
                         }
                         case "净重": {
-                            if (tieLiangSumNetWgt.doubleValue() > 0) {
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, tieLiangSumNetWgt);
+                            if (Objects.nonNull(actWeight) && actWeight > 0) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, actWeight);
                             }
                             break;
                         }
                         case "回收焦比": {
                             // 回用焦丁 * 1000 / 铁量
-                            if (huiYongJiaoDing.doubleValue() > 0 && tieLiangSumNetWgt.doubleValue() > 0){
-                                BigDecimal huiShouJiaoDing = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(tieLiangSumNetWgt, 2, BigDecimal.ROUND_HALF_UP);
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, huiShouJiaoDing);
+                            if (huiYongJiaoDing.doubleValue() > 0 && Objects.nonNull(actWeight) && actWeight > 0){
+                                BigDecimal huiShouJiaoBi = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(new BigDecimal(actWeight), 2, BigDecimal.ROUND_HALF_UP);
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, huiShouJiaoBi);
                             }
                             break;
                         }
                         case "小块焦比": {
                             // 小块焦 * 1000 / 铁量
-                            if (xiaoKuaiJiao.doubleValue() > 0 && tieLiangSumNetWgt.doubleValue() > 0){
-                                BigDecimal xiaoKuaiJiaoBi = xiaoKuaiJiao.multiply(new BigDecimal(1000)).divide(tieLiangSumNetWgt, 2, BigDecimal.ROUND_HALF_UP);
+                            if (xiaoKuaiJiao.doubleValue() > 0 && Objects.nonNull(actWeight) && actWeight > 0){
+                                BigDecimal xiaoKuaiJiaoBi = xiaoKuaiJiao.multiply(new BigDecimal(1000)).divide(new BigDecimal(actWeight), 2, BigDecimal.ROUND_HALF_UP);
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, xiaoKuaiJiaoBi);
                             }
                             break;
@@ -166,6 +168,37 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                             }
                             break;
                         }
+                        case "铁水温度": {
+                            // 获取铁水温度
+                            if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
+                                Double tapTemp = tapSummaryListDTO.getData().get(0).getTapTemp();
+                                if (Objects.nonNull(tapTemp) && tapTemp > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, tapTemp);
+                                }
+                            }
+                            break;
+                        }
+                        case "出铁次数": {
+                            // 获取出铁次数
+                            if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
+                                Integer tapNum = tapSummaryListDTO.getData().get(0).getTapNum();
+                                if (Objects.nonNull(tapNum) && tapNum > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, tapNum);
+                                }
+                            }
+                            break;
+                        }
+                        case "铁量差": {
+                            // 获取燃料比
+                            if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
+                                Double theoryWeight = tapSummaryListDTO.getData().get(0).getTheoryWeight();
+                                if (Objects.nonNull(actWeight) && actWeight > 0 && Objects.nonNull(theoryWeight) && theoryWeight > 0) {
+                                    double tieLiangCha = actWeight.doubleValue() - theoryWeight.doubleValue();
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, tieLiangCha);
+                                }
+                            }
+                            break;
+                        }
                         default: {
                             break;
                         }
@@ -181,6 +214,24 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
         // TODO 隐藏行首两行，改为隐藏一行
         sheet.getRow(itemRowNum).setZeroHeight(true);
         sheet.getRow(itemRowNum - 1).setZeroHeight(true);
+    }
+
+    protected TapSummaryListDTO getTapSummaryListDTO(String version, Date date) {
+        TapSummaryListDTO tapSummaryListDTO = null;
+        Map<String, String> queryParam = new HashMap();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        queryParam.put("dateTime",  String.valueOf(dateBeginTime.getTime()));
+        queryParam.put("workShift",  "day");
+
+        String tapSummaryListUrl = httpProperties.getGlUrlVersion(version) + "/report/tap/getTapSummary";
+        String tapSummaryListStr = httpUtil.get(tapSummaryListUrl, queryParam);
+        if (StringUtils.isNotBlank(tapSummaryListStr)) {
+            tapSummaryListDTO = JSON.parseObject(tapSummaryListStr, TapSummaryListDTO.class);
+            if (Objects.isNull(tapSummaryListDTO) || CollectionUtils.isEmpty(tapSummaryListDTO.getData())) {
+                log.warn("[{}] 的TapSummaryListDTO数据为空", dateBeginTime);
+            }
+        }
+        return tapSummaryListDTO;
     }
 
 }
