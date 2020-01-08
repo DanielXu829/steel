@@ -163,4 +163,16 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
      */
     @TableField(exist = false)
     private String categoryName;
+
+    /**
+     * 是否是由动态报表生成，1代表是
+     */
+    @TableField("is_dynamic_report")
+    private String isDynamicReport;
+
+    /**
+     * 动态报表配置表的id
+     */
+    @TableField("template_config_id")
+    private Long templateConfigId;
 }
