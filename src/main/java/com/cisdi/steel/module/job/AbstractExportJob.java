@@ -43,11 +43,13 @@ public abstract class AbstractExportJob implements Job, Serializable {
         try {
             log.debug(getCurrentJob().getName() + "       开始执行");
             // 如果jobExecutionContext中report category code不为空，则修改报表的job code为此值
-            JobDataMap mergedJobDataMap = jobExecutionContext.getMergedJobDataMap();
-            String reportCategoryCode = (String)mergedJobDataMap.get("report_category_code");
             JobEnum currentJob = getCurrentJob();
-            if (StringUtils.isNotBlank(reportCategoryCode)) {
-                currentJob.setCode(reportCategoryCode);
+            if (Objects.nonNull(jobExecutionContext)) {
+                JobDataMap mergedJobDataMap = jobExecutionContext.getMergedJobDataMap();
+                String reportCategoryCode = (String) mergedJobDataMap.get("report_category_code");
+                if (StringUtils.isNotBlank(reportCategoryCode)) {
+                    currentJob.setCode(reportCategoryCode);
+                }
             }
             JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
                     .jobEnum(currentJob)
