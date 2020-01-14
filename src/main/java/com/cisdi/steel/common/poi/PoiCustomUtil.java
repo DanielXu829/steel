@@ -93,6 +93,30 @@ public class PoiCustomUtil {
     }
 
     /**
+     * 遍历sheet, 清除以"{"为开头, "}"为结尾的占位符
+     */
+    public static void clearPlaceHolder(Sheet sheet) {
+        int firstRowNum = sheet.getFirstRowNum();
+        int lastRowNum = sheet.getLastRowNum();
+        Cell cell = null;
+        for (int rowNum = firstRowNum; rowNum <= lastRowNum; rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (Objects.isNull(row)) {
+                continue;
+            }
+            short lastCellNum = row.getLastCellNum();
+            for (int colNum = 0; colNum <= lastCellNum; colNum++) {
+                cell = row.getCell(colNum);
+                String value = PoiCellUtil.getCellValue(cell);
+                if (StringUtils.isNotBlank(value) && value.startsWith("{") && value.endsWith("}")) {
+                    cell.setCellValue("");
+                }
+            }
+        }
+
+    }
+
+    /**
      * 获取第一行的值
      *
      * @param sheet sheet值
