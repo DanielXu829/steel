@@ -52,4 +52,16 @@
     <select id="selectAllTargetManagement" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
         SELECT * FROM target_management
     </select>
+
+    <select id="selectTargetManagementsByTargetNames" parameterType="java.util.List" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
+        SELECT
+        *
+        FROM
+        target_management
+        WHERE
+        target_name IN
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

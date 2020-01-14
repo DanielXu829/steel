@@ -104,6 +104,9 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
      */
     private String remark;
 
+    /**
+     * 是否从空模板生成，是则为1
+     */
     private String attr1;
 
     private String attr2;

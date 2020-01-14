@@ -70,11 +70,15 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
         } else {
             wrapper.eq(StringUtils.isNotBlank(query.getSequence()), ReportCategoryTemplate::getSequence, query.getSequence());
         }
+        // 添加按id倒序
+        wrapper.orderByDesc(ReportCategoryTemplate::getId);
+
         List<ReportCategoryTemplate> list = list(wrapper);
-        if(StringUtils.isNotBlank(query.getSequence()) && ("焦化12".equals(query.getSequence()) || "焦化45".equals(query.getSequence())
-            || "焦化".equals(query.getSequence()))){
-            list = list.stream().sorted((a,b) ->Integer.valueOf(a.getAttr2()) - Integer.valueOf(b.getAttr2())).collect(Collectors.toList());
-        }
+        // 注释无效代码
+//        if(StringUtils.isNotBlank(query.getSequence()) && ("焦化12".equals(query.getSequence()) || "焦化45".equals(query.getSequence())
+//            || "焦化".equals(query.getSequence()))){
+//            list = list.stream().sorted((a,b) ->Integer.valueOf(a.getAttr2()) - Integer.valueOf(b.getAttr2())).collect(Collectors.toList());
+//        }
         list.forEach(reportCategoryTemplate -> {
             QuartzEntity quartzEntity = quartzMapper.selectQuartzByCode(reportCategoryTemplate.getReportCategoryCode());
             reportCategoryTemplate.setQuartzEntity(quartzEntity);

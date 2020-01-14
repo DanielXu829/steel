@@ -5,7 +5,7 @@ package com.cisdi.steel.module.report.enums;
  */
 public enum SequenceEnum {
     // 秒
-    GL8("高炉8", "8.0"),
+    GL8("8高炉", "8.0"),
     // 分钟
     SJ4("4烧结", "4"),
     // 小时
@@ -27,5 +27,13 @@ public enum SequenceEnum {
             }
         }
         return null;
+    }
+
+    public String getSequenceCode(){
+        return this.sequenceCode;
+    }
+
+    public String getVersion(){
+        return this.version;
     }
 }

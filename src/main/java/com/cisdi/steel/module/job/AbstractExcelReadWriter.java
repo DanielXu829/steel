@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.dto.response.jh.res.TagValue;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -22,6 +23,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -287,5 +289,22 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
             }
         }
         return val;
+    }
+
+    /**
+     * 获取最后一个非0的数值
+     * @param arr 点位值数组，时间从老到新默认排序
+     * @return
+     */
+    protected Double getLatestNonZeroValue(List<TagValue> arr) {
+        BigDecimal val = new BigDecimal(0);
+        for (int j = arr.size() - 1; j > 0; j--) {
+            TagValue tagValue = arr.get(j);
+            if (tagValue.getVal() != null && tagValue.getVal().doubleValue() != 0) {
+                val = tagValue.getVal();
+                break;
+            }
+        }
+        return val.doubleValue();
     }
 }

@@ -15,7 +15,9 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.report.enums.SequenceEnum;
+import com.cisdi.steel.module.report.util.ExcelStyleUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Assert;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * - 如何动态设置多行表头
@@ -308,6 +311,46 @@ public class ReportTemplateConfigExcelTest extends SteelApplicationTests {
             Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams("测试", "测试"), entity, list);
             FileOutputStream fos = new FileOutputStream("C:/testing/ExcelExportForMap.xlsx");
             fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Test
+    public void testCellStype() {
+        try {
+            String templatePath = "C:\\testing\\高炉动态报表1_2020-01-06_19.xlsx";
+            Workbook workbook = WorkbookFactory.create(POICacheManager.getFile(templatePath));
+
+            Sheet sheet = workbook.getSheetAt(0);
+            Cell cellOrCreate = ExcelWriterUtil.getCellOrCreate(sheet.getRow(6), 2);
+            System.out.println("原始值：" + cellOrCreate.getNumericCellValue());
+
+            CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook);
+
+            // 设置小数点位数
+            DataFormat dataFormat = workbook.createDataFormat();//此处设置数据格式
+            int scale = 1;
+            String format = "0";
+            if (scale > 0) {
+                format = format + ".";
+                for (int i = 0; i < scale; i++) {
+                    format = format + "0";
+                }
+            }
+            cellStyle.setDataFormat(dataFormat.getFormat(format)); //小数点后保留两位，可以写contentStyle.setDataFormat(df.getFormat("#,#0.00"));
+            cellOrCreate.setCellStyle(cellStyle);
+
+
+            // 输出excel到文件中。
+            String excelName = "C:/testing/ExcelExportForTesting_" + System.currentTimeMillis() + ".xlsx";
+            FileOutputStream fos = new FileOutputStream(excelName);
+            workbook.write(fos);
+            fos.close();
+
+            System.out.println("生成excel成功：" + excelName);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

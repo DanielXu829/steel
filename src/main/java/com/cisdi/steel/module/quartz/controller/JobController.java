@@ -2,11 +2,13 @@ package com.cisdi.steel.module.quartz.controller;
 
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
+import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.query.CronQuery;
 import com.cisdi.steel.module.quartz.query.QuartzEntityQuery;
 import com.cisdi.steel.module.quartz.service.JobService;
 import com.cisdi.steel.module.quartz.util.QuartzUtil;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.sys.service.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,40 +53,10 @@ public class JobController {
     /**
      * 新建任务或更新任务
      */
+    @Deprecated
     @PostMapping("/save")
     public ApiResult save(@RequestBody QuartzEntity quartz) {
-        log.info("更新任务");
-        try {
-            //如果是修改  展示旧的 任务
-            if (quartz.getJobName() != null) {
-                JobKey key = new JobKey(quartz.getJobName(), quartz.getJobGroup());
-                // 删除旧的任务
-                scheduler.deleteJob(key);
-            } else {
-                return ApiUtil.fail("编码不能为空");
-            }
-
-            //通过任务编码获取执行类
-            String action = sysConfigService.selectActionByCode(quartz.getJobName());
-//            Class cls = Class.forName(quartz.getJobClassName());
-            Class cls = Class.forName(action);
-            cls.newInstance();
-            //构建job信息
-            JobDetail job = JobBuilder.newJob(cls).withIdentity(quartz.getJobName(),
-                    quartz.getJobGroup())
-                    .withDescription(quartz.getDescription())
-                    .build();
-            // 触发时间点
-            CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(quartz.getCronExpression());
-            Trigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger" + quartz.getJobName(), quartz.getJobGroup())
-                    .startNow().withSchedule(cronScheduleBuilder).build();
-            //交由Scheduler安排触发
-            scheduler.scheduleJob(job, trigger);
-        } catch (Exception e) {
-            log.error("修改任务报错", e);
-            return ApiUtil.fail();
-        }
-        return ApiUtil.success();
+        return this.saveInfo(quartz);
     }
 
     @PostMapping("/saveInfo")
@@ -100,23 +72,43 @@ public class JobController {
             } else {
                 return ApiUtil.fail("编码不能为空");
             }
+            
+            // 获取报表详情
+            ApiResult reportCategoryTemplateResult = reportCategoryTemplateService.getById(quartz.getId());
+            if (Objects.nonNull(reportCategoryTemplateResult.getData())) {
+                ReportCategoryTemplate reportCategoryTemplate = (ReportCategoryTemplate)reportCategoryTemplateResult.getData();
+                String reportCategoryCode = reportCategoryTemplate.getReportCategoryCode();
 
-            //通过任务编码获取执行类
-            String action = sysConfigService.selectActionByCode(quartz.getJobName());
+                String code = quartz.getJobName();
+                // 如果是动态模板，重设此JobEnum
+                if ("1".equals(reportCategoryTemplate.getIsDynamicReport())) {
+                    code = JobEnum.drt.getCode();
+                }
+                //通过任务编码获取执行类
+                String action = sysConfigService.selectActionByCode(code);
+
 //            Class cls = Class.forName(quartz.getJobClassName());
-            Class cls = Class.forName(action);
-            cls.newInstance();
-            //构建job信息
-            JobDetail job = JobBuilder.newJob(cls).withIdentity(quartz.getJobName(),
-                    quartz.getJobGroup())
-                    .withDescription(quartz.getDescription())
-                    .build();
-            // 触发时间点
-            CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(quartz.getCronExpression());
-            Trigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger" + quartz.getJobName(), quartz.getJobGroup())
-                    .startNow().withSchedule(cronScheduleBuilder).build();
-            //交由Scheduler安排触发
-            scheduler.scheduleJob(job, trigger);
+                Class cls = Class.forName(action);
+                cls.newInstance();
+                //构建job信息时，添加report_category_code，供区分不同动态报表
+                JobDetail job = JobBuilder.newJob(cls).withIdentity(quartz.getJobName(),
+                        quartz.getJobGroup())
+                        .withDescription(quartz.getDescription())
+                        .usingJobData("report_category_template_id", quartz.getId())
+                        .usingJobData("report_category_code", reportCategoryCode)
+                        .build();
+                // 触发时间点
+                CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(quartz.getCronExpression());
+                Trigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger" + quartz.getJobName(), quartz.getJobGroup())
+                        .startNow().withSchedule(cronScheduleBuilder).build();
+                //交由Scheduler安排触发
+                scheduler.scheduleJob(job, trigger);
+            } else {
+                log.error("未找到对应模板");
+                return ApiUtil.fail();
+            }
+
+
         } catch (Exception e) {
             log.error("修改任务报错", e);
             return ApiUtil.fail();

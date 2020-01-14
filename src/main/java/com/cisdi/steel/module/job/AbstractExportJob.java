@@ -1,9 +1,11 @@
 package com.cisdi.steel.module.job;
 
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.JobExecuteInfo;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 
 import java.io.Serializable;
@@ -40,8 +42,15 @@ public abstract class AbstractExportJob implements Job, Serializable {
         Objects.requireNonNull(jobHandler, "没有执行的类");
         try {
             log.debug(getCurrentJob().getName() + "       开始执行");
+            // 如果jobExecutionContext中report category code不为空，则修改报表的job code为此值
+            JobDataMap mergedJobDataMap = jobExecutionContext.getMergedJobDataMap();
+            String reportCategoryCode = (String)mergedJobDataMap.get("report_category_code");
+            JobEnum currentJob = getCurrentJob();
+            if (StringUtils.isNotBlank(reportCategoryCode)) {
+                currentJob.setCode(reportCategoryCode);
+            }
             JobExecuteInfo jobExecuteInfo = JobExecuteInfo.builder()
-                    .jobEnum(getCurrentJob())
+                    .jobEnum(currentJob)
                     .build();
             jobHandler.execute(jobExecuteInfo);
             log.debug(getCurrentJob().getName() + "       执行结束");
