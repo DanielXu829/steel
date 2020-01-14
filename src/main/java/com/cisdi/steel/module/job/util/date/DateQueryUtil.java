@@ -339,6 +339,22 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建24小时时间段
+     * 昨天晚上8点-今天晚上8点
+     *
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static DateQuery build24HoursFromEight(Date date) {
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Date nightWorkBeginTime = DateUtil.addHours(dateBeginTime, -4);
+        Date dayWorkEndTime = DateUtil.addHours(dateBeginTime, 20);
+        DateQuery dateQuery = new DateQuery(nightWorkBeginTime, dayWorkEndTime, nightWorkBeginTime);
+
+        return dateQuery;
+    }
+
+    /**
      * 构建不规则时间段
      *
      * @param date
