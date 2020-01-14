@@ -47,8 +47,17 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     //点位数据占位公式
     private static final String formula = "IF(cell%=\"\",\"\",cell%)";
     private static final String[] letterArray = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-    String avarageFormulaPrefix = "IFERROR(AVERAGE(";
-    String averageFormulaSuffix =  "), \"\")";
+
+    private static final String firstSheetName = "报表";
+    private static final int firstDataRowIndex = 4;//从开始填充点位的行开始，下标从0开始
+    private static final int firstDataColumnIndex = 2;//从开始填充点位的列开始，下标从0开始，并且排除时间列
+    private static final int heightInPoints = 18;//普通行高度
+    private static final int heightInPointsHeader = 25;//参数表头行高度
+    private static final int heightInPointsTitle = 45;//大标题行高度
+    private static final int cellWidth = 14 * 256;//普通列宽度
+    private static final String avarageFormula = "IFERROR(AVERAGE(%s:%s), \"\")";
+    //默认小数点位
+    private static final int defaultScale = 2;
 
     @Autowired
     private JobProperties jobProperties;
@@ -180,13 +189,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
      * @param tagsSheetName
      */
     private void createReportSheet(Workbook workbook, ReportTemplateConfig reportTemplateConfig, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap, String tagsSheetName) {
-        String firstSheetName = "report_info";
-        int firstDataRowIndex = 4;//从开始填充点位的行开始，下标从0开始
-        int firstDataColumnIndex = 2;//从开始填充点位的列开始，下标从0开始，并且排除时间列
-        int heightInPoints = 18;//普通行高度
-        int heightInPointsHeader = 25;//参数表头行高度
-        int heightInPointsTitle = 45;//大标题行高度
-        int cellWidth = 14 * 256;//普通列宽度
         int tagsMapSize = tagsMap.keySet().size();
         //创建第一个sheet
         Sheet firstSheet = workbook.createSheet(firstSheetName);
@@ -231,14 +233,27 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         }
 
         // 在第一个sheet中填充点位信息
-        int interval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval());//计算填充需填充点位的行数。
-        int maxRow = (Integer.valueOf(reportTemplateConfig.getEndTimeslot()) - Integer.valueOf(reportTemplateConfig.getStartTimeslot()))/interval;
+        // 计算填充需填充点位的行数。以及对应的最大行数
+        int interval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval());
+        Integer startTimeSlot = Integer.valueOf(reportTemplateConfig.getStartTimeslot());
+        Integer endTimeSlot = Integer.valueOf(reportTemplateConfig.getEndTimeslot());
+        int maxRow = (endTimeSlot - startTimeSlot)/interval;
+        if (startTimeSlot >= endTimeSlot) {
+            //处理焦化报表时间跨天的情况
+            maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval;
+        }
 
         for (int i = 0; i <= maxRow; i++) {
             Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
             Cell timeCell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex - 1);
             //添加时间信息
-            timeCell.setCellValue(i * interval + ":00");
+            int timeSlot = i * interval + startTimeSlot;
+            String timeStr = timeSlot + ":00";
+            //处理焦化报表时间跨天的情况
+            if (timeSlot > 24) {
+                timeStr = timeSlot - 24 + ":00";
+            }
+            timeCell.setCellValue(timeStr);
             timeCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));//设置样式
             // 循环点位列表
             int j = 0;
@@ -247,7 +262,14 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 Cell cell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex + j);
                 cell.setCellFormula(formula.replaceAll("cell%", tagsSheetName + "!" + columnLetter + (i + 2)));
                 cell.setCellType(CellType.FORMULA);
-                cell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));//设置样式
+                // 设置单元格样式及小数点位
+                TargetManagement targetManagement = tagsMap.get(reportTemplateTags);
+                Integer scaleObj = targetManagement.getScale();
+                int scale = scaleObj != null ? scaleObj.intValue() : defaultScale;
+                CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, scale);
+                //设置样式
+                cell.setCellStyle(cellStyle);
+
                 j++;
             }
         }
@@ -261,13 +283,15 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
 
             for (int j = 0; j < tagsMapSize; j++) {
                 Cell cell = ExcelWriterUtil.getCellOrCreate(summaryRow, firstDataColumnIndex + j);
-                cell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));
                 String columnLetter = letterArray[firstDataColumnIndex + j];
                 String avgBegin = columnLetter + (firstDataRowIndex + 1);
                 String avgEnd = columnLetter + (firstDataRowIndex + maxRow);
-                String formula = avarageFormulaPrefix + avgBegin + ":" + avgEnd + averageFormulaSuffix;
+                String formula = String.format(avarageFormula, avgBegin, avgEnd);
                 cell.setCellFormula(formula);
                 cell.setCellType(CellType.FORMULA);
+                // 设置平均值单元格样式和小数点位
+                CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, defaultScale);
+                cell.setCellStyle(cellStyle);
             }
         }
 
@@ -295,8 +319,8 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
 
         int i = 0;
         for (ReportTemplateTags reportTemplateTags : tagsMap.keySet()) {
-            String targetFormula = tagsMap.get(reportTemplateTags).getTargetFormula();
-            ExcelWriterUtil.addCellData(cellDataList, 0, i, targetFormula != null ? targetFormula : "");
+            String targetName = tagsMap.get(reportTemplateTags).getTargetName();
+            ExcelWriterUtil.addCellData(cellDataList, 0, i, targetName != null ? targetName : "");
             i++;
         }
 

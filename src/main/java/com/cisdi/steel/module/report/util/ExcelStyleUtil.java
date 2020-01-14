@@ -70,6 +70,22 @@ public class ExcelStyleUtil {
         return style;
     }
 
+    public static CellStyle getCellStyle(Workbook workbook, int scale) {
+        CellStyle cellStyle = getCellStyle(workbook);
+        String format = "0";
+        if (scale > 0) {
+            format = format + ".";
+            for (int k = 0; k < scale; k++) {
+                format = format + "0";
+            }
+        }
+        //此处设置数据格式
+        DataFormat dataFormat = workbook.createDataFormat();
+        cellStyle.setDataFormat(dataFormat.getFormat(format));
+
+        return cellStyle;
+    }
+
     /**
      * 字体样式
      *

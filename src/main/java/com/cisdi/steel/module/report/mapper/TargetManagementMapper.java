@@ -55,4 +55,11 @@ public interface TargetManagementMapper extends BaseMapper<TargetManagement> {
      */
     @MapKey("id")
     Map<Long, TargetManagement> selectAllTargetManagement();
+
+    /**
+     * 通过别名查询tag点
+     * @param targetNames
+     * @return 别名对应的tag点集合
+     */
+    List<TargetManagement> selectTargetManagementsByTargetNames(List<String> targetNames);
 }

@@ -18,6 +18,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
  * @version 1.0
  */
 public enum JobEnum {
+    drt("drt", "动态报表"),
     // 高炉
     gl_chutiezonglan("gl_chutiezonglan", "出铁总览"),
     gl_gaolubuliao("gl_gaolubuliao", "高炉布料"),
@@ -238,4 +239,7 @@ public enum JobEnum {
         return code;
     }
 
+    public void setCode(String code) {
+        this.code = code;
+    }
 }

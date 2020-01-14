@@ -97,7 +97,6 @@ public class ChuChenWriter extends AbstractExcelReadWriter {
         if (Objects.nonNull(columnCells)) {
             queryParam.put("tagNames", searchParam);
             String result = httpUtil.get(url, queryParam);
-            result.length();
             for (int i = 0; i < columnCells.size(); i++) {
                 String column = columnCells.get(i);
                 if (StringUtils.isNotBlank(column)) {
@@ -109,8 +108,6 @@ public class ChuChenWriter extends AbstractExcelReadWriter {
                         String executeWay = columnSplit[0];
                         int columnSplitSize = columnSplit.length;
                         for (int k = 1; k < columnSplitSize; k++) {
-                            //queryParam.put("tagname", columnSplit[k]);
-                            queryParam.put("tagNames", columnSplit[k]);
                             if (StringUtils.isNotBlank(result)) {
                                 JSONObject jsonObject = JSONObject.parseObject(result);
                                 if (Objects.nonNull(jsonObject)) {
@@ -129,7 +126,6 @@ public class ChuChenWriter extends AbstractExcelReadWriter {
                         Double executeVal = ExcelWriterUtil.executeSpecialList(executeWay, specialValues);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, executeVal);
                     } else {
-                        queryParam.put("tagNames", column);
                         if (StringUtils.isNotBlank(result)) {
                             JSONObject jsonObject = JSONObject.parseObject(result);
                             if (Objects.nonNull(jsonObject)) {
