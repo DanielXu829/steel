@@ -3,12 +3,16 @@ package com.cisdi.steel.module.job.sj.writer;
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.sj.AnaValueDTO;
+import com.cisdi.steel.dto.response.SuccessEntity;
+import com.cisdi.steel.dto.response.sj.res.ProdStopRecordInfo;
 import com.cisdi.steel.dto.response.sj.res.AnalysisValue;
+import com.cisdi.steel.dto.response.sj.res.ProdStopRecord;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -17,6 +21,8 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +35,8 @@ import java.util.*;
 @SuppressWarnings("ALL")
 @Slf4j
 public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
-    private static int shaoJieChengPinItemRowNum = 28;
-    private static int yuanLiaoXingNengItemRowNum = 17;
+    private static final int shaoJieChengPinItemRowNum = 28;
+    private static final int yuanLiaoXingNengItemRowNum = 17;
     private Date dateRun;
 
     @Autowired
@@ -93,6 +99,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 }
             }
         }
+
         //  接口直接写入的数据：烧结成品质量
         Sheet sheet1 = workbook.getSheetAt(0);
         sheet1.getRow(shaoJieChengPinItemRowNum).setZeroHeight(true);
@@ -105,7 +112,74 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         List<CellData> cellDataList2  = handleYuanLiaoXingNengData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList2);
 
+        // 接口写入数据：停机记录
+        DateQuery dateQuery1 = DateQueryUtil.build24HoursFromEight(dateRun);
+        List<CellData> cellDataList3  = handleDownTimeRecordData(sheet1, dateQuery1, version);
+        ExcelWriterUtil.setCellValue(sheet1, cellDataList3);
+
+        // 清除标记项(例如:{停机记录.停机起时.夜})
+        PoiCustomUtil.clearPlaceHolder(sheet1);
+
         return workbook;
+    }
+
+    /**
+     * 处理停机记录数据
+     * @param sheet1
+     * @param dateQuery
+     * @param version
+     * @return
+     */
+    private List<CellData> handleDownTimeRecordData(Sheet sheet, DateQuery dateQuery, String version) {
+        List<CellData> cellDataList = new ArrayList();
+        String data = getDownTimeRecordData(dateQuery, version);
+        Cell nightDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.夜}");
+        int nightDownTimeBeginRow = nightDownTimeCell.getRowIndex();
+        int nightDownTimeBeginColumn = nightDownTimeCell.getColumnIndex();
+        Cell dayDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.白}");
+        int dayDownTimeBeginRow = dayDownTimeCell.getRowIndex();
+        int dayDownTimeBeginColumn = dayDownTimeCell.getColumnIndex();
+        if (StringUtils.isBlank(data)) {
+            return null;
+        }
+        SuccessEntity<ProdStopRecordInfo> prodStopRecordDTO = JSON.parseObject(data, new TypeReference<SuccessEntity<ProdStopRecordInfo>>(){});
+        List<ProdStopRecord> nightProdStopRecords = prodStopRecordDTO.getData().getNightProdStopRecords();
+        List<ProdStopRecord> dayProdStopRecords = prodStopRecordDTO.getData().getDayProdStopRecords();
+        // excel中只有5行单元格
+        int nightMaxSize = 5;
+        int dayMaxSize = 5;
+        handleWriteDownTimeData(cellDataList, nightDownTimeBeginRow, nightDownTimeBeginColumn, nightProdStopRecords, nightMaxSize);
+        handleWriteDownTimeData(cellDataList, dayDownTimeBeginRow, dayDownTimeBeginColumn, dayProdStopRecords, dayMaxSize);
+
+        Cell dayDownTimesCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数}");
+        int dayDownTimes = nightProdStopRecords.size() + dayProdStopRecords.size();
+        ExcelWriterUtil.addCellData(cellDataList, dayDownTimesCell.getRowIndex(), dayDownTimesCell.getColumnIndex(), dayDownTimes);
+        return cellDataList;
+    }
+
+    private void handleWriteDownTimeData(List<CellData> cellDataList, int BeginRow, int BeginColumn, List<ProdStopRecord> prodStopRecords, int maxSize) {
+        if (CollectionUtils.isNotEmpty(prodStopRecords)) {
+            int size = prodStopRecords.size();
+            int offset;
+            if (size > maxSize) {
+                offset = size - maxSize;
+            } else {
+                offset = 0;
+            }
+            for (int i = offset, j = 0; i < size; i++, j++) {
+                ProdStopRecord nightProdStopRecord = prodStopRecords.get(i);
+                String startTime = DateUtil.getFormatDateTime(nightProdStopRecord.getStartTime(), "yyyy-MM-dd HH:mm:ss");
+                String endTime = DateUtil.getFormatDateTime(nightProdStopRecord.getEndTime(), "yyyy-MM-dd HH:mm:ss");
+                Long stopTime = nightProdStopRecord.getStopTime();
+                String causeDesc = nightProdStopRecord.getCauseDesc();
+
+                ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn, startTime);
+                ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn + 1, endTime);
+                ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn + 2, stopTime);
+                ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn + 2, stopTime);
+                ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn + 3, causeDesc);
+            }
+        }
     }
 
     /**
@@ -361,6 +435,21 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 调用api获取停机记录
+     * @param dateQuery
+     * @param version
+     * @param materialType
+     * @return
+     */
+    private String getDownTimeRecordData(DateQuery dateQuery, String version) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("start", Objects.requireNonNull(dateQuery.getQueryStartTime().toString()));
+        queryParam.put("end", Objects.requireNonNull(dateQuery.getQueryEndTime().toString()));
+        String url = getDownTimeRecordUrl(version);
+        return httpUtil.get(url, queryParam);
+    }
+
+    /**
      * 调用api获取原料性能数据
      * @param dateQuery
      * @param version
@@ -422,6 +511,15 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      */
     private String getAnalysisValuesUrl(String version) {
         return httpProperties.getSJUrlVersion(version) + "/analysisValues/clock";
+    }
+
+    /**
+     * 停机记录API
+     * @param version
+     * @return
+     */
+    private String getDownTimeRecordUrl(String version) {
+        return httpProperties.getSJUrlVersion(version) + "/stopRecord/time";
     }
 
 }
