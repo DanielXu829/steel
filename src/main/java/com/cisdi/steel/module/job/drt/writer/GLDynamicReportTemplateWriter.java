@@ -67,7 +67,7 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
      */
     private List<CellData> handleEachRowData(List<String> tagNames, String queryUrl, DateQuery dateQuery, int rowIndex) {
         List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementsByTargetNames(tagNames);
-        Map<String, TargetManagement> targetManagementMap = targetManagements.stream().collect(Collectors.toMap(TargetManagement::getTargetFormula, target -> target));
+        Map<String, TargetManagement> targetManagementMap = targetManagements.stream().collect(Collectors.toMap(TargetManagement::getTargetName, target -> target));
         List<String> tagFormulas = targetManagements.stream().map(TargetManagement::getTargetFormula).collect(Collectors.toList());
         // 批量查询tag value
         TagQueryParam tagQueryParam = new TagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagFormulas);
@@ -79,14 +79,17 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
             Map<String, Map<Long, Double>> tagValueMaps = tagValueMapDTO.getData();
             // 获取targetManagement map
 
-            for (int columnIndex = 0; columnIndex < tagFormulas.size(); columnIndex++) {
-                String tagFormula = tagFormulas.get(columnIndex);
-                if (StringUtils.isNotBlank(tagFormula)) {
-                    Map<Long, Double> tagValueMap = tagValueMaps.get(tagFormula);
-                    if (Objects.nonNull(tagValueMap)) {
-                        TargetManagement tag = targetManagementMap.get(tagFormula);
-                        List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(dateQuery.getQueryStartTime()), new Date(dateQuery.getQueryEndTime()));
-                        handleEachCellData(dayEach, tagValueMap, resultList, rowIndex, columnIndex, tag);
+            for (int columnIndex = 0; columnIndex < tagNames.size(); columnIndex++) {
+                String targetName = tagNames.get(columnIndex);
+                if (StringUtils.isNotBlank(targetName)) {
+                    TargetManagement targetManagement = targetManagementMap.get(targetName);
+                    if (Objects.nonNull(targetManagement)) {
+                        Map<Long, Double> tagValueMap = tagValueMaps.get(targetManagement.getTargetFormula());
+                        if (Objects.nonNull(tagValueMap)) {
+                            TargetManagement tag = targetManagementMap.get(targetName);
+                            List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(dateQuery.getQueryStartTime()), new Date(dateQuery.getQueryEndTime()));
+                            handleEachCellData(dayEach, tagValueMap, resultList, rowIndex, columnIndex, tag);
+                        }
                     }
                 }
             }
