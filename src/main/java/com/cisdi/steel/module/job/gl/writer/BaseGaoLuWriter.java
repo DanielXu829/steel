@@ -1,8 +1,10 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.dto.response.SuccessEntity;
 import com.cisdi.steel.dto.response.gl.ChargeDTO;
 import com.cisdi.steel.dto.response.gl.MaterialExpendDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
@@ -23,6 +25,46 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
 
     // 获取批次总数 tagName
     protected static String batchCountTagName = "BF8_L2C_SH_CurrentBatch_1d_max";
+
+    /**
+     * 获取变料信息数据
+     * @param version
+     * @return api数据
+     */
+    protected List<ChargeVarInfo> getChargeVarInfo(String version, DateQuery dateQuery) {
+        List<ChargeVarInfo> chargeVarInfos = null;
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+        String chargeVarInfoStr = httpUtil.get(getChargeVarInfoUrl(version), queryParam);
+
+        if (StringUtils.isNotBlank(chargeVarInfoStr)) {
+            SuccessEntity<List<ChargeVarInfo>> successEntity = JSON.parseObject(chargeVarInfoStr, new TypeReference<SuccessEntity<List<ChargeVarInfo>>>() {});
+            chargeVarInfos = successEntity.getData();
+            if (CollectionUtils.isEmpty(chargeVarInfos)) {
+                log.warn("获取ChargeVarInfo数据为空");
+            }
+        }
+        return chargeVarInfos;
+    }
+
+    /**
+     * 获取风口信息数据
+     * @param version
+     * @return api数据
+     */
+    protected BfBlastMainInfo getBfBlastMainInfo(String version) {
+        BfBlastMainInfo bfBlastMainInfo = null;
+        String bfBlastMainInfoStr = httpUtil.get(getBfBlastMainInfoUrl(version));
+        if (StringUtils.isNotBlank(bfBlastMainInfoStr)) {
+            SuccessEntity<BfBlastMainInfo> successEntity = JSON.parseObject(bfBlastMainInfoStr, new TypeReference<SuccessEntity<BfBlastMainInfo>>() {});
+            bfBlastMainInfo = successEntity.getData();
+            if (Objects.isNull(bfBlastMainInfo) || CollectionUtils.isEmpty(bfBlastMainInfo.getBfBlastMains())) {
+                log.warn("获取BfBlastMainInfo数据为空");
+            }
+        }
+        return bfBlastMainInfo;
+    }
 
     /**
      * 根据chargeNo获取charge raw data
@@ -322,6 +364,25 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      */
     protected String getChargeNoUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValues";
+    }
+
+    /**
+     * 获取/bfBlast/main/info的url
+     * @param version
+     * @return
+     */
+    protected String getBfBlastMainInfoUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/bfBlast/main/info";
+    }
+
+
+    /**
+     * 获取/charge/variation/range的url
+     * @param version
+     * @return
+     */
+    protected String getChargeVarInfoUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/charge/variation/range";
     }
 
 }

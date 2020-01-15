@@ -1,14 +1,18 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.dto.response.SuccessEntity;
 import com.cisdi.steel.dto.response.gl.MaterialExpendDTO;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
 import com.cisdi.steel.dto.response.gl.TapSummaryListDTO;
 import com.cisdi.steel.dto.response.gl.TapTPCDTO;
 import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
+import com.cisdi.steel.dto.response.gl.res.BfBlastMain;
+import com.cisdi.steel.dto.response.gl.res.BfBlastMainInfo;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -18,6 +22,7 @@ import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +64,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         // 正面-小时参数
         handleFacadeXiaoShiCanShu(excelDTO, workbook, version);
 
+        handleFengKouXinXi(excelDTO, workbook, version);
         // 填充
 
         return workbook;
@@ -88,6 +94,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
+
+            // TODO 煤枪数支
+            // TODO 齿轮箱水温差℃
         } catch (Exception e) {
             log.error("处理正面-小时参数出错", e);
         }
@@ -104,7 +113,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      */
     private List<CellData> handleEachRowData(List<String> tagNames, String queryUrl, DateQuery dateQuery, int rowIndex) {
         List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementsByTargetNames(tagNames);
-        Map<String, TargetManagement> targetManagementMap = targetManagements.stream().collect(Collectors.toMap(TargetManagement::getTargetFormula, target -> target));
+        Map<String, TargetManagement> targetManagementMap = targetManagements.stream().collect(Collectors.toMap(TargetManagement::getTargetName, target -> target));
         List<String> tagFormulas = targetManagements.stream().map(TargetManagement::getTargetFormula).collect(Collectors.toList());
         // 批量查询tag value
         TagQueryParam tagQueryParam = new TagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagFormulas);
@@ -116,14 +125,17 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             Map<String, Map<Long, Double>> tagValueMaps = tagValueMapDTO.getData();
             // 获取targetManagement map
 
-            for (int columnIndex = 0; columnIndex < tagFormulas.size(); columnIndex++) {
-                String tagFormula = tagFormulas.get(columnIndex);
-                if (StringUtils.isNotBlank(tagFormula)) {
-                    Map<Long, Double> tagValueMap = tagValueMaps.get(tagFormula);
-                    if (Objects.nonNull(tagValueMap)) {
-                        TargetManagement tag = targetManagementMap.get(tagFormula);
-                        List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(dateQuery.getQueryStartTime()), new Date(dateQuery.getQueryEndTime()));
-                        handleEachCellData(dayEach, tagValueMap, resultList, rowIndex, columnIndex, tag);
+            for (int columnIndex = 0; columnIndex < tagNames.size(); columnIndex++) {
+                String targetName = tagNames.get(columnIndex);
+                if (StringUtils.isNotBlank(targetName)) {
+                    TargetManagement targetManagement = targetManagementMap.get(targetName);
+                    if (Objects.nonNull(targetManagement)) {
+                        Map<Long, Double> tagValueMap = tagValueMaps.get(targetManagement.getTargetFormula());
+                        if (Objects.nonNull(tagValueMap)) {
+                            TargetManagement tag = targetManagementMap.get(targetName);
+                            List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(dateQuery.getQueryStartTime()), new Date(dateQuery.getQueryEndTime()));
+                            handleEachCellData(dayEach, tagValueMap, resultList, rowIndex, columnIndex, tag);
+                        }
                     }
                 }
             }
@@ -179,6 +191,35 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         }
     }
     //结束--------------------正面-小时参数--------------------
+
+    //开始--------------------正面-风口信息--------------------
+    protected void handleFengKouXinXi(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+        try {
+            Sheet zhengMianSheet = workbook.getSheetAt(0);
+            // 获取标志位的坐标
+            Cell fengKouZhiJing = PoiCustomUtil.getCellByValue(zhengMianSheet, "风口直径");
+            int rowIndex = fengKouZhiJing.getRowIndex();
+            int columnIndex = fengKouZhiJing.getColumnIndex();
+
+            // 填充风口信息
+            BfBlastMainInfo bfBlastMainInfo = getBfBlastMainInfo(version);
+            int fengkouNumMaxIndex = columnIndex + 36;
+            List<CellData> cellDataList = new ArrayList<CellData>();
+            for (int i = columnIndex + 1; i <= fengkouNumMaxIndex; i++) {
+                BfBlastMain bfBlastMain = bfBlastMainInfo.getBfBlastMains().get(i - columnIndex - 1);
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, bfBlastMain.getBlastDiameter());
+            }
+
+            ExcelWriterUtil.setCellValue(zhengMianSheet, cellDataList);
+
+            // TODO 夜班白班
+            // TODO 其他风口信息
+        } catch (Exception e) {
+            log.error("处理正面-风口信息出错", e);
+        }
+    }
+
+
     /**
      * 通过tag点拿数据的API，根据sequence和version返回不同工序的api地址
      *
