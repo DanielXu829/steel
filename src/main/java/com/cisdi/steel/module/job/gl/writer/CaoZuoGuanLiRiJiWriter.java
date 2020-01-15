@@ -5,14 +5,14 @@ import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.dto.response.SuccessEntity;
-import com.cisdi.steel.dto.response.gl.MaterialExpendDTO;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
-import com.cisdi.steel.dto.response.gl.TapSummaryListDTO;
 import com.cisdi.steel.dto.response.gl.TapTPCDTO;
 import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
 import com.cisdi.steel.dto.response.gl.res.BfBlastMain;
 import com.cisdi.steel.dto.response.gl.res.BfBlastMainInfo;
+import com.cisdi.steel.dto.response.gl.res.PageData;
+import com.cisdi.steel.dto.response.gl.res.TapSgRow;
+import com.cisdi.steel.dto.response.gl.res.TapTPC;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -29,8 +29,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 /**
  * <p>Description: 8高炉操作管理日记 执行处理类 </p>
@@ -67,6 +73,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         handleFengKouXinXi(excelDTO, workbook, version);
         // 填充
 
+        // 出铁(反面)
+        handleTapData(excelDTO, workbook, version);
         return workbook;
     }
 
@@ -239,7 +247,182 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         }
     }
 
+    // 反面-出铁
+    protected void handleTapData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+        // 需要写入的单元格数据对象
+        List<CellData> resultList = new ArrayList<>();
+        // 反面sheet
+        Sheet sheet = workbook.getSheetAt(1);
+        DateQuery date = this.getDateQuery(excelDTO);
+        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+        // 处理出铁数据
+        List<String> tapNoList = handleTapData(sheet, dateQuery, resultList, version);
+        // 处理罐号重量数据
+        if (CollectionUtils.isNotEmpty(tapNoList)) {
+            handleTpcInfoData(sheet, resultList, tapNoList, version);
+        }
 
+        ExcelWriterUtil.setCellValue(sheet, resultList);
+    }
+
+    /**
+     * 处理出铁数据
+     * @param sheet
+     * @param dateQuery
+     * @param resultList
+     * @param version
+     * @return tapNoList
+     */
+    private List<String> handleTapData(Sheet sheet, DateQuery dateQuery, List<CellData> resultList, String version) {
+        // 铁次(tapNo)list，用于调接口罐号重量接口
+        ArrayList<String> tapNoList = new ArrayList<>();
+        int itemRowNum = 6;
+        try {
+            // 1、组装出铁数据URL
+            Map<String, String> queryParam = this.getQueryParam(dateQuery);
+            queryParam.put("pagenum", "1");
+            queryParam.put("pagesize", "10");
+            // 2、获取数据并反序列化为java对象
+            String tapData = httpUtil.get(getTapsInRange(version), queryParam);
+            if (StringUtils.isBlank(tapData)) {
+                return null;
+            }
+            PageData<TapSgRow> pageData = JSON.parseObject(tapData, new TypeReference<PageData<TapSgRow>>(){});
+            if (Objects.isNull(pageData)) {
+                return null;
+            }
+            List<TapSgRow> tapSgRowData = pageData.getData();
+            if (CollectionUtils.isEmpty(tapSgRowData)) {
+                return null;
+            }
+            tapSgRowData.sort(comparing(TapSgRow::getStartTime)); // 按时间先后进行排序
+            int dataSize = tapSgRowData.size();
+            // 隐藏标记行
+            sheet.getRow(itemRowNum).setZeroHeight(true);
+            List<String> itemRow = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
+            if (CollectionUtils.isEmpty(itemRow)) {
+                return null;
+            }
+            int itemDataSize = itemRow.size();
+            TapSgRow tapSgRow = null;
+            // 需要对时间数据进行格式化处理
+            String[] timeItemArray = {"startTime", "slagTime", "endTime"};
+            List<String> timeItemList = Arrays.asList(timeItemArray);
+
+            // 遍历标记行
+            for (int i = 0; i < dataSize; i++) {
+                tapSgRow = tapSgRowData.get(i);
+                tapNoList.add(tapSgRow.getTapNo());
+                // 将对象转为Map,key为对象引用名
+                Map<String, Object> stringObjectMap = JSON.parseObject(JSON.toJSONString(tapSgRow), new TypeReference<Map<String, Object>>(){});
+                Map<String, Double> tapValues = tapSgRow.getTapValues();
+                Map<String, Double> slagAnalysis = tapSgRow.getSlagAnalysis();
+                Map<String, Double> hmAnalysis = tapSgRow.getHmAnalysis();
+
+                for (int j = 0; j < itemDataSize; j++) {
+                    String itemData = itemRow.get(j);
+                    if (StringUtils.isBlank(itemData)) {
+                        continue;
+                    }
+                    String[] itemArray = itemData.split("_");
+                    if (itemArray.length == 2 && "item".equals(itemArray[0])) {
+                        Object value = stringObjectMap.get(itemArray[1]);
+                        // 对时间数据进行格式化处理
+                        if (timeItemList.contains(itemArray[1])) {
+                            LocalDateTime localDate = Instant.ofEpochMilli(Long.valueOf(String.valueOf(value))).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                            value = DateTimeFormatter.ofPattern("HH:mm:ss").format(localDate);
+                            // yyyy-MM-dd HH:mm:ss
+                        }
+                        ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, value);
+                    } else if (itemArray.length == 3 && "item".equals(itemArray[0])) {
+                        switch (itemArray[1]) {
+                            case "tapValues":
+                                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, tapValues.get(itemArray[2]));
+                                break;
+                            case "slagAnalysis":
+                                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, slagAnalysis.get(itemArray[2]));
+                                break;
+                            case "hmAnalysis":
+                                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, hmAnalysis.get(itemArray[2]));
+                                break;
+                        }
+                    } else {
+                        log.warn("excel标记项格式错误:" + itemData);
+                    }
+                }
+            }
+
+            return tapNoList;
+        } catch (Exception e) {
+            log.error("处理反面-出铁出错", e);
+            return tapNoList;
+        }
+    }
+
+    /**
+     * 处理罐号重量数据
+     * @param sheet
+     * @param resultList
+     * @param tapNoList
+     * @param version
+     */
+    private void handleTpcInfoData(Sheet sheet, List<CellData> resultList, List<String> tapNoList, String version) {
+        try {
+            Cell tpcNoCell = PoiCustomUtil.getCellByValue(sheet, "{罐号}");
+            if (Objects.isNull(tpcNoCell)) {
+                return;
+            }
+            int tpcNoBeginRow = tpcNoCell.getRowIndex();
+            int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
+            // 组装罐号重量数据URL(基于出铁返回的铁次)
+            for (int i = 0; i < tapNoList.size(); i++) {
+                Map<String, String> queryParam = new HashMap<>();
+                queryParam.put("tapNo", tapNoList.get(i));
+                String tpcInfoData = httpUtil.get(getTpcInfoByTapNo(version), queryParam);
+                if (StringUtils.isBlank(tpcInfoData)) {
+                    return;
+                }
+                TapTPCDTO tapTPCDTO = JSON.parseObject(tpcInfoData, TapTPCDTO.class);
+                if (Objects.isNull(tapTPCDTO)) {
+                    return;
+                }
+                List<TapTPC> tapTPCList = tapTPCDTO.getData();
+                if (CollectionUtils.isEmpty(tapTPCList)) {
+                    return;
+                }
+                int dataSize = tapTPCList.size();
+                for (int j = 0; j < dataSize; j++) {
+                    TapTPC tapTPC = tapTPCList.get(j);
+                    String tpcNo = tapTPC.getTpcNo();
+                    BigDecimal netWt = tapTPC.getNetWt();
+                    int writeRow = tpcNoBeginRow + i;
+                    int writeColumn = tpcNoBeginColumn + j * 2;
+                    ExcelWriterUtil.addCellData(resultList, writeRow, writeColumn, tpcNo);
+                    ExcelWriterUtil.addCellData(resultList, writeRow, writeColumn + 1, netWt);
+                }
+            }
+        } catch (Exception e) {
+            log.error("处理反面-罐号重量出错", e);
+        }
+    }
+
+    /**
+     * 出铁数据接口
+     * @param version
+     * @return
+     */
+    protected String getTapsInRange(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/taps/sg/period";
+    }
+
+    /**
+     * 罐号重量数据接口
+     * @param version
+     * @return
+     */
+    protected String getTpcInfoByTapNo(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/report/tap/queryTpcInfoByTapNo";
+    }
 
 
 }

@@ -102,6 +102,7 @@ public class ChuChenWriter extends AbstractExcelReadWriter {
                 if (StringUtils.isNotBlank(column)) {
                     // 可能是处理方法加tag点的组合。 e.g: max,tag1,tag2 需要根据最前面的方式做特殊处理
                     String[] columnSplit = column.split(",");
+                    // TODO if中可以删掉
                     if (Objects.nonNull(columnSplit) && columnSplit.length > 2) {
                         List<Double> specialValues = new ArrayList<Double>();
                         // 获取处理方式
