@@ -70,7 +70,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         // 正面-小时参数
         handleFacadeXiaoShiCanShu(excelDTO, workbook, version);
 
-        // 正面-风口信息
         handleFengKouXinXi(excelDTO, workbook, version);
         // 填充
 
@@ -103,6 +102,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
+
             // TODO 煤枪数支
             // TODO 齿轮箱水温差℃
         } catch (Exception e) {
@@ -217,21 +217,11 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 BfBlastMain bfBlastMain = bfBlastMainInfo.getBfBlastMains().get(i - columnIndex - 1);
                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, bfBlastMain.getBlastDiameter());
             }
+
             ExcelWriterUtil.setCellValue(zhengMianSheet, cellDataList);
 
             // TODO 夜班白班
-
-            // 填充其他风口信息
-            String queryUrl = getUrlTagNamesInRange(excelDTO.getTemplate().getSequence(), version);
-            // 动态报表生成的模板默认取第二个sheet。
-            String sheetName = "_FacadeFengKouXinXi_day_hour";
-            Sheet sheet = workbook.getSheet(sheetName);
-            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(new Date());
-            // 直接拿到tag点名, 无需根据别名再去获取tag点名
-            List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
-            int rowNum = 1;
-            List<CellData> cellData = handleEachRowData(tagNames, queryUrl, dateQuery, rowNum);
-            ExcelWriterUtil.setCellValue(sheet, cellData);
+            // TODO 其他风口信息
         } catch (Exception e) {
             log.error("处理正面-风口信息出错", e);
         }
