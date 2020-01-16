@@ -283,6 +283,16 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                             .map(ChargeVarMaterial::getWeight)
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+                    BigDecimal daShaoWeightSum = chargeVarMaterial.stream()
+                            .filter(p -> p.getTyp() == 2)
+                            .map(ChargeVarMaterial::getWeight)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add).subtract(cokeNutWeight);// （chargeVarMaterial.typ =2   weight 和 ） 减去 （brandcode=CokeNut的weight）
+
+                    BigDecimal xiaoShaoWeightSum = chargeVarMaterial.stream()
+                            .filter(p -> p.getTyp() == 3)
+                            .map(ChargeVarMaterial::getWeight)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);// chargeVarMaterial.typ =3  weight 和
+
                     // 循环所有的标志位列
                     for (int j = beginRowIndex; j <= endRowIndex; j++) {
                         Cell flagCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(zhengMianSheet, j), columnIndex);
@@ -304,23 +314,21 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                                     ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
                                     break;
                                 }
+                                case "{变料.矿批}": {
+                                    // 大烧 + 小烧
+                                    BigDecimal val = daShaoWeightSum.add(xiaoShaoWeightSum);
+                                    ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
+                                    break;
+                                }
                                 case "{变料.大烧}": {
                                     // （（chargeVarMaterial.typ =2   weight 和 ） 减去 （brandcode=CokeNut的weight））  再除以 （大烧+小烧+球团之和）的百分比
-                                    BigDecimal type2WeightSum = chargeVarMaterial.stream()
-                                            .filter(p -> p.getTyp() == 2)
-                                            .map(ChargeVarMaterial::getWeight)
-                                            .reduce(BigDecimal.ZERO, BigDecimal::add);// chargeVarMaterial.typ =2  weight 和
-                                    BigDecimal val = type2WeightSum.subtract(cokeNutWeight).divide(jiaoPiWeightSum, BigDecimal.ROUND_HALF_UP, 4).multiply(new BigDecimal(100));
+                                    BigDecimal val = daShaoWeightSum.divide(jiaoPiWeightSum, BigDecimal.ROUND_HALF_UP, 4).multiply(new BigDecimal(100));
                                     ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
                                     break;
                                 }
                                 case "{变料.小烧}": {
                                     // （chargeVarMaterial.typ =3   weight 和） 除以 （大烧+小烧+球团之和）的百分比
-                                    BigDecimal type3WeightSum = chargeVarMaterial.stream()
-                                            .filter(p -> p.getTyp() == 3)
-                                            .map(ChargeVarMaterial::getWeight)
-                                            .reduce(BigDecimal.ZERO, BigDecimal::add);// chargeVarMaterial.typ =3  weight 和
-                                    BigDecimal val = type3WeightSum.divide(jiaoPiWeightSum, BigDecimal.ROUND_HALF_UP, 4).multiply(new BigDecimal(100));
+                                    BigDecimal val = xiaoShaoWeightSum.divide(jiaoPiWeightSum, BigDecimal.ROUND_HALF_UP, 4).multiply(new BigDecimal(100));
                                     ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
                                     break;
                                 }
