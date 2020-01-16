@@ -8,11 +8,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
 import com.cisdi.steel.dto.response.gl.TapTPCDTO;
 import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
-import com.cisdi.steel.dto.response.gl.res.BfBlastMain;
-import com.cisdi.steel.dto.response.gl.res.BfBlastMainInfo;
-import com.cisdi.steel.dto.response.gl.res.PageData;
-import com.cisdi.steel.dto.response.gl.res.TapSgRow;
-import com.cisdi.steel.dto.response.gl.res.TapTPC;
+import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -63,19 +59,31 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String version = "8.0";
         try {
             version = PoiCustomUtil.getSheetCellVersion(workbook);
+
+            // 正面-小时参数
+            handleFacadeXiaoShiCanShu(excelDTO, workbook, version);
+
+            // 正面-风口信息
+            handleFengKouXinXi(excelDTO, workbook, version);
+
+            // 正面-变料信息
+            handleBianLiaoXinXi(excelDTO, workbook, version);
+            // 填充
+
+            // 出铁(反面)
+            handleTapData(excelDTO, workbook, version);
+
+            // 全局替换 当前日期
+
+            Sheet sheet1 = workbook.getSheetAt(0);
+            Date currentDate = new Date();
+            ExcelWriterUtil.replaceCurrentDateInTitle(sheet1, "%当前日期%", currentDate);
+            Sheet sheet2 = workbook.getSheetAt(1);
+            ExcelWriterUtil.replaceCurrentDateInTitle(sheet2, "%当前日期%", currentDate);
         } catch (Exception e) {
             log.error("在模板中获取version失败", e);
         }
 
-        // 正面-小时参数
-        handleFacadeXiaoShiCanShu(excelDTO, workbook, version);
-
-        // 正面-风口信息
-        handleFengKouXinXi(excelDTO, workbook, version);
-        // 填充
-
-        // 出铁(反面)
-        handleTapData(excelDTO, workbook, version);
         return workbook;
     }
 
@@ -236,7 +244,106 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             log.error("处理正面-风口信息出错", e);
         }
     }
+    //结束--------------------正面-风口信息--------------------
 
+
+    //开始--------------------正面-变料信息--------------------
+    protected void handleBianLiaoXinXi(WriterExcelDTO excelDTO,Workbook workbook,String version){
+        try {
+            Sheet zhengMianSheet = workbook.getSheetAt(0);
+            // 获取标志位的坐标
+            Cell piShuCell = PoiCustomUtil.getCellByValue(zhengMianSheet, "{变料.批数}");
+            int beginRowIndex = piShuCell.getRowIndex();
+            int columnIndex = piShuCell.getColumnIndex();
+
+            Cell qiuTuanCell = PoiCustomUtil.getCellByValue(zhengMianSheet, "{变料.球团}");
+            int endRowIndex = qiuTuanCell.getRowIndex();
+
+            // 获取数据并填充
+            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(new Date());
+            List<ChargeVarInfo> chargeVarInfos = getChargeVarInfo(version, dateQuery);
+            List<CellData> cellDataList = new ArrayList<>();
+
+            if (CollectionUtils.isNotEmpty(chargeVarInfos)) {
+                for (int i = 0; i < chargeVarInfos.size(); i++) {
+                    ChargeVarInfo chargeVarInfo = chargeVarInfos.get(i);
+                    // 计算相关项
+                    List<ChargeVarMaterial> chargeVarMaterial = chargeVarInfo.getChargeVarMaterial();
+                    BigDecimal cokeNutWeight = chargeVarMaterial.stream()
+                            .filter(p -> ("CokeNut".equals(p.getBrandCode()) && 2 == p.getTyp()))
+                            .map(ChargeVarMaterial::getWeight)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);// type=2 的brandcode=CokeNut的weight
+
+                    BigDecimal jiaoPiWeightSum = chargeVarMaterial.stream()
+                            .filter(p -> (p.getTyp() != 1 && !"CokeNut".equals(p.getBrandCode())))
+                            .map(ChargeVarMaterial::getWeight)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    // 循环所有的标志位列
+                    for (int j = beginRowIndex; j <= endRowIndex; j++) {
+                        Cell flagCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(zhengMianSheet, j), columnIndex);
+                        String itemName = flagCell.getStringCellValue();
+                        if (StringUtils.isNotBlank(itemName)) {
+                            switch (itemName) {
+                                case "{变料.批数}": {
+                                    Integer chargeNo = chargeVarInfo.getChargeVarIndex().getChargeNo();
+                                    ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, chargeNo);
+                                    break;
+                                }
+                                case "{变料.焦批}": {
+                                    // chargeVarMaterial.typ =1  weight 和  + type=2 的brandcode=CokeNut的weight
+                                    BigDecimal type1WeightSum = chargeVarMaterial.stream()
+                                            .filter(p -> p.getTyp() == 1)
+                                            .map(ChargeVarMaterial::getWeight)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add);// chargeVarMaterial.typ =1  weight 和
+                                    BigDecimal val = type1WeightSum.add(cokeNutWeight);
+                                    ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
+                                    break;
+                                }
+                                case "{变料.大烧}": {
+                                    // （（chargeVarMaterial.typ =2   weight 和 ） 减去 （brandcode=CokeNut的weight））  再除以 （大烧+小烧+球团之和）的百分比
+                                    BigDecimal type2WeightSum = chargeVarMaterial.stream()
+                                            .filter(p -> p.getTyp() == 2)
+                                            .map(ChargeVarMaterial::getWeight)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add);// chargeVarMaterial.typ =2  weight 和
+                                    BigDecimal val = type2WeightSum.subtract(cokeNutWeight).divide(jiaoPiWeightSum, BigDecimal.ROUND_HALF_UP, 4).multiply(new BigDecimal(100));
+                                    ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
+                                    break;
+                                }
+                                case "{变料.小烧}": {
+                                    // （chargeVarMaterial.typ =3   weight 和） 除以 （大烧+小烧+球团之和）的百分比
+                                    BigDecimal type3WeightSum = chargeVarMaterial.stream()
+                                            .filter(p -> p.getTyp() == 3)
+                                            .map(ChargeVarMaterial::getWeight)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add);// chargeVarMaterial.typ =3  weight 和
+                                    BigDecimal val = type3WeightSum.divide(jiaoPiWeightSum, BigDecimal.ROUND_HALF_UP, 4).multiply(new BigDecimal(100));
+                                    ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
+                                    break;
+                                }
+                                case "{变料.球团}": {
+                                    //（brandCode以PELLETS结尾的 weight之和） 除以 （大烧+小烧+球团之和）的百分比
+                                    BigDecimal sum = chargeVarMaterial.stream()
+                                            .filter(p -> StringUtils.endsWith(p.getBrandCode(), "PELLETS"))
+                                            .map(ChargeVarMaterial::getWeight)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add);// （brandCode以PELLETS结尾的 weight之和）
+                                    BigDecimal val = sum.divide(jiaoPiWeightSum, BigDecimal.ROUND_HALF_UP, 4).multiply(new BigDecimal(100));
+                                    ExcelWriterUtil.addCellData(cellDataList, j, columnIndex + i, val);
+                                    break;
+                                }
+                                default: {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                ExcelWriterUtil.setCellValue(zhengMianSheet, cellDataList);
+            }
+        } catch (Exception e) {
+            log.error("处理正面-变料信息出错", e);
+        }
+    }
+    //结束--------------------正面-变料信息--------------------
 
     /**
      * 通过tag点拿数据的API，根据sequence和version返回不同工序的api地址
