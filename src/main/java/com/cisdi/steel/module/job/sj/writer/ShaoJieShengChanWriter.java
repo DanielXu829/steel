@@ -132,29 +132,82 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      */
     private List<CellData> handleDownTimeRecordData(Sheet sheet, DateQuery dateQuery, String version) {
         List<CellData> cellDataList = new ArrayList();
-        String data = getDownTimeRecordData(dateQuery, version);
-        Cell nightDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.夜}");
-        int nightDownTimeBeginRow = nightDownTimeCell.getRowIndex();
-        int nightDownTimeBeginColumn = nightDownTimeCell.getColumnIndex();
-        Cell dayDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.白}");
-        int dayDownTimeBeginRow = dayDownTimeCell.getRowIndex();
-        int dayDownTimeBeginColumn = dayDownTimeCell.getColumnIndex();
-        if (StringUtils.isBlank(data)) {
-            return null;
-        }
-        SuccessEntity<ProdStopRecordInfo> prodStopRecordDTO = JSON.parseObject(data, new TypeReference<SuccessEntity<ProdStopRecordInfo>>(){});
-        List<ProdStopRecord> nightProdStopRecords = prodStopRecordDTO.getData().getNightProdStopRecords();
-        List<ProdStopRecord> dayProdStopRecords = prodStopRecordDTO.getData().getDayProdStopRecords();
-        // excel中只有5行单元格
-        int nightMaxSize = 5;
-        int dayMaxSize = 5;
-        handleWriteDownTimeData(cellDataList, nightDownTimeBeginRow, nightDownTimeBeginColumn, nightProdStopRecords, nightMaxSize);
-        handleWriteDownTimeData(cellDataList, dayDownTimeBeginRow, dayDownTimeBeginColumn, dayProdStopRecords, dayMaxSize);
+        try {
+            String data = getDownTimeRecordData(dateQuery, version);
+            if (StringUtils.isBlank(data)) {
+                return null;
+            }
 
-        Cell dayDownTimesCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数}");
-        int dayDownTimes = nightProdStopRecords.size() + dayProdStopRecords.size();
-        ExcelWriterUtil.addCellData(cellDataList, dayDownTimesCell.getRowIndex(), dayDownTimesCell.getColumnIndex(), dayDownTimes);
-        return cellDataList;
+            SuccessEntity<ProdStopRecordInfo> prodStopRecordDTO = JSON.parseObject(data, new TypeReference<SuccessEntity<ProdStopRecordInfo>>(){});
+            if (Objects.isNull(prodStopRecordDTO)) {
+                return null;
+            }
+
+            ProdStopRecordInfo prodStopRecordInfo = prodStopRecordDTO.getData();
+            if (Objects.isNull(prodStopRecordInfo)) {
+                return null;
+            }
+
+            try {
+                // 处理夜班停机记录
+                List<ProdStopRecord> nightProdStopRecords = prodStopRecordInfo.getNightProdStopRecords();
+                // excel中只有5行单元格
+                int nightMaxSize = 5;
+                if (CollectionUtils.isNotEmpty(nightProdStopRecords)) {
+                    Cell nightDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.夜}");
+                    if (Objects.nonNull(nightDownTimeCell)) {
+                        int nightDownTimeBeginRow = nightDownTimeCell.getRowIndex();
+                        int nightDownTimeBeginColumn = nightDownTimeCell.getColumnIndex();
+                        handleWriteDownTimeData(cellDataList, nightDownTimeBeginRow, nightDownTimeBeginColumn, nightProdStopRecords, nightMaxSize);
+                    } else {
+                        log.error("模板中{停机记录.停机起时.夜}占位符不存在");
+                    }
+                }
+            } catch (Exception e) {
+                log.error("处理夜班停机记录出错", e);
+            }
+
+            try {
+                // 处理白班停机记录
+                List<ProdStopRecord> dayProdStopRecords = prodStopRecordInfo.getDayProdStopRecords();
+                Cell dayDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.白}");
+                // excel中只有5行单元格
+                int dayMaxSize = 5;
+                if (CollectionUtils.isNotEmpty(dayProdStopRecords)) {
+                    if (Objects.nonNull(dayDownTimeCell)) {
+                        int dayDownTimeBeginRow = dayDownTimeCell.getRowIndex();
+                        int dayDownTimeBeginColumn = dayDownTimeCell.getColumnIndex();
+                        handleWriteDownTimeData(cellDataList, dayDownTimeBeginRow, dayDownTimeBeginColumn, dayProdStopRecords, dayMaxSize);
+                    } else {
+                        log.error("模板中{停机记录.停机起时.白}占位符不存在");
+                    }
+                }
+            } catch (Exception e) {
+                log.error("处理白班停机记录出错", e);
+            }
+
+            Cell totalStopTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.共停}");
+            if (Objects.nonNull(totalStopTimeCell)) {
+                int totalStopTime = prodStopRecordInfo.getTotalStopTime();
+                ExcelWriterUtil.addCellData(cellDataList, totalStopTimeCell.getRowIndex(), totalStopTimeCell.getColumnIndex(), totalStopTime);
+            } else {
+                log.error("模板中{停机记录.共停}占位符不存在");
+            }
+
+            Cell timeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数}");
+            if (Objects.nonNull(timeCell)) {
+                int downTimes = prodStopRecordInfo.getTime();
+                ExcelWriterUtil.addCellData(cellDataList, timeCell.getRowIndex(), timeCell.getColumnIndex(), downTimes);
+            } else {
+                log.error("模板中{停机记录.停机次数}占位符不存在");
+            }
+
+            return cellDataList;
+        } catch (Exception e) {
+            log.error("处理停机记录出错", e);
+
+            return cellDataList;
+        }
     }
 
     private void handleWriteDownTimeData(List<CellData> cellDataList, int BeginRow, int BeginColumn, List<ProdStopRecord> prodStopRecords, int maxSize) {
@@ -172,7 +225,6 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 String endTime = DateUtil.getFormatDateTime(nightProdStopRecord.getEndTime(), "yyyy-MM-dd HH:mm:ss");
                 Long stopTime = nightProdStopRecord.getStopTime();
                 String causeDesc = nightProdStopRecord.getCauseDesc();
-
                 ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn, startTime);
                 ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn + 1, endTime);
                 ExcelWriterUtil.addCellData(cellDataList, BeginRow + j, BeginColumn + 2, stopTime);
