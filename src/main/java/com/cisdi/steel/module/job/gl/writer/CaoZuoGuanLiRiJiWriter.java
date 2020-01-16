@@ -59,7 +59,11 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String version = "8.0";
         try {
             version = PoiCustomUtil.getSheetCellVersion(workbook);
+        } catch (Exception e) {
+            log.error("在模板中获取version失败", e);
+        }
 
+        try {
             // 正面-小时参数
             handleFacadeXiaoShiCanShu(excelDTO, workbook, version);
 
@@ -81,7 +85,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             Sheet sheet2 = workbook.getSheetAt(1);
             ExcelWriterUtil.replaceCurrentDateInTitle(sheet2, "%当前日期%", currentDate);
         } catch (Exception e) {
-            log.error("在模板中获取version失败", e);
+            log.error("处理模板数据失败", e);
         }
 
         return workbook;
