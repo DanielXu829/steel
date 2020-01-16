@@ -407,6 +407,20 @@ public class ExcelWriterUtil {
     /**
      * 动态替换报表首行标题中的日期
      * @param sheet
+     * @param date
+     * @param date
+     */
+    public static void replaceCurrentDateInTitle(Sheet sheet, String placeHolder, Date date) {
+        Cell titleCell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
+        String stringCellValue = titleCell.getStringCellValue();
+        String currentDate = DateFormatUtils.format(date, DateUtil.yyyyMMddChineseFormat);
+        stringCellValue = stringCellValue.replaceAll(placeHolder, currentDate);
+        titleCell.setCellValue(stringCellValue);
+    }
+
+    /**
+     * 动态替换报表首行标题中的日期
+     * @param sheet
      * @param row
      * @param column
      * @param date
