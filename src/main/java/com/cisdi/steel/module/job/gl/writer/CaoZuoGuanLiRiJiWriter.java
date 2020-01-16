@@ -251,18 +251,22 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     protected void handleTapData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         // 需要写入的单元格数据对象
         List<CellData> resultList = new ArrayList<>();
-        // 反面sheet
-        Sheet sheet = workbook.getSheetAt(1);
-        DateQuery date = this.getDateQuery(excelDTO);
-        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
-        // 处理出铁数据
-        List<String> tapNoList = handleTapData(sheet, dateQuery, resultList, version);
-        // 处理罐号重量数据
-        if (CollectionUtils.isNotEmpty(tapNoList)) {
-            handleTpcInfoData(sheet, resultList, tapNoList, version);
-        }
+        try {
+            // 反面sheet
+            Sheet sheet = workbook.getSheetAt(1);
+            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+            // 处理出铁数据
+            List<String> tapNoList = handleTapData(sheet, dateQuery, resultList, version);
+            // 处理罐号重量数据
+            if (CollectionUtils.isNotEmpty(tapNoList)) {
+                handleTpcInfoData(sheet, resultList, tapNoList, version);
+            }
 
-        ExcelWriterUtil.setCellValue(sheet, resultList);
+            ExcelWriterUtil.setCellValue(sheet, resultList);
+        } catch (Exception e) {
+            log.error("处理反面-出铁参数出错", e);
+        }
     }
 
     /**
