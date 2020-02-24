@@ -80,9 +80,9 @@ public class JobController {
                 String reportCategoryCode = reportCategoryTemplate.getReportCategoryCode();
 
                 String code = quartz.getJobName();
-                // 如果是动态模板，重设此JobEnum
+                // 如果是动态模板，设置code为"drt"
                 if ("1".equals(reportCategoryTemplate.getIsDynamicReport())) {
-                    code = JobEnum.drt.getCode();
+                    code = "drt";
                 }
                 //通过任务编码获取执行类
                 String action = sysConfigService.selectActionByCode(code);
