@@ -174,6 +174,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         String tempPath = jobProperties.getTempPath();
         String excelFileName = new StringBuilder().append(tempPath).append(File.separator)
                 .append(reportTemplateConfig.getTemplateName()).append("_").append(System.currentTimeMillis()).append(".xlsx").toString();
+        File localFile = new File(excelFileName);
+        if (!localFile.getParentFile().exists()) {
+            localFile.getParentFile().mkdirs();
+        }
         FileOutputStream fos = new FileOutputStream(excelFileName);
         workbook.write(fos);
         fos.close();
