@@ -59,6 +59,7 @@ public enum JobEnum {
     gl_guankongzhibiao("gl_guankongzhibiao", "高炉重点管控指标"),
     gl_bf6gongyicanshu("gl_bf6gongyicanshu", "6高炉工艺参数跟踪"),
     gl_caoyehui_day("gl_caoyehui_day", "高炉操业会议"),
+    gl_rishengchanfenxibaogao_day("gl_rishengchanfenxibaogao_day", "高炉日生产分析报告"),
     gl_tuosifuyang("gl_tuosifuyang", "6高炉脱湿富氧操作报表"),
     gl_zhuangliaochuchen("gl_zhuangliaochuchen", "装料除尘操作报表"),
     gl_refenglujiankong("gl_refenglujiankong", "6高炉热风炉设备监控日报"),
