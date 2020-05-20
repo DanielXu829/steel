@@ -167,6 +167,7 @@ public enum JobEnum {
     sj_nengyuanxiaohao_month("sj_nengyuanxiaohao_month", "烧结公辅能源消耗及成本统计表"),
     sj_shengchan4("sj_shengchan4", "4烧结生产报表"),
     sj_shengchanfenxi4("sj_shengchanfenxi4", "4烧结生产分析模板"),
+    sj_duichangyunxingtongji("sj_duichangyunxingtongji", "堆场运行统计"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),

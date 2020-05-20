@@ -411,11 +411,38 @@ public class ExcelWriterUtil {
      * @param date
      */
     public static void replaceCurrentDateInTitle(Sheet sheet, String placeHolder, Date date) {
-        Cell titleCell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
-        String stringCellValue = titleCell.getStringCellValue();
-        String currentDate = DateFormatUtils.format(date, DateUtil.yyyyMMddChineseFormat);
-        stringCellValue = stringCellValue.replaceAll(placeHolder, currentDate);
-        titleCell.setCellValue(stringCellValue);
+        replaceCurrentDateInTitle(sheet, placeHolder, date, DateUtil.yyyyMMddChineseFormat);
+    }
+
+    /**
+     * 动态替换报表首行标题中的日期
+     * @param sheet
+     * @param placeHolder
+     * @param date
+     * @param format
+     */
+    public static void replaceCurrentDateInTitle(Sheet sheet, String placeHolder, Date date, String format) {
+        replaceCurrentDateInTitle(sheet, placeHolder, date, format, 1);
+    }
+
+    /**
+     * 动态替换报表首行标题中的日期
+     * @param sheet
+     * @param placeHolder
+     * @param date
+     * @param format
+     * @param loop
+     */
+    public static void replaceCurrentDateInTitle(Sheet sheet, String placeHolder, Date date, String format, Integer loop) {
+        for (Integer index = 0; index < loop; index++) {
+            Cell titleCell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
+            if (titleCell != null) {
+                String stringCellValue = titleCell.getStringCellValue();
+                String currentDate = DateFormatUtils.format(date, format);
+                stringCellValue = stringCellValue.replaceAll(placeHolder, currentDate);
+                titleCell.setCellValue(stringCellValue);
+            }
+        }
     }
 
     /**
