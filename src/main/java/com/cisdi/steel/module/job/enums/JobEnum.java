@@ -92,7 +92,6 @@ public enum JobEnum {
     jh_cdqcaozuob("jh_cdqcaozuob", "干熄焦-CDQ操作运行报表B（日）"),
     jh_zhuangmeichuchen("jh_zhuangmeichuchen", "装煤除尘报表"),
     jh_cdqchuchen("jh_cdqchuchen", "CDQ除尘报表"),
-    jh_shaijiaochuchen("jh_shaijiaochuchen", "干熄焦-筛焦除尘报表（日）"),
     jh_gufenglengning1("jh_gufenglengning1", "化产-鼓风冷凝报表（一）（日）"),
     jh_gufenglengning2("jh_gufenglengning2", "化产-鼓风冷凝报表（二）（日）"),
     jh_zhilengxunhuanshui("jh_zhilengxunhuanshui", "化产-制冷循环水报表（日）"),
@@ -135,6 +134,7 @@ public enum JobEnum {
     jh_jiaolujiare10("jh_jiaolujiare10", "10#焦炉加热制度"),
     jh_chujiaochuchen("jh_chujiaochuchen", "出焦除尘报表"),
     jh_gxjchuchen("jh_gxjchuchen", "干熄焦除尘报表"),
+    jh_shaijiaochuchen("jh_shaijiaochuchen", "筛焦除尘报表"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫系统运行日报"),

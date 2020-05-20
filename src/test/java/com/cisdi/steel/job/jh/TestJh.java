@@ -66,4 +66,12 @@ public class TestJh extends SteelApplicationTests {
     public void test6() {
         gxjChuChenJob.execute(null);
     }
+
+    @Autowired
+    private ShaiJiaoChuChenJob shaiJiaoChuChenJob;
+
+    @Test
+    public void testShaiJiaoChuChenJob() {
+        shaiJiaoChuChenJob.execute(null);
+    }
 }
