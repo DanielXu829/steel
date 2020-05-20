@@ -338,7 +338,7 @@ public class GaoLuRiFenXiBaoGao {
         cal.set(Calendar.SECOND,0);
         cal.set(Calendar.MILLISECOND,0);
         // test
-        cal.add(Calendar.DAY_OF_MONTH,-3);
+        // cal.add(Calendar.DAY_OF_MONTH,-3);
         // 今日零点，作为结束时间点
         Date endDate = cal.getTime();
         // 前推30天，作为开始时间点
