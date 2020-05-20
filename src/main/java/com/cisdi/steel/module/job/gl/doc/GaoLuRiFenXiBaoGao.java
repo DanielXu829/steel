@@ -12,9 +12,13 @@ import com.cisdi.steel.module.job.a1.doc.Serie;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
+import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -23,6 +27,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -82,7 +87,11 @@ public class GaoLuRiFenXiBaoGao {
     @Autowired
     private ReportIndexMapper reportIndexMapper;
 
-    //@Scheduled(cron = "0 40 14 * * ?")
+    @Autowired
+    private ReportCategoryTemplateService reportCategoryTemplateService;
+
+    //@Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void mainTask() {
         result = new HashMap<>();
         initDateTime();
@@ -99,7 +108,12 @@ public class GaoLuRiFenXiBaoGao {
         dealPart(data, "partTwo", L2);
         dealPart(data, "partThree", L3);
         dealPart(data, "partFour", L4);
-        comm(version, jobProperties.getTemplatePath() + File.separator + "doc" + File.separator + "高炉日生产分析报告.docx");
+        List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day.getCode(), LanguageEnum.cn_zh.getName(), "8高炉");
+        if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
+            String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
+            log.debug("高炉日生产分析报告模板路径：" + templatePath);
+            comm(version, templatePath);
+        }
     }
 
     /**
@@ -191,17 +205,17 @@ public class GaoLuRiFenXiBaoGao {
 
     private void dealChart1(JSONObject data) {
         List<Double> tagObject1 = getValuesByTag(data, "BF8_L2M_HMMassAct_1d_cur");
-        List<Double> tagObject2 = getValuesByTag(data,"BF8_L2M_BX_FuelRate_1d_cur");
+        List<Double> tagObject2 = getValuesByTag(data, "BF8_L2M_BX_FuelRate_1d_cur");
         List<Double> tempObject1 = new ArrayList<>();
         tempObject1.addAll(tagObject1);
         List<Double> tempObject2 = new ArrayList<>();
         tempObject2.addAll(tagObject2);
         tempObject1.removeAll(Collections.singleton(null));
         tempObject2.removeAll(Collections.singleton(null));
-        Double max1 = Collections.max(tempObject1) * 1.2;
-        Double min1 = Collections.min(tempObject1) * 0.8;
-        Double max2 = Collections.max(tempObject2) * 1.2;
-        Double min2 = Collections.min(tempObject2) * 0.8;
+        Double max1 = tempObject1.size() > 0 ? Collections.max(tempObject1) * 1.2 : 10000.0;
+        Double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : 0.0;
+        Double max2 = tempObject2.size() > 0 ? Collections.max(tempObject2) * 1.2 : 600.0;
+        Double min2 = tempObject2.size() > 0 ? Collections.min(tempObject2) * 0.8 : 400.0;
 
 //        Double min1 = 0.0;
 //        Double max1 = 10000.0;
@@ -223,7 +237,7 @@ public class GaoLuRiFenXiBaoGao {
 
         String title1 = "";
         String categoryAxisLabel1 = "";
-        String[] yLabels = {"产量(t)","燃料比(kg/t)"};
+        String[] yLabels = {"产量(t)", "燃料比(kg/t)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
@@ -237,17 +251,17 @@ public class GaoLuRiFenXiBaoGao {
 
     private void dealChart2(JSONObject data) {
         List<Double> tagObject1 = getValuesByTag(data, "BF8_L2M_BX_CokeRate_1d_cur");
-        List<Double> tagObject2 = getValuesByTag(data,"BF8_L2M_BX_CoalRate_1d_cur");
+        List<Double> tagObject2 = getValuesByTag(data, "BF8_L2M_BX_CoalRate_1d_cur");
         List<Double> tempObject1 = new ArrayList<>();
         tempObject1.addAll(tagObject1);
         List<Double> tempObject2 = new ArrayList<>();
         tempObject2.addAll(tagObject2);
         tempObject1.removeAll(Collections.singleton(null));
         tempObject2.removeAll(Collections.singleton(null));
-        Double max1 = Collections.max(tempObject1) * 1.2;
-        Double min1 = Collections.min(tempObject1) * 0.8;
-        Double max2 = Collections.max(tempObject2) * 1.2;
-        Double min2 = Collections.min(tempObject2) * 0.8;
+        Double max1 = tempObject1.size() > 0 ? Collections.max(tempObject1) * 1.2 : 10000.0;
+        Double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : 0.0;
+        Double max2 = tempObject2.size() > 0 ? Collections.max(tempObject2) * 1.2 : 600.0;
+        Double min2 = tempObject2.size() > 0 ? Collections.min(tempObject2) * 0.8 : 400.0;
 
 //        Double min1 = 0.0;
 //        Double max1 = 10000.0;
@@ -269,7 +283,7 @@ public class GaoLuRiFenXiBaoGao {
 
         String title1 = "";
         String categoryAxisLabel1 = "";
-        String[] yLabels = {"焦比(kg/t)","煤比(kg/t)"};
+        String[] yLabels = {"焦比(kg/t)", "煤比(kg/t)"};
 
         int[] stack = {1, 1};
         int[] ystack = {1, 2};
