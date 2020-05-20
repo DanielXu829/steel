@@ -1,10 +1,13 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
 import com.cisdi.steel.dto.response.gl.TapTPCDTO;
 import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
@@ -25,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -72,20 +76,32 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
 
             // 正面-变料信息
             handleBianLiaoXinXi(excelDTO, workbook, version);
-            // 填充
 
             // 出铁(反面)
             handleTapData(excelDTO, workbook, version);
 
-            // 全局替换 当前日期
+            //反面-块矿
+            handOreBlockData(excelDTO, workbook, version);
 
-            Sheet sheet1 = workbook.getSheetAt(0);
-            Date currentDate = new Date();
-            ExcelWriterUtil.replaceCurrentDateInTitle(sheet1, "%当前日期%", currentDate);
-            Sheet sheet2 = workbook.getSheetAt(1);
-            ExcelWriterUtil.replaceCurrentDateInTitle(sheet2, "%当前日期%", currentDate);
+            //反面-焦炭/煤粉
+            handAnalysisValue(excelDTO, workbook, version);
+
+            // 反面-烧结矿理化分析
+            handAnalysisValues(excelDTO, workbook, version);
+
         } catch (Exception e) {
             log.error("处理模板数据失败", e);
+        } finally {
+            Date currentDate = new Date();
+            for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+                Sheet sheet=workbook.getSheetAt(i);
+                // 清除标记项(例如:{块矿.矿种})
+                if (!Objects.isNull(sheet) && !workbook.isSheetHidden(i)) {
+                    // 全局替换 当前日期
+                    ExcelWriterUtil.replaceCurrentDateInTitle(sheet, "%当前日期%", currentDate);
+                    PoiCustomUtil.clearPlaceHolder(sheet);
+                }
+            }
         }
 
         return workbook;
@@ -411,6 +427,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         ArrayList<String> tapNoList = new ArrayList<>();
         int itemRowNum = 6;
         try {
+            // 隐藏标记行
+            sheet.getRow(itemRowNum).setZeroHeight(true);
             // 1、组装出铁数据URL
             Map<String, String> queryParam = this.getQueryParam(dateQuery);
             queryParam.put("pagenum", "1");
@@ -430,8 +448,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             }
             tapSgRowData.sort(comparing(TapSgRow::getStartTime)); // 按时间先后进行排序
             int dataSize = tapSgRowData.size();
-            // 隐藏标记行
-            sheet.getRow(itemRowNum).setZeroHeight(true);
             List<String> itemRow = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
             if (CollectionUtils.isEmpty(itemRow)) {
                 return null;
@@ -540,6 +556,427 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     }
 
     /**
+     * 处理反面-块矿-矿种数据
+     *
+     * @param sheet
+     * @param dateQuery
+     * @param resultList
+     * @param version
+     * @param type
+     * @return
+     */
+    protected void handOreBlockData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+        String brandCodeType = "LUMPORE";
+        String oreBlockType = "LC";
+        // 待填充的数据
+        String[] arr = {"TFe", "Al2O3", "CaO", "MgO", "SiO2", "S" ,"P"};
+        List<CellData> cellDataList = new ArrayList<>();
+        // 反面sheet
+        Sheet sheet = null;
+        try {
+            sheet = workbook.getSheetAt(1);
+            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+
+            // 1. 找到待填充的坐标
+            Cell tpcNoCell = PoiCustomUtil.getCellByValue(sheet, "{块矿.矿种}");
+            if (Objects.isNull(tpcNoCell)) {
+                return;
+            }
+            // 待填充的行,列
+            int tpcNoBeginRow = tpcNoCell.getRowIndex();
+            int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
+            // 检查表头列是否存在，如果不存在则不填充数据
+            checkHeaders(sheet, arr, new HashMap<>(), tpcNoBeginRow-1);
+            // 2.获取brandCode
+            List<String> brandCodeList = getBrandCodeData(version, dateQuery, brandCodeType);
+            String endTime = Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString();
+            if (brandCodeList.isEmpty()) {
+                return;
+            }
+            // 2.遍历brandCodeList取出所有数据
+            for (int i = 0; i < brandCodeList.size(); i++) {
+                // 3. 根据brandCode和 type调接口获取数据
+                String url = getAnalysisValueUrl(version) + "/" + endTime;
+                Map<String, String> queryParam = new HashMap();
+                queryParam.put("brandcode", brandCodeList.get(i));
+                queryParam.put("type", oreBlockType);
+
+                setAnalysisValue2Cell(sheet, cellDataList, arr, url, queryParam,
+                        tpcNoBeginRow + i, tpcNoBeginColumn);
+            }
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理反面-块矿-矿种出错", e);
+        }
+    }
+
+    /**
+     * 取出AnalysisValue中的data，并给相应的cell赋值
+     * @param sheet
+     * @param cellDataList
+     * @param arr
+     * @param url
+     * @param queryParam
+     * @param tpcNoBeginRow
+     * @param tpcNoBeginColumn
+     * @return
+     */
+    private void setAnalysisValue2Cell(Sheet sheet, List<CellData> cellDataList, String[] arr, String url,
+                                             Map<String, String> queryParam, int tpcNoBeginRow, int tpcNoBeginColumn) {
+        String jsonData = httpUtil.get(url, queryParam);
+        // 根据json映射对象DTO
+        AnalysisValueDTO analysisValueDTO = null;
+        if (StringUtils.isNotBlank(jsonData)) {
+            analysisValueDTO = JSON.parseObject(jsonData, AnalysisValueDTO.class);
+        }
+        if (Objects.isNull(analysisValueDTO)) {
+            return;
+        }
+        List<AnalysisValue> oreBlockList = analysisValueDTO.getData();
+        if (oreBlockList == null || oreBlockList.isEmpty()) {
+            log.warn(url + " 接口中无数据");
+            return;
+        }
+        int dataSize = arr.length;
+        for (AnalysisValue analysisValue : oreBlockList) {
+            if (oreBlockList.indexOf(analysisValue) > 2) break;
+            if (Objects.isNull(analysisValue)) return;
+            for (int j = 0; j < dataSize; j++){
+                Map<String, BigDecimal> values = analysisValue.getValues();
+                if (Objects.isNull(values)) return;
+                // 获取具体AnalysisValue数据
+                if (!values.containsKey(arr[j])) continue;
+                BigDecimal value = values.get(arr[j]);
+                int writeRow = tpcNoBeginRow;
+                int writeColumn = tpcNoBeginColumn + j;
+                // 填充具体数据
+                ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
+            }
+        }
+    }
+
+    /**
+     * 构造取回AnalysisValue所需要的参数，然后给cell赋值
+     * @param sheet
+     * @param cellDataList
+     * @param url
+     * @param arr
+     * @param heatPlaceHolder
+     * @param brandCode
+     * @param type
+     * @param isNeedMapping
+     * @return
+     */
+    private void handAnalysisValue2Cell(Sheet sheet, List<CellData> cellDataList, String url, String[] arr,
+                                                  String placeHolder, String brandCode, String type, Map<String,String> map) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("brandcode", brandCode);
+        queryParam.put("type", type);
+        // 找到待填充的坐标
+        Cell tpcNoCell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
+        if (Objects.isNull(tpcNoCell)) {
+            return;
+        }
+        // 待填充的行,列
+        int tpcNoBeginRow = tpcNoCell.getRowIndex();
+        int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
+        // 检查表头列是否存在，如果不存在则不填充数据
+        checkHeaders(sheet, arr, map, tpcNoBeginRow-1);
+
+        setAnalysisValue2Cell(sheet, cellDataList, arr, url, queryParam,
+                tpcNoBeginRow, tpcNoBeginColumn);
+    }
+
+    /**
+     * 处理AnalysisValue相关的数据，包含成分分析(焦炭和煤粉)和热力强度
+     * @param excelDTO
+     * @param workbook
+     * @param version
+     */
+    protected void handAnalysisValue(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+        String heatType = "LG";
+        String cokeType = "LC";
+        String cokeBrandCode = "KM-L_COKE";
+        String coalBrandCode = "FBFM-A_COAL";
+        String heatPlaceHolder = "{热强度}";
+        String cokePlaceHolder = "{焦炭}";
+        String coalPlaceHolder = "{煤粉}";
+        String[] heatArr = {"M40", "M10", "CSR", "CRI"};
+        String[] cokeArr = {"H2O", "Ad", "Vdaf", "C", "S"};
+        // 根据需求，取回的煤粉数据中C取Fcad，S取Std
+        String[] coalArr = {"H2O", "Ad", "Vdaf", "Fcad", "Std"};
+        Map<String,String> map = new HashMap<String, String>(){{
+            put("Fcad","C");
+            put("Std","S");
+        }};
+        List<CellData> cellDataList = new ArrayList<>();
+        try {
+            // 反面sheet
+            Sheet sheet = workbook.getSheetAt(1);
+            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+            String endTime = Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString();
+            // 1. 获取AnalysisValue Url前缀
+            String url = getAnalysisValueUrl(version) + "/" + endTime;
+            //先处理热力强度，因为只有一行数据
+            //再处理成分分析，分为煤粉和焦炭
+            // 2. 获取热强度数据，填充数据
+            handAnalysisValue2Cell(sheet, cellDataList, url, heatArr, heatPlaceHolder, cokeBrandCode, heatType, new HashMap<>());
+            // 3. 获取焦炭数据，填充数据
+            handAnalysisValue2Cell(sheet, cellDataList, url, cokeArr, cokePlaceHolder, cokeBrandCode, cokeType, new HashMap<>());
+            // 4. 获取煤粉数据，填充数据
+            handAnalysisValue2Cell(sheet, cellDataList, url, coalArr, coalPlaceHolder, coalBrandCode, cokeType, map);
+
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理反面-块矿-矿种出错", e);
+        }
+    }
+
+    /**
+     * 表头节点不存在或者不在指定行，若表头节点被删除则该列不填充数据
+     * 某些表头节点名也许不是返回数据节点名，映射关系存放在headerMap中
+     * @param sheet
+     * @param headers
+     * @param headerMap
+     * @param rowIndex
+     */
+    private void checkHeaders(Sheet sheet, String[] headers, Map<String, String> headerMap, int rowIndex) {
+
+        List<String> arrList = new ArrayList<String>(Arrays.asList(headers));
+        for (String item :headers) {
+            Cell cell = null;
+            if (headerMap.containsKey(item)) {
+                cell = PoiCustomUtil.getCellByValue(sheet, headerMap.get(item));
+            } else {
+                cell = PoiCustomUtil.getCellByValue(sheet, item);
+            }
+            List<String> list = PoiCustomUtil.getRowCelVal(sheet, rowIndex);
+            if (Objects.isNull(cell)) {
+                arrList.remove(item);
+            } else if (list != null && !list.contains(item)) {
+                arrList.remove(item);
+            }
+        }
+        headers = arrList.toArray(new String[arrList.size()]);
+    }
+
+    /**
+     * 处理烧结矿理化数据，时间和编号以LC为主显示，LP没有数据则空着
+     * @param sheet
+     * @param brandCode
+     * @param pageNum
+     * @param result
+     * @param cellDataList
+     */
+    private void handAnalysisValuesData(Sheet sheet, String brandCode, String pageNum, String result, List<CellData> cellDataList) {
+        String largerType = "LC";
+        String smallerType = "LP";
+        String placeHolder = "{矿种}";
+        String[] largerArr = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "B2", "DI"};
+        String[] smallerArr = {"S+40", "S25-40", "S16-25", "S10-16", "S5-10", "S-5", "S-10", "抗磨"};
+        String[] arr = {"矿种", "clock","sampleid", "槽号"};
+
+        // TODO 矿种 槽号 DI 抗磨
+        // 矿种坐标
+        Cell cell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
+        if (Objects.isNull(cell)) {
+            return;
+        }
+        // 待填充的行,列
+        int beginRow = cell.getRowIndex();
+        int coalBeginColumn = 1;
+        // LC数据起始列
+        int largerBeginColumn = coalBeginColumn + 9;
+        // LP数据起始列
+        int smallerBeginColumn = largerBeginColumn + 16;
+
+        // 表头R对应节点数据B2
+        checkHeaders(sheet, largerArr, new HashMap<String, String>(){{
+            put("B2","R");
+        }}, beginRow-1);
+        // 检查表头列是否存在，如果不存在则不填充数据
+        checkHeaders(sheet, smallerArr, new HashMap<String, String>(){{
+            put("S+40",">40");
+            put("S25-40",">40");
+            put("S16-25",">40");
+            put("S5-10",">40");
+            put("S-5",">40");
+            put("S-10",">40");
+        }}, beginRow-1);
+
+        // 根据json映射对象DTO
+        AnalysisValueDTO analysisValueDTO = null;
+        if (StringUtils.isNotBlank(result)) {
+            analysisValueDTO = JSON.parseObject(result, AnalysisValueDTO.class);
+        }
+        if (Objects.isNull(analysisValueDTO)) {
+            return;
+        }
+        List<AnalysisValue> lcList = analysisValueDTO.getData().stream().filter(item -> item.getAnalysis().getType().
+                equals("LC")).collect(Collectors.toList());
+        List<AnalysisValue> lpList = analysisValueDTO.getData().stream().filter(item -> item.getAnalysis().getType().
+                equals("LP")).collect(Collectors.toList());
+        List<AnalysisValue> largerList = lcList;
+        List<AnalysisValue> smallerList =lpList;
+        if (largerList == null || largerList.isEmpty()) {
+            return;
+        }
+        // i < 8最多8行数据
+        for (int i = 0; i< largerList.size() && i < 8; i++) {
+            AnalysisValue analysisValue = largerList.get(i);
+            if (Objects.isNull(analysisValue)) continue;
+            Analysis analysis = analysisValue.getAnalysis();
+            final String sampleid = analysis != null ? analysis.getSampleid() : null;
+            String type = analysis != null ? analysis.getType() : null;
+            // 处理矿种、记录时间、编号、槽号
+            if (!Objects.isNull(analysis)) {
+                //TODO 填充矿种数据
+                // 记录时间
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                Date clock = analysis.getClock();
+                String time = sdf.format(clock);
+                if (StringUtils.isNotBlank(time)) {
+                    ExcelWriterUtil.addCellData(cellDataList, beginRow + i, coalBeginColumn + 3, time);
+                }
+                // 编号
+                if (StringUtils.isNotBlank(sampleid)) {
+                    ExcelWriterUtil.addCellData(cellDataList, beginRow + i, coalBeginColumn + 6, sampleid);
+                }
+                // TODO 槽号
+            }
+            Map<String, BigDecimal> values = analysisValue.getValues();
+            if (Objects.isNull(values)) continue;
+            for (int j = 0; j < largerArr.length; j++){
+                // 获取具体AnalysisValue数据
+                if (!values.containsKey(largerArr[j])) continue;
+                BigDecimal value = values.get(largerArr[j]);
+                // 合并的单元格占两格
+                int writeColumn = largerBeginColumn + j*2;
+                if (j > 1 && type.equals("LP")) {
+                    // 未合并的单元格
+                    writeColumn = largerBeginColumn + j + 2;
+                }
+                ExcelWriterUtil.addCellData(cellDataList, beginRow + i, writeColumn, value);
+            }
+            if (smallerList != null && !smallerList.isEmpty() && sampleid != null) {
+                Optional<AnalysisValue> optional = smallerList.stream().filter(item ->item.getAnalysis().
+                        getSampleid().equals(sampleid)).findFirst();
+                // 存在
+                if (optional.isPresent()) {
+                    AnalysisValue temp =  optional.get();
+                    if (Objects.isNull(temp)) continue;
+                    Map<String, BigDecimal> tempValues = temp.getValues();
+                    type = temp.getAnalysis().getType();
+                    if (Objects.isNull(tempValues)) continue;
+                    for (int k = 0; k < smallerArr.length; k++) {
+                        // 获取具体AnalysisValue数据
+                        if (!tempValues.containsKey(smallerArr[k])) continue;
+                        BigDecimal tempValue = tempValues.get(smallerArr[k]);
+                        // 合并的单元格占两格
+                        int column = smallerBeginColumn + k*2;
+                        if (k > 1 && type.equals("LP")) {
+                            // 未合并的单元格
+                            column = smallerBeginColumn + k + 2;
+                        }
+                        // 填充具体type = LC数据
+                        ExcelWriterUtil.addCellData(cellDataList, beginRow + i, column, tempValue);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理烧结矿理化分析数据
+     * @param excelDTO
+     * @param workbook
+     * @param version
+     */
+    protected void handAnalysisValues(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+        String brandCode = "S4_SINTER";
+        String pageNum = "1";
+        String type = "ALL";
+        List<CellData> cellDataList = new ArrayList<>();
+        try {
+            // 反面sheet
+            Sheet sheet = workbook.getSheetAt(1);
+            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+            // 1. 获取AnalysisValues Url前缀
+            String url = getAnalysisValuesUrl(version);
+            Map<String, String> queryParam = new HashMap();
+            queryParam.put("starttime", Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+            queryParam.put("endtime", Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+            queryParam.put("brandcode", brandCode);
+            queryParam.put("pageNum", pageNum);
+            queryParam.put("type", type);
+            String result = httpUtil.get(url, queryParam);
+            handAnalysisValuesData(sheet, brandCode, pageNum, result, cellDataList);
+
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理反面-烧结矿理化分析出错", e);
+        }
+    }
+
+    /**
+     * 查询BrandCode,可能有多个，最多三个
+     * @param version
+     * @param startTime
+     * @param endTime
+     * @param type
+     * @return 包含BrandCode的JSONArray
+     */
+    private List<String> getBrandCodeData(String version, DateQuery dateQuery, String type) {
+        List<String> brandCodeData = new ArrayList<>();
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime", Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+        queryParam.put("endTime", Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+        queryParam.put("type", type);
+        String url = getBrandCodes(version);
+        String result = httpUtil.get(url, queryParam);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        if(null != jsonObject){
+            JSONArray data = jsonObject.getJSONArray("data");
+            if(null!= data){
+                for (Object o : data) {
+                    brandCodeData.add(String.valueOf(o));
+                }
+            }
+        }
+        return brandCodeData;
+    }
+
+    /**
+     * 获取高炉的种类Url
+     * @param version
+     * @return Url的string
+     */
+    private String getBrandCodes(String version){
+        return httpProperties.getGlUrlVersion(version) + "/brandCodes/getBrandCodes";
+    }
+
+    /**
+     * 高炉API
+     * @param version
+     * @return
+     */
+    private String getAnalysisValueUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/analysisValue/clock";
+    }
+
+    /**
+     * 烧结矿理化分析API
+     * @param version
+     * @return
+     */
+    private String getAnalysisValuesUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/analysisValues/clock";
+    }
+
+    /**
      * 出铁数据接口
      * @param version
      * @return
@@ -556,6 +993,4 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     protected String getTpcInfoByTapNo(String version) {
         return httpProperties.getGlUrlVersion(version) + "/report/tap/queryTpcInfoByTapNo";
     }
-
-
 }
