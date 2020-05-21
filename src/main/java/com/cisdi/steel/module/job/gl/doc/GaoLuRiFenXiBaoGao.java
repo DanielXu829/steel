@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 
@@ -51,6 +52,9 @@ public class GaoLuRiFenXiBaoGao {
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
     List<String> longTimeList = new ArrayList<>();
+    DecimalFormat df1 = new DecimalFormat("0.0");
+    DecimalFormat df2 = new DecimalFormat("0.00");
+    DecimalFormat df3 = new DecimalFormat("0.000");
     private String[] L1 = new String[]{
             "BF8_L2M_HMMassAct_1d_cur","BF8_L2M_Productivity_1d","BF8_L2M_BX_CokeRate_1d_cur","BF8_L2M_BX_CoalRate_1d_cur",
             "BF8_L2M_BX_FuelRate_1d_cur","BF8_L2C_BD_HotBlastTemp1_1d_avg"
@@ -90,13 +94,22 @@ public class GaoLuRiFenXiBaoGao {
     @Autowired
     private ReportCategoryTemplateService reportCategoryTemplateService;
 
-    //@Scheduled(cron = "0 0 23 * * ?")
-    @Scheduled(cron = "0 0/1 * * * ?")
-    public void mainTask() {
+    private void initialData() {
         result = new HashMap<>();
+        startTime = null;
+        endTime = null;
+        categoriesList = new ArrayList<>();
+        dateList = new ArrayList<>();
+        longTimeList = new ArrayList<>();
+    }
+
+    //@Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 0 0/1 * * ?")
+    public void mainTask() {
+        initialData();
         initDateTime();
         mainDeal(version8);
-        log.error("高炉日生产分析报告word生成完毕！");
+        log.info("高炉日生产分析报告word生成完毕！");
     }
 
     public void mainDeal(String version) {
@@ -106,12 +119,12 @@ public class GaoLuRiFenXiBaoGao {
         JSONObject data = getDataByTag(allTagNames, startTime, endTime, version);
         dealPart1(data);
         dealPart(data, "partTwo", L2);
-        dealPart(data, "partThree", L3);
+        dealPart3(data);
         dealPart(data, "partFour", L4);
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day.getCode(), LanguageEnum.cn_zh.getName(), "8高炉");
         if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
             String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
-            log.debug("高炉日生产分析报告模板路径：" + templatePath);
+            log.info("高炉日生产分析报告模板路径：" + templatePath);
             comm(version, templatePath);
         }
     }
@@ -146,7 +159,7 @@ public class GaoLuRiFenXiBaoGao {
         } else {
             result.put("textOne1", "降低");
         }
-        result.put("countOne1", Math.abs(increase.doubleValue()));
+        result.put("countOne1", df2.format(Math.abs(increase.doubleValue())));
 
         increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CokeRate_1d_cur");
         if (increase >= 0d) {
@@ -154,7 +167,7 @@ public class GaoLuRiFenXiBaoGao {
         } else {
             result.put("textOne2", "降低");
         }
-        result.put("countOne2", Math.abs(increase.doubleValue()));
+        result.put("countOne2", df2.format(Math.abs(increase.doubleValue())));
 
         increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CoalRate_1d_cur");
         if (increase >= 0d) {
@@ -162,12 +175,38 @@ public class GaoLuRiFenXiBaoGao {
         } else {
             result.put("textOne3", "降低");
         }
-        result.put("countOne3", Math.abs(increase.doubleValue()));
+        result.put("countOne3", df2.format(Math.abs(increase.doubleValue())));
 
-        result.put("countOne4", dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false));
-        result.put("countOne5", dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true));
-        result.put("countOne6", dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true));
-        result.put("countOne7", dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true));
+        result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
+        result.put("countOne5", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
+        result.put("countOne6", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
+        result.put("countOne7", df2.format(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
+    }
+
+    private void dealPart3(JSONObject data){
+        dealPart(data, "partThree", L3);
+        result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
+        result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
+        result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
+        result.put("offsetP", df3.format(dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
+        result.put("offsetTP", df3.format(dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
+        result.put("offsetPT", df2.format(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
+        result.put("offsetFR", df2.format(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
+        result.put("offsetCO", df2.format(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
+    }
+
+    private Double dealOffset(Double min, Double max, String tagName, JSONObject data) {
+        Double result = 0d;
+        List<Double> tagObject = getValuesByTag(data, tagName);
+        Double actual = tagObject.get(tagObject.size() - 1);
+        if (actual != null) {
+            if (actual > max) {
+                result = actual - max;
+            } else if (actual < min) {
+                result = actual - min;
+            }
+        }
+        return result;
     }
 
     private Double dealIncreaseYesterday (JSONObject data, String tagName) {
