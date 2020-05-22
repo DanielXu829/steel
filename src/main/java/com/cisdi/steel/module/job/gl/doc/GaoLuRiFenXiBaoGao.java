@@ -118,9 +118,9 @@ public class GaoLuRiFenXiBaoGao {
         String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(L1, L2), L3), L4);
         JSONObject data = getDataByTag(allTagNames, startTime, endTime, version);
         dealPart1(data);
-        dealPart(data, "partTwo", L2);
+        dealPart(data, "partTwo", L2, df2);
         dealPart3(data);
-        dealPart(data, "partFour", L4);
+        dealPart(data, "partFour", L4, df2);
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day.getCode(), LanguageEnum.cn_zh.getName(), "8高炉");
         if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
             String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
@@ -135,21 +135,32 @@ public class GaoLuRiFenXiBaoGao {
      * @param data
      * @param prefix
      */
-    private void dealPart(JSONObject data, String prefix, String[] tagNames) {
+    private void dealPart(JSONObject data, String prefix, String[] tagNames, DecimalFormat df) {
         if (data != null && data.size() > 0) {
             for (int i = 0; i < tagNames.length; i++) {
                 Double doubleValue = 0d;
                 List<Double> valueObject = getValuesByTag(data, tagNames[i]);
                 if (valueObject != null && valueObject.size() > 0) {
                     doubleValue = valueObject.get(valueObject.size() - 1);
-                    result.put(prefix + String.valueOf(i + 1), doubleValue == null ? 0d : doubleValue);
+                    result.put(prefix + String.valueOf(i + 1), doubleValue == null ? 0d : df.format(doubleValue));
                 }
             }
         }
     }
 
+    private void dealSingle(JSONObject data, String addr, String tagName, DecimalFormat df) {
+        if (data != null && data.size() > 0) {
+            Double doubleValue = 0d;
+            List<Double> valueObject = getValuesByTag(data, tagName);
+            if (valueObject != null && valueObject.size() > 0) {
+                doubleValue = valueObject.get(valueObject.size() - 1);
+                result.put(addr, doubleValue == null ? 0d : df.format(doubleValue));
+            }
+        }
+    }
+
     private void dealPart1(JSONObject data) {
-        dealPart(data, "partOne", L1);
+        dealPart(data, "partOne", L1, df2);
         dealChart1(data);
         dealChart2(data);
 
@@ -184,7 +195,10 @@ public class GaoLuRiFenXiBaoGao {
     }
 
     private void dealPart3(JSONObject data){
-        dealPart(data, "partThree", L3);
+        dealPart(data, "partThree", L3, df2);
+        dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg", df3);
+        dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg", df3);
+        dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg", df3);
         result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
         result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
         result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
