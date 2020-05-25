@@ -8,6 +8,7 @@ import com.cisdi.steel.module.job.a1.doc.GaoLuDocMain2;
 import com.cisdi.steel.module.job.a3.doc.ShaoJieMain2;
 import com.cisdi.steel.module.job.a3.doc.ShaojieDocMain;
 import com.cisdi.steel.module.job.gl.doc.GaoLuRiFenXiBaoGao;
+import com.cisdi.steel.module.job.sj.doc.HuanDuiCaoYeHuiJiYaoDocMain;
 import com.cisdi.steel.module.job.jh.doc.JiaoHuaShengChanZhenDuanBaoGao;
 import com.cisdi.steel.module.job.sj.doc.ShaoJieFenXiDocMain;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +82,20 @@ public class DocTest extends SteelApplicationTests {
     public void testShaoJieFenXi() {
         long start = System.currentTimeMillis();
         shaojieFenXiDocMain.mainJob();
+        long end = System.currentTimeMillis();
+
+        System.out.println(end - start);
+    }
+
+    /**
+     * 测试“烧结生产分析模板”
+     */
+    @Autowired
+    private HuanDuiCaoYeHuiJiYaoDocMain huanDuiCaoYeHuiJiYaoDocMain;
+    @Test
+    public void testHuanDuiCaoYeHuiJiYao() {
+        long start = System.currentTimeMillis();
+        huanDuiCaoYeHuiJiYaoDocMain.mainJob();
         long end = System.currentTimeMillis();
 
         System.out.println(end - start);
