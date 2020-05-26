@@ -74,7 +74,14 @@ public class BianLiaoJiLuWriter extends AbstractExcelReadWriter {
                 }
             }
         }
-
+        Date currentDate = new Date();
+        for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet sheet=workbook.getSheetAt(i);
+            if (!Objects.isNull(sheet) && !workbook.isSheetHidden(i)) {
+                // 全局替换 当前日期
+                ExcelWriterUtil.replaceCurrentDateInTitle(sheet, "%当前日期%", currentDate);
+            }
+        }
         return workbook;
     }
 
