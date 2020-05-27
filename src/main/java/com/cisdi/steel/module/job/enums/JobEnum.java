@@ -128,6 +128,7 @@ public enum JobEnum {
     jh_ck45zkcaozuo2("jh_ck45zkcaozuo2", "CK45-化产-中控操作(二)"),
     jh_ck12beimeixieche("jh_ck12beimeixieche", "CK12-备煤-备煤卸车统计"),
     jh_jiaoluyoukucaozuo("jh_jiaoluyoukucaozuo", "CK67-化产-焦炉油库操作记录表"),
+    jh_shengchanzhenduanbaogao("jh_shengchanzhenduanbaogao", "焦化生产诊断报告"),
     jh_meiqidanhao("jh_meiqidanhao", "炼焦煤气单耗分析"),
     jh_gxjshengchan5("jh_gxjshengchan5", "5#干熄焦生产报表"),
     jh_gxjshengchan6("jh_gxjshengchan6", "6#干熄焦生产报表"),
