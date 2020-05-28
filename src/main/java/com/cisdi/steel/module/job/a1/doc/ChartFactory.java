@@ -116,4 +116,81 @@ public class ChartFactory {
         ChartUtils.setLegendShow(chart, 0, show);
         return chart;
     }
+
+    /**
+     * 生成折线图
+     *
+     * @param title             折线图的标题
+     * @param categoryAxisLabel x轴标题
+     * @param yLabels    y轴标题
+     * @param series            数据
+     * @param categories        类别
+     * @return
+     */
+    public static JFreeChart createLineChart(String title,
+                                             String categoryAxisLabel, String[] yLabels,
+                                             List<Vector<Serie>> series, Object[] categories, CategoryLabelPositions positions, boolean show,
+                                             double rangIndex, double rangEnd, double rangIndex2, double rangEnd2, double rangIndex3, double rangEnd3, double rangIndex4, double rangEnd4, int y2, int[] stack, int[] ystack) {
+        // 1：创建数据集合
+        DefaultCategoryDataset dataset = ChartUtils
+                .createDefaultCategoryDataset(series.get(0), categories);
+        DefaultCategoryDataset dataset2 = null;
+        DefaultCategoryDataset dataset3 = null;
+        DefaultCategoryDataset dataset4 = null;
+        DefaultCategoryDataset dataset5 = null;
+
+
+        JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, null,null);
+        if (stack[0] == 2) {
+            chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, null,null);
+        }
+
+        if (y2 >= 2) {
+            dataset2 = ChartUtils.createDefaultCategoryDataset(series.get(1), categories);
+        }
+        if (y2 >= 3) {
+            dataset3 = ChartUtils.createDefaultCategoryDataset(series.get(2), categories);
+        }
+        if (y2 >= 4) {
+            dataset4 = ChartUtils.createDefaultCategoryDataset(series.get(3), categories);
+        }
+        if (y2 >= 5) {
+            dataset5 = ChartUtils.createDefaultCategoryDataset(series.get(4), categories);
+        }
+
+        LegendTitle legend = chart.getLegend(); // 设置图例的字体
+        legend.setItemFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
+
+        chart.setBorderVisible(false);
+        // 3:设置抗锯齿，防止字体显示不清楚
+        ChartUtils.setAntiAlias(chart);// 抗锯齿
+        // 4:对柱子进行渲染[[采用不同渲染]]
+        int batch = 2;
+        if (categories.length > 1000) {
+            batch = 2000;
+        }
+        for (int i = 0; i < categories.length; i++) {
+            Object s = categories[i];
+            if (i % batch == 0) {
+                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.white);
+            } else {
+                // 设置背景色为白色
+                chart.getCategoryPlot().getDomainAxis().setTickLabelPaint(s.toString(), Color.black);
+            }
+        }
+        double[] rangStarts = {rangIndex,rangIndex2,rangIndex3,rangIndex4};
+        double[] rangEnds = {rangEnd,rangEnd2,rangEnd3,rangEnd4};
+        DefaultCategoryDataset[] datasets = {dataset,dataset2,dataset3,dataset4,dataset5};
+        ChartUtils.setLineRender(chart.getCategoryPlot(), positions, rangStarts, rangEnds, y2, datasets, yLabels, stack, ystack);
+        // 5:对其他部分进行渲染
+        ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
+//        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
+        // 设置标注无边框
+//        ChartUtils.setLegendEmptyBorder(chart);
+        //设置标注不显示
+        chart.setTextAntiAlias(false);
+
+        ChartUtils.setLegendShow(chart, 0, show);
+        return chart;
+    }
 }
