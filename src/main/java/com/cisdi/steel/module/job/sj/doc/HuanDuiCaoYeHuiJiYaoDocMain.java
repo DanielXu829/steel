@@ -102,16 +102,16 @@ public class HuanDuiCaoYeHuiJiYaoDocMain {
             dealPart5(version, date);
 
             //获取对应的路径
-            List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.sj_huanduicaoyehuijiyao.getCode(), LanguageEnum.cn_zh.getName(), "4烧结");
+            List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.sj_huanduicaoyehuiyijiyao.getCode(), LanguageEnum.cn_zh.getName(), "4烧结");
             if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
                 String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
                 XWPFDocument doc = WordExportUtil.exportWord07(templatePath, result);
-                log.debug("换堆操业会纪要模板路径：" + templatePath);
+                log.debug("换堆操业会议纪要模板路径：" + templatePath);
 
                 comm(version, templatePath);
             }
         } catch (Exception e) {
-            log.error("生成换堆操业会纪要word文档失败", e);
+            log.error("生成换堆操业会议纪要word文档失败", e);
         }
         if (Objects.isNull(date)) {
             date = new Date();
@@ -416,7 +416,7 @@ public class HuanDuiCaoYeHuiJiYaoDocMain {
                 List<XWPFTableRow> tableRows = mergeRows.get(key);
                 mergeCellsVertically(tables.get(tables.size()-1), 0, key, key + tableRows.size() - 1);
             }
-            String fileName = sequence + "_换堆操业会纪要_" + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + ".docx";
+            String fileName = sequence + "_换堆操业会议纪要_" + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + ".docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
@@ -430,13 +430,13 @@ public class HuanDuiCaoYeHuiJiYaoDocMain {
             reportIndex.setIndexType("report_day");
             reportIndex.setRecordDate(new Date());
             reportIndex.setName(fileName);
-            reportIndex.setReportCategoryCode(JobEnum.sj_huanduicaoyehuijiyao.getCode());
+            reportIndex.setReportCategoryCode(JobEnum.sj_huanduicaoyehuiyijiyao.getCode());
             reportIndex.setPath(filePath);
             reportIndexMapper.insert(reportIndex);
 
-            log.info("换堆操业会纪要word文档生成完毕" + filePath);
+            log.info("换堆操业会议纪要word文档生成完毕" + filePath);
         } catch (Exception e) {
-            log.error("换堆操业会纪要word文档失败", e);
+            log.error("换堆操业会议纪要word文档失败", e);
         }
     }
 
