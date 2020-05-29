@@ -24,6 +24,7 @@ import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.tools.ant.util.DateUtils;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
@@ -73,7 +74,19 @@ public class HuanDuiCaoYeHuiJiYaoDocMain {
     public void mainJob() {
         result = new HashMap<>();
         Date date = new Date();
+        initDate(date);
         mainDeal(version, date);
+    }
+
+    /**
+     * 替换时间和日期
+     * @param date
+     */
+    private void initDate (Date date) {
+        String currentDate = DateFormatUtils.format(date, DateUtil.MMddChineseFormat);
+        String currentDateTime = DateFormatUtils.format(date, DateUtil.yyyyMMddChineseFormat);
+        result.put("Date", currentDate);
+        result.put("DateTime", currentDateTime);
     }
 
     public void mainDeal(String version, Date date) {
@@ -81,6 +94,7 @@ public class HuanDuiCaoYeHuiJiYaoDocMain {
 
             //该文档总共5个部分
             // part1
+            //dealPart1(version, date);
             // part2
             // part3
             // part4
@@ -104,23 +118,78 @@ public class HuanDuiCaoYeHuiJiYaoDocMain {
         }
     }
 
+    private void dealPart1(String version, Date date) {
+        //第一个表
+        String url = getUrl(version) + "/report/burdenChangeInfo";
+        String results = httpGetData(version, date, url);
+        if (StringUtils.isBlank(results)) {
+            return;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(results);
+        if (Objects.nonNull(jsonObject)) {
+            String data = jsonObject.getString("data");
+            List<BurdenBleRatio> bleRatioList = JSON.parseObject(data, new TypeReference<List<BurdenBleRatio>>(){});
+            if (Objects.isNull(bleRatioList)) {
+                return;
+            }
+            Collections.sort(bleRatioList, new Comparator<BurdenBleRatio>() {
+                @Override
+                public int compare(BurdenBleRatio o1, BurdenBleRatio o2) {
+                    //跟据OrderNum降序
+                    return o2.getOrderNum().compareTo(o1.getOrderNum());
+                }
+            });
+
+            if (bleRatioList.size() < 2) {
+                return;
+            }
+            List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
+            // 第一列
+            Map<String, String> lm = new HashMap<String, String>();
+            lm.put("header", "堆号");
+            lm.put("value1", bleRatioList.get(0).getPile_no());
+            lm.put("value2", bleRatioList.get(1).getPile_no());
+            lm.put("value3", "比较");
+            listMap.add(lm);
+            List<BurdenMatRatio> burdenMatRatioList1 = bleRatioList.get(0).getRatios();
+            List<BurdenMatRatio> burdenMatRatioList2 = bleRatioList.get(1).getRatios();
+            for (BurdenMatRatio b1 : burdenMatRatioList1) {
+                Map<String, String> map = new HashMap<String, String>();
+                Optional<BurdenMatRatio> optional = burdenMatRatioList2.stream().filter(item -> item.getBrandcode().equals(b1.getBrandcode())).findFirst();
+                if (optional.isPresent()) {
+                    BurdenMatRatio b2 = optional.get();
+                    map.put("header", b1.getBrandname());
+                    map.put("value1", b1.getRatio().toString());
+                    map.put("value2", b2.getRatio().toString());
+                    map.put("value3", b2.getRatio().subtract(b1.getRatio()).toString());
+                    listMap.add(map);
+                }
+            }
+            Map<String, String> lm2 = new HashMap<String, String>();
+            lm2.put("header", "合计(%)");
+            lm2.put("value1", bleRatioList.get(0).getSum().toString());
+            lm2.put("value2", bleRatioList.get(1).getSum().toString());
+            lm2.put("value3", "");
+            listMap.add(lm2);
+            result.put("part1MapList", listMap);
+        }
+
+        //TODO 第二个表
+    }
+
     /**
      * 获取堆号
      *
      * @param version
      * @param date
      */
-    private void getDuiHao(String version, Date date) {
-        String url = getUrl(version) + "/report/pileNo";
+    private String httpGetData(String version, Date date, String url) {
         DateQuery dateQuery = DateQueryUtil.buildToday(date);
         Map<String, String> queryParam = new HashMap();
         queryParam.put("clock", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
         String results = httpUtil.get(url, queryParam);
-        JSONObject jsonObject = JSONObject.parseObject(results);
-        JSONObject data = jsonObject.getJSONObject("data");
-        if (null != jsonObject) {
-            result.put("dui", data.getString("BM_PILE_NO"));
-        }
+
+        return results;
     }
 
     /**
@@ -255,7 +324,16 @@ public class HuanDuiCaoYeHuiJiYaoDocMain {
      */
     private void dealPart5(String version, Date date) {
         // 堆号
-        getDuiHao(version, date);
+        String url = getUrl(version) + "/report/pileNo";
+        String results = httpGetData(version, date, url);
+        if (StringUtils.isBlank(results)) {
+            return;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(results);
+        if (Objects.nonNull(jsonObject)) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            result.put("pileNo", data.getString("BM_PILE_NO"));
+        }
         // 第一列
         dealColumns(version);
     }
