@@ -2,10 +2,12 @@ package com.cisdi.steel.module.job.gl.doc;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
 import cn.afterturn.easypoi.word.entity.WordImageEntity;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.a1.doc.ChartFactory;
 import com.cisdi.steel.module.job.a1.doc.Serie;
@@ -36,6 +38,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -49,12 +53,11 @@ public class GaoLuRiFenXiBaoGao {
     private HashMap<String, Object> result = null;
     private Date startTime = null;
     private Date endTime = null;
+    private Date beforeYesterday = null;
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
     List<String> longTimeList = new ArrayList<>();
-    DecimalFormat df1 = new DecimalFormat("0.0");
-    DecimalFormat df2 = new DecimalFormat("0.00");
-    DecimalFormat df3 = new DecimalFormat("0.000");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private String[] L1 = new String[]{
             "BF8_L2M_HMMassAct_1d_cur","BF8_L2M_Productivity_1d","BF8_L2M_BX_CokeRate_1d_cur","BF8_L2M_BX_CoalRate_1d_cur",
             "BF8_L2M_BX_FuelRate_1d_cur","BF8_L2C_BD_HotBlastTemp1_1d_avg"
@@ -113,13 +116,13 @@ public class GaoLuRiFenXiBaoGao {
 
     public void mainDeal(String version) {
         // 处理当前时间
-        result.put("current_date", DateUtils.format(new Date(), DateUtil.yyyyMMddChineseFormat));
+        result.put("current_date", DateUtils.format(endTime, DateUtil.yyyyMMddChineseFormat));
         String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(L1, L2), L3), L4);
         JSONObject data = getDataByTag(allTagNames, startTime, endTime, version);
         dealPart1(data);
-        dealPart(data, "partTwo", L2, df2);
+        dealPart(data, "partTwo", L2);
         dealPart3(data);
-        dealPart(data, "partFour", L4, df2);
+        dealPart(data, "partFour", L4);
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day.getCode(), LanguageEnum.cn_zh.getName(), "8高炉");
         if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
             String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
@@ -134,96 +137,115 @@ public class GaoLuRiFenXiBaoGao {
      * @param data
      * @param prefix
      */
-    private void dealPart(JSONObject data, String prefix, String[] tagNames, DecimalFormat df) {
+    private void dealPart(JSONObject data, String prefix, String[] tagNames) {
         if (data != null && data.size() > 0) {
             for (int i = 0; i < tagNames.length; i++) {
                 Double doubleValue = 0d;
                 List<Double> valueObject = getValuesByTag(data, tagNames[i]);
                 if (valueObject != null && valueObject.size() > 0) {
                     doubleValue = valueObject.get(valueObject.size() - 1);
-                    result.put(prefix + String.valueOf(i + 1), doubleValue == null ? 0d : df.format(doubleValue));
+                    result.put(prefix + String.valueOf(i + 1), parse(doubleValue));
                 }
             }
         }
     }
 
-    private void dealSingle(JSONObject data, String addr, String tagName, DecimalFormat df) {
+    private void dealSingle(JSONObject data, String addr, String tagName) {
         if (data != null && data.size() > 0) {
             Double doubleValue = 0d;
             List<Double> valueObject = getValuesByTag(data, tagName);
             if (valueObject != null && valueObject.size() > 0) {
                 doubleValue = valueObject.get(valueObject.size() - 1);
-                result.put(addr, doubleValue == null ? 0d : df.format(doubleValue));
+                result.put(addr, parse(3, doubleValue));
             }
         }
     }
 
     private void dealPart1(JSONObject data) {
-        dealPart(data, "partOne", L1, df2);
+        dealPart(data, "partOne", L1);
         dealChart1(data);
         dealChart2(data);
 
         Double increase = dealIncreaseYesterday(data, "BF8_L2M_HMMassAct_1d_cur");
-        if (increase >= 0d) {
+        if (increase != null && increase >= 0d) {
             result.put("textOne1", "升高");
         } else {
             result.put("textOne1", "降低");
         }
-        result.put("countOne1", df2.format(Math.abs(increase.doubleValue())));
+        if (increase != null) {
+            result.put("countOne1", parse(Math.abs(increase.doubleValue())));
+        }
+        else {
+            result.put("countOne1", parse(increase));
+        }
 
         increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CokeRate_1d_cur");
-        if (increase >= 0d) {
+        if (increase != null && increase >= 0d) {
             result.put("textOne2", "升高");
         } else {
             result.put("textOne2", "降低");
         }
-        result.put("countOne2", df2.format(Math.abs(increase.doubleValue())));
+        if (increase != null) {
+            result.put("countOne2", parse(Math.abs(increase.doubleValue())));
+        }
+        else {
+            result.put("countOne2", parse(increase));
+        }
 
         increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CoalRate_1d_cur");
-        if (increase >= 0d) {
+        if (increase != null && increase >= 0d) {
             result.put("textOne3", "升高");
         } else {
             result.put("textOne3", "降低");
         }
-        result.put("countOne3", df2.format(Math.abs(increase.doubleValue())));
+        if (increase != null) {
+            result.put("countOne3", parse(Math.abs(increase.doubleValue())));
+        }
+        else {
+            result.put("countOne3", parse(increase));
+        }
 
-        result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
-        result.put("countOne5", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
-        result.put("countOne6", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
-        result.put("countOne7", df2.format(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
+        result.put("countOne4", parse(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
+        result.put("countOne5", parse(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
+        result.put("countOne6", parse(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
+        result.put("countOne7", parse(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
     }
 
     private void dealPart3(JSONObject data){
-        dealPart(data, "partThree", L3, df2);
-        dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg", df3);
-        dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg", df3);
-        dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg", df3);
-        result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
-        result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
-        result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
-        result.put("offsetP", df3.format(dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
-        result.put("offsetTP", df3.format(dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
-        result.put("offsetPT", df2.format(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
-        result.put("offsetFR", df2.format(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
-        result.put("offsetCO", df2.format(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
+        dealPart(data, "partThree", L3);
+        dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg");
+        dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg");
+        dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg");
+        result.put("offsetWet", parse(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
+        result.put("offsetBV", parse(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
+        result.put("offsetBP", parse(3, dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
+        result.put("offsetP", parse(3, dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
+        result.put("offsetTP", parse(3, dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
+        result.put("offsetPT", parse(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
+        result.put("offsetFR", parse(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
+        result.put("offsetCO", parse(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
     }
 
     private Double dealOffset(Double min, Double max, String tagName, JSONObject data) {
-        Double result = 0d;
+        Double result = null;
         List<Double> tagObject = getValuesByTag(data, tagName);
         Double actual = tagObject.get(tagObject.size() - 1);
         if (actual != null) {
             if (actual > max) {
                 result = actual - max;
-            } else if (actual < min) {
+            }
+            else if (actual < min) {
                 result = actual - min;
+            }
+            else {
+                result = 0d;
             }
         }
         return result;
     }
 
     private Double dealIncreaseYesterday (JSONObject data, String tagName) {
-        Double result = 0d;
+        Double result = null;
         List<Double> tagObject = getValuesByTag(data, tagName);
         Double yesterday = tagObject.get(tagObject.size() - 1);
         Double twoDaysAgo = tagObject.get(tagObject.size() - 2);
@@ -236,7 +258,7 @@ public class GaoLuRiFenXiBaoGao {
     }
 
     private Double dealMonthTotal (JSONObject data, String tagName, Boolean isAvg) {
-        Double result = 0d;
+        Double result = null;
         Double total = 0d;
         Double count = 0d;
         List<Double> tagObject = getValuesByTag(data, tagName);
@@ -246,11 +268,12 @@ public class GaoLuRiFenXiBaoGao {
                 count++;
             }
         }
-        if (isAvg && count > 0d) {
-            result = total / count;
-        }
-        else {
-            result = total;
+        if (count > 0d) {
+            if (isAvg) {
+                result = total / count;
+            } else {
+                result = total;
+            }
         }
         return result;
     }
@@ -403,18 +426,17 @@ public class GaoLuRiFenXiBaoGao {
         cal.set(Calendar.MINUTE,0);
         cal.set(Calendar.SECOND,0);
         cal.set(Calendar.MILLISECOND,0);
-        // test
-        // cal.add(Calendar.DAY_OF_MONTH,-3);
-        // 今日零点，作为结束时间点
-        Date endDate = cal.getTime();
-        // 前推30天，作为开始时间点
-        cal.add(Calendar.DAY_OF_MONTH,-29);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        // 昨日零点，作为结束时间点
+        endTime = cal.getTime();
+        cal.add(Calendar.DAY_OF_MONTH,-1);
+        beforeYesterday = cal.getTime();
+        // 当月第一天，作为开始时间点
+        cal.set(Calendar.DAY_OF_MONTH, 1);
         Date startDate = cal.getTime();
-
         startTime = startDate;
-        endTime = endDate;
 
-        while (startDate.before(endDate)) {
+        while (startDate.before(endTime)) {
             // 拼接x坐标轴
             categoriesList.add(DateUtil.getFormatDateTime(startDate, "MM-dd"));
             dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
@@ -425,9 +447,9 @@ public class GaoLuRiFenXiBaoGao {
             startDate = cal.getTime();
         }
 
-        categoriesList.add(DateUtil.getFormatDateTime(endDate, "MM-dd"));
-        dateList.add(DateUtil.getFormatDateTime(endDate, DateUtil.yyyyMMddFormat));
-        longTimeList.add(endDate.getTime()+"");
+        categoriesList.add(DateUtil.getFormatDateTime(endTime, "MM-dd"));
+        dateList.add(DateUtil.getFormatDateTime(endTime, DateUtil.yyyyMMddFormat));
+        longTimeList.add(endTime.getTime()+"");
     }
 
     /**
@@ -458,19 +480,19 @@ public class GaoLuRiFenXiBaoGao {
 
             List<XWPFTable> tt = doc.getTables();
 
-            String fileName = sequence + "_高炉日生产分析报告_" + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + ".docx";
+            String fileName = sequence + "_高炉日生产分析报告_" + DateUtil.getFormatDateTime(endTime, "yyyyMMdd") + ".docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setCreateTime(new Date());
-            reportIndex.setUpdateTime(new Date());
+            reportIndex.setCreateTime(endTime);
+            reportIndex.setUpdateTime(endTime);
             reportIndex.setSequence(sequence);
             reportIndex.setIndexLang("cn_zh");
             reportIndex.setIndexType("report_day");
-            reportIndex.setRecordDate(new Date());
+            reportIndex.setRecordDate(endTime);
             reportIndex.setName(fileName);
             reportIndex.setReportCategoryCode(JobEnum.gl_rishengchanfenxibaogao_day.getCode());
             reportIndex.setPath(filePath);
@@ -509,5 +531,29 @@ public class GaoLuRiFenXiBaoGao {
             }
         }
         return image;
+    }
+
+    private String parse(Double v) {
+        if (v == null) {
+            return "   ";
+        }
+        Double value = NumberArithmeticUtils.roundingX(v, 2);
+        if (value.equals(0d)) {
+            return "0";
+        } else {
+            return value.toString();
+        }
+    }
+
+    private String parse(int scale, Double v) {
+        if (v == null) {
+            return "   ";
+        }
+        Double value = NumberArithmeticUtils.roundingX(v, scale);
+        if (value.equals(0d)) {
+            return "0";
+        } else {
+            return value.toString();
+        }
     }
 }
