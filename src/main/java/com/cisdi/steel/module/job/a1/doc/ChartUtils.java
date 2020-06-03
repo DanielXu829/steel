@@ -187,8 +187,8 @@ public class ChartUtils {
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
         categoryaxis.setCategoryLabelPositionOffset(10);
-        categoryaxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 13));
-        categoryaxis.setLabelFont(new Font("宋体", Font.PLAIN, 13));
+        categoryaxis.setTickLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
+        categoryaxis.setLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
         categoryaxis.setCategoryMargin(0.4);
 
         plot.setNoDataMessage(NO_DATA_MSG);
@@ -206,13 +206,15 @@ public class ChartUtils {
             plot.setDataset(i, datasets[i]);
             plot.mapDatasetToRangeAxis(i, i);
 
+            plot.getRangeAxis(i).setLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
+
             // -- 修改第i条曲线显示效果
             CategoryItemRenderer renderer = new LineAndShapeRenderer();
             if (stack[i] == 2) {
                 renderer = new StackedBarRenderer();
             }
             renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-            renderer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
+            renderer.setBaseItemLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub().deriveFont(Font.ROMAN_BASELINE, 15));
 
             renderer.setSeriesPaint(0, colors[i]);
             renderer.setSeriesPaint(1, colors[i]);

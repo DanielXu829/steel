@@ -106,8 +106,7 @@ public class GaoLuRiFenXiBaoGao {
         longTimeList = new ArrayList<>();
     }
 
-    //@Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0 0 0/1 * * ?")
+    @Scheduled(cron = "0 0 23 * * ?")
     public void mainTask() {
         initialData();
         initDateTime();

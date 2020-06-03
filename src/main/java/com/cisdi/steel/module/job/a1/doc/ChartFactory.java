@@ -1,5 +1,7 @@
 package com.cisdi.steel.module.job.a1.doc;
 
+import com.cisdi.steel.common.util.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.block.BlockBorder;
@@ -7,6 +9,8 @@ import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.awt.*;
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
 
@@ -16,7 +20,25 @@ import java.util.Vector;
  *
  * @author liuyimin
  */
+@Slf4j
 public class ChartFactory {
+
+    private static Font simsun;
+
+    static{
+        try (InputStream is = ChartFactory.class.getClassLoader().getResourceAsStream("config/simsun.ttf");){
+            simsun = Font.createFont(Font.TRUETYPE_FONT, is);
+            simsun = simsun.deriveFont(Font.ROMAN_BASELINE, 13);
+        } catch (Exception e){
+            // nothing
+            log.error("初始化字体库宋体失败", e);
+        }
+
+    }
+
+    public static Font getSimsub(){
+        return simsun;
+    }
 
 
     public static JFreeChart createBarChart(String title,
@@ -62,7 +84,6 @@ public class ChartFactory {
         DefaultCategoryDataset dataset4 = null;
         DefaultCategoryDataset dataset5 = null;
 
-
         JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, null,null);
         if (stack[0] == 2) {
             chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, null,null);
@@ -82,7 +103,7 @@ public class ChartFactory {
         }
 
         LegendTitle legend = chart.getLegend(); // 设置图例的字体
-        legend.setItemFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
+        legend.setItemFont(simsun);
 
         chart.setBorderVisible(false);
         // 3:设置抗锯齿，防止字体显示不清楚
@@ -139,7 +160,6 @@ public class ChartFactory {
         DefaultCategoryDataset dataset4 = null;
         DefaultCategoryDataset dataset5 = null;
 
-
         JFreeChart chart = org.jfree.chart.ChartFactory.createLineChart(title, categoryAxisLabel, null,null);
         if (stack[0] == 2) {
             chart = org.jfree.chart.ChartFactory.createStackedBarChart(title, categoryAxisLabel, null,null);
@@ -159,7 +179,7 @@ public class ChartFactory {
         }
 
         LegendTitle legend = chart.getLegend(); // 设置图例的字体
-        legend.setItemFont(new Font("宋体", Font.ROMAN_BASELINE, 13));
+        legend.setItemFont(simsun);
 
         chart.setBorderVisible(false);
         // 3:设置抗锯齿，防止字体显示不清楚
