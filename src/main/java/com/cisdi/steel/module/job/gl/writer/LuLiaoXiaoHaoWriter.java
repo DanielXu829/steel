@@ -8,7 +8,10 @@ import com.cisdi.steel.dto.response.gl.AnaItemValDTO;
 import com.cisdi.steel.dto.response.gl.ChargeDTO;
 import com.cisdi.steel.dto.response.gl.MaterialExpendDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
-import com.cisdi.steel.dto.response.gl.res.*;
+import com.cisdi.steel.dto.response.gl.res.BatchData;
+import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
+import com.cisdi.steel.dto.response.gl.res.MaterialExpend;
+import com.cisdi.steel.dto.response.gl.res.TagValue;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -16,6 +19,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -24,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>Description: 8高炉炉料消耗月报表 执行处理类 </p>
@@ -91,6 +96,19 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
             BigDecimal yuanLiaoPeiBiCount = getYuanLiaoPeiBiCount(materialExpendDTO);
             // 获取当天最后一条chargeNo对应的COO
             ChargeDTO latestCOO = getLatestCOO(version, day);
+
+            // TODO be testing 获取布料矩阵
+            DateQuery dateQueryNodelay = DateQueryUtil.buildTodayNoDelay(day);
+            Map<String, List<BatchDistribution>> matrixDistrAvgInRangeMap = getMatrixDistrAvgInRangeMap(dateQueryNodelay, version);
+
+            // TODO be testing 获取料线数据
+            Map<String, String> liaoXianMaps = new HashMap<>();
+            liaoXianMaps.put("料线-烧结矿", "BF8_L2C_TP_SinterSetLine_1d_avg");
+            liaoXianMaps.put("料线-焦炭", "BF8_L2C_TP_CokeSetLine_1d_avg");
+            liaoXianMaps.put("料线-小烧", "BF8_L2C_TP_LiSinterSetLine_1d_avg");
+            List<String> liaoXianTagNames = Arrays.asList("BF8_L2C_TP_CokeSetLine_1d_avg", "BF8_L2C_TP_SinterSetLine_1d_avg", "BF8_L2C_TP_LiSinterSetLine_1d_avg");
+            Date liaoXianQueryTime = DateUtil.addDays(day, 1);
+            TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(liaoXianQueryTime, version, liaoXianTagNames);
 
             // 计算行
             if (i > 0 && i%10 ==0) {
@@ -219,6 +237,30 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                                 if (CollectionUtils.isNotEmpty(data)) {
                                     List<BatchDistribution> o2Distributions = data.get(2).getDistributions();
                                     String val = getPosition(o2Distributions) + "-" + getRoundact(o2Distributions);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                }
+                            }
+                            break;
+                        }
+                        case "料线-烧结矿":
+                        case "料线-焦炭":
+                        case "料线-小烧": {
+                            if(Objects.nonNull(liaoXianTagValueList) && CollectionUtils.isNotEmpty(liaoXianTagValueList.getData())) {
+                                Map<String, BigDecimal> collect = liaoXianTagValueList.getData().stream().collect(Collectors.toMap(TagValue::getName, t -> t.getVal()));
+                                BigDecimal orignalVal = collect.get(itemName);
+                                BigDecimal val = orignalVal.divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                            }
+                            break;
+                        }
+                        case "C":
+                        case "Ol":
+                        case "Os": {
+                            if(MapUtils.isNotEmpty(matrixDistrAvgInRangeMap)) {
+                                List<BatchDistribution> batchDistributions = matrixDistrAvgInRangeMap.get(itemName);
+                                BatchDistribution batchDistribution = batchDistributions.get(0);
+                                if (Objects.nonNull(batchDistribution)) {
+                                    String val = StringUtils.join(Arrays.asList(itemName, batchDistribution.getPosition(), batchDistribution.getRoundset()), "-");
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                                 }
                             }
