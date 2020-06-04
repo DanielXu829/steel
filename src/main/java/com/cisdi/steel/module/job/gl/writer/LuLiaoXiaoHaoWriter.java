@@ -151,8 +151,17 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                             }
                             break;
                         }
-                        case "回用焦丁": {
+                        case "回用焦丁批重": {
                             BigDecimal huiYongJiaoDing = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("回用焦丁"));
+                            BigDecimal val = new BigDecimal(0);
+                            if (batchCount.intValue() > 0) {
+                                val = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
+                            }
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                            break;
+                        }
+                        case "小焦批重": {
+                            BigDecimal huiYongJiaoDing = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦"));
                             BigDecimal val = new BigDecimal(0);
                             if (batchCount.intValue() > 0) {
                                 val = huiYongJiaoDing.multiply(new BigDecimal(1000)).divide(batchCount, 0, BigDecimal.ROUND_HALF_UP);
