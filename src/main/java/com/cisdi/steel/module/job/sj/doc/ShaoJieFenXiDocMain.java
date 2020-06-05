@@ -7,6 +7,7 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.dto.response.sj.AnaValueDTO;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Component
@@ -150,51 +152,17 @@ public class ShaoJieFenXiDocMain {
      * @param date
      */
     private void dealYuanLiaoZhiLiangPart(Date date) {
-        String apiPath = "/burdenReport/getBurdenAvg";
-        Map<String, String> queryParams = new LinkedHashMap<String, String>();
-        DateQuery dateQuery = DateQueryUtil.buildToday(DateUtil.getDateBeginTime(date));
-        JSONObject query = new JSONObject();
-        query.put("start", dateQuery.getQueryStartTime());
-        List<String> itemNames = new ArrayList<>();
-        itemNames.add("CaO");
-        itemNames.add("SiO2");
-        itemNames.add("MgO");
-        itemNames.add("TFe");
-        itemNames.add("S");
-        itemNames.add("Mt");
-        itemNames.add("H2O");
-        itemNames.add("SMS");
-        itemNames.add("AOL");
-        query.put("itemNames", itemNames);
-        SerializeConfig serializeConfig = new SerializeConfig();
-        String jsonString = JSONObject.toJSONString(query, serializeConfig);
-        String results = httpUtil.postJsonParams(getUrl(version) + apiPath, jsonString);
-        if (StringUtils.isNotBlank(results)) {
-            JSONObject jsonObject = JSONObject.parseObject(results);
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject dataObject = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(dataObject)) {
-                    List list = new ArrayList();
-                    Map<String, Object> dataMap = dataObject.getInnerMap();
-
-                    dataMap.keySet().forEach(key -> {
-                        Map<String, Object> valuesMap = new LinkedHashMap<>();
-                        valuesMap.put("key", key);
-                        valuesMap.putAll(dataObject.getJSONObject(key).getInnerMap());
-
-                        //对于“水分”，优先去H2O，取不到再取Mt
-                        Object h2O = valuesMap.get("H2O");
-                        if (Objects.isNull(h2O)) {
-                            valuesMap.put("H2O", valuesMap.get("Mt"));
-                        }
-
-                        list.add(valuesMap);
-                    });
-
-                    result.put("yuanliaozhiliang", list);
-                }
+        List list = new ArrayList();
+        Arrays.asList("ore_blending", "coke", "quicklime", "limestone", "dolomite").stream().forEach(type -> {
+            AnaValueDTO anaValueDTO = getYuanLiaoZhiLiang(date, type);
+            if (Objects.nonNull(anaValueDTO) && CollectionUtils.isNotEmpty(anaValueDTO.getData())) {
+                Map<String, BigDecimal> values = anaValueDTO.getData().get(0).getValues();
+                list.add(values);
             }
-        }
+        });
+
+        result.put("yuanliaozhiliang", list);
+
     }
 
     /**
@@ -274,6 +242,21 @@ public class ShaoJieFenXiDocMain {
         JSONObject data = jsonObject.getJSONObject("data");
 
         return data;
+    }
+
+    private AnaValueDTO getYuanLiaoZhiLiang(Date date, String materialType) {
+        String apiPath = "/burdenMatAnalysisVal?pageSize=1&pageNum=1";
+        DateQuery dateQuery = DateQueryUtil.buildToday(date);
+        JSONObject query = new JSONObject();
+        query.put("start", dateQuery.getStartTime());
+        query.put("end", dateQuery.getEndTime());
+        query.put("materialType", materialType);
+        String results = httpUtil.postJsonParams(getUrl(version) + apiPath, JSONObject.toJSONString(query));
+
+        JSONObject jsonObject = JSONObject.parseObject(results);
+        JSONObject data = jsonObject.getJSONObject("data");
+
+        return null;
     }
 
     /**
