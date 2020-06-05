@@ -187,6 +187,19 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
                             }
                             break;
                         }
+                        case "焦丁": {
+                            if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
+                                BigDecimal nightShiftSumWetWgt = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦"), "1");
+                                if (nightShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, nightShiftSumWetWgt);
+                                }
+                                BigDecimal dayShiftSumWetWgt = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦"), "2");;
+                                if (dayShiftSumWetWgt.doubleValue() > 0) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row + 1, col, dayShiftSumWetWgt);
+                                }
+                            }
+                            break;
+                        }
                         case "煤量": {
                             ShiftTagValueListDTO shiftTagValueListDTO = getShiftTagValueListDTO(version, day);
                             if (Objects.nonNull(shiftTagValueListDTO) && CollectionUtils.isNotEmpty(shiftTagValueListDTO.getData())) {
