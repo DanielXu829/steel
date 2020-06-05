@@ -7,6 +7,8 @@ public class ChargeVarMaterial {
 
     private String brandCode;
 
+    private String brandName;
+
     private BigDecimal weight;
 
     private Short typ;
@@ -41,5 +43,12 @@ public class ChargeVarMaterial {
 
     public void setTyp(Short typ) {
         this.typ = typ;
+    }
+    public String getBrandName() {
+        return brandName;
+    }
+
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
     }
 }
