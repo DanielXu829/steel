@@ -1,12 +1,19 @@
 package com.cisdi.steel.module.job.sj.doc;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.dto.response.SuccessEntity;
+import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
+import com.cisdi.steel.dto.response.sj.AnaValueDTO;
+import com.cisdi.steel.dto.response.sj.PageData;
+import com.cisdi.steel.dto.response.sj.res.AnalysisValue;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
@@ -19,6 +26,7 @@ import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.tools.ant.util.DateUtils;
@@ -28,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Component
@@ -81,7 +90,7 @@ public class ShaoJieFenXiDocMain {
 
         dealShaoJiePeiBiPart(date);
 
-        dealYuanLiaoZhiLiangPart(date);
+        dealYuanLiaoZhiLiangPart(DateUtil.addDays(date, -1));
 
         //获取对应的路径
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.sj_shengchanfenxi4.getCode(), LanguageEnum.cn_zh.getName(), "4烧结");
@@ -150,51 +159,25 @@ public class ShaoJieFenXiDocMain {
      * @param date
      */
     private void dealYuanLiaoZhiLiangPart(Date date) {
-        String apiPath = "/burdenReport/getBurdenAvg";
-        Map<String, String> queryParams = new LinkedHashMap<String, String>();
-        DateQuery dateQuery = DateQueryUtil.buildToday(DateUtil.getDateBeginTime(date));
-        JSONObject query = new JSONObject();
-        query.put("start", dateQuery.getQueryStartTime());
-        List<String> itemNames = new ArrayList<>();
-        itemNames.add("CaO");
-        itemNames.add("SiO2");
-        itemNames.add("MgO");
-        itemNames.add("TFe");
-        itemNames.add("S");
-        itemNames.add("Mt");
-        itemNames.add("H2O");
-        itemNames.add("SMS");
-        itemNames.add("AOL");
-        query.put("itemNames", itemNames);
-        SerializeConfig serializeConfig = new SerializeConfig();
-        String jsonString = JSONObject.toJSONString(query, serializeConfig);
-        String results = httpUtil.postJsonParams(getUrl(version) + apiPath, jsonString);
-        if (StringUtils.isNotBlank(results)) {
-            JSONObject jsonObject = JSONObject.parseObject(results);
-            if (Objects.nonNull(jsonObject)) {
-                JSONObject dataObject = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(dataObject)) {
-                    List list = new ArrayList();
-                    Map<String, Object> dataMap = dataObject.getInnerMap();
-
-                    dataMap.keySet().forEach(key -> {
-                        Map<String, Object> valuesMap = new LinkedHashMap<>();
-                        valuesMap.put("key", key);
-                        valuesMap.putAll(dataObject.getJSONObject(key).getInnerMap());
-
-                        //对于“水分”，优先去H2O，取不到再取Mt
-                        Object h2O = valuesMap.get("H2O");
-                        if (Objects.isNull(h2O)) {
-                            valuesMap.put("H2O", valuesMap.get("Mt"));
-                        }
-
-                        list.add(valuesMap);
-                    });
-
-                    result.put("yuanliaozhiliang", list);
-                }
+        List list = new ArrayList();
+        Map<String, String> typeMap = new LinkedHashMap<>();
+        typeMap.put("ore_blending", "混匀矿");
+        typeMap.put("coke", "燃料");
+        typeMap.put("quicklime", "生灰");
+        typeMap.put("limestone", "石灰石");
+        typeMap.put("dolomite", "白云石");
+        typeMap.keySet().stream().forEach(type -> {
+            List<AnalysisValue> yuanLiaoZhiLiangByType = getYuanLiaoZhiLiangByType(date, type);
+            Map<String, String> values = new HashMap<>();;
+            if (CollectionUtils.isNotEmpty(yuanLiaoZhiLiangByType)) {
+                yuanLiaoZhiLiangByType.get(0).getValues().forEach((s, val) ->  values.put(s, val.toString()));
             }
-        }
+            values.put("title", typeMap.get(type));
+            list.add(values);
+        });
+
+        result.put("yuanliaozhiliang", list);
+
     }
 
     /**
@@ -274,6 +257,32 @@ public class ShaoJieFenXiDocMain {
         JSONObject data = jsonObject.getJSONObject("data");
 
         return data;
+    }
+
+    /**
+     * 根据materialType获取原料质量
+     * @param date
+     * @param materialType
+     * @return
+     */
+    private List<AnalysisValue> getYuanLiaoZhiLiangByType(Date date, String materialType) {
+        String apiPath = "/burdenMatAnalysisVal?pageSize=1&pageNum=1";
+        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date);
+        JSONObject query = new JSONObject();
+        query.put("start", dateQuery.getStartTime());
+        query.put("end", dateQuery.getEndTime());
+        query.put("materialType", materialType);
+        String results = httpUtil.postJsonParams(getUrl(version) + apiPath, JSONObject.toJSONString(query));
+
+        List<AnalysisValue> analysisValueList = null;
+        PageData<AnalysisValue> successEntity = JSON.parseObject(results, new TypeReference<PageData<AnalysisValue>>() {});
+        if (Objects.nonNull(successEntity) && CollectionUtils.isNotEmpty(successEntity.getData())) {
+            analysisValueList = successEntity.getData();
+        } else {
+            log.warn("根据时间[{}]，类型[{}]获取的原料质量数据为空", date, materialType);
+        }
+
+        return analysisValueList;
     }
 
     /**

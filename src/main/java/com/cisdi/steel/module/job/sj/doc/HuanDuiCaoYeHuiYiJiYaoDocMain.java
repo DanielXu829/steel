@@ -72,7 +72,7 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain {
      */
     private HashMap<String, Object> result = null;
 
-    @Scheduled(cron = "0 0 0/1 * * ?")
+    @Scheduled(cron = "0 0 23 * * ?")
     public void mainJob() {
         result = new HashMap<>();
         Date date = new Date();
