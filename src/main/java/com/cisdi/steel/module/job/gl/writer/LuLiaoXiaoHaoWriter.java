@@ -247,7 +247,7 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                         case "料线-小烧": {
                             if(Objects.nonNull(liaoXianTagValueList) && CollectionUtils.isNotEmpty(liaoXianTagValueList.getData())) {
                                 Map<String, BigDecimal> collect = liaoXianTagValueList.getData().stream().collect(Collectors.toMap(TagValue::getName, t -> t.getVal()));
-                                BigDecimal orignalVal = collect.get(itemName);
+                                BigDecimal orignalVal = collect.get(liaoXianMaps.get(itemName));
                                 BigDecimal val = orignalVal.divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
@@ -256,11 +256,10 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                         case "C":
                         case "Ol":
                         case "Os": {
-                            if(MapUtils.isNotEmpty(matrixDistrAvgInRangeMap)) {
-                                List<BatchDistribution> batchDistributions = matrixDistrAvgInRangeMap.get(itemName);
-                                BatchDistribution batchDistribution = batchDistributions.get(0);
+                            if(MapUtils.isNotEmpty(matrixDistrAvgInRangeMap) && CollectionUtils.isNotEmpty(matrixDistrAvgInRangeMap.get(itemName))) {
+                                BatchDistribution batchDistribution = matrixDistrAvgInRangeMap.get(itemName).get(0);
                                 if (Objects.nonNull(batchDistribution)) {
-                                    String val = StringUtils.join(Arrays.asList(itemName, batchDistribution.getPosition(), batchDistribution.getRoundset()), "-");
+                                    String val = StringUtils.join(Arrays.asList(itemName.substring(0,1), batchDistribution.getPosition(), batchDistribution.getRoundset()), "-");
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                                 }
                             }

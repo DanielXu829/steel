@@ -386,7 +386,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         Map<String, String> queryParam = new HashMap();
         queryParam.put("startTime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
         queryParam.put("endTime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
-        String chargeNoData = httpUtil.get(getChargeNoUrl(version), queryParam);
+        String chargeNoData = httpUtil.get(getMatrixDistrAvgInRangeUrl(version), queryParam);
 
         Map<String, List<BatchDistribution>> matrixDistrAvgInRangeMap = null;
         if (StringUtils.isNotBlank(chargeNoData)) {
