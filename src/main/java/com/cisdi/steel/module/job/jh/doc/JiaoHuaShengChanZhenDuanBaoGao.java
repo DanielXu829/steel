@@ -77,10 +77,11 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
     private String L1 = "CK9_10_MESR_ANA_cokeProduct_1d_avg," +
             "CK9_10_MESR_CI_LJC001_1d_avg," +
             "CK9_10_CDQ_rate_1d_avg," +
-            "CK9_10_L2C_CDQ_auxfi309_total_1d_avg," +
+            "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg," +
             "CK9_10_MESR_ANA_cokeProduct_1month_avg," +
             "CK9_10_MESR_CI_LJC001_1month_avg";
-    private String L2 = "CK9_10_MESR_SH_Mt_1d_avg," +
+    private String L2 = "CK9_10_MESR_SH_Vd_1d_avg," +
+            "CK9_10_MESR_SH_Mt_1d_avg," +
             "CK9_10_MESR_SH_Ad_1d_avg," +
             "CK9_10_MESR_SH_Std_1d_avg," +
             "CK9_10_MESR_SH_G_1d_avg," +
@@ -144,33 +145,49 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         }
     }
 
+    // 技术经济模块
     private void dealPart1(JSONObject data) {
         dealPart(data, "partOne", L1);
+        // 煤气量
         dealMeiQiLiang();
-        dealIncreaseYesterday(data, "CK9_10_MESR_ANA_cokeProduct_1d_avg", "textOne1", "countOne1");
-        dealIncreaseYesterday(data, "CK9_10_MESR_CI_LJC001_1d_avg", "textOne2", "countOne2");
-        dealIncreaseYesterday(data, "CK9_10_CDQ_rate_1d_avg", "textOne3", "countOne3");
-        dealIncreaseYesterday(data, "CK9_10_L2C_CDQ_auxfi309_total_1d_avg", "textOne4", "countOne4");
+        // 昨日产焦较前日
+        dealIncreaseYesterday(data, "CK9_10_MESR_ANA_cokeProduct_1d_avg", "textOne1", "countOne1", 0);
+        // 昨日配合煤消耗较前日
+        dealIncreaseYesterday(data, "CK9_10_MESR_CI_LJC001_1d_avg", "textOne2", "countOne2", 0);
+        // 昨日干熄率较前日 保留一位小数
+        dealIncreaseYesterday(data, "CK9_10_CDQ_rate_1d_avg", "textOne3", "countOne3", 1);
+        // 昨日蒸汽量较前日
+        dealIncreaseYesterday(data, "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg", "textOne4", "countOne4", 0);
+        // 焦炭平均产量
         selectProdItemValue();
+        // 趋势分析
         dealChart(data, "CK9_10_MESR_ANA_cokeProduct_1d_avg", "CK9_10_MESR_CI_LJC001_1d_avg", 5750d, 5250d, 6800d, 5800d, "产量", "煤粉", "chartOne1");
-        dealChart(data, "CK9_10_CDQ_rate_1d_avg", "CK9_10_L2C_CDQ_auxfi309_total_1d_avg", 5750d, 5250d, 6800d, 5800d, "干熄率", "蒸汽量", "chartOne2");
-        result.put("countOne5", parse(dealMonthTotal(data, "CK9_10_L2C_CDQ_auxfi309_total_1d_avg", false)));
+        dealChart(data, "CK9_10_CDQ_rate_1d_avg", "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg", 5750d, 5250d, 6800d, 5800d, "干熄率", "蒸汽量", "chartOne2");
+        result.put("countOne5", parse(dealMonthTotal(data, "CK9_10_L2C_CDQ_25201_acculat_total_1month_avg", false)));
     }
 
+    // 配煤质量模块
     private void dealPart2(JSONObject data) {
         dealPart(data, "partTwo", L2);
+        result.put("offsetVd", parse(dealOffset(20d, 23d, "CK9_10_MESR_SH_Vd_1d_avg", data)));
         result.put("offsetMT", parse(dealOffset(7d, 12d, "CK9_10_MESR_SH_Mt_1d_avg", data)));
         result.put("offsetAd", parse(dealOffset(0d, 13d, "CK9_10_MESR_SH_Ad_1d_avg", data)));
         result.put("offsetStd", parse(dealOffset(0d, 0.85d, "CK9_10_MESR_SH_Std_1d_avg", data)));
         result.put("offsetG", parse(dealOffset(70d, Double.MAX_VALUE, "CK9_10_MESR_SH_G_1d_avg", data)));
         result.put("offsetY", parse(dealOffset(0d, 21d, "CK9_10_MESR_SH_G_Y_1d_avg", data)));
         getCurrByDateTime(DateUtil.getFormatDateTime(endTime, "yyyy/MM/dd"));
+        dealChart(data, "CK9_10_MESR_SH_Vd_1d_avg", "CK9_10_MESR_SH_Mt_1d_avg",
+                5750d, 5250d, 6800d, 5800d, "Vd", "MT", "chartTwo1");
         dealChart(data, "CK9_10_MESR_SH_Ad_1d_avg", "CK9_10_MESR_SH_Std_1d_avg",
                 5750d, 5250d, 6800d, 5800d, "Ad", "Std", "chartTwo2");
         dealChart(data, "CK9_10_MESR_SH_G_1d_avg", "CK9_10_MESR_SH_G_Y_1d_avg",
                 5750d, 5250d, 6800d, 5800d, "G", "Y", "chartTwo3");
+        dealIncreaseYesterday(data, "CK9_10_MESR_SH_Mt_1d_avg", "textTwo2", "countTwo2", 2);
+        dealIncreaseYesterday(data, "CK9_10_MESR_SH_Ad_1d_avg", "textTwo3", "countTwo3", 2);
+        dealIncreaseYesterday(data, "CK9_10_MESR_SH_Std_1d_avg", "textTwo4", "countTwo4", 2);
     }
 
+    // 炼焦状态模块
     private void dealPart3(JSONObject data) {
         dealPart(data, "partThree", L3);
         Double offsetCoke1 = dealOffset(0.75d, Double.MAX_VALUE, "CK9_10_MESR_SH_K3_1d_avg", data);
@@ -261,17 +278,26 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         result.put("partOverview3", sb.toString());
     }
 
+    // 干熄状态模块
     private void dealPart4(JSONObject data) {
+        // (1)干熄操作
+        // 实际值
         dealPart(data, "partFour", L4);
+        // 偏差-干熄率
         Double offsetDry1 = dealOffset(90d, Double.MAX_VALUE, "CK9_10_CDQ_rate_1d_avg", data);
+        // 偏差-5#排焦温度
         Double offsetDry2 = dealOffset(80d, 90d, "CK9_10_L2C_CDQ_C_3TE_25101a_1d_avg", data);
+        // 偏差-6#排焦温度
         Double offsetDry3 = dealOffset(200d, 270d, "CK9_10_L2C_CDQ_C_23TE_225101a_1d_avg", data);
-
+        // 偏差-5#CO
         Double offsetDry8 = dealOffset(0d, 0.5d, "CK9_10_L2C_CDQ_EI01AI118_00_1d_avg", data);
+        // 偏差-5#H2
         Double offsetDry9 = dealOffset(0d, 2.5d, "CK9_10_L2C_CDQ_EI01AI118_02_1d_avg", data);
+        // 偏差-5#O2
         Double offsetDry10 = dealOffset(0d, 0.8d, "CK9_10_L2C_CDQ_EI01AI118_03_1d_avg", data);
-
+        // 偏差-6#CO
         Double offsetDry12 = dealOffset(0d, 0.5d, "CK9_10_L2C_CDQ_EI01AI118_200_1d_avg", data);
+        // 6#H2
         Double offsetDry13 = dealOffset(0d, 2.5d, "CK9_10_L2C_CDQ_EI01AI118_203_1d_avg", data);
 
         result.put("offsetDry1", parse(offsetDry1));
@@ -283,6 +309,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         result.put("offsetDry12", parse(offsetDry12));
         result.put("offsetDry13", parse(offsetDry13));
 
+        // (2)趋势分析 5炉
         dealChart(data, "CK9_10_L2C_CDQ_EI01AI118_00_1d_avg", "CK9_10_L2C_CDQ_EI01AI118_02_1d_avg",
                 "CK9_10_L2C_CDQ_EI01AI118_03_1d_avg", "CK9_10_L2C_CDQ_EI01AI118_01_1d_avg",
                 5750d, 5250d, 6800d, 5800d, 5750d, 5250d, 6800d, 5800d,
@@ -292,6 +319,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
                 5750d, 5250d, 6800d, 5800d, 5750d, 5250d, 6800d, 5800d,
                 "6#CO", "6#H2", "6#O2", "6#CO2", "chartFour2");
 
+        // (3) 小结的结论
         StringBuilder sb = new StringBuilder();
         if (offsetDry1 != null) {
             if (offsetDry1 > 0d) {
@@ -366,12 +394,30 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
             String[] tags = tagNames.split(comma);
             for (int i = 0; i < tags.length; i++) {
                 Double doubleValue = getLastByTag(data, tags[i]);
-                result.put(prefix + String.valueOf(i + 1), parse(doubleValue));
+                // 第一部分除了干熄率保留一位小数，其他部分为整数
+                if ("partOne".equals(prefix)) {
+                    if ("CK9_10_CDQ_rate_1d_avg".equals(tags[i])) {
+                        result.put(prefix + String.valueOf(i + 1), parse(doubleValue, 1));
+                    } else {
+                        result.put(prefix + String.valueOf(i + 1), parseInteger(doubleValue));
+                    }
+                } else {
+                    // TODO 其他部分还未确认，暂时保留两位小数
+                    result.put(prefix + String.valueOf(i + 1), parse(doubleValue));
+                }
             }
         }
     }
 
-    private void dealIncreaseYesterday(JSONObject data, String tagName, String textAddr, String countAddr) {
+    /**
+     *
+     * @param data
+     * @param tagName
+     * @param textAddr
+     * @param countAddr
+     * @param n 小数点保留位数
+     */
+    private void dealIncreaseYesterday(JSONObject data, String tagName, String textAddr, String countAddr, int n) {
         Double increase = null;
         List<Double> tagObject = getLast2ByTag(data, tagName);
         Double yesterday = tagObject.get(tagObject.size() - 1);
@@ -387,7 +433,12 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
             result.put(textAddr, "降低");
         }
         if (increase != null) {
-            result.put(countAddr, parse(Math.abs(increase.doubleValue())));
+            if (n == 0) {
+                // 保留整数
+                result.put(countAddr, parseInteger(Math.abs(increase.doubleValue())));
+            } else {
+                result.put(countAddr, parse(Math.abs(increase.doubleValue()), n));
+            }
         }
         else {
             result.put(countAddr, parse(increase));
@@ -415,11 +466,23 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         return result;
     }
 
+    /**
+     * 获取昨日的tag点值
+     * @param data
+     * @param tagName
+     * @return
+     */
     private Double getLastByTag(JSONObject data, String tagName) {
         JSONArray tagArray = data.getJSONArray(tagName);
         return getValueByClock(tagArray, endTime);
     }
 
+    /**
+     * 获取昨天和前天的tag点数据
+     * @param data
+     * @param tagName
+     * @return
+     */
     private List<Double> getLast2ByTag(JSONObject data, String tagName) {
         JSONArray tagArray = data.getJSONArray(tagName);
         List<Double> vals = new ArrayList<>();
@@ -428,6 +491,13 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         return vals;
     }
 
+
+    /**
+     * 取longTimeList天的tag点的value
+     * @param data
+     * @param tagName
+     * @return
+     */
     private List<Double> getValuesByTag(JSONObject data, String tagName) {
         JSONArray tagArray = data.getJSONArray(tagName);
         List<Double> vals = new ArrayList<>();
@@ -438,6 +508,12 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         return vals;
     }
 
+    /**
+     * 取指定某天的value
+     * @param tagArray
+     * @param clock
+     * @return
+     */
     private Double getValueByClock(JSONArray tagArray, Date clock) {
         Double result = null;
         if (tagArray != null && tagArray.size() > 0) {
@@ -457,6 +533,12 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         return result;
     }
 
+    /**
+     * // 取指定某天的value
+     * @param tagArray
+     * @param clock
+     * @return
+     */
     private Double getValueByClock(JSONArray tagArray, String clock) {
         Double result = null;
         if (tagArray != null && tagArray.size() > 0) {
@@ -508,10 +590,12 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         tempObject2.addAll(tagObject2);
         tempObject1.removeAll(Collections.singleton(null));
         tempObject2.removeAll(Collections.singleton(null));
-        Double max1 = tempObject1.size() > 0 ? Collections.max(tempObject1) * 1.2 : mx1;
-        Double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : mn1;
-        Double max2 = tempObject2.size() > 0 ? Collections.max(tempObject2) * 1.2 : mx2;
-        Double min2 = tempObject2.size() > 0 ? Collections.min(tempObject2) * 0.8 : mn2;
+
+        Double max1 = tempObject1.size() > 0 ? getAxisMaxValue(tempObject1) : mx1;
+        Double min1 = tempObject1.size() > 0 ? getAxisMinValue(tempObject1) : mn1;
+
+        Double max2 = tempObject2.size() > 0 ? getAxisMaxValue(tempObject2) : mx2;
+        Double min2 = tempObject2.size() > 0 ? getAxisMinValue(tempObject2) : mn2;
 
         if (max1.equals(min1)) {
             max1 = mx1;
@@ -556,6 +640,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         List<Double> tagObject2 = getValuesByTag(data, tag2);
         List<Double> tagObject3 = getValuesByTag(data, tag3);
         List<Double> tagObject4 = getValuesByTag(data, tag4);
+
         List<Double> tempObject1 = new ArrayList<>();
         tempObject1.addAll(tagObject1);
         List<Double> tempObject2 = new ArrayList<>();
@@ -564,18 +649,23 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         tempObject3.addAll(tagObject3);
         List<Double> tempObject4 = new ArrayList<>();
         tempObject4.addAll(tagObject4);
+
         tempObject1.removeAll(Collections.singleton(null));
         tempObject2.removeAll(Collections.singleton(null));
         tempObject3.removeAll(Collections.singleton(null));
         tempObject4.removeAll(Collections.singleton(null));
-        Double max1 = tempObject1.size() > 0 ? Collections.max(tempObject1) * 1.2 : mx1;
-        Double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : mn1;
-        Double max2 = tempObject2.size() > 0 ? Collections.max(tempObject2) * 1.2 : mx2;
-        Double min2 = tempObject2.size() > 0 ? Collections.min(tempObject2) * 0.8 : mn2;
-        Double max3 = tempObject3.size() > 0 ? Collections.max(tempObject3) * 1.2 : mx3;
-        Double min3 = tempObject3.size() > 0 ? Collections.min(tempObject3) * 0.8 : mn3;
-        Double max4 = tempObject4.size() > 0 ? Collections.max(tempObject4) * 1.2 : mx4;
-        Double min4 = tempObject4.size() > 0 ? Collections.min(tempObject4) * 0.8 : mn4;
+
+        Double max1 = tempObject1.size() > 0 ? getAxisMaxValue(tempObject1) : mx1;
+        Double min1 = tempObject1.size() > 0 ? getAxisMinValue(tempObject1) : mn1;
+
+        Double max2 = tempObject2.size() > 0 ? getAxisMaxValue(tempObject2) : mx2;
+        Double min2 = tempObject2.size() > 0 ? getAxisMinValue(tempObject2) : mn2;
+
+        Double max3 = tempObject3.size() > 0 ? getAxisMaxValue(tempObject3) : mx3;
+        Double min3 = tempObject3.size() > 0 ? getAxisMinValue(tempObject3) : mn3;
+
+        Double max4 = tempObject4.size() > 0 ? getAxisMaxValue(tempObject4) : mx4;
+        Double min4 = tempObject4.size() > 0 ? getAxisMinValue(tempObject4) : mn4;
 
         if (max1.equals(min1)) {
             max1 = mx1;
@@ -629,6 +719,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         result.put(addr, image1);
     }
 
+    // 煤气量消耗
     private void dealMeiQiLiang() {
         Double today = 0d;
         Double abs = 0d;
@@ -665,15 +756,16 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         if (yesterday2T != null) {
             abs -= yesterday2T;
         }
-        result.put("selectAddDirct1", parse(today));
+        result.put("selectAddDirct1", parseInteger(today));
         if (abs >= 0d) {
             result.put("selectAddDirct2", "升高");
         } else {
             result.put("selectAddDirct2", "降低");
         }
-        result.put("selectAddDirct3", parse(Math.abs(abs.doubleValue())));
+        result.put("selectAddDirct3", parseInteger(Math.abs(abs.doubleValue())));
     }
 
+    // 焦炭平均产量
     private void selectProdItemValue() {
         String apiPath = "/cokingYieldAndNumberHoles/selectProdItemValue";
         Map<String, String> query = new HashMap<String, String>();
@@ -688,7 +780,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
 //            for (int i = 0; i < array.size(); i++) {
 //                total += array.getJSONObject(i).getDouble("");
 //            }
-                result.put("selectProdItemValue1", parse(avg));
+                result.put("selectProdItemValue1", parseInteger(avg));
             }
         } else {
             result.put("selectProdItemValue1", parse(null));
@@ -813,6 +905,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         }
     }
 
+    // 处理偏差
     private Double dealOffset(Double min, Double max, String tagName, JSONObject data) {
         Double result = null;
         Double actual = getLastByTag(data, tagName);
@@ -942,6 +1035,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         return image;
     }
 
+    // 处理double数据 四舍五入保留2位小数
     private String parse(Double v) {
         if (v == null) {
             return "   ";
@@ -952,5 +1046,61 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         } else {
             return value.toString();
         }
+    }
+
+    /**
+     * 四舍五入取整
+     * @return
+     */
+    private String parseInteger(Double v) {
+        if (v == null) {
+            return "   ";
+        }
+        Long value = Math.round(v);
+        return value.toString();
+    }
+
+    /**
+     *
+     * @param v
+     * @param n 小数点保留位数
+     * @return
+     */
+    private String parse(Double v, int n) {
+        if (v == null) {
+            return "   ";
+        }
+        Double value = NumberArithmeticUtils.roundingX(v, n);
+        if (value.equals(0d)) {
+            return "0";
+        } else {
+            return value.toString();
+        }
+    }
+
+    /**
+     * 获取坐标轴最大值
+     * @param tempObject1
+     * @return
+     */
+    private Double getAxisMaxValue(List<Double> tempObject1) {
+        Double max = Collections.max(tempObject1);
+        if (max < 0) {
+            return max * 0.8;
+        }
+        return max * 1.2;
+    }
+
+    /**
+     * 获取坐标轴最小值
+     * @param tempObject1
+     * @return
+     */
+    private Double getAxisMinValue(List<Double> tempObject1) {
+        Double min = Collections.min(tempObject1);
+        if (min < 0) {
+            return min * 1.2;
+        }
+        return min * 0.8;
     }
 }
