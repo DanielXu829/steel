@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
@@ -14,6 +15,7 @@ import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.math.BigDecimal;
@@ -349,6 +351,56 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 获取latest tagValues
+     * @param date
+     * @param version
+     * @param tagNames
+     * @return
+     */
+    protected TagValueListDTO getLatestTagValueListDTO(Date date, String version, List<String> tagNames) {
+        Map<String, String> queryParam = new HashMap();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", tagNames);
+        String chargeNoData = httpUtil.postJsonParams(getLatestTagValuesUrl(version) + date.getTime(), jsonObject.toJSONString());
+
+        TagValueListDTO tagValueListDTO = null;
+        if (StringUtils.isNotBlank(chargeNoData)) {
+            tagValueListDTO = JSON.parseObject(chargeNoData, TagValueListDTO.class);
+            if (Objects.isNull(tagValueListDTO) || CollectionUtils.isEmpty(tagValueListDTO.getData())) {
+                log.warn("根据tagName[{}]获取[{}]的latest TagValueListDTO数据为空", tagNames, date);
+            } else {
+                // 排序，默认按chargeNo从小到大排序，即时间从老到新
+                tagValueListDTO.getData().sort(Comparator.comparing(TagValue::getVal));
+            }
+        }
+        return tagValueListDTO;
+    }
+
+    /**
+     * 获取布料矩阵数据
+     * @param query
+     * @param version
+     * @return
+     */
+    protected Map<String, List<BatchDistribution>> getMatrixDistrAvgInRangeMap(DateQuery query, String version) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
+        String chargeNoData = httpUtil.get(getMatrixDistrAvgInRangeUrl(version), queryParam);
+
+        Map<String, List<BatchDistribution>> matrixDistrAvgInRangeMap = null;
+        if (StringUtils.isNotBlank(chargeNoData)) {
+            SuccessEntity<Map<String, List<BatchDistribution>>> successEntity = JSON.parseObject(chargeNoData, new TypeReference<SuccessEntity<Map<String, List<BatchDistribution>>>>() {});
+            if (Objects.isNull(successEntity) || MapUtils.isEmpty(successEntity.getData())) {
+                log.warn("根据时间[{}]获取的matrixDistrAvgInRangeMap数据为空", query.getStartTime());
+            } else {
+                matrixDistrAvgInRangeMap = successEntity.getData();
+            }
+        }
+        return matrixDistrAvgInRangeMap;
+    }
+
+    /**
      * 获取charge/rawdata的url
      * @param version
      * @return url
@@ -383,6 +435,24 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      */
     protected String getChargeVarInfoUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/charge/variation/range";
+    }
+
+    /**
+     * 获取/tagValues/latest的url
+     * @param version
+     * @return
+     */
+    protected String getLatestTagValuesUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tagValues/latest/";
+    }
+
+    /**
+     * 获取/batch/distribution/getMatrixDistrAvgInRange的url
+     * @param version
+     * @return
+     */
+    protected String getMatrixDistrAvgInRangeUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/batch/distribution/getMatrixDistrAvgInRange";
     }
 
 }

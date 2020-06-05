@@ -9,6 +9,8 @@ public class TagValueKey {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date clock;
 
+    private String name;
+
     public Integer getId() {
         return id;
     }
@@ -23,5 +25,13 @@ public class TagValueKey {
 
     public void setClock(Date clock) {
         this.clock = clock;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
