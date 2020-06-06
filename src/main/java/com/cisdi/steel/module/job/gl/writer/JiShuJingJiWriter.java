@@ -74,6 +74,13 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             DateQuery dateQuery = DateQueryUtil.buildDayWithBeginTimeForBoth(day);
             TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
             TapSummaryListDTO tapSummaryListDTO = getTapSummaryListDTO(version, day);
+
+            DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(day);
+
+            BigDecimal countChargeNumByTapTimeRange = glDataUtil.getCountChargeNumByTapTimeRange(version, dateQueryNoDelay);
+            System.out.println("出铁间批数" + countChargeNumByTapTimeRange);
+            BigDecimal firstGradeRateInRange = glDataUtil.getFirstGradeRateInRange(version, dateQueryNoDelay);
+            System.out.println("一级品率" + firstGradeRateInRange);
             //计算铁量净重
             Double actWeight = defaultCellValue.doubleValue();
             if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
