@@ -12,11 +12,13 @@ import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.TapTPCDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
+import com.cisdi.steel.module.job.gl.GLDataUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -27,6 +29,9 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
 
     // 获取批次总数 tagName
     protected static String batchCountTagName = "BF8_L2C_SH_CurrentBatch_1d_max";
+
+    @Autowired
+    protected GLDataUtil glDataUtil;
 
     /**
      * 获取变料信息数据
