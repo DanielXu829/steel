@@ -81,6 +81,33 @@ public class GLDataUtil {
         return data;
     }
 
+    /**
+     * 获取茵巴作业率
+     * @param version
+     * @param dateQuery
+     * @return api数据
+     */
+    public BigDecimal getInbaRateInRange(String version, DateQuery dateQuery) {
+        BigDecimal data = null;
+        try {
+            Map<String, String> queryParam = new HashMap();
+            queryParam.put("startTime",  Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+            queryParam.put("endTime",  Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+            String chargeVarInfoStr = httpUtil.get(getInbaRateInRangeUrl(version), queryParam);
+
+            if (StringUtils.isNotBlank(chargeVarInfoStr)) {
+                SuccessEntity<BigDecimal> successEntity = JSON.parseObject(chargeVarInfoStr, new TypeReference<SuccessEntity<BigDecimal>>() {});
+                data = successEntity.getData();
+                if (Objects.isNull(data)) {
+                    log.warn("根据时间[{}],[{}]获取茵巴作业率 数据为空", dateQuery.getStartTime(), dateQuery.getEndTime());
+                }
+            }
+        } catch (Exception e) {
+            log.error(String.format("根据时间[{}],[{}]获取茵巴作业率 出错", dateQuery.getStartTime(), dateQuery.getEndTime()), e);
+        }
+        return data;
+    }
+
 
     /**
      * 获取出铁间批数 url
@@ -98,5 +125,14 @@ public class GLDataUtil {
      */
     private String getFirstGradeRateInRangeUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/report/tap/getFirstGradeRateInRange";
+    }
+
+    /**
+     * 获取茵巴作业率 url
+     * @param version
+     * @return
+     */
+    private String getInbaRateInRangeUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/report/tap/getInbaRateInRange";
     }
 }
