@@ -280,9 +280,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             int fengkouNumMaxIndex = columnIndex + 36;
             // 填充风口信息
             BfBlastMainInfo bfBlastMainInfo = getBfBlastMainInfo(version);
-            for (int i = columnIndex; i < fengkouNumMaxIndex; i++) {
-                BfBlastMain bfBlastMain = bfBlastMainInfo.getBfBlastMains().get(i - columnIndex);
-                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i, bfBlastMain.getBlastDiameter());
+            for (int i = 0; i < 36; i++) {
+                BfBlastMain bfBlastMain = bfBlastMainInfo.getBfBlastMains().get(i);
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2+columnIndex, bfBlastMain.getBlastDiameter());
             }
             String url = httpProperties.getGlUrlVersion(version) + "/bfBlast/queryBlastStatus";
             DateQuery date = this.getDateQuery(excelDTO);
@@ -300,8 +300,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 }
             }
             ExcelWriterUtil.setCellValue(zhengMianSheet, cellDataList);
-
-            // TODO 夜班白班
 
             // 填充其他风口信息
             String queryUrl = getUrlTagNamesInRange(version);
@@ -419,6 +417,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
             }
+            handleLiaoXianBianGeng(sheet, version);
         } catch (Exception e) {
             log.error("处理正面-变料信息出错", e);
         }
@@ -503,6 +502,118 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             if (isThirdFiled) {
                 beginRowIndex = beginRowIndex + 2;
             }
+        }
+        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+    }
+
+    /**
+     * 整合料线变更数据
+     * @param version
+     * @param key
+     * @param liaoXianMap
+     * @param tagValue
+     * @param tag
+     */
+    private void handleStartIndex(String version, String key, Map<Integer, Map<String, BigDecimal>> liaoXianMap, BigDecimal tagValue, String tag) {
+        String url = httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
+        Map<String, String> param = new HashMap<>();
+        param.put("time", String.valueOf(Long.valueOf(key)));
+        param.put("tagname", "BF8_L2C_SH_CurrentBatch_evt");
+        String result = httpUtil.get(url, param);
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject startIndex = JSON.parseObject(result);
+            if (Objects.nonNull(startIndex)) {
+                startIndex = startIndex.getJSONObject("data");
+                if (Objects.nonNull(startIndex)) {
+                    Integer val = startIndex.getInteger("val");
+                    if (val != null) {
+                        if (liaoXianMap.containsKey(val)) {
+                            liaoXianMap.get(val).put(tag, tagValue);
+                        } else {
+                            liaoXianMap.put(val, new HashMap<String, BigDecimal>(){{ put("C", tagValue); }});
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理料线变更数据
+     * @param version
+     */
+    private void handleLiaoXianBianGeng (Sheet sheet, String version) {
+        //{挡位.角度}
+        Cell cell = PoiCustomUtil.getCellByValue(sheet, "{开始批次}");
+        if (Objects.isNull(cell)) {
+            return;
+        }
+        int beginRowIndex = cell.getRowIndex();
+        int columnIndex = cell.getColumnIndex();
+
+        List<CellData> cellDataList = new ArrayList<>();
+        String queryUrl = getUrlTagNamesInRange(version);
+        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(new Date());
+        JSONObject query = new JSONObject();
+        query.put("starttime", String.valueOf(dateQuery.getQueryStartTime()));
+        query.put("endtime", String.valueOf(dateQuery.getQueryEndTime()));
+        String[] tagNames = new String[]{"BF8_L2C_TP_CokeSetLine_evt", "BF8_L2C_TP_SinterSetLine_evt", "BF8_L2C_TP_LiSinterSetLine_evt"};
+        query.put("tagnames", tagNames);
+        SerializeConfig serializeConfig = new SerializeConfig();
+        String jsonString = JSONObject.toJSONString(query, serializeConfig);
+        String results = httpUtil.postJsonParams(queryUrl, jsonString);
+        Map<Integer, Map<String, BigDecimal>> liaoXianMap = new HashMap<Integer, Map<String, BigDecimal>>();
+        if (StringUtils.isNotBlank(results)) {
+            JSONObject jsonObject = JSON.parseObject(results);
+            if (Objects.nonNull(jsonObject)) {
+                jsonObject = jsonObject.getJSONObject("data");
+                if (Objects.nonNull(jsonObject)) {
+                    int index = 0;
+                    for (String tagName:tagNames) {
+                        JSONObject jsonDatas = jsonObject.getJSONObject(tagName);
+                        if (Objects.nonNull(jsonDatas) && jsonDatas.size() > 0) {
+                            Set<String> keySet = jsonDatas.keySet();
+                            for (String key:keySet) {
+                                BigDecimal tagValue = jsonDatas.getBigDecimal(key);
+                                switch (tagName) {
+                                    case "BF8_L2C_TP_CokeSetLine_evt":
+                                        handleStartIndex(version, key, liaoXianMap, tagValue, "C");
+                                        break;
+                                    case "BF8_L2C_TP_SinterSetLine_evt":
+                                        handleStartIndex(version, key, liaoXianMap, tagValue, "OI");
+                                        break;
+                                    case "BF8_L2C_TP_LiSinterSetLine_evt":
+                                        handleStartIndex(version, key, liaoXianMap, tagValue, "Os");
+                                        break;
+                                }
+                                index ++;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        int index = 0;
+        for(Map.Entry<Integer, Map<String, BigDecimal>> entry : liaoXianMap.entrySet()) {
+            Integer mapKey = entry.getKey();
+            Map<String, BigDecimal> mapValue = entry.getValue();
+            ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex, mapKey);
+            for(String key : mapValue.keySet()){
+                BigDecimal val = mapValue.get(key);
+                switch (key) {
+                    case "C":
+                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 3, val);
+                        break;
+                    case "OI":
+                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5, val);
+                        break;
+                    case "Os":
+                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
+                        break;
+                }
+            }
+            index++;
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
     }
@@ -1037,11 +1148,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     private void handJiaoTan(Sheet sheet, String url, List<CellData> cellDataList, DateQuery dateQuery, String[] arr, String placeHolder) {
         Map<String, String> queryParam = new HashMap();
         Date date = new Date();
-        if (dateQuery.getQueryEndTime() > date.getTime()) {
-            queryParam.put("to", Objects.requireNonNull(date.getTime()).toString());
-        } else {
-            queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
-        }
+        queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
         queryParam.put("from", Objects.requireNonNull(dateQuery.getQueryStartTime()).toString());
 
         queryParam.put("materialType", "COKE");
