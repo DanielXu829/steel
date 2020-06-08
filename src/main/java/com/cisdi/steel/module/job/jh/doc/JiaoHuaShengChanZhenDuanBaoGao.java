@@ -5,7 +5,6 @@ import cn.afterturn.easypoi.word.entity.WordImageEntity;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.config.http.HttpUtil;
@@ -21,11 +20,9 @@ import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.tools.ant.util.DateUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
@@ -38,12 +35,10 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -79,7 +74,8 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
             "CK9_10_CDQ_rate_1d_avg," +
             "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg," +
             "CK9_10_MESR_ANA_cokeProduct_1month_avg," +
-            "CK9_10_MESR_CI_LJC001_1month_avg";
+            "CK9_10_MESR_CI_LJC001_1month_avg," +
+            "CK9_10_L2C_CDQ_25201_acculat_total_1month_avg";
     private String L2 = "CK9_10_MESR_SH_Vd_1d_avg," +
             "CK9_10_MESR_SH_Mt_1d_avg," +
             "CK9_10_MESR_SH_Ad_1d_avg," +
@@ -133,6 +129,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         result.put("current_date", DateUtil.getFormatDateTime(endTime, DateUtil.yyyyMMddChineseFormat));
         String allTagNames = L1 + comma + L2 + comma + L3 + comma + L4;
         JSONObject data = getDataByTag(allTagNames, startTime, endTime);
+
         dealPart1(data);
         dealPart2(data);
         dealPart3(data);
@@ -160,9 +157,10 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         dealIncreaseYesterday(data, "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg", "textOne4", "countOne4", 0);
         // 焦炭平均产量
         selectProdItemValue();
-        // 趋势分析
-        dealChart(data, "CK9_10_MESR_ANA_cokeProduct_1d_avg", "CK9_10_MESR_CI_LJC001_1d_avg", 5750d, 5250d, 6800d, 5800d, "产量", "煤粉", "chartOne1");
-        dealChart(data, "CK9_10_CDQ_rate_1d_avg", "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg", 5750d, 5250d, 6800d, 5800d, "干熄率", "蒸汽量", "chartOne2");
+        // 趋势分析 产量和配合煤
+        dealChart(data, "CK9_10_MESR_ANA_cokeProduct_1d_avg", "CK9_10_MESR_CI_LJC001_1d_avg", 5750d, 5250d, 6800d, 5800d, "产量(t)", "煤粉(t)", "chartOne1");
+        dealChart(data, "CK9_10_CDQ_rate_1d_avg", "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg", 5750d, 5250d, 6800d, 5800d, "干熄率(%)", "蒸汽量(t)", "chartOne2");
+        // 蒸汽量累计
         result.put("countOne5", parse(dealMonthTotal(data, "CK9_10_L2C_CDQ_25201_acculat_total_1month_avg", false)));
     }
 
@@ -177,11 +175,11 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         result.put("offsetY", parse(dealOffset(0d, 21d, "CK9_10_MESR_SH_G_Y_1d_avg", data)));
         getCurrByDateTime(DateUtil.getFormatDateTime(endTime, "yyyy/MM/dd"));
         dealChart(data, "CK9_10_MESR_SH_Vd_1d_avg", "CK9_10_MESR_SH_Mt_1d_avg",
-                5750d, 5250d, 6800d, 5800d, "Vd", "MT", "chartTwo1");
+                5750d, 5250d, 6800d, 5800d, "Vd(%)", "MT(%)", "chartTwo1");
         dealChart(data, "CK9_10_MESR_SH_Ad_1d_avg", "CK9_10_MESR_SH_Std_1d_avg",
-                5750d, 5250d, 6800d, 5800d, "Ad", "Std", "chartTwo2");
+                5750d, 5250d, 6800d, 5800d, "Ad(%)", "Std(%)", "chartTwo2");
         dealChart(data, "CK9_10_MESR_SH_G_1d_avg", "CK9_10_MESR_SH_G_Y_1d_avg",
-                5750d, 5250d, 6800d, 5800d, "G", "Y", "chartTwo3");
+                5750d, 5250d, 6800d, 5800d, "G", "Y(mm)", "chartTwo3");
         dealIncreaseYesterday(data, "CK9_10_MESR_SH_Mt_1d_avg", "textTwo2", "countTwo2", 2);
         dealIncreaseYesterday(data, "CK9_10_MESR_SH_Ad_1d_avg", "textTwo3", "countTwo3", 2);
         dealIncreaseYesterday(data, "CK9_10_MESR_SH_Std_1d_avg", "textTwo4", "countTwo4", 2);
@@ -852,6 +850,10 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         }
     }
 
+    /**
+     * 配合煤配比
+     * @param date
+     */
     private void getCurrByDateTime(String date) {
         String apiPath = "/coalBlendingParameter/getCurrByDateTime";
         Map<String, String> query = new HashMap<String, String>();
@@ -981,13 +983,14 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         cal.add(Calendar.DAY_OF_MONTH, -1);
-        // 昨日零点，作为结束时间点
+        // 昨日23点，作为结束时间点
         endTime = cal.getTime();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.add(Calendar.DAY_OF_MONTH, -1);
         beforeYesterday = cal.getTime();
         // 当月第一天，作为开始时间点
