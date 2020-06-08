@@ -2,18 +2,25 @@ package com.cisdi.steel.module.job.gl.doc;
 
 import cn.afterturn.easypoi.word.WordExportUtil;
 import cn.afterturn.easypoi.word.entity.WordImageEntity;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.dto.response.gl.res.PageData;
+import com.cisdi.steel.dto.response.gl.res.TapSgRow;
+import com.cisdi.steel.dto.response.sj.*;
 import com.cisdi.steel.module.job.a1.doc.ChartFactory;
 import com.cisdi.steel.module.job.a1.doc.Serie;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
+import com.cisdi.steel.module.job.gl.GLDataUtil;
+import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
@@ -22,12 +29,12 @@ import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.*;
 import org.apache.tools.ant.util.DateUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -38,10 +45,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 @Component
 @Slf4j
@@ -53,11 +61,12 @@ public class GaoLuRiFenXiBaoGao {
     private HashMap<String, Object> result = null;
     private Date startTime = null;
     private Date endTime = null;
-    private Date beforeYesterday = null;
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
     List<String> longTimeList = new ArrayList<>();
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    DecimalFormat df1 = new DecimalFormat("0.0");
+    DecimalFormat df2 = new DecimalFormat("0.00");
+    DecimalFormat df3 = new DecimalFormat("0.000");
     private String[] L1 = new String[]{
             "BF8_L2M_HMMassAct_1d_cur","BF8_L2M_Productivity_1d","BF8_L2M_BX_CokeRate_1d_cur","BF8_L2M_BX_CoalRate_1d_cur",
             "BF8_L2M_BX_FuelRate_1d_cur","BF8_L2C_BD_HotBlastTemp1_1d_avg"
@@ -81,9 +90,41 @@ public class GaoLuRiFenXiBaoGao {
     private String[] L4 = new String[]{
             "BF8_L2C_BD_SoftTempDiff_1d_avg"
     };
+    //铁口温度
+    private String[] L5 = new String[]{
+            "BF8_L2C_HMTemp_1",
+            "BF8_L2C_HMTemp_2",
+            "BF8_L2C_HMTemp_3",
+            "BF8_L2C_HMTemp_3"
+    };
+
+    private String[] luGang = new String[]{
+            "TI0707C", "TI0708A", "TI0708B", "TI0708C", "TI0709A", "TI0709B", "TI0709C", "TI0710A", "TI0710B",
+            "TI0710C", "TI0711A", "TI0711B", "TI0711C", "TI0712A", "TI0712B", "TI0712C", "TI0713A", "TI0713B", "TI0713C",
+            "ATI0801A", "ATI0801B", "ATI0801C", "TI0802A", "TI0802B", "TI0802C", "TI0803A", "TI0803B", "TI0803C", "TI0804A",
+            "TI0804B", "TI0804C", "TI0805A", "TI0805B", "TI0805C", "TI0806A", "TI0806B", "TI0806C", "TI0807A", "TI0807B",
+            "TI0807C", "TI0808A", "TI0808B", "TI0808C", "TI0809A", "TI0809B", "TI0809C", "TI0810A", "TI0810B", "TI0810C",
+            "TI0811A", "TI0811B", "TI0811C", "TI0812A", "TI0812B", "TI0812C", "TI0813A", "TI0813B", "TI0813C", "TI0901A",
+            "TI0901B", "TI0901C", "TI0902A", "TI0902B", "TI0902C", "TI0903A", "TI0903B", "TI0903C", "TI0904A", "TI0904B",
+            "TI0904C", "TI0905A", "TI0905B", "TI0905C", "TI0906A", "TI0906B", "TI0906C", "TI0907A", "TI0907B", "TI0907C",
+            "TI0908A", "TI0908B", "TI0908C", "TI0909A", "TI0909B", "TI0909C", "TI0910A", "TI0910B", "TI0910C", "TI0911A",
+            "TI0911B", "TI0911C", "TI0912A", "TI0912B", "TI0912C", "TI0913A", "TI0913B", "TI0913C", "TI1001A", "TI1001B",
+            "TI1002A", "TI1002B", "TI1003A", "TI1003B", "TI1004A", "TI1004B", "TI1005A", "TI1005B", "TI1006A", "TI1006B",
+            "TI1007A", "TI1007B", "TI1008A", "TI1008B", "TI1009A", "TI1009B", "TI1010A", "TI1010B", "ATI1011A", "ATI1011B",
+            "TI1012A", "TI1012B", "TI1013A", "TI1013B", "TI1101A", "TI1101B", "TI1102A", "TI1102B", "TI1103A", "TI1103B",
+            "TI1104A", "TI1104B", "TI1105A", "TI1105B", "TI1106A", "TI1106B","TI1107A", "TI1107B", "TI1108A", "TI1108B",
+            "TI1109A", "TI1109B", "TI1110A", "TI1110B", "TI1111A", "TI1111B", "TI1112A", "TI1112B", "TI1113A", "TI1113B",
+            "TI2101", "TI2102", "TI2103", "TI2104", "TI2105", "TI2106", "TI2107", "TI2108", "TI2201", "TI2202", "TI2203",
+            "TI2204", "TI2205", "TI2206", "TI2207", "TI2208", "TI2301", "TI2302", "TI2303", "TI2304", "TI2305", "TI2307",
+            "TI2308", "TI2401", "TI2402", "TI2403", "TI2404", "TI2405", "TI2406", "TI2407", "TI2408", "TI2409", "TI2410",
+            "TI2306"
+    };
 
     @Autowired
     private HttpUtil httpUtil;
+
+    @Autowired
+    protected GLDataUtil glDataUtil;
 
     @Autowired
     private HttpProperties httpProperties;
@@ -106,7 +147,9 @@ public class GaoLuRiFenXiBaoGao {
         longTimeList = new ArrayList<>();
     }
 
-    @Scheduled(cron = "0 0 0/1 * * ?")
+    //@Scheduled(cron = "0 0 23 * * ?")
+    //@Scheduled(cron = "0 0 0/1 * * ?")
+    @Scheduled(cron = "0 0 6 * * ?")
     public void mainTask() {
         initialData();
         initDateTime();
@@ -116,13 +159,16 @@ public class GaoLuRiFenXiBaoGao {
 
     public void mainDeal(String version) {
         // 处理当前时间
-        result.put("current_date", DateUtils.format(endTime, DateUtil.yyyyMMddChineseFormat));
-        String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(L1, L2), L3), L4);
+        result.put("current_date", DateUtils.format(DateUtil.addDays(new Date(), -1), DateUtil.yyyyMMddChineseFormat));
+        String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(L1, L2), L3), L4), L5);
         JSONObject data = getDataByTag(allTagNames, startTime, endTime, version);
-        dealPart1(data);
-        dealPart(data, "partTwo", L2);
+        dealPart1(data, version);
+        dealPart(data, "partTwo", L2, df2);
+        handleCaoZuoCanShu(version);
         dealPart3(data);
-        dealPart(data, "partFour", L4);
+        dealPart4(data);
+        handleTapTempture(version);
+        handleLuTiWenDu(version);
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day.getCode(), LanguageEnum.cn_zh.getName(), "8高炉");
         if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
             String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
@@ -132,120 +178,595 @@ public class GaoLuRiFenXiBaoGao {
     }
 
     /**
+     * 炉体温度数据
+     * @param version
+     * @param startIndex
+     * @param endIndex
+     * @return
+     */
+    private Map<String, BigDecimal> getLuTiWenDuData(String version, int startIndex, int endIndex) {
+        String prefix = "BF8_L2C_BD_";
+        String suffix = "_1d_max";
+        BigDecimal maxTemp = new BigDecimal(0);
+        String maxTempTagName = "";
+        for (int i = startIndex; i < endIndex; i++) {
+            String tagName = prefix + i + suffix;
+            BigDecimal tagValue = getLatestMaxTagValue(version, tagName, -1);
+            if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
+                maxTemp = tagValue;
+                maxTempTagName = tagName;
+            }
+        }
+        Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
+        tempMap.put(maxTempTagName, maxTemp);
+
+        return tempMap;
+    }
+
+    private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames) {
+        String prefix = "BF8_L2C_BD_";
+        String suffix = "_1d_max";
+        BigDecimal maxTemp = new BigDecimal(0);
+        String maxTempTagName = "";
+        for (int i = 0; i < tagNames.length; i++) {
+            String tagName = prefix + tagNames[i] + suffix;
+            BigDecimal tagValue = getLatestMaxTagValue(version, tagName, -1);
+            if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
+                maxTemp = tagValue;
+                maxTempTagName = tagName;
+            }
+        }
+        Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
+        tempMap.put(maxTempTagName, maxTemp);
+
+        return tempMap;
+    }
+
+    /**
+     * 获取单个tag的最大温度
+     * @param version
+     * @param tagName
+     * @return
+     */
+    private BigDecimal getLatestMaxTagValue (String version, String tagName, int days) {
+        BigDecimal maxTemp = new BigDecimal(0);
+        String url = getUrl(version) + "/tagValue/latest";
+        Map<String, String> param = new HashMap<>();
+        Date date = DateUtil.addDays(new Date(), days);
+        param.put("time", String.valueOf(date.getTime()));
+        param.put("tagname", tagName);
+        String results = httpUtil.get(url, param);
+        JSONObject jsonObject = JSONObject.parseObject(results, Feature.OrderedField);
+        JSONObject data = jsonObject.getJSONObject("data");
+        if (data != null && data.size() > 0) {
+            JSONObject tagObject = jsonObject.getJSONObject(tagName);
+            Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
+            if (Objects.nonNull(innerMap)) {
+                Set<String> keySet = innerMap.keySet();
+                for (String key:keySet) {
+                    BigDecimal tagValue  = (BigDecimal) innerMap.get(key);
+                    if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
+                        maxTemp = tagValue;
+                    }
+                }
+            }
+        }
+        return maxTemp;
+    }
+
+    private void handleLuTiWenDu (String version) {
+        //炉缸
+        Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang);
+        for(Map.Entry<String, BigDecimal> entry : luGangMap.entrySet()){
+            String mapKey = entry.getKey();
+            BigDecimal mapValue = entry.getValue();
+            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
+                result.put("luti_text1", mapKey);
+                result.put("luti_temp1", df2.format(mapValue));
+                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
+                if (yesterdayVal != null) {
+                    if (yesterdayVal.compareTo(mapValue) == 1) {
+                        result.put("tap_temp_differ1", df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put("luti_differ_text1", "降低");
+                    } else {
+                        result.put("tap_temp_differ1", df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put("luti_differ_text1", "升高");
+                    }
+                }
+            } else {
+                result.put("luti_text1", " ");
+                result.put("luti_temp1", " ");
+                result.put("tap_temp_differ1", " ");
+                result.put("luti_differ_text1", " ");
+            }
+        }
+        //炉腹 192~208
+        Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, 192, 209);
+        for(Map.Entry<String, BigDecimal> entry : luFuMap.entrySet()){
+            String mapKey = entry.getKey();
+            BigDecimal mapValue = entry.getValue();
+            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
+                result.put("luti_text2", mapKey);
+                result.put("luti_temp2", df2.format(mapValue));
+                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
+                if (yesterdayVal != null) {
+                    if (yesterdayVal.compareTo(mapValue) == 1) {
+                        result.put("tap_temp_differ2", df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put("luti_differ_text2", "降低");
+                    } else {
+                        result.put("tap_temp_differ2", df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put("luti_differ_text2", "升高");
+                    }
+                }
+            } else {
+                result.put("luti_text2", " ");
+                result.put("luti_temp2", " ");
+                result.put("tap_temp_differ2", " ");
+                result.put("luti_differ_text2", " ");
+            }
+        }
+        //炉腰 209~225
+        Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, 209, 226);
+        for(Map.Entry<String, BigDecimal> entry : luYaoMap.entrySet()){
+            String mapKey = entry.getKey();
+            BigDecimal mapValue = entry.getValue();
+            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
+                result.put("luti_text3", mapKey);
+                result.put("luti_temp3", df2.format(mapValue));
+                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
+                if (yesterdayVal != null) {
+                    if (yesterdayVal.compareTo(mapValue) == 1) {
+                        result.put("tap_temp_differ3", df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put("luti_differ_text3", "降低");
+                    } else {
+                        result.put("tap_temp_differ3", df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put("luti_differ_text3", "升高");
+                    }
+                }
+            } else {
+                result.put("luti_text3", " ");
+                result.put("luti_temp3", " ");
+                result.put("tap_temp_differ3", " ");
+                result.put("luti_differ_text3", " ");
+            }
+        }
+        //炉身 226~304
+        Map<String, BigDecimal> lushengMap =  getLuTiWenDuData(version, 226, 305);
+        for(Map.Entry<String, BigDecimal> entry : lushengMap.entrySet()){
+            String mapKey = entry.getKey();
+            BigDecimal mapValue = entry.getValue();
+            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
+                result.put("luti_text4", mapKey);
+                result.put("luti_temp4", df2.format(mapValue));
+                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
+                if (yesterdayVal != null) {
+                    if (yesterdayVal.compareTo(mapValue) == 1) {
+                        result.put("tap_temp_differ4", df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put("luti_differ_text4", "降低");
+                    } else {
+                        result.put("tap_temp_differ4", df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put("luti_differ_text4", "升高");
+                    }
+                }
+            } else {
+                result.put("luti_text4", " ");
+                result.put("luti_temp4", " ");
+                result.put("tap_temp_differ4", " ");
+                result.put("luti_differ_text4", " ");
+            }
+        }
+    }
+
+    /**
+     * 获取某天最高温度
+     * @param daysBefore
+     * @param version
+     * @param tagNames
+     * @return
+     */
+    private List<BigDecimal> getMaxTemp (int daysBefore, String version, String[] tagNames) {
+        List<BigDecimal> results = new ArrayList<>();
+        Date date = DateUtil.addDays(new Date(), daysBefore);
+        DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
+        JSONObject jsonObject = getDataByTag(tagNames, dateQueryNoDelay.getStartTime(), dateQueryNoDelay.getEndTime(), version);
+        if (jsonObject != null && jsonObject.size() > 0) {
+            BigDecimal tempMax = new BigDecimal(0);
+            for (int i = 0; i < tagNames.length; i++) {
+                JSONObject tagObject = jsonObject.getJSONObject(tagNames[i]);
+                Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
+                if (Objects.nonNull(innerMap)) {
+                    Set<String> keySet = innerMap.keySet();
+                    for (String key:keySet) {
+                        BigDecimal tagValue = (BigDecimal) innerMap.get(key);
+                        if (tagValue.compareTo(tempMax) == 1) {
+                            tempMax = tagValue;
+                        }
+                    }
+                    results.add(tempMax);
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * 处理铁口温度
+     * @param version
+     */
+    private void handleTapTempture (String version) {
+        String prefix1 = "tap_temp";
+        String prefix2 = "tap_temp_text";
+        String prefix3 = "tap_temp_differ";
+        //今日最高温度
+        List<BigDecimal> todayList = getMaxTemp(-1, version, L5);
+        //昨日最高温度
+        List<BigDecimal> yesterdayList =getMaxTemp(-2, version, L5);
+        //默认值，防止接口中没有数据
+        for(int i = 0; i < L5.length; i++) {
+            result.put(prefix1 + String.valueOf(i + 1), " ");
+            result.put(prefix2 + String.valueOf(i + 1), " ");
+            result.put(prefix3 + String.valueOf(i + 1), " ");
+        }
+
+        for (int i = 0; i < todayList.size(); i++) {
+            BigDecimal yesterday = yesterdayList.get(i);
+            BigDecimal today = todayList.get(i);
+            result.put(prefix1 + String.valueOf(i + 1), today == null ? 0d : df2.format(today));
+            String text = "";
+            BigDecimal differ = null;
+            if (today.compareTo(yesterday) == 1) {
+                text = "升高";
+                differ = today.subtract(yesterday);
+            } else {
+                text = "降低";
+                differ = yesterday.subtract(today);
+            }
+            result.put(prefix2 + String.valueOf(i + 1), text);
+            result.put(prefix3 + String.valueOf(i + 1), df2.format(differ));
+        }
+    }
+
+    /**
+     * 获取第一列对应的数据
+     * @param version
+     * @return
+     */
+    private List<ProcessCardDto> getVaues(String version) {
+        String url = getUrl(version) + "/processCard/selectLatest";
+        String jsonData = httpUtil.get(url);
+        JsonListResult<ProcessCardDto> listResult = null;
+        if (StringUtils.isNotBlank(jsonData)) {
+            listResult = JSON.parseObject(jsonData, new TypeReference<JsonListResult<ProcessCardDto>>(){});
+        }
+        if (Objects.isNull(listResult)) {
+            return null;
+        }
+        List<ProcessCardDto> rows = listResult.getRows();
+        if (Objects.isNull(rows)) {
+            return rows;
+        }
+        return rows;
+    }
+
+    /**
+     * 处理列数据
+     * @param version
+     */
+    private void dealColumns(String version) {
+        String url = getUrl(version) + "/processCard/paramList";
+        String paramName = "paramName";
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("type", "1");
+        String jsonData = httpUtil.get(url, queryParam);
+        JsonListResult<ProcessParameter> listResult = null;
+        if (StringUtils.isNotBlank(jsonData)) {
+            listResult = JSON.parseObject(jsonData, new TypeReference<JsonListResult<ProcessParameter>>(){});
+        }
+        if (Objects.isNull(listResult)) {
+            return;
+        }
+        List<ProcessParameter> rows = listResult.getRows();
+        if (Objects.isNull(rows)) {
+            return;
+        }
+        // 排序，保证可以合并的单元格时连续的，方便合并
+        Collections.sort(rows, new Comparator<ProcessParameter>(){
+            @Override
+            public int compare(ProcessParameter p1, ProcessParameter p2) {
+                if (StringUtils.isBlank(p1.getName()) && StringUtils.isBlank(p2.getName())) {
+                    return 0;
+                }
+                if (p1.getName().compareTo(p2.getName()) > 0){
+                    return 1;
+                }else if (p1.getName().compareTo(p2.getName()) > 0){
+                    return 0;
+                }else{
+                    return -1;
+                }
+            }
+        });
+        //获取第二列
+        List<ProcessCardDto> processCardDtoList = getVaues(version);
+        ProcessCardDto processCardDto = null;
+        if (processCardDtoList != null && !CollectionUtils.isEmpty(processCardDtoList)) {
+            processCardDto = processCardDtoList.get(0);
+        }
+        if (Objects.isNull(processCardDto)) {
+            return;
+        }
+        List<ProcessGoal> goals = processCardDto.getGoals();
+
+        List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
+        for (int i =0; i < rows.size(); i++) {
+            ProcessParameter row = rows.get(i);
+            Map<String, String> lm = new HashMap<String, String>();
+            String name = row.getName();
+            if(!row.getUnit().equals("-"))
+                lm.put("name", name + " " + row.getUnit());
+            else
+                lm.put("name", name);
+            String tagName = row.getTagName();
+            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(new Date());
+            JSONObject data = getDataByTag(new String[]{tagName}, dateQuery.getStartTime(), dateQuery.getEndTime(), version);
+            BigDecimal total = new BigDecimal("0.00");
+            BigDecimal realVal = null;
+            if (Objects.nonNull(data) && data.size() > 0) {
+                JSONObject object = data.getJSONObject(tagName);
+                for (String key:object.keySet()) {
+                    BigDecimal tagValue = object.getBigDecimal(key);
+                    total = total.add(tagValue);
+                }
+                realVal = total.divide(new BigDecimal(object.size()), 2, BigDecimal.ROUND_HALF_UP);
+                lm.put("real", realVal.toString());
+            }
+            Optional<ProcessGoal> optional = goals.stream().filter(item -> item.getParamId()==row.getId()).findFirst();
+            if (optional.isPresent()) {
+                ProcessGoal goal = optional.get();
+                String avg = "";
+                if (!Objects.isNull(goal)) {
+                    BigDecimal low = goal.getLow();
+                    BigDecimal up = goal.getUp();
+                    if (low != null && up != null) {
+                        avg = low + "-" + up;
+                        if (realVal != null) {
+                            if (realVal.compareTo(up) == 1) {
+                                lm.put("gap", realVal.subtract(up).toString());
+                            } else if (realVal.compareTo(low) == -1) {
+                                lm.put("gap", low.subtract(realVal).toString());
+                            } else {
+                                lm.put("gap", 0+"");
+                            }
+                        }
+                    } else if (low == null && up == null) {
+                        avg = "";
+                    } else if (low == null && up != null) {
+                        avg = ">" + up;
+                        if (realVal != null) {
+                            if (realVal.compareTo(up) == 1) {
+                                lm.put("gap", realVal.subtract(up).toString());
+                            } else {
+                                lm.put("gap", 0+"");
+                            }
+                        }
+                    } else if (low != null && up == null) {
+                        avg = "<" + low;
+                        if (realVal != null) {
+                            if (realVal.compareTo(low) == -1) {
+                                lm.put("gap", low.subtract(realVal).toString());
+                            } else {
+                                lm.put("gap", 0+"");
+                            }
+                        }
+                    }
+                }
+                lm.put("target", avg);
+                if (i == 0) {
+                    ProcessCard card = processCardDto.getProcessCard();
+                    String note = "";
+                    if (!Objects.isNull(card)) {
+                        note = card.getNote();
+                    }
+                    lm.put("note", note);
+                }
+            }
+
+            listMap.add(lm);
+        }
+        result.put("partThreeList", listMap);
+    }
+
+    /**
+     * 动态生成操作参数表格
+     * @param version
+     */
+    private void handleCaoZuoCanShu(String version) {
+        dealColumns(version);
+    }
+
+    /**
      * 通过tag点获取得数据，组装到result
      *
      * @param data
      * @param prefix
      */
-    private void dealPart(JSONObject data, String prefix, String[] tagNames) {
+    private void dealPart(JSONObject data, String prefix, String[] tagNames, DecimalFormat df) {
         if (data != null && data.size() > 0) {
             for (int i = 0; i < tagNames.length; i++) {
                 Double doubleValue = 0d;
                 List<Double> valueObject = getValuesByTag(data, tagNames[i]);
                 if (valueObject != null && valueObject.size() > 0) {
                     doubleValue = valueObject.get(valueObject.size() - 1);
-                    result.put(prefix + String.valueOf(i + 1), parse(doubleValue));
+                    result.put(prefix + String.valueOf(i + 1), doubleValue == null ? 0d : df.format(doubleValue));
                 }
             }
         }
     }
 
-    private void dealSingle(JSONObject data, String addr, String tagName) {
+    /**
+     * 根据tagName从data中获取某天的数据，例如获取前一天的数据，beforeDays = 1
+     * @param data
+     * @param tagName
+     * @param df
+     * @param beforeDays
+     * @return
+     */
+    private String getDataBeforeDays (JSONObject data, String tagName, DecimalFormat df, int beforeDays) {
+        String result = "";
+        if (data != null && data.size() > 0) {
+            Double doubleValue = 0d;
+            List<Double> valueObject = getValuesByTag(data, tagName);
+            if (valueObject != null && valueObject.size() > 0) {
+                doubleValue = valueObject.get(valueObject.size() - 1 - beforeDays);
+                result = doubleValue == null ? "" : df.format(doubleValue);
+            }
+        }
+        return result;
+    }
+
+    private void dealSingle(JSONObject data, String addr, String tagName, DecimalFormat df) {
         if (data != null && data.size() > 0) {
             Double doubleValue = 0d;
             List<Double> valueObject = getValuesByTag(data, tagName);
             if (valueObject != null && valueObject.size() > 0) {
                 doubleValue = valueObject.get(valueObject.size() - 1);
-                result.put(addr, parse(3, doubleValue));
+                result.put(addr, doubleValue == null ? 0d : df.format(doubleValue));
             }
         }
     }
 
-    private void dealPart1(JSONObject data) {
-        dealPart(data, "partOne", L1);
+    /**
+     * [S]达标率
+     * @param version
+     */
+    private void dealSQualifiedRate (String version) {
+        Map<String, String> queryParam = new HashMap<>();
+        DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(new Date());
+        queryParam.put("starttime", Objects.requireNonNull(dateQueryNoDelay.getQueryStartTime()).toString());
+        queryParam.put("endtime", Objects.requireNonNull(dateQueryNoDelay.getQueryEndTime()).toString());
+        // 2、获取数据并反序列化为java对象
+        String tapData = httpUtil.get(getTapsInRange(version), queryParam);
+        if (StringUtils.isBlank(tapData)) {
+            return;
+        }
+        com.cisdi.steel.dto.response.gl.res.PageData<TapSgRow> pageData = JSON.parseObject(tapData, new TypeReference<PageData<TapSgRow>>(){});
+        if (Objects.isNull(pageData)) {
+            return;
+        }
+        List<TapSgRow> tapSgRowData = pageData.getData();
+        if (CollectionUtils.isEmpty(tapSgRowData)) {
+            return;
+        }
+        tapSgRowData.sort(comparing(TapSgRow::getStartTime)); // 按时间先后进行排序
+        int dataSize = tapSgRowData.size();
+        if (dataSize == 0) {
+            return;
+        }
+        // S合格的数据
+        int count = 0;
+        int total = 0;
+        for (int i = 0; i < dataSize; i++) {
+            TapSgRow tapSgRow = tapSgRowData.get(i);
+            Map<String, Double> hmAnalysis = tapSgRow.getHmAnalysis();
+            if (Objects.isNull(hmAnalysis) || hmAnalysis.size() == 0) {
+                continue;
+            }
+            total ++;
+            Double value = hmAnalysis.get("S");
+            if (value != null && value*100 <= 0.03) {
+                count++;
+            }
+        }
+        //[S]达标率
+        if (total > 0) {
+            result.put("sQualifiedRate", df2.format((count/total)*100));
+        } else {
+            result.put("sQualifiedRate", " ");
+        }
+    }
+
+    private void dealPart1(JSONObject data, String version) {
+        dealPart(data, "partOne", L1, df2);
+        //一级品率
+        Date date = DateUtil.addDays(new Date(), -1);
+        DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
+        BigDecimal firstGradeRateInRange = glDataUtil.getFirstGradeRateInRange("8.0", dateQueryNoDelay);
+        if (firstGradeRateInRange != null) {
+            result.put("firstGradeRate", df2.format(firstGradeRateInRange));
+        } else {
+            result.put("firstGradeRate", " ");
+        }
+        //[S]达标率
+        dealSQualifiedRate(version);
         dealChart1(data);
         dealChart2(data);
 
         Double increase = dealIncreaseYesterday(data, "BF8_L2M_HMMassAct_1d_cur");
-        if (increase != null && increase >= 0d) {
+        if (increase >= 0d) {
             result.put("textOne1", "升高");
         } else {
             result.put("textOne1", "降低");
         }
-        if (increase != null) {
-            result.put("countOne1", parse(Math.abs(increase.doubleValue())));
-        }
-        else {
-            result.put("countOne1", parse(increase));
-        }
+        result.put("countOne1", df2.format(Math.abs(increase.doubleValue())));
 
         increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CokeRate_1d_cur");
-        if (increase != null && increase >= 0d) {
+        if (increase >= 0d) {
             result.put("textOne2", "升高");
         } else {
             result.put("textOne2", "降低");
         }
-        if (increase != null) {
-            result.put("countOne2", parse(Math.abs(increase.doubleValue())));
-        }
-        else {
-            result.put("countOne2", parse(increase));
-        }
+        result.put("countOne2", df2.format(Math.abs(increase.doubleValue())));
 
         increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CoalRate_1d_cur");
-        if (increase != null && increase >= 0d) {
+        if (increase >= 0d) {
             result.put("textOne3", "升高");
         } else {
             result.put("textOne3", "降低");
         }
-        if (increase != null) {
-            result.put("countOne3", parse(Math.abs(increase.doubleValue())));
-        }
-        else {
-            result.put("countOne3", parse(increase));
-        }
+        result.put("countOne3", df2.format(Math.abs(increase.doubleValue())));
 
-        result.put("countOne4", parse(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
-        result.put("countOne5", parse(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
-        result.put("countOne6", parse(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
-        result.put("countOne7", parse(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
+        result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
+        result.put("countOne5", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
+        result.put("countOne6", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
+        result.put("countOne7", df2.format(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
     }
 
     private void dealPart3(JSONObject data){
-        dealPart(data, "partThree", L3);
-        dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg");
-        dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg");
-        dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg");
-        result.put("offsetWet", parse(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
-        result.put("offsetBV", parse(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
-        result.put("offsetBP", parse(3, dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
-        result.put("offsetP", parse(3, dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
-        result.put("offsetTP", parse(3, dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
-        result.put("offsetPT", parse(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
-        result.put("offsetFR", parse(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
-        result.put("offsetCO", parse(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
+        dealPart(data, "partThree", L3, df2);
+        dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg", df3);
+        dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg", df3);
+        dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg", df3);
+        result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
+        result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
+        result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
+        result.put("offsetP", df3.format(dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
+        result.put("offsetTP", df3.format(dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
+        result.put("offsetPT", df2.format(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
+        result.put("offsetFR", df2.format(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
+        result.put("offsetCO", df2.format(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
+    }
+
+    private void dealPart4(JSONObject data) {
+        dealPart(data, "partFour", L4, df2);
+        String yesterdayData = getDataBeforeDays(data, L4[0], df2, 1);
+        result.put("yesterday_temp", yesterdayData);
     }
 
     private Double dealOffset(Double min, Double max, String tagName, JSONObject data) {
-        Double result = null;
+        Double result = 0d;
         List<Double> tagObject = getValuesByTag(data, tagName);
         Double actual = tagObject.get(tagObject.size() - 1);
         if (actual != null) {
             if (actual > max) {
                 result = actual - max;
-            }
-            else if (actual < min) {
+            } else if (actual < min) {
                 result = actual - min;
-            }
-            else {
-                result = 0d;
             }
         }
         return result;
     }
 
     private Double dealIncreaseYesterday (JSONObject data, String tagName) {
-        Double result = null;
+        Double result = 0d;
         List<Double> tagObject = getValuesByTag(data, tagName);
         Double yesterday = tagObject.get(tagObject.size() - 1);
         Double twoDaysAgo = tagObject.get(tagObject.size() - 2);
@@ -258,7 +779,7 @@ public class GaoLuRiFenXiBaoGao {
     }
 
     private Double dealMonthTotal (JSONObject data, String tagName, Boolean isAvg) {
-        Double result = null;
+        Double result = 0d;
         Double total = 0d;
         Double count = 0d;
         List<Double> tagObject = getValuesByTag(data, tagName);
@@ -268,12 +789,11 @@ public class GaoLuRiFenXiBaoGao {
                 count++;
             }
         }
-        if (count > 0d) {
-            if (isAvg) {
-                result = total / count;
-            } else {
-                result = total;
-            }
+        if (isAvg && count > 0d) {
+            result = total / count;
+        }
+        else {
+            result = total;
         }
         return result;
     }
@@ -421,22 +941,25 @@ public class GaoLuRiFenXiBaoGao {
         // 当前时间点
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
-        cal.setTime(now);
+        //日报是取前一天的数据
+        Date date = DateUtil.addDays(now, -1);
+        cal.setTime(date);
         cal.set(Calendar.HOUR_OF_DAY,0);
         cal.set(Calendar.MINUTE,0);
         cal.set(Calendar.SECOND,0);
         cal.set(Calendar.MILLISECOND,0);
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        // 昨日零点，作为结束时间点
-        endTime = cal.getTime();
-        cal.add(Calendar.DAY_OF_MONTH,-1);
-        beforeYesterday = cal.getTime();
-        // 当月第一天，作为开始时间点
-        cal.set(Calendar.DAY_OF_MONTH, 1);
+        // test
+        // cal.add(Calendar.DAY_OF_MONTH,-3);
+        // 今日零点，作为结束时间点
+        Date endDate = cal.getTime();
+        // 前推30天，作为开始时间点
+        cal.add(Calendar.DAY_OF_MONTH,-29);
         Date startDate = cal.getTime();
-        startTime = startDate;
 
-        while (startDate.before(endTime)) {
+        startTime = startDate;
+        endTime = endDate;
+
+        while (startDate.before(endDate)) {
             // 拼接x坐标轴
             categoriesList.add(DateUtil.getFormatDateTime(startDate, "MM-dd"));
             dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
@@ -447,9 +970,18 @@ public class GaoLuRiFenXiBaoGao {
             startDate = cal.getTime();
         }
 
-        categoriesList.add(DateUtil.getFormatDateTime(endTime, "MM-dd"));
-        dateList.add(DateUtil.getFormatDateTime(endTime, DateUtil.yyyyMMddFormat));
-        longTimeList.add(endTime.getTime()+"");
+        categoriesList.add(DateUtil.getFormatDateTime(endDate, "MM-dd"));
+        dateList.add(DateUtil.getFormatDateTime(endDate, DateUtil.yyyyMMddFormat));
+        longTimeList.add(endDate.getTime()+"");
+    }
+
+    /**
+     * 出铁数据接口
+     * @param version
+     * @return
+     */
+    protected String getTapsInRange(String version) {
+        return getUrl(version) + "/taps/sg/period";
     }
 
     /**
@@ -467,6 +999,45 @@ public class GaoLuRiFenXiBaoGao {
         return httpProperties.getUrlApiGLTwo();
     }
 
+    // word跨行并单元格
+    private void mergeCellsVertically(XWPFTable table, int col, int fromRow, int toRow) {
+        for (int rowIndex = fromRow; rowIndex <= toRow; rowIndex++) {
+            XWPFTableCell cell = table.getRow(rowIndex).getCell(col);
+            if (rowIndex == fromRow) {
+                // The first merged cell is set with RESTART merge value
+                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.RESTART);
+            } else {
+                // Cells which join (merge) the first one, are set with CONTINUE
+                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.CONTINUE);
+            }
+        }
+    }
+
+    /**
+     * 添加换行符，word中表格中直接替换或者替换字符串，如果包含换行符则会有问题
+     * @param cell
+     */
+    private  void addBreakInCell(XWPFTableCell cell) {
+        if(cell.getText() != null && cell.getText().contains("\n")) {
+            for (XWPFParagraph p : cell.getParagraphs()) {
+                for (XWPFRun run : p.getRuns()) {//XWPFRun对象定义具有一组公共属性的文本区域
+                    if(run.getText(0)!= null && run.getText(0).contains("\n")) {
+                        String[] lines = run.getText(0).split("\n");
+                        if(lines.length > 0) {
+                            run.setText(lines[0], 0); // set first line into XWPFRun
+                            for(int i=1;i<lines.length;i++){
+                                // add break and insert new text
+                                run.addBreak();//中断
+                                //run.addCarriageReturn();//回车符，但是不起作用
+                                run.setText(lines[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 生产word文档
      *
@@ -478,21 +1049,26 @@ public class GaoLuRiFenXiBaoGao {
             String sequence = "8高炉";
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
 
-            List<XWPFTable> tt = doc.getTables();
+            List<XWPFTable> tables = doc.getTables();
 
-            String fileName = sequence + "_高炉日生产分析报告_" + DateUtil.getFormatDateTime(endTime, "yyyyMMdd") + ".docx";
+            mergeCellsVertically(tables.get(tables.size()-1), 4, 1, tables.get(tables.size()-1).getRows().size()-1);
+            XWPFTableCell targetCell = tables.get(tables.size()-1).getRow(1).getCell(4);
+            // 处理换行符
+            addBreakInCell(targetCell);
+            Date date = DateUtil.addDays(new Date(), -1);
+            String fileName = sequence + "_高炉日生产分析报告_" + DateUtil.getFormatDateTime(date, "yyyyMMdd") + ".docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setCreateTime(endTime);
-            reportIndex.setUpdateTime(endTime);
+            reportIndex.setCreateTime(new Date());
+            reportIndex.setUpdateTime(new Date());
             reportIndex.setSequence(sequence);
             reportIndex.setIndexLang("cn_zh");
             reportIndex.setIndexType("report_day");
-            reportIndex.setRecordDate(endTime);
+            reportIndex.setRecordDate(new Date());
             reportIndex.setName(fileName);
             reportIndex.setReportCategoryCode(JobEnum.gl_rishengchanfenxibaogao_day.getCode());
             reportIndex.setPath(filePath);
@@ -531,29 +1107,5 @@ public class GaoLuRiFenXiBaoGao {
             }
         }
         return image;
-    }
-
-    private String parse(Double v) {
-        if (v == null) {
-            return "   ";
-        }
-        Double value = NumberArithmeticUtils.roundingX(v, 2);
-        if (value.equals(0d)) {
-            return "0";
-        } else {
-            return value.toString();
-        }
-    }
-
-    private String parse(int scale, Double v) {
-        if (v == null) {
-            return "   ";
-        }
-        Double value = NumberArithmeticUtils.roundingX(v, scale);
-        if (value.equals(0d)) {
-            return "0";
-        } else {
-            return value.toString();
-        }
     }
 }
