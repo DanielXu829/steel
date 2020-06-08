@@ -116,7 +116,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         longTimeList = new ArrayList<>();
     }
 
-    @Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 0 6 * * ?")
     public void mainTask() {
         initialData();
         initDateTime();
