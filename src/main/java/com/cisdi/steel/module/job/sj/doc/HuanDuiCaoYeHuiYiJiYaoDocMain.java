@@ -22,6 +22,7 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.report.service.ReportIndexService;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -64,6 +65,9 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain {
 
     @Autowired
     private ReportCategoryTemplateService reportCategoryTemplateService;
+
+    @Autowired
+    protected ReportIndexService reportIndexService;
 
     private String version = "4.0";
 
@@ -694,8 +698,6 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain {
             fos.close();
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setCreateTime(new Date());
-            reportIndex.setUpdateTime(new Date());
             reportIndex.setSequence(sequence);
             reportIndex.setIndexLang("cn_zh");
             reportIndex.setIndexType("report_day");
@@ -703,8 +705,8 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain {
             reportIndex.setName(fileName);
             reportIndex.setReportCategoryCode(JobEnum.sj_huanduicaoyehuiyijiyao.getCode());
             reportIndex.setPath(filePath);
-            reportIndexMapper.insert(reportIndex);
 
+            reportIndexService.insertReportRecord(reportIndex);
             log.info("换堆操业会议纪要word文档生成完毕" + filePath);
         } catch (Exception e) {
             log.error("换堆操业会议纪要word文档失败", e);

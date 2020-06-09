@@ -16,8 +16,10 @@ import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
+import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.report.service.ReportIndexService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -58,6 +60,9 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
     @Autowired
     private ReportCategoryTemplateService reportCategoryTemplateService;
 
+    @Autowired
+    protected ReportIndexService reportIndexService;
+
     private HashMap<String, Object> result = null;
     private Date startTime = null;
     private Date endTime = null;
@@ -67,6 +72,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
     List<String> longTimeList = new ArrayList<>();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     String sequence = "焦化910";
+    private ReportCategoryTemplate currentTemplate;
 
     private String comma = ",";
     private String L1 = "CK9_10_MESR_ANA_cokeProduct_1d_avg," +
@@ -116,7 +122,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         longTimeList = new ArrayList<>();
     }
 
-    @Scheduled(cron = "0 0 6 * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void mainTask() {
         initialData();
         initDateTime();
@@ -136,7 +142,8 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         dealPart4(data);
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.jh_shengchanzhenduanbaogao.getCode(), LanguageEnum.cn_zh.getName(), sequence);
         if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
-            String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
+            currentTemplate = reportCategoryTemplates.get(0);
+            String templatePath = currentTemplate.getTemplatePath();
             log.info("焦化生产诊断报告模板路径：" + templatePath);
             comm(templatePath);
         }
@@ -936,25 +943,22 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
                     mergeCellsVertically(tt.get(1), 0, i, i + 2);
                 }
             }
-
-            String fileName = sequence + "_焦化生产诊断报告_" + DateUtil.getFormatDateTime(endTime, "yyyyMMdd") + ".docx";
+            String fileName = String.format("%s_%s_%s.docx", sequence, currentTemplate.getTemplateName(), DateUtil.getFormatDateTime(endTime, "yyyyMMdd"));
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setCreateTime(new Date());
-            reportIndex.setUpdateTime(new Date());
-            reportIndex.setSequence(sequence);
-            reportIndex.setIndexLang("cn_zh");
-            reportIndex.setIndexType("report_day");
-            reportIndex.setRecordDate(new Date());
-            reportIndex.setName(fileName);
-            reportIndex.setReportCategoryCode(JobEnum.jh_shengchanzhenduanbaogao.getCode());
-            reportIndex.setPath(filePath);
-            reportIndexMapper.insert(reportIndex);
+            reportIndex.setSequence(sequence)
+                    .setReportCategoryCode(JobEnum.jh_shengchanzhenduanbaogao.getCode())
+                    .setName(fileName)
+                    .setPath(filePath)
+                    .setIndexLang(LanguageEnum.getByLang(currentTemplate.getTemplateLang()).getName())
+                    .setIndexType(ReportTemplateTypeEnum.getType(currentTemplate.getTemplateType()).getCode())
+                    .setRecordDate(new Date());
 
+            reportIndexService.insertReportRecord(reportIndex);
             log.info("焦化生产诊断报告word文档生成完毕" + filePath);
         } catch (Exception e) {
             log.error("焦化生产诊断报告word文档失败", e);

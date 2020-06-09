@@ -24,6 +24,7 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.report.service.ReportIndexService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -61,6 +62,9 @@ public class ShaoJieFenXiDocMain {
 
     @Autowired
     private ReportCategoryTemplateService reportCategoryTemplateService;
+
+    @Autowired
+    protected ReportIndexService reportIndexService;
 
     private String version = "4.0";
 
@@ -201,8 +205,6 @@ public class ShaoJieFenXiDocMain {
             fos.close();
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setCreateTime(new Date());
-            reportIndex.setUpdateTime(new Date());
             reportIndex.setSequence(sequence);
             reportIndex.setIndexLang("cn_zh");
             reportIndex.setIndexType("report_day");
@@ -210,8 +212,8 @@ public class ShaoJieFenXiDocMain {
             reportIndex.setName(fileName);
             reportIndex.setReportCategoryCode(JobEnum.sj_shengchanfenxi4.getCode());
             reportIndex.setPath(filePath);
-            reportIndexMapper.insert(reportIndex);
 
+            reportIndexService.insertReportRecord(reportIndex);
             log.info("生产烧结生产分析word文档生成完毕" + filePath);
         } catch (Exception e) {
             log.error("生产烧结生产分析word文档失败", e);
