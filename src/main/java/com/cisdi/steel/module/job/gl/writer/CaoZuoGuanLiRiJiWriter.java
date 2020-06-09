@@ -365,7 +365,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 }
                 for (int i = 0; i < luLiaoList.size(); i++) {
                     String brandName = luLiaoList.get(i);
-                    for(int j = 0; j < chargeVarInfos.size() && j < 12; j++) {
+                    for(int j = 0; j < chargeVarInfos.size(); j++) {
                         ChargeVarInfo chargeVarInfo = chargeVarInfos.get(j);
                         List<ChargeVarMaterial> chargeVarMaterials = chargeVarInfo.getChargeVarMaterial();
                         switch (brandName) {
@@ -416,6 +416,14 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     }
                 }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                if (luLiaoList.size() > 18) {
+                    //设置动态边框样式
+                    int beginRowNum = beginRowIndex;
+                    int lastRowNum = beginRowIndex + (luLiaoList.size()-18);
+                    int beginColumnNum = typeColumnIndex;
+                    int endColumnNum = typeColumnIndex + chargeVarInfos.size();
+                    ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+                }
             }
             handleLiaoXianBianGeng(sheet, version);
         } catch (Exception e) {
@@ -439,7 +447,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         }
         int beginRowIndex = cell.getRowIndex();
         int columnIndex = cell.getColumnIndex();
-        for (int i = 0; i < chargeVarInfos.size() && i < 4; i ++) {
+        for (int i = 0; i < chargeVarInfos.size(); i ++) {
             ChargeVarInfo info = chargeVarInfos.get(i);
             // 开始批数
             Integer index = info.getChargeVarIndex().getChargeNo();
@@ -456,9 +464,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                         ExcelWriterUtil.addCellData(cellDataList, beginRowIndex, columnIndex, index);
                         ExcelWriterUtil.addCellData(cellDataList, beginRowIndex, columnIndex + 3, "焦炭");
                         ExcelWriterUtil.addCellData(cellDataList, beginRowIndex, columnIndex + 6 +
-                                22 - distribution.getPosition() * 2, distribution.getAngle());
-                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + 1, columnIndex + 6 +
                                 22 - distribution.getPosition() * 2, distribution.getRound());
+                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + 1, columnIndex + 6 +
+                                22 - distribution.getPosition() * 2, distribution.getAngle());
                         break;
                     case 2:
                         // 大烧
@@ -470,9 +478,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, index);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex + 3, "大烧");
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex + 6 +
-                                22 - distribution.getPosition() * 2, distribution.getAngle());
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex + 1, columnIndex + 6 +
                                 22 - distribution.getPosition() * 2, distribution.getRound());
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex + 1, columnIndex + 6 +
+                                22 - distribution.getPosition() * 2, distribution.getAngle());
                         break;
                     case 3:
                         // 小烧
@@ -487,9 +495,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex2, columnIndex, index);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex2, columnIndex + 3, "小烧");
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex2, columnIndex + 6 +
-                                22 - distribution.getPosition() * 2, distribution.getAngle());
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex2 + 1, columnIndex + 6 +
                                 22 - distribution.getPosition() * 2, distribution.getRound());
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex2 + 1, columnIndex + 6 +
+                                22 - distribution.getPosition() * 2, distribution.getAngle());
                         break;
                 }
             }
@@ -504,6 +512,15 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
+
+        //设置动态边框样式
+        if (chargeVarInfos.size() > 4) {
+            int beginRowNum = beginRowIndex;
+            int lastRowNum = beginRowIndex + (chargeVarInfos.size()-4)*6;
+            int beginColumnNum = 1;
+            int endColumnNum = 35;
+            ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+        }
     }
 
     /**
@@ -616,6 +633,14 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             index++;
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        if (liaoXianMap.size() > 23) {
+            //设置动态边框样式
+            int beginRowNum = beginRowIndex;
+            int lastRowNum = beginRowIndex + (liaoXianMap.size()-23);
+            int beginColumnNum = columnIndex;
+            int endColumnNum = columnIndex + 8;
+            ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+        }
     }
 
     //结束--------------------正面-变料信息--------------------
@@ -992,7 +1017,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 String url = getAnalysisValueUrl(version) + "/" + endTime + "?type=" + oreBlockType + "&brandcode=" + brandCodeList.get(i);;
 
                 setAnalysisValue2Cell(sheet, cellDataList, arr, url,
-                        tpcNoBeginRow + i, tpcNoBeginColumn, true);
+                        tpcNoBeginRow + i, tpcNoBeginColumn);
             }
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
@@ -1012,7 +1037,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @return
      */
     private void setAnalysisValue2Cell(Sheet sheet, List<CellData> cellDataList, String[] arr, String url,
-                                             int tpcNoBeginRow, int tpcNoBeginColumn, boolean needHandle) {
+                                       int tpcNoBeginRow, int tpcNoBeginColumn) {
         String jsonData = httpUtil.get(url);
         // 根据json映射对象DTO
         AnalysisValueDTO analysisValueDTO = null;
@@ -1039,15 +1064,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 BigDecimal value = values.get(arr[j]);
                 int writeRow = tpcNoBeginRow;
                 int writeColumn = tpcNoBeginColumn + j;
-                if (value != null) {
-                    if (needHandle) {
-                        // 填充具体数据
-                        ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value.multiply(new BigDecimal(100)));
-                    } else {
-                        ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
-                    }
-
-                }
+                // 填充具体数据
+                ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
             }
         }
     }
@@ -1065,7 +1083,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @return
      */
     private void handAnalysisValue2Cell(Sheet sheet, List<CellData> cellDataList, String url, String[] arr,
-                                                  String placeHolder, boolean needHandle) {
+                                        String placeHolder, Map<String,String> map) {
         // 找到待填充的坐标
         Cell tpcNoCell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
         if (Objects.isNull(tpcNoCell)) {
@@ -1074,8 +1092,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         // 待填充的行,列
         int tpcNoBeginRow = tpcNoCell.getRowIndex();
         int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
+        // 检查表头列是否存在，如果不存在则不填充数据
+        //checkHeaders(sheet, arr, map, tpcNoBeginRow-1);
 
-        setAnalysisValue2Cell(sheet, cellDataList, arr, url, tpcNoBeginRow, tpcNoBeginColumn, needHandle);
+        setAnalysisValue2Cell(sheet, cellDataList, arr, url, tpcNoBeginRow, tpcNoBeginColumn);
     }
 
     /**
@@ -1097,6 +1117,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String[] cokeArr = {"H2O", "Ad", "Vdaf", "S"};
         // 根据需求，取回的煤粉数据中C取Fcad，S取Std
         String[] coalArr = {"Ad", "Vdaf", "Std", "Fcad", "S"};
+        Map<String,String> map = new HashMap<String, String>(){{
+            put("Fcad","C");
+            put("Std","S");
+        }};
         List<CellData> cellDataList = new ArrayList<>();
         try {
             // 反面sheet
@@ -1113,7 +1137,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             //先处理热力强度，因为只有一行数据
             //再处理成分分析，分为煤粉和焦炭
             // 2. 获取热强度数据，填充数据
-            handAnalysisValue2Cell(sheet, cellDataList, heatUrl, heatArr, heatPlaceHolder, false);
+            handAnalysisValue2Cell(sheet, cellDataList, heatUrl, heatArr, heatPlaceHolder, new HashMap<>());
             // 3. 获取焦炭数据，填充数据
             // 获取两班倒查询策略
             Date dateRun = this.getDateQuery(excelDTO).getRecordDate();
@@ -1129,7 +1153,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             }
             // 4. 获取煤粉数据，填充数据
 
-            handAnalysisValue2Cell(sheet, cellDataList, url + coalBrandCode, coalArr, coalPlaceHolder, true);
+            handAnalysisValue2Cell(sheet, cellDataList, url + coalBrandCode, coalArr, coalPlaceHolder, map);
 
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
@@ -1187,10 +1211,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 BigDecimal value = values.get(arr[j]);
                 int writeRow = tpcNoBeginRow;
                 int writeColumn = tpcNoBeginColumn + j;
-                if (value != null) {
-                    // 填充具体数据
-                    ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value.multiply(new BigDecimal(100)));
-                }
+                // 填充具体数据
+                ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
             }
         }
     }
