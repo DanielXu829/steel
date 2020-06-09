@@ -26,6 +26,7 @@ import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
+import com.cisdi.steel.module.report.service.ReportIndexService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -45,9 +46,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 
@@ -120,6 +122,27 @@ public class GaoLuRiFenXiBaoGao {
             "TI2306"
     };
 
+    private String[] luFu = new String[]{
+            "TI2501", "TI2502", "TI2503", "TI2504", "TI2601", "TI2602", "TI2603", "TI2604", "TI2605", "TI2606",
+            "TI2607", "TI2608", "TI2609", "TI2610", "TI2611", "TI2612", "TI2613"
+    };
+
+    private String[] luYao = new String[]{
+            "TI2701", "TI2702", "TI2703", "TI2704", "TI2801", "TI2802", "TI2803", "TI2804", "TI2805", "TI2806", "TI2807",
+            "TI2808", "TI2809", "TI2810", "TI2811", "TI2812", "TI2813"
+    };
+
+    private String[] luSheng = new String[]{
+            "TI2901", "TI2902", "TI2903", "TI2904", "TI3001", "TI3002", "TI3003", "TI3004", "TI3005", "TI3006", "TI3007",
+            "TI3008", "TI3009", "TI3010", "TI3011", "TI3012", "TI3013", "TI3101", "TI3102", "TI3103", "TI3104", "TI3105",
+            "TI3106", "TI3107", "TI3108", "TI3109", "TI3110", "TI3111", "TI3112", "TI3113", "TI3201", "TI3202", "TI3203",
+            "TI3204", "TI3301", "TI3302", "TI3303", "TI3304", "TI3305", "TI3306", "TI3307", "TI3308", "TI3309", "TI3310",
+            "TI3311", "TI3312", "TI3401", "TI3402", "TI3403", "TI3404", "TI3405", "TI3406", "TI3407", "TI3408", "TI3409",
+            "TI3410", "TI3411", "TI3412", "TI3501", "TI3502", "TI3503", "TI3504", "TI3505", "TI3506", "TI3507", "TI3508",
+            "TI3509", "TI3510", "TI3511", "TI3601", "TI3602", "TI3603", "TI3604", "TI3605", "TI3606", "TI3607", "TI3608",
+            "TI3609", "TI3610"
+    };
+
     @Autowired
     private HttpUtil httpUtil;
 
@@ -134,6 +157,10 @@ public class GaoLuRiFenXiBaoGao {
 
     @Autowired
     private ReportIndexMapper reportIndexMapper;
+
+    @Autowired
+    protected ReportIndexService reportIndexService;
+
 
     @Autowired
     private ReportCategoryTemplateService reportCategoryTemplateService;
@@ -180,40 +207,21 @@ public class GaoLuRiFenXiBaoGao {
     /**
      * 炉体温度数据
      * @param version
-     * @param startIndex
-     * @param endIndex
+     * @param tagNames
      * @return
      */
-    private Map<String, BigDecimal> getLuTiWenDuData(String version, int startIndex, int endIndex) {
-        String prefix = "BF8_L2C_BD_";
-        String suffix = "_1d_max";
-        BigDecimal maxTemp = new BigDecimal(0);
-        String maxTempTagName = "";
-        for (int i = startIndex; i < endIndex; i++) {
-            String tagName = prefix + i + suffix;
-            BigDecimal tagValue = getLatestMaxTagValue(version, tagName, -1);
-            if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
-                maxTemp = tagValue;
-                maxTempTagName = tagName;
-            }
-        }
-        Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
-        tempMap.put(maxTempTagName, maxTemp);
 
-        return tempMap;
-    }
-
-    private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames) {
+    private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames, int days) {
         String prefix = "BF8_L2C_BD_";
         String suffix = "_1d_max";
         BigDecimal maxTemp = new BigDecimal(0);
         String maxTempTagName = "";
         for (int i = 0; i < tagNames.length; i++) {
             String tagName = prefix + tagNames[i] + suffix;
-            BigDecimal tagValue = getLatestMaxTagValue(version, tagName, -1);
+            BigDecimal tagValue = getLatestMaxTagValue(version, tagName, days);
             if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
                 maxTemp = tagValue;
-                maxTempTagName = tagName;
+                maxTempTagName = tagNames[i];
             }
         }
         Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
@@ -254,107 +262,95 @@ public class GaoLuRiFenXiBaoGao {
         return maxTemp;
     }
 
+    /**
+     * 处理炉体温度数据
+     * @param version
+     * @param map
+     * @param suffix
+     */
+    private void dealLuTiWenDuData (String version, Map<String, BigDecimal> map, int suffix) {
+        for(Map.Entry<String, BigDecimal> entry : map.entrySet()){
+            String mapKey = entry.getKey();
+            BigDecimal mapValue = entry.getValue();
+            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
+                result.put("luti_text"+suffix, mapKey);
+                result.put("luti_temp"+suffix, df2.format(mapValue));
+                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
+                if (yesterdayVal != null) {
+                    if (yesterdayVal.compareTo(mapValue) == 1) {
+                        result.put("tap_temp_differ"+suffix, df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put("luti_differ_text"+suffix, "降低");
+                    } else {
+                        result.put("tap_temp_differ"+suffix, df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put("luti_differ_text"+suffix, "升高");
+                    }
+                }
+            } else {
+                result.put("luti_text"+suffix, " ");
+                result.put("luti_temp"+suffix, " ");
+                result.put("tap_temp_differ"+suffix, " ");
+                result.put("luti_differ_text"+suffix, " ");
+            }
+        }
+    }
+
+    /**
+     * 炉体温度
+     * @param version
+     */
     private void handleLuTiWenDu (String version) {
-        //炉缸
-        Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang);
-        for(Map.Entry<String, BigDecimal> entry : luGangMap.entrySet()){
-            String mapKey = entry.getKey();
-            BigDecimal mapValue = entry.getValue();
-            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
-                result.put("luti_text1", mapKey);
-                result.put("luti_temp1", df2.format(mapValue));
-                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
-                if (yesterdayVal != null) {
-                    if (yesterdayVal.compareTo(mapValue) == 1) {
-                        result.put("tap_temp_differ1", df2.format(yesterdayVal.subtract(mapValue)));
-                        result.put("luti_differ_text1", "降低");
-                    } else {
-                        result.put("tap_temp_differ1", df2.format(mapValue.subtract(yesterdayVal)));
-                        result.put("luti_differ_text1", "升高");
+        try {
+            //炉缸
+            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang, -1);
+            dealLuTiWenDuData(version, luGangMap, 1);
+            //炉腹
+            Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, luFu, -1);
+            dealLuTiWenDuData(version, luFuMap, 2);
+            //炉腰 5
+            Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, luYao, -1);
+            dealLuTiWenDuData(version, luYaoMap, 3);
+            //炉身
+            Map<String, BigDecimal> lushengMap =  getLuTiWenDuData(version, luSheng, -1);
+            dealLuTiWenDuData(version, lushengMap, 4);
+
+            initDateTime(Calendar.WEEK_OF_MONTH,  -10, 0);
+            dealChart3(version);
+            dealChart4(version);
+            dealChart5(version);
+        } catch (Exception e) {
+            log.error("处理炉体温度失败", e);
+        }
+
+    }
+
+    /**
+     * 获取某天最高温度
+     * @param daysBefore
+     * @param version
+     * @param tagName
+     * @return
+     */
+    private BigDecimal getMaxTemp(int daysBefore, String version, String tagName) {
+        BigDecimal tempMax = new BigDecimal(0);
+        Date date = DateUtil.addDays(new Date(), daysBefore);
+        DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
+        JSONObject jsonObject = getDataByTag(new String[]{tagName}, dateQueryNoDelay.getStartTime(), dateQueryNoDelay.getEndTime(), version);
+        if (jsonObject != null && jsonObject.size() > 0) {
+            JSONObject tagObject = jsonObject.getJSONObject(tagName);
+            Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
+            if (Objects.nonNull(innerMap)) {
+                Set<String> keySet = innerMap.keySet();
+                for (String key:keySet) {
+                    BigDecimal tagValue = (BigDecimal) innerMap.get(key);
+                    if (tagValue == null) {
+                        tempMax = null;
+                    } else if (tagValue.compareTo(tempMax) == 1) {
+                        tempMax = tagValue;
                     }
                 }
-            } else {
-                result.put("luti_text1", " ");
-                result.put("luti_temp1", " ");
-                result.put("tap_temp_differ1", " ");
-                result.put("luti_differ_text1", " ");
             }
         }
-        //炉腹 192~208
-        Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, 192, 209);
-        for(Map.Entry<String, BigDecimal> entry : luFuMap.entrySet()){
-            String mapKey = entry.getKey();
-            BigDecimal mapValue = entry.getValue();
-            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
-                result.put("luti_text2", mapKey);
-                result.put("luti_temp2", df2.format(mapValue));
-                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
-                if (yesterdayVal != null) {
-                    if (yesterdayVal.compareTo(mapValue) == 1) {
-                        result.put("tap_temp_differ2", df2.format(yesterdayVal.subtract(mapValue)));
-                        result.put("luti_differ_text2", "降低");
-                    } else {
-                        result.put("tap_temp_differ2", df2.format(mapValue.subtract(yesterdayVal)));
-                        result.put("luti_differ_text2", "升高");
-                    }
-                }
-            } else {
-                result.put("luti_text2", " ");
-                result.put("luti_temp2", " ");
-                result.put("tap_temp_differ2", " ");
-                result.put("luti_differ_text2", " ");
-            }
-        }
-        //炉腰 209~225
-        Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, 209, 226);
-        for(Map.Entry<String, BigDecimal> entry : luYaoMap.entrySet()){
-            String mapKey = entry.getKey();
-            BigDecimal mapValue = entry.getValue();
-            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
-                result.put("luti_text3", mapKey);
-                result.put("luti_temp3", df2.format(mapValue));
-                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
-                if (yesterdayVal != null) {
-                    if (yesterdayVal.compareTo(mapValue) == 1) {
-                        result.put("tap_temp_differ3", df2.format(yesterdayVal.subtract(mapValue)));
-                        result.put("luti_differ_text3", "降低");
-                    } else {
-                        result.put("tap_temp_differ3", df2.format(mapValue.subtract(yesterdayVal)));
-                        result.put("luti_differ_text3", "升高");
-                    }
-                }
-            } else {
-                result.put("luti_text3", " ");
-                result.put("luti_temp3", " ");
-                result.put("tap_temp_differ3", " ");
-                result.put("luti_differ_text3", " ");
-            }
-        }
-        //炉身 226~304
-        Map<String, BigDecimal> lushengMap =  getLuTiWenDuData(version, 226, 305);
-        for(Map.Entry<String, BigDecimal> entry : lushengMap.entrySet()){
-            String mapKey = entry.getKey();
-            BigDecimal mapValue = entry.getValue();
-            if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
-                result.put("luti_text4", mapKey);
-                result.put("luti_temp4", df2.format(mapValue));
-                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
-                if (yesterdayVal != null) {
-                    if (yesterdayVal.compareTo(mapValue) == 1) {
-                        result.put("tap_temp_differ4", df2.format(yesterdayVal.subtract(mapValue)));
-                        result.put("luti_differ_text4", "降低");
-                    } else {
-                        result.put("tap_temp_differ4", df2.format(mapValue.subtract(yesterdayVal)));
-                        result.put("luti_differ_text4", "升高");
-                    }
-                }
-            } else {
-                result.put("luti_text4", " ");
-                result.put("luti_temp4", " ");
-                result.put("tap_temp_differ4", " ");
-                result.put("luti_differ_text4", " ");
-            }
-        }
+        return tempMax;
     }
 
     /**
@@ -366,25 +362,9 @@ public class GaoLuRiFenXiBaoGao {
      */
     private List<BigDecimal> getMaxTemp (int daysBefore, String version, String[] tagNames) {
         List<BigDecimal> results = new ArrayList<>();
-        Date date = DateUtil.addDays(new Date(), daysBefore);
-        DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
-        JSONObject jsonObject = getDataByTag(tagNames, dateQueryNoDelay.getStartTime(), dateQueryNoDelay.getEndTime(), version);
-        if (jsonObject != null && jsonObject.size() > 0) {
-            BigDecimal tempMax = new BigDecimal(0);
-            for (int i = 0; i < tagNames.length; i++) {
-                JSONObject tagObject = jsonObject.getJSONObject(tagNames[i]);
-                Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
-                if (Objects.nonNull(innerMap)) {
-                    Set<String> keySet = innerMap.keySet();
-                    for (String key:keySet) {
-                        BigDecimal tagValue = (BigDecimal) innerMap.get(key);
-                        if (tagValue.compareTo(tempMax) == 1) {
-                            tempMax = tagValue;
-                        }
-                    }
-                    results.add(tempMax);
-                }
-            }
+        for (String tagName:tagNames) {
+            BigDecimal value = getMaxTemp(daysBefore, version, tagName);
+            results.add(value);
         }
         return results;
     }
@@ -394,35 +374,45 @@ public class GaoLuRiFenXiBaoGao {
      * @param version
      */
     private void handleTapTempture (String version) {
-        String prefix1 = "tap_temp";
-        String prefix2 = "tap_temp_text";
-        String prefix3 = "tap_temp_differ";
-        //今日最高温度
-        List<BigDecimal> todayList = getMaxTemp(-1, version, L5);
-        //昨日最高温度
-        List<BigDecimal> yesterdayList =getMaxTemp(-2, version, L5);
-        //默认值，防止接口中没有数据
-        for(int i = 0; i < L5.length; i++) {
-            result.put(prefix1 + String.valueOf(i + 1), " ");
-            result.put(prefix2 + String.valueOf(i + 1), " ");
-            result.put(prefix3 + String.valueOf(i + 1), " ");
-        }
+        try {
 
-        for (int i = 0; i < todayList.size(); i++) {
-            BigDecimal yesterday = yesterdayList.get(i);
-            BigDecimal today = todayList.get(i);
-            result.put(prefix1 + String.valueOf(i + 1), today == null ? 0d : df2.format(today));
-            String text = "";
-            BigDecimal differ = null;
-            if (today.compareTo(yesterday) == 1) {
-                text = "升高";
-                differ = today.subtract(yesterday);
-            } else {
-                text = "降低";
-                differ = yesterday.subtract(today);
+            String prefix1 = "tap_temp";
+            String prefix2 = "tap_temp_text";
+            String prefix3 = "tap_temp_differ";
+            //今日最高温度
+            List<BigDecimal> todayList = getMaxTemp(-1, version, L5);
+            //昨日最高温度
+            List<BigDecimal> yesterdayList =getMaxTemp(-2, version, L5);
+            //默认值，防止接口中没有数据
+            for(int i = 0; i < L5.length; i++) {
+                result.put(prefix1 + String.valueOf(i + 1), " ");
+                result.put(prefix2 + String.valueOf(i + 1), " ");
+                result.put(prefix3 + String.valueOf(i + 1), " ");
             }
-            result.put(prefix2 + String.valueOf(i + 1), text);
-            result.put(prefix3 + String.valueOf(i + 1), df2.format(differ));
+
+            for (int i = 0; i < todayList.size(); i++) {
+                BigDecimal today = todayList.get(i);
+                result.put(prefix1 + String.valueOf(i + 1), today == null ? 0d : df2.format(today));
+                if (today == null) continue;
+                if (yesterdayList.size() > i) {
+                    BigDecimal yesterday = yesterdayList.get(i);
+                    if (yesterday == null) continue;
+                    String text = "";
+                    BigDecimal differ = null;
+                    if (today.compareTo(yesterday) == 1) {
+                        text = "升高";
+                        differ = today.subtract(yesterday);
+                    } else {
+                        text = "降低";
+                        differ = yesterday.subtract(today);
+                    }
+                    result.put(prefix2 + String.valueOf(i + 1), text);
+                    result.put(prefix3 + String.valueOf(i + 1), df2.format(differ));
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("处理铁口温度失败", e);
         }
     }
 
@@ -580,7 +570,12 @@ public class GaoLuRiFenXiBaoGao {
      * @param version
      */
     private void handleCaoZuoCanShu(String version) {
-        dealColumns(version);
+        try {
+            dealColumns(version);
+        } catch (Exception e) {
+            log.error("生成操作参数表格失败", e);
+        }
+
     }
 
     /**
@@ -748,7 +743,11 @@ public class GaoLuRiFenXiBaoGao {
     private void dealPart4(JSONObject data) {
         dealPart(data, "partFour", L4, df2);
         String yesterdayData = getDataBeforeDays(data, L4[0], df2, 1);
-        result.put("yesterday_temp", yesterdayData);
+        if (StringUtils.isNotBlank(yesterdayData)) {
+            result.put("yesterday_temp", yesterdayData);
+        } else {
+            result.put("yesterday_temp", " ");
+        }
     }
 
     private Double dealOffset(Double min, Double max, String tagName, JSONObject data) {
@@ -890,6 +889,253 @@ public class GaoLuRiFenXiBaoGao {
         result.put("jfreechartImg2", image1);
     }
 
+    private void dealChart3(String version) {
+        String tagName = "BF8_L2C_BD_SoftTempDiff_1d_avg";
+        JSONObject data = getDataByTag(new String[]{tagName}, startTime, endTime, version);
+        List<Double> tagObject1 = getValuesByTag(data, tagName);
+        List<Double> tempObject1 = new ArrayList<>();
+        tempObject1.addAll(tagObject1);
+        tempObject1.removeAll(Collections.singleton(null));
+        Double max1 = tempObject1.size() > 0 ? Collections.max(tempObject1) * 1.2 : 6.0;
+        Double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : 0.0;
+        double[] rangStarts = {min1};
+        double[] rangEnds = {max1};
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("水温差", tagObject1.toArray()));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+
+        String title1 = "";
+        String categoryAxisLabel1 = "";
+        String[] yLabels = {""};
+
+        int[] stack = {1, 1};
+        int[] ystack = {1, 1};
+
+        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(1,title1,
+                categoryAxisLabel1, yLabels, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, rangStarts, rangEnds, 1, stack, ystack);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg3", image1);
+    }
+
+    private void dealChart4(String version) {
+        String tagName1 = "BF8_L2C_HMTemp_1";
+        String tagName2 = "BF8_L2C_HMTemp_2";
+        String tagName3 = "BF8_L2C_HMTemp_3";
+        String tagName4 = "BF8_L2C_HMTemp_4";
+        List<Double> tempObject1 = new ArrayList<>();
+        List<Double> tempObject2 = new ArrayList<>();
+        List<Double> tempObject3 = new ArrayList<>();
+        List<Double> tempObject4 = new ArrayList<>();
+        for(int i = 70; i>-1; i--) {
+            if(i%7 != 0) continue;
+            Double val = null;
+            BigDecimal value = getMaxTemp(-1-i, version, tagName1);
+            if(value != null) {
+                val = value.doubleValue();
+            }
+            tempObject1.add(val);
+        }
+        tempObject1.removeAll(Collections.singleton(null));
+        for(int i=70; i>-1; i--) {
+            if(i%7 != 0) continue;
+            Double val = null;
+            BigDecimal value = getMaxTemp(-1-i, version, tagName2);
+            if(value != null) {
+                val = value.doubleValue();
+            }
+            tempObject2.add(val);
+        }
+        tempObject2.removeAll(Collections.singleton(null));
+        for(int i=70; i>-1; i--) {
+            if(i%7 != 0) continue;
+            Double val = null;
+            BigDecimal value = getMaxTemp(-1-i, version, tagName3);
+            if(value != null) {
+                val = value.doubleValue();
+            }
+            tempObject3.add(val);
+        }
+        tempObject3.removeAll(Collections.singleton(null));
+        for(int i=70; i>-1; i--) {
+            if(i%7 != 0) continue;
+            Double val = null;
+            BigDecimal value = getMaxTemp(-1-i, version, tagName4);
+            if(value != null) {
+                val = value.doubleValue();
+            }
+            tempObject4.add(val);
+        }
+        tempObject4.removeAll(Collections.singleton(null));
+        //(Collections.max(tempObject4) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject4) * 1.2 )
+        Double max1 = tempObject1.size() > 0 ? (Collections.max(tempObject1) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject1) * 1.2 ) : 10000.0;
+        Double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : 0.0;
+        Double max2 = tempObject2.size() > 0 ? (Collections.max(tempObject2) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject2) * 1.2 ) : 10000.0;
+        Double min2 = tempObject2.size() > 0 ? Collections.min(tempObject2) * 0.8 : 0.0;
+        Double max3 = tempObject3.size() > 0 ? (Collections.max(tempObject3) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject3) * 1.2 ) : 10000.0;
+        Double min3 = tempObject3.size() > 0 ? Collections.min(tempObject3) * 0.8 : 0.0;
+        Double max4 = tempObject4.size() > 0 ? (Collections.max(tempObject4) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject4) * 1.2 ) : 10000.0;
+        Double min4 = tempObject4.size() > 0 ? Collections.min(tempObject4) * 0.8 : 0.0;
+        double[] rangStarts = {min1,min2,min3,min4};
+        double[] rangEnds = {max1,max2,max3,max4};
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("1#铁口最高温度", tempObject1.toArray()));
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("2#铁口最高温度", tempObject2.toArray()));
+        // 标注类别
+        Vector<Serie> series3 = new Vector<Serie>();
+        series3.add(new Serie("3#铁口最高温度", tempObject3.toArray()));
+        // 标注类别
+        Vector<Serie> series4 = new Vector<Serie>();
+        series4.add(new Serie("4#铁口最高温度", tempObject4.toArray()));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series2);
+        vectors.add(series3);
+        vectors.add(series4);
+
+        String title1 = "";
+        String categoryAxisLabel1 = "";
+        String[] yLabels = {"", "", "", ""};
+
+        int[] stack = {1, 1, 1, 1};
+        int[] ystack = {1, 2};
+
+        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(1, title1,
+                categoryAxisLabel1, yLabels, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, rangStarts, rangEnds, 4, stack, ystack);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg4", image1);
+    }
+
+    private List<Double> getMaxLuTiWenDuList(String version, String[] array) {
+        List<Double> value = new ArrayList<>();
+        for (int i = 10; i > -1; i--) {
+            //炉缸
+            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, array, -1 - i*7);
+            for (BigDecimal big:luGangMap.values()) {
+                Double val = null;
+                if (null != big) {
+                    val = big.doubleValue();
+                    if (val < 0) {
+                        val = null;
+                    }
+                }
+                value.add(val);
+            }
+        }
+        return value;
+    }
+
+    private void dealChart5(String version) {
+
+        List<Double> luGangList = getMaxLuTiWenDuList(version, luGang);
+        List<Double> luFuList = getMaxLuTiWenDuList(version, luFu);
+        List<Double> luYaoList = getMaxLuTiWenDuList(version, luYao);
+        List<Double> luShengList = getMaxLuTiWenDuList(version, luSheng);
+
+        luGangList.removeAll(Collections.singleton(null));
+        luFuList.removeAll(Collections.singleton(null));
+        luYaoList.removeAll(Collections.singleton(null));
+        luShengList.removeAll(Collections.singleton(null));
+        Double max1 = luGangList.size() > 0 ? (Collections.max(luGangList) * 1.2 == 0.0 ? 100.0: Collections.max(luGangList) * 1.2) : 10000.0;
+        Double min1 = luGangList.size() > 0 ? Collections.min(luGangList) * 0.8 : 0.0;
+        Double max2 = luFuList.size() > 0 ? (Collections.max(luFuList) * 1.2 == 0.0 ? 100.0: Collections.max(luFuList) * 1.2) : 10000.0;
+        Double min2 = luFuList.size() > 0 ? Collections.min(luFuList) * 0.8 : 0.0;
+        Double max3 = luYaoList.size() > 0 ? (Collections.max(luYaoList) * 1.2 == 0.0 ? 100.0: Collections.max(luYaoList) * 1.2) : 10000.0;
+        Double min3 = luYaoList.size() > 0 ? Collections.min(luYaoList) * 0.8 : 0.0;
+        Double max4 = luShengList.size() > 0 ? (Collections.max(luShengList) * 1.2 == 0.0 ? 100.0: Collections.max(luShengList) * 1.2) : 10000.0;
+        Double min4 = luShengList.size() > 0 ? Collections.min(luShengList) * 0.8 : 0.0;
+        double[] rangStarts = {min1,min2,min3,min4};
+        double[] rangEnds = {max1,max2,max3,max4};
+        // 标注类别
+        Vector<Serie> series1 = new Vector<Serie>();
+        // 柱子名称：柱子所有的值集合
+        series1.add(new Serie("炉缸", luGangList.toArray()));
+        // 标注类别
+        Vector<Serie> series2 = new Vector<Serie>();
+        series2.add(new Serie("炉腹", luFuList.toArray()));
+        // 标注类别
+        Vector<Serie> series3 = new Vector<Serie>();
+        series3.add(new Serie("炉腰", luYaoList.toArray()));
+        // 标注类别
+        Vector<Serie> series4 = new Vector<Serie>();
+        series4.add(new Serie("炉身", luShengList.toArray()));
+
+        List<Vector<Serie>> vectors = new ArrayList<>();
+        vectors.add(series1);
+        vectors.add(series2);
+        vectors.add(series3);
+        vectors.add(series4);
+
+        String title1 = "";
+        String categoryAxisLabel1 = "";
+        String[] yLabels = {"", "", "", ""};
+
+        int[] stack = {1, 1, 1, 1};
+        int[] ystack = {1, 2};
+
+        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(1, title1,
+                categoryAxisLabel1, yLabels, vectors,
+                categoriesList.toArray(), CategoryLabelPositions.UP_45, true, rangStarts, rangEnds, 4, stack, ystack);
+        WordImageEntity image1 = image(Chart1);
+        result.put("jfreechartImg5", image1);
+    }
+
+    private void initDateTime(int field, int amount1, int amount2){
+        categoriesList.clear();
+        dateList.clear();
+        longTimeList.clear();
+        // 当前时间点
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        //日报是取前一天的数据
+        Date date = DateUtil.addDays(now, -1);
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,0);
+        cal.set(Calendar.SECOND,0);
+        cal.set(Calendar.MILLISECOND,0);
+        // test
+        // cal.add(Calendar.DAY_OF_MONTH,-3);
+        // 今日零点，作为结束时间点
+        Date endDate = cal.getTime();
+        // 前推30天，作为开始时间点
+        cal.add(field, amount1);
+        Date startDate = cal.getTime();
+
+        startTime = startDate;
+        endTime = endDate;
+        int batch = 7;
+        int index = 0;
+        while (startDate.before(endDate)) {
+            // 拼接x坐标轴
+            if (index % batch == 0) {
+                categoriesList.add(DateUtil.getFormatDateTime(startDate, DateUtil.MMddChineseFormat));
+                longTimeList.add(startDate.getTime()+"");
+            }
+            dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
+
+
+            // 递增日期
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            startDate = cal.getTime();
+            index++;
+        }
+
+        categoriesList.add(DateUtil.getFormatDateTime(endDate, DateUtil.MMddChineseFormat));
+        dateList.add(DateUtil.getFormatDateTime(endDate, DateUtil.yyyyMMddFormat));
+        longTimeList.add(endDate.getTime()+"");
+    }
+
     private List<Double> getValuesByTag (JSONObject data, String tagName) {
         JSONObject tagObject = data.getJSONObject(tagName);
         List<Double> vals = new ArrayList<>();
@@ -961,7 +1207,7 @@ public class GaoLuRiFenXiBaoGao {
 
         while (startDate.before(endDate)) {
             // 拼接x坐标轴
-            categoriesList.add(DateUtil.getFormatDateTime(startDate, "MM-dd"));
+            categoriesList.add(DateUtil.getFormatDateTime(startDate, DateUtil.MMddChineseFormat));
             dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
             longTimeList.add(startDate.getTime()+"");
 
@@ -970,7 +1216,7 @@ public class GaoLuRiFenXiBaoGao {
             startDate = cal.getTime();
         }
 
-        categoriesList.add(DateUtil.getFormatDateTime(endDate, "MM-dd"));
+        categoriesList.add(DateUtil.getFormatDateTime(endDate, DateUtil.MMddChineseFormat));
         dateList.add(DateUtil.getFormatDateTime(endDate, DateUtil.yyyyMMddFormat));
         longTimeList.add(endDate.getTime()+"");
     }
@@ -1063,16 +1309,13 @@ public class GaoLuRiFenXiBaoGao {
             fos.close();
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setCreateTime(new Date());
-            reportIndex.setUpdateTime(new Date());
             reportIndex.setSequence(sequence);
             reportIndex.setIndexLang("cn_zh");
             reportIndex.setIndexType("report_day");
-            reportIndex.setRecordDate(new Date());
             reportIndex.setName(fileName);
             reportIndex.setReportCategoryCode(JobEnum.gl_rishengchanfenxibaogao_day.getCode());
             reportIndex.setPath(filePath);
-            reportIndexMapper.insert(reportIndex);
+            reportIndexService.insertReportRecord(reportIndex);
 
             log.info("高炉日生产分析报告word文档生成完毕" + filePath);
         } catch (Exception e) {
