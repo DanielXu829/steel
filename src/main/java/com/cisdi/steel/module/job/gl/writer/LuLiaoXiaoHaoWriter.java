@@ -82,7 +82,8 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
-        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
+        //List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
+        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 1);
 
         int fixLineCount = 0;
         for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {

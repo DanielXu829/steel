@@ -77,7 +77,7 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
-        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
+        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 1);
 
         int fixLineCount = 0;
         for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
@@ -119,7 +119,9 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        //Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        // 替换当月天数和当前月份
+        Date lastDay = new Date();
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 1, lastDay);
         sheet.getRow(itemRowNum).setZeroHeight(true);
     }
@@ -131,7 +133,8 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
-        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
+        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 1);
+        //List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
 
         for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
             // 通过api获取MaterialExpendDTO数据
@@ -223,7 +226,9 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        //Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        // 替换当月天数和当前月份
+        Date lastDay = new Date();
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 0, 0, lastDay);
         sheet.getRow(itemRowNum).setZeroHeight(true);
     }

@@ -428,10 +428,18 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      * @param version
      * @return
      */
+    protected String getBlastIntakeAreaUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/bfBlast/blastIntakeArea";
+    }
+
+    /**
+     * 获取/bfBlast/main/info的url
+     * @param version
+     * @return
+     */
     protected String getBfBlastMainInfoUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/bfBlast/main/info";
     }
-
 
     /**
      * 获取/charge/variation/range的url

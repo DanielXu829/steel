@@ -53,7 +53,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         sheet.getRow(itemRowNum).setZeroHeight(true);//隐藏占位符行
 
-        DateQuery date = this.getDateQuery(excelDTO);
+        DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
         List<Integer> chargeNos= handleChargeNoData(dateQuery, version);
 
