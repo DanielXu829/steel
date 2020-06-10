@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.a1.doc.ChartFactory;
@@ -20,6 +21,8 @@ import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.report.service.ReportIndexService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -174,19 +177,40 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
     // 配煤质量模块
     private void dealPart2(JSONObject data) {
         dealPart(data, "partTwo", L2);
-        result.put("offsetVd", parse(dealOffset(20d, 23d, "CK9_10_MESR_SH_Vd_1d_avg", data)));
-        result.put("offsetMT", parse(dealOffset(7d, 12d, "CK9_10_MESR_SH_Mt_1d_avg", data)));
-        result.put("offsetAd", parse(dealOffset(0d, 13d, "CK9_10_MESR_SH_Ad_1d_avg", data)));
-        result.put("offsetStd", parse(dealOffset(0d, 0.85d, "CK9_10_MESR_SH_Std_1d_avg", data)));
-        result.put("offsetG", parse(dealOffset(70d, Double.MAX_VALUE, "CK9_10_MESR_SH_G_1d_avg", data)));
-        result.put("offsetY", parse(dealOffset(0d, 21d, "CK9_10_MESR_SH_G_Y_1d_avg", data)));
+        // 偏差
+        Double offsetVd = dealOffset(20d, 23d, "CK9_10_MESR_SH_Vd_1d_avg", data);
+        Double offsetMT = dealOffset(7d, 12d, "CK9_10_MESR_SH_Mt_1d_avg", data);
+        Double offsetAd = dealOffset(0d, 13d, "CK9_10_MESR_SH_Ad_1d_avg", data);
+        Double offsetStd = dealOffset(0d, 0.85d, "CK9_10_MESR_SH_Std_1d_avg", data);
+        Double offsetG = dealOffset(70d, Double.MAX_VALUE, "CK9_10_MESR_SH_G_1d_avg", data);
+        Double offsetY = dealOffset(0d, 21d, "CK9_10_MESR_SH_G_Y_1d_avg", data);
+        result.put("offsetVd", parse(offsetVd));
+        result.put("offsetMt", parse(offsetMT));
+        result.put("offsetAd", parse(offsetAd));
+        result.put("offsetStd", parse(offsetStd));
+        result.put("offsetG", parse(offsetG));
+        result.put("offsetY", parse(offsetY));
+
+        // 前日总结中配煤部分
+        List<TagNameOffset> tagNameOffsetList = new ArrayList<>();
+        tagNameOffsetList.add(new TagNameOffset("Vd", offsetVd == null ? 0d : offsetVd));
+        tagNameOffsetList.add(new TagNameOffset("Mt", offsetMT == null ? 0d : offsetMT));
+        tagNameOffsetList.add(new TagNameOffset("Ad", offsetAd == null ? 0d : offsetAd));
+        tagNameOffsetList.add(new TagNameOffset("Std", offsetStd == null ? 0d : offsetStd));
+        tagNameOffsetList.add(new TagNameOffset("G", offsetG == null ? 0d : offsetG));
+        tagNameOffsetList.add(new TagNameOffset("Y", offsetY == null ? 0d : offsetY));
+        final String allValueNormalSummary = "配合煤质量正常";
+        handleOffsetSummary("peiMeiSummary", tagNameOffsetList,false, allValueNormalSummary);
+        // 配合煤配比
         getCurrByDateTime(DateUtil.getFormatDateTime(endTime, "yyyy/MM/dd"));
+        // 趋势分析
         dealChart(data, "CK9_10_MESR_SH_Vd_1d_avg", "CK9_10_MESR_SH_Mt_1d_avg",
                 5750d, 5250d, 6800d, 5800d, "Vd(%)", "MT(%)", "chartTwo1");
         dealChart(data, "CK9_10_MESR_SH_Ad_1d_avg", "CK9_10_MESR_SH_Std_1d_avg",
                 5750d, 5250d, 6800d, 5800d, "Ad(%)", "Std(%)", "chartTwo2");
         dealChart(data, "CK9_10_MESR_SH_G_1d_avg", "CK9_10_MESR_SH_G_Y_1d_avg",
                 5750d, 5250d, 6800d, 5800d, "G", "Y(mm)", "chartTwo3");
+        // 小结
         dealIncreaseYesterday(data, "CK9_10_MESR_SH_Mt_1d_avg", "textTwo2", "countTwo2", 2);
         dealIncreaseYesterday(data, "CK9_10_MESR_SH_Ad_1d_avg", "textTwo3", "countTwo3", 2);
         dealIncreaseYesterday(data, "CK9_10_MESR_SH_Std_1d_avg", "textTwo4", "countTwo4", 2);
@@ -213,74 +237,23 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         result.put("offsetCoke7", parse(offsetCoke7));
         result.put("offsetCoke8", parse(offsetCoke8));
         result.put("offsetCoke9", parse(offsetCoke9));
-        StringBuilder sb = new StringBuilder();
-        if (offsetCoke1 != null) {
-            if (offsetCoke1 > 0d) {
-                sb.append("K3结果偏高").append(parse(offsetCoke1)).append(", ");
-            } else if (offsetCoke1 < 0d) {
-                sb.append("K3结果偏低").append(parse(Math.abs(offsetCoke1))).append(", ");
-            }
-        }
-        if (offsetCoke2 != null) {
-            if (offsetCoke2 > 0d) {
-                sb.append("9#K均结果偏高").append(parse(offsetCoke2)).append(", ");
-            } else if (offsetCoke2 < 0d) {
-                sb.append("9#K均结果偏低").append(parse(Math.abs(offsetCoke2))).append(", ");
-            }
-        }
-        if (offsetCoke3 != null) {
-            if (offsetCoke3 > 0d) {
-                sb.append("9#K安结果偏高").append(parse(offsetCoke3)).append(", ");
-            } else if (offsetCoke3 < 0d) {
-                sb.append("9#K安结果偏低").append(parse(Math.abs(offsetCoke3))).append(", ");
-            }
-        }
-        if (offsetCoke4 != null) {
-            if (offsetCoke4 > 0d) {
-                sb.append("10#K均结果偏高").append(parse(offsetCoke4)).append(", ");
-            } else if (offsetCoke4 < 0d) {
-                sb.append("10#K均结果偏低").append(parse(Math.abs(offsetCoke4))).append(", ");
-            }
-        }
-        if (offsetCoke5 != null) {
-            if (offsetCoke5 > 0d) {
-                sb.append("10#K安结果偏高").append(parse(offsetCoke5)).append(", ");
-            } else if (offsetCoke5 < 0d) {
-                sb.append("10#K安结果偏低").append(parse(Math.abs(offsetCoke5))).append(", ");
-            }
-        }
-        if (offsetCoke6 != null) {
-            if (offsetCoke6 > 0d) {
-                sb.append("9#机侧直行温度结果偏高").append(parse(offsetCoke6)).append(", ");
-            } else if (offsetCoke6 < 0d) {
-                sb.append("9#机侧直行温度结果偏低").append(parse(Math.abs(offsetCoke6))).append(", ");
-            }
-        }
-        if (offsetCoke7 != null) {
-            if (offsetCoke7 > 0d) {
-                sb.append("10#机侧直行温度结果偏高").append(parse(offsetCoke7)).append(", ");
-            } else if (offsetCoke7 < 0d) {
-                sb.append("10#机侧直行温度结果偏低").append(parse(Math.abs(offsetCoke7))).append(", ");
-            }
-        }
-        if (offsetCoke8 != null) {
-            if (offsetCoke8 > 0d) {
-                sb.append("9#焦侧直行温度结果偏高").append(parse(offsetCoke8)).append(", ");
-            } else if (offsetCoke8 < 0d) {
-                sb.append("9#焦侧直行温度结果偏低").append(parse(Math.abs(offsetCoke8))).append(", ");
-            }
-        }
-        if (offsetCoke9 != null) {
-            if (offsetCoke9 > 0d) {
-                sb.append("10#焦侧直行温度结果偏高").append(parse(offsetCoke9)).append(", ");
-            } else if (offsetCoke9 < 0d) {
-                sb.append("10#焦侧直行温度结果偏低").append(parse(Math.abs(offsetCoke9))).append(", ");
-            }
-        }
-        if (sb.toString().isEmpty()) {
-            sb.append(" ");
-        }
-        result.put("partOverview3", sb.toString());
+
+        // 处理炼焦操作偏差
+        List<TagNameOffset> tagNameOffsetList = new ArrayList<>();
+        tagNameOffsetList.add(new TagNameOffset("推焦总系数K3", offsetCoke1 == null ? 0d : offsetCoke1));
+        tagNameOffsetList.add(new TagNameOffset("9#K均", offsetCoke2 == null ? 0d : offsetCoke2));
+        tagNameOffsetList.add(new TagNameOffset("9#K安", offsetCoke3 == null ? 0d : offsetCoke3));
+        tagNameOffsetList.add(new TagNameOffset("10#K均", offsetCoke4 == null ? 0d : offsetCoke4));
+        tagNameOffsetList.add(new TagNameOffset("10#K安", offsetCoke5 == null ? 0d : offsetCoke5));
+        tagNameOffsetList.add(new TagNameOffset("9#机侧直行温度", offsetCoke6 == null ? 0d : offsetCoke6));
+        tagNameOffsetList.add(new TagNameOffset("10#机侧直行温度", offsetCoke7 == null ? 0d : offsetCoke7));
+        tagNameOffsetList.add(new TagNameOffset("9#焦侧直行温度", offsetCoke8 == null ? 0d : offsetCoke8));
+        tagNameOffsetList.add(new TagNameOffset("10#焦侧直行温度", offsetCoke9 == null ? 0d : offsetCoke9));
+        // 小结
+        handleOffsetSummary("partOverview3", tagNameOffsetList,true, StringUtils.EMPTY);
+        // 前日总结
+        final String allValueNormalSummary = "炼焦操作状态正常";
+        handleOffsetSummary("lianJiaoSummary", tagNameOffsetList,false, allValueNormalSummary);
     }
 
     // 干熄状态模块
@@ -324,68 +297,62 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
                 5750d, 5250d, 6800d, 5800d, 5750d, 5250d, 6800d, 5800d,
                 "6#CO", "6#H2", "6#O2", "6#CO2", "chartFour2");
 
-        // (3) 小结的结论
-        StringBuilder sb = new StringBuilder();
-        if (offsetDry1 != null) {
-            if (offsetDry1 > 0d) {
-                sb.append("干熄率结果偏高").append(parse(offsetDry1)).append(", ");
-            } else if (offsetDry1 < 0d) {
-                sb.append("干熄率结果偏低").append(parse(Math.abs(offsetDry1))).append(", ");
+        // 处理干熄操作偏差
+        List<TagNameOffset> tagNameOffsetList = new ArrayList<>();
+        tagNameOffsetList.add(new TagNameOffset("干熄率", offsetDry1 == null ? 0d : offsetDry1));
+        tagNameOffsetList.add(new TagNameOffset("5#排焦温度", offsetDry2 == null ? 0d : offsetDry2));
+        tagNameOffsetList.add(new TagNameOffset("6#排焦温度", offsetDry3 == null ? 0d : offsetDry3));
+        tagNameOffsetList.add(new TagNameOffset("5#CO", offsetDry3 == null ? 0d : offsetDry8));
+        tagNameOffsetList.add(new TagNameOffset("5#H2", offsetDry3 == null ? 0d : offsetDry9));
+        tagNameOffsetList.add(new TagNameOffset("5#O2", offsetDry3 == null ? 0d : offsetDry10));
+        tagNameOffsetList.add(new TagNameOffset("6#CO", offsetDry3 == null ? 0d : offsetDry12));
+        tagNameOffsetList.add(new TagNameOffset("6#H2", offsetDry3 == null ? 0d : offsetDry13));
+        // 小结
+        handleOffsetSummary("partOverview4", tagNameOffsetList,true, StringUtils.EMPTY);
+        // 前日总结
+        final String allValueNormalSummary = "干熄操作状态正常";
+        handleOffsetSummary("ganXiSummary", tagNameOffsetList,false, allValueNormalSummary);
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    class TagNameOffset {
+        private String name;
+        private Double offset;
+    }
+
+    /**
+     * 处理偏差总结
+     * @param offsetPlaceHolder
+     * @param tagNameOffsetList
+     * @param allValueNormalSummary
+     */
+    private void handleOffsetSummary(String offsetPlaceHolder, List<TagNameOffset> tagNameOffsetList, Boolean isShowOffsetValue, String allValueNormalSummary) {
+        final String resultHigher = "结果偏高";
+        final String resultLower = "结果偏低";
+        StringBuilder summary = new StringBuilder();
+        for (TagNameOffset tagNameOffset : tagNameOffsetList) {
+            if (isShowOffsetValue) {
+                if (tagNameOffset.offset > 0d) {
+                    summary.append(tagNameOffset.name).append(resultHigher).append(parse(Math.abs(tagNameOffset.offset))).append("，");
+                }
+                if (tagNameOffset.offset < 0d) {
+                    summary.append(tagNameOffset.name).append(resultLower).append(parse(Math.abs(tagNameOffset.offset))).append("，");
+                }
+            } else {
+                if (tagNameOffset.offset > 0d) {
+                    summary.append(tagNameOffset.name).append(resultHigher).append("，");
+                }
+                if (tagNameOffset.offset < 0d) {
+                    summary.append(tagNameOffset.name).append(resultLower).append("，");
+                }
             }
         }
-        if (offsetDry2 != null) {
-            if (offsetDry2 > 0d) {
-                sb.append("5#排焦温度结果偏高").append(parse(offsetDry2)).append(", ");
-            } else if (offsetDry2 < 0d) {
-                sb.append("5#排焦温度结果偏低").append(parse(Math.abs(offsetDry2))).append(", ");
-            }
+        // 如果全部正常，写入正常总结
+        if (!allValueNormalSummary.isEmpty() && summary.toString().isEmpty()) {
+            summary.append(allValueNormalSummary.concat("，"));
         }
-        if (offsetDry3 != null) {
-            if (offsetDry3 > 0d) {
-                sb.append("6#排焦温度结果偏高").append(parse(offsetDry3)).append(", ");
-            } else if (offsetDry3 < 0d) {
-                sb.append("6#排焦温度结果偏低").append(parse(Math.abs(offsetDry3))).append(", ");
-            }
-        }
-        if (offsetDry8 != null) {
-            if (offsetDry8 > 0d) {
-                sb.append("5#CO结果偏高").append(parse(offsetDry8)).append(", ");
-            } else if (offsetDry8 < 0d) {
-                sb.append("5#CO结果偏低").append(parse(Math.abs(offsetDry8))).append(", ");
-            }
-        }
-        if (offsetDry9 != null) {
-            if (offsetDry9 > 0d) {
-                sb.append("5#H2结果偏高").append(parse(offsetDry9)).append(", ");
-            } else if (offsetDry9 < 0d) {
-                sb.append("5#H2结果偏低").append(parse(Math.abs(offsetDry9))).append(", ");
-            }
-        }
-        if (offsetDry10 != null) {
-            if (offsetDry10 > 0d) {
-                sb.append("5#O2结果偏高").append(parse(offsetDry10)).append(", ");
-            } else if (offsetDry10 < 0d) {
-                sb.append("5#O2结果偏低").append(parse(Math.abs(offsetDry10))).append(", ");
-            }
-        }
-        if (offsetDry12 != null) {
-            if (offsetDry12 > 0d) {
-                sb.append("6#CO结果偏高").append(parse(offsetDry12)).append(", ");
-            } else if (offsetDry12 < 0d) {
-                sb.append("6#CO结果偏低").append(parse(Math.abs(offsetDry12))).append(", ");
-            }
-        }
-        if (offsetDry13 != null) {
-            if (offsetDry13 > 0d) {
-                sb.append("6#H2结果偏高").append(parse(offsetDry13)).append(", ");
-            } else if (offsetDry13 < 0d) {
-                sb.append("6#H2结果偏低").append(parse(Math.abs(offsetDry13))).append(", ");
-            }
-        }
-        if (sb.toString().isEmpty()) {
-            sb.append(" ");
-        }
-        result.put("partOverview4", sb.toString());
+        result.put(offsetPlaceHolder, summary.toString());
     }
 
     /**
@@ -407,7 +374,7 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
                         result.put(prefix + String.valueOf(i + 1), parseInteger(doubleValue));
                     }
                 } else {
-                    // TODO 其他部分还未确认，暂时保留两位小数
+                    // TODO 修改成从参数管理中获取小数点位数
                     result.put(prefix + String.valueOf(i + 1), parse(doubleValue));
                 }
             }
@@ -495,7 +462,6 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         vals.add(getValueByClock(tagArray, endTime));
         return vals;
     }
-
 
     /**
      * 取longTimeList天的tag点的value
