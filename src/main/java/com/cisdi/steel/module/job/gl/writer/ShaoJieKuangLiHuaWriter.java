@@ -48,7 +48,7 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
             log.info("从模板中获取version失败", e);
         }
 
-        DateQuery date = this.getDateQuery(excelDTO);
+        DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
 
         // 第1个sheet 获取并隐藏标记行

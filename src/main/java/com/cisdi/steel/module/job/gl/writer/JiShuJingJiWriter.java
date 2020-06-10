@@ -65,7 +65,8 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
-        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
+
+        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 1);
 
         int fixLineCount = 0;
         for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
@@ -261,8 +262,9 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        //Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
         // 替换当月天数和当前月份
+        Date lastDay = new Date();
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 0, lastDay);
         ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 4, lastDay);
         // TODO 隐藏行首两行，改为隐藏一行

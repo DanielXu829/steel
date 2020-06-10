@@ -97,7 +97,7 @@ public class GaoLuRiFenXiBaoGao {
             "BF8_L2C_HMTemp_1",
             "BF8_L2C_HMTemp_2",
             "BF8_L2C_HMTemp_3",
-            "BF8_L2C_HMTemp_3"
+            "BF8_L2C_HMTemp_4"
     };
 
     private String[] luGang = new String[]{
@@ -175,8 +175,8 @@ public class GaoLuRiFenXiBaoGao {
     }
 
     //@Scheduled(cron = "0 0 23 * * ?")
-    //@Scheduled(cron = "0 0 0/1 * * ?")
-    @Scheduled(cron = "0 0 6 * * ?")
+    //@Scheduled(cron = "0 30/ 0 * * ?")
+    @Scheduled(cron = "0 10/30 * * * ?")
     public void mainTask() {
         initialData();
         initDateTime();
@@ -247,16 +247,9 @@ public class GaoLuRiFenXiBaoGao {
         JSONObject jsonObject = JSONObject.parseObject(results, Feature.OrderedField);
         JSONObject data = jsonObject.getJSONObject("data");
         if (data != null && data.size() > 0) {
-            JSONObject tagObject = jsonObject.getJSONObject(tagName);
-            Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
-            if (Objects.nonNull(innerMap)) {
-                Set<String> keySet = innerMap.keySet();
-                for (String key:keySet) {
-                    BigDecimal tagValue  = (BigDecimal) innerMap.get(key);
-                    if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
-                        maxTemp = tagValue;
-                    }
-                }
+            BigDecimal tagValue  = (BigDecimal) data.get("val");
+            if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
+                maxTemp = tagValue;
             }
         }
         return maxTemp;
@@ -278,17 +271,17 @@ public class GaoLuRiFenXiBaoGao {
                 BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
                 if (yesterdayVal != null) {
                     if (yesterdayVal.compareTo(mapValue) == 1) {
-                        result.put("tap_temp_differ"+suffix, df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put("luti_temp_differ"+suffix, df2.format(yesterdayVal.subtract(mapValue)));
                         result.put("luti_differ_text"+suffix, "降低");
                     } else {
-                        result.put("tap_temp_differ"+suffix, df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put("luti_temp_differ"+suffix, df2.format(mapValue.subtract(yesterdayVal)));
                         result.put("luti_differ_text"+suffix, "升高");
                     }
                 }
             } else {
                 result.put("luti_text"+suffix, " ");
                 result.put("luti_temp"+suffix, " ");
-                result.put("tap_temp_differ"+suffix, " ");
+                result.put("luti_temp_differ"+suffix, " ");
                 result.put("luti_differ_text"+suffix, " ");
             }
         }
@@ -313,7 +306,7 @@ public class GaoLuRiFenXiBaoGao {
             Map<String, BigDecimal> lushengMap =  getLuTiWenDuData(version, luSheng, -1);
             dealLuTiWenDuData(version, lushengMap, 4);
 
-            initDateTime(Calendar.WEEK_OF_MONTH,  -10, 0);
+            //initDateTime(Calendar.WEEK_OF_MONTH,  -10, 0);
             dealChart3(version);
             dealChart4(version);
             dealChart5(version);
@@ -915,7 +908,7 @@ public class GaoLuRiFenXiBaoGao {
         int[] stack = {1, 1};
         int[] ystack = {1, 1};
 
-        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(1,title1,
+        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(2,title1,
                 categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, rangStarts, rangEnds, 1, stack, ystack);
         WordImageEntity image1 = image(Chart1);
@@ -941,8 +934,7 @@ public class GaoLuRiFenXiBaoGao {
             tempObject1.add(val);
         }
         tempObject1.removeAll(Collections.singleton(null));
-        for(int i=70; i>-1; i--) {
-            if(i%7 != 0) continue;
+        for(int i=29; i>-1; i--) {
             Double val = null;
             BigDecimal value = getMaxTemp(-1-i, version, tagName2);
             if(value != null) {
@@ -951,8 +943,7 @@ public class GaoLuRiFenXiBaoGao {
             tempObject2.add(val);
         }
         tempObject2.removeAll(Collections.singleton(null));
-        for(int i=70; i>-1; i--) {
-            if(i%7 != 0) continue;
+        for(int i=29; i>-1; i--) {
             Double val = null;
             BigDecimal value = getMaxTemp(-1-i, version, tagName3);
             if(value != null) {
@@ -961,8 +952,7 @@ public class GaoLuRiFenXiBaoGao {
             tempObject3.add(val);
         }
         tempObject3.removeAll(Collections.singleton(null));
-        for(int i=70; i>-1; i--) {
-            if(i%7 != 0) continue;
+        for(int i=29; i>-1; i--) {
             Double val = null;
             BigDecimal value = getMaxTemp(-1-i, version, tagName4);
             if(value != null) {
@@ -1009,7 +999,7 @@ public class GaoLuRiFenXiBaoGao {
         int[] stack = {1, 1, 1, 1};
         int[] ystack = {1, 2};
 
-        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(1, title1,
+        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(2, title1,
                 categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, rangStarts, rangEnds, 4, stack, ystack);
         WordImageEntity image1 = image(Chart1);
@@ -1018,9 +1008,9 @@ public class GaoLuRiFenXiBaoGao {
 
     private List<Double> getMaxLuTiWenDuList(String version, String[] array) {
         List<Double> value = new ArrayList<>();
-        for (int i = 10; i > -1; i--) {
+        for (int i = 29; i > -1; i--) {
             //炉缸
-            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, array, -1 - i*7);
+            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, array, -1 - i);
             for (BigDecimal big:luGangMap.values()) {
                 Double val = null;
                 if (null != big) {
@@ -1083,57 +1073,11 @@ public class GaoLuRiFenXiBaoGao {
         int[] stack = {1, 1, 1, 1};
         int[] ystack = {1, 2};
 
-        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(1, title1,
+        JFreeChart Chart1 = ChartFactory.createLineChartEachBatch(2, title1,
                 categoryAxisLabel1, yLabels, vectors,
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, rangStarts, rangEnds, 4, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
-    }
-
-    private void initDateTime(int field, int amount1, int amount2){
-        categoriesList.clear();
-        dateList.clear();
-        longTimeList.clear();
-        // 当前时间点
-        Date now = new Date();
-        Calendar cal = Calendar.getInstance();
-        //日报是取前一天的数据
-        Date date = DateUtil.addDays(now, -1);
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY,0);
-        cal.set(Calendar.MINUTE,0);
-        cal.set(Calendar.SECOND,0);
-        cal.set(Calendar.MILLISECOND,0);
-        // test
-        // cal.add(Calendar.DAY_OF_MONTH,-3);
-        // 今日零点，作为结束时间点
-        Date endDate = cal.getTime();
-        // 前推30天，作为开始时间点
-        cal.add(field, amount1);
-        Date startDate = cal.getTime();
-
-        startTime = startDate;
-        endTime = endDate;
-        int batch = 7;
-        int index = 0;
-        while (startDate.before(endDate)) {
-            // 拼接x坐标轴
-            if (index % batch == 0) {
-                categoriesList.add(DateUtil.getFormatDateTime(startDate, DateUtil.MMddChineseFormat));
-                longTimeList.add(startDate.getTime()+"");
-            }
-            dateList.add(DateUtil.getFormatDateTime(startDate, DateUtil.yyyyMMddFormat));
-
-
-            // 递增日期
-            cal.add(Calendar.DAY_OF_MONTH, 1);
-            startDate = cal.getTime();
-            index++;
-        }
-
-        categoriesList.add(DateUtil.getFormatDateTime(endDate, DateUtil.MMddChineseFormat));
-        dateList.add(DateUtil.getFormatDateTime(endDate, DateUtil.yyyyMMddFormat));
-        longTimeList.add(endDate.getTime()+"");
     }
 
     private List<Double> getValuesByTag (JSONObject data, String tagName) {
@@ -1301,8 +1245,8 @@ public class GaoLuRiFenXiBaoGao {
             XWPFTableCell targetCell = tables.get(tables.size()-1).getRow(1).getCell(4);
             // 处理换行符
             addBreakInCell(targetCell);
-            Date date = DateUtil.addDays(new Date(), -1);
-            String fileName = sequence + "_高炉日生产分析报告_" + DateUtil.getFormatDateTime(date, "yyyyMMdd") + ".docx";
+            //Date date = DateUtil.addDays(new Date(), -1);
+            String fileName = sequence + "_高炉日生产分析报告_" + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + ".docx";
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);

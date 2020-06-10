@@ -60,7 +60,7 @@ public class ChuTieHuaXueChengFenWriter extends AbstractExcelReadWriter {
             log.error("在模板中获取version失败", e);
         }
 
-        DateQuery date = this.getDateQuery(excelDTO);
+        DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
         // 报表当前记录时间的前一天晚上8点到当前晚上24点，重新生成报表不会改变记录时间
         Date tieLiangEndTime = date.getRecordDate();

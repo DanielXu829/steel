@@ -97,6 +97,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             log.error("处理模板数据失败", e);
         } finally {
             Date currentDate = new Date();
+            //Date currentDate = DateUtil.addDays(new Date(), -1);
             for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet=workbook.getSheetAt(i);
                 // 清除标记项(例如:{块矿.矿种})
@@ -121,7 +122,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             Sheet sheet = workbook.getSheet(sheetName);
             String[] sheetSplit = sheetName.split("_");
             if (sheetSplit.length == 4) {
-                DateQuery dateQuery = this.getDateQuery(excelDTO);
+                DateQuery dateQuery = this.getDateQueryBeforeOneDay(excelDTO);
                 List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, dateQuery.getRecordDate());
                 // evt为后缀的值需要此逻辑，防止取到前一天累计的值。
                 DateQuery firstDateQuery = dateQueries.get(0);
@@ -285,9 +286,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2+columnIndex, bfBlastMain.getBlastDiameter());
             }
             String url = httpProperties.getGlUrlVersion(version) + "/bfBlast/queryBlastStatus";
-            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
             DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
-            Date dateRun = this.getDateQuery(excelDTO).getRecordDate();
+            Date dateRun = date.getRecordDate();
             List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourEach(dateRun);
             for (int k = 0; k < dateQueries.size(); k++) {
                 DateQuery dateQuery1 = dateQueries.get(k);
@@ -309,7 +310,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             // 直接拿到tag点名, 无需根据别名再去获取tag点名
             List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
             int rowNum = 1;
-            List<CellData> cellData = handleEachRowData(tagNames, queryUrl, dateQuery, rowNum);
+
+             List<CellData> cellData = handleEachRowData(tagNames, queryUrl, dateQuery, rowNum);
             ExcelWriterUtil.setCellValue(sheet, cellData);
         } catch (Exception e) {
             log.error("处理正面-风口信息出错", e);
@@ -333,7 +335,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             int typeColumnIndex = typeCell.getColumnIndex();
 
             // 获取数据并填充
-            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(new Date());
+            DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(DateUtil.addDays(new Date(), -1));
             List<ChargeVarInfo> chargeVarInfos = getChargeVarInfo(version, dateQuery);
             List<CellData> cellDataList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(chargeVarInfos)) {
@@ -416,7 +418,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     }
                 }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                if (luLiaoList.size() > 18) {
+                if (luLiaoList.size() > 18 || chargeVarInfos.size() > 12) {
                     //设置动态边框样式
                     int beginRowNum = beginRowIndex;
                     int lastRowNum = beginRowIndex + (luLiaoList.size()-18);
@@ -464,9 +466,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                         ExcelWriterUtil.addCellData(cellDataList, beginRowIndex, columnIndex, index);
                         ExcelWriterUtil.addCellData(cellDataList, beginRowIndex, columnIndex + 3, "焦炭");
                         ExcelWriterUtil.addCellData(cellDataList, beginRowIndex, columnIndex + 6 +
-                                22 - distribution.getPosition() * 2, distribution.getRound());
-                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + 1, columnIndex + 6 +
                                 22 - distribution.getPosition() * 2, distribution.getAngle());
+                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + 1, columnIndex + 6 +
+                                22 - distribution.getPosition() * 2, distribution.getRound());
                         break;
                     case 2:
                         // 大烧
@@ -478,9 +480,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, index);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex + 3, "大烧");
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex + 6 +
-                                22 - distribution.getPosition() * 2, distribution.getRound());
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex + 1, columnIndex + 6 +
                                 22 - distribution.getPosition() * 2, distribution.getAngle());
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex + 1, columnIndex + 6 +
+                                22 - distribution.getPosition() * 2, distribution.getRound());
                         break;
                     case 3:
                         // 小烧
@@ -495,9 +497,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex2, columnIndex, index);
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex2, columnIndex + 3, "小烧");
                         ExcelWriterUtil.addCellData(cellDataList, rowIndex2, columnIndex + 6 +
-                                22 - distribution.getPosition() * 2, distribution.getRound());
-                        ExcelWriterUtil.addCellData(cellDataList, rowIndex2 + 1, columnIndex + 6 +
                                 22 - distribution.getPosition() * 2, distribution.getAngle());
+                        ExcelWriterUtil.addCellData(cellDataList, rowIndex2 + 1, columnIndex + 6 +
+                                22 - distribution.getPosition() * 2, distribution.getRound());
                         break;
                 }
             }
@@ -570,7 +572,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
 
         List<CellData> cellDataList = new ArrayList<>();
         String queryUrl = getUrlTagNamesInRange(version);
-        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(new Date());
+        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(DateUtil.addDays(new Date(), -1));
         JSONObject query = new JSONObject();
         query.put("starttime", String.valueOf(dateQuery.getQueryStartTime()));
         query.put("endtime", String.valueOf(dateQuery.getQueryEndTime()));
@@ -757,15 +759,15 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         try {
             // 反面sheet
             Sheet sheet = workbook.getSheetAt(1);
-            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
             DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
             // 处理出铁数据
             List<String> tapNoList = handleTapData(sheet, 6, dateQuery, resultList, version, null);
-            tapNoList = handleTapData(sheet, 26, dateQuery, resultList, version, tapNoList);
             // 处理罐号重量数据
             if (CollectionUtils.isNotEmpty(tapNoList)) {
                 handleTpcInfoData(sheet, resultList, tapNoList, version);
             }
+            tapNoList = handleTapData(sheet, 26, dateQuery, resultList, version, tapNoList);
 
             ExcelWriterUtil.setCellValue(sheet, resultList);
         } catch (Exception e) {
@@ -992,7 +994,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         Sheet sheet = null;
         try {
             sheet = workbook.getSheetAt(1);
-            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
             DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
 
             // 1. 找到待填充的坐标
@@ -1017,7 +1019,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 String url = getAnalysisValueUrl(version) + "/" + endTime + "?type=" + oreBlockType + "&brandcode=" + brandCodeList.get(i);;
 
                 setAnalysisValue2Cell(sheet, cellDataList, arr, url,
-                        tpcNoBeginRow + i, tpcNoBeginColumn);
+                        tpcNoBeginRow + i, tpcNoBeginColumn, true);
             }
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
@@ -1037,7 +1039,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @return
      */
     private void setAnalysisValue2Cell(Sheet sheet, List<CellData> cellDataList, String[] arr, String url,
-                                       int tpcNoBeginRow, int tpcNoBeginColumn) {
+                                       int tpcNoBeginRow, int tpcNoBeginColumn, boolean needHandle) {
         String jsonData = httpUtil.get(url);
         // 根据json映射对象DTO
         AnalysisValueDTO analysisValueDTO = null;
@@ -1064,8 +1066,12 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 BigDecimal value = values.get(arr[j]);
                 int writeRow = tpcNoBeginRow;
                 int writeColumn = tpcNoBeginColumn + j;
-                // 填充具体数据
-                ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
+                if (value != null && needHandle) {
+                    // 填充具体数据
+                    ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value.multiply(new BigDecimal(100)));
+                } else {
+                    ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
+                }
             }
         }
     }
@@ -1083,7 +1089,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @return
      */
     private void handAnalysisValue2Cell(Sheet sheet, List<CellData> cellDataList, String url, String[] arr,
-                                        String placeHolder, Map<String,String> map) {
+                                        String placeHolder, boolean needHandle) {
         // 找到待填充的坐标
         Cell tpcNoCell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
         if (Objects.isNull(tpcNoCell)) {
@@ -1092,10 +1098,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         // 待填充的行,列
         int tpcNoBeginRow = tpcNoCell.getRowIndex();
         int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
-        // 检查表头列是否存在，如果不存在则不填充数据
-        //checkHeaders(sheet, arr, map, tpcNoBeginRow-1);
 
-        setAnalysisValue2Cell(sheet, cellDataList, arr, url, tpcNoBeginRow, tpcNoBeginColumn);
+        setAnalysisValue2Cell(sheet, cellDataList, arr, url, tpcNoBeginRow, tpcNoBeginColumn, needHandle);
     }
 
     /**
@@ -1117,15 +1121,11 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String[] cokeArr = {"H2O", "Ad", "Vdaf", "S"};
         // 根据需求，取回的煤粉数据中C取Fcad，S取Std
         String[] coalArr = {"Ad", "Vdaf", "Std", "Fcad", "S"};
-        Map<String,String> map = new HashMap<String, String>(){{
-            put("Fcad","C");
-            put("Std","S");
-        }};
         List<CellData> cellDataList = new ArrayList<>();
         try {
             // 反面sheet
             Sheet sheet = workbook.getSheetAt(1);
-            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
             DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
             //analysisValues/rangeByType?from=1577931200000&to=1578017600000&materialType=COAL
             String from = Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString();
@@ -1137,10 +1137,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             //先处理热力强度，因为只有一行数据
             //再处理成分分析，分为煤粉和焦炭
             // 2. 获取热强度数据，填充数据
-            handAnalysisValue2Cell(sheet, cellDataList, heatUrl, heatArr, heatPlaceHolder, new HashMap<>());
+            handAnalysisValue2Cell(sheet, cellDataList, heatUrl, heatArr, heatPlaceHolder, false);
             // 3. 获取焦炭数据，填充数据
             // 获取两班倒查询策略
-            Date dateRun = this.getDateQuery(excelDTO).getRecordDate();
+            Date dateRun = this.getDateQueryBeforeOneDay(excelDTO).getRecordDate();
             List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourEach(dateRun);
             for (int k = 0; k < dateQueries.size(); k++) {
                 DateQuery dateQuery1 = dateQueries.get(k);
@@ -1153,7 +1153,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             }
             // 4. 获取煤粉数据，填充数据
 
-            handAnalysisValue2Cell(sheet, cellDataList, url + coalBrandCode, coalArr, coalPlaceHolder, map);
+            handAnalysisValue2Cell(sheet, cellDataList, url + coalBrandCode, coalArr, coalPlaceHolder, true);
 
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
@@ -1357,7 +1357,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             // 反面sheet
             ///analysisValues/rangeByCode?from=1589904000000&to=1590163200000&brandCode=S4_SINTER
             Sheet sheet = workbook.getSheetAt(1);
-            DateQuery date = this.getDateQuery(excelDTO);
+            DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
             DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
             // 1. 获取AnalysisValues Url前缀
             String url = getAnalysisValuesUrl(version);
