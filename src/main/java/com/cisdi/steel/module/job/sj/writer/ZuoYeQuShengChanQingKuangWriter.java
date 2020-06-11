@@ -52,7 +52,7 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
      * @return
      */
     private void getMapHandler1(WriterExcelDTO excelDTO, Workbook workbook, String version) {
-        dateQuery = this.getDateQuery(excelDTO);
+        dateQuery = this.getDateQueryBeforeOneDay(excelDTO);
 
         // 填充质量指标sheet
         // handleZhiLiangZhiBiao(workbook, version);
@@ -95,14 +95,13 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
         Cell productPerHourCell = PoiCustomUtil.getCellByValue(sheet, "ST4_L1R_SIN_ProductPerHour_1d_avg");
         int productPerHourColIndex = productPerHourCell.getColumnIndex();
 
-        Date recordDate = dateQuery.getRecordDate();
         // yyyy/MM/dd HH:mm:ss
         String startTime = DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy-MM-01 00:00:00");
         String endTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-dd 23:59:59");
-
+        Date endDate = DateUtil.strToDate(endTime, "yyyy-MM-dd HH:mm:ss");
         Integer[] workTeams = {1, 2, 3, 4};
         for (Integer workTeam : workTeams) {
-            String productInfo = getProductInfo(recordDate.getTime(), workTeam, version);
+            String productInfo = getProductInfo(endDate.getTime(), workTeam, version);
             if (StringUtils.isNotBlank(productInfo)) {
                 JSONObject productInfoObj = JSONObject.parseObject(productInfo);
                 JSONObject productInfoData = productInfoObj.getJSONObject("data");
@@ -144,14 +143,15 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
         Sheet sheet = workbook.getSheet("_yuanliaozhibiao");
         List<CellData> resultList = new ArrayList<>();
 
-        Date recordDate = dateQuery.getRecordDate();
+        String searchDateStr = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd 23:59:59");
+        Date endDate = DateUtil.strToDate(searchDateStr, "yyyy-MM-dd HH:mm:ss");
         String MATERIAL_CLASS = "materialClass";
         String MATERIAL_TYPE = "materialType";
 
-        writeMatConsume(sheet, resultList, MATERIAL_CLASS, recordDate.getTime(), "ore", version);
-        writeMatConsume(sheet, resultList, MATERIAL_CLASS, recordDate.getTime(), "flux", version);
-        writeMatConsume(sheet, resultList, MATERIAL_CLASS, recordDate.getTime(), "fuel", version);
-        writeMatConsume(sheet, resultList, MATERIAL_TYPE, recordDate.getTime(), "limestone", version);
+        writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "ore", version);
+        writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "flux", version);
+        writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "fuel", version);
+        writeMatConsume(sheet, resultList, MATERIAL_TYPE, endDate.getTime(), "limestone", version);
 
         ExcelWriterUtil.setCellValue(sheet, resultList);
     }
