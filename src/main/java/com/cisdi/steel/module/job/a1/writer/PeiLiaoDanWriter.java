@@ -12,6 +12,7 @@ import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import java.util.*;
  * 配料单报表
  */
 @Component
+@Slf4j
 public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
 
     @Autowired
@@ -282,114 +284,118 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
 
     protected List<CellData> mapDataHandler2(String url, DecimalFormat df) {
         List<CellData> cellDataList = new ArrayList<>();
-        String s = httpUtil.get(url, null);
-        if (StringUtils.isBlank(s)) {
-            return null;
-        }
-        JSONObject json = JSONObject.parseObject(s);
-        if (Objects.isNull(json)) {
-            return null;
-        }
-
-        JSONObject jsonObject = json.getJSONObject("data");
-        if (Objects.isNull(jsonObject)) {
-            return null;
-        }
-        JSONArray jsonArray = jsonObject.getJSONArray("bookMaterials");
-        if (Objects.isNull(jsonArray) || jsonArray.size() == 0) {
-            return null;
-        }
-        //焦炭
-        List<JSONObject> cokeObjects = new ArrayList<>();
-        // 回用焦丁
-        JSONObject cokeNUTObject = null;
-        for(int i = 0; i < jsonArray.size(); i ++) {
-            JSONObject object = jsonArray.getJSONObject(i);
-            if (Objects.isNull(object)) continue;
-            String matClass = object.getString("matClass");
-            if (StringUtils.isNotBlank(matClass) && matClass.equals("COKE")) {
-                cokeObjects.add(object);
+        try {
+            String s = httpUtil.get(url, null);
+            if (StringUtils.isBlank(s)) {
+                return null;
             }
-            if (StringUtils.isNotBlank(matClass) && matClass.equals("COKENUT")) {
-                cokeNUTObject = object;
+            JSONObject json = JSONObject.parseObject(s);
+            if (Objects.isNull(json)) {
+                return null;
             }
-        }
-        if (cokeNUTObject != null) {
-            //回用焦丁
-            ExcelWriterUtil.addCellData(cellDataList, 31, 0, cokeNUTObject.getString("descr"));
-            //回用焦丁值
-            ExcelWriterUtil.addCellData(cellDataList, 31, 1, df.format(cokeNUTObject.getBigDecimal("weight")));
-            //回用焦丁比例
-            ExcelWriterUtil.addCellData(cellDataList, 31, 2, df.format(cokeNUTObject.getBigDecimal("ratio")));
-        }
-        for (int i = 0; i < cokeObjects.size(); i ++) {
-            JSONObject obj = cokeObjects.get(i);
-            //回用焦丁
-            ExcelWriterUtil.addCellData(cellDataList, i + 28, 0, obj.getString("descr"));
-            //回用焦丁值
-            ExcelWriterUtil.addCellData(cellDataList, i + 28, 1, df.format(obj.getBigDecimal("weight")));
-            //回用焦丁比例
-            ExcelWriterUtil.addCellData(cellDataList, i + 28, 2, df.format(obj.getBigDecimal("ratio")));
-        }
 
-        JSONObject paramObj = jsonObject.getJSONObject("parameters");
-        if (Objects.nonNull(paramObj)) {
-            paramObj = paramObj.getJSONObject("components");
+            JSONObject jsonObject = json.getJSONObject("data");
+            if (Objects.isNull(jsonObject)) {
+                return null;
+            }
+            JSONArray jsonArray = jsonObject.getJSONArray("bookMaterials");
+            if (Objects.isNull(jsonArray) || jsonArray.size() == 0) {
+                return null;
+            }
+            //焦炭
+            List<JSONObject> cokeObjects = new ArrayList<>();
+            // 回用焦丁
+            JSONObject cokeNUTObject = null;
+            for(int i = 0; i < jsonArray.size(); i ++) {
+                JSONObject object = jsonArray.getJSONObject(i);
+                if (Objects.isNull(object)) continue;
+                String matClass = object.getString("matClass");
+                if (StringUtils.isNotBlank(matClass) && matClass.equals("COKE")) {
+                    cokeObjects.add(object);
+                }
+                if (StringUtils.isNotBlank(matClass) && matClass.equals("COKENUT")) {
+                    cokeNUTObject = object;
+                }
+            }
+            if (cokeNUTObject != null) {
+                //回用焦丁
+                ExcelWriterUtil.addCellData(cellDataList, 31, 0, cokeNUTObject.getString("descr"));
+                //回用焦丁值
+                ExcelWriterUtil.addCellData(cellDataList, 31, 1, df.format(cokeNUTObject.getBigDecimal("weight")));
+                //回用焦丁比例
+                ExcelWriterUtil.addCellData(cellDataList, 31, 2, df.format(cokeNUTObject.getBigDecimal("ratio")));
+            }
+            for (int i = 0; i < cokeObjects.size(); i ++) {
+                JSONObject obj = cokeObjects.get(i);
+                //回用焦丁
+                ExcelWriterUtil.addCellData(cellDataList, i + 28, 0, obj.getString("descr"));
+                //回用焦丁值
+                ExcelWriterUtil.addCellData(cellDataList, i + 28, 1, df.format(obj.getBigDecimal("weight")));
+                //回用焦丁比例
+                ExcelWriterUtil.addCellData(cellDataList, i + 28, 2, df.format(obj.getBigDecimal("ratio")));
+            }
+
+            JSONObject paramObj = jsonObject.getJSONObject("parameters");
             if (Objects.nonNull(paramObj)) {
-                //矿批
-                ExcelWriterUtil.addCellData(cellDataList, 32, 0, df.format(paramObj.getBigDecimal("OreWeight")));
-                //焦炭
-                ExcelWriterUtil.addCellData(cellDataList, 32, 1, df.format(paramObj.getBigDecimal("cCount")));
+                paramObj = paramObj.getJSONObject("components");
+                if (Objects.nonNull(paramObj)) {
+                    //矿批
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 0, df.format(paramObj.getBigDecimal("OreWeight")));
+                    //焦炭
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 1, df.format(paramObj.getBigDecimal("cCount")));
+                }
             }
-        }
 
-        JSONObject resultsObj = jsonObject.getJSONObject("results");
-        if (Objects.nonNull(resultsObj)) {
-            resultsObj = resultsObj.getJSONObject("components");
+            JSONObject resultsObj = jsonObject.getJSONObject("results");
             if (Objects.nonNull(resultsObj)) {
-                //负荷
-                ExcelWriterUtil.addCellData(cellDataList, 32, 2,
-                        df.format(resultsObj.getBigDecimal("OCRate")) + "/" + df.format(resultsObj.getBigDecimal("AllOCRate")));
-                //焦比
-                ExcelWriterUtil.addCellData(cellDataList, 32, 3,
-                        df.format(resultsObj.getBigDecimal("CokeRate")) + "/" + df.format(resultsObj.getBigDecimal("NcRate")));
-                //批铁
-                ExcelWriterUtil.addCellData(cellDataList, 32, 4,
-                        df.format(resultsObj.getBigDecimal("HmWeight")));
-                //批渣
-                ExcelWriterUtil.addCellData(cellDataList, 32, 5,
-                        df.format(resultsObj.getBigDecimal("SlagWeight")));
-                //综合品位
-                ExcelWriterUtil.addCellData(cellDataList, 32, 6,
-                        df.format(resultsObj.getBigDecimal("Quality")));
-                //矿耗
-                ExcelWriterUtil.addCellData(cellDataList, 32, 7,
-                        df.format(resultsObj.getBigDecimal("Consumption")));
-                //熟料率
-                ExcelWriterUtil.addCellData(cellDataList, 32, 8,
-                        df.format(resultsObj.getBigDecimal("ClinkerRatio")));
-                //渣比
-                ExcelWriterUtil.addCellData(cellDataList, 32, 9,
-                        df.format(resultsObj.getBigDecimal("SlagRate")));
-                //入炉S负荷
-                ExcelWriterUtil.addCellData(cellDataList, 32, 10,
-                        df.format(resultsObj.getBigDecimal("SLoad")));
-                //入炉Zn负荷
-                ExcelWriterUtil.addCellData(cellDataList, 32, 11,
-                        df.format(resultsObj.getBigDecimal("ZnLoad")));
+                resultsObj = resultsObj.getJSONObject("components");
+                if (Objects.nonNull(resultsObj)) {
+                    //负荷
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 2,
+                            df.format(resultsObj.getBigDecimal("OCRate")) + "/" + df.format(resultsObj.getBigDecimal("AllOCRate")));
+                    //焦比
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 3,
+                            df.format(resultsObj.getBigDecimal("CokeRate")) + "/" + df.format(resultsObj.getBigDecimal("NcRate")));
+                    //批铁
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 4,
+                            df.format(resultsObj.getBigDecimal("HmWeight")));
+                    //批渣
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 5,
+                            df.format(resultsObj.getBigDecimal("SlagWeight")));
+                    //综合品位
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 6,
+                            df.format(resultsObj.getBigDecimal("Quality")));
+                    //矿耗
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 7,
+                            df.format(resultsObj.getBigDecimal("Consumption")));
+                    //熟料率
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 8,
+                            df.format(resultsObj.getBigDecimal("ClinkerRatio")));
+                    //渣比
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 9,
+                            df.format(resultsObj.getBigDecimal("SlagRate")));
+                    //入炉S负荷
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 10,
+                            df.format(resultsObj.getBigDecimal("SLoad")));
+                    //入炉Zn负荷
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 11,
+                            df.format(resultsObj.getBigDecimal("ZnLoad")));
+                }
             }
-        }
 
-        JSONObject slagObj = jsonObject.getJSONObject("slag");
-        if (Objects.nonNull(slagObj)) {
-            slagObj = slagObj.getJSONObject("components");
+            JSONObject slagObj = jsonObject.getJSONObject("slag");
             if (Objects.nonNull(slagObj)) {
-                //R2
-                ExcelWriterUtil.addCellData(cellDataList, 32, 12,
-                        df.format(slagObj.getBigDecimal("R2")) + "/" + df.format(slagObj.getBigDecimal("R4")));
-                //Al2O3
-                ExcelWriterUtil.addCellData(cellDataList, 32, 13, df.format(slagObj.getBigDecimal("Al2O3")));
+                slagObj = slagObj.getJSONObject("components");
+                if (Objects.nonNull(slagObj)) {
+                    //R2
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 12,
+                            df.format(slagObj.getBigDecimal("R2")) + "/" + df.format(slagObj.getBigDecimal("R4")));
+                    //Al2O3
+                    ExcelWriterUtil.addCellData(cellDataList, 32, 13, df.format(slagObj.getBigDecimal("Al2O3")));
+                }
             }
+        } catch (Exception e){
+            log.error("处理配料单出错", e);
         }
         return cellDataList;
     }

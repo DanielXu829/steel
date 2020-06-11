@@ -889,7 +889,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                             value = DateTimeFormatter.ofPattern("HH:mm:ss").format(localDate);
                             // yyyy-MM-dd HH:mm:ss
                         }
-                        ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, value.toString());
+                        ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, value);
                     } else if (itemArray.length == 3 && "item".equals(itemArray[0])) {
                         switch (itemArray[1]) {
                             case "tapValues":
@@ -899,7 +899,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                                 ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, tapValues.get(itemArray[2]));
                                 break;
                             case "slagAnalysis":
-                                if (Objects.isNull(slagAnalysis) || slagAnalysis.size() == 0) {
+                                if (Objects.isNull(slagAnalysis) || slagAnalysis.size() == 0 || slagAnalysis.get(itemArray[2]) == null) {
                                     continue;
                                 }
                                 Double val = slagAnalysis.get(itemArray[2]);
@@ -910,7 +910,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                                 ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, val);
                                 break;
                             case "hmAnalysis":
-                                if (Objects.isNull(hmAnalysis) || hmAnalysis.size() == 0) {
+                                if (Objects.isNull(hmAnalysis) || hmAnalysis.size() == 0 || hmAnalysis.get(itemArray[2]) == null) {
                                     continue;
                                 }
                                 ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, hmAnalysis.get(itemArray[2]) * 100);
@@ -1255,15 +1255,13 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param result
      * @param cellDataList
      */
-    private void handAnalysisValuesData(Sheet sheet, String result, List<CellData> cellDataList) {
+    private void handAnalysisValuesData(Sheet sheet, String result, List<CellData> cellDataList, String oreType) {
         String placeHolder = "{矿种}";
         String[] arr = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "B2", "Drum", "S+40",
-                "S25-40", "S16-25", "S10-16", "S5-10", "S-5", "S-10", "Abrasion"};
+                "S25-40", "S16-25", "S10-16", "S5-10", "S-5", "S-10", "SF"};
         String[] lcArr = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S"};
         List< String> lcList = new ArrayList<String>(lcArr.length);
         Collections.addAll(lcList, lcArr);
-
-        // TODO 矿种 槽号 DI 抗磨
         // 矿种坐标
         Cell cell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
         if (Objects.isNull(cell)) {
@@ -1295,7 +1293,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             String type = analysis != null ? analysis.getType() : null;
             // 处理矿种、记录时间、编号、槽号
             if (!Objects.isNull(analysis)) {
-                //TODO 填充矿种数据
+                //矿种
+                ExcelWriterUtil.addCellData(cellDataList, beginRow + i, coalBeginColumn, oreType);
                 // 记录时间
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                 Date clock = analysis.getClock();
@@ -1370,8 +1369,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             //queryParam.put("from", "1591200000000");
             //queryParam.put("to", "1591286400000");
             String result = httpUtil.get(url, queryParam);
+            String kuangZhong = "S4";
             if (StringUtils.isBlank(result)) {
                 queryParam.put("brandCode", "S1_SINTER");
+                kuangZhong = "S1";
                 result = httpUtil.get(url, queryParam);
             } else {
                 JSONObject jsonObject = JSON.parseObject(result);
@@ -1379,14 +1380,16 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     JSONArray jsonArray = jsonObject.getJSONArray("data");
                     if (jsonArray.size() == 0) {
                         queryParam.put("brandCode", "S1_SINTER");
+                        kuangZhong = "S1";
                         result = httpUtil.get(url, queryParam);
                     }
                 } else {
                     queryParam.put("brandCode", "S1_SINTER");
+                    kuangZhong = "S1";
                     result = httpUtil.get(url, queryParam);
                 }
             }
-            handAnalysisValuesData(sheet, result, cellDataList);
+            handAnalysisValuesData(sheet, result, cellDataList, kuangZhong);
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
             log.error("处理反面-烧结矿理化分析出错", e);
