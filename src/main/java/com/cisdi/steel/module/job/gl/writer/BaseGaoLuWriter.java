@@ -316,11 +316,24 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
         //过滤weightact不为0的值
         List<BatchDistribution> collect = distributions.stream()
-                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .filter(p -> (p.getWeightset() == null || p.getWeightset().doubleValue() > 0))
                 .collect(Collectors.toList());
         // 拼接roundset
         return collect.stream()
                 .map(p -> String.valueOf(p.getRoundact()))
+                .collect(Collectors.joining(""));
+    }
+
+    protected String getRoundset(List<BatchDistribution> distributions) {
+        //排序, 按position倒序
+        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
+        //过滤weightact不为0的值
+        List<BatchDistribution> collect = distributions.stream()
+                .filter(p -> (p.getWeightset() == null || p.getWeightset().doubleValue() > 0))
+                .collect(Collectors.toList());
+        // 拼接roundset
+        return collect.stream()
+                .map(p -> String.valueOf(p.getRoundset()))
                 .collect(Collectors.joining(""));
     }
 
@@ -329,7 +342,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
         //过滤weightact不为0的值
         List<BatchDistribution> collect = distributions.stream()
-                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .filter(p -> (p.getWeightset() == null || p.getWeightset().doubleValue() > 0))
                 .collect(Collectors.toList());
         // 拼接position
         return collect.stream()

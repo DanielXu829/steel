@@ -258,9 +258,9 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
                         case "Ol":
                         case "Os": {
                             if(MapUtils.isNotEmpty(matrixDistrAvgInRangeMap) && CollectionUtils.isNotEmpty(matrixDistrAvgInRangeMap.get(itemName))) {
-                                BatchDistribution batchDistribution = matrixDistrAvgInRangeMap.get(itemName).get(0);
-                                if (Objects.nonNull(batchDistribution)) {
-                                    String val = StringUtils.join(Arrays.asList(itemName.substring(0,1), batchDistribution.getPosition(), batchDistribution.getRoundset()), "-");
+                                List<BatchDistribution> batchDistributions = matrixDistrAvgInRangeMap.get(itemName);
+                                if (CollectionUtils.isNotEmpty(batchDistributions)) {
+                                    String val = StringUtils.join(Arrays.asList(itemName.substring(0,1), getPosition(batchDistributions), getRoundset(batchDistributions)), "-");
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                                 }
                             }
