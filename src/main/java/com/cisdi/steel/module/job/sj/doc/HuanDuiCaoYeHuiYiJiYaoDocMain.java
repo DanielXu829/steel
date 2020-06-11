@@ -76,10 +76,14 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain {
      */
     private HashMap<String, Object> result = null;
 
-    @Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 0 6 * * ?")
     public void mainJob() {
         result = new HashMap<>();
-        Date date = new Date();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(now);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        Date date = cal.getTime();
         initDate(date);
         mainDeal(version, date);
     }

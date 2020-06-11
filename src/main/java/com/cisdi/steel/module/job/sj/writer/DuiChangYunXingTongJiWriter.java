@@ -21,8 +21,6 @@ import java.util.*;
 @SuppressWarnings("ALL")
 @Slf4j
 public class DuiChangYunXingTongJiWriter extends AbstractExcelReadWriter {
-    private Date dateRun;
-
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -68,11 +66,14 @@ public class DuiChangYunXingTongJiWriter extends AbstractExcelReadWriter {
         Cell pullMatCell = PoiCustomUtil.getCellByValue(sheet, "PULLMAT");
         int pullMatColIndex = pullMatCell.getColumnIndex();
 
-        dateRun = this.getDateQuery(excelDTO).getRecordDate();
+        // 当天早上运行，查询截至前一天23:59:59
+        Date searchDate = this.getDateQueryBeforeOneDay(excelDTO).getRecordDate();
+        String searchDateStr = DateUtil.getFormatDateTime(searchDate, "yyyy-MM-dd 23:59:59");
+        searchDate = DateUtil.strToDate(searchDateStr, "yyyy-MM-dd HH:mm:ss");
         Integer[] workTeams = {1, 2, 3, 4};
 
         for (Integer workTeam : workTeams) {
-            String result = getDuiChangeYunXingTongJi(dateRun.getTime(), workTeam, version);
+            String result = getDuiChangeYunXingTongJi(searchDate.getTime(), workTeam, version);
             if (StringUtils.isNotBlank(result)) {
                 YardRunInfoDTO yardRunInfoDTO = JSON.parseObject(result, YardRunInfoDTO.class);
                 if (yardRunInfoDTO == null || yardRunInfoDTO.getData() == null) {
@@ -90,9 +91,8 @@ public class DuiChangYunXingTongJiWriter extends AbstractExcelReadWriter {
         ExcelWriterUtil.setCellValue(sheet, resultList);
         // 设置报表标题
         Sheet sheet1 = workbook.getSheetAt(0);
-        Date currentDate = new Date();
-        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet1, 0, 0, currentDate);
-        ExcelWriterUtil.replaceCurrentDateInTitle(sheet1, "%当日数%", currentDate, DateUtil.ddFormat);
+        ExcelWriterUtil.replaceCurrentMonthInTitle(sheet1, 0, 0, searchDate);
+        ExcelWriterUtil.replaceCurrentDateInTitle(sheet1, "%当日数%", searchDate, DateUtil.ddFormat);
     }
 
     /**
