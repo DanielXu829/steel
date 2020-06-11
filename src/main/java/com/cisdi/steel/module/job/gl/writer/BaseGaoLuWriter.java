@@ -74,6 +74,26 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 获取进风面积
+     * @param version
+     * @param time
+     * @return
+     */
+    protected BigDecimal getBlastIntakeArea(String version, String time) {
+        BigDecimal value = null;
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("time",  time);
+        String blastIntakeArea = httpUtil.get(getBlastIntakeAreaUrl(version), queryParam);
+        if (StringUtils.isNotBlank(blastIntakeArea)) {
+            JSONObject data = JSON.parseObject(blastIntakeArea);
+            if (Objects.nonNull(data)) {
+                value = data.getBigDecimal("data");
+            }
+        }
+        return value;
+    }
+
+    /**
      * 根据chargeNo获取charge raw data
      * @param version
      * @param chargeNo

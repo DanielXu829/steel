@@ -24,6 +24,7 @@ import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
+import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.report.service.ReportIndexService;
@@ -66,6 +67,7 @@ public class GaoLuRiFenXiBaoGao {
     List<String> categoriesList = new ArrayList<>();
     List<String> dateList = new ArrayList<>();
     List<String> longTimeList = new ArrayList<>();
+    private ReportCategoryTemplate currentTemplate;
     DecimalFormat df1 = new DecimalFormat("0.0");
     DecimalFormat df2 = new DecimalFormat("0.00");
     DecimalFormat df3 = new DecimalFormat("0.000");
@@ -198,7 +200,8 @@ public class GaoLuRiFenXiBaoGao {
         handleLuTiWenDu(version);
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day.getCode(), LanguageEnum.cn_zh.getName(), "8高炉");
         if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
-            String templatePath = reportCategoryTemplates.get(0).getTemplatePath();
+            currentTemplate = reportCategoryTemplates.get(0);
+            String templatePath = currentTemplate.getTemplatePath();
             log.info("高炉日生产分析报告模板路径：" + templatePath);
             comm(version, templatePath);
         }
@@ -1246,19 +1249,21 @@ public class GaoLuRiFenXiBaoGao {
             // 处理换行符
             addBreakInCell(targetCell);
             //Date date = DateUtil.addDays(new Date(), -1);
-            String fileName = sequence + "_高炉日生产分析报告_" + DateUtil.getFormatDateTime(new Date(), "yyyyMMdd") + ".docx";
+            String fileName = String.format("%s_%s_%s.docx", sequence, currentTemplate.getTemplateName(), DateUtil.getFormatDateTime(endTime, "yyyyMMdd"));
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
             fos.close();
 
             ReportIndex reportIndex = new ReportIndex();
-            reportIndex.setSequence(sequence);
-            reportIndex.setIndexLang("cn_zh");
-            reportIndex.setIndexType("report_day");
-            reportIndex.setName(fileName);
-            reportIndex.setReportCategoryCode(JobEnum.gl_rishengchanfenxibaogao_day.getCode());
-            reportIndex.setPath(filePath);
+            reportIndex.setSequence(sequence)
+                    .setReportCategoryCode(JobEnum.gl_rishengchanfenxibaogao_day.getCode())
+                    .setName(fileName)
+                    .setPath(filePath)
+                    .setIndexLang(LanguageEnum.getByLang(currentTemplate.getTemplateLang()).getName())
+                    .setIndexType(ReportTemplateTypeEnum.getType(currentTemplate.getTemplateType()).getCode())
+                    .setRecordDate(new Date());
+
             reportIndexService.insertReportRecord(reportIndex);
 
             log.info("高炉日生产分析报告word文档生成完毕" + filePath);
