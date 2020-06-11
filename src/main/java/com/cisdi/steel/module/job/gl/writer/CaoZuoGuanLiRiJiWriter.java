@@ -311,7 +311,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
             int rowNum = 1;
 
-             List<CellData> cellData = handleEachRowData(tagNames, queryUrl, dateQuery, rowNum);
+            List<CellData> cellData = handleEachRowData(tagNames, queryUrl, dateQuery, rowNum);
+            BigDecimal value = this.getBlastIntakeArea(version, String.valueOf(dateQuery.getQueryEndTime()));
+            ExcelWriterUtil.addCellData(cellData, 1, 0, value);
             ExcelWriterUtil.setCellValue(sheet, cellData);
         } catch (Exception e) {
             log.error("处理正面-风口信息出错", e);
@@ -418,14 +420,14 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     }
                 }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                if (luLiaoList.size() > 18 || chargeVarInfos.size() > 12) {
-                    //设置动态边框样式
-                    int beginRowNum = beginRowIndex;
-                    int lastRowNum = beginRowIndex + (luLiaoList.size()-18);
-                    int beginColumnNum = typeColumnIndex;
-                    int endColumnNum = typeColumnIndex + chargeVarInfos.size();
-                    ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
-                }
+//                if (luLiaoList.size() > 18 || chargeVarInfos.size() > 12) {
+//                    //设置动态边框样式
+//                    int beginRowNum = beginRowIndex;
+//                    int lastRowNum = beginRowIndex + (luLiaoList.size()-18);
+//                    int beginColumnNum = typeColumnIndex;
+//                    int endColumnNum = typeColumnIndex + chargeVarInfos.size();
+//                    ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+//                }
             }
             handleLiaoXianBianGeng(sheet, version);
         } catch (Exception e) {
@@ -516,13 +518,13 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
 
         //设置动态边框样式
-        if (chargeVarInfos.size() > 4) {
-            int beginRowNum = beginRowIndex;
-            int lastRowNum = beginRowIndex + (chargeVarInfos.size()-4)*6;
-            int beginColumnNum = 1;
-            int endColumnNum = 35;
-            ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
-        }
+//        if (chargeVarInfos.size() > 4) {
+//            int beginRowNum = beginRowIndex;
+//            int lastRowNum = beginRowIndex + (chargeVarInfos.size()-4)*6;
+//            int beginColumnNum = 1;
+//            int endColumnNum = 35;
+//            ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+//        }
     }
 
     /**
@@ -635,14 +637,14 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             index++;
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        if (liaoXianMap.size() > 23) {
-            //设置动态边框样式
-            int beginRowNum = beginRowIndex;
-            int lastRowNum = beginRowIndex + (liaoXianMap.size()-23);
-            int beginColumnNum = columnIndex;
-            int endColumnNum = columnIndex + 8;
-            ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
-        }
+//        if (liaoXianMap.size() > 23) {
+//            //设置动态边框样式
+//            int beginRowNum = beginRowIndex;
+//            int lastRowNum = beginRowIndex + (liaoXianMap.size()-23);
+//            int beginColumnNum = columnIndex;
+//            int endColumnNum = columnIndex + 8;
+//            ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+//        }
     }
 
     //结束--------------------正面-变料信息--------------------
