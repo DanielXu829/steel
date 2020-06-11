@@ -1249,7 +1249,7 @@ public class GaoLuRiFenXiBaoGao {
             // 处理换行符
             addBreakInCell(targetCell);
             //Date date = DateUtil.addDays(new Date(), -1);
-            String fileName = String.format("%s_%s_%s.docx", sequence, currentTemplate.getTemplateName(), DateUtil.getFormatDateTime(endTime, "yyyyMMdd"));
+            String fileName = String.format("%s_%s_%s.docx", sequence, currentTemplate.getTemplateName(), DateUtil.getFormatDateTime(new Date(), "yyyyMMdd"));
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);
