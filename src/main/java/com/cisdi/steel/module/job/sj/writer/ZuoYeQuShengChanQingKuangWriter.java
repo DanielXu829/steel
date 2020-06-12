@@ -65,7 +65,7 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
 
         // 设置报表标题
         Sheet sheet0 = workbook.getSheetAt(0);
-        Date currentDate = new Date();
+        Date currentDate = dateQuery.getRecordDate();
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet0, 0, 0, currentDate);
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet0, 11, 0, currentDate);
         ExcelWriterUtil.replaceCurrentDateInTitle(sheet0, "%当日数%", currentDate, DateUtil.ddFormat, 3);
