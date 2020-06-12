@@ -9,6 +9,7 @@ import com.cisdi.steel.common.util.FileUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.ExportJobContext;
+import com.cisdi.steel.module.job.ExportWordJobContext;
 import com.cisdi.steel.module.job.a1.execute.ChutiezonglanExecute;
 import com.cisdi.steel.module.job.a1.execute.GongyiLuruExecute;
 import com.cisdi.steel.module.job.a3.execute.GongyikaExecute;
@@ -36,6 +37,29 @@ public class JobTController {
 
     @Autowired
     ExportJobContext exportJobContext;
+
+    @Autowired
+    ExportWordJobContext exportWordJobContext;
+
+    /**
+     * 配料单手动触发执行
+     *
+     * @param code 配料单任务编码
+     * @return
+     */
+    @GetMapping(value = "/wordReGenerate")
+    public ApiResult wordReGenerate(String code) {
+        try {
+            if (StringUtils.isBlank(code)) {
+                return ApiUtil.fail("编码不能为空");
+            }
+            String path = exportWordJobContext.execute(code);
+            return ApiUtil.success(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiUtil.fail("word 文档生成出错，code:" + code + " Exception:" + e);
+        }
+    }
 
     /**
      * 配料单手动触发执行

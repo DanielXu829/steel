@@ -13,6 +13,7 @@ import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.dto.response.gl.res.PageData;
 import com.cisdi.steel.dto.response.gl.res.TapSgRow;
 import com.cisdi.steel.dto.response.sj.*;
+import com.cisdi.steel.module.job.AbstractExportWordJob;
 import com.cisdi.steel.module.job.a1.doc.ChartFactory;
 import com.cisdi.steel.module.job.a1.doc.Serie;
 import com.cisdi.steel.module.job.config.HttpProperties;
@@ -56,7 +57,7 @@ import static java.util.Comparator.comparing;
 
 @Component
 @Slf4j
-public class GaoLuRiFenXiBaoGao {
+public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private static String version8 = "1.0";
     /**
      * doc最后结果
@@ -174,6 +175,11 @@ public class GaoLuRiFenXiBaoGao {
         categoriesList = new ArrayList<>();
         dateList = new ArrayList<>();
         longTimeList = new ArrayList<>();
+    }
+
+    @Override
+    public JobEnum getCurrentJob() {
+        return JobEnum.gl_rishengchanfenxibaogao_day;
     }
 
     //@Scheduled(cron = "0 0 23 * * ?")
