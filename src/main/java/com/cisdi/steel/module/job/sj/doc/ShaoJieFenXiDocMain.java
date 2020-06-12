@@ -14,6 +14,7 @@ import com.cisdi.steel.dto.response.gl.res.BatchDistribution;
 import com.cisdi.steel.dto.response.sj.AnaValueDTO;
 import com.cisdi.steel.dto.response.sj.PageData;
 import com.cisdi.steel.dto.response.sj.res.AnalysisValue;
+import com.cisdi.steel.module.job.AbstractExportWordJob;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
@@ -46,7 +47,7 @@ import java.util.*;
 /**
  *
  */
-public class ShaoJieFenXiDocMain {
+public class ShaoJieFenXiDocMain extends AbstractExportWordJob {
 
     @Autowired
     private HttpUtil httpUtil;
@@ -78,8 +79,13 @@ public class ShaoJieFenXiDocMain {
      */
     private HashMap<String, Object> result = null;
 
+    @Override
+    public JobEnum getCurrentJob() {
+        return JobEnum.sj_shengchanfenxi4;
+    }
+
     @Scheduled(cron = "0 0 6 * * ?")
-    public void mainJob() {
+    public void mainTask() {
         result = new HashMap<>();
         Date date = new Date();
         mainDeal(version, date);

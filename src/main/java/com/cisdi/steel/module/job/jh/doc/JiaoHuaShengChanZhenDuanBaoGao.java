@@ -9,6 +9,7 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.module.job.AbstractExportWordJob;
 import com.cisdi.steel.module.job.a1.doc.ChartFactory;
 import com.cisdi.steel.module.job.a1.doc.Serie;
 import com.cisdi.steel.module.job.config.HttpProperties;
@@ -47,7 +48,7 @@ import java.util.*;
 
 @Component
 @Slf4j
-public class JiaoHuaShengChanZhenDuanBaoGao {
+public class JiaoHuaShengChanZhenDuanBaoGao extends AbstractExportWordJob {
     @Autowired
     private HttpUtil httpUtil;
 
@@ -123,6 +124,11 @@ public class JiaoHuaShengChanZhenDuanBaoGao {
         categoriesList = new ArrayList<>();
         dateList = new ArrayList<>();
         longTimeList = new ArrayList<>();
+    }
+
+    @Override
+    public JobEnum getCurrentJob() {
+        return JobEnum.jh_shengchanzhenduanbaogao;
     }
 
     @Scheduled(cron = "0 0/30 * * * ?")

@@ -12,6 +12,7 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.dto.response.sj.*;
+import com.cisdi.steel.module.job.AbstractExportWordJob;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
@@ -49,7 +50,7 @@ import static java.util.Comparator.comparing;
 /**
  *
  */
-public class HuanDuiCaoYeHuiYiJiYaoDocMain {
+public class HuanDuiCaoYeHuiYiJiYaoDocMain extends AbstractExportWordJob {
 
     @Autowired
     private HttpUtil httpUtil;
@@ -77,7 +78,7 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain {
     private HashMap<String, Object> result = null;
 
     @Scheduled(cron = "0 0 6 * * ?")
-    public void mainJob() {
+    public void mainTask() {
         result = new HashMap<>();
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
@@ -725,5 +726,10 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain {
      */
     private String getUrl(String version) {
         return httpProperties.getUrlApiSJThree();
+    }
+
+    @Override
+    public JobEnum getCurrentJob() {
+        return JobEnum.sj_huanduicaoyehuiyijiyao;
     }
 }

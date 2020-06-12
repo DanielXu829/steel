@@ -64,7 +64,7 @@ public class DocTest extends SteelApplicationTests {
     @Test
     public void testShaoJieFenXi() {
         long start = System.currentTimeMillis();
-        shaojieFenXiDocMain.mainJob();
+        shaojieFenXiDocMain.mainTask();
         long end = System.currentTimeMillis();
 
         System.out.println(end - start);
@@ -78,7 +78,7 @@ public class DocTest extends SteelApplicationTests {
     @Test
     public void testHuanDuiCaoYeHuiYiJiYao() {
         long start = System.currentTimeMillis();
-        huanDuiCaoYeHuiYiJiYaoDocMain.mainJob();
+        huanDuiCaoYeHuiYiJiYaoDocMain.mainTask();
         long end = System.currentTimeMillis();
 
         System.out.println(end - start);
