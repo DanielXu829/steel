@@ -80,11 +80,13 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
-            List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourFromYesEighteen(date.getRecordDate());
-            List<CellData> cellDataList = this.handleWgShiftTeams(sheet, getWgShiftTeamUrl(version), dateQueries);
-            ExcelWriterUtil.setCellValue(sheet, cellDataList);
-            // 清除去占位符
-            PoiCustomUtil.clearPlaceHolder(sheet);
+            if (i == 0) {
+                List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourFromYesEighteen(date.getRecordDate());
+                List<CellData> cellDataList = this.handleWgShiftTeams(sheet, getWgShiftTeamUrl(version), dateQueries);
+                ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                // 清除去占位符
+                PoiCustomUtil.clearPlaceHolder(sheet);
+            }
         }
         Date currentDate = new Date();
         for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
