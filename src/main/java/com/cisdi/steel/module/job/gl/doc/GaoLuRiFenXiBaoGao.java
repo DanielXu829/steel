@@ -254,11 +254,13 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         param.put("tagname", tagName);
         String results = httpUtil.get(url, param);
         JSONObject jsonObject = JSONObject.parseObject(results, Feature.OrderedField);
-        JSONObject data = jsonObject.getJSONObject("data");
-        if (data != null && data.size() > 0) {
-            BigDecimal tagValue  = (BigDecimal) data.get("val");
-            if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
-                maxTemp = tagValue;
+        if (Objects.nonNull(jsonObject)) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            if (data != null && data.size() > 0) {
+                BigDecimal tagValue  = (BigDecimal) data.get("val");
+                if (tagValue != null && tagValue.compareTo(maxTemp) == 1) {
+                    maxTemp = tagValue;
+                }
             }
         }
         return maxTemp;
