@@ -430,9 +430,75 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
 //                }
             }
             handleLiaoXianBianGeng(sheet, version);
+            handJingJiaoJiLu(sheet, version, dateQuery);
         } catch (Exception e) {
             log.error("处理正面-变料信息出错", e);
         }
+    }
+
+    /**
+     * 净焦记录
+     * @param sheet
+     * @param version
+     * @param dateQuery
+     */
+    private void handJingJiaoJiLu (Sheet sheet, String version, DateQuery dateQuery) {
+        //{挡位.角度}
+        Cell cell = PoiCustomUtil.getCellByValue(sheet, "{净焦.批次}");
+        if (Objects.isNull(cell)) {
+            return;
+        }
+        int beginRowIndex = cell.getRowIndex();
+        int columnIndex = cell.getColumnIndex();
+
+        List<CellData> cellDataList = new ArrayList<>();
+        String queryUrl = getUrlTagNamesInRange(version);
+        JSONObject query = new JSONObject();
+        query.put("starttime", dateQuery.getQueryStartTime());
+        query.put("endtime", dateQuery.getQueryEndTime());
+        query.put("tagnames", new String[]{"BF8_L2M_NetCokeTime_evt"});
+        SerializeConfig serializeConfig = new SerializeConfig();
+        String jsonString = JSONObject.toJSONString(query, serializeConfig);
+        String results = httpUtil.postJsonParams(queryUrl, jsonString);
+        if (StringUtils.isNotBlank(results)) {
+            JSONObject object = JSONObject.parseObject(results);
+            if (Objects.nonNull(object)) {
+                JSONObject data = object.getJSONObject("data");
+                if (Objects.nonNull(data)) {
+                    JSONObject tag = data.getJSONObject("BF8_L2M_NetCokeTime_evt");
+                    if (Objects.nonNull(tag)) {
+                        Map<String, Object> innerMap = tag.getInnerMap();
+                        Set<String> keys = innerMap.keySet();
+                        int k = 0;
+                        for (String key : keys) {
+                            //批次
+                            ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + k, columnIndex, tag.getBigDecimal(key));
+
+                            String url = httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
+                            Map<String, String> param = new HashMap<>();
+                            param.put("time", key);
+                            param.put("tagname", "BF8_L2M_CokeBatchWeight_evt");
+                            String result = httpUtil.get(url, param);
+                            if (StringUtils.isNotBlank(result)) {
+                                JSONObject weight = JSON.parseObject(result);
+                                if (Objects.nonNull(weight)) {
+                                    weight = weight.getJSONObject("data");
+                                    if (Objects.nonNull(weight)) {
+                                        BigDecimal val = weight.getBigDecimal("val");
+                                        if (val != null) {
+                                            //重量
+                                            ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + k, columnIndex + 2, val);
+                                        }
+                                    }
+                                }
+                            }
+                            k++;
+                        }
+                    }
+                }
+            }
+        }
+        ExcelWriterUtil.setCellValue(sheet, cellDataList);
     }
 
     /**
@@ -1213,8 +1279,13 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 BigDecimal value = values.get(arr[j]);
                 int writeRow = tpcNoBeginRow;
                 int writeColumn = tpcNoBeginColumn + j;
-                // 填充具体数据
-                ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
+                if (value != null) {
+                    ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value.multiply(new BigDecimal(100)));
+                } else {
+                    // 填充具体数据
+                    ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
+                }
+
             }
         }
     }
@@ -1283,8 +1354,26 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list)) {
             return;
         }
+        // 升序
+        Collections.sort(list, new Comparator<AnalysisValue>(){
+            @Override
+            public int compare(AnalysisValue p1, AnalysisValue p2) {
+                if (p1.getAnalysis() == null || p2.getAnalysis() == null) {
+                    return 0;
+                }
+                if (StringUtils.isBlank(p1.getAnalysis().getSampleid()) && StringUtils.isBlank(p2.getAnalysis().getSampleid())) {
+                    return 0;
+                }
+                if (p1.getAnalysis().getSampleid().compareTo(p2.getAnalysis().getSampleid()) > 0){
+                    return 1;
+                }else if (p1.getAnalysis().getSampleid().compareTo(p2.getAnalysis().getSampleid()) > 0){
+                    return 0;
+                }else{
+                    return -1;
+                }
+            }
+        });
 
-        //目前只能显示12行数据
         for (int i = 0; i< list.size() && i < 12; i++) {
             AnalysisValue analysisValue = list.get(i);
             if (Objects.isNull(analysisValue)) continue;

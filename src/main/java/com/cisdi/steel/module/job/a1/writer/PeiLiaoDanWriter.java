@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.a1.writer;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -13,6 +14,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -394,6 +396,10 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
                     ExcelWriterUtil.addCellData(cellDataList, 32, 13, df.format(slagObj.getBigDecimal("Al2O3")));
                 }
             }
+            Date date = new Date();
+            String currentDate = DateFormatUtils.format(date, DateUtil.hhmmFormat);
+            ExcelWriterUtil.addCellData(cellDataList, 32, 14, currentDate);
+
         } catch (Exception e){
             log.error("处理配料单出错", e);
         }
