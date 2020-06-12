@@ -9,10 +9,12 @@ import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.ExportJobContext;
+import com.cisdi.steel.module.job.ExportWordJobContext;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import com.cisdi.steel.module.report.service.ReportIndexService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,9 @@ public class ReportIndexController {
     @Autowired
     protected HttpProperties httpProperties;
 
+    @Autowired
+    private ReportIndexMapper reportIndexMapper;
+
     /**
      * 构造器注入
      */
@@ -49,10 +54,13 @@ public class ReportIndexController {
 
     private final ExportJobContext exportJobContext;
 
+    private final ExportWordJobContext exportWordJobContext;
+
     @Autowired
-    public ReportIndexController(ReportIndexService baseService, ExportJobContext exportJobContext) {
+    public ReportIndexController(ReportIndexService baseService, ExportJobContext exportJobContext, ExportWordJobContext exportWordJobContext) {
         this.baseService = baseService;
         this.exportJobContext = exportJobContext;
+        this.exportWordJobContext = exportWordJobContext;
     }
 
     /**
@@ -162,10 +170,17 @@ public class ReportIndexController {
      */
     @PostMapping(value = "/reloadIndex")
     public ApiResult reloadIndex(@RequestBody ReportIndexQuery reportIndexQuery) {
-        if (Objects.isNull(reportIndexQuery.getReportDate())) {
-            exportJobContext.executeByIndexId(reportIndexQuery.getId());
-        } else {
-            exportJobContext.executeByIndexId(reportIndexQuery.getId(), reportIndexQuery.getReportDate());
+        ReportIndex reportIndex = reportIndexMapper.selectById(reportIndexQuery.getId());
+        if (Objects.nonNull(reportIndex)) {
+            if (reportIndex.getPath().endsWith(".doc") || reportIndex.getPath().endsWith(".docx")) {
+                exportWordJobContext.executeByIndexId(reportIndexQuery.getId());
+            } else {
+                if (Objects.isNull(reportIndexQuery.getReportDate())) {
+                    exportJobContext.executeByIndexId(reportIndexQuery.getId());
+                } else {
+                    exportJobContext.executeByIndexId(reportIndexQuery.getId(), reportIndexQuery.getReportDate());
+                }
+            }
         }
         return ApiUtil.success();
     }
