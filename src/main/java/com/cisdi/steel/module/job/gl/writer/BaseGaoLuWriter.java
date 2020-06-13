@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.util.DateUtil;
@@ -436,6 +437,26 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
             }
         }
         return matrixDistrAvgInRangeMap;
+    }
+
+    /**
+     * 获取materials数据组指定的值
+     * @param materialsArray
+     * @param compareKey
+     * @param compareValue
+     * @param actualKey
+     * @return
+     */
+    protected String getMaterialValue(JSONArray materialsArray, String compareKey, String compareValue, String actualKey) {
+        if (CollectionUtils.isNotEmpty(materialsArray)) {
+            for (int k = 0; k < materialsArray.size(); k++) {
+                JSONObject material = materialsArray.getJSONObject(k);
+                if (StringUtils.endsWith(material.getString(compareKey), compareValue)){
+                    return material.getString(actualKey);
+                }
+            }
+        }
+        return null;
     }
 
     /**
