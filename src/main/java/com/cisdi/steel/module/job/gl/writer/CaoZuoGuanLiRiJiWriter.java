@@ -96,8 +96,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         } catch (Exception e) {
             log.error("处理模板数据失败", e);
         } finally {
-            Date currentDate = new Date();
-            //Date currentDate = DateUtil.addDays(new Date(), -1);
+            //Date currentDate = new Date();
+            Date currentDate = DateUtil.addDays(new Date(), -1);
             for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet=workbook.getSheetAt(i);
                 // 清除标记项(例如:{块矿.矿种})
@@ -136,8 +136,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
             }
-            // TODO 煤枪数支
-            // TODO 齿轮箱水温差℃
         } catch (Exception e) {
             log.error("处理正面-小时参数出错", e);
         }
@@ -321,7 +319,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     }
     //结束--------------------正面-风口信息--------------------
 
-
     //开始--------------------正面-变料信息--------------------
     protected void handleBianLiaoXinXi(WriterExcelDTO excelDTO,Workbook workbook,String version){
         try {
@@ -408,7 +405,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                             }
                             default: {
                                 // 动态类型赋值
-                                // TODO 需要累加brandName相同的数据
+                                // 需要累加brandName相同的数据
                                 BigDecimal weight = chargeVarMaterials.stream()
                                         .filter(p -> brandName.equals(p.getBrandName()))
                                         .map(ChargeVarMaterial::getWeight)
@@ -726,14 +723,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
     }
 
-    protected void handleFacadeXiaoShiCanShu(Workbook workbook, String version) {
-        try {
-            log.debug("处理 正面 - 小时参数 部分");
-        } catch (Exception e) {
-            log.error("处理 正面 - 小时参数 部分产生错误", e);
-        }
-    }
-
     /**
      * 获取数据
      * @param sheet
@@ -745,7 +734,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String url = httpProperties.getGlUrlVersion(version) + "/getLatestByCategoryAndItem";
         String data = httpUtil.get(url, queryParam);
         JSONObject jsonObject = JSONObject.parseObject(data);
-        BigDecimal result = jsonObject.getBigDecimal("data");
+        BigDecimal result = null;
+        if (Objects.nonNull(jsonObject)) {
+            result = jsonObject.getBigDecimal("data");
+        }
         return result;
     }
 
