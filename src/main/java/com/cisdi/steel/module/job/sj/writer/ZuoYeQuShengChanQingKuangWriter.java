@@ -1,10 +1,14 @@
 package com.cisdi.steel.module.job.sj.writer;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.dto.response.sj.res.AnaQualitySttcs;
+import com.cisdi.steel.dto.response.sj.res.AnalysisQuality;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -55,7 +59,7 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
         dateQuery = this.getDateQueryBeforeOneDay(excelDTO);
 
         // 填充质量指标sheet
-        // handleZhiLiangZhiBiao(workbook, version);
+        handleZhiLiangZhiBiao(workbook, version);
 
         // 填充生产情况sheet
         handleShengChanQingKuang(workbook, version);
@@ -71,11 +75,85 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
         ExcelWriterUtil.replaceCurrentDateInTitle(sheet0, "%当日数%", currentDate, DateUtil.ddFormat, 3);
     }
 
+    /**
+     * 质量指标统计
+     * @param workbook
+     * @param version
+     */
     private void handleZhiLiangZhiBiao(Workbook workbook, String version) {
-        Sheet sheet = workbook.getSheet("_zhiliangzhibiao");
-        List<CellData> resultList = new ArrayList<>();
+        final String FEO = "FeO";
+        final String RO = "RO";
+        final String MGO = "MgO";
+        // 表头
+        Sheet firstSheet = workbook.getSheetAt(0);
+        String tableHeadData = getQualityIndexTableHead(version);
+        if (StringUtils.isNotBlank(tableHeadData)) {
+            JSONObject analysisQualityJsonObject = JSON.parseObject(tableHeadData);
+            JSONArray analysisQualityArray = analysisQualityJsonObject.getJSONArray("data");
+            List<AnalysisQuality> analysisQualityList = JSON.parseObject(analysisQualityArray.toJSONString(), new TypeReference<List<AnalysisQuality>>() {});
+            for (AnalysisQuality item : analysisQualityList) {
+                String itemOs = item.getItemOs();
+                String unit = item.getUnit() == null ? "%" : item.getUnit();
+                String content = itemOs + "（" + item.getCenter() + unit + "±" + item.getRange() + "）";
+                if (FEO.equals(itemOs))  {
+                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + FEO + "}}");
+                    if (Objects.nonNull(cell)) {
+                        PoiCustomUtil.setCellValue(cell, content);
+                    } else {
+                        log.warn("{{FeO}}占位符不存在");
+                    }
+                } else if (RO.equals(itemOs)) {
+                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + RO + "}}");
+                    if (Objects.nonNull(cell)) {
+                        PoiCustomUtil.setCellValue(cell, content);
+                    } else {
+                        log.warn("{{Ro}}占位符不存在");
+                    }
+                } else if (MGO.equals(itemOs)) {
+                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + MGO + "}}");
+                    if (Objects.nonNull(cell)) {
+                        PoiCustomUtil.setCellValue(cell, content);
+                    } else {
+                        log.warn("{{MgO}}占位符不存在");
+                    }
+                }
+            }
+        }
+        // 清除表头占位符
+        PoiCustomUtil.clearPlaceHolder(firstSheet);
 
-        ExcelWriterUtil.setCellValue(sheet, resultList);
+        // 表体
+        Sheet qualityIndexSheet = workbook.getSheet("_zhiliangzhibiao");
+        List<CellData> resultList = new ArrayList<>();
+        Integer[] workTeams = {1, 2, 3, 4, null};
+        String endTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-dd 23:59:59");
+        Date endDate = DateUtil.strToDate(endTime, "yyyy-MM-dd HH:mm:ss");
+        for (int i = 0; i < workTeams.length; i++) {
+            Integer workTeam = workTeams[i];
+            String qualityIndexData = getQualityIndexData(endDate.getTime(), workTeam, version);
+            if (StringUtils.isNotBlank(qualityIndexData)) {
+                JSONObject anaQualitySttcsJsonObject = JSON.parseObject(qualityIndexData);
+                JSONArray anaQualitySttcsArray = anaQualitySttcsJsonObject.getJSONArray("data");
+                List<AnaQualitySttcs> anaQualitySttcsList = JSON.parseObject(anaQualitySttcsArray.toJSONString(), new TypeReference<List<AnaQualitySttcs>>() {});
+                for (AnaQualitySttcs anaQualitySttcs : anaQualitySttcsList) {
+                    ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
+                    if (FEO.equals(anaQualitySttcs.getItem())) {
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 2, anaQualitySttcs.getUnqualified());
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 3, anaQualitySttcs.getQualifiedRate());
+                    }
+                    if (RO.equals(anaQualitySttcs.getItem())) {
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 4, anaQualitySttcs.getUnqualified());
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 5, anaQualitySttcs.getQualifiedRate());
+                    }
+                    if (MGO.equals(anaQualitySttcs.getItem())) {
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 6, anaQualitySttcs.getUnqualified());
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 7, anaQualitySttcs.getQualifiedRate());
+                    }
+                }
+            }
+        }
+
+        ExcelWriterUtil.setCellValue(qualityIndexSheet, resultList);
     }
 
     private void handleShengChanQingKuang(Workbook workbook, String version) {
@@ -172,6 +250,35 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
                 }
             }
         }
+    }
+
+    /**
+     * 获取质量指标表头数据
+     * @param timestamp
+     * @param workTeam
+     * @param version
+     * @return
+     */
+    private String getQualityIndexTableHead(String version) {
+        String url = httpProperties.getSJUrlVersion(version) + "/report/qualitySttcs/tableHead";
+        return httpUtil.get(url);
+    }
+
+    /**
+     * 获取质量指标表体数据
+     * @param timestamp
+     * @param workTeam
+     * @param version
+     * @return
+     */
+    private String getQualityIndexData(Long timestamp, Integer workTeam, String version) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("clock", Objects.requireNonNull(timestamp.toString()));
+        if (Objects.nonNull(workTeam)) {
+            queryParam.put("workTeam", Objects.requireNonNull(workTeam.toString()));
+        }
+        String url = httpProperties.getSJUrlVersion(version) + "/report/qualitySttcs/clock";
+        return httpUtil.get(url, queryParam);
     }
 
     /**
