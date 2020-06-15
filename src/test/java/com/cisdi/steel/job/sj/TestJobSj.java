@@ -39,7 +39,7 @@ public class TestJobSj extends SteelApplicationTests {
 
     @Test
     public void testHuanDuiCaoYeHuiYiJiYaoDocMain() {
-        huanDuiCaoYeHuiYiJiYaoDocMain.mainJob();
+        huanDuiCaoYeHuiYiJiYaoDocMain.mainTask();
     }
 
 }
