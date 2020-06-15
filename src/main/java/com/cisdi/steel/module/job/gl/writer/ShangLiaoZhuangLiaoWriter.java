@@ -5,6 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.dto.response.gl.ChargeDTO;
+import com.cisdi.steel.dto.response.gl.res.BatchData;
+import com.cisdi.steel.dto.response.gl.res.BatchIndex;
+import com.cisdi.steel.dto.response.gl.res.BatchMaterial;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -17,12 +21,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>Description: 上料装料 执行处理类 </p>
@@ -61,14 +62,16 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         for (int i = 0; i < chargeNos.size(); i++) {
             Integer chargeNo = chargeNos.get(i);
             // 通过api获取数据
-            String chargeRawDataStr = getChargeRawData(version, chargeNo);
+            //String chargeRawDataStr = getChargeRawData(version, chargeNo);
+            ChargeDTO chargeDTO = getChargeDTO(version, chargeNo);
 
-            JSONArray shangLiaoDataArray = FastJSONUtil.convertJsonStringToJsonArray(chargeRawDataStr);
-            if (CollectionUtils.isNotEmpty(shangLiaoDataArray)) {
+            //JSONArray shangLiaoDataArray = FastJSONUtil.convertJsonStringToJsonArray(chargeRawDataStr);
+            if (Objects.nonNull(chargeDTO) && CollectionUtils.isNotEmpty(chargeDTO.getData())) {
                 // 写入数据
-                List<CellData> cellDataList = mapDataHandler(shangLiaoDataArray, itemNameList, sheet, count);
+                //List<CellData> cellDataList = mapDataHandler(shangLiaoDataArray, itemNameList, sheet, count);
+                List<CellData> cellDataList = mapDataHandler(chargeDTO, itemNameList, sheet, count);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                count = count + shangLiaoDataArray.size();
+                count = count + chargeDTO.getData().size();
             }
         }
 
@@ -194,23 +197,131 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
     }
 
     /**
-     * 获取materials数据组指定的值
-     * @param materialsArray
-     * @param compareKey
-     * @param compareValue
-     * @param actualKey
+     * 解析JSON数组，封装写入数据
+     * @param data
+     * @param prefix
+     * @param itemNameList
+     * @param itemRowNum
+     * @param itemColNum
      * @return
      */
-    private String getMaterialValue(JSONArray materialsArray, String compareKey, String compareValue, String actualKey) {
-        if (CollectionUtils.isNotEmpty(materialsArray)) {
-            for (int k = 0; k < materialsArray.size(); k++) {
-                JSONObject material = materialsArray.getJSONObject(k);
-                if (StringUtils.endsWith(material.getString(compareKey), compareValue)){
-                    return material.getString(actualKey);
+    private List<CellData> mapDataHandler(ChargeDTO chargeDTO, List<String> itemNameList, Sheet sheet, Integer count) {
+        List<CellData> cellDataList = new ArrayList<>();
+
+        List<BatchData> data = chargeDTO.getData();
+        if (Objects.nonNull(chargeDTO) && CollectionUtils.isNotEmpty(data)) {
+            // 计算本次o之和。
+            BigDecimal oCount = new BigDecimal(0);
+            List<BatchData> oCollect = data.stream()
+                    .filter(p -> ("O1".equalsIgnoreCase(p.getBatchIndex().getTyp()) || "Os".equalsIgnoreCase(p.getBatchIndex().getTyp())))
+                    .collect(Collectors.toList());
+            for (int i = 0; i < oCollect.size(); i++) {
+                BigDecimal reduce = oCollect.get(i).getMaterials().stream()
+                        .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
+                oCount = oCount.add(reduce);
+            }
+            // 第一个C中的回用焦丁
+            BigDecimal c1HuiYongJiaoDing = data.get(0).getMaterials().stream()
+                    .filter(m -> m.getDescr().endsWith("回用焦丁"))
+                    .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            for (int i = 0; i < data.size(); i++) {
+                BatchData batchData = data.get(i);
+                if (Objects.nonNull(batchData) && Objects.nonNull(batchData.getBatchIndex()) && Objects.nonNull(batchData.getMaterials())) {
+                    BatchIndex batchIndexDataMap = batchData.getBatchIndex();
+                    List<BatchMaterial> materialsArray = batchData.getMaterials();
+                    int sequence = count + i + 1;
+                    int row = sequence + itemRowNum;
+                    // 遍历标记行所有的单元格
+                    for (int j = 0; j < itemNameList.size(); j++) {
+                        // 获取标记项单元格中的值
+                        String itemName = itemNameList.get(j);
+                        int col = j;
+                        if (StringUtils.isNotBlank(itemName)) {
+                            switch (itemName) {
+                                case "sequence": {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, sequence);
+                                    break;
+                                }
+                                case "batchIndex.weighttime": {
+                                    Long weightTimeInMs = batchIndexDataMap.getWeighttime().getTime();
+                                    Date weightTime = new Date();
+                                    weightTime.setTime(weightTimeInMs);
+                                    String formatWeightTime = DateUtil.getFormatDateTime(weightTime, DateUtil.hhmmFormat);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, formatWeightTime);
+                                    break;
+                                }
+                                case "batchIndex.matrixno": {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, batchIndexDataMap.getMatrixno());
+                                    break;
+                                }
+                                case "batchIndex.batchno": {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, batchIndexDataMap.getBatchno());
+                                    break;
+                                }
+                                case "N/A": {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, "");
+                                    break;
+                                }
+                                case "materials.brandcode" : {
+                                    //c中：materials.brandcode后缀是COKE
+                                    if ("C".equals(batchIndexDataMap.getTyp())) {
+                                        BigDecimal val = materialsArray.stream()
+                                                .filter(m -> m.getBrandcode().endsWith("COKE"))
+                                                .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    }
+                                    break;
+                                }
+                                case "矿石总量" : {
+                                    //本次o之和 - 第一个C中的回用焦丁
+                                    if ("C".equals(batchIndexDataMap.getTyp())) {
+                                        BigDecimal val = oCount.add(c1HuiYongJiaoDing);
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    } else {
+                                        BigDecimal val = oCount.subtract(c1HuiYongJiaoDing);
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    }
+                                    break;
+                                }
+                                case "大烧" : {
+                                    //第一个o中：materials.brandcode后缀是SINTER
+                                    if ("O1".equals(batchIndexDataMap.getTyp())) {
+                                        BigDecimal val = materialsArray.stream()
+                                                .filter(m -> m.getBrandcode().endsWith("SINTER"))
+                                                .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    }
+                                    break;
+                                }
+                                case "小烧" : {
+                                    //第二个o中：materials.brandcode后缀是SINTER
+                                    if ("Os".equals(batchIndexDataMap.getTyp())) {
+                                        BigDecimal val = materialsArray.stream()
+                                                .filter(m -> m.getBrandcode().endsWith("SINTER"))
+                                                .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    }
+                                    break;
+                                }
+                                default: {
+                                    //默认，materials中descr对应表头
+                                    BigDecimal val = materialsArray.stream()
+                                            .filter(m -> itemName.equals(m.getDescr()))
+                                            .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                    if (val != null && val.doubleValue() > 0) {
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-        return null;
+
+        return cellDataList;
     }
 
     /**
