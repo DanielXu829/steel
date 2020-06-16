@@ -685,17 +685,27 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex, mapKey);
             for(String key : mapValue.keySet()){
                 BigDecimal val = mapValue.get(key);
-                switch (key) {
-                    case "C":
-                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 3, val);
-                        break;
-                    case "OI":
-                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5, val);
-                        break;
-                    case "Os":
-                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
-                        break;
+                if (key.equals("C")) {
+                    ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 3, val);
+                } else if (key.equals("基准")) {
+                    ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
+                } else {
+                    ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5,
+                            mapValue.get("OI")+"/"+mapValue.get("Os"));
                 }
+//                switch (key) {
+//                    case "C":
+//                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 3, val);
+//                        break;
+//                    case "OI":
+//                    case "Os":
+//                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5,
+//                                mapValue.get("OI")+"/"+mapValue.get("Os"));
+//                        break;
+//                    case "基准":
+//                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
+//                        break;
+//                }
             }
             index++;
         }
@@ -778,7 +788,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 int beginRow = cell.getRowIndex();
                 int beginColumn = cell.getColumnIndex();
                 if (Objects.nonNull(ruLuTieFen)) {
-                    ExcelWriterUtil.addCellData(resultList, beginRow, beginColumn, ruLuTieFen);
+                    ExcelWriterUtil.addCellData(resultList, beginRow, beginColumn, ruLuTieFen.multiply(new BigDecimal(100)));
                 }
             }
 
@@ -789,8 +799,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 int beginRow = piTieLiangCell.getRowIndex();
                 int beginColumn = piTieLiangCell.getColumnIndex();
                 if (Objects.nonNull(piTieLiang) && Objects.nonNull(ruLuTieFen)) {
-//            ExcelWriterUtil.addCellData(resultList, tapBeginRow, tapBeginColumn, result.setScale(3,
-//                    BigDecimal.ROUND_HALF_UP).multiply(ruLuTieFen.setScale(3, BigDecimal.ROUND_HALF_UP)));
                     ExcelWriterUtil.addCellData(resultList, beginRow, beginColumn, piTieLiang.multiply(ruLuTieFen));
                 }
             }
@@ -802,7 +810,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 int beginRow = jiaoBiCell.getRowIndex();
                 int beginColumn = jiaoBiCell.getColumnIndex();
                 if (Objects.nonNull(piTieLiang) && Objects.nonNull(ruLuTieFen) && Objects.nonNull(jiaoBi)) {
-                    ExcelWriterUtil.addCellData(resultList, beginRow, beginColumn, jiaoBi.divide(piTieLiang.multiply(ruLuTieFen), 4, BigDecimal.ROUND_HALF_UP));
+                    ExcelWriterUtil.addCellData(resultList, beginRow, beginColumn, jiaoBi.divide(piTieLiang.multiply(ruLuTieFen), 6, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(1000)));
                 }
             }
 
