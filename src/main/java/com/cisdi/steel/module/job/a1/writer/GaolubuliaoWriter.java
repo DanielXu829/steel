@@ -40,8 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class GaolubuliaoWriter extends AbstractExcelReadWriter {
-    //限制两次时间间隔10分钟
-    private static int LIMITTIME = 10;
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -63,13 +61,7 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
         JSONObject jsonObject = JSONObject.parseObject(s);
 
         // 料制
-        boolean b = handlerPart3(workbook, dictionary, excelDTO, jsonObject);
-
-        //若是两次时间间隔小于10分钟就不写入
-        if (!b) {
-            int i = 1 / 0;
-            log.error("高炉变料月报小于" + LIMITTIME + "分钟,不继续谢写入数据");
-        }
+        handlerPart3(workbook, dictionary, excelDTO, jsonObject);
 
         // 炉料结构
         handlerPart4(workbook, dictionary, excelDTO, jsonObject);
@@ -219,13 +211,6 @@ public class GaolubuliaoWriter extends AbstractExcelReadWriter {
             rowIndex = Double.valueOf(rowIndexStr).intValue();
         }
         Date curr = new Date();
-        if (StringUtils.isNotBlank(dateStr)) {
-            Date date = DateUtil.strToDate(dateStr, DateUtil.fullFormat);
-            Long betweenMin = DateUtil.getBetweenMin(curr, date);
-            if (betweenMin.intValue() < LIMITTIME) {
-                return false;
-            }
-        }
 
         Sheet sheet = workbook.getSheet(sheetName);
         List<String> rowVals = PoiCustomUtil.getRowCelVal(sheet, 2);
