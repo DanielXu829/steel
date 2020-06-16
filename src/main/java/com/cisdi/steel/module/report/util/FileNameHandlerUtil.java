@@ -42,7 +42,8 @@ public class FileNameHandlerUtil {
             String time = DateUtil.getFormatDateTime(calendar.getTime(), "yyyy-MM-dd HH");
             return time;
         }
-
+        //目前日报表和月报表需要拿前一天的数据，因此文件名应该是前一天的
+        Date currentDate = DateUtil.addDays(dateQuery.getRecordDate(), -1);
         switch (templateTypeEnum) {
             case report_hour:
                 return hourName(dateQuery.getRecordDate(), flag);
@@ -51,11 +52,11 @@ public class FileNameHandlerUtil {
             case report_class:
                 return hourName(dateQuery.getRecordDate(), flag);
             case report_day:
-                return hourName(dateQuery.getRecordDate(), flag);
+                return hourName(currentDate, flag);
             case report_week:
                 return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
             case report_month:
-                return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
+                return DateUtil.getFormatDateTime(currentDate, "yyyy-MM-dd");
             case report_year:
                 return DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd");
             default:

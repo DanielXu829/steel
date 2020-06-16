@@ -36,7 +36,7 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
 
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        DateQuery date = this.getDateQuery(excelDTO);
+        DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
         String version ="8.0";
         try {
@@ -74,6 +74,17 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
                     List<CellData> cellDataList = eachData(columnCells, getUrl(version), eachDate.getQueryParam(), rowNum + 1);
                     ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 }
+            }
+        }
+
+        Date currentDate = new Date();
+        for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet tempSheet = workbook.getSheetAt(i);
+            // 清除标记项(例如:{块矿.矿种})
+            if (!Objects.isNull(tempSheet) && !workbook.isSheetHidden(i)) {
+                // 全局替换 当前日期
+                ExcelWriterUtil.replaceCurrentDateInTitle(tempSheet, "%当前日期%", currentDate);
+                PoiCustomUtil.clearPlaceHolder(tempSheet);
             }
         }
 

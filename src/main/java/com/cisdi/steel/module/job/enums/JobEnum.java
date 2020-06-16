@@ -59,6 +59,7 @@ public enum JobEnum {
     gl_guankongzhibiao("gl_guankongzhibiao", "高炉重点管控指标"),
     gl_bf6gongyicanshu("gl_bf6gongyicanshu", "6高炉工艺参数跟踪"),
     gl_caoyehui_day("gl_caoyehui_day", "高炉操业会议"),
+    gl_rishengchanfenxibaogao_day("gl_rishengchanfenxibaogao_day", "高炉日生产分析报告"),
     gl_tuosifuyang("gl_tuosifuyang", "6高炉脱湿富氧操作报表"),
     gl_zhuangliaochuchen("gl_zhuangliaochuchen", "装料除尘操作报表"),
     gl_refenglujiankong("gl_refenglujiankong", "6高炉热风炉设备监控日报"),
@@ -92,7 +93,6 @@ public enum JobEnum {
     jh_cdqcaozuob("jh_cdqcaozuob", "干熄焦-CDQ操作运行报表B（日）"),
     jh_zhuangmeichuchen("jh_zhuangmeichuchen", "装煤除尘报表"),
     jh_cdqchuchen("jh_cdqchuchen", "CDQ除尘报表"),
-    jh_shaijiaochuchen("jh_shaijiaochuchen", "干熄焦-筛焦除尘报表（日）"),
     jh_gufenglengning1("jh_gufenglengning1", "化产-鼓风冷凝报表（一）（日）"),
     jh_gufenglengning2("jh_gufenglengning2", "化产-鼓风冷凝报表（二）（日）"),
     jh_zhilengxunhuanshui("jh_zhilengxunhuanshui", "化产-制冷循环水报表（日）"),
@@ -128,6 +128,7 @@ public enum JobEnum {
     jh_ck45zkcaozuo2("jh_ck45zkcaozuo2", "CK45-化产-中控操作(二)"),
     jh_ck12beimeixieche("jh_ck12beimeixieche", "CK12-备煤-备煤卸车统计"),
     jh_jiaoluyoukucaozuo("jh_jiaoluyoukucaozuo", "CK67-化产-焦炉油库操作记录表"),
+    jh_shengchanzhenduanbaogao("jh_shengchanzhenduanbaogao", "焦化生产诊断报告"),
     jh_meiqidanhao("jh_meiqidanhao", "炼焦煤气单耗分析"),
     jh_gxjshengchan5("jh_gxjshengchan5", "5#干熄焦生产报表"),
     jh_gxjshengchan6("jh_gxjshengchan6", "6#干熄焦生产报表"),
@@ -135,6 +136,7 @@ public enum JobEnum {
     jh_jiaolujiare10("jh_jiaolujiare10", "10#焦炉加热制度"),
     jh_chujiaochuchen("jh_chujiaochuchen", "出焦除尘报表"),
     jh_gxjchuchen("jh_gxjchuchen", "干熄焦除尘报表"),
+    jh_shaijiaochuchen("jh_shaijiaochuchen", "筛焦除尘报表"),
 
     // 烧结
     sj_tuoliu("sj_tuoliu", "脱硫系统运行日报"),
@@ -167,6 +169,9 @@ public enum JobEnum {
     sj_nengyuanxiaohao_month("sj_nengyuanxiaohao_month", "烧结公辅能源消耗及成本统计表"),
     sj_shengchan4("sj_shengchan4", "4烧结生产报表"),
     sj_shengchanfenxi4("sj_shengchanfenxi4", "4烧结生产分析模板"),
+    sj_duichangyunxingtongji("sj_duichangyunxingtongji", "堆场运行统计"),
+    sj_zuoyequshengchanqingkuang("sj_zuoyequshengchanqingkuang", "4烧结作业区每月生产情况"),
+    sj_huanduicaoyehuiyijiyao("sj_huanduicaoyehuiyijiyao", "换堆操业会议纪要"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),

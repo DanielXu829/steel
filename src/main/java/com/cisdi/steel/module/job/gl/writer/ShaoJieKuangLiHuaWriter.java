@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
 import com.cisdi.steel.dto.response.gl.res.AnalysisValue;
@@ -12,6 +13,7 @@ import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +50,7 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
             log.info("从模板中获取version失败", e);
         }
 
-        DateQuery date = this.getDateQuery(excelDTO);
+        DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
 
         // 第1个sheet 获取并隐藏标记行
@@ -66,15 +68,30 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         List<String> columnsLumpore = PoiCustomUtil.getRowCelVal(sheetLumpore, itemRowNum);
         sheetLumpore.getRow(itemRowNum).setZeroHeight(true);
 
-        List<CellData> cellDataListSinterLC = handleData(sheetSinter, dateQuery, version, columnsSinter, "S4_SINTER", "LC");
-        List<CellData> cellDataListSinterLP = handleData(sheetSinter, dateQuery, version, columnsSinter, "S4_SINTER", "LP");
-        List<CellData> cellDataListPellets = handleData(sheetPellets, dateQuery, version, columnsLumpore, "PELLETS", "LC");
-        List<CellData> cellDataListLumpore = handleData(sheetLumpore, dateQuery, version, columnsLumpore, "LUMPORE", "LC");
+        String[] handleArray = new String[]{"TFe", "FeO", "CaO", "MgO", "SiO2", "S"};
+        List<CellData> cellDataListSinterLC = handleData(sheetSinter, dateQuery, version, columnsSinter, "S4_SINTER",
+                "LC", handleArray);
+        List<CellData> cellDataListSinterLP = handleData(sheetSinter, dateQuery, version, columnsSinter, "S4_SINTER",
+                "LP", new String[]{});
+        List<CellData> cellDataListPellets = handleData(sheetPellets, dateQuery, version, columnsLumpore, "PELLETS", "LC", handleArray);
+        List<CellData> cellDataListLumpore = handleData(sheetLumpore, dateQuery, version, columnsLumpore, "LUMPORE", "LC", handleArray);
 
         ExcelWriterUtil.setCellValue(sheetSinter, cellDataListSinterLC);
         ExcelWriterUtil.setCellValue(sheetSinter, cellDataListSinterLP);
         ExcelWriterUtil.setCellValue(sheetPellets, cellDataListPellets);
         ExcelWriterUtil.setCellValue(sheetLumpore, cellDataListLumpore);
+
+
+        Date currentDate = DateUtil.addDays(new Date(), -1);
+        for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet tempSheet = workbook.getSheetAt(i);
+            // 清除标记项(例如:{块矿.矿种})
+            if (!Objects.isNull(tempSheet) && !workbook.isSheetHidden(i)) {
+                // 全局替换 当前日期
+                ExcelWriterUtil.replaceCurrentDateInTitle(tempSheet, "%当前日期%", currentDate);
+                PoiCustomUtil.clearPlaceHolder(tempSheet);
+            }
+        }
 
         return workbook;
     }
@@ -89,7 +106,8 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
      * @param type
      * @return
      */
-    protected List<CellData> handleData(Sheet sheet, DateQuery dateQuery, String version, List<String> columns, String category, String type) {
+    protected List<CellData> handleData(Sheet sheet, DateQuery dateQuery, String version, List<String> columns,
+                                        String category, String type, String[] handleArray) {
         List<CellData> cellDataList = new ArrayList<>();
         String jsonData = getData(dateQuery, version, category, type);
         AnalysisValueDTO analysisValueDTO = null;
@@ -132,7 +150,11 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
                                 if (columnSplit[0].equals(type)) {
                                     BigDecimal cellValue = data.get(j).getValues().get(compoundName);
                                     if (Objects.nonNull(cellValue)) {
-                                        ExcelWriterUtil.addCellData(cellDataList, beginRowNum + j, i, cellValue);
+                                        if (ArrayUtils.contains(handleArray,compoundName)) {
+                                            ExcelWriterUtil.addCellData(cellDataList, beginRowNum + j, i, cellValue.multiply(new BigDecimal(100)));
+                                        } else {
+                                            ExcelWriterUtil.addCellData(cellDataList, beginRowNum + j, i, cellValue);
+                                        }
                                     } else {
                                         log.warn(time + ":  " + category + "-" + compoundName + " 接口返回无数据");
                                     }

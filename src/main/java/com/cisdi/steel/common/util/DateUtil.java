@@ -903,4 +903,27 @@ public class DateUtil {
 
         return dates;
     }
+
+    /**
+     * 获取当月从1号开始到当前日期，每一天的开始时间00:00:00,
+     * @param date
+     * @return
+     */
+    public static List<Date> getAllDayBeginTimeInCurrentMonthBeforeDays(Date date, int beforeDays) {
+        date = DateUtil.addDays(date, -beforeDays);
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateBeginTime);
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+
+        List<Date> dates = new ArrayList<Date>();
+        // 循环遍历每一个
+        for (int i = 1; i <= dayOfMonth; i++) {
+            Calendar day = Calendar.getInstance();
+            day.set(Calendar.DAY_OF_MONTH, i);
+            dates.add(day.getTime());
+        }
+
+        return dates;
+    }
 }

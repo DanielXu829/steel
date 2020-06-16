@@ -1,6 +1,8 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
@@ -11,10 +13,13 @@ import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.TapTPCDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
+import com.cisdi.steel.module.job.gl.GLDataUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -25,6 +30,9 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
 
     // 获取批次总数 tagName
     protected static String batchCountTagName = "BF8_L2C_SH_CurrentBatch_1d_max";
+
+    @Autowired
+    protected GLDataUtil glDataUtil;
 
     /**
      * 获取变料信息数据
@@ -64,6 +72,26 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
             }
         }
         return bfBlastMainInfo;
+    }
+
+    /**
+     * 获取进风面积
+     * @param version
+     * @param time
+     * @return
+     */
+    protected BigDecimal getBlastIntakeArea(String version, String time) {
+        BigDecimal value = null;
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("time",  time);
+        String blastIntakeArea = httpUtil.get(getBlastIntakeAreaUrl(version), queryParam);
+        if (StringUtils.isNotBlank(blastIntakeArea)) {
+            JSONObject data = JSON.parseObject(blastIntakeArea);
+            if (Objects.nonNull(data)) {
+                value = data.getBigDecimal("data");
+            }
+        }
+        return value;
     }
 
     /**
@@ -289,11 +317,24 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
         //过滤weightact不为0的值
         List<BatchDistribution> collect = distributions.stream()
-                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .filter(p -> (p.getWeightset() == null || p.getWeightset().doubleValue() > 0))
                 .collect(Collectors.toList());
         // 拼接roundset
         return collect.stream()
                 .map(p -> String.valueOf(p.getRoundact()))
+                .collect(Collectors.joining(""));
+    }
+
+    protected String getRoundset(List<BatchDistribution> distributions) {
+        //排序, 按position倒序
+        distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
+        //过滤weightact不为0的值
+        List<BatchDistribution> collect = distributions.stream()
+                .filter(p -> (p.getWeightset() == null || p.getWeightset().doubleValue() > 0))
+                .collect(Collectors.toList());
+        // 拼接roundset
+        return collect.stream()
+                .map(p -> String.valueOf(p.getRoundset()))
                 .collect(Collectors.joining(""));
     }
 
@@ -302,7 +343,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         distributions.sort(Comparator.comparing(BatchDistribution::getPosition).reversed());
         //过滤weightact不为0的值
         List<BatchDistribution> collect = distributions.stream()
-                .filter(p -> p.getWeightset().doubleValue() > 0)
+                .filter(p -> (p.getWeightset() == null || p.getWeightset().doubleValue() > 0))
                 .collect(Collectors.toList());
         // 拼接position
         return collect.stream()
@@ -349,6 +390,76 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 获取latest tagValues
+     * @param date
+     * @param version
+     * @param tagNames
+     * @return
+     */
+    protected TagValueListDTO getLatestTagValueListDTO(Date date, String version, List<String> tagNames) {
+        Map<String, String> queryParam = new HashMap();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", tagNames);
+        String chargeNoData = httpUtil.postJsonParams(getLatestTagValuesUrl(version) + date.getTime(), jsonObject.toJSONString());
+
+        TagValueListDTO tagValueListDTO = null;
+        if (StringUtils.isNotBlank(chargeNoData)) {
+            tagValueListDTO = JSON.parseObject(chargeNoData, TagValueListDTO.class);
+            if (Objects.isNull(tagValueListDTO) || CollectionUtils.isEmpty(tagValueListDTO.getData())) {
+                log.warn("根据tagName[{}]获取[{}]的latest TagValueListDTO数据为空", tagNames, date);
+            } else {
+                // 排序，默认按chargeNo从小到大排序，即时间从老到新
+                tagValueListDTO.getData().sort(Comparator.comparing(TagValue::getVal));
+            }
+        }
+        return tagValueListDTO;
+    }
+
+    /**
+     * 获取布料矩阵数据
+     * @param query
+     * @param version
+     * @return
+     */
+    protected Map<String, List<BatchDistribution>> getMatrixDistrAvgInRangeMap(DateQuery query, String version) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
+        String chargeNoData = httpUtil.get(getMatrixDistrAvgInRangeUrl(version), queryParam);
+
+        Map<String, List<BatchDistribution>> matrixDistrAvgInRangeMap = null;
+        if (StringUtils.isNotBlank(chargeNoData)) {
+            SuccessEntity<Map<String, List<BatchDistribution>>> successEntity = JSON.parseObject(chargeNoData, new TypeReference<SuccessEntity<Map<String, List<BatchDistribution>>>>() {});
+            if (Objects.isNull(successEntity) || MapUtils.isEmpty(successEntity.getData())) {
+                log.warn("根据时间[{}]获取的matrixDistrAvgInRangeMap数据为空", query.getStartTime());
+            } else {
+                matrixDistrAvgInRangeMap = successEntity.getData();
+            }
+        }
+        return matrixDistrAvgInRangeMap;
+    }
+
+    /**
+     * 获取materials数据组指定的值
+     * @param materialsArray
+     * @param compareKey
+     * @param compareValue
+     * @param actualKey
+     * @return
+     */
+    protected String getMaterialValue(JSONArray materialsArray, String compareKey, String compareValue, String actualKey) {
+        if (CollectionUtils.isNotEmpty(materialsArray)) {
+            for (int k = 0; k < materialsArray.size(); k++) {
+                JSONObject material = materialsArray.getJSONObject(k);
+                if (StringUtils.endsWith(material.getString(compareKey), compareValue)){
+                    return material.getString(actualKey);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 获取charge/rawdata的url
      * @param version
      * @return url
@@ -371,10 +482,18 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      * @param version
      * @return
      */
+    protected String getBlastIntakeAreaUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/bfBlast/blastIntakeArea";
+    }
+
+    /**
+     * 获取/bfBlast/main/info的url
+     * @param version
+     * @return
+     */
     protected String getBfBlastMainInfoUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/bfBlast/main/info";
     }
-
 
     /**
      * 获取/charge/variation/range的url
@@ -383,6 +502,24 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      */
     protected String getChargeVarInfoUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/charge/variation/range";
+    }
+
+    /**
+     * 获取/tagValues/latest的url
+     * @param version
+     * @return
+     */
+    protected String getLatestTagValuesUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tagValues/latest/";
+    }
+
+    /**
+     * 获取/batch/distribution/getMatrixDistrAvgInRange的url
+     * @param version
+     * @return
+     */
+    protected String getMatrixDistrAvgInRangeUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/batch/distribution/getMatrixDistrAvgInRange";
     }
 
 }

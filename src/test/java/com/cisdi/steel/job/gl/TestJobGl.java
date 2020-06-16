@@ -121,6 +121,7 @@ public class TestJobGl extends SteelApplicationTests {
         testLuLiaoXiaoHao8Job();
         testKaoHeYueBao();
         testJiShuJingJi8Job();
+        testCaoZuoGuanLiRiJiJob();
     }
 
     @Test

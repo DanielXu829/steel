@@ -4,6 +4,7 @@ import cn.afterturn.easypoi.cache.manager.POICacheManager;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.dto.response.jh.res.TagValue;
@@ -15,6 +16,7 @@ import com.cisdi.steel.module.job.strategy.date.DateStrategy;
 import com.cisdi.steel.module.job.strategy.options.OptionsStrategy;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -102,6 +104,25 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
         if (Objects.isNull(dateQuery)) {
             // 默认取当前时间
             dateQuery = new DateQuery(new Date());
+        }
+        return dateQuery;
+    }
+
+    /**
+     * 查询条件
+     * 一定存在 recordDate数据
+     *
+     * @return 结果
+     */
+    protected final DateQuery getDateQueryBeforeOneDay(WriterExcelDTO excelDTO) {
+        DateQuery dateQuery = excelDTO.getDateQuery();
+        if (Objects.isNull(dateQuery)) {
+            // 默认取当前时间前一天
+            Date date = DateUtil.addDays(new Date(), -1);
+            dateQuery = new DateQuery(date);
+        } else {
+            // 默认取当前时间前一天
+            dateQuery = DateQueryUtil.buildToday(DateUtil.addDays(dateQuery.getRecordDate(), -1));
         }
         return dateQuery;
     }

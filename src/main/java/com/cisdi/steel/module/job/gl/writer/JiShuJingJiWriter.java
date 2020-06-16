@@ -65,7 +65,8 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
-        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonth(new Date());
+
+        List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 1);
 
         int fixLineCount = 0;
         for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
@@ -74,6 +75,8 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             DateQuery dateQuery = DateQueryUtil.buildDayWithBeginTimeForBoth(day);
             TapTPCDTO tapTPCDTO = getTapTPCDTO(version, day);
             TapSummaryListDTO tapSummaryListDTO = getTapSummaryListDTO(version, day);
+
+            DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(day);
             //计算铁量净重
             Double actWeight = defaultCellValue.doubleValue();
             if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
@@ -81,12 +84,15 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             }
             // 计算回用焦丁、焦量、小块焦、矿石重量
             MaterialExpendDTO materialExpendDTO = getMaterialExpendDTO(version, day);
-            BigDecimal huiYongJiaoDing = defaultCellValue, ganJiaoLiang = defaultCellValue, xiaoKuaiJiao = defaultCellValue, kuaiShiZhongLiang = defaultCellValue;
+            BigDecimal huiYongJiaoDing = defaultCellValue, ganJiaoLiang = defaultCellValue, xiaoKuaiJiao = defaultCellValue,
+                    materialZhongLiang = defaultCellValue, daKuaiJiao = defaultCellValue, penMei = defaultCellValue;
             if (Objects.nonNull(materialExpendDTO) && CollectionUtils.isNotEmpty(materialExpendDTO.getData())) {
                 huiYongJiaoDing = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("回用焦丁"));
+                daKuaiJiao = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("大块焦"));
                 ganJiaoLiang = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦","大块焦"));
                 xiaoKuaiJiao = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("小块焦"));
-                kuaiShiZhongLiang = getMaterialExpendWetWgt(materialExpendDTO);
+                penMei = getMaterialExpendWetWgt(materialExpendDTO, Arrays.asList("炼铁无烟煤","高挥发份烟煤"));
+                materialZhongLiang = getMaterialExpendWetWgt(materialExpendDTO);
             }
 
             // 计算行
@@ -109,6 +115,14 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                             }
                             break;
                         }
+                        case "出铁间批数": {
+                            // 获取批次总数
+                            BigDecimal countChargeNumByTapTimeRange = glDataUtil.getCountChargeNumByTapTimeRange(version, dateQueryNoDelay);
+                            if (Objects.nonNull(countChargeNumByTapTimeRange)) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, countChargeNumByTapTimeRange);
+                            }
+                            break;
+                        }
                         case "毛重": {
                             if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
                                 Double grossWgt = tapSummaryListDTO.getData().get(0).getGrossWgt();
@@ -121,6 +135,14 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                         case "净重": {
                             if (Objects.nonNull(actWeight) && actWeight > 0) {
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, actWeight);
+                            }
+                            break;
+                        }
+                        case "一级品率": {
+                            // 获取批次总数
+                            BigDecimal firstGradeRateInRange = glDataUtil.getFirstGradeRateInRange(version, dateQueryNoDelay);
+                            if (Objects.nonNull(firstGradeRateInRange)) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, firstGradeRateInRange);
                             }
                             break;
                         }
@@ -142,8 +164,9 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                         }
                         case "焦炭负荷": {
                             // 矿石重量 /（大块焦+小块焦+回用焦丁）
-                            if (kuaiShiZhongLiang.doubleValue() > 0 && (huiYongJiaoDing.doubleValue() > 0 || ganJiaoLiang.doubleValue() > 0)){
-                                BigDecimal jiaoTanFuHe = kuaiShiZhongLiang.divide(ganJiaoLiang.add(huiYongJiaoDing), 2, BigDecimal.ROUND_HALF_UP);
+                            if (materialZhongLiang.doubleValue() > 0 && (huiYongJiaoDing.doubleValue() > 0 || ganJiaoLiang.doubleValue() > 0)){
+                                BigDecimal kuangShiZhongLiang = materialZhongLiang.subtract(ganJiaoLiang).subtract(huiYongJiaoDing).subtract(penMei);
+                                BigDecimal jiaoTanFuHe = kuangShiZhongLiang.divide(ganJiaoLiang.add(huiYongJiaoDing), 2, BigDecimal.ROUND_HALF_UP);
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, jiaoTanFuHe);
                             }
                             break;
@@ -188,6 +211,14 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                             }
                             break;
                         }
+                        case "茵巴作业率": {
+                            // 获取批次总数
+                            BigDecimal inbaRateInRange = glDataUtil.getInbaRateInRange(version, dateQueryNoDelay);
+                            if (Objects.nonNull(inbaRateInRange)) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, inbaRateInRange);
+                            }
+                            break;
+                        }
                         case "铁量差": {
                             // 获取燃料比
                             if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
@@ -199,6 +230,30 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
                             }
                             break;
                         }
+                        case "大块焦": {
+                            if (Objects.nonNull(daKuaiJiao)) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, daKuaiJiao);
+                            }
+                            break;
+                        }
+                        case "小块焦": {
+                            if (Objects.nonNull(xiaoKuaiJiao)) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, xiaoKuaiJiao);
+                            }
+                            break;
+                        }
+                        case "回用焦丁": {
+                            if (Objects.nonNull(huiYongJiaoDing)) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, huiYongJiaoDing);
+                            }
+                            break;
+                        }
+                        case "喷煤": {
+                            if (Objects.nonNull(penMei)) {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, penMei);
+                            }
+                            break;
+                        }
                         default: {
                             break;
                         }
@@ -207,8 +262,9 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
+        //Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
         // 替换当月天数和当前月份
+        Date lastDay = new Date();
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 0, lastDay);
         ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 4, lastDay);
         // TODO 隐藏行首两行，改为隐藏一行

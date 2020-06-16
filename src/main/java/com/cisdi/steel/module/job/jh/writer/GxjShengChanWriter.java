@@ -14,6 +14,7 @@ import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                 // 有需求，可以自己组装dateQueries
                 //List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, date.getRecordDate());
                 //List<DateQuery>dateQueries=this.getHandlerData(sheetSplit,date.getRecordDate());
-                List<DateQuery>dateQueries=DateQueryUtil.buildDay2HourFromYesEighteen(date.getRecordDate());
+                List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourFromYesEighteen(date.getRecordDate());
                 // 拿到tag点别名
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 // 拼装cellDataList，是直接调用，或者是重写父类AbstractExcelReadWriter 的 mapDataHandler 方法
@@ -79,8 +80,22 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
                     }
                 }
             }
+            if (i == 0) {
+                List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourFromYesEighteen(date.getRecordDate());
+                List<CellData> cellDataList = this.handleWgShiftTeams(sheet, getWgShiftTeamUrl(version), dateQueries);
+                ExcelWriterUtil.setCellValue(sheet, cellDataList);
+                // 清除去占位符
+                PoiCustomUtil.clearPlaceHolder(sheet);
+            }
         }
-
+        Date currentDate = new Date();
+        for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet sheet=workbook.getSheetAt(i);
+            if (!Objects.isNull(sheet) && !workbook.isSheetHidden(i)) {
+                // 全局替换 当前日期
+                ExcelWriterUtil.replaceCurrentDateInTitle(sheet, "%当前日期%", currentDate);
+            }
+        }
         return workbook;
     }
 
@@ -171,12 +186,69 @@ public class GxjShengChanWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 处理班组
+     * @param sheet
+     * @param url
+     * @param dateQueries
+     * @return
+     */
+    protected List<CellData> handleWgShiftTeams(Sheet sheet, String url, List<DateQuery> dateQueries) {
+        List<CellData> cellDataList = new ArrayList<>();
+        Map<String, String> teamCodeToNameMap = new HashMap<String, String>() {
+            {
+                put("A", "甲");
+                put("B", "乙");
+                put("C", "丙");
+                put("D", "丁");
+            }
+        };
+        this.handleWgShiftTeam(cellDataList, sheet, url, dateQueries.get(0).getQueryEndTime(), "{班组1}", teamCodeToNameMap);
+        this.handleWgShiftTeam(cellDataList, sheet, url, dateQueries.get(dateQueries.size() - 1).getQueryStartTime(), "{班组2}", teamCodeToNameMap);
+        return cellDataList;
+    }
+
+    protected void handleWgShiftTeam(List<CellData> cellDataList, Sheet sheet, String url, Long time, String teamPlaceHolder, Map<String, String> teamCodeToNameMap) {
+        try {
+            Cell classGroupOne = PoiCustomUtil.getCellByValue(sheet, teamPlaceHolder);
+            if (Objects.isNull(classGroupOne)) {
+                log.error(String.format("模板中%s占位符不存在", teamPlaceHolder));
+                return;
+            }
+            Map<String, String> queryParam = new HashMap<String, String>();
+            queryParam.put("workDate", String.valueOf(time));
+            String classGroupOneResult = httpUtil.get(url, queryParam);
+            if (StringUtils.isNotBlank(classGroupOneResult)) {
+                JSONObject jsonObject = JSONObject.parseObject(classGroupOneResult);
+                if (Objects.nonNull(jsonObject)) {
+                    JSONObject dataObject = jsonObject.getJSONObject("data");
+                    if (Objects.nonNull(dataObject)) {
+                        String teamCode = dataObject.getString("team");
+                        String teamName = teamCodeToNameMap.get(teamCode);
+                        ExcelWriterUtil.addCellData(cellDataList, classGroupOne.getRowIndex(), classGroupOne.getColumnIndex(), teamName);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("处理班组出错", e);
+        }
+    }
+
+    /**
      * 通过tag点拿数据的API，路径可能会改变
      * @param version
      * @return
      */
     protected String getUrl(String version) {
         return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getNewTagValue";
+    }
+
+    /**
+     * 获取班组的API
+     * @param version
+     * @return
+     */
+    protected String getWgShiftTeamUrl(String version) {
+        return httpProperties.getJHUrlVersion(version) + "/cokeActualPerformance/selectWgShiftAndTeam";
     }
 
 }

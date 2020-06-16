@@ -187,8 +187,8 @@ public class ChartUtils {
         categoryaxis.setMaximumCategoryLabelLines(1);
         categoryaxis.setTickMarksVisible(true);
         categoryaxis.setCategoryLabelPositionOffset(10);
-        categoryaxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 13));
-        categoryaxis.setLabelFont(new Font("宋体", Font.PLAIN, 13));
+        categoryaxis.setTickLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
+        categoryaxis.setLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
         categoryaxis.setCategoryMargin(0.4);
 
         plot.setNoDataMessage(NO_DATA_MSG);
@@ -206,13 +206,15 @@ public class ChartUtils {
             plot.setDataset(i, datasets[i]);
             plot.mapDatasetToRangeAxis(i, i);
 
+            plot.getRangeAxis(i).setLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
+
             // -- 修改第i条曲线显示效果
             CategoryItemRenderer renderer = new LineAndShapeRenderer();
             if (stack[i] == 2) {
                 renderer = new StackedBarRenderer();
             }
             renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-            renderer.setBaseItemLabelFont(new Font("宋体", Font.ROMAN_BASELINE, 15));
+            renderer.setBaseItemLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub().deriveFont(Font.ROMAN_BASELINE, 15));
 
             renderer.setSeriesPaint(0, colors[i]);
             renderer.setSeriesPaint(1, colors[i]);
@@ -231,6 +233,68 @@ public class ChartUtils {
         setYAixs(plot, 0);
     }
 
+
+    /**
+     * 设置折线图样式
+     *
+     * @param plot
+     */
+    @SuppressWarnings("deprecation")
+    public static void setLineRenderAndyVisible(CategoryPlot plot,
+                                                CategoryLabelPositions positions,
+                                                double[] rangStarts, double[] rangEnds, int y2, boolean[] isVisible,
+                                                DefaultCategoryDataset[] datasets,String[] yLabels, int stack[], int[] ystack) {
+        CategoryAxis categoryaxis = plot.getDomainAxis();//X轴
+        categoryaxis.setCategoryLabelPositions(positions);
+        categoryaxis.setMaximumCategoryLabelWidthRatio(5.0f);
+        categoryaxis.setMaximumCategoryLabelLines(1);
+        categoryaxis.setTickMarksVisible(true);
+        categoryaxis.setCategoryLabelPositionOffset(10);
+        categoryaxis.setTickLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
+        categoryaxis.setLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
+        categoryaxis.setCategoryMargin(0.4);
+
+        plot.setNoDataMessage(NO_DATA_MSG);
+        plot.setInsets(new RectangleInsets(10, 10, 0, 10), false);
+
+        Color[] colors = {Color.CYAN,Color.BLUE,Color.BLACK,Color.MAGENTA,Color.GREEN};
+        for(int i=0; i<y2; i++){
+            // 添加第i个Y轴
+            NumberAxis axis = new NumberAxis();
+            // 修改第i个Y轴的显示效果
+            axis.setRange(rangStarts[i], rangEnds[i]);
+            axis.setLabel(yLabels[i]);
+            axis.setVisible(isVisible[i]);
+            plot.setRangeAxis(i, axis);
+            plot.setDataset(i, datasets[i]);
+            plot.mapDatasetToRangeAxis(i, i);
+
+            plot.getRangeAxis(i).setLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub());
+
+            // -- 修改第i条曲线显示效果
+            CategoryItemRenderer renderer = new LineAndShapeRenderer();
+            if (stack[i] == 2) {
+                renderer = new StackedBarRenderer();
+            }
+            renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+            renderer.setBaseItemLabelFont(com.cisdi.steel.module.job.a1.doc.ChartFactory.getSimsub().deriveFont(Font.ROMAN_BASELINE, 15));
+
+            renderer.setSeriesPaint(0, colors[i]);
+            renderer.setSeriesPaint(1, colors[i]);
+            renderer.setSeriesPaint(2, colors[i]);
+            plot.setRenderer(i, renderer);
+        }
+
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setDomainGridlinePaint(new Color(112, 128, 144));
+        plot.setRangeGridlinePaint(new Color(112, 128, 144));
+        plot.setAxisOffset(new RectangleInsets(5D, 5D, 5D, 5D));
+        plot.setDomainCrosshairVisible(true);
+        plot.setRangeCrosshairVisible(true);
+        plot.setOutlineVisible(false);
+        setXAixs(plot);
+        setYAixs(plot, 0);
+    }
 
     /**
      * 设置柱状图渲染
