@@ -247,10 +247,10 @@ public class PeiLiaoDanWriter extends AbstractExcelReadWriter {
             JSONObject object = list.get(i);
             Object descr = object.get("descr");
             Object weight = object.get("weight");
-            Double moisture = object.getDouble("moisture");
+            BigDecimal ratio = object.getBigDecimal("ratio");
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 0, descr);
             ExcelWriterUtil.addCellData(cellDataList, rowIndex, 1, weight);
-            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 2, moisture);
+            ExcelWriterUtil.addCellData(cellDataList, rowIndex, 2, ratio);
             rowIndex++;
         }
     }
