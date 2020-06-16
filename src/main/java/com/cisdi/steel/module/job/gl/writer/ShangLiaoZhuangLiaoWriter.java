@@ -82,6 +82,17 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         int endColumnNum = itemNameList.size() + beginColumnNum - 2;
         ExcelWriterUtil.setBorderStyle(workbook, sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
 
+        Date currentDate = DateUtil.addDays(new Date(), -1);
+        for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet tempSheet = workbook.getSheetAt(i);
+            // 清除标记项(例如:{块矿.矿种})
+            if (!Objects.isNull(tempSheet) && !workbook.isSheetHidden(i)) {
+                // 全局替换 当前日期
+                ExcelWriterUtil.replaceCurrentDateInTitle(tempSheet, "%当前日期%", currentDate);
+                PoiCustomUtil.clearPlaceHolder(tempSheet);
+            }
+        }
+
         return workbook;
     }
 
@@ -94,6 +105,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
      * @param itemColNum
      * @return
      */
+    @Deprecated
     private List<CellData> mapDataHandler(JSONArray dataArray, List<String> itemNameList, Sheet sheet, Integer count) {
         List<CellData> cellDataList = new ArrayList<>();
         for (int i = 0; i < dataArray.size(); i++) {
@@ -213,7 +225,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
             // 计算本次o之和。
             BigDecimal oCount = new BigDecimal(0);
             List<BatchData> oCollect = data.stream()
-                    .filter(p -> ("O1".equalsIgnoreCase(p.getBatchIndex().getTyp()) || "Os".equalsIgnoreCase(p.getBatchIndex().getTyp())))
+                    .filter(p -> ("Ol".equalsIgnoreCase(p.getBatchIndex().getTyp()) || "Os".equalsIgnoreCase(p.getBatchIndex().getTyp())))
                     .collect(Collectors.toList());
             for (int i = 0; i < oCollect.size(); i++) {
                 BigDecimal reduce = oCollect.get(i).getMaterials().stream()

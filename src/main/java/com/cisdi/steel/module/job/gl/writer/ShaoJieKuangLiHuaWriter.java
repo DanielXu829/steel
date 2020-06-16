@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
 import com.cisdi.steel.dto.response.gl.res.AnalysisValue;
@@ -79,6 +80,18 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         ExcelWriterUtil.setCellValue(sheetSinter, cellDataListSinterLP);
         ExcelWriterUtil.setCellValue(sheetPellets, cellDataListPellets);
         ExcelWriterUtil.setCellValue(sheetLumpore, cellDataListLumpore);
+
+
+        Date currentDate = DateUtil.addDays(new Date(), -1);
+        for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet tempSheet = workbook.getSheetAt(i);
+            // 清除标记项(例如:{块矿.矿种})
+            if (!Objects.isNull(tempSheet) && !workbook.isSheetHidden(i)) {
+                // 全局替换 当前日期
+                ExcelWriterUtil.replaceCurrentDateInTitle(tempSheet, "%当前日期%", currentDate);
+                PoiCustomUtil.clearPlaceHolder(tempSheet);
+            }
+        }
 
         return workbook;
     }

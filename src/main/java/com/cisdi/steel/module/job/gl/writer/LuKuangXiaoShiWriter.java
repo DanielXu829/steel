@@ -77,6 +77,17 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
             }
         }
 
+        Date currentDate = new Date();
+        for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet tempSheet = workbook.getSheetAt(i);
+            // 清除标记项(例如:{块矿.矿种})
+            if (!Objects.isNull(tempSheet) && !workbook.isSheetHidden(i)) {
+                // 全局替换 当前日期
+                ExcelWriterUtil.replaceCurrentDateInTitle(tempSheet, "%当前日期%", currentDate);
+                PoiCustomUtil.clearPlaceHolder(tempSheet);
+            }
+        }
+
         return workbook;
     }
 
