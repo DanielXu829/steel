@@ -49,6 +49,9 @@ public class TestJobGl extends SteelApplicationTests {
     @Autowired
     private CaoZuoGuanLiRiJiJob caoZuoGuanLiRiJiJob;
 
+    @Autowired
+    private LuDiWenDu8Job luDiWenDu8Job;
+
     @Test
     public void test1() {
         bianLiaoJiLu8Job.execute(null);
@@ -113,6 +116,10 @@ public class TestJobGl extends SteelApplicationTests {
         jiShuJingJi8Job.execute(null);
     }
 
+    @Test
+    public void testLuDiWenDu() {
+        luDiWenDu8Job.execute(null);
+    }
 
     @Test
     public void testAllGaoLuNew() {
