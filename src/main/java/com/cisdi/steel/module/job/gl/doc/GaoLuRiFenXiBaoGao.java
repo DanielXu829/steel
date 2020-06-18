@@ -48,8 +48,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -95,13 +93,6 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private String[] L4 = new String[]{
             "BF8_L2C_BD_SoftTempDiff_1d_avg"
     };
-    //铁口温度
-    private String[] L5 = new String[]{
-            "BF8_L2C_HMTemp_1",
-            "BF8_L2C_HMTemp_2",
-            "BF8_L2C_HMTemp_3",
-            "BF8_L2C_HMTemp_4"
-    };
 
     private String[] luGang = new String[]{
             "TI0707C", "TI0708A", "TI0708B", "TI0708C", "TI0709A", "TI0709B", "TI0709C", "TI0710A", "TI0710B",
@@ -135,7 +126,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             "TI2808", "TI2809", "TI2810", "TI2811", "TI2812", "TI2813"
     };
 
-    private String[] luSheng = new String[]{
+    private String[] luShen = new String[]{
             "TI2901", "TI2902", "TI2903", "TI2904", "TI3001", "TI3002", "TI3003", "TI3004", "TI3005", "TI3006", "TI3007",
             "TI3008", "TI3009", "TI3010", "TI3011", "TI3012", "TI3013", "TI3101", "TI3102", "TI3103", "TI3104", "TI3105",
             "TI3106", "TI3107", "TI3108", "TI3109", "TI3110", "TI3111", "TI3112", "TI3113", "TI3201", "TI3202", "TI3203",
@@ -144,6 +135,44 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             "TI3410", "TI3411", "TI3412", "TI3501", "TI3502", "TI3503", "TI3504", "TI3505", "TI3506", "TI3507", "TI3508",
             "TI3509", "TI3510", "TI3511", "TI3601", "TI3602", "TI3603", "TI3604", "TI3605", "TI3606", "TI3607", "TI3608",
             "TI3609", "TI3610"
+    };
+
+    private String[] luGangA_C = new String[]{
+            "TI0601A", "TI0601B", "TI0601C", "TI0602A", "TI0602B", "TI0602C", "TI0603A", "TI0603B", "TI0603C",
+            "TI0604A", "TI0604B", "TI0604C", "TI0605A", "TI0605B", "TI0605C", "TI0606A", "TI0606B", "TI0606C",
+            "TI0607A", "TI0607B", "TI0607C", "TI0608A", "TI0608B", "TI0608C", "TI0609A", "TI0609B", "TI0609C",
+            "TI0610A", "TI0610B", "TI0610C", "TI0611A", "TI0611B", "TI0611C", "TI0612A", "TI0612B", "TI0612C",
+            "TI0613A", "TI0613B", "TI0613C", "TI0701A", "TI0701B", "TI0701C", "TI0702A", "TI0702B", "TI0702C",
+            "TI0703A", "TI0703B", "TI0703C"
+    };
+
+    private String[] luGangD_F = new String[]{
+            "TI0704A", "TI0704B", "TI0704C", "TI0705A", "TI0705B", "TI0705C", "TI0706A", "TI0706B", "TI0706C",
+            "TI0707A", "TI0707B", "TI0707C", "TI0708A", "TI0708B", "TI0708C", "TI0709A", "TI0709B", "TI0709C",
+            "TI0710A", "TI0710B", "TI0710C", "TI0711A", "TI0711B", "TI0711C", "TI0712A", "TI0712B", "TI0712C",
+            "TI0713A", "TI0713B", "TI0713C", "ATI0801A", "ATI0801B", "ATI0801C", "TI0802A", "TI0802B", "TI0802C",
+            "TI0803A", "TI0803B", "TI0803C", "TI0804A", "TI0804B", "TI0804C", "TI0805A", "TI0805B", "TI0805C",
+            "TI0806A", "TI0806B", "TI0806C"
+    };
+
+    private String[] luGangG_I = new String[]{
+            "TI0807A", "TI0807B", "TI0807C", "TI0808A", "TI0808B", "TI0808C", "TI0809A", "TI0809B", "TI0809C",
+            "TI0810A", "TI0810B", "TI0810C", "TI0811A", "TI0811B", "TI0811C", "TI0812A", "TI0812B", "TI0812C",
+            "TI0813A", "TI0813B", "TI0813C", "TI0901A", "TI0901B", "TI0901C", "TI0902A", "TI0902B", "TI0902C",
+            "TI0903A", "TI0903B", "TI0903C", "TI0904A", "TI0904B", "TI0904C", "TI0905A", "TI0905B", "TI0905C",
+            "TI0906A", "TI0906B", "TI0906C", "TI0907A", "TI0907B", "TI0907C", "TI0908A", "TI0908B", "TI0908C",
+            "TI0909A", "TI0909B", "TI0909C"
+    };
+
+    private String[] luGangJ_M = new String[]{
+            "TI0910A", "TI0910B", "TI0910C", "TI0911A", "TI0911B", "TI0911C", "TI0912A", "TI0912B", "TI0912C",
+            "TI0913A", "TI0913B", "TI0913C", "TI1001A", "TI1001B", "TI1002A", "TI1002B", "TI1003A", "TI1003B",
+            "TI1004A", "TI1004B", "TI1005A", "TI1005B", "TI1006A", "TI1006B", "TI1007A", "TI1007B", "TI1008A",
+            "TI1008B", "TI1009A", "TI1009B", "TI1010A", "TI1010B", "ATI1011A", "ATI1011B", "TI1012A", "TI1012B",
+            "TI1013A", "TI1013B", "TI1101A", "TI1101B", "TI1102A", "TI1102B", "TI1103A", "TI1103B", "TI1104A",
+            "TI1104B", "TI1105A", "TI1105B", "TI1106A", "TI1106B", "TI1107A", "TI1107B", "TI1108A", "TI1108B",
+            "TI1109A", "TI1109B", "TI1110A", "TI1110B", "TI1111A", "TI1111B", "TI1112A", "TI1112B", "TI1113A",
+            "TI1113B"
     };
 
     @Autowired
@@ -195,7 +224,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     public void mainDeal(String version) {
         // 处理当前时间
         result.put("current_date", DateUtils.format(DateUtil.addDays(new Date(), -1), DateUtil.yyyyMMddChineseFormat));
-        String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(L1, L2), L3), L4), L5);
+        String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(L1, L2), L3), L4);
         JSONObject data = getDataByTag(allTagNames, startTime, endTime, version);
         dealPart1(data, version);
         dealPart(data, "partTwo", L2, df2);
@@ -213,18 +242,9 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         }
     }
 
-    /**
-     * 炉体温度数据
-     * @param version
-     * @param tagNames
-     * @return
-     */
-
-    private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames, int days) {
-        String prefix = "BF8_L2C_BD_";
-        String suffix = "_1d_max";
-        BigDecimal maxTemp = new BigDecimal(0);
+    private BigDecimal getMaxLuTiTemp(StringBuilder builder, String version, String[] tagNames, int days, String prefix, String suffix) {
         String maxTempTagName = "";
+        BigDecimal maxTemp = new BigDecimal(0);
         for (int i = 0; i < tagNames.length; i++) {
             String tagName = prefix + tagNames[i] + suffix;
             BigDecimal tagValue = getLatestMaxTagValue(version, tagName, days);
@@ -233,9 +253,22 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                 maxTempTagName = tagNames[i];
             }
         }
-        Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
-        tempMap.put(maxTempTagName, maxTemp);
+        builder.append(maxTempTagName);
+        return maxTemp;
+    }
 
+    /**
+     * 炉体温度数据
+     * @param version
+     * @param tagNames
+     * @return
+     */
+
+    private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames, int days, String prefix, String suffix) {
+        StringBuilder builder = new StringBuilder();
+        BigDecimal maxTemp = getMaxLuTiTemp(builder, version, tagNames, days, prefix, suffix);
+        Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
+        tempMap.put(builder.toString(), maxTemp);
         return tempMap;
     }
 
@@ -268,32 +301,30 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
 
     /**
      * 处理炉体温度数据
-     * @param version
      * @param map
      * @param suffix
      */
-    private void dealLuTiWenDuData (String version, Map<String, BigDecimal> map, int suffix) {
+    private void dealLuTiWenDuData (Map<String, BigDecimal> map, BigDecimal yesterdayVal, int suffix,
+                                    String text1, String text2, String text3, String text4) {
+        result.put(text1+suffix, " ");
+        result.put(text2+suffix, " ");
+        result.put(text3+suffix, " ");
+        result.put(text4+suffix, " ");
         for(Map.Entry<String, BigDecimal> entry : map.entrySet()){
             String mapKey = entry.getKey();
             BigDecimal mapValue = entry.getValue();
             if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
-                result.put("luti_text"+suffix, mapKey);
-                result.put("luti_temp"+suffix, df2.format(mapValue));
-                BigDecimal yesterdayVal = getLatestMaxTagValue(version, mapKey, -2);
+                result.put(text1+suffix, mapKey);
+                result.put(text2+suffix, df2.format(mapValue));
                 if (yesterdayVal != null) {
                     if (yesterdayVal.compareTo(mapValue) == 1) {
-                        result.put("luti_temp_differ"+suffix, df2.format(yesterdayVal.subtract(mapValue)));
-                        result.put("luti_differ_text"+suffix, "降低");
+                        result.put(text4+suffix, df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put(text3+suffix, "降低");
                     } else {
-                        result.put("luti_temp_differ"+suffix, df2.format(mapValue.subtract(yesterdayVal)));
-                        result.put("luti_differ_text"+suffix, "升高");
+                        result.put(text4+suffix, df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put(text3+suffix, "升高");
                     }
                 }
-            } else {
-                result.put("luti_text"+suffix, " ");
-                result.put("luti_temp"+suffix, " ");
-                result.put("luti_temp_differ"+suffix, " ");
-                result.put("luti_differ_text"+suffix, " ");
             }
         }
     }
@@ -304,20 +335,29 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      */
     private void handleLuTiWenDu (String version) {
         try {
+            String text1 = "luti_text";
+            String text2 = "luti_temp";
+            String text3 = "luti_differ_text";
+            String text4 = "luti_temp_differ";
+            String prefix = "BF8_L2C_BD_";
+            String suffix = "_1d_max";
             //炉缸
-            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang, -1);
-            dealLuTiWenDuData(version, luGangMap, 1);
+            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang, -1, prefix, suffix);
+            BigDecimal luGangYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luGang, -2, prefix, suffix);
+            dealLuTiWenDuData(luGangMap, luGangYesterdayMax, 1, text1, text2, text3, text4);
             //炉腹
-            Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, luFu, -1);
-            dealLuTiWenDuData(version, luFuMap, 2);
+            Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, luFu, -1, prefix, suffix);
+            BigDecimal luFuYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luFu, -2, prefix, suffix);
+            dealLuTiWenDuData(luFuMap, luFuYesterdayMax, 2, text1, text2, text3, text4);
             //炉腰 5
-            Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, luYao, -1);
-            dealLuTiWenDuData(version, luYaoMap, 3);
+            Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, luYao, -1, prefix, suffix);
+            BigDecimal luYaoYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luYao, -2, prefix, suffix);
+            dealLuTiWenDuData(luYaoMap, luYaoYesterdayMax, 3, text1, text2, text3, text4);
             //炉身
-            Map<String, BigDecimal> lushengMap =  getLuTiWenDuData(version, luSheng, -1);
-            dealLuTiWenDuData(version, lushengMap, 4);
+            Map<String, BigDecimal> lushenMap =  getLuTiWenDuData(version, luShen, -1, prefix, suffix);
+            BigDecimal lushenYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luShen, -2, prefix, suffix);
+            dealLuTiWenDuData(lushenMap, lushenYesterdayMax, 4, text1, text2, text3, text4);
 
-            //initDateTime(Calendar.WEEK_OF_MONTH,  -10, 0);
             dealChart3(version);
             dealChart4(version);
             dealChart5(version);
@@ -331,29 +371,34 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      * 获取某天最高温度
      * @param daysBefore
      * @param version
-     * @param tagName
+     * @param tagNames
      * @return
      */
-    private BigDecimal getMaxTemp(int daysBefore, String version, String tagName) {
+    private BigDecimal getMaxTemp(StringBuilder builder, int daysBefore, String version, String[] tagNames) {
+        String name = "";
         BigDecimal tempMax = new BigDecimal(0);
         Date date = DateUtil.addDays(new Date(), daysBefore);
         DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
-        JSONObject jsonObject = getDataByTag(new String[]{tagName}, dateQueryNoDelay.getStartTime(), dateQueryNoDelay.getEndTime(), version);
+        JSONObject jsonObject = getDataByTag(tagNames, dateQueryNoDelay.getStartTime(), dateQueryNoDelay.getEndTime(), version);
         if (jsonObject != null && jsonObject.size() > 0) {
-            JSONObject tagObject = jsonObject.getJSONObject(tagName);
-            Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
-            if (Objects.nonNull(innerMap)) {
-                Set<String> keySet = innerMap.keySet();
-                for (String key:keySet) {
-                    BigDecimal tagValue = (BigDecimal) innerMap.get(key);
-                    if (tagValue == null) {
-                        tempMax = null;
-                    } else if (tagValue.compareTo(tempMax) == 1) {
-                        tempMax = tagValue;
+            for (String tagName:tagNames) {
+                JSONObject tagObject = jsonObject.getJSONObject(tagName);
+                Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
+                if (Objects.nonNull(innerMap)) {
+                    Set<String> keySet = innerMap.keySet();
+                    for (String key:keySet) {
+                        BigDecimal tagValue = (BigDecimal) innerMap.get(key);
+                        if (tagValue == null) {
+                            tempMax = null;
+                        } else if (tagValue.compareTo(tempMax) == 1) {
+                            tempMax = tagValue;
+                            name = tagName;
+                        }
                     }
                 }
             }
         }
+        builder.append(name);
         return tempMax;
     }
 
@@ -364,13 +409,12 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      * @param tagNames
      * @return
      */
-    private List<BigDecimal> getMaxTemp (int daysBefore, String version, String[] tagNames) {
-        List<BigDecimal> results = new ArrayList<>();
-        for (String tagName:tagNames) {
-            BigDecimal value = getMaxTemp(daysBefore, version, tagName);
-            results.add(value);
-        }
-        return results;
+    private Map<String, BigDecimal> getMaxTempMap (int daysBefore, String version, String[] tagNames, String prefix, String stuffix) {
+        StringBuilder builder = new StringBuilder();
+        BigDecimal maxTemp = getMaxTemp(builder, daysBefore, version, tagNames);
+        Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
+        tempMap.put(builder.toString().replace(prefix,"").replace(stuffix,""), maxTemp);
+        return tempMap;
     }
 
     /**
@@ -379,42 +423,46 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      */
     private void handleTapTempture (String version) {
         try {
+            String text1 = "tap_text";
+            String text2 = "tap_temp";
+            String text3 = "tap_temp_text";
+            String text4 = "tap_temp_differ";
 
-            String prefix1 = "tap_temp";
-            String prefix2 = "tap_temp_text";
-            String prefix3 = "tap_temp_differ";
-            //今日最高温度
-            List<BigDecimal> todayList = getMaxTemp(-1, version, L5);
-            //昨日最高温度
-            List<BigDecimal> yesterdayList =getMaxTemp(-2, version, L5);
+            String prefix = "BF8_L2C_BD_";
+            String stuffix = "_1d_max";
             //默认值，防止接口中没有数据
-            for(int i = 0; i < L5.length; i++) {
-                result.put(prefix1 + String.valueOf(i + 1), " ");
-                result.put(prefix2 + String.valueOf(i + 1), " ");
-                result.put(prefix3 + String.valueOf(i + 1), " ");
+            for(int i = 0; i < 4; i++) {
+                result.put(text1 + String.valueOf(i + 1), " ");
+                result.put(text2 + String.valueOf(i + 1), " ");
+                result.put(text3 + String.valueOf(i + 1), " ");
+                result.put(text4 + String.valueOf(i + 1), " ");
             }
-
-            for (int i = 0; i < todayList.size(); i++) {
-                BigDecimal today = todayList.get(i);
-                result.put(prefix1 + String.valueOf(i + 1), today == null ? 0d : df2.format(today));
-                if (today == null) continue;
-                if (yesterdayList.size() > i) {
-                    BigDecimal yesterday = yesterdayList.get(i);
-                    if (yesterday == null) continue;
-                    String text = "";
-                    BigDecimal differ = null;
-                    if (today.compareTo(yesterday) == 1) {
-                        text = "升高";
-                        differ = today.subtract(yesterday);
-                    } else {
-                        text = "降低";
-                        differ = yesterday.subtract(today);
-                    }
-                    result.put(prefix2 + String.valueOf(i + 1), text);
-                    result.put(prefix3 + String.valueOf(i + 1), df2.format(differ));
-                }
+            for (int i=0;i<luGangA_C.length;i++) {
+                luGangA_C[i] = prefix + luGangA_C[i] + stuffix;
             }
-
+            for (int i=0;i<luGangD_F.length;i++) {
+                luGangD_F[i] = prefix + luGangD_F[i] + stuffix;
+            }
+            for (int i=0;i<luGangG_I.length;i++) {
+                luGangG_I[i] = prefix + luGangG_I[i] + stuffix;
+            }
+            for (int i=0;i<luGangJ_M.length;i++) {
+                luGangJ_M[i] = prefix + luGangJ_M[i] + stuffix;
+            }
+            //今日最高温度
+            Map<String, BigDecimal> todayACMap = getMaxTempMap(-1, version, luGangA_C, prefix, stuffix);
+            //昨日最高温度
+            BigDecimal maxACTemp = getMaxTemp(new StringBuilder(), -2, version, luGangA_C);
+            dealLuTiWenDuData(todayACMap, maxACTemp, 1, text1, text2, text3, text4);
+            Map<String, BigDecimal> todayDFMap = getMaxTempMap(-1, version, luGangD_F, prefix, stuffix);
+            BigDecimal maxDFTemp = getMaxTemp(new StringBuilder(), -2, version, luGangD_F);
+            dealLuTiWenDuData(todayDFMap, maxDFTemp, 2, text1, text2, text3, text4);
+            Map<String, BigDecimal> todayDIMap = getMaxTempMap(-1, version, luGangG_I, prefix, stuffix);
+            BigDecimal maxGITemp = getMaxTemp(new StringBuilder(), -2, version, luGangG_I);
+            dealLuTiWenDuData(todayDIMap, maxGITemp, 3, text1, text2, text3, text4);
+            Map<String, BigDecimal> todayJMMap = getMaxTempMap(-1, version, luGangJ_M, prefix, stuffix);
+            BigDecimal maxJMTemp = getMaxTemp(new StringBuilder(), -2, version, luGangJ_M);
+            dealLuTiWenDuData(todayJMMap, maxJMTemp, 4, text1, text2, text3, text4);
         } catch (Exception e) {
             log.error("处理铁口温度失败", e);
         }
@@ -695,6 +743,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             result.put("firstGradeRate", " ");
         }
         //[S]达标率
+        result.put("sQualifiedRate", " ");
         dealSQualifiedRate(version);
         dealChart1(data);
         dealChart2(data);
@@ -861,11 +910,6 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         Double max2 = tempObject2.size() > 0 ? Collections.max(tempObject2) * 1.2 : 600.0;
         Double min2 = tempObject2.size() > 0 ? Collections.min(tempObject2) * 0.8 : 400.0;
 
-//        Double min1 = 0.0;
-//        Double max1 = 10000.0;
-//        Double min2 = 400.0;
-//        Double max2 = 600.0;
-
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
@@ -926,76 +970,61 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         result.put("jfreechartImg3", image1);
     }
 
+    private List<Double> getMaxLuGangList(String version, String[] array, String prefix, String suffix) {
+        List<Double> value = new ArrayList<>();
+        for (int i = 29; i > -1; i--) {
+            BigDecimal big = getMaxTemp(new StringBuilder(), -1 - i, version, array);
+            Double val = null;
+            if (null != big) {
+                val = big.doubleValue();
+                if (val < 0) {
+                    val = null;
+                }
+            }
+            value.add(val);
+        }
+        return value;
+    }
+
     private void dealChart4(String version) {
-        String tagName1 = "BF8_L2C_HMTemp_1";
-        String tagName2 = "BF8_L2C_HMTemp_2";
-        String tagName3 = "BF8_L2C_HMTemp_3";
-        String tagName4 = "BF8_L2C_HMTemp_4";
-        List<Double> tempObject1 = new ArrayList<>();
-        List<Double> tempObject2 = new ArrayList<>();
-        List<Double> tempObject3 = new ArrayList<>();
-        List<Double> tempObject4 = new ArrayList<>();
-        for(int i = 70; i>-1; i--) {
-            if(i%7 != 0) continue;
-            Double val = null;
-            BigDecimal value = getMaxTemp(-1-i, version, tagName1);
-            if(value != null) {
-                val = value.doubleValue();
-            }
-            tempObject1.add(val);
-        }
-        tempObject1.removeAll(Collections.singleton(null));
-        for(int i=29; i>-1; i--) {
-            Double val = null;
-            BigDecimal value = getMaxTemp(-1-i, version, tagName2);
-            if(value != null) {
-                val = value.doubleValue();
-            }
-            tempObject2.add(val);
-        }
-        tempObject2.removeAll(Collections.singleton(null));
-        for(int i=29; i>-1; i--) {
-            Double val = null;
-            BigDecimal value = getMaxTemp(-1-i, version, tagName3);
-            if(value != null) {
-                val = value.doubleValue();
-            }
-            tempObject3.add(val);
-        }
-        tempObject3.removeAll(Collections.singleton(null));
-        for(int i=29; i>-1; i--) {
-            Double val = null;
-            BigDecimal value = getMaxTemp(-1-i, version, tagName4);
-            if(value != null) {
-                val = value.doubleValue();
-            }
-            tempObject4.add(val);
-        }
-        tempObject4.removeAll(Collections.singleton(null));
-        //(Collections.max(tempObject4) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject4) * 1.2 )
-        Double max1 = tempObject1.size() > 0 ? (Collections.max(tempObject1) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject1) * 1.2 ) : 10000.0;
-        Double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : 0.0;
-        Double max2 = tempObject2.size() > 0 ? (Collections.max(tempObject2) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject2) * 1.2 ) : 10000.0;
-        Double min2 = tempObject2.size() > 0 ? Collections.min(tempObject2) * 0.8 : 0.0;
-        Double max3 = tempObject3.size() > 0 ? (Collections.max(tempObject3) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject3) * 1.2 ) : 10000.0;
-        Double min3 = tempObject3.size() > 0 ? Collections.min(tempObject3) * 0.8 : 0.0;
-        Double max4 = tempObject4.size() > 0 ? (Collections.max(tempObject4) * 1.2 == 0.0 ? 100.0: Collections.max(tempObject4) * 1.2 ) : 10000.0;
-        Double min4 = tempObject4.size() > 0 ? Collections.min(tempObject4) * 0.8 : 0.0;
-        double[] rangStarts = {min1,min2,min3,min4};
-        double[] rangEnds = {max1,max2,max3,max4};
+        String prefix = "BF8_L2C_BD_";
+        String suffix = "_1d_max";
+        List<Double> luGangA_CList = getMaxLuGangList(version, luGangA_C, prefix, suffix);
+        List<Double> luGangD_FList = getMaxLuGangList(version, luGangD_F, prefix, suffix);
+        List<Double> luGangG_IList = getMaxLuGangList(version, luGangG_I, prefix, suffix);
+        List<Double> luGangJ_MList = getMaxLuGangList(version, luGangJ_M, prefix, suffix);
+
+        luGangA_CList.removeAll(Collections.singleton(null));
+        luGangD_FList.removeAll(Collections.singleton(null));
+        luGangG_IList.removeAll(Collections.singleton(null));
+        luGangJ_MList.removeAll(Collections.singleton(null));
+        Double max1 = luGangA_CList.size() > 0 ? (Collections.max(luGangA_CList) * 1.2 == 0.0 ? 100.0: Collections.max(luGangA_CList) * 1.2) : 10000.0;
+        Double min1 = luGangA_CList.size() > 0 ? Collections.min(luGangA_CList) * 0.8 : 0.0;
+        Double max2 = luGangD_FList.size() > 0 ? (Collections.max(luGangD_FList) * 1.2 == 0.0 ? 100.0: Collections.max(luGangD_FList) * 1.2) : 10000.0;
+        Double min2 = luGangD_FList.size() > 0 ? Collections.min(luGangD_FList) * 0.8 : 0.0;
+        Double max3 = luGangG_IList.size() > 0 ? (Collections.max(luGangG_IList) * 1.2 == 0.0 ? 100.0: Collections.max(luGangG_IList) * 1.2) : 10000.0;
+        Double min3 = luGangG_IList.size() > 0 ? Collections.min(luGangG_IList) * 0.8 : 0.0;
+        Double max4 = luGangJ_MList.size() > 0 ? (Collections.max(luGangJ_MList) * 1.2 == 0.0 ? 100.0: Collections.max(luGangJ_MList) * 1.2) : 10000.0;
+        Double min4 = luGangJ_MList.size() > 0 ? Collections.min(luGangJ_MList) * 0.8 : 0.0;
+        double max = ((max1 > max2 ? max1 : max2) > max3 ? (max1 > max2 ? max1 : max2) : max3) > max4 ? ((max1 > max2 ?
+                max1 : max2) > max3 ? (max1 > max2 ? max1 : max2) : max3) : max4;
+        double min = ((min1 < min2 ? min1 :min2) < min3 ? (min1 < min2 ? min1 :min2) :min3) < min4 ? ((min1 < min2 ?
+                min1 :min2) < min3 ? (min1 < min2 ? min1 :min2) :min3) : min4;
+        double[] rangStarts = {min,min,min,min};
+        double[] rangEnds = {max,max,max,max};
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
-        series1.add(new Serie("1#铁口最高温度", tempObject1.toArray()));
+        series1.add(new Serie("A-C", luGangA_CList.toArray()));
         // 标注类别
         Vector<Serie> series2 = new Vector<Serie>();
-        series2.add(new Serie("2#铁口最高温度", tempObject2.toArray()));
+        series2.add(new Serie("D-F", luGangD_FList.toArray()));
         // 标注类别
         Vector<Serie> series3 = new Vector<Serie>();
-        series3.add(new Serie("3#铁口最高温度", tempObject3.toArray()));
+        series3.add(new Serie("G-I", luGangG_IList.toArray()));
         // 标注类别
         Vector<Serie> series4 = new Vector<Serie>();
-        series4.add(new Serie("4#铁口最高温度", tempObject4.toArray()));
+        series4.add(new Serie("J-M", luGangJ_MList.toArray()));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
@@ -1017,46 +1046,49 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         result.put("jfreechartImg4", image1);
     }
 
-    private List<Double> getMaxLuTiWenDuList(String version, String[] array) {
+    private List<Double> getMaxLuTiWenDuList(String version, String[] array, String prefix, String suffix) {
         List<Double> value = new ArrayList<>();
         for (int i = 29; i > -1; i--) {
             //炉缸
-            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, array, -1 - i);
-            for (BigDecimal big:luGangMap.values()) {
-                Double val = null;
-                if (null != big) {
-                    val = big.doubleValue();
-                    if (val < 0) {
-                        val = null;
-                    }
+            BigDecimal big = getMaxLuTiTemp(new StringBuilder(), version, array, -1 - i, prefix, suffix);
+            Double val = null;
+            if (null != big) {
+                val = big.doubleValue();
+                if (val < 0) {
+                    val = null;
                 }
-                value.add(val);
             }
+            value.add(val);
         }
         return value;
     }
 
     private void dealChart5(String version) {
-
-        List<Double> luGangList = getMaxLuTiWenDuList(version, luGang);
-        List<Double> luFuList = getMaxLuTiWenDuList(version, luFu);
-        List<Double> luYaoList = getMaxLuTiWenDuList(version, luYao);
-        List<Double> luShengList = getMaxLuTiWenDuList(version, luSheng);
+        String prefix = "BF8_L2C_BD_";
+        String suffix = "_1d_max";
+        List<Double> luGangList = getMaxLuTiWenDuList(version, luGang, prefix, suffix);
+        List<Double> luFuList = getMaxLuTiWenDuList(version, luFu, prefix, suffix);
+        List<Double> luYaoList = getMaxLuTiWenDuList(version, luYao, prefix, suffix);
+        List<Double> luShenList = getMaxLuTiWenDuList(version, luShen, prefix, suffix);
 
         luGangList.removeAll(Collections.singleton(null));
         luFuList.removeAll(Collections.singleton(null));
         luYaoList.removeAll(Collections.singleton(null));
-        luShengList.removeAll(Collections.singleton(null));
+        luShenList.removeAll(Collections.singleton(null));
         Double max1 = luGangList.size() > 0 ? (Collections.max(luGangList) * 1.2 == 0.0 ? 100.0: Collections.max(luGangList) * 1.2) : 10000.0;
         Double min1 = luGangList.size() > 0 ? Collections.min(luGangList) * 0.8 : 0.0;
         Double max2 = luFuList.size() > 0 ? (Collections.max(luFuList) * 1.2 == 0.0 ? 100.0: Collections.max(luFuList) * 1.2) : 10000.0;
         Double min2 = luFuList.size() > 0 ? Collections.min(luFuList) * 0.8 : 0.0;
         Double max3 = luYaoList.size() > 0 ? (Collections.max(luYaoList) * 1.2 == 0.0 ? 100.0: Collections.max(luYaoList) * 1.2) : 10000.0;
         Double min3 = luYaoList.size() > 0 ? Collections.min(luYaoList) * 0.8 : 0.0;
-        Double max4 = luShengList.size() > 0 ? (Collections.max(luShengList) * 1.2 == 0.0 ? 100.0: Collections.max(luShengList) * 1.2) : 10000.0;
-        Double min4 = luShengList.size() > 0 ? Collections.min(luShengList) * 0.8 : 0.0;
-        double[] rangStarts = {min1,min2,min3,min4};
-        double[] rangEnds = {max1,max2,max3,max4};
+        Double max4 = luShenList.size() > 0 ? (Collections.max(luShenList) * 1.2 == 0.0 ? 100.0: Collections.max(luShenList) * 1.2) : 10000.0;
+        Double min4 = luShenList.size() > 0 ? Collections.min(luShenList) * 0.8 : 0.0;
+        double max = ((max1 > max2 ? max1 : max2) > max3 ? (max1 > max2 ? max1 : max2) : max3) > max4 ? ((max1 > max2 ?
+                max1 : max2) > max3 ? (max1 > max2 ? max1 : max2) : max3) : max4;
+        double min = ((min1 < min2 ? min1 :min2) < min3 ? (min1 < min2 ? min1 :min2) :min3) < min4 ? ((min1 < min2 ?
+                min1 :min2) < min3 ? (min1 < min2 ? min1 :min2) :min3) : min4;
+        double[] rangStarts = {min,min,min,min};
+        double[] rangEnds = {max,max,max,max};
         // 标注类别
         Vector<Serie> series1 = new Vector<Serie>();
         // 柱子名称：柱子所有的值集合
@@ -1069,7 +1101,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         series3.add(new Serie("炉腰", luYaoList.toArray()));
         // 标注类别
         Vector<Serie> series4 = new Vector<Serie>();
-        series4.add(new Serie("炉身", luShengList.toArray()));
+        series4.add(new Serie("炉身", luShenList.toArray()));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
@@ -1256,8 +1288,8 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             XWPFTableCell targetCell = tables.get(tables.size()-1).getRow(1).getCell(4);
             // 处理换行符
             addBreakInCell(targetCell);
-            //Date date = DateUtil.addDays(new Date(), -1);
-            String fileName = String.format("%s_%s_%s.docx", sequence, currentTemplate.getTemplateName(), DateUtil.getFormatDateTime(new Date(), "yyyyMMdd"));
+            Date date = DateUtil.addDays(new Date(), -1);
+            String fileName = String.format("%s_%s_%s.docx", sequence, currentTemplate.getTemplateName(), DateUtil.getFormatDateTime(date, "yyyyMMdd"));
             String filePath = jobProperties.getFilePath() + File.separator + "doc" + File.separator + fileName;
             FileOutputStream fos = new FileOutputStream(filePath);
             doc.write(fos);

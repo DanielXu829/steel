@@ -52,6 +52,9 @@ public class TestJobGl extends SteelApplicationTests {
     @Autowired
     private LuDiWenDu8Job luDiWenDu8Job;
 
+    @Autowired
+    private LengQueBiYueBaoJob lengQueBiYueBaoJob;
+
     @Test
     public void test1() {
         bianLiaoJiLu8Job.execute(null);
@@ -109,6 +112,14 @@ public class TestJobGl extends SteelApplicationTests {
     }
 
     /**
+     * 测试 8高炉冷却水冷却壁月报
+     */
+    @Test
+    public void testLengQueBiYueBaoJob() {
+        lengQueBiYueBaoJob.execute(null);
+    }
+
+    /**
      * 测试 8高炉考核月报表
      */
     @Test
@@ -129,6 +140,7 @@ public class TestJobGl extends SteelApplicationTests {
         testKaoHeYueBao();
         testJiShuJingJi8Job();
         testCaoZuoGuanLiRiJiJob();
+        testLengQueBiYueBaoJob();
     }
 
     @Test
