@@ -55,7 +55,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         sheet.getRow(itemRowNum).setZeroHeight(true);//隐藏占位符行
 
         DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
-        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date.getRecordDate());
+        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date.getRecordDate());
         List<Integer> chargeNos= handleChargeNoData(dateQuery, version);
 
         int count = 0;

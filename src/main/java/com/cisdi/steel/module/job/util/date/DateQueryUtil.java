@@ -35,6 +35,19 @@ public class DateQueryUtil {
 //    }
 
     /**
+     * 构建前一天的22点到当天的22点
+     * @param date
+     * @return
+     */
+    public static DateQuery buildDayAheadTwoHour(Date date) {
+        Date todayBeginTime = DateUtil.getDateBeginTime(date);
+        todayBeginTime = DateUtil.addHours(todayBeginTime, -2);
+        Date todayEndTime = DateUtil.getDateEndTime(date);
+        todayEndTime = DateUtil.addHours(todayEndTime, -2);
+        return new DateQuery(todayBeginTime, todayEndTime, date);
+    }
+
+    /**
      * 构建一个当天的开始时间（23:05:00）---结束时间（23:05:00）
      * 如 时间：2019-12-16 10:00:00
      * recordDate=2019-12-16 10:00:00, startTime=2019-12-15 23:05:00, endTime=2019-12-16 23:05:00

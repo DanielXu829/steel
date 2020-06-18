@@ -83,6 +83,7 @@ public enum JobEnum {
     gl_kaoheyuebao("gl_kaoheyuebao","8高炉考核月报表"),
     gl_jishujingji("gl_jishujingji","8高炉技术经济月报表"),
     gl_caozuoguanliriji("gl_caozuoguanliriji","8高炉操作管理日记"),
+    gl_ludiwendu("gl_ludiwendu", "8高炉炉底温度月报表"),
 
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "配煤-自动配煤报表（班）"),
