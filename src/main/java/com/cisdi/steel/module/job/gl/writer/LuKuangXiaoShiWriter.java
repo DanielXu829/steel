@@ -36,7 +36,7 @@ public class LuKuangXiaoShiWriter extends AbstractExcelReadWriter {
 
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
+        DateQuery date = this.getDateQuery(excelDTO);
         int numberOfSheets = workbook.getNumberOfSheets();
         String version ="8.0";
         try {

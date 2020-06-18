@@ -39,11 +39,11 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      * @param version
      * @return api数据
      */
-    protected List<ChargeVarInfo> getChargeVarInfo(String version, DateQuery dateQuery) {
+    protected List<ChargeVarInfo> getChargeVarInfo(String version, DateQuery dateQuery, String type) {
         List<ChargeVarInfo> chargeVarInfos = null;
         Map<String, String> queryParam = new HashMap();
-        queryParam.put("startTime",  Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
-        queryParam.put("endTime",  Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+        queryParam.put("time",  Objects.requireNonNull(dateQuery.getRecordDate().getTime()).toString());
+        queryParam.put("type",  type);
         String chargeVarInfoStr = httpUtil.get(getChargeVarInfoUrl(version), queryParam);
 
         if (StringUtils.isNotBlank(chargeVarInfoStr)) {
@@ -501,7 +501,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getChargeVarInfoUrl(String version) {
-        return httpProperties.getGlUrlVersion(version) + "/charge/variation/range";
+        return httpProperties.getGlUrlVersion(version) + "/charge/variation/day";
     }
 
     /**
@@ -522,4 +522,97 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return httpProperties.getGlUrlVersion(version) + "/batch/distribution/getMatrixDistrAvgInRange";
     }
 
+    /**
+     * 获取/tagValue/latest的url
+     * @param version
+     * @return
+     */
+    protected String getLatestTagValueUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
+    }
+    /**
+     * 获取高炉的种类Url
+     * @param version
+     * @return Url的string
+     */
+    protected String getBrandCodes(String version){
+        return httpProperties.getGlUrlVersion(version) + "/brandCodes/getBrandCodes";
+    }
+
+    /**
+     * 通过tag点拿数据的API，根据sequence和version返回不同工序的api地址
+     * @param version
+     * @return
+     */
+    protected String getUrlTagNamesInRange(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
+    }
+
+    /**
+     * 热强度和矿块信息
+     * @param version
+     * @return
+     */
+    protected String getAnalysisValueUrl(String version, String time, String type, String brandCode) {
+        String url = String.format(httpProperties.getGlUrlVersion(version) + "/analysisValue/clock/%s?type=%s&brandcode=%s", time, type, brandCode);
+        return url;
+    }
+
+    protected String getRangeByTypeUrl (String version, String from, String to, String type) {
+        String url = String.format(httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByType?from=%s&to=%s&materialType=", from, to, type);
+        return url;
+    }
+
+    /**
+     * 烧结矿理化分析API
+     * @param version
+     * @return
+     */
+    protected String getAnalysisValuesUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByCode";
+    }
+
+    /**
+     * 出铁数据接口
+     * @param version
+     * @return
+     */
+    protected String getTapsInRange(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/taps/sg/period";
+    }
+
+    /**
+     * 罐号重量数据接口
+     * @param version
+     * @return
+     */
+    protected String getTpcInfoByTapNo(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/report/tap/queryTpcInfoByTapNo";
+    }
+
+    /**
+     * 风口坏否信息
+     * @param version
+     * @return
+     */
+    protected String getQueryBlastStatus(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/bfBlast/queryBlastStatus";
+    }
+
+    /**
+     * 获取数据：入炉铁份、批铁量、焦比
+     * @param version
+     * @param queryParam
+     * @return
+     */
+    protected BigDecimal getLatestByCategoryAndItem (String version, Map<String, String> queryParam) {
+        String url = httpProperties.getGlUrlVersion(version) + "/getLatestByCategoryAndItem";
+        String data = httpUtil.get(url, queryParam);
+        JSONObject jsonObject = JSONObject.parseObject(data);
+        BigDecimal result = null;
+        if (Objects.nonNull(jsonObject)) {
+            result = jsonObject.getBigDecimal("data");
+        }
+        return result;
+    }
 }

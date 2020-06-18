@@ -4,7 +4,7 @@ spring:
         name: steel
 #profile
     profiles:
-        active: prod
+        active: local
 #datasource
     datasource:
         # druid
@@ -67,16 +67,23 @@ spring:
 http:
   url:
 #   urlApiGLOne: http://10.64.11.202:9001
-   urlApiGLTwo: http://10.11.11.4:9001
+    urlApiGLTwo: http://10.11.11.4:9001
+    #urlApiGLTwo: http://localhost:9904
+    #urlApiGLTwo: http://10.64.11.203:9001
+    #urlApiGLTwo: http://172.20.10.7:9904
 #   urlApiGLThree: http://10.64.11.204:9001
 #   urlApiNJOne: http://10.64.11.220:8080
-   urlApiJHOne:  http://10.11.11.10:9001
+    urlApiJHOne:  http://10.11.11.10:9001
+    #urlApiJHOne:  http://10.64.11.209:8099
+    #urlApiJHOne:  http://172.20.61.27:9910
 #   urlApiJHTwo:  http://10.64.11.208:8080
 #   urlApiJHThree:  http://10.64.11.207:8080
 #   urlApiYGLOne: http://10.64.11.210:8181
 #   urlApiSJTwo: http://10.64.11.205:9001
 #   urlApiSJOne: http://10.64.11.206:9001
-   urlApiSJThree: http://10.11.11.7:9001
+    urlApiSJThree: http://10.11.11.7:9001
+    #urlApiSJThree: http://172.20.61.27:9907
+    #urlApiSJThree: http://10.64.11.205:9001
 
 # mybatis-plus
 mybatis-plus:

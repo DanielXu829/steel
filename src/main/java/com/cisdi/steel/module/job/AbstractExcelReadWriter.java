@@ -109,6 +109,22 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
     }
 
     /**
+     * 构建24小时时间段
+     * 昨天晚上22点-今天晚上22点
+     *
+     * @param excelDTO 指定时间
+     * @return 结果
+     */
+    protected final DateQuery build24HoursFromTwentyTwo(WriterExcelDTO excelDTO) {
+        DateQuery date = excelDTO.getDateQuery();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date.getRecordDate());
+        Date nightWorkBeginTime = DateUtil.addHours(dateBeginTime, -2);
+        Date dayWorkEndTime = DateUtil.addHours(dateBeginTime, 22);
+        DateQuery dateQuery = new DateQuery(nightWorkBeginTime, dayWorkEndTime, date.getRecordDate());
+        return dateQuery;
+    }
+
+    /**
      * 查询条件
      * 一定存在 recordDate数据
      *
@@ -122,7 +138,7 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
             dateQuery = new DateQuery(date);
         } else {
             // 默认取当前时间前一天
-            dateQuery = DateQueryUtil.buildToday(DateUtil.addDays(dateQuery.getRecordDate(), -1));
+            dateQuery = DateQueryUtil.buildTodayNoDelay(DateUtil.addDays(dateQuery.getRecordDate(), -1));
         }
         return dateQuery;
     }
