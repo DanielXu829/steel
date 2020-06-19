@@ -16,10 +16,12 @@ import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
+import com.cisdi.steel.module.job.util.FastJSONUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -246,25 +248,14 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         Map<String, String> queryParam = new HashMap();
         queryParam.put("time", Objects.requireNonNull(dateTime).toString());
         String jsonData = httpUtil.get(url, queryParam);
-        if (StringUtils.isNotBlank(jsonData)) {
-            JSONObject object = JSON.parseObject(jsonData);
-            if (Objects.nonNull(object)) {
-                object = object.getJSONObject("data");
-                if (Objects.nonNull(object)) {
-                    Map<String, Object> innerMap = object.getInnerMap();
-                    if (Objects.isNull(innerMap)) {
-                        return;
-                    }
-                    for (int i = 0; i < 36; i++) {
-                        if (Objects.nonNull(innerMap.get(i+1+"")) && (int)innerMap.get(i+1+"") != 0) {
-                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2 + columnIndex, "×");
-                            ExcelWriterUtil.addCellData(cellDataList, rowIndex + 2, i*2 + columnIndex, "×");
-                        } else {
-                            ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2 + columnIndex, "√");
-                            ExcelWriterUtil.addCellData(cellDataList, rowIndex + 2, i*2 + columnIndex, "√");
-                        }
-                    }
-                }
+        for (int i = 0; i < 36; i++) {
+            Integer val = FastJSONUtil.getJsonValueByKey(jsonData, Lists.newArrayList("data"), String.valueOf(i+1), Integer.class);
+            if (Objects.nonNull(val) && val != 0) {
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2 + columnIndex, "×");
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex + 2, i*2 + columnIndex, "×");
+            } else {
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2 + columnIndex, "√");
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex + 2, i*2 + columnIndex, "√");
             }
         }
     }
@@ -451,42 +442,23 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String results = httpUtil.postJsonParams(queryUrl, jsonString);
-        if (StringUtils.isNotBlank(results)) {
-            JSONObject object = JSONObject.parseObject(results);
-            if (Objects.nonNull(object)) {
-                JSONObject data = object.getJSONObject("data");
-                if (Objects.nonNull(data)) {
-                    JSONObject tag = data.getJSONObject("BF8_L2M_NetCokeTime_evt");
-                    if (Objects.nonNull(tag)) {
-                        Map<String, Object> innerMap = tag.getInnerMap();
-                        Set<String> keys = innerMap.keySet();
-                        int k = 0;
-                        for (String key : keys) {
-                            //批次
-                            ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + k, columnIndex, tag.getBigDecimal(key));
+        JSONObject tag = FastJSONUtil.getJsonObjectByKey(results, Lists.newArrayList("data", "BF8_L2M_NetCokeTime_evt"));
+        if (Objects.nonNull(tag)) {
+            Map<String, Object> innerMap = tag.getInnerMap();
+            Set<String> keys = innerMap.keySet();
+            int k = 0;
+            for (String key : keys) {
+                //批次
+                ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + k, columnIndex, tag.getBigDecimal(key));
 
-                            String url = getLatestTagValueUrl(version);
-                            Map<String, String> param = new HashMap<>();
-                            param.put("time", key);
-                            param.put("tagname", "BF8_L2M_CokeBatchWeight_evt");
-                            String result = httpUtil.get(url, param);
-                            if (StringUtils.isNotBlank(result)) {
-                                JSONObject weight = JSON.parseObject(result);
-                                if (Objects.nonNull(weight)) {
-                                    weight = weight.getJSONObject("data");
-                                    if (Objects.nonNull(weight)) {
-                                        BigDecimal val = weight.getBigDecimal("val");
-                                        if (val != null) {
-                                            //重量
-                                            ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + k, columnIndex + 2, val);
-                                        }
-                                    }
-                                }
-                            }
-                            k++;
-                        }
-                    }
-                }
+                String url = getLatestTagValueUrl(version);
+                Map<String, String> param = new HashMap<>();
+                param.put("time", key);
+                param.put("tagname", "BF8_L2M_CokeBatchWeight_evt");
+                String result = httpUtil.get(url, param);
+                BigDecimal tagValue = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", BigDecimal.class);
+                ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + k, columnIndex + 2, tagValue);
+                k++;
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -593,20 +565,12 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         param.put("time", String.valueOf(Long.valueOf(key)));
         param.put("tagname", "BF8_L2C_SH_CurrentBatch_evt");
         String result = httpUtil.get(url, param);
-        if (StringUtils.isNotBlank(result)) {
-            JSONObject startIndex = JSON.parseObject(result);
-            if (Objects.nonNull(startIndex)) {
-                startIndex = startIndex.getJSONObject("data");
-                if (Objects.nonNull(startIndex)) {
-                    Integer val = startIndex.getInteger("val");
-                    if (val != null) {
-                        if (liaoXianMap.containsKey(val)) {
-                            liaoXianMap.get(val).put(tag, tagValue);
-                        } else {
-                            liaoXianMap.put(val, new HashMap<String, BigDecimal>(){{ put("C", tagValue); }});
-                        }
-                    }
-                }
+        Integer val = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", Integer.class);
+        if (val != null) {
+            if (liaoXianMap.containsKey(val)) {
+                liaoXianMap.get(val).put(tag, tagValue);
+            } else {
+                liaoXianMap.put(val, new HashMap<String, BigDecimal>(){{ put("C", tagValue); }});
             }
         }
     }
@@ -636,38 +600,29 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String results = httpUtil.postJsonParams(queryUrl, jsonString);
         Map<Integer, Map<String, BigDecimal>> liaoXianMap = new HashMap<Integer, Map<String, BigDecimal>>();
-        if (StringUtils.isNotBlank(results)) {
-            JSONObject jsonObject = JSON.parseObject(results);
-            if (Objects.nonNull(jsonObject)) {
-                jsonObject = jsonObject.getJSONObject("data");
-                if (Objects.nonNull(jsonObject)) {
-                    int index = 0;
-                    for (String tagName:tagNames) {
-                        JSONObject jsonDatas = jsonObject.getJSONObject(tagName);
-                        if (Objects.nonNull(jsonDatas) && jsonDatas.size() > 0) {
-                            Set<String> keySet = jsonDatas.keySet();
-                            for (String key:keySet) {
-                                BigDecimal tagValue = jsonDatas.getBigDecimal(key);
-                                switch (tagName) {
-                                    case "BF8_L2C_TP_CokeSetLine_evt":
-                                        handleStartIndex(version, key, liaoXianMap, tagValue, "C");
-                                        break;
-                                    case "BF8_L2C_TP_SinterSetLine_evt":
-                                        handleStartIndex(version, key, liaoXianMap, tagValue, "OI");
-                                        break;
-                                    case "BF8_L2C_TP_LiSinterSetLine_evt":
-                                        handleStartIndex(version, key, liaoXianMap, tagValue, "Os");
-                                        break;
-                                }
-                                index ++;
-                            }
-                        }
+        int index = 0;
+        for (String tagName:tagNames) {
+            JSONObject jsonDatas = FastJSONUtil.getJsonObjectByKey(results, Lists.newArrayList("data", tagName));
+            if (Objects.nonNull(jsonDatas) && jsonDatas.size() > 0) {
+                Set<String> keySet = jsonDatas.keySet();
+                for (String key:keySet) {
+                    BigDecimal tagValue = jsonDatas.getBigDecimal(key);
+                    switch (tagName) {
+                        case "BF8_L2C_TP_CokeSetLine_evt":
+                            handleStartIndex(version, key, liaoXianMap, tagValue, "C");
+                            break;
+                        case "BF8_L2C_TP_SinterSetLine_evt":
+                            handleStartIndex(version, key, liaoXianMap, tagValue, "OI");
+                            break;
+                        case "BF8_L2C_TP_LiSinterSetLine_evt":
+                            handleStartIndex(version, key, liaoXianMap, tagValue, "Os");
+                            break;
                     }
+                    index ++;
                 }
-
             }
         }
-        int index = 0;
+        index = 0;
         for(Map.Entry<Integer, Map<String, BigDecimal>> entry : liaoXianMap.entrySet()) {
             Integer mapKey = entry.getKey();
             Map<String, BigDecimal> mapValue = entry.getValue();
@@ -682,31 +637,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5,
                             mapValue.get("OI")+"/"+mapValue.get("Os"));
                 }
-//                switch (key) {
-//                    case "C":
-//                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 3, val);
-//                        break;
-//                    case "OI":
-//                    case "Os":
-//                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5,
-//                                mapValue.get("OI")+"/"+mapValue.get("Os"));
-//                        break;
-//                    case "基准":
-//                        ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
-//                        break;
-//                }
             }
             index++;
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-//        if (liaoXianMap.size() > 23) {
-//            //设置动态边框样式
-//            int beginRowNum = beginRowIndex;
-//            int lastRowNum = beginRowIndex + (liaoXianMap.size()-23);
-//            int beginColumnNum = columnIndex;
-//            int endColumnNum = columnIndex + 8;
-//            ExcelWriterUtil.setBorderStyle(sheet.getWorkbook(), sheet,  beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
-//        }
     }
 
     //结束--------------------正面-变料信息--------------------
@@ -863,16 +797,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 param.put("time", String.valueOf(stringObjectMap.get("endTime")));
                 param.put("tagname", "BF8_L2M_SH_ChargeCount_evt");
                 String result = httpUtil.get(url, param);
-                if (StringUtils.isNotBlank(result)) {
-                    JSONObject object = JSON.parseObject(result);
-                    if (Objects.nonNull(object)) {
-                        object = object.getJSONObject("data");
-                        if (Objects.nonNull(object)) {
-                            int val = object.getIntValue("val");
-                            ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, 1, val);
-                        }
-                    }
-                }
+                Integer tagValue = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", Integer.class);
+                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, 1, tagValue);
                 //批料数
                 String queryUrl = getUrlTagNamesInRange(version);
                 JSONObject query = new JSONObject();
@@ -882,21 +808,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 SerializeConfig serializeConfig = new SerializeConfig();
                 String jsonString = JSONObject.toJSONString(query, serializeConfig);
                 String results = httpUtil.postJsonParams(queryUrl, jsonString);
-                if (StringUtils.isNotBlank(results)) {
-                    JSONObject tagObject = JSONObject.parseObject(results);
-                    if (Objects.nonNull(tagObject)) {
-                        tagObject = tagObject.getJSONObject("data");
-                        if (Objects.nonNull(tagObject)) {
-                            tagObject = tagObject.getJSONObject("BF8_L2M_SH_ChargeCount_evt");
-                            if (Objects.nonNull(tagObject)) {
-                                Map<String, Object> innerMap = tagObject.getInnerMap();
-                                if (Objects.nonNull(innerMap)) {
-                                    ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, 9, innerMap.size());
-                                }
-                            }
-                        }
-                    }
-
+                JSONObject tagData = FastJSONUtil.getJsonObjectByKey(results, Lists.newArrayList("data", "BF8_L2M_SH_ChargeCount_evt"));
+                if (Objects.nonNull(tagData)) {
+                    ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, 9, tagData.size());
                 }
                 for (int j = 0; j < itemDataSize; j++) {
                     String itemData = itemRow.get(j);
@@ -1415,7 +1329,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 JSONObject jsonObject = JSON.parseObject(result);
                 if (Objects.nonNull(jsonObject)) {
                     JSONArray jsonArray = jsonObject.getJSONArray("data");
-                    if (jsonArray.size() == 0) {
+                    if (Objects.isNull(jsonArray) || jsonArray.size() == 0) {
                         queryParam.put("brandCode", "S1_SINTER");
                         kuangZhong = "S1";
                         result = httpUtil.get(url, queryParam);
