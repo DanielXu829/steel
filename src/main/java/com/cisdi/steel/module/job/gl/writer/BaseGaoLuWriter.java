@@ -559,7 +559,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     protected String getRangeByTypeUrl (String version, String from, String to, String type) {
-        String url = String.format(httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByType?from=%s&to=%s&materialType=", from, to, type);
+        String url = String.format(httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByType?from=%s&to=%s&materialType=%s", from, to, type);
         return url;
     }
 
