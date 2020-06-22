@@ -91,6 +91,12 @@ public class DateUtil {
      * 几年几月
      */
     public static final String yyyyMM = "yyyy年MM月";
+
+    /**
+     * 几年几月
+     */
+    public static final String yyyyMMWithSpace = "yyyy 年 MM 月";
+
     /**
      * 星期
      */
