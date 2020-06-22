@@ -163,5 +163,19 @@ public class ReportCategoryUtil {
         return getChildList(list, t).size() > 0;
     }
 
-
+    /**
+     * 获取所有子节点(包括字节点下面的子节点)
+     * @param reportCategorys
+     * @return
+     */
+    public static List<ReportCategory> getAllChildCategorys(List<ReportCategory> reportCategorys, List<ReportCategory> childCategorys) {
+        for (ReportCategory reportCategory : reportCategorys) {
+            childCategorys.add(reportCategory);
+            List<ReportCategory> childList = reportCategory.getChildList();
+            if (!CollectionUtils.isEmpty(childList)) {
+                getAllChildCategorys(childList, childCategorys);
+            }
+        }
+        return childCategorys;
+    }
 }

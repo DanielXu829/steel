@@ -36,6 +36,8 @@ public interface QuartzMapper {
      */
     QuartzEntity selectQuartzByCode(@Param("jobName") String code);
 
+    List<QuartzEntity> selectQuartzByCodeList(@Param("jobNameList") List<String> codeList);
+
     /**
      * 查询 数量
      *

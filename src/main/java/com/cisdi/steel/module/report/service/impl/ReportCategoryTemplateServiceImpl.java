@@ -3,15 +3,16 @@ package com.cisdi.steel.module.report.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
+import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.exception.BusinessException;
 import com.cisdi.steel.common.exception.LeafException;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
-import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.FileUtils;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
+import com.cisdi.steel.module.quartz.controller.JobController;
 import com.cisdi.steel.module.quartz.entity.QuartzEntity;
 import com.cisdi.steel.module.quartz.mapper.QuartzMapper;
 import com.cisdi.steel.module.report.entity.ReportCategory;
@@ -21,15 +22,15 @@ import com.cisdi.steel.module.report.mapper.ReportCategoryMapper;
 import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
-import com.cisdi.steel.module.sys.entity.SysConfig;
 import com.cisdi.steel.module.sys.mapper.SysConfigMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -60,6 +61,10 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
 
     @Autowired
     private ReportCategoryTemplateMapper reportCategoryTemplateMapper;
+
+    @Autowired
+    private JobController jobController;
+
     @Override
     public ApiResult pageList(ReportCategoryTemplateQuery query) {
         LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
@@ -227,6 +232,57 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
             return ApiUtil.fail("保存失败, 请重新上传模板");
         }
 
+        return ApiUtil.success();
+    }
+
+    @Override
+    @Transactional(rollbackFor = LeafException.class)
+    public ApiResult deleteRecord(BaseId record) {
+        if (Objects.isNull(record)) {
+            return ApiUtil.success();
+        }
+        if (Objects.nonNull(record.getId())) {
+            // 删除
+            log.debug("delete  id" + record.getId());
+            ReportCategoryTemplate reportCategoryTemplate = baseMapper.selectById(record.getId());
+            if (Objects.isNull(reportCategoryTemplate)) {
+                return ApiUtil.success();
+            }
+            QuartzEntity quartzEntity = quartzMapper.selectQuartzByCode(reportCategoryTemplate.getReportCategoryCode());
+            if (Objects.nonNull(quartzEntity)) {
+                // 删除定时任务
+                jobController.remove(quartzEntity);
+            }
+            // 删除报表分类
+            LambdaQueryWrapper<ReportCategory> categoryWrapper = new QueryWrapper<ReportCategory>().lambda();
+            categoryWrapper.eq(ReportCategory::getCode, reportCategoryTemplate.getReportCategoryCode());
+            ReportCategory reportCategory = reportCategoryMapper.selectOne(categoryWrapper);
+            reportCategoryMapper.deleteById(reportCategory.getId());
+            // 删除模板
+            Integer result = baseMapper.deleteById(record.getId());
+            // 等于1 表示删除了1条记录
+            return getResult(result);
+        }
+        if (Objects.nonNull(record.getIds()) && !record.getIds().isEmpty()) {
+            log.debug("delete ids " + record.getIds());
+            List<ReportCategoryTemplate> reportCategoryTemplates = baseMapper.selectBatchIds(record.getIds());
+            List<String> categoryCodeList = reportCategoryTemplates.stream().map(ReportCategoryTemplate::getReportCategoryCode).collect(Collectors.toList());
+            List<QuartzEntity> quartzEntities = quartzMapper.selectQuartzByCodeList(categoryCodeList);
+            if (CollectionUtils.isNotEmpty(quartzEntities)) {
+                quartzEntities.forEach(jobController::remove);
+            }
+            // 删除报表分类
+            LambdaQueryWrapper<ReportCategory> categoryWrapper = new QueryWrapper<ReportCategory>().lambda();
+            categoryWrapper.in(ReportCategory::getCode, categoryCodeList);
+            List<ReportCategory> reportCategories = reportCategoryMapper.selectList(categoryWrapper);
+            if (CollectionUtils.isNotEmpty(reportCategories)) {
+                reportCategoryMapper.deleteBatchIds(reportCategories.stream().map(ReportCategory::getId).collect(Collectors.toList()));
+            }
+            // 删除模板
+            boolean result = this.removeByIds(record.getIds());
+            // 多条记录
+            return getResult(result);
+        }
         return ApiUtil.success();
     }
 
