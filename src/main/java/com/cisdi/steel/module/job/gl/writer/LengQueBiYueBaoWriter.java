@@ -32,6 +32,7 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         String version = "8.0";
+        Date date = new Date();
         try {
             version = PoiCustomUtil.getSheetCellVersion(workbook);
         } catch (Exception e) {
@@ -60,7 +61,6 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
             log.error("处理 冷却水冷却壁月报 时产生错误", e);
             throw e;
         } finally {
-            Date date = new Date();
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 if (!Objects.isNull(sheet) && !workbook.isSheetHidden(i)) {
