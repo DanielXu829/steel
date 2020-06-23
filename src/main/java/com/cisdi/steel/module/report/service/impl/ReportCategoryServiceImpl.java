@@ -3,28 +3,37 @@ package com.cisdi.steel.module.report.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
+import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.constant.Constants;
 import com.cisdi.steel.common.exception.CodeRepeatException;
+import com.cisdi.steel.common.exception.LeafException;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
 import com.cisdi.steel.module.report.entity.ReportCategory;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.mapper.ReportCategoryMapper;
+import com.cisdi.steel.module.report.mapper.ReportCategoryTemplateMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryService;
+import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.report.util.ReportCategoryUtil;
 import com.cisdi.steel.module.sys.entity.SysConfig;
 import com.cisdi.steel.module.sys.mapper.SysConfigMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>Description: 报表分类 服务实现类 </p>
@@ -34,6 +43,7 @@ import java.util.Objects;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMapper, ReportCategory> implements ReportCategoryService {
 
     @Autowired
@@ -44,6 +54,12 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
 
     @Autowired
     private SysConfigMapper sysConfigMapper;
+
+    @Autowired
+    private ReportCategoryTemplateMapper reportCategoryTemplateMapper;
+
+    @Autowired
+    private ReportCategoryTemplateService reportCategoryTemplateService;
 
     /**
      * 插入数据到ReportCategory表中，同时在SysConfig表中插入数据，存储report路径
@@ -61,6 +77,54 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
         }
 
         return super.insertRecord(record);
+    }
+
+    @Override
+    @Transactional(rollbackFor = LeafException.class)
+    public ApiResult deleteRecord(BaseId record) {
+        // 如果没有记录 ，直接返回删除成功
+        if (Objects.isNull(record)) {
+            return ApiUtil.success();
+        }
+        // 判断是否id
+        if (Objects.nonNull(record.getId())) {
+            // 删除
+            log.debug("delete  id" + record.getId());
+            ReportCategory reportCategory = baseMapper.selectById(record.getId());
+            BaseId baseId = new BaseId();
+            LambdaQueryWrapper<ReportCategoryTemplate> categoryTemplateWrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
+            categoryTemplateWrapper.eq(ReportCategoryTemplate::getReportCategoryCode, reportCategory.getCode());
+            List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateMapper.selectList(categoryTemplateWrapper);
+            if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
+                baseId.setIds(reportCategoryTemplates.stream().map(ReportCategoryTemplate::getId).collect(Collectors.toList()));
+                // 删除模板
+                reportCategoryTemplateService.deleteRecord(baseId);
+            }
+            Integer result = baseMapper.deleteById(record.getId());
+            // 等于1 表示删除了1条记录
+            return getResult(result);
+        }
+        if (Objects.nonNull(record.getIds()) && !record.getIds().isEmpty()) {
+            log.debug("delete ids " + record.getIds());
+            List<ReportCategory> reportCategories = baseMapper.selectBatchIds(record.getIds());
+            // 查询reportCategories下所有的模板的id
+            LambdaQueryWrapper<ReportCategoryTemplate> categoryTemplateWrapper = new QueryWrapper<ReportCategoryTemplate>().lambda();
+            List<String> reportCategoryCodes = reportCategories.stream().map(ReportCategory::getCode).collect(Collectors.toList());
+            categoryTemplateWrapper.in(ReportCategoryTemplate::getReportCategoryCode, reportCategoryCodes);
+            // 批量查询模板
+
+            List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateMapper.selectList(categoryTemplateWrapper);
+            if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
+                BaseId baseId = new BaseId();
+                baseId.setIds(reportCategoryTemplates.stream().map(ReportCategoryTemplate::getId).collect(Collectors.toList()));
+                // 删除模板
+                reportCategoryTemplateService.deleteRecord(baseId);
+            }
+            boolean result = this.removeByIds(record.getIds());
+            // 多条记录
+            return getResult(result);
+        }
+        return ApiUtil.success();
     }
 
     /**
@@ -149,17 +213,23 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
      * @return
      */
     @Override
+    @Transactional(rollbackFor = LeafException.class)
     public ApiResult deleteCurrentTarget(ReportCategory record) {
-        if (Objects.nonNull(record)) {
-            long id = record.getId();
-            List<ReportCategory> list = this.list(null);
-            List<ReportCategory> reportCategorys = ReportCategoryUtil.list2TreeConverter(list, id);
-            this.deleteTargetTree(reportCategorys, list);
+        if (Objects.isNull(record)) {
+            return ApiUtil.success();
         }
-        // 删除所有子节点后，删除此节点
-        this.removeById(record.getId());
-
-        return ApiUtil.success();
+        long recordId = record.getId();
+        List<ReportCategory> list = this.list(null);
+        List<ReportCategory> reportCategoryList = ReportCategoryUtil.list2TreeConverter(list, recordId);
+        List<ReportCategory> childCategoryList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(reportCategoryList)) {
+            ReportCategoryUtil.getAllChildCategorys(reportCategoryList, childCategoryList);
+        }
+        List<Long> categoryIds = childCategoryList.stream().map(ReportCategory::getId).collect(Collectors.toList());
+        categoryIds.add(recordId);
+        BaseId baseId = new BaseId();
+        baseId.setIds(categoryIds);
+        return this.deleteRecord(baseId);
     }
 
     /**
@@ -181,7 +251,9 @@ public class ReportCategoryServiceImpl extends BaseServiceImpl<ReportCategoryMap
      */
     public void removeTargetReportCategory(List<ReportCategory> list, ReportCategory t) {
         // 直接在数据库中删除数据
-        this.removeById(t.getId());
+        BaseId baseId = new BaseId();
+        baseId.setId(t.getId());
+        this.deleteRecord(baseId);
 
         // 如果不是叶子节点，则需要删除该节点下面所有的节点
         if ("0".equals(t.getLeafNode())) {
