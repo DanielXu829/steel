@@ -3,13 +3,13 @@ package com.cisdi.steel.module.job.sj.doc;
 import cn.afterturn.easypoi.util.PoiPublicUtil;
 import cn.afterturn.easypoi.util.PoiWordStyleUtil;
 import cn.afterturn.easypoi.word.WordExportUtil;
-import cn.afterturn.easypoi.word.entity.params.ExcelListEntity;
-import cn.afterturn.easypoi.word.parse.excel.ExcelEntityParse;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
+import com.cisdi.steel.common.util.math.NumberArithmeticUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.dto.response.sj.*;
 import com.cisdi.steel.module.job.AbstractExportWordJob;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.xwpf.usermodel.*;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.afterturn.easypoi.util.PoiElUtil.*;
-import static cn.afterturn.easypoi.util.PoiElUtil.eval;
 import static java.util.Comparator.comparing;
 
 @Component
@@ -106,7 +105,8 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain extends AbstractExportWordJob {
             //该文档总共5个部分
             // part1
             dealPart1(version, date);
-            // part2
+            // part2 成分对比
+            dealPart2(version, date);
             // part3
             // part4
             // part5 操业方针(换堆)
@@ -376,6 +376,84 @@ public class HuanDuiCaoYeHuiYiJiYaoDocMain extends AbstractExportWordJob {
      */
     private void dealPart1(String version, Date date) {
         handPart1Data(version, date);
+    }
+
+    private void dealPart2(String version, Date date) {
+        try {
+            String url = getUrl(version) + "/report/compositionCompare";
+            String results = httpGetData(version, date, url);
+            JSONObject jsonObject = JSONObject.parseObject(results);
+            JSONArray arrayData = jsonObject.getJSONArray("data");
+            String [] components = {"TFe", "SiO2", "Al2O3", "CaO", "MgO", "P", "S", "Zn"};
+            for (Object data : arrayData) {
+                JSONObject jsonDataObject = (JSONObject) data;
+                if (jsonDataObject.getInteger("order") == 0) {
+                    Optional<JSONObject> predictionJsonObjectOpt = Optional.ofNullable(jsonDataObject.getJSONObject("compareMap"))
+                            .map(e -> e.getJSONObject("prediction"));
+                    if (predictionJsonObjectOpt.isPresent()) {
+                        for (String key : predictionJsonObjectOpt.get().keySet()) {
+                            String valueName = "order0Pre_" + key;
+                            Double value = predictionJsonObjectOpt.get().getDouble(key);
+                            result.put(valueName, value);
+                        }
+                    }
+                }
+                if (jsonDataObject.getInteger("order") == 1) {
+                    Optional<JSONObject> predictionJsonObjectOpt = Optional.ofNullable(jsonDataObject.getJSONObject("compareMap"))
+                            .map(e -> e.getJSONObject("prediction"));
+                    if (predictionJsonObjectOpt.isPresent()) {
+                        for (String key : predictionJsonObjectOpt.get().keySet()) {
+                            String valueName = "order1Pre_" + key;
+                            Double value = predictionJsonObjectOpt.get().getDouble(key);
+                            result.put(valueName, value);
+                        }
+                    }
+                    Optional<JSONObject> actJsonObjectOpt = Optional.ofNullable(jsonDataObject.getJSONObject("compareMap"))
+                            .map(e -> e.getJSONObject("act"));
+                    if (actJsonObjectOpt.isPresent()) {
+                        for (String key : actJsonObjectOpt.get().keySet()) {
+                            String valueName = "order1Act_" + key;
+                            Double value = actJsonObjectOpt.get().getDouble(key);
+                            result.put(valueName, value);
+                        }
+                    }
+                }
+            }
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String component : components) {
+                String order1ActMinusPreName = "order1ActMinusPre_" + component;
+                Double order1ActMinusPreValue = (Double)result.get("order1Act_" + component) - (Double)result.get("order1Pre_" + component);
+                result.put(order1ActMinusPreName, parse(order1ActMinusPreValue, 4));
+                String order0PreMinusOrder1PreName = "order0PreMinusOrder1Pre_" + component;
+                Double order0PreMinusOrder1PreValue = (Double)result.get("order0Pre_" + component) - (Double)result.get("order1Pre_" + component);
+                result.put(order0PreMinusOrder1PreName, parse(order0PreMinusOrder1PreValue, 4));
+                String order0PreMinusOrder1ActName = "order0PreMinusOrder1Act_" + component;
+                Double order0PreMinusOrder1ActValue = (Double)result.get("order0Pre_" + component) - (Double)result.get("order1Act_" + component);
+                result.put(order0PreMinusOrder1ActName, parse(order0PreMinusOrder1ActValue, 4));
+                if (order0PreMinusOrder1PreValue > 0d) {
+                    stringBuilder.append(component).append("↑").append(parse(Math.abs(order0PreMinusOrder1PreValue),4)).append("，");
+                }
+                if (order0PreMinusOrder1PreValue < 0d) {
+                    stringBuilder.append(component).append("↓").append(parse(Math.abs(order0PreMinusOrder1PreValue),4)).append("，");;
+                }
+            }
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            result.put("predictionSummary", stringBuilder.toString());
+        } catch (Exception e) {
+            log.error("处理换堆操业会议纪要word文档的成分对比部分出错", e);
+        }
+    }
+
+    private String parse(Double v, int n) {
+        if (v == null) {
+            return "   ";
+        }
+        Double value = NumberArithmeticUtils.roundingX(v, n);
+        if (value.equals(0d)) {
+            return "0";
+        } else {
+            return value.toString();
+        }
     }
 
     /**
