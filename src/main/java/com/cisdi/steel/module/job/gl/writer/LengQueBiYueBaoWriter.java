@@ -6,6 +6,7 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.FastJSONUtil;
+import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,6 +32,7 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         String version = "8.0";
+        Date date = new Date();
         try {
             version = PoiCustomUtil.getSheetCellVersion(workbook);
         } catch (Exception e) {
@@ -38,11 +40,14 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
         }
         List<CellData> resultList = new ArrayList<>();
         try {
+            DateQuery dateQuery = getDateQuery(excelDTO);
             int beginRow = 3;
             Sheet sheet = workbook.getSheetAt(0);
-            List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 0);
+            List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(dateQuery.getRecordDate(), 1);
             int fixLineCount = 0;
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
+//                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+//                Date day = eachDateQuery.getRecordDate();
                 Date day = allDayBeginTimeInCurrentMonth.get(i);
                 // 计算行
                 if (i > 0 && i % 10 == 0) {
@@ -56,12 +61,11 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
             log.error("处理 冷却水冷却壁月报 时产生错误", e);
             throw e;
         } finally {
-            Date date = new Date();
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 if (!Objects.isNull(sheet) && !workbook.isSheetHidden(i)) {
                     // 全局替换 当前日期
-                    ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 0, 0, date);
+                    ExcelWriterUtil.replaceCurrentMonthInTitleWithSpace(sheet, 0, 0, date);
                     PoiCustomUtil.clearPlaceHolder(sheet);
                 }
             }
@@ -121,6 +125,9 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
         try {
             List<CellData> resultList = new ArrayList<>();
             Sheet sheet = workbook.getSheet("_data");
+            if (Objects.isNull(sheet)) {
+                return;
+            }
             // 直接拿到tag点名, 无需根据别名再去获取tag点名
             List<String> tagNames = PoiCustomUtil.getRowCelVal(sheet, 2);
             for (int i = 0; i < tagNames.size(); i++) {
