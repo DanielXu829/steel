@@ -203,6 +203,35 @@ public class PoiCustomUtil {
     }
 
     /**
+     * 根据占位符获取某一行Cell
+     * @param sheet
+     * @param rowNum
+     * @param keyValue
+     * @return
+     */
+    public static List<Cell> getRowCelByValue(Sheet sheet, int rowNum, String keyValue) {
+        Row row = sheet.getRow(rowNum);
+        short lastCellNum = row.getLastCellNum();
+        List<Cell> result = new ArrayList<>();
+        for (int index = 0; index < lastCellNum; index++) {
+            Cell cell = row.getCell(index);
+            String value = PoiCellUtil.getCellValue(cell);
+            if (StringUtils.isNotBlank(value) && value.equals(keyValue)) {
+                result.add(cell);
+            }
+        }
+        return result;
+    }
+
+    public static void setColumnHidden (Sheet sheet, String placeHolder, int rowNum) {
+        List<Cell> cellList = getRowCelByValue(sheet, rowNum, placeHolder);
+        for (Cell cell:cellList) {
+            int columnIndex = cell.getColumnIndex();
+            sheet.setColumnHidden(columnIndex, true);
+        }
+    }
+
+    /**
      * 获取某一行的值
      *
      * @param filePath  文件路径
