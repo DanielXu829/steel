@@ -22,11 +22,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 
@@ -75,12 +77,11 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 handleBuLiaoFengKouLuKuang(workbook, version, rowIndex, eachDateQuery);
                 //出渣铁及煤气成分
                 handleChuZhaTieMeiQiChenFen(workbook, version, rowIndex, eachDateQuery);
-                //技术经济指标及操作参数
-                handleJiShuJingJiZhiBiao(workbook, version, rowIndex, eachDateQuery);
             }
-
+            //技术经济指标及操作参数
+            handleJiShuJingJiZhiBiao(workbook, version, allDayBeginTimeInCurrentMonth);
         } catch (Exception e) {
-            log.error("处理 冷却水冷却壁月报 时产生错误", e);
+            log.error("处理 月报汇总 时产生错误", e);
             throw e;
         } finally {
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -125,10 +126,66 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
     }
 
     //技术经济指标及操作参数
-    private void handleJiShuJingJiZhiBiao(Workbook workbook, String version, int rowIndex, DateQuery eachDateQuery) {
-        List<CellData> resultList = new ArrayList<>();
-        Sheet sheet = workbook.getSheet("术经济指标及操作参数");
-        ExcelWriterUtil.setCellValue(sheet, resultList);
+    private void handleJiShuJingJiZhiBiao(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
+        int beginRow = 8;
+        int fixLineCount = 0;
+        Sheet sheet = workbook.getSheet("技术经济指标及操作参数");
+        // 标记行
+        int tagFormulaNum = 6;
+        int itemRowNum = 7;
+        sheet.getRow(tagFormulaNum).setZeroHeight(true);
+        sheet.getRow(itemRowNum).setZeroHeight(true);
+        // 获取excel占位符列
+        List<String> tagFormulaList = PoiCustomUtil.getRowCelVal(sheet, tagFormulaNum);
+        List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
+        Map<String, String> itemToTagFormulaMap = itemNameList.stream()
+                .collect(Collectors.toMap(key -> key,key -> tagFormulaList.get(itemNameList.indexOf(key)), (value1, value2) -> value1));
+        List<CellData> cellDataList = new ArrayList<>();
+        for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
+            DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+            Date day = allDayBeginTimeInCurrentMonth.get(i);
+            BigDecimal defaultCellValue = new BigDecimal(0.0);
+            JSONObject queryJsonObject = new JSONObject();
+            Map<String, String> queryParam = eachDateQuery.getQueryParam();
+            String starttime = queryParam.get("starttime");
+            queryJsonObject.put("starttime", starttime);
+            String endtime = queryParam.get("endtime");
+            queryJsonObject.put("endtime", endtime);
+            queryJsonObject.put("tagnames", tagFormulaList);
+            String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), queryJsonObject.toJSONString());
+            if (StringUtils.isBlank(jsonData)) {
+                continue;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(jsonData).getJSONObject("data");
+            if (Objects.isNull(jsonObject)) {
+                continue;
+            }
+            Map<String, Double> itemToValueMap = new HashMap<>();
+            for (Map.Entry<String, String> itemToTagFormulaEntry : itemToTagFormulaMap.entrySet()) {
+                JSONObject timeValueJsonObject = jsonObject.getJSONObject(itemToTagFormulaEntry.getValue());
+                if (Objects.isNull(timeValueJsonObject)) {
+                    continue;
+                }
+                List<Object> valueList = new ArrayList<>(timeValueJsonObject.values());
+                if (CollectionUtils.isNotEmpty(valueList)) {
+                    itemToValueMap.put(itemToTagFormulaEntry.getKey(), new Double(valueList.get(0).toString()));
+                }
+            }
+            if (i > 0 && i % 10 == 0) {
+                fixLineCount++;
+            }
+            int row = itemRowNum + 1 + fixLineCount + i;
+            // 循环列
+            for (int j = 1; j < itemNameList.size(); j++) {
+                String itemName = itemNameList.get(j);
+                int col = j;
+                if (StringUtils.isNotBlank(itemName)) {
+                    ExcelWriterUtil.addCellData(cellDataList, row, col, itemToValueMap.get(itemName));
+                }
+            }
+        }
+        ExcelWriterUtil.replaceCurrentMonthInTitleWithSpace(sheet, 1, 0, allDayBeginTimeInCurrentMonth.get(0));
+        ExcelWriterUtil.setCellValue(sheet, cellDataList);
     }
 
     /**
@@ -255,5 +312,4 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             log.error("处理反面-出铁出错", e);
         }
     }
-
 }
