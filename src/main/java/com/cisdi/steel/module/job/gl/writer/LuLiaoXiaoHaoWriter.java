@@ -110,6 +110,10 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
             List<String> liaoXianTagNames = Arrays.asList("BF8_L2C_TP_CokeSetLine_1d_avg", "BF8_L2C_TP_SinterSetLine_1d_avg", "BF8_L2C_TP_LiSinterSetLine_1d_avg");
             Date liaoXianQueryTime = DateUtil.addDays(day, 1);
             TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(liaoXianQueryTime, version, liaoXianTagNames);
+            // 排序，默认按chargeNo从小到大排序，即时间从老到新
+            if (Objects.nonNull(liaoXianTagValueList) && CollectionUtils.isNotEmpty(liaoXianTagValueList.getData())) {
+                liaoXianTagValueList.getData().sort(Comparator.comparing(TagValue::getVal));
+            }
 
             // 计算行
             if (i > 0 && i%10 ==0) {

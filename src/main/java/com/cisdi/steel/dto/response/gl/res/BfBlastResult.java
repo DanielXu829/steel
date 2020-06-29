@@ -32,6 +32,20 @@ public class BfBlastResult {
 
     private Date createTime;
 
+    private Integer tuyereBlockCount;
+
+    private Integer tuyereLeakCount;
+
+    private Integer tuyereQualityCount;
+
+    private Integer tuyereBurnoutCount;
+
+    private Integer tuyereAdjustCount;
+
+    private Integer tuyereAbrasionCount;
+
+    private Integer tuyereOutboardCount;
+
     public Long getId() {
         return id;
     }
@@ -142,5 +156,61 @@ public class BfBlastResult {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getTuyereBlockCount() {
+        return tuyereBlockCount;
+    }
+
+    public void setTuyereBlockCount(Integer tuyereBlockCount) {
+        this.tuyereBlockCount = tuyereBlockCount;
+    }
+
+    public Integer getTuyereLeakCount() {
+        return tuyereLeakCount;
+    }
+
+    public void setTuyereLeakCount(Integer tuyereLeakCount) {
+        this.tuyereLeakCount = tuyereLeakCount;
+    }
+
+    public Integer getTuyereQualityCount() {
+        return tuyereQualityCount;
+    }
+
+    public void setTuyereQualityCount(Integer tuyereQualityCount) {
+        this.tuyereQualityCount = tuyereQualityCount;
+    }
+
+    public Integer getTuyereBurnoutCount() {
+        return tuyereBurnoutCount;
+    }
+
+    public void setTuyereBurnoutCount(Integer tuyereBurnoutCount) {
+        this.tuyereBurnoutCount = tuyereBurnoutCount;
+    }
+
+    public Integer getTuyereAdjustCount() {
+        return tuyereAdjustCount;
+    }
+
+    public void setTuyereAdjustCount(Integer tuyereAdjustCount) {
+        this.tuyereAdjustCount = tuyereAdjustCount;
+    }
+
+    public Integer getTuyereAbrasionCount() {
+        return tuyereAbrasionCount;
+    }
+
+    public void setTuyereAbrasionCount(Integer tuyereAbrasionCount) {
+        this.tuyereAbrasionCount = tuyereAbrasionCount;
+    }
+
+    public Integer getTuyereOutboardCount() {
+        return tuyereOutboardCount;
+    }
+
+    public void setTuyereOutboardCount(Integer tuyereOutboardCount) {
+        this.tuyereOutboardCount = tuyereOutboardCount;
     }
 }

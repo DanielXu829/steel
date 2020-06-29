@@ -5,10 +5,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.BeanUtils;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.dto.response.gl.res.PageData;
-import com.cisdi.steel.dto.response.gl.res.TapSgRow;
+import com.cisdi.steel.dto.response.gl.AnaItemValDTO;
+import com.cisdi.steel.dto.response.gl.TagValueListDTO;
+import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -18,6 +20,7 @@ import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
@@ -56,30 +59,11 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
 
         try {
             DateQuery dateQuery = getDateQuery(excelDTO);
-            int beginRow = 3;
-            Sheet sheet = workbook.getSheetAt(0);
             List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(dateQuery.getRecordDate(), 1);
-            int fixLineCount = 0;
-            for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
-                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
-//                Date day = eachDateQuery.getRecordDate();
-                Date day = allDayBeginTimeInCurrentMonth.get(i);
-                // 计算行
-                if (i > 0 && i % 10 == 0) {
-                    fixLineCount++;
-                }
-                int rowIndex = beginRow + fixLineCount + i;
-                //原燃料质量
-                handleYuanRanLiaoZhiLiang(workbook, version, rowIndex, eachDateQuery);
-                //原燃料消耗
-                handleYuanRanLiaoXiaoHao(workbook, version, rowIndex, eachDateQuery);
-                //布料、风口及炉况情况
-                handleBuLiaoFengKouLuKuang(workbook, version, rowIndex, eachDateQuery);
-                //出渣铁及煤气成分
-                handleChuZhaTieMeiQiChenFen(workbook, version, rowIndex, eachDateQuery);
-            }
             //技术经济指标及操作参数
             handleJiShuJingJiZhiBiao(workbook, version, allDayBeginTimeInCurrentMonth);
+            //布料、风口及炉况情况
+            handleBuLiaoFengKouLuKuang(workbook, version, allDayBeginTimeInCurrentMonth);
         } catch (Exception e) {
             log.error("处理 月报汇总 时产生错误", e);
             throw e;
@@ -111,10 +95,121 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
     }
 
     //布料、风口及炉况情况
-    private void handleBuLiaoFengKouLuKuang(Workbook workbook, String version, int rowIndex, DateQuery eachDateQuery) {
-        List<CellData> resultList = new ArrayList<>();
-        Sheet sheet = workbook.getSheet("布料、风口及炉况情况");
-        ExcelWriterUtil.setCellValue(sheet, resultList);
+    private void handleBuLiaoFengKouLuKuang(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
+        try {
+            int beginRow = 6;
+            int fixLineCount = 0;
+            Sheet sheet = workbook.getSheet("布料、风口及炉况情况");
+            // 标记行
+            int itemRowNum = 5;
+            sheet.getRow(itemRowNum).setZeroHeight(true);
+            // 获取excel占位符列
+            List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
+            List<CellData> cellDataList = new ArrayList<>();
+            for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
+                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                Date day = allDayBeginTimeInCurrentMonth.get(i);
+                BigDecimal defaultCellValue = new BigDecimal(0.0);
+
+                // 获取风口信息
+                BfBlastResult bfBlastResult = this.getBfBlastResult(version, day);
+                Map<String, Object> bfBlastResultMap = new HashMap<String, Object>();
+                if (Objects.nonNull(bfBlastResult)) {
+                    bfBlastResultMap.put("qualityCount", bfBlastResult.getTuyereQualityCount());
+                    bfBlastResultMap.put("tuyereBurnoutCount", bfBlastResult.getTuyereBurnoutCount());
+                    bfBlastResultMap.put("tuyereAbrasionCount", bfBlastResult.getTuyereAbrasionCount());
+                    bfBlastResultMap.put("tuyereOutboardCount", bfBlastResult.getTuyereOutboardCount());
+                    bfBlastResultMap.put("tuyereAdjustCount", bfBlastResult.getTuyereAdjustCount());
+                    bfBlastResultMap.put("tuyereBlockCount", bfBlastResult.getTuyereBlockCount());
+                    bfBlastResultMap.put("blastArea", bfBlastResult.getBlastArea());
+                    bfBlastResultMap.put("blastChangeCount", bfBlastResult.getBlastChangeCount());
+                }
+
+                // 获取布料矩阵
+                DateQuery dateQueryNodelay = DateQueryUtil.buildTodayNoDelay(day);
+                Map<String, List<BatchDistribution>> matrixDistrAvgInRangeMap = getMatrixDistrAvgInRangeMap(dateQueryNodelay, version);
+
+                // 获取料线数据
+                Map<String, String> liaoXianMaps = new HashMap<>();
+                liaoXianMaps.put("料线-烧结矿", "BF8_L2C_TP_SinterSetLine_1d_avg");
+                liaoXianMaps.put("料线-焦炭", "BF8_L2C_TP_CokeSetLine_1d_avg");
+                liaoXianMaps.put("料线-小烧", "BF8_L2C_TP_LiSinterSetLine_1d_avg");
+                liaoXianMaps.put("料线-主尺", "BF8_L2C_MainRuler_1d_avg");
+                ArrayList<String> liaoXianTagNames = Lists.newArrayList(liaoXianMaps.values());
+                Date liaoXianQueryTime = DateUtil.addDays(day, 1);
+                TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(liaoXianQueryTime, version, liaoXianTagNames);
+
+                if (i > 0 && i % 10 == 0) {
+                    fixLineCount++;
+                }
+                int row = itemRowNum + 1 + fixLineCount + i;
+                // 循环列
+                for (int j = 0; j < itemNameList.size(); j++) {
+                    // 获取标记项单元格中的值
+                    String itemName = itemNameList.get(j);
+                    int col = j;
+                    if (StringUtils.isNotBlank(itemName)) {
+                        ExcelWriterUtil.addCellData(cellDataList, row, col, defaultCellValue);
+                        switch (itemName) {
+                            case "料线-烧结矿":
+                            case "料线-焦炭":
+                            case "料线-小烧":
+                            case "料线-主尺": {
+                                if(Objects.nonNull(liaoXianTagValueList) && CollectionUtils.isNotEmpty(liaoXianTagValueList.getData())) {
+                                    Map<String, Object> collect = liaoXianTagValueList.getData().stream().collect(HashMap::new, (m,v)->
+                                            m.put(v.getName(), v.getVal()),HashMap::putAll);
+                                    Object orignalVal = collect.get(liaoXianMaps.get(itemName));
+                                    if (Objects.nonNull(orignalVal)) {
+                                        BigDecimal val = ((BigDecimal) orignalVal).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    }
+                                }
+                                break;
+                            }
+                            case "C":
+                            case "Ol":
+                            case "Os": {
+                                if(MapUtils.isNotEmpty(matrixDistrAvgInRangeMap) && CollectionUtils.isNotEmpty(matrixDistrAvgInRangeMap.get(itemName))) {
+                                    List<BatchDistribution> batchDistributions = matrixDistrAvgInRangeMap.get(itemName);
+                                    if (CollectionUtils.isNotEmpty(batchDistributions)) {
+                                        String val = StringUtils.join(Arrays.asList(itemName.substring(0,1), getPosition(batchDistributions), getRoundset(batchDistributions)), "-");
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                    }
+                                }
+                                break;
+                            }
+                            case "qualityCount":
+                            case "tuyereBurnoutCount":
+                            case "tuyereAbrasionCount":
+                            case "tuyereOutboardCount":
+                            case "tuyereAdjustCount":
+                            case "tuyereBlockCount":
+                            case "blastArea":
+                            case "blastChangeCount": {
+                                if(MapUtils.isNotEmpty(bfBlastResultMap)) {
+                                    Object valObj = bfBlastResultMap.get(itemName);
+                                    if (Objects.nonNull(valObj)) {
+                                        ExcelWriterUtil.addCellData(cellDataList, row, col, valObj);
+                                    }
+                                }
+                                break;
+                            }
+                            case "N/A": {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, defaultCellValue);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            ExcelWriterUtil.replaceCurrentMonthInTitleWithSpace(sheet, 0, 0, allDayBeginTimeInCurrentMonth.get(0));
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理 布料、风口及炉况情况 出错", e);
+        }
     }
 
     //出渣铁及煤气成分
