@@ -302,6 +302,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
         try {
             int fixLineCount = 0;
             Sheet sheet = workbook.getSheet("技术经济指标及操作参数");
+            ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 6, allDayBeginTimeInCurrentMonth.get(0));
             // 标记行
             int tagFormulaNum = 6;
             int itemRowNum = 7;
