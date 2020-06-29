@@ -685,4 +685,13 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         }
         return result;
     }
+
+    /**
+     * 出铁信息
+     * @param version
+     * @return
+     */
+    protected String getTapSummaryByRangeUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/report/tap/getTapSummaryByRange";
+    }
 }

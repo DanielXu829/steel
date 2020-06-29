@@ -3,12 +3,11 @@ package com.cisdi.steel.module.job.gl.writer;
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
+import com.cisdi.steel.dto.response.gl.res.AnalysisValue;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.dto.CellData;
@@ -26,15 +25,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.util.Comparator.comparing;
-
 
 /**
  * <p>Description: 8高炉月报汇总 执行处理类 </p>
@@ -67,6 +59,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             handleJiShuJingJiZhiBiao(workbook, version, allDayBeginTimeInCurrentMonth);
             //布料、风口及炉况情况
             handleBuLiaoFengKouLuKuang(workbook, version, allDayBeginTimeInCurrentMonth);
+            //出渣铁及煤气成分
+            handleChuZhaTieMeiQiChenFen(workbook, version, allDayBeginTimeInCurrentMonth);
         } catch (Exception e) {
             log.error("处理 月报汇总 时产生错误", e);
             throw e;
@@ -290,10 +284,10 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
     }
 
     //出渣铁及煤气成分
-    private void handleChuZhaTieMeiQiChenFen(Workbook workbook, String version, int rowIndex, DateQuery eachDateQuery) {
+    private void handleChuZhaTieMeiQiChenFen(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
         List<CellData> resultList = new ArrayList<>();
         Sheet sheet = workbook.getSheet("出渣铁及煤气成分");
-        handleTapData(sheet, 5, eachDateQuery, resultList, version);
+        handleTapData(sheet, version, allDayBeginTimeInCurrentMonth, resultList);
         ExcelWriterUtil.setCellValue(sheet, resultList);
     }
 
@@ -365,127 +359,152 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
     }
 
     /**
-     * 处理出铁数据
+     * 出渣铁及煤气成分数据
      * @param sheet
      * @param dateQuery
      * @param resultList
      * @param version
      * @return tapNoList
      */
-    private void handleTapData(Sheet sheet, int itemRowNum, DateQuery dateQuery, List<CellData> resultList, String version) {
-        // 铁次(tapNo)list，用于调接口罐号重量接口
+    private void handleTapData(Sheet sheet, String version, List<Date> allDayBeginTimeInCurrentMonth, List<CellData> cellDataList) {
         try {
-            // 隐藏标记行
-            sheet.getRow(itemRowNum).setZeroHeight(true);
-            // 1、组装出铁数据URL
-            Map<String, String> queryParam = this.getQueryParam(dateQuery);
-            queryParam.put("pagenum", "1");
-            queryParam.put("pagesize", "10");
-            // 2、获取数据并反序列化为java对象
-            String tapData = httpUtil.get(getTapsInRange(version), queryParam);
-            if (StringUtils.isBlank(tapData)) {
+            int beginRow = 6;
+            int fixLineCount = 0;
+            // 标记行
+            int tagFormulaNum = 5;
+            sheet.getRow(tagFormulaNum).setZeroHeight(true);
+            // 获取excel占位符列
+            List<String> tagFormulaList = PoiCustomUtil.getRowCelVal(sheet, tagFormulaNum);
+            if (CollectionUtils.isEmpty(tagFormulaList)) {
                 return;
             }
-            PageData<TapSgRow> pageData = JSON.parseObject(tapData, new TypeReference<PageData<TapSgRow>>(){});
-            if (Objects.isNull(pageData)) {
-                return;
-            }
-            List<TapSgRow> tapSgRowData = pageData.getData();
-            if (CollectionUtils.isEmpty(tapSgRowData)) {
-                return;
-            }
-            tapSgRowData.sort(comparing(TapSgRow::getStartTime)); // 按时间先后进行排序
-            int dataSize = tapSgRowData.size();
-            List<String> itemRow = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
-            if (CollectionUtils.isEmpty(itemRow)) {
-                return;
-            }
-            int itemDataSize = itemRow.size();
-            TapSgRow tapSgRow = null;
-            // 需要对时间数据进行格式化处理
-            String[] timeItemArray = {"startTime", "slagTime", "endTime"};
-            List<String> timeItemList = Arrays.asList(timeItemArray);
-
-            // 遍历标记行
-            for (int i = 0; i < dataSize; i++) {
-                tapSgRow = tapSgRowData.get(i);
-                // 将对象转为Map,key为对象引用名
-                Map<String, Object> stringObjectMap = JSON.parseObject(JSON.toJSONString(tapSgRow), new TypeReference<Map<String, Object>>(){});
-                Map<String, Double> tapValues = tapSgRow.getTapValues();
-                Map<String, Double> slagAnalysis = tapSgRow.getSlagAnalysis();
-                Map<String, Double> hmAnalysis = tapSgRow.getHmAnalysis();
-                //批号
-                String url = getLatestTagValueUrl(version);
-                Map<String, String> param = new HashMap<>();
-                param.put("time", String.valueOf(stringObjectMap.get("endTime")));
-                param.put("tagname", "BF8_L2M_SH_ChargeCount_evt");
-                String result = httpUtil.get(url, param);
-                Integer tagValue = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", Integer.class);
-                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, 1, tagValue);
-                //批料数
-                String queryUrl = getUrlTagNamesInRange(version);
-                JSONObject query = new JSONObject();
-                query.put("starttime", String.valueOf(stringObjectMap.get("startTime")));
-                query.put("endtime", String.valueOf(stringObjectMap.get("endTime")));
-                query.put("tagnames", new String[]{"BF8_L2M_SH_ChargeCount_evt"});
-                SerializeConfig serializeConfig = new SerializeConfig();
-                String jsonString = JSONObject.toJSONString(query, serializeConfig);
-                String results = httpUtil.postJsonParams(queryUrl, jsonString);
-                JSONObject tagData = FastJSONUtil.getJsonObjectByKey(results, Lists.newArrayList("data", "BF8_L2M_SH_ChargeCount_evt"));
-                if (Objects.nonNull(tagData)) {
-                    ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, 9, tagData.size());
+            int itemDataSize = tagFormulaList.size();
+            for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
+                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                if (i > 0 && i % 10 == 0) {
+                    fixLineCount++;
                 }
-                for (int j = 0; j < itemDataSize; j++) {
-                    String itemData = itemRow.get(j);
-                    if (StringUtils.isBlank(itemData)) {
+                int row = beginRow + fixLineCount + i;
+                for (int j = 1; j < itemDataSize; j++) {
+                    String item = tagFormulaList.get(j);
+                    Double val = null;
+                    if(StringUtils.isBlank(item)) {
                         continue;
                     }
-                    String[] itemArray = itemData.split("_");
-                    if (itemArray.length == 2 && "item".equals(itemArray[0])) {
-                        Object value = stringObjectMap.get(itemArray[1]);
-                        if (Objects.isNull(value)) {
-                            continue;
-                        }
-                        // 对时间数据进行格式化处理
-                        if (timeItemList.contains(itemArray[1])) {
-                            LocalDateTime localDate = Instant.ofEpochMilli(Long.valueOf(String.valueOf(value))).atZone(ZoneId.systemDefault()).toLocalDateTime();
-                            value = DateTimeFormatter.ofPattern("HH:mm:ss").format(localDate);
-                            // yyyy-MM-dd HH:mm:ss
-                        }
-                        ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, value);
-                    } else if (itemArray.length == 3 && "item".equals(itemArray[0])) {
-                        switch (itemArray[1]) {
-                            case "tapValues":
-                                if (Objects.isNull(tapValues) || tapValues.size() == 0) {
-                                    continue;
-                                }
-                                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, tapValues.get(itemArray[2]));
-                                break;
-                            case "slagAnalysis":
-                                if (Objects.isNull(slagAnalysis) || slagAnalysis.size() == 0 || slagAnalysis.get(itemArray[2]) == null) {
-                                    continue;
-                                }
-                                Double val = slagAnalysis.get(itemArray[2]);
-                                //R2不乘100
-                                if (!itemArray[2].equals("B2")) {
-                                    val = slagAnalysis.get(itemArray[2]) * 100;
-                                }
-                                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, val);
-                                break;
-                            case "hmAnalysis":
-                                if (Objects.isNull(hmAnalysis) || hmAnalysis.size() == 0 || hmAnalysis.get(itemArray[2]) == null) {
-                                    continue;
-                                }
-                                ExcelWriterUtil.addCellData(resultList, itemRowNum + 1 + i, j, hmAnalysis.get(itemArray[2]) * 100);
-                                break;
-                        }
-                    } else {
-                        log.warn("excel标记项格式错误:" + itemData);
+                    String[] itemArray = item.split("_");
+                    switch (itemArray[0]) {
+                        case "CountChargeNum":
+                            BigDecimal countChargeNum = glDataUtil.getCountChargeNumByTapTimeRange(version, eachDateQuery);
+                            if(Objects.nonNull(countChargeNum)) val = countChargeNum.doubleValue();
+                            break;
+                        case "InbaRate":
+                            BigDecimal inbaRateInRange = glDataUtil.getInbaRateInRange(version, eachDateQuery);
+                            if(Objects.nonNull(inbaRateInRange)) val = inbaRateInRange.doubleValue();
+                            break;
+                        case "AnalysisValues":
+                            if (itemArray.length == 4) {
+                                List<Double> list = getAnalysisValuesByKey(version, eachDateQuery, itemArray[1], itemArray[2]);
+                                val = ExcelWriterUtil.executeSpecialList(itemArray[3], list);
+                            }
+                            break;
+                        case "TapSummary":
+                            if (itemArray.length == 2) {
+                                val = getTapSummaryByKey(version, eachDateQuery, itemArray[1]);
+                            }
+                            break;
+                        default:
+                            val = getLatestValue(version, String.valueOf(eachDateQuery.getRecordDate().getTime()), item);
+                            break;
                     }
+                    ExcelWriterUtil.addCellData(cellDataList, row, j, val);
                 }
             }
         } catch (Exception e) {
-            log.error("处理反面-出铁出错", e);
+            log.error("处理出渣铁及煤气成分出错", e);
         }
+    }
+
+    /**
+     * 获取出铁信息
+     * @param version
+     * @param dateQuery
+     * @param key
+     * @return
+     */
+    private Double getTapSummaryByKey (String version, DateQuery dateQuery, String key) {
+        Double val = null;
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+        String result = httpUtil.get(getTapSummaryByRangeUrl(version), queryParam);
+        BigDecimal value = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), key, BigDecimal.class);
+        if(Objects.nonNull(value)) {
+            val = value.doubleValue();
+        }
+        return val;
+    }
+
+    /**
+     * 根据key获取AnalysisValue中某个元素的list
+     * @param version
+     * @param dateQuery
+     * @param brandCode
+     * @param key
+     * @return
+     */
+    private List<Double> getAnalysisValuesByKey(String version, DateQuery dateQuery, String brandCode, String key) {
+        List<String> strList = new ArrayList<String>(){{add("B2");add("B4");}};
+        List<AnalysisValue> list = null;
+        List<Double> valueList = new ArrayList<>();
+        String url = getAnalysisValuesUrl(version);
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("from", Objects.requireNonNull(dateQuery.getQueryStartTime()).toString());
+        queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
+        queryParam.put("brandCode", brandCode);
+        String result = httpUtil.get(url, queryParam);
+        // 根据json映射对象DTO
+        AnalysisValueDTO analysisValueDTO = null;
+        if (StringUtils.isNotBlank(result)) {
+            analysisValueDTO = JSON.parseObject(result, AnalysisValueDTO.class);
+            if (Objects.nonNull(analysisValueDTO)) {
+                list = analysisValueDTO.getData();
+                if (Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
+                    for (AnalysisValue analysisValue:list) {
+                        Map<String, BigDecimal> values = analysisValue.getValues();
+                        if (Objects.nonNull(values)) {
+                            BigDecimal val = values.get(key);
+                            if(Objects.nonNull(val)) {
+                                if(!strList.contains(key)) {
+                                    val = val.multiply(new BigDecimal(100));
+                                }
+                                valueList.add(val.doubleValue());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return valueList;
+    }
+
+    /**
+     * 获取latest tagvalue
+     * @param version
+     * @param time
+     * @param tagName
+     * @return
+     */
+    private Double getLatestValue(String version, String time, String tagName) {
+        BigDecimal tagValue = null;
+        String url = getLatestTagValueUrl(version);
+        Map<String, String> param = new HashMap<>();
+        param.put("time", time);
+        param.put("tagname", tagName);
+        String result = httpUtil.get(url, param);
+        tagValue = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", BigDecimal.class);
+        if (Objects.nonNull(tagValue)) {
+            return tagValue.doubleValue();
+        }
+        return null;
     }
 }
