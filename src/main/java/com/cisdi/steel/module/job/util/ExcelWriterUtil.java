@@ -461,6 +461,21 @@ public class ExcelWriterUtil {
     }
 
     /**
+     * 动态替换报表首行标题中的日期 - 年份
+     * @param sheet
+     * @param row
+     * @param column
+     * @param date
+     */
+    public static void replaceCurrentYearInTitle(Sheet sheet, int row, int column, Date date) {
+        Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, row), column);
+        String stringCellValue = titleCell.getStringCellValue();
+        String currentMonth = DateFormatUtils.format(date, DateUtil.yyyyChineseFormat);
+        stringCellValue = stringCellValue.replaceAll("%当前年份%", currentMonth);
+        titleCell.setCellValue(stringCellValue);
+    }
+
+    /**
      * 动态替换报表首行标题中的日期
      * @param sheet
      * @param row
