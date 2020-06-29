@@ -93,29 +93,18 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
             List<AnalysisQuality> analysisQualityList = JSON.parseObject(analysisQualityArray.toJSONString(), new TypeReference<List<AnalysisQuality>>() {});
             for (AnalysisQuality item : analysisQualityList) {
                 String itemOs = item.getItemOs();
-                String unit = item.getUnit() == null ? "%" : item.getUnit();
-                String content = itemOs + "（" + item.getCenter() + unit + "±" + item.getRange() + "）";
-                if (FEO.equals(itemOs))  {
-                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + FEO + "}}");
-                    if (Objects.nonNull(cell)) {
-                        PoiCustomUtil.setCellValue(cell, content);
-                    } else {
-                        log.warn("{{FeO}}占位符不存在");
-                    }
-                } else if (RO.equals(itemOs)) {
-                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + RO + "}}");
-                    if (Objects.nonNull(cell)) {
-                        PoiCustomUtil.setCellValue(cell, content);
-                    } else {
-                        log.warn("{{Ro}}占位符不存在");
-                    }
-                } else if (MGO.equals(itemOs)) {
-                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + MGO + "}}");
-                    if (Objects.nonNull(cell)) {
-                        PoiCustomUtil.setCellValue(cell, content);
-                    } else {
-                        log.warn("{{MgO}}占位符不存在");
-                    }
+                String content;
+                if (RO.equals(itemOs)) {
+                    content = itemOs + "±" + item.getRange();
+                } else {
+                    String unit = item.getUnit() == null ? "%" : item.getUnit();
+                    content = itemOs + "（" + item.getCenter() + unit + "±" + item.getRange() + "）";
+                }
+                Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + itemOs + "}}");
+                if (Objects.nonNull(cell)) {
+                    PoiCustomUtil.setCellValue(cell, content);
+                } else {
+                    log.warn("{{" + itemOs + "}}占位符不存在");
                 }
             }
         }
