@@ -502,6 +502,17 @@ public class DateUtil {
         return endTime;
     }
 
+    public static Date getDateEndTime22(Date date) {
+        String dateString = DateFormatUtils.format(date, "yyyy-MM-dd 22:00:00");
+        Date endTime = null;
+        try {
+            endTime = DateUtils.parseDate(dateString, new String[]{"yyyy-MM-dd hh:mm:ss"});
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return endTime;
+    }
+
     /**
      * 取得本周的开始时间
      *

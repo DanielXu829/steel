@@ -265,6 +265,30 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 获取每天的风口完整信息，可用于月报展示
+     * @param version
+     * @return api数据
+     */
+    protected BfBlastResult getBfBlastResult(String version, Date date) {
+        BfBlastResult bfBlastResultDTO = null;
+        Map<String, String> queryParam = new HashMap();
+        Date dateBeginTime = DateUtil.getDateEndTime22(date);
+        queryParam.put("time",  String.valueOf(dateBeginTime.getTime()));
+
+        String bfBlastResultUrl = this.getBfBlastResultUrl(version);
+        String bfBlastResultDTOStr = httpUtil.get(bfBlastResultUrl, queryParam);
+        if (StringUtils.isNotBlank(bfBlastResultDTOStr)) {
+            SuccessEntity<BfBlastResult> successEntity = JSON.parseObject(bfBlastResultDTOStr, new TypeReference<SuccessEntity<BfBlastResult>>() {});
+            if (Objects.isNull(successEntity) || Objects.isNull(successEntity.getData())) {
+                log.warn("根据时间[{}]获取的bfBlastResultDTO数据为空", dateBeginTime);
+            } else {
+                bfBlastResultDTO = successEntity.getData();
+            }
+        }
+        return bfBlastResultDTO;
+    }
+
+    /**
      * 计算出铁量 - 净重
      * @param tapTPCDTO
      * @return
@@ -409,7 +433,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
                 log.warn("根据tagName[{}]获取[{}]的latest TagValueListDTO数据为空", tagNames, date);
             } else {
                 // 排序，默认按chargeNo从小到大排序，即时间从老到新
-                tagValueListDTO.getData().sort(Comparator.comparing(TagValue::getVal));
+                //tagValueListDTO.getData().sort(Comparator.comparing(TagValue::getVal));
             }
         }
         return tagValueListDTO;
@@ -597,6 +621,15 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      */
     protected String getQueryBlastStatus(String version) {
         return httpProperties.getGlUrlVersion(version) + "/bfBlast/queryBlastStatus";
+    }
+
+    /**
+     * 风口完整信息
+     * @param version
+     * @return
+     */
+    protected String getBfBlastResultUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/bfBlastResult/latest";
     }
 
     /**
