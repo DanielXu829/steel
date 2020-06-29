@@ -15,6 +15,7 @@ import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.gl.GLDataUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -287,6 +288,33 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         }
         return bfBlastResultDTO;
     }
+
+    /**
+     * 按天或者按月获取精益信息
+     * @param version
+     * @return api数据
+     */
+    protected TapJyDTO getTapJyDTO(String version, DateQuery date, String dataType, String workShift) {
+        TapJyDTO tapJyDTO = null;
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  String.valueOf(date.getStartTime().getTime()));
+        queryParam.put("endTime",  String.valueOf(date.getEndTime().getTime()));
+        queryParam.put("dataType",  dataType);
+        queryParam.put("workShift",  workShift);
+
+        String tapJyDTOUrl = this.getTapJyDTOUrl(version);
+        String tapJyDTOStr = httpUtil.get(tapJyDTOUrl, queryParam);
+        if (StringUtils.isNotBlank(tapJyDTOStr)) {
+            SuccessEntity<TapJyDTO> successEntity = JSON.parseObject(tapJyDTOStr, new TypeReference<SuccessEntity<TapJyDTO>>() {});
+            if (Objects.isNull(successEntity) || Objects.isNull(successEntity.getData())) {
+                log.warn("根据时间[{}]获取的tapJyDTO数据为空", date.getStartTime());
+            } else {
+                tapJyDTO = successEntity.getData();
+            }
+        }
+        return tapJyDTO;
+    }
+
 
     /**
      * 计算出铁量 - 净重
@@ -630,6 +658,15 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      */
     protected String getBfBlastResultUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/bfBlastResult/latest";
+    }
+
+    /**
+     * 精益接口信息url
+     * @param version
+     * @return
+     */
+    protected String getTapJyDTOUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/report/query/jygl";
     }
 
     /**

@@ -143,6 +143,56 @@ public class TestJobGl extends SteelApplicationTests {
         luDiWenDu8Job.execute(null);
     }
 
+    /**
+     * 测试 8高炉鱼雷罐装载率
+     */
+    @Autowired
+    private YuLeiGuanZhuangZaiLv8Job yuLeiGuanZhuangZaiLv8Job;
+    @Test
+    public void testYuLeiGuanZhuangZaiLv8Job() {
+        yuLeiGuanZhuangZaiLv8Job.execute(null);
+    }
+
+    /**
+     * 测试 8高炉硅硫双命中率
+     */
+    @Autowired
+    private GuiLiuShuangMingZhongLv8Job guiLiuShuangMingZhongLv8Job;
+    @Test
+    public void testGuiLiuShuangMingZhongLv8Job() {
+        guiLiuShuangMingZhongLv8Job.execute(null);
+    }
+
+    /**
+     * 测试 8高炉炉温合格率精益统计表
+     */
+    @Autowired
+    private LuWenHeGeLv8Job luWenHeGeLv8Job;
+    @Test
+    public void testLuWenHeGeLv8Job() {
+        luWenHeGeLv8Job.execute(null);
+    }
+
+    /**
+     * 测试 8高炉铁水一级品率精益统计表
+     */
+    @Autowired
+    private TieShuiYiJiPinLv8Job tieShuiYiJiPinLv8Job;
+    @Test
+    public void testTieShuiYiJiPinLv8Job() {
+        tieShuiYiJiPinLv8Job.execute(null);
+    }
+
+    /**
+     * 测试 8高炉炉渣碱度合格率精益统计表
+     */
+    @Autowired
+    private LuZhaJianDuHeGeLv8Job luZhaJianDuHeGeLv8Job;
+    @Test
+    public void testLuZhaJianDuHeGeLv8Job() {
+        luZhaJianDuHeGeLv8Job.execute(null);
+    }
+
     @Test
     public void testAllGaoLuNew() {
         testShangLiaoZhuangLiao8Job();

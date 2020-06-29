@@ -514,6 +514,20 @@ public class DateQueryUtil {
         Date beginTime = DateUtil.getDateBeginTime(monthStartTime);
         Date monthEndTime = getMonthEndTime(date);
         Date endTime = DateUtil.getDateEndTime(monthEndTime);
+        return new DateQuery(beginTime, endTime, date);
+    }
+
+    /**
+     * 指定 月的时间范围
+     *
+     * @param date 指定月
+     * @return 结果
+     */
+    public static DateQuery buildMonthAppend12hour(Date date) {
+        Date monthStartTime = getMonthStartTime(date);
+        Date beginTime = DateUtil.getDateBeginTime(monthStartTime);
+        Date monthEndTime = getMonthEndTime(date);
+        Date endTime = DateUtil.getDateEndTime(monthEndTime);
         endTime = DateUtil.addHours(endTime, 12);
         return new DateQuery(beginTime, endTime, date);
     }

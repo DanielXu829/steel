@@ -86,6 +86,11 @@ public enum JobEnum {
     gl_ludiwendu("gl_ludiwendu", "8高炉炉底温度月报表"),
     gl_lengquebiyuebao("gl_lengquebiyuebao","8高炉冷却水冷却壁月报"),
     gl_yuebaohuizong("gl_yuebaohuizong","8高炉月报汇总"),
+    gl_yuleiguanzhuang("gl_yuleiguanzhuang","8高炉鱼雷罐装载率"),
+    gl_guiliushuangmingzhong("gl_guiliushuangmingzhong","8高炉硅硫双命中率"),
+    gl_luwenhegelv("gl_luwenhegelv","8高炉炉温合格率精益统计表"),
+    gl_tieshuiyijipinlv("gl_tieshuiyijipinlv","8高炉铁水一级品率精益统计表"),
+    gl_luzhajianduhegelv("gl_luzhajianduhegelv","8高炉炉渣碱度合格率精益统计表"),
     // 焦化
     jh_zidongpeimei("jh_zidongpeimei", "配煤-自动配煤报表（班）"),
     jh_ck12zidongpeimeinew("jh_ck12zidongpeimeinew", "CK12-配煤-自动配煤报表（班）-New"),
