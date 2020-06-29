@@ -26,7 +26,7 @@ public class MybatisPlusConfig {
      * 设置 dev test local 环境开启
      * @return mybatis配置
      */
-    @Profile({"dev", "test","local"})
+    @Profile({"dev", "test"})
     @Bean
     public PerformanceInterceptor performanceInterceptor() {
         PerformanceInterceptor performanceInterceptor = new PerformanceInterceptor();
