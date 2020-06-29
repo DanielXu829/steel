@@ -41,6 +41,8 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -177,7 +179,14 @@ public class JiaoHuaShengChanZhenDuanBaoGao extends AbstractExportWordJob {
         dealChart(data, "CK9_10_MESR_ANA_cokeProduct_1d_avg", "CK9_10_MESR_CI_LJC001_1d_avg", 5750d, 5250d, 6800d, 5800d, "产量(t)", "煤粉(t)", "chartOne1");
         dealChart(data, "CK9_10_CDQ_rate_1d_avg", "CK9_10_L2C_CDQ_25201_acculat_total_1d_avg", 5750d, 5250d, 6800d, 5800d, "干熄率(%)", "蒸汽量(t)", "chartOne2");
         // 蒸汽量累计
-        result.put("countOne5", parse(dealMonthTotal(data, "CK9_10_L2C_CDQ_25201_acculat_total_1month_avg", false)));
+        Double value = dealMonthTotal(data, "CK9_10_L2C_CDQ_25201_acculat_total_1month_avg", false);
+        if (value == null) {
+            result.put("countOne5", "   ");
+        } else {
+            DecimalFormat df = new DecimalFormat("0");
+            BigDecimal valueDecimal = new BigDecimal(value.toString());
+            result.put("countOne5", df.format(valueDecimal));
+        }
     }
 
     // 配煤质量模块
