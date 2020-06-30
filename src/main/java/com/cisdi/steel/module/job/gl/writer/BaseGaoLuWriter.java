@@ -7,15 +7,11 @@ import com.alibaba.fastjson.TypeReference;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.SuccessEntity;
-import com.cisdi.steel.dto.response.gl.ChargeDTO;
-import com.cisdi.steel.dto.response.gl.MaterialExpendDTO;
-import com.cisdi.steel.dto.response.gl.TagValueListDTO;
-import com.cisdi.steel.dto.response.gl.TapTPCDTO;
+import com.cisdi.steel.dto.response.gl.*;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.gl.GLDataUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -174,6 +170,20 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
             }
         }
         return materialExpendDTO;
+    }
+
+    /**
+     * 8高炉月报汇总的原燃料消耗接口
+     * @param version
+     * @param date
+     * @return
+     */
+    protected MaterialExpendStcDTO getMaterialExpandStcDTO(String version, Date date) {
+        String materialExpendStcUrl = String.format(httpProperties.getGlUrlVersion(version) + "/report/material/materialExpend/stc?dateTime=%s", date.getTime());
+        String materialExpendDTOStr = httpUtil.get(materialExpendStcUrl);
+        MaterialExpendStcDTO materialExpendStcDTO = null;
+
+        return Optional.ofNullable(materialExpendDTOStr).map(e -> JSON.parseObject(e, MaterialExpendStcDTO.class)).orElse(null);
     }
 
     /**
@@ -694,4 +704,5 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     protected String getTapSummaryByRangeUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/report/tap/getTapSummaryByRange";
     }
+
 }

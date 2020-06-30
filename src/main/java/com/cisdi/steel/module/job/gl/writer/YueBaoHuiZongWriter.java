@@ -7,6 +7,7 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
+import com.cisdi.steel.dto.response.gl.MaterialExpendStcDTO;
 import com.cisdi.steel.dto.response.gl.res.AnalysisValue;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
@@ -61,6 +62,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             handleBuLiaoFengKouLuKuang(workbook, version, allDayBeginTimeInCurrentMonth);
             //出渣铁及煤气成分
             handleChuZhaTieMeiQiChenFen(workbook, version, allDayBeginTimeInCurrentMonth);
+            // 原燃料消耗
+            handleYuanRanLiaoXiaoHao(workbook, version, allDayBeginTimeInCurrentMonth);
         } catch (Exception e) {
             log.error("处理 月报汇总 时产生错误", e);
             throw e;
@@ -139,9 +142,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             continue;
                         }
                         String item = itemSplitArray[1];
-                        // todo 改成两位小数
                         BigDecimal sinterAverageValue = analysisValues.stream().map(AnalysisValue::getValues)
-                                .collect(Collectors.toList()).stream().map(e -> e.get(item)).filter(e -> e != null)
+                                .map(e -> e.get(item)).filter(e -> e != null)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                                 .divide(BigDecimal.valueOf(analysisValues.size()), 4, BigDecimal.ROUND_HALF_UP);
                         String unit = PoiCellUtil.getCellValue(sheet, itemRowNum - 1, itemIndex);
@@ -159,10 +161,45 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
     }
 
     //原燃料消耗
-    private void handleYuanRanLiaoXiaoHao(Workbook workbook, String version, int rowIndex, DateQuery eachDateQuery) {
-        List<CellData> resultList = new ArrayList<>();
-        Sheet sheet = workbook.getSheet("原燃料消耗");
-        ExcelWriterUtil.setCellValue(sheet, resultList);
+    private void handleYuanRanLiaoXiaoHao(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
+        try {
+            List<CellData> cellDataList = new ArrayList<>();
+            Sheet sheet = workbook.getSheet("原燃料消耗");
+            int itemRowNum = 4;
+            int fixLineCount = 0;
+            List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
+            sheet.getRow(itemRowNum).setZeroHeight(true);
+            for (int i = 0, daySize = allDayBeginTimeInCurrentMonth.size(); i < daySize; i++) {
+                if (i > 0 && i % 10 == 0) {
+                    fixLineCount++;
+                }
+                int row = itemRowNum + 1 + fixLineCount + i;
+                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                MaterialExpendStcDTO materialExpandStcDTO = getMaterialExpandStcDTO(version, eachDateQuery.getEndTime());
+                Map<String, List<MaterialExpend>> typeToMaterialExpendListMap =
+                        Optional.ofNullable(materialExpandStcDTO).map(MaterialExpendStcDTO::getData).orElse(null);
+                if (Objects.isNull(typeToMaterialExpendListMap) || typeToMaterialExpendListMap.isEmpty()) {
+                    continue;
+                }
+                // 转换为key为matCode，value为dryWgt的map
+                Map<String, BigDecimal> matCodeToDryWgtMap = typeToMaterialExpendListMap.entrySet().stream()
+                        .map(Map.Entry::getValue).flatMap(Collection::stream)
+                        .collect(Collectors.toMap(MaterialExpend::getMatCode, MaterialExpend::getDryWgt));
+                for (int itemIndex = 0, itemSize = itemNameList.size(); itemIndex < itemSize; itemIndex++) {
+                    String itemName = itemNameList.get(itemIndex);
+                    if (StringUtils.isBlank(itemName)) {
+                        continue;
+                    }
+                    BigDecimal dryWgt = matCodeToDryWgtMap.get(itemName);
+                    if (Objects.nonNull(dryWgt)) {
+                        ExcelWriterUtil.addCellData(cellDataList, row, itemIndex, dryWgt);
+                    }
+                }
+            }
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理 原燃料消耗 出错", e);
+        }
     }
 
     //布料、风口及炉况情况
@@ -296,7 +333,15 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
         try {
             int fixLineCount = 0;
             Sheet sheet = workbook.getSheet("技术经济指标及操作参数");
-            ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 6, allDayBeginTimeInCurrentMonth.get(0));
+            Date date = allDayBeginTimeInCurrentMonth.get(0);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            int currentMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            // 累计数据显示有点问题，隐藏第31天
+            if (currentMonth < 31) {
+                sheet.getRow(40).setZeroHeight(true);
+            }
+            ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 6, date);
             // 标记行
             int tagFormulaNum = 6;
             int itemRowNum = 7;
