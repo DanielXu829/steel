@@ -2,8 +2,7 @@ package com.cisdi.steel.module.job.gl.execute;
 
 import com.cisdi.steel.module.job.AbstractJobExecuteExecute;
 import com.cisdi.steel.module.job.IExcelReadWriter;
-import com.cisdi.steel.module.job.gl.writer.GuiLiuShuangMingZhongLvWriter;
-import com.cisdi.steel.module.job.gl.writer.YuLeiGuanZhuangZaiLvWriter;
+import com.cisdi.steel.module.job.gl.writer.HeGeGuanShuWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class GuiLiuShuangMingZhongLvExecute extends AbstractJobExecuteExecute {
 
     @Autowired
-    private GuiLiuShuangMingZhongLvWriter writer;
+    private HeGeGuanShuWriter writer;
 
     @Override
     public IExcelReadWriter getCurrentExcelWriter() {
