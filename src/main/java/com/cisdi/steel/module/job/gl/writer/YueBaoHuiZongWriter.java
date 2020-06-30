@@ -355,7 +355,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             List<CellData> cellDataList = new ArrayList<>();
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
-                Date daqy = allDayBeginTimeInCurrentMonth.get(i);
+                Date day = allDayBeginTimeInCurrentMonth.get(i);
                 BigDecimal defaultCellValue = new BigDecimal(0.0);
                 JSONObject queryJsonObject = new JSONObject();
                 Map<String, String> queryParam = eachDateQuery.getQueryParam();
