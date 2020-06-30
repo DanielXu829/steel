@@ -79,7 +79,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             "BF8_L2M_ANA_COKE_M10_1d_avg","BF8_L2M_ANA_COKE_CSR_1d_avg","BF8_L2M_ANA_COKE_CRI_1d_avg",
             "BF8_L2M_ANA_COAL_H2O_1d_avg","BF8_L2M_ANA_COAL_Vdaf_1d_avg","BF8_L2M_ANA_COAL_Fcad_1d_avg",
             "BF8_L2M_ANA_SINTER_TFe_1d_avg","BF8_L2M_ANA_SINTER_FeO_1d_avg","BF8_L2M_ANA_SINTER_CaO_1d_avg",
-            "BF8_L2M_ANA_SINTER_SiO2_1d_avg","BF8_L2M_ANA_SINTER_MgO_1d_avg","BF8_L2M_ANA_SINTER_Al203_1d_avg",
+            "BF8_L2M_ANA_SINTER_SiO2_1d_avg","BF8_L2M_ANA_SINTER_MgO_1d_avg","BF8_L2M_ANA_SINTER_Al2O3_1d_avg",
             "BF8_L2M_ANA_SINTER_TFe_B2_avg","BF8_L2M_ANA_PELLETS_TFe_1d_avg","BF8_L2M_ANA_PELLETS_CaO_1d_avg",
             "BF8_L2M_ANA_PELLETS_SiO2_1d_avg","BF8_L2M_ANA_LUMPORE_TFe_1d_avg","BF8_L2M_ANA_LUMPORE_SiO2_1d_avg",
             "BF8_L2M_ANA_LUMPORE_Al2O3_1d_avg"
@@ -274,6 +274,13 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return tagValue;
     }
 
+    /**
+     * 批量获取Latest TagValue
+     * @param date
+     * @param version
+     * @param tagNames
+     * @return
+     */
     private List<TagValue> getLatestTagValueList(Date date, String version, List<String> tagNames) {
         String url = getUrl(version) + "/tagValues/latest/";
         JSONObject jsonObject = new JSONObject();
@@ -284,7 +291,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         if (StringUtils.isNotBlank(chargeNoData)) {
             tagValueListDTO = JSON.parseObject(chargeNoData, TagValueListDTO.class);
             if (Objects.isNull(tagValueListDTO) || CollectionUtils.isEmpty(tagValueListDTO.getData())) {
-                log.warn("根据tagName[{}]获取[{}]的latest TagValueListDTO数据为空", tagNames, date);
+                log.warn("根据tagName[{}]获取[{}]的latest TagValueList数据为空", tagNames, date);
             } else {
                 // 排序
                 list = tagValueListDTO.getData();
@@ -635,15 +642,24 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      * @param prefix
      */
     private void dealPart(JSONObject data, String prefix, String[] tagNames, DecimalFormat df) {
-        if (data != null && data.size() > 0) {
-            for (int i = 0; i < tagNames.length; i++) {
-                Double doubleValue;
-                List<Double> valueObject = getValuesByTag(data, tagNames[i]);
-                if (valueObject.size() > 0) {
-                    doubleValue = valueObject.get(valueObject.size() - 1);
-                    result.put(prefix + (i + 1), doubleValue == null ? 0d : df.format(doubleValue));
+        try {
+            if (data != null && data.size() > 0) {
+                for (int i = 0; i < tagNames.length; i++) {
+                    Double doubleValue;
+                    List<Double> valueObject = getValuesByTag(data, tagNames[i]);
+                    if (valueObject.size() > 0) {
+                        doubleValue = valueObject.get(valueObject.size() - 1);
+                        if((prefix + (i + 1)).equals("partTwo17")) {
+                            Double partTwo13 = Double.valueOf((String)result.get("partTwo13"));
+                            Double partTwo14 = Double.valueOf((String)result.get("partTwo14"));
+                            doubleValue = partTwo13/partTwo14;
+                        }
+                        result.put(prefix + (i + 1), doubleValue == null ? 0d : df.format(doubleValue));
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error("高炉日生产分析报告处理数据失败", e);
         }
     }
 
@@ -728,74 +744,86 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private void dealPart1(JSONObject data, String version) {
-        dealPart(data, "partOne", L1, df2);
-        //一级品率
-        Date date = DateUtil.addDays(new Date(), -1);
-        DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
-        BigDecimal firstGradeRateInRange = glDataUtil.getFirstGradeRateInRange("8.0", dateQueryNoDelay);
-        if (firstGradeRateInRange != null) {
-            result.put("firstGradeRate", df2.format(firstGradeRateInRange));
-        } else {
-            result.put("firstGradeRate", " ");
-        }
-        //[S]达标率
-        result.put("sQualifiedRate", " ");
-        dealSQualifiedRate(version);
-        dealChart1(data);
-        dealChart2(data);
+        try {
+            dealPart(data, "partOne", L1, df2);
+            //一级品率
+            Date date = DateUtil.addDays(new Date(), -1);
+            DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
+            BigDecimal firstGradeRateInRange = glDataUtil.getFirstGradeRateInRange("8.0", dateQueryNoDelay);
+            if (firstGradeRateInRange != null) {
+                result.put("firstGradeRate", df2.format(firstGradeRateInRange));
+            } else {
+                result.put("firstGradeRate", " ");
+            }
+            //[S]达标率
+            result.put("sQualifiedRate", " ");
+            dealSQualifiedRate(version);
+            dealChart1(data);
+            dealChart2(data);
 
-        double increase = dealIncreaseYesterday(data, "BF8_L2M_HMMassAct_1d_cur");
-        if (increase >= 0d) {
-            result.put("textOne1", "升高");
-        } else {
-            result.put("textOne1", "降低");
-        }
-        result.put("countOne1", df2.format(Math.abs(increase)));
+            double increase = dealIncreaseYesterday(data, "BF8_L2M_HMMassAct_1d_cur");
+            if (increase >= 0d) {
+                result.put("textOne1", "升高");
+            } else {
+                result.put("textOne1", "降低");
+            }
+            result.put("countOne1", df2.format(Math.abs(increase)));
 
-        increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CokeRate_1d_cur");
-        if (increase >= 0d) {
-            result.put("textOne2", "升高");
-        } else {
-            result.put("textOne2", "降低");
-        }
-        result.put("countOne2", df2.format(Math.abs(increase)));
+            increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CokeRate_1d_cur");
+            if (increase >= 0d) {
+                result.put("textOne2", "升高");
+            } else {
+                result.put("textOne2", "降低");
+            }
+            result.put("countOne2", df2.format(Math.abs(increase)));
 
-        increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CoalRate_1d_cur");
-        if (increase >= 0d) {
-            result.put("textOne3", "升高");
-        } else {
-            result.put("textOne3", "降低");
-        }
-        result.put("countOne3", df2.format(Math.abs(increase)));
+            increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CoalRate_1d_cur");
+            if (increase >= 0d) {
+                result.put("textOne3", "升高");
+            } else {
+                result.put("textOne3", "降低");
+            }
+            result.put("countOne3", df2.format(Math.abs(increase)));
 
-        result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
-        result.put("countOne5", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
-        result.put("countOne6", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
-        result.put("countOne7", df2.format(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
+            result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
+            result.put("countOne5", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
+            result.put("countOne6", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
+            result.put("countOne7", df2.format(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
+        } catch (Exception e) {
+            log.error("高炉日生产分析报告处理part1失败", e);
+        }
     }
 
     private void dealPart3(JSONObject data){
-        dealPart(data, "partThree", L3, df2);
-        dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg", df3);
-        dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg", df3);
-        dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg", df3);
-        result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
-        result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
-        result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
-        result.put("offsetP", df3.format(dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
-        result.put("offsetTP", df3.format(dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
-        result.put("offsetPT", df2.format(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
-        result.put("offsetFR", df2.format(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
-        result.put("offsetCO", df2.format(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
+        try {
+            dealPart(data, "partThree", L3, df2);
+            dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg", df3);
+            dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg", df3);
+            dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg", df3);
+            result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
+            result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
+            result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
+            result.put("offsetP", df3.format(dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
+            result.put("offsetTP", df3.format(dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
+            result.put("offsetPT", df2.format(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
+            result.put("offsetFR", df2.format(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
+            result.put("offsetCO", df2.format(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
+        } catch (Exception e) {
+            log.error("高炉日生产分析报告处理part3失败", e);
+        }
     }
 
     private void dealPart4(JSONObject data) {
-        dealPart(data, "partFour", L4, df2);
-        String yesterdayData = getDataBeforeDays(data, L4[0], df2);
-        if (StringUtils.isNotBlank(yesterdayData)) {
-            result.put("yesterday_temp", yesterdayData);
-        } else {
-            result.put("yesterday_temp", " ");
+        try {
+            dealPart(data, "partFour", L4, df2);
+            String yesterdayData = getDataBeforeDays(data, L4[0], df2);
+            if (StringUtils.isNotBlank(yesterdayData)) {
+                result.put("yesterday_temp", yesterdayData);
+            } else {
+                result.put("yesterday_temp", " ");
+            }
+        } catch (Exception e) {
+            log.error("高炉日生产分析报告处理part4失败", e);
         }
     }
 
@@ -1033,12 +1061,9 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         for (int i = 29; i > -1; i--) {
             //炉缸
             BigDecimal big = getMaxLuTiTemp(new StringBuilder(), version, array, -1 - i, prefix, suffix);
-            Double val = null;
+            Double val = 0d;;
             if (null != big) {
                 val = big.doubleValue();
-                if (val < 0) {
-                    val = null;
-                }
             }
             value.add(val);
         }
@@ -1133,16 +1158,22 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      * @return
      */
     private JSONObject getDataByTag(String[] tagNames, Date startTime, Date endTime, String version) {
-        String apiPath = "/getTagValues/tagNamesInRange";
-        JSONObject query = new JSONObject();
-        query.put("endtime", endTime.getTime());
-        query.put("starttime", startTime.getTime());
-        query.put("tagnames", tagNames);
-        SerializeConfig serializeConfig = new SerializeConfig();
-        String jsonString = JSONObject.toJSONString(query, serializeConfig);
-        String results = httpUtil.postJsonParams(getUrl(version) + apiPath, jsonString);
-        JSONObject jsonObject = JSONObject.parseObject(results, Feature.OrderedField);
-        return jsonObject.getJSONObject("data");
+        JSONObject object = null;
+        try {
+            String apiPath = "/getTagValues/tagNamesInRange";
+            JSONObject query = new JSONObject();
+            query.put("endtime", endTime.getTime());
+            query.put("starttime", startTime.getTime());
+            query.put("tagnames", tagNames);
+            SerializeConfig serializeConfig = new SerializeConfig();
+            String jsonString = JSONObject.toJSONString(query, serializeConfig);
+            String results = httpUtil.postJsonParams(getUrl(version) + apiPath, jsonString);
+            JSONObject jsonObject = JSONObject.parseObject(results, Feature.OrderedField);
+            object = jsonObject.getJSONObject("data");
+        } catch (Exception e) {
+            log.error("高炉日生产分析报告获取数据失败", e);
+        }
+        return object;
     }
 
     /**
@@ -1153,8 +1184,8 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         Date now = new Date();
         Calendar cal = Calendar.getInstance();
         //日报是取前一天的数据
-        Date date = DateUtil.addDays(now, -1);
-        cal.setTime(date);
+        //Date date = DateUtil.addDays(now, -1);
+        cal.setTime(now);
         cal.set(Calendar.HOUR_OF_DAY,0);
         cal.set(Calendar.MINUTE,0);
         cal.set(Calendar.SECOND,0);
@@ -1172,15 +1203,14 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
 
         while (startDate.before(endDate)) {
             // 拼接x坐标轴
-            categoriesList.add(DateUtil.getFormatDateTime(startDate, DateUtil.MMddChineseFormat));
+            categoriesList.add(DateUtil.getFormatDateTime(DateUtil.addDays(startDate, -1), DateUtil.MMddChineseFormat));
             longTimeList.add(startDate.getTime()+"");
-
             // 递增日期
             cal.add(Calendar.DAY_OF_MONTH, 1);
             startDate = cal.getTime();
         }
 
-        categoriesList.add(DateUtil.getFormatDateTime(endDate, DateUtil.MMddChineseFormat));
+        categoriesList.add(DateUtil.getFormatDateTime(DateUtil.addDays(endDate, -1), DateUtil.MMddChineseFormat));
         longTimeList.add(endDate.getTime()+"");
     }
 
