@@ -96,6 +96,16 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
                 int col = j;
                 if (StringUtils.isNotBlank(itemName)) {
                     switch (itemName) {
+                        case "目标值": {
+                            // 获取子项
+                            if (Objects.nonNull(tapJyDTO)) {
+                                Double targetVal = tapJyDTO.getTargetVal();
+                                if (Objects.nonNull(targetVal)) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, targetVal * 100);
+                                }
+                            }
+                            break;
+                        }
                         case "子项": {
                             // 获取子项
                             if (Objects.nonNull(tapJyDTO)) {
@@ -178,6 +188,16 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
                 int col = j;
                 if (StringUtils.isNotBlank(itemName)) {
                     switch (itemName) {
+                        case "目标值": {
+                            // 获取子项
+                            if (Objects.nonNull(tapJyDTO)) {
+                                Double targetVal = tapJyDTO.getTargetVal();
+                                if (Objects.nonNull(targetVal)) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, targetVal * 100);
+                                }
+                            }
+                            break;
+                        }
                         case "子项": {
                             // 获取子项
                             if (Objects.nonNull(tapJyDTO)) {
