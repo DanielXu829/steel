@@ -122,6 +122,9 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         //Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
         // 替换当月天数和当前月份
         Date lastDay = new Date();
+        if(allDayBeginTimeInCurrentMonth.size() > 0) {
+            lastDay = allDayBeginTimeInCurrentMonth.get(0);
+        }
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 1, lastDay);
         sheet.getRow(itemRowNum).setZeroHeight(true);
     }
@@ -229,6 +232,9 @@ public class KaoHeYueBaoWriter extends BaseGaoLuWriter {
         //Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
         // 替换当月天数和当前月份
         Date lastDay = new Date();
+        if(allDayBeginTimeInCurrentMonth.size() > 0) {
+            lastDay = allDayBeginTimeInCurrentMonth.get(0);
+        }
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 0, 0, lastDay);
         sheet.getRow(itemRowNum).setZeroHeight(true);
     }

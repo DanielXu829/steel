@@ -232,9 +232,9 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return JobEnum.gl_rishengchanfenxibaogao_day;
     }
 
-    //@Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 0 10 * * ?")
     //@Scheduled(cron = "0 30/ 0 * * ?")
-    @Scheduled(cron = "0 10/30 * * * ?")
+    //@Scheduled(cron = "0 10/30 * * * ?")
     public void mainTask() {
         initialData();
         initDateTime();

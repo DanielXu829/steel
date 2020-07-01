@@ -70,7 +70,7 @@ public class LuLiaoXiaoHaoWriter extends BaseGaoLuWriter {
         // 动态替换报表首行标题中的日期
         Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, 0), 0);
         String stringCellValue = titleCell.getStringCellValue();
-        String currentMonth = DateFormatUtils.format(new Date(), DateUtil.yyyyMM);
+        String currentMonth = DateFormatUtils.format(DateUtil.addDays(new Date(), -1), DateUtil.yyyyMM);
         stringCellValue = stringCellValue.replaceAll("%当前月份%", currentMonth);
         titleCell.setCellValue(stringCellValue);
 

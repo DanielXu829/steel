@@ -67,7 +67,7 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
 
-        List<DateQuery> allMonthInCurrentYear = DateQueryUtil.buildYearMonthEach(new Date());
+        List<DateQuery> allMonthInCurrentYear = DateQueryUtil.buildYearMonthEach(DateUtil.addDays(new Date(), -1));
 
         for (int i = 0; i < allMonthInCurrentYear.size(); i++) {
             // 通过api获取按天的精益数据

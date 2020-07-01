@@ -495,7 +495,7 @@ public class DateQueryUtil {
         long betweenDays = DateUtil.getBetweenMonths(date);
         List<DateQuery> queryList = new ArrayList<>();
         Date currentDate = startTime;
-        for (int i = 0; i <= betweenDays; i++) {
+        for (int i = 1; i <= betweenDays; i++) {
             DateQuery query = buildMonth(currentDate);
             queryList.add(query);
             currentDate = DateUtil.addMonths(currentDate, 1);

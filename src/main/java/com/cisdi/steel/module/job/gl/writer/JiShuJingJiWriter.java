@@ -265,6 +265,9 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
         //Date lastDay = allDayBeginTimeInCurrentMonth.get(allDayBeginTimeInCurrentMonth.size() - 1);
         // 替换当月天数和当前月份
         Date lastDay = new Date();
+        if(allDayBeginTimeInCurrentMonth.size() > 0) {
+            lastDay = allDayBeginTimeInCurrentMonth.get(0);
+        }
         ExcelWriterUtil.replaceCurrentMonthInTitle(sheet, 1, 0, lastDay);
         ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 4, lastDay);
         // TODO 隐藏行首两行，改为隐藏一行

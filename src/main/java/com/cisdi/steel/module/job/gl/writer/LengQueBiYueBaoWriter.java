@@ -44,6 +44,9 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
             int beginRow = 3;
             Sheet sheet = workbook.getSheetAt(0);
             List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(dateQuery.getRecordDate(), 1);
+            if(allDayBeginTimeInCurrentMonth.size() > 0) {
+                date = allDayBeginTimeInCurrentMonth.get(0);
+            }
             int fixLineCount = 0;
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
 //                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
