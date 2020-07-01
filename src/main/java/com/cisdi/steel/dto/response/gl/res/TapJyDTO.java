@@ -9,9 +9,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TapJyDTO {
     /**
+     * 班次
+     * 1:夜班，2:白班
+     */
+    private String workShift;
+    /**
      * 目标值
      */
-    private Double targetValue;
+    private Double targetVal;
     /**
      * 分子
      */
