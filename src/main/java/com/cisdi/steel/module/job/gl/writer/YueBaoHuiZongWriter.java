@@ -54,6 +54,9 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
         try {
             DateQuery dateQuery = getDateQuery(excelDTO);
             List<Date> allDayBeginTimeInCurrentMonth = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(dateQuery.getRecordDate(), 1);
+            if(allDayBeginTimeInCurrentMonth.size() > 0) {
+                date = allDayBeginTimeInCurrentMonth.get(0);
+            }
             //原燃料质量
             handleYuanRanLiaoZhiLiang(workbook, version, allDayBeginTimeInCurrentMonth);
             //技术经济指标及操作参数
@@ -64,6 +67,10 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             handleChuZhaTieMeiQiChenFen(workbook, version, allDayBeginTimeInCurrentMonth);
             // 原燃料消耗
             handleYuanRanLiaoXiaoHao(workbook, version, allDayBeginTimeInCurrentMonth);
+            //TODO 休风统计
+            handleXiuFenTongJi(workbook, version, allDayBeginTimeInCurrentMonth);
+            //大计事
+            handleDaJiShi(workbook, version, allDayBeginTimeInCurrentMonth);
         } catch (Exception e) {
             log.error("处理 月报汇总 时产生错误", e);
             throw e;
@@ -78,6 +85,66 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             }
         }
         return workbook;
+    }
+
+    //TODO 休风统计
+    private void handleXiuFenTongJi(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
+        try {
+            List<CellData> resultList = new ArrayList<>();
+            Sheet sheet = workbook.getSheet("休风统计");
+
+            int beginRow = 6;
+            int fixLineCount = 0;
+            // 标记行
+            int tagFormulaNum = 5;
+            sheet.getRow(tagFormulaNum).setZeroHeight(true);
+            // 获取excel占位符列
+            List<String> tagFormulaList = PoiCustomUtil.getRowCelVal(sheet, tagFormulaNum);
+            if (CollectionUtils.isEmpty(tagFormulaList)) {
+                return;
+            }
+            int itemDataSize = tagFormulaList.size();
+            for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
+                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                if (i > 0 && i % 10 == 0) {
+                    fixLineCount++;
+                }
+                int row = beginRow + fixLineCount + i;
+                for (int j = 1; j < itemDataSize; j++) {
+                    String item = tagFormulaList.get(j);
+                    Double val = null;
+                    if(StringUtils.isBlank(item)) {
+                        continue;
+                    }
+                    String[] itemArray = item.split("_");
+                    switch (itemArray[0]) {
+                    }
+                    //ExcelWriterUtil.addCellData(resultList, row, j, val);
+                }
+            }
+            ExcelWriterUtil.setCellValue(sheet, resultList);
+        } catch (Exception e) {
+            log.error("处理休风统计出错", e);
+        }
+    }
+    //大计事
+    private void handleDaJiShi(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
+        try {
+            List<CellData> resultList = new ArrayList<>();
+            Sheet sheet = workbook.getSheet("大计事");
+
+            int beginRow = 6;
+            for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
+                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                for (int j = 1; j < 3; j++) {
+
+                    //ExcelWriterUtil.addCellData(cellDataList, row, j, val);
+                }
+            }
+            ExcelWriterUtil.setCellValue(sheet, resultList);
+        } catch (Exception e) {
+            log.error("处理大计事出错", e);
+        }
     }
 
     //原燃料质量
@@ -455,6 +522,9 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                         case "TapSummary":
                             if (itemArray.length == 2) {
                                 val = getTapSummaryByKey(version, eachDateQuery, itemArray[1]);
+                                if (itemArray[1].equals("hmRatio") || itemArray[1].equals("slagRatio")) {
+                                    if(Objects.nonNull(val)) val = val * 100;
+                                }
                             }
                             break;
                         default:

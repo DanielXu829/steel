@@ -936,9 +936,8 @@ public class DateUtil {
         List<Date> dates = new ArrayList<Date>();
         // 循环遍历每一个
         for (int i = 1; i <= dayOfMonth; i++) {
-            Calendar day = Calendar.getInstance();
-            day.set(Calendar.DAY_OF_MONTH, i);
-            dates.add(day.getTime());
+            cal.set(Calendar.DAY_OF_MONTH, i);
+            dates.add(cal.getTime());
         }
 
         return dates;
