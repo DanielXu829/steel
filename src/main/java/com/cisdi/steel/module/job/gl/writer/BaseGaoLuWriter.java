@@ -634,6 +634,9 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByCode";
     }
 
+    protected String getMaterialMapUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/material/map";
+    }
     /**
      * 出铁数据接口
      * @param version

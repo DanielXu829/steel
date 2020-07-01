@@ -56,7 +56,7 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
      * @return
      */
     private void getMapHandler1(WriterExcelDTO excelDTO, Workbook workbook, String version) {
-        dateQuery = this.getDateQueryBeforeOneDay(excelDTO);
+        dateQuery = this.getDateQueryAheadTwoHourBeforeOneDay(excelDTO);
 
         // 填充质量指标sheet
         handleZhiLiangZhiBiao(workbook, version);
@@ -81,146 +81,156 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
      * @param version
      */
     private void handleZhiLiangZhiBiao(Workbook workbook, String version) {
-        final String FEO = "FeO";
-        final String RO = "RO";
-        final String MGO = "MgO";
-        // 表头
-        Sheet firstSheet = workbook.getSheetAt(0);
-        String tableHeadData = getQualityIndexTableHead(version);
-        if (StringUtils.isNotBlank(tableHeadData)) {
-            JSONObject analysisQualityJsonObject = JSON.parseObject(tableHeadData);
-            JSONArray analysisQualityArray = analysisQualityJsonObject.getJSONArray("data");
-            List<AnalysisQuality> analysisQualityList = JSON.parseObject(analysisQualityArray.toJSONString(), new TypeReference<List<AnalysisQuality>>() {});
-            for (AnalysisQuality item : analysisQualityList) {
-                String itemOs = item.getItemOs();
-                String content;
-                if (RO.equals(itemOs)) {
-                    content = itemOs + "±" + item.getRange();
-                } else {
-                    String unit = item.getUnit() == null ? "%" : item.getUnit();
-                    content = itemOs + "（" + item.getCenter() + unit + "±" + item.getRange() + "）";
-                }
-                Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + itemOs + "}}");
-                if (Objects.nonNull(cell)) {
-                    PoiCustomUtil.setCellValue(cell, content);
-                } else {
-                    log.warn("{{" + itemOs + "}}占位符不存在");
-                }
-            }
-        }
-        // 清除表头占位符
-        PoiCustomUtil.clearPlaceHolder(firstSheet);
-
-        // 表体
-        Sheet qualityIndexSheet = workbook.getSheet("_zhiliangzhibiao");
-        List<CellData> resultList = new ArrayList<>();
-        Integer[] workTeams = {1, 2, 3, 4, null};
-        String endTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-dd 23:59:59");
-        Date endDate = DateUtil.strToDate(endTime, "yyyy-MM-dd HH:mm:ss");
-        for (int i = 0; i < workTeams.length; i++) {
-            Integer workTeam = workTeams[i];
-            String qualityIndexData = getQualityIndexData(endDate.getTime(), workTeam, version);
-            if (StringUtils.isNotBlank(qualityIndexData)) {
-                JSONObject anaQualitySttcsJsonObject = JSON.parseObject(qualityIndexData);
-                JSONArray anaQualitySttcsArray = anaQualitySttcsJsonObject.getJSONArray("data");
-                List<AnaQualitySttcs> anaQualitySttcsList = JSON.parseObject(anaQualitySttcsArray.toJSONString(), new TypeReference<List<AnaQualitySttcs>>() {});
-                for (AnaQualitySttcs anaQualitySttcs : anaQualitySttcsList) {
-                    ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
-                    if (FEO.equals(anaQualitySttcs.getItem())) {
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 2, anaQualitySttcs.getUnqualified());
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 3, anaQualitySttcs.getQualifiedRate());
+        try {
+            final String FEO = "FeO";
+            final String RO = "RO";
+            final String MGO = "MgO";
+            // 表头
+            Sheet firstSheet = workbook.getSheetAt(0);
+            String tableHeadData = getQualityIndexTableHead(version);
+            if (StringUtils.isNotBlank(tableHeadData)) {
+                JSONObject analysisQualityJsonObject = JSON.parseObject(tableHeadData);
+                JSONArray analysisQualityArray = analysisQualityJsonObject.getJSONArray("data");
+                List<AnalysisQuality> analysisQualityList = JSON.parseObject(analysisQualityArray.toJSONString(), new TypeReference<List<AnalysisQuality>>() {});
+                for (AnalysisQuality item : analysisQualityList) {
+                    String itemOs = item.getItemOs();
+                    String content;
+                    if (RO.equals(itemOs)) {
+                        content = itemOs + "±" + item.getRange();
+                    } else {
+                        String unit = item.getUnit() == null ? "%" : item.getUnit();
+                        content = itemOs + "（" + item.getCenter() + unit + "±" + item.getRange() + "）";
                     }
-                    if (RO.equals(anaQualitySttcs.getItem())) {
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 4, anaQualitySttcs.getUnqualified());
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 5, anaQualitySttcs.getQualifiedRate());
-                    }
-                    if (MGO.equals(anaQualitySttcs.getItem())) {
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 6, anaQualitySttcs.getUnqualified());
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 7, anaQualitySttcs.getQualifiedRate());
+                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + itemOs + "}}");
+                    if (Objects.nonNull(cell)) {
+                        PoiCustomUtil.setCellValue(cell, content);
                     }
                 }
             }
-        }
+            // 清除表头占位符
+            PoiCustomUtil.clearPlaceHolder(firstSheet);
 
-        ExcelWriterUtil.setCellValue(qualityIndexSheet, resultList);
+            // 表体
+            Sheet qualityIndexSheet = workbook.getSheet("_zhiliangzhibiao");
+            List<CellData> resultList = new ArrayList<>();
+            Integer[] workTeams = {1, 2, 3, 4, null};
+            String endTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-dd 23:59:59");
+            Date endDate = DateUtil.strToDate(endTime, "yyyy-MM-dd HH:mm:ss");
+            for (int i = 0; i < workTeams.length; i++) {
+                Integer workTeam = workTeams[i];
+                String qualityIndexData = getQualityIndexData(endDate.getTime(), workTeam, version);
+                if (StringUtils.isNotBlank(qualityIndexData)) {
+                    JSONObject anaQualitySttcsJsonObject = JSON.parseObject(qualityIndexData);
+                    JSONArray anaQualitySttcsArray = anaQualitySttcsJsonObject.getJSONArray("data");
+                    List<AnaQualitySttcs> anaQualitySttcsList = JSON.parseObject(anaQualitySttcsArray.toJSONString(), new TypeReference<List<AnaQualitySttcs>>() {});
+                    for (AnaQualitySttcs anaQualitySttcs : anaQualitySttcsList) {
+                        ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
+                        if (FEO.equals(anaQualitySttcs.getItem())) {
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 2, anaQualitySttcs.getUnqualified());
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 3, anaQualitySttcs.getQualifiedRate());
+                        }
+                        if (RO.equals(anaQualitySttcs.getItem())) {
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 4, anaQualitySttcs.getUnqualified());
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 5, anaQualitySttcs.getQualifiedRate());
+                        }
+                        if (MGO.equals(anaQualitySttcs.getItem())) {
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 6, anaQualitySttcs.getUnqualified());
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 7, anaQualitySttcs.getQualifiedRate());
+                        }
+                    }
+                }
+            }
+
+            ExcelWriterUtil.setCellValue(qualityIndexSheet, resultList);
+        } catch (Exception e) {
+            log.error("处理 4烧结作业区每月生产情况-质量指标统计 出错", e);
+        }
     }
 
     private void handleShengChanQingKuang(Workbook workbook, String version) {
-        Sheet sheet = workbook.getSheet("_shengchanqingkuang");
-        List<CellData> resultList = new ArrayList<>();
+        try {
+            Sheet sheet = workbook.getSheet("_shengchanqingkuang");
+            List<CellData> resultList = new ArrayList<>();
 
-        Cell planOutputCell = PoiCustomUtil.getCellByValue(sheet, "PLAN_OUTPUT");
-        int planOutputColIndex = planOutputCell.getColumnIndex();
-        Cell actOutputCell = PoiCustomUtil.getCellByValue(sheet, "ACT_OUTPUT");
-        int actOutputColIndex = actOutputCell.getColumnIndex();
-        Cell sinterDayConfirmYCell = PoiCustomUtil.getCellByValue(sheet, "ST4_MESR_SIN_SinterDayConfirmY_1d_cur");
-        int sinterDayConfirmYColIndex = sinterDayConfirmYCell.getColumnIndex();
-        Cell productPerHourAvgCell = PoiCustomUtil.getCellByValue(sheet, "ST4_L1R_SIN_ProductPerHour_1d");
-        int productPerHourAvgColIndex = productPerHourAvgCell.getColumnIndex();
-        Cell productRatioCell = PoiCustomUtil.getCellByValue(sheet, "ST4_L2R_SIN_ProductRatio_1d_cur");
-        int productRatioColIndex = productRatioCell.getColumnIndex();
-        Cell productPerHourCell = PoiCustomUtil.getCellByValue(sheet, "ST4_L1R_SIN_ProductPerHour_1d_avg");
-        int productPerHourColIndex = productPerHourCell.getColumnIndex();
+            Cell planOutputCell = PoiCustomUtil.getCellByValue(sheet, "PLAN_OUTPUT");
+            int planOutputColIndex = planOutputCell.getColumnIndex();
+            Cell actOutputCell = PoiCustomUtil.getCellByValue(sheet, "ACT_OUTPUT");
+            int actOutputColIndex = actOutputCell.getColumnIndex();
+            Cell sinterDayConfirmYCell = PoiCustomUtil.getCellByValue(sheet, "ST4_MESR_SIN_SinterDayConfirmY_1d_cur");
+            int sinterDayConfirmYColIndex = sinterDayConfirmYCell.getColumnIndex();
+            Cell productPerHourAvgCell = PoiCustomUtil.getCellByValue(sheet, "ST4_L1R_SIN_ProductPerHour_1d");
+            int productPerHourAvgColIndex = productPerHourAvgCell.getColumnIndex();
+            Cell productRatioCell = PoiCustomUtil.getCellByValue(sheet, "ST4_L2R_SIN_ProductRatio_1d_cur");
+            int productRatioColIndex = productRatioCell.getColumnIndex();
+            Cell productPerHourCell = PoiCustomUtil.getCellByValue(sheet, "ST4_L1R_SIN_ProductPerHour_1d_avg");
+            int productPerHourColIndex = productPerHourCell.getColumnIndex();
 
-        // yyyy/MM/dd HH:mm:ss
-        String startTime = DateUtil.getFormatDateTime(dateQuery.getStartTime(), "yyyy-MM-01 00:00:00");
-        String endTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-dd 23:59:59");
-        Date endDate = DateUtil.strToDate(endTime, "yyyy-MM-dd HH:mm:ss");
-        Integer[] workTeams = {1, 2, 3, 4};
-        for (Integer workTeam : workTeams) {
-            String productInfo = getProductInfo(endDate.getTime(), workTeam, version);
-            if (StringUtils.isNotBlank(productInfo)) {
-                JSONObject productInfoObj = JSONObject.parseObject(productInfo);
-                JSONObject productInfoData = productInfoObj.getJSONObject("data");
-                Float planOutput = productInfoData.getFloat("PLAN_OUTPUT");
-                Float actOutput = productInfoData.getFloat("ACT_OUTPUT");
-                ExcelWriterUtil.addCellData(resultList, workTeam, actOutputColIndex, actOutput);
-                ExcelWriterUtil.addCellData(resultList, workTeam, planOutputColIndex, planOutput);
-            }
-        }
-
-        String[] tags1 = {"ST4_MESR_SIN_SinterDayConfirmY_1d_cur", "ST4_L1R_SIN_ProductPerHour_1d_avg", "ST4_L2R_SIN_ProductRatio_1d_cur"};
-        String tagValueResults = getTagValueAction(startTime, endTime, tags1, version);
-        if (StringUtils.isNotBlank(tagValueResults)) {
-            JSONObject tagValueResultsObj = JSONObject.parseObject(tagValueResults);
-            JSONObject tagValueResultsData = tagValueResultsObj.getJSONObject("data");
-            Float sinterDayConfirmY = tagValueResultsData.getFloat(tags1[0]);
-            Float productPerHour = tagValueResultsData.getFloat(tags1[1]);
-            Float productRatio = tagValueResultsData.getFloat(tags1[2])/100;
-            ExcelWriterUtil.addCellData(resultList, 1, sinterDayConfirmYColIndex, sinterDayConfirmY);
-            ExcelWriterUtil.addCellData(resultList, 1, productPerHourAvgColIndex, productPerHour);
-            ExcelWriterUtil.addCellData(resultList, 1, productRatioColIndex, productRatio);
-        }
-
-        String[] tags2 = {"ST4_L1R_SIN_ProductPerHour_1d_avg"};
-        String productPerHourOfWorkTeamResults = getProductPerHourOfWorkTeam(startTime, endTime, tags2, version);
-        if (StringUtils.isNotBlank(productPerHourOfWorkTeamResults)) {
-            JSONObject productPerHourOfWorkTeamResultsObj = JSONObject.parseObject(productPerHourOfWorkTeamResults);
-            JSONObject productPerHourOfWorkTeamResultsData = productPerHourOfWorkTeamResultsObj.getJSONObject("data");
+            // yyyy/MM/dd HH:mm:ss
+            String startTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-01 00:00:00");
+            String endTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-dd 23:59:59");
+            Date endDate = DateUtil.strToDate(endTime, "yyyy-MM-dd HH:mm:ss");
+            Integer[] workTeams = {1, 2, 3, 4};
             for (Integer workTeam : workTeams) {
-                Float productPerHour = productPerHourOfWorkTeamResultsData.getFloat(workTeam.toString());
-                ExcelWriterUtil.addCellData(resultList, workTeam, productPerHourColIndex, productPerHour);
+                String productInfo = getProductInfo(endDate.getTime(), workTeam, version);
+                if (StringUtils.isNotBlank(productInfo)) {
+                    JSONObject productInfoObj = JSONObject.parseObject(productInfo);
+                    JSONObject productInfoData = productInfoObj.getJSONObject("data");
+                    Float planOutput = productInfoData.getFloat("PLAN_OUTPUT");
+                    Float actOutput = productInfoData.getFloat("ACT_OUTPUT");
+                    ExcelWriterUtil.addCellData(resultList, workTeam, actOutputColIndex, actOutput);
+                    ExcelWriterUtil.addCellData(resultList, workTeam, planOutputColIndex, planOutput);
+                }
             }
-        }
 
-        ExcelWriterUtil.setCellValue(sheet, resultList);
+            String[] tags1 = {"ST4_MESR_SIN_SinterDayConfirmY_1d_cur", "ST4_L1R_SIN_ProductPerHour_1d_avg", "ST4_L2R_SIN_ProductRatio_1d_cur"};
+            String tagValueResults = getTagValueAction(startTime, endTime, tags1, version);
+            if (StringUtils.isNotBlank(tagValueResults)) {
+                JSONObject tagValueResultsObj = JSONObject.parseObject(tagValueResults);
+                JSONObject tagValueResultsData = tagValueResultsObj.getJSONObject("data");
+                Float sinterDayConfirmY = tagValueResultsData.getFloat(tags1[0]);
+                Float productPerHour = tagValueResultsData.getFloat(tags1[1]);
+                Float productRatio = tagValueResultsData.getFloat(tags1[2])/100;
+                ExcelWriterUtil.addCellData(resultList, 1, sinterDayConfirmYColIndex, sinterDayConfirmY);
+                ExcelWriterUtil.addCellData(resultList, 1, productPerHourAvgColIndex, productPerHour);
+                ExcelWriterUtil.addCellData(resultList, 1, productRatioColIndex, productRatio);
+            }
+
+            String[] tags2 = {"ST4_L1R_SIN_ProductPerHour_1d_avg"};
+            String productPerHourOfWorkTeamResults = getProductPerHourOfWorkTeam(startTime, endTime, tags2, version);
+            if (StringUtils.isNotBlank(productPerHourOfWorkTeamResults)) {
+                JSONObject productPerHourOfWorkTeamResultsObj = JSONObject.parseObject(productPerHourOfWorkTeamResults);
+                JSONObject productPerHourOfWorkTeamResultsData = productPerHourOfWorkTeamResultsObj.getJSONObject("data");
+                for (Integer workTeam : workTeams) {
+                    Float productPerHour = productPerHourOfWorkTeamResultsData.getFloat(workTeam.toString());
+                    ExcelWriterUtil.addCellData(resultList, workTeam, productPerHourColIndex, productPerHour);
+                }
+            }
+
+            ExcelWriterUtil.setCellValue(sheet, resultList);
+        } catch (Exception e) {
+            log.error("处理 4烧结作业区每月生产情况-生产情况 出错", e);
+        }
     }
 
     private void handleYuanLiaoZhiBiao(Workbook workbook, String version) {
-        Sheet sheet = workbook.getSheet("_yuanliaozhibiao");
-        List<CellData> resultList = new ArrayList<>();
+        try {
+            Sheet sheet = workbook.getSheet("_yuanliaozhibiao");
+            List<CellData> resultList = new ArrayList<>();
 
-        String searchDateStr = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd 23:59:59");
-        Date endDate = DateUtil.strToDate(searchDateStr, "yyyy-MM-dd HH:mm:ss");
-        String MATERIAL_CLASS = "materialClass";
-        String MATERIAL_TYPE = "materialType";
+            String searchDateStr = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd 23:59:59");
+            Date endDate = DateUtil.strToDate(searchDateStr, "yyyy-MM-dd HH:mm:ss");
+            String MATERIAL_CLASS = "materialClass";
+            String MATERIAL_TYPE = "materialType";
 
-        writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "ore", version);
-        writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "flux", version);
-        writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "fuel", version);
-        writeMatConsume(sheet, resultList, MATERIAL_TYPE, endDate.getTime(), "limestone", version);
+            writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "ore", version);
+            writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "flux", version);
+            writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "fuel", version);
+            writeMatConsume(sheet, resultList, MATERIAL_TYPE, endDate.getTime(), "limestone", version);
 
-        ExcelWriterUtil.setCellValue(sheet, resultList);
+            ExcelWriterUtil.setCellValue(sheet, resultList);
+        } catch (Exception e) {
+            log.error("处理 4烧结作业区每月生产情况-原料指标完成情况 出错", e);
+        }
     }
 
     private void writeMatConsume(Sheet sheet, List<CellData> resultList, String category, Long timestamp, String code, String version) {

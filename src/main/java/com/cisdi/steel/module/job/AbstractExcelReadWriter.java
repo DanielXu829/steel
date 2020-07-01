@@ -144,6 +144,24 @@ public abstract class AbstractExcelReadWriter implements IExcelReadWriter {
     }
 
     /**
+     * 构建前天22点到昨天22点的查询策略
+     * @param excelDTO
+     * @return
+     */
+    protected final DateQuery getDateQueryAheadTwoHourBeforeOneDay(WriterExcelDTO excelDTO) {
+        DateQuery dateQuery = excelDTO.getDateQuery();
+        if (Objects.isNull(dateQuery)) {
+            // 默认取当前时间前一天
+            Date date = DateUtil.addDays(new Date(), -1);
+            dateQuery = new DateQuery(date);
+        } else {
+            // 默认取当前时间前一天
+            dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(dateQuery.getRecordDate(), -1));
+        }
+        return dateQuery;
+    }
+
+    /**
      * 处理 时间参数
      * 请检查参数后再执行
      *

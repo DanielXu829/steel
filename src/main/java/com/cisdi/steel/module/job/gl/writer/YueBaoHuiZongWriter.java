@@ -6,10 +6,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
-import com.cisdi.steel.dto.response.gl.MaterialExpendStcDTO;
+import com.cisdi.steel.dto.response.gl.*;
+import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
 import com.cisdi.steel.dto.response.gl.res.AnalysisValue;
-import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -158,6 +157,11 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             int fixLineCount = 0;
             List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
             sheet.getRow(itemRowNum).setZeroHeight(true);
+            String materialMapJsonData = httpUtil.get(getMaterialMapUrl(version));
+            MaterialMapDTO materialMapDTO = JSON.parseObject(materialMapJsonData, MaterialMapDTO.class);
+            Map<String, Material> stringMaterialMap = Optional.ofNullable(materialMapDTO).map(MaterialMapDTO::getData).orElse(new HashMap<>());
+            Map<String, String> brandCodeToDescrMap = stringMaterialMap.values().stream()
+                    .collect(Collectors.toMap(Material::getBrandcode, Material::getDescr));
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
@@ -173,7 +177,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 String pelletsResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "PELLETS"));
                 String lumporeResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "LUMPORE"));
                 String cokeResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "COKE"));
-                String pciResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "PCI"));
+                String pciResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "COAL"));
                 List<AnalysisValue> sinterValues = Optional.ofNullable(sinterResult)
                         .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
                         .map(AnalysisValueDTO::getData).orElse(null);
@@ -197,7 +201,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     put("PCM", pciValues);
                 }};
                 String [] itemsNoNeedToHandlePercent = {"S-5", "S5-10", "S25-40", "B2", "Drum", "SF"};
-                for (int itemIndex = 2; itemIndex < itemNameList.size(); itemIndex++) {
+                for (int itemIndex = 1; itemIndex < itemNameList.size(); itemIndex++) {
                     String itemName = itemNameList.get(itemIndex);
                     if (StringUtils.isBlank(itemName)) {
                         continue;
@@ -209,6 +213,13 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             continue;
                         }
                         String item = itemSplitArray[1];
+                        // 写入名称
+                        if ("name".equals(item)) {
+                            String brandcode = Optional.ofNullable(analysisValues.get(0))
+                                    .map(AnalysisValue::getAnalysis).map(Analysis::getBrandcode).orElse(null);
+                            ExcelWriterUtil.addCellData(cellDataList, row, itemIndex, brandCodeToDescrMap.get(brandcode));
+                            continue;
+                        }
                         BigDecimal sinterAverageValue = analysisValues.stream().map(AnalysisValue::getValues)
                                 .map(e -> e.get(item)).filter(e -> e != null)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
@@ -235,6 +246,9 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             int itemRowNum = 4;
             int fixLineCount = 0;
             List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
+            // 用tag-开头标识此为tag点
+            List<String> tagFormulaList = itemNameList.stream().filter(e -> e.startsWith("tag"))
+                    .map(e -> e.split("-")[1]).collect(Collectors.toList());
             sheet.getRow(itemRowNum).setZeroHeight(true);
             for (int i = 0, daySize = allDayBeginTimeInCurrentMonth.size(); i < daySize; i++) {
                 if (i > 0 && i % 10 == 0) {
@@ -242,6 +256,19 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 }
                 int row = itemRowNum + 1 + fixLineCount + i;
                 DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                Map<String, String> queryParam = eachDateQuery.getQueryParam();
+                TagQueryParam tagQueryParam =
+                        new TagQueryParam(eachDateQuery.getQueryStartTime(), eachDateQuery.getQueryEndTime(), tagFormulaList);
+                String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), JSON.toJSONString(tagQueryParam));
+                Map<String, Double> tagFormulaToValueMap = new HashMap<>();
+                if (StringUtils.isNotBlank(jsonData)) {
+                    TagValueMapDTO tagValueMapDTO = JSON.parseObject(jsonData, TagValueMapDTO.class);
+                    Optional.ofNullable(tagValueMapDTO).map(TagValueMapDTO::getData)
+                            .orElse(new HashMap<>()).forEach((key, value) -> {
+                                List<Double> valueList = new ArrayList(value.values());
+                                tagFormulaToValueMap.put(key, valueList.get(0));
+                            });
+                }
                 MaterialExpendStcDTO materialExpandStcDTO = getMaterialExpandStcDTO(version, eachDateQuery.getEndTime());
                 Map<String, List<MaterialExpend>> typeToMaterialExpendListMap =
                         Optional.ofNullable(materialExpandStcDTO).map(MaterialExpendStcDTO::getData).orElse(null);
@@ -257,7 +284,15 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     if (StringUtils.isBlank(itemName)) {
                         continue;
                     }
-                    BigDecimal dryWgt = matCodeToDryWgtMap.get(itemName);
+                    BigDecimal dryWgt = null;
+                    if (itemName.startsWith("tag")) {
+                        Double doubleValue = tagFormulaToValueMap.get(itemName.split("-")[1]);
+                        if (Objects.nonNull(doubleValue)) {
+                            dryWgt = BigDecimal.valueOf(doubleValue);
+                        }
+                    } else {
+                        dryWgt = matCodeToDryWgtMap.get(itemName);
+                    }
                     if (Objects.nonNull(dryWgt)) {
                         ExcelWriterUtil.addCellData(cellDataList, row, itemIndex, dryWgt);
                     }
@@ -408,7 +443,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             if (currentMonth < 31) {
                 sheet.getRow(40).setZeroHeight(true);
             }
-            ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 6, date);
+            ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 7, date);
             // 标记行
             int tagFormulaNum = 6;
             int itemRowNum = 7;
@@ -420,6 +455,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             Map<String, String> itemToTagFormulaMap = itemNameList.stream()
                     .collect(Collectors.toMap(key -> key,key -> tagFormulaList.get(itemNameList.indexOf(key)), (value1, value2) -> value1));
             List<CellData> cellDataList = new ArrayList<>();
+            String [] needToMultiply100Array = {"熟料率"};
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
                 Date day = allDayBeginTimeInCurrentMonth.get(i);
@@ -447,7 +483,15 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     }
                     List<Object> valueList = new ArrayList<>(timeValueJsonObject.values());
                     if (CollectionUtils.isNotEmpty(valueList)) {
-                        itemToValueMap.put(itemToTagFormulaEntry.getKey(), new Double(valueList.get(0).toString()));
+                        String itemName = itemToTagFormulaEntry.getKey();
+                        String valueString = valueList.get(0).toString();
+                        Double doubleValue = Double.valueOf(valueString);
+                        if (Arrays.asList(needToMultiply100Array).contains(itemName)) {
+                            BigDecimal bigDecimalValue = BigDecimal.valueOf(doubleValue).multiply(BigDecimal.valueOf(100));
+                            itemToValueMap.put(itemName, bigDecimalValue.doubleValue());
+                        } else {
+                            itemToValueMap.put(itemName, doubleValue);
+                        }
                     }
                 }
                 if (i > 0 && i % 10 == 0) {
