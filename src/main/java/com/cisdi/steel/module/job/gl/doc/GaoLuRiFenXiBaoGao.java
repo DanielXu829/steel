@@ -3,6 +3,7 @@ package com.cisdi.steel.module.job.gl.doc;
 import cn.afterturn.easypoi.word.WordExportUtil;
 import cn.afterturn.easypoi.word.entity.WordImageEntity;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.parser.Feature;
@@ -10,10 +11,10 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
+import com.cisdi.steel.dto.response.SuccessEntity;
+import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
-import com.cisdi.steel.dto.response.gl.res.PageData;
-import com.cisdi.steel.dto.response.gl.res.TagValue;
-import com.cisdi.steel.dto.response.gl.res.TapSgRow;
+import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.dto.response.sj.*;
 import com.cisdi.steel.module.job.AbstractExportWordJob;
 import com.cisdi.steel.module.job.a1.doc.ChartFactory;
@@ -28,7 +29,6 @@ import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.LanguageEnum;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
-import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.report.service.ReportIndexService;
 import lombok.extern.slf4j.Slf4j;
@@ -72,17 +72,6 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private String[] L1 = new String[]{
             "BF8_L2M_HMMassAct_1d_cur","BF8_L2M_Productivity_1d","BF8_L2M_BX_CokeRate_1d_cur","BF8_L2M_BX_CoalRate_1d_cur",
             "BF8_L2M_BX_FuelRate_1d_cur","BF8_L2C_BD_HotBlastTemp1_1d_avg"
-    };
-    private String[] L2 = new String[]{
-            "BF8_L2M_ANA_COKE_H2O_1d_avg",
-            "BF8_L2M_ANA_COKE_Vdaf_1d_avg","BF8_L2M_ANA_COKE_Ad_1d_avg","BF8_L2M_ANA_COKE_M40_1d_avg",
-            "BF8_L2M_ANA_COKE_M10_1d_avg","BF8_L2M_ANA_COKE_CSR_1d_avg","BF8_L2M_ANA_COKE_CRI_1d_avg",
-            "BF8_L2M_ANA_COAL_H2O_1d_avg","BF8_L2M_ANA_COAL_Vdaf_1d_avg","BF8_L2M_ANA_COAL_Fcad_1d_avg",
-            "BF8_L2M_ANA_SINTER_TFe_1d_avg","BF8_L2M_ANA_SINTER_FeO_1d_avg","BF8_L2M_ANA_SINTER_CaO_1d_avg",
-            "BF8_L2M_ANA_SINTER_SiO2_1d_avg","BF8_L2M_ANA_SINTER_MgO_1d_avg","BF8_L2M_ANA_SINTER_Al2O3_1d_avg",
-            "BF8_L2M_ANA_SINTER_TFe_B2_avg","BF8_L2M_ANA_PELLETS_TFe_1d_avg","BF8_L2M_ANA_PELLETS_CaO_1d_avg",
-            "BF8_L2M_ANA_PELLETS_SiO2_1d_avg","BF8_L2M_ANA_LUMPORE_TFe_1d_avg","BF8_L2M_ANA_LUMPORE_SiO2_1d_avg",
-            "BF8_L2M_ANA_LUMPORE_Al2O3_1d_avg"
     };
     private String[] L3 = new String[]{
             "BF8_L2C_BD_BH_1d_avg","BF8_L2C_BD_ColdBlastFlow_1d_avg",
@@ -246,10 +235,10 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private void mainDeal(String version) {
         // 处理当前时间
         result.put("current_date", DateUtils.format(DateUtil.addDays(new Date(), -1), DateUtil.yyyyMMddChineseFormat));
-        String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(ArrayUtils.addAll(L1, L2), L3), L4);
+        String[] allTagNames = ArrayUtils.addAll(ArrayUtils.addAll(L1, L3), L4);
         JSONObject data = getDataByTag(allTagNames, startTime, endTime, version);
         dealPart1(data, version);
-        dealPart(data, "partTwo", L2, df2);
+        dealPartTwo(version);
         handleCaoZuoCanShu(version);
         dealPart3(data);
         dealPart4(data);
@@ -262,6 +251,129 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             log.info("高炉日生产分析报告模板路径：" + templatePath);
             comm(templatePath);
         }
+    }
+
+    /**
+     * 查询BrandCode,可能有多个，最多三个
+     * @param version
+     * @param dateQuery
+     * @param type
+     * @return 包含BrandCode的JSONArray
+     */
+    private List<String> getBrandCodeData(String version, DateQuery dateQuery, String type) {
+        List<String> brandCodeData = new ArrayList<>();
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime", Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+        queryParam.put("endTime", Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+        queryParam.put("type", type);
+        String url = getUrl(version) + "/brandCodes/getBrandCodes";
+        String result = httpUtil.get(url, queryParam);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        if(null != jsonObject){
+            JSONArray data = jsonObject.getJSONArray("data");
+            if(null!= data){
+                for (Object o : data) {
+                    brandCodeData.add(String.valueOf(o));
+                }
+            }
+        }
+        return brandCodeData;
+    }
+
+    private String getAnalysisValuesByCodeUrl(String version, long time, String type, String brandCode) {
+        return String.format(getUrl(version) + "/analysisValue/clock/%s?type=%s&brandcode=%s", time, type, brandCode);
+    }
+
+    private String getAnalysisValuesByTypeUrl(String version) {
+        return getUrl(version) + "/analysisValues/rangeByType";
+    }
+
+    private String getAnalysisValuesByCodeUrl(String version) {
+        return getUrl(version) + "/analysisValues/rangeByCode";
+    }
+
+    private List<AnalysisValue> getAnalysisValuesByUrl(String url, DateQuery dateQuery, String name, String brandCode) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("from", Objects.requireNonNull(dateQuery.getQueryStartTime()).toString());
+        queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
+        //materialType
+        queryParam.put(name, brandCode);
+        String data = httpUtil.get(url, queryParam);
+        // 根据json映射对象DTO
+        AnalysisValueDTO analysisValueDTO = null;
+        if (StringUtils.isNotBlank(data)) {
+            analysisValueDTO = JSON.parseObject(data, AnalysisValueDTO.class);
+        }
+        if (Objects.isNull(analysisValueDTO)) {
+            return null;
+        }
+        return analysisValueDTO.getData();
+    }
+
+    private List<AnalysisValue> getAnalysisValuesByType(String version, DateQuery dateQuery, String name, String brandCode) {
+        return getAnalysisValuesByUrl(getAnalysisValuesByTypeUrl(version), dateQuery, name, brandCode);
+    }
+
+    private List<AnalysisValue> getAnalysisValuesByBrandCode(String version, DateQuery dateQuery, String name, String brandCode) {
+        return getAnalysisValuesByUrl(getAnalysisValuesByCodeUrl(version), dateQuery, name, brandCode);
+    }
+
+    private List<AnalysisValue> getAnalysisValuesByCode(String version, DateQuery dateQuery, String type, String brandCode) {
+        String url = getAnalysisValuesByCodeUrl(version, dateQuery.getQueryEndTime(), type, brandCode);
+        String data = httpUtil.get(url);
+        // 根据json映射对象DTO
+        AnalysisValueDTO analysisValueDTO = null;
+        if (StringUtils.isNotBlank(data)) {
+            analysisValueDTO = JSON.parseObject(data, AnalysisValueDTO.class);
+        }
+        if (Objects.isNull(analysisValueDTO)) {
+            return null;
+        }
+        return analysisValueDTO.getData();
+    }
+
+    private void handleAnalysisValues(List<AnalysisValue> analysisValues, String[] array, String prefix, List<String> list) {
+        if(Objects.isNull(analysisValues) || CollectionUtils.isEmpty(analysisValues)) {
+            return;
+        }
+        for (String item:array) {
+            BigDecimal averageValue = analysisValues.stream().map(AnalysisValue::getValues)
+                    .map(e -> e.get(item)).filter(e -> e != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(BigDecimal.valueOf(analysisValues.size()), 4, BigDecimal.ROUND_HALF_UP);
+            if(!list.contains(item) && Objects.nonNull(averageValue)) {
+                averageValue = averageValue.multiply(new BigDecimal(100));
+            }
+            result.put(prefix+"_"+item, df2.format(averageValue));
+        }
+    }
+
+    private void dealPartTwo(String version) {
+        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(new Date(), -1));
+        //焦炭
+        handleAnalysisValues(getAnalysisValuesByType(version, dateQuery, "materialType", "COKE"), new String[]{"H2O", "Ad", "Vdaf"}, "COKE", Arrays.asList());
+        handleAnalysisValues(getAnalysisValuesByCode(version, dateQuery, "LG", "KM-L_COKE"), new String[]{"M40", "M10", "CSR", "CRI"}, "COKE", Arrays.asList("M40", "M10", "CSR", "CRI"));
+        //煤粉
+        handleAnalysisValues(getAnalysisValuesByType(version, dateQuery, "materialType", "COAL"), new String[]{"H2O", "Vdaf", "Fcad"}, "COAL", Arrays.asList());
+        //烧结
+        List<AnalysisValue> sinterList = getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", "S4_SINTER");
+        if(Objects.isNull(sinterList) || CollectionUtils.isEmpty(sinterList)) {
+            sinterList = getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", "S1_SINTER");
+        }
+        handleAnalysisValues(sinterList, new String[]{"TFe", "FeO", "CaO", "SiO2", "MgO", "Al2O3", "B2"}, "SINTER", Arrays.asList("B2"));
+        //球团
+        handleAnalysisValues(getAnalysisValuesByType(version, dateQuery, "materialType", "PELLETS"), new String[]{"TFe", "CaO", "SiO2"}, "PELLETS", Arrays.asList());
+        //块矿
+        String brandCodeType = "LUMPORE";
+        String oreBlockType = "LC";
+        List<AnalysisValue> allAnalysisValues = new ArrayList<>();
+        List<String> list = getBrandCodeData(version, dateQuery, brandCodeType);
+        if(Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
+            for (String brandCode:list) {
+                allAnalysisValues.addAll(getAnalysisValuesByCode(version, dateQuery, oreBlockType, brandCode));
+            }
+        }
+        handleAnalysisValues(allAnalysisValues, new String[]{"TFe", "SiO2", "Al2O3"}, brandCodeType, Arrays.asList());
     }
 
     private TagValue getLatestMaxTag(String version, String[] tagNames, int days) {
@@ -298,7 +410,8 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                 Iterator<TagValue> iterator = list.iterator();
                 while (iterator.hasNext()) {
                     TagValue value = iterator.next();
-                    if(Objects.isNull(value.getVal())) {
+                    if(Objects.isNull(value.getVal()) || Objects.isNull(value.getClock()) || value.getClock().
+                            before(DateUtil.getDateBeginTime(date))) {
                         iterator.remove();
                     }
                 }
@@ -308,12 +421,12 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return list;
     }
 
-    private BigDecimal getMaxLuTiTemp(StringBuilder builder, String version, String[] tagNames, int days, String prefix, String suffix) {
+    private BigDecimal getMaxLuTiTemp(StringBuilder builder, String version, String[] tagNames, int days) {
         BigDecimal maxTemp = null;
         TagValue tagValue = getLatestMaxTag(version, tagNames, days);
         if (Objects.nonNull(tagValue)) {
             maxTemp = tagValue.getVal();
-            builder.append(tagValue.getName().replace(prefix, "").replace(suffix, ""));
+            builder.append(tagValue.getName());
         }
         return maxTemp;
     }
@@ -322,13 +435,11 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      * 炉体温度数据
      * @param version
      * @param tagNames
-     * @param prefix
-     * @param suffix
      * @return
      */
-    private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames, String prefix, String suffix) {
+    private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames) {
         StringBuilder builder = new StringBuilder();
-        BigDecimal maxTemp = getMaxLuTiTemp(builder, version, tagNames, -1, prefix, suffix);
+        BigDecimal maxTemp = getMaxLuTiTemp(builder, version, tagNames, 0);
         Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
         tempMap.put(builder.toString(), maxTemp);
         return tempMap;
@@ -337,27 +448,27 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     /**
      * 处理炉体温度数据
      * @param map
-     * @param suffix
+     * @param num
      */
-    private void dealLuTiWenDuData (Map<String, BigDecimal> map, BigDecimal yesterdayVal, int suffix,
-                                    String text1, String text2, String text3, String text4) {
-        result.put(text1+suffix, " ");
-        result.put(text2+suffix, " ");
-        result.put(text3+suffix, " ");
-        result.put(text4+suffix, " ");
+    private void dealLuTiWenDuData (Map<String, BigDecimal> map, BigDecimal yesterdayVal, int num,
+                                    String text1, String text2, String text3, String text4, String prefix, String stuffix) {
+        result.put(text1+ num, " ");
+        result.put(text2+ num, " ");
+        result.put(text3+ num, " ");
+        result.put(text4+ num, " ");
         for(Map.Entry<String, BigDecimal> entry : map.entrySet()){
             String mapKey = entry.getKey();
             BigDecimal mapValue = entry.getValue();
             if (StringUtils.isNotBlank(mapKey) && mapValue != null) {
-                result.put(text1+suffix, mapKey);
-                result.put(text2+suffix, df2.format(mapValue));
+                result.put(text1+ num, mapKey.replace(prefix, "").replace(stuffix, ""));
+                result.put(text2+ num, df2.format(mapValue));
                 if (yesterdayVal != null) {
                     if (yesterdayVal.compareTo(mapValue) > 0) {
-                        result.put(text4+suffix, df2.format(yesterdayVal.subtract(mapValue)));
-                        result.put(text3+suffix, "降低");
+                        result.put(text4+ num, df2.format(yesterdayVal.subtract(mapValue)));
+                        result.put(text3+ num, "降低");
                     } else {
-                        result.put(text4+suffix, df2.format(mapValue.subtract(yesterdayVal)));
-                        result.put(text3+suffix, "升高");
+                        result.put(text4+ num, df2.format(mapValue.subtract(yesterdayVal)));
+                        result.put(text3+ num, "升高");
                     }
                 }
             }
@@ -377,21 +488,21 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             String prefix = "BF8_L2C_BD_";
             String suffix = "_1d_max";
             //炉缸
-            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang, prefix, suffix);
-            BigDecimal luGangYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luGang, -2, prefix, suffix);
-            dealLuTiWenDuData(luGangMap, luGangYesterdayMax, 1, text1, text2, text3, text4);
+            Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang);
+            BigDecimal luGangYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luGangMap.keySet().toArray(new String[luGangMap.keySet().size()]), -1);
+            dealLuTiWenDuData(luGangMap, luGangYesterdayMax, 1, text1, text2, text3, text4, prefix, suffix);
             //炉腹
-            Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, luFu, prefix, suffix);
-            BigDecimal luFuYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luFu, -2, prefix, suffix);
-            dealLuTiWenDuData(luFuMap, luFuYesterdayMax, 2, text1, text2, text3, text4);
+            Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, luFu);
+            BigDecimal luFuYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luFuMap.keySet().toArray(new String[luFuMap.keySet().size()]), -1);
+            dealLuTiWenDuData(luFuMap, luFuYesterdayMax, 2, text1, text2, text3, text4, prefix, suffix);
             //炉腰 5
-            Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, luYao, prefix, suffix);
-            BigDecimal luYaoYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luYao, -2, prefix, suffix);
-            dealLuTiWenDuData(luYaoMap, luYaoYesterdayMax, 3, text1, text2, text3, text4);
+            Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, luYao);
+            BigDecimal luYaoYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luYaoMap.keySet().toArray(new String[luYaoMap.keySet().size()]), -1);
+            dealLuTiWenDuData(luYaoMap, luYaoYesterdayMax, 3, text1, text2, text3, text4, prefix, suffix);
             //炉身
-            Map<String, BigDecimal> lushenMap =  getLuTiWenDuData(version, luShen, prefix, suffix);
-            BigDecimal lushenYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luShen, -2, prefix, suffix);
-            dealLuTiWenDuData(lushenMap, lushenYesterdayMax, 4, text1, text2, text3, text4);
+            Map<String, BigDecimal> lushenMap =  getLuTiWenDuData(version, luShen);
+            BigDecimal lushenYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, lushenMap.keySet().toArray(new String[lushenMap.keySet().size()]), -1);
+            dealLuTiWenDuData(lushenMap, lushenYesterdayMax, 4, text1, text2, text3, text4, prefix, suffix);
 
             dealChart3(version);
             dealChart4(version);
@@ -443,11 +554,11 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      * @param tagNames
      * @return
      */
-    private Map<String, BigDecimal> getMaxTempMap(String version, String[] tagNames, String prefix, String stuffix) {
+    private Map<String, BigDecimal> getMaxTempMap(String version, String[] tagNames) {
         StringBuilder builder = new StringBuilder();
-        BigDecimal maxTemp = getMaxTemp(builder, -1, version, tagNames);
+        BigDecimal maxTemp = getMaxTemp(builder, 0, version, tagNames);
         Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
-        tempMap.put(builder.toString().replace(prefix,"").replace(stuffix,""), maxTemp);
+        tempMap.put(builder.toString(), maxTemp);
         return tempMap;
     }
 
@@ -472,19 +583,19 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                 result.put(text4 + (i + 1), " ");
             }
             //今日最高温度
-            Map<String, BigDecimal> todayACMap = getMaxTempMap(version, luGangA_C, prefix, stuffix);
+            Map<String, BigDecimal> todayACMap = getMaxTempMap(version, luGangA_C);
             //昨日最高温度
-            BigDecimal maxACTemp = getMaxTemp(new StringBuilder(), -2, version, luGangA_C);
-            dealLuTiWenDuData(todayACMap, maxACTemp, 1, text1, text2, text3, text4);
-            Map<String, BigDecimal> todayDFMap = getMaxTempMap(version, luGangD_F, prefix, stuffix);
-            BigDecimal maxDFTemp = getMaxTemp(new StringBuilder(), -2, version, luGangD_F);
-            dealLuTiWenDuData(todayDFMap, maxDFTemp, 2, text1, text2, text3, text4);
-            Map<String, BigDecimal> todayDIMap = getMaxTempMap(version, luGangG_I, prefix, stuffix);
-            BigDecimal maxGITemp = getMaxTemp(new StringBuilder(), -2, version, luGangG_I);
-            dealLuTiWenDuData(todayDIMap, maxGITemp, 3, text1, text2, text3, text4);
-            Map<String, BigDecimal> todayJMMap = getMaxTempMap(version, luGangJ_M, prefix, stuffix);
-            BigDecimal maxJMTemp = getMaxTemp(new StringBuilder(), -2, version, luGangJ_M);
-            dealLuTiWenDuData(todayJMMap, maxJMTemp, 4, text1, text2, text3, text4);
+            BigDecimal maxACTemp = getMaxTemp(new StringBuilder(), -1, version, todayACMap.keySet().toArray(new String[todayACMap.keySet().size()]));
+            dealLuTiWenDuData(todayACMap, maxACTemp, 1, text1, text2, text3, text4, prefix, stuffix);
+            Map<String, BigDecimal> todayDFMap = getMaxTempMap(version, luGangD_F);
+            BigDecimal maxDFTemp = getMaxTemp(new StringBuilder(), -1, version, todayDFMap.keySet().toArray(new String[todayDFMap.keySet().size()]));
+            dealLuTiWenDuData(todayDFMap, maxDFTemp, 2, text1, text2, text3, text4, prefix, stuffix);
+            Map<String, BigDecimal> todayGIMap = getMaxTempMap(version, luGangG_I);
+            BigDecimal maxGITemp = getMaxTemp(new StringBuilder(), -1, version, todayGIMap.keySet().toArray(new String[todayGIMap.keySet().size()]));
+            dealLuTiWenDuData(todayGIMap, maxGITemp, 3, text1, text2, text3, text4, prefix, stuffix);
+            Map<String, BigDecimal> todayJMMap = getMaxTempMap(version, luGangJ_M);
+            BigDecimal maxJMTemp = getMaxTemp(new StringBuilder(), -1, version, todayJMMap.keySet().toArray(new String[todayJMMap.keySet().size()]));
+            dealLuTiWenDuData(todayJMMap, maxJMTemp, 4, text1, text2, text3, text4, prefix, stuffix);
         } catch (Exception e) {
             log.error("处理铁口温度失败", e);
         }
@@ -647,7 +758,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                 for (int i = 0; i < tagNames.length; i++) {
                     Double doubleValue;
                     List<Double> valueObject = getValuesByTag(data, tagNames[i]);
-                    if (valueObject.size() > 0) {
+                    if (Objects.nonNull(valueObject) && valueObject.size() > 0) {
                         doubleValue = valueObject.get(valueObject.size() - 1);
                         if((prefix + (i + 1)).equals("partTwo17")) {
                             Double partTwo13 = Double.valueOf((String)result.get("partTwo13"));
@@ -675,7 +786,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         if (data != null && data.size() > 0) {
             Double doubleValue = 0d;
             List<Double> valueObject = getValuesByTag(data, tagName);
-            if (valueObject.size() > 0) {
+            if (Objects.nonNull(valueObject) && valueObject.size() > 0) {
                 doubleValue = valueObject.get(valueObject.size() - 1 - 1);
                 result = doubleValue == null ? "" : df.format(doubleValue);
             }
@@ -687,7 +798,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         if (data != null && data.size() > 0) {
             Double doubleValue;
             List<Double> valueObject = getValuesByTag(data, tagName);
-            if (valueObject.size() > 0) {
+            if (Objects.nonNull(valueObject) && valueObject.size() > 0) {
                 doubleValue = valueObject.get(valueObject.size() - 1);
                 result.put(addr, doubleValue == null ? 0d : df.format(doubleValue));
             }
@@ -695,51 +806,45 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     /**
-     * [S]达标率
+     * 获取精益信息
+     * @param version
+     * @return api数据
+     */
+    protected TapJyDTO getTapJyDTO(String version, DateQuery date, String dataType) {
+        TapJyDTO tapJyDTO = null;
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  String.valueOf(date.getStartTime().getTime()));
+        queryParam.put("endTime",  String.valueOf(date.getEndTime().getTime()));
+        queryParam.put("dataType",  dataType);
+        queryParam.put("workShift",  "day");
+
+        String tapJyDTOUrl = getUrl(version) + "/report/query/jygl";
+        String tapJyDTOStr = httpUtil.get(tapJyDTOUrl, queryParam);
+        if (StringUtils.isNotBlank(tapJyDTOStr)) {
+            SuccessEntity<TapJyDTO> successEntity = JSON.parseObject(tapJyDTOStr, new TypeReference<SuccessEntity<TapJyDTO>>() {});
+            if (Objects.isNull(successEntity) || Objects.isNull(successEntity.getData())) {
+                log.warn("根据时间[{}]获取的tapJyDTO数据为空", date.getStartTime());
+            } else {
+                tapJyDTO = successEntity.getData();
+            }
+        }
+        return tapJyDTO;
+    }
+
+    /**
+     * 达标率
      * @param version
      */
-    private void dealSQualifiedRate (String version) {
-        Map<String, String> queryParam = new HashMap<>();
-        DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(new Date());
-        queryParam.put("starttime", Objects.requireNonNull(dateQueryNoDelay.getQueryStartTime()).toString());
-        queryParam.put("endtime", Objects.requireNonNull(dateQueryNoDelay.getQueryEndTime()).toString());
-        // 2、获取数据并反序列化为java对象
-        String tapData = httpUtil.get(getTapsInRange(version), queryParam);
-        if (StringUtils.isBlank(tapData)) {
-            return;
-        }
-        com.cisdi.steel.dto.response.gl.res.PageData<TapSgRow> pageData = JSON.parseObject(tapData, new TypeReference<PageData<TapSgRow>>(){});
-        if (Objects.isNull(pageData)) {
-            return;
-        }
-        List<TapSgRow> tapSgRowData = pageData.getData();
-        if (CollectionUtils.isEmpty(tapSgRowData)) {
-            return;
-        }
-        tapSgRowData.sort(comparing(TapSgRow::getStartTime)); // 按时间先后进行排序
-        int dataSize = tapSgRowData.size();
-        if (dataSize == 0) {
-            return;
-        }
-        // S合格的数据
-        int count = 0;
-        int total = 0;
-        for (TapSgRow tapSgRow : tapSgRowData) {
-            Map<String, Double> hmAnalysis = tapSgRow.getHmAnalysis();
-            if (Objects.isNull(hmAnalysis) || hmAnalysis.size() == 0) {
-                continue;
+    private void dealQualifiedRate(String version, DateQuery dateQuery, String dataType) {
+        TapJyDTO tapJyDTO = getTapJyDTO(version, dateQuery, dataType);
+        if (Objects.nonNull(tapJyDTO)) {
+            int fz = tapJyDTO.getFz();
+            int fm = tapJyDTO.getFm();
+            if (Objects.nonNull(fm) && Objects.nonNull(fz) && fm != 0) {
+                result.put("QualifiedRate_" + dataType, df2.format(((float)fz/fm)*100));
             }
-            total++;
-            Double value = hmAnalysis.get("S");
-            if (value != null && value * 100 <= 0.03) {
-                count++;
-            }
-        }
-        //[S]达标率
-        if (total > 0) {
-            result.put("sQualifiedRate", df2.format((count/total)*100));
         } else {
-            result.put("sQualifiedRate", " ");
+            result.put("QualifiedRate_" + dataType, " ");
         }
     }
 
@@ -749,15 +854,11 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             //一级品率
             Date date = DateUtil.addDays(new Date(), -1);
             DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
-            BigDecimal firstGradeRateInRange = glDataUtil.getFirstGradeRateInRange("8.0", dateQueryNoDelay);
-            if (firstGradeRateInRange != null) {
-                result.put("firstGradeRate", df2.format(firstGradeRateInRange));
-            } else {
-                result.put("firstGradeRate", " ");
+            //合格率
+            String[] arr = new String[]{"lw", "lz", "ts", "gl"};
+            for (String dataType:arr) {
+                dealQualifiedRate(version, dateQueryNoDelay, dataType);
             }
-            //[S]达标率
-            result.put("sQualifiedRate", " ");
-            dealSQualifiedRate(version);
             dealChart1(data);
             dealChart2(data);
 
@@ -830,12 +931,14 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private double dealOffset(Double min, Double max, String tagName, JSONObject data) {
         double result = 0d;
         List<Double> tagObject = getValuesByTag(data, tagName);
-        Double actual = tagObject.get(tagObject.size() - 1);
-        if (actual != null) {
-            if (actual > max) {
-                result = actual - max;
-            } else if (actual < min) {
-                result = actual - min;
+        if(Objects.nonNull(tagObject) && tagObject.size() > 0) {
+            Double actual = tagObject.get(tagObject.size() - 1);
+            if (actual != null) {
+                if (actual > max) {
+                    result = actual - max;
+                } else if (actual < min) {
+                    result = actual - min;
+                }
             }
         }
         return result;
@@ -844,11 +947,13 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private double dealIncreaseYesterday (JSONObject data, String tagName) {
         double result = 0d;
         List<Double> tagObject = getValuesByTag(data, tagName);
-        Double yesterday = tagObject.get(tagObject.size() - 1);
-        Double twoDaysAgo = tagObject.get(tagObject.size() - 2);
-        if (yesterday != null) {
-            if (twoDaysAgo != null) {
-                result = yesterday - twoDaysAgo;
+        if(Objects.nonNull(tagObject) && tagObject.size() > 0) {
+            Double yesterday = tagObject.get(tagObject.size() - 1);
+            Double twoDaysAgo = tagObject.get(tagObject.size() - 2);
+            if (yesterday != null) {
+                if (twoDaysAgo != null) {
+                    result = yesterday - twoDaysAgo;
+                }
             }
         }
         return result;
@@ -859,10 +964,12 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         Double total = 0d;
         Double count = 0d;
         List<Double> tagObject = getValuesByTag(data, tagName);
-        for (Double item : tagObject) {
-            if (item != null) {
-                total += item;
-                count++;
+        if(Objects.nonNull(tagObject) && tagObject.size() > 0) {
+            for (Double item : tagObject) {
+                if (item != null) {
+                    total += item;
+                    count++;
+                }
             }
         }
         if (isAvg && count > 0d) {
@@ -1060,7 +1167,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         List<Double> value = new ArrayList<>();
         for (int i = 29; i > -1; i--) {
             //炉缸
-            BigDecimal big = getMaxLuTiTemp(new StringBuilder(), version, array, -1 - i, prefix, suffix);
+            BigDecimal big = getMaxLuTiTemp(new StringBuilder(), version, array, -1 - i);
             Double val = 0d;;
             if (null != big) {
                 val = big.doubleValue();
@@ -1129,6 +1236,9 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private List<Double> getValuesByTag (JSONObject data, String tagName) {
+        if(Objects.isNull(data)) {
+            return new ArrayList<Double>();
+        }
         JSONObject tagObject = data.getJSONObject(tagName);
         List<Double> vals = new ArrayList<>();
         Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
@@ -1169,7 +1279,9 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             String jsonString = JSONObject.toJSONString(query, serializeConfig);
             String results = httpUtil.postJsonParams(getUrl(version) + apiPath, jsonString);
             JSONObject jsonObject = JSONObject.parseObject(results, Feature.OrderedField);
-            object = jsonObject.getJSONObject("data");
+            if(Objects.nonNull(jsonObject)) {
+                object = jsonObject.getJSONObject("data");
+            }
         } catch (Exception e) {
             log.error("高炉日生产分析报告获取数据失败", e);
         }

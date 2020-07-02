@@ -157,11 +157,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             int fixLineCount = 0;
             List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
             sheet.getRow(itemRowNum).setZeroHeight(true);
-            String materialMapJsonData = httpUtil.get(getMaterialMapUrl(version));
-            MaterialMapDTO materialMapDTO = JSON.parseObject(materialMapJsonData, MaterialMapDTO.class);
-            Map<String, Material> stringMaterialMap = Optional.ofNullable(materialMapDTO).map(MaterialMapDTO::getData).orElse(new HashMap<>());
-            Map<String, String> brandCodeToDescrMap = stringMaterialMap.values().stream()
-                    .collect(Collectors.toMap(Material::getBrandcode, Material::getDescr));
+            Map<String, String> brandCodeToDescrMap = getBrandCodeToDescrMap(version);
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
