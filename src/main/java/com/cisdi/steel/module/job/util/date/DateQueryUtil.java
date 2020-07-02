@@ -48,6 +48,25 @@ public class DateQueryUtil {
     }
 
     /**
+     * 构建每12小时时间段
+     *  夜班：晚上10点-早上10点
+     *  白班：早上10点-晚上10点
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay12HourAheadTwoHour(Date date) {
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Date nightWorkBeginTime = DateUtil.addHours(dateBeginTime, -2);
+        Date nightWorkEndTime = DateUtil.addHours(dateBeginTime, 10);
+        Date dayWorkEndTime = DateUtil.addHours(nightWorkEndTime, 12);
+        queryList.add(new DateQuery(nightWorkBeginTime, nightWorkEndTime, dateBeginTime));
+        queryList.add(new DateQuery(nightWorkEndTime, dayWorkEndTime, nightWorkEndTime));
+
+        return queryList;
+    }
+
+    /**
      * 构建一个当天的开始时间（23:05:00）---结束时间（23:05:00）
      * 如 时间：2019-12-16 10:00:00
      * recordDate=2019-12-16 10:00:00, startTime=2019-12-15 23:05:00, endTime=2019-12-16 23:05:00

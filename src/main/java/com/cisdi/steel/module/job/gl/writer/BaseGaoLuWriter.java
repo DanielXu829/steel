@@ -522,6 +522,20 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     }
 
     /**
+     * 获取无聊brandCode和描述map
+     * @param version
+     * @return
+     */
+    protected Map<String, String> getBrandCodeToDescrMap(String version) {
+        String materialMapJsonData = httpUtil.get(getMaterialMapUrl(version));
+        MaterialMapDTO materialMapDTO = JSON.parseObject(materialMapJsonData, MaterialMapDTO.class);
+        Map<String, Material> stringMaterialMap = Optional.ofNullable(materialMapDTO).map(MaterialMapDTO::getData).orElse(new HashMap<>());
+        Map<String, String> brandCodeToDescrMap = stringMaterialMap.values().stream()
+                .collect(Collectors.toMap(Material::getBrandcode, Material::getDescr));
+        return brandCodeToDescrMap;
+    }
+
+    /**
      * 获取charge/rawdata的url
      * @param version
      * @return url
