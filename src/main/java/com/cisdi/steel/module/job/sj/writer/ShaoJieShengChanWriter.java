@@ -8,11 +8,11 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.dto.response.sj.AnaValueDTO;
 import com.cisdi.steel.dto.response.SuccessEntity;
-import com.cisdi.steel.dto.response.sj.res.ProdStopRecordInfo;
+import com.cisdi.steel.dto.response.sj.AnaValueDTO;
 import com.cisdi.steel.dto.response.sj.res.AnalysisValue;
 import com.cisdi.steel.dto.response.sj.res.ProdStopRecord;
+import com.cisdi.steel.dto.response.sj.res.ProdStopRecordInfo;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -88,6 +88,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
 
                 // 获取两班倒查询策略
                 List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourEach(dateRun);
+                handleCumulativeOperationRate(workbook, dateQueries, version);
                 for (int k = 0; k < dateQueries.size(); k++) {
                     DateQuery dateQuery = dateQueries.get(k);
                     if (dateQuery.getRecordDate().before(new Date())) {
@@ -486,6 +487,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
+
     /**
      * 调用api获取停机记录
      * @param dateQuery
@@ -547,6 +549,50 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return httpProperties.getSJUrlVersion(version) + "/tagValues/tagNames";
     }
 
+    private void handleCumulativeOperationRate(Workbook workbook, List<DateQuery> dateQueries, String version) {
+        try {
+            List<Double> valueList = new ArrayList<>();
+            for (DateQuery dateQuery : dateQueries) {
+                JSONObject queryJsonObject = new JSONObject();
+                String endDateStr = DateUtil.getFormatDateTime(dateQuery.getEndTime(), DateUtil.fullFormat);
+                Date startDate = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(dateQuery.getRecordDate(), 0).get(0);
+                String startDateStr = DateUtil.getFormatDateTime(startDate, DateUtil.fullFormat);
+                queryJsonObject.put("start", startDateStr);
+                queryJsonObject.put("end", endDateStr);
+                queryJsonObject.put("method", "avg");
+                String [] tagArr = {"ST4_L2R_SIN_ProductRatio_1d_cur"};
+                queryJsonObject.put("tagNames", tagArr);
+                String data = httpUtil.postJsonParams(getTagValueActionsUrl(version), queryJsonObject.toJSONString());
+                JSONObject jsonObject = JSONObject.parseObject(data);
+                Double doubleValue = Optional.ofNullable(jsonObject).map(e -> e.getJSONObject("data"))
+                        .map(e -> e.getJSONObject("ST4_L2R_SIN_ProductRatio_1d_cur"))
+                        .map(e -> e.getDouble("AVG")).orElse(null);
+                valueList.add(doubleValue);
+            }
+
+            Sheet sheet = workbook.getSheetAt(0);
+            Cell cellByValue1 = PoiCustomUtil.getCellByValue(sheet, "{累计作业率1}");
+            Cell cellByValue2 = PoiCustomUtil.getCellByValue(sheet, "{累计作业率2}");
+            if (Objects.isNull(cellByValue1) || Objects.isNull(cellByValue2)) {
+                return;
+            }
+            Date itemTime = DateUtil.addHours(DateUtil.getDateBeginTime(dateRun), 20);
+            List<CellData> cellDataList = new ArrayList<>();
+            if (dateRun.getTime() < itemTime.getTime()) {
+                ExcelWriterUtil.addCellData(cellDataList, cellByValue1.getRowIndex(), cellByValue1.getColumnIndex(), valueList.get(0));
+            } else {
+                ExcelWriterUtil.addCellData(cellDataList, cellByValue1.getRowIndex(), cellByValue1.getColumnIndex(), valueList.get(1));
+                ExcelWriterUtil.addCellData(cellDataList, cellByValue2.getRowIndex(), cellByValue2.getColumnIndex(), valueList.get(1));
+            }
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理累计作业率出错", e);
+        }
+    }
+
+    private String getTagValueActionsUrl(String version) {
+        return httpProperties.getSJUrlVersion(version) + "/tagValueActions";
+    }
     /**
      * 原料性能API
      * @param version
