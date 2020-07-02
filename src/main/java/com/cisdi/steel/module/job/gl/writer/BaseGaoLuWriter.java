@@ -615,6 +615,14 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return httpProperties.getGlUrlVersion(version) + "/brandCodes/getBrandCodes";
     }
 
+    protected String getBrandCodeData(String version, String startTime, String endTime, String type) {
+        Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("startTime", startTime);
+        queryMap.put("endTime", endTime);
+        queryMap.put("type", type);
+        return httpUtil.get(getBrandCodes(version), queryMap);
+    }
+
     /**
      * 通过tag点拿数据的API，根据sequence和version返回不同工序的api地址
      * @param version
@@ -646,6 +654,14 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      */
     protected String getAnalysisValuesUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByCode";
+    }
+
+    protected String getAnalysisValuesByBrandCode(String version, String from, String to, String brandCode) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("from", from);
+        queryParam.put("to", to);
+        queryParam.put("brandCode", brandCode);
+        return httpUtil.get(getAnalysisValuesUrl(version), queryParam);
     }
 
     protected String getMaterialMapUrl(String version) {

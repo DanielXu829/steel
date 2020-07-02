@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.gl.writer;
 
 import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
@@ -166,36 +167,26 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
                 String from = Objects.requireNonNull(eachDateQuery.getStartTime().getTime()).toString();
                 String to = Objects.requireNonNull(eachDateQuery.getEndTime().getTime()).toString();
-                queryParamSINTER.put("from", from);
-                queryParamSINTER.put("to", to);
-                queryParamSINTER.put("brandCode", "S4_SINTER");
-                String sinterResult = httpUtil.get(url, queryParamSINTER);
-                String pelletsResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "PELLETS"));
-                String lumporeResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "LUMPORE"));
-                String cokeResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "COKE"));
-                String pciResult = httpUtil.get(getRangeByTypeUrl(version, from, to, "COAL"));
-                List<AnalysisValue> sinterValues = Optional.ofNullable(sinterResult)
-                        .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
-                        .map(AnalysisValueDTO::getData).orElse(null);
-                List<AnalysisValue> pelletsValues = Optional.ofNullable(pelletsResult)
-                        .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
-                        .map(AnalysisValueDTO::getData).orElse(null);
-                List<AnalysisValue> lumporeValues = Optional.ofNullable(lumporeResult)
-                        .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
-                        .map(AnalysisValueDTO::getData).orElse(null);
-                List<AnalysisValue> cokeValues = Optional.ofNullable(cokeResult)
-                        .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
-                        .map(AnalysisValueDTO::getData).orElse(null);
-                List<AnalysisValue> pciValues = Optional.ofNullable(pciResult)
-                        .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
-                        .map(AnalysisValueDTO::getData).orElse(null);
-                Map<String, List<AnalysisValue>> itemPrefixToValues = new HashMap<String, List<AnalysisValue>>() {{
-                    put("SJK", sinterValues);
-                    put("QT", pelletsValues);
-                    put("KK", lumporeValues);
-                    put("JT", cokeValues);
-                    put("PCM", pciValues);
-                }};
+                String sinterResult = getAnalysisValuesByBrandCode(version, from, to, "S4_SINTER");
+                Map<String, List<AnalysisValue>> itemPrefixToValues = new HashMap<>();
+                List<String> typeList = Arrays.asList("S4_SINTER", "PELLETS", "LUMPORE", "COKE", "COAL");
+                List<String> prefixList = Arrays.asList("SJK", "QT", "KK", "JT", "PCM");
+                Map<String, String> typeToPrefixMap = typeList.stream()
+                        .collect(Collectors.toMap(key -> key, key -> prefixList.get(typeList.indexOf(key))));
+                typeToPrefixMap.forEach((type, prefix) -> {
+                    String result;
+                    if ("S4_SINTER".equals(type)) {
+                        result = getAnalysisValuesByBrandCode(version, from, to, type);
+                    } else {
+                        String brandCode = getBrandCodeByType(version, from, to, type);
+                        result = getAnalysisValuesByBrandCode(version, from, to, brandCode);
+                    }
+                    List<AnalysisValue> analysisValueList = Optional.ofNullable(result)
+                            .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
+                            .map(AnalysisValueDTO::getData).orElse(null);
+                    itemPrefixToValues.put(prefix, analysisValueList);
+                });
+
                 String [] itemsNoNeedToHandlePercent = {"S-5", "S5-10", "S25-40", "B2", "Drum", "SF"};
                 for (int itemIndex = 1; itemIndex < itemNameList.size(); itemIndex++) {
                     String itemName = itemNameList.get(itemIndex);
@@ -232,6 +223,26 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
         } catch (Exception e) {
             log.error("处理 原燃料质量 出错", e);
         }
+    }
+
+    // 获取brandCode
+    private String getBrandCodeByType(String version, String startTime, String endTime, String type) {
+        String pelletsBrandCodeJsonString = getBrandCodeData(version, startTime, endTime, "PELLETS");
+        if (StringUtils.isBlank(pelletsBrandCodeJsonString)) {
+            return null;
+        }
+        JSONArray dataArray = Optional.ofNullable(JSONObject.parseObject(pelletsBrandCodeJsonString))
+                .map(e -> e.getJSONArray("data")).orElse(null);
+        if (CollectionUtils.isEmpty(dataArray)) {
+            return null;
+        }
+
+        return String.valueOf(dataArray.get(0));
+    }
+
+    //
+    private void getAnalysisValueList() {
+
     }
 
     //原燃料消耗
