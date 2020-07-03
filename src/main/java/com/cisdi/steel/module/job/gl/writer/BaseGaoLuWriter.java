@@ -656,12 +656,17 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByCode";
     }
 
-    protected String getAnalysisValuesByBrandCode(String version, String from, String to, String brandCode) {
+    protected List<AnalysisValue> getAnalysisValuesByBrandCode(String version, String from, String to, String brandCode) {
         Map<String, String> queryParam = new HashMap();
         queryParam.put("from", from);
         queryParam.put("to", to);
         queryParam.put("brandCode", brandCode);
-        return httpUtil.get(getAnalysisValuesUrl(version), queryParam);
+        String result = httpUtil.get(getAnalysisValuesUrl(version), queryParam);
+        List<AnalysisValue> analysisValueList = Optional.ofNullable(result)
+                .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
+                .map(AnalysisValueDTO::getData).orElse(null);
+
+        return analysisValueList;
     }
 
     protected String getMaterialMapUrl(String version) {

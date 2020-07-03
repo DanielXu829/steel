@@ -581,7 +581,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             if (dateRun.getTime() < itemTime.getTime()) {
                 ExcelWriterUtil.addCellData(cellDataList, cellByValue1.getRowIndex(), cellByValue1.getColumnIndex(), valueList.get(0));
             } else {
-                ExcelWriterUtil.addCellData(cellDataList, cellByValue1.getRowIndex(), cellByValue1.getColumnIndex(), valueList.get(1));
+                ExcelWriterUtil.addCellData(cellDataList, cellByValue1.getRowIndex(), cellByValue1.getColumnIndex(), valueList.get(0));
                 ExcelWriterUtil.addCellData(cellDataList, cellByValue2.getRowIndex(), cellByValue2.getColumnIndex(), valueList.get(1));
             }
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
