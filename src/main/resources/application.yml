@@ -68,6 +68,7 @@ http:
   url:
 #   urlApiGLOne: http://10.64.11.202:9001
     urlApiGLTwo: http://10.11.11.4:9001
+    urlApiGLThree: http://10.11.11.3:9001
     #urlApiGLTwo: http://localhost:9904
     #urlApiGLTwo: http://10.64.11.203:9001
     #urlApiGLTwo: http://172.20.10.7:9904
