@@ -167,28 +167,30 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
                 String from = Objects.requireNonNull(eachDateQuery.getStartTime().getTime()).toString();
                 String to = Objects.requireNonNull(eachDateQuery.getEndTime().getTime()).toString();
-                String sinterResult = getAnalysisValuesByBrandCode(version, from, to, "S4_SINTER");
                 Map<String, List<AnalysisValue>> itemPrefixToValues = new HashMap<>();
-                List<String> typeList = Arrays.asList("S4_SINTER", "PELLETS", "LUMPORE", "COKE", "COAL");
+                List<String> typeList = Arrays.asList("S4_SINTER", "PELLETS", "LUMPORE", "COKE", "FBFM-A_COAL");
                 List<String> prefixList = Arrays.asList("SJK", "QT", "KK", "JT", "PCM");
                 Map<String, String> typeToPrefixMap = typeList.stream()
                         .collect(Collectors.toMap(key -> key, key -> prefixList.get(typeList.indexOf(key))));
                 typeToPrefixMap.forEach((type, prefix) -> {
-                    String result;
-                    if ("S4_SINTER".equals(type)) {
-                        result = getAnalysisValuesByBrandCode(version, from, to, type);
+                    List<AnalysisValue> analysisValueList = new ArrayList<>();
+                    if ("S4_SINTER".equals(type) || "FBFM-A_COAL".equals(type)) {
+                        analysisValueList = getAnalysisValuesByBrandCode(version, from, to, type);
                     } else {
-                        String brandCode = getBrandCodeByType(version, from, to, type);
-                        result = getAnalysisValuesByBrandCode(version, from, to, brandCode);
+                        List<String> brandCodeListByType = getBrandCodeListByType(version, from, to, type);
+                        // 如果通过brandCode查出来无数据，则用下一个brandCode,直到有数据。
+                        for (String brandCode : brandCodeListByType) {
+                            analysisValueList = getAnalysisValuesByBrandCode(version, from, to, brandCode);
+                            if (CollectionUtils.isNotEmpty(analysisValueList)) {
+                                break;
+                            }
+                        }
                     }
-                    List<AnalysisValue> analysisValueList = Optional.ofNullable(result)
-                            .map(e -> JSON.parseObject(e, AnalysisValueDTO.class))
-                            .map(AnalysisValueDTO::getData).orElse(null);
                     itemPrefixToValues.put(prefix, analysisValueList);
                 });
 
                 String [] itemsNoNeedToHandlePercent = {"S-5", "S5-10", "S25-40", "B2", "Drum", "SF"};
-                for (int itemIndex = 1; itemIndex < itemNameList.size(); itemIndex++) {
+                for (int itemIndex = 1, size = itemNameList.size(); itemIndex < size; itemIndex++) {
                     String itemName = itemNameList.get(itemIndex);
                     if (StringUtils.isBlank(itemName)) {
                         continue;
@@ -226,8 +228,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
     }
 
     // 获取brandCode
-    private String getBrandCodeByType(String version, String startTime, String endTime, String type) {
-        String pelletsBrandCodeJsonString = getBrandCodeData(version, startTime, endTime, "PELLETS");
+    private List<String> getBrandCodeListByType(String version, String startTime, String endTime, String type) {
+        String pelletsBrandCodeJsonString = getBrandCodeData(version, startTime, endTime, type);
         if (StringUtils.isBlank(pelletsBrandCodeJsonString)) {
             return null;
         }
@@ -237,7 +239,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             return null;
         }
 
-        return String.valueOf(dataArray.get(0));
+        return JSONObject.parseArray(dataArray.toJSONString(), String.class);
     }
 
     //
@@ -356,6 +358,28 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 Date liaoXianQueryTime = DateUtil.addDays(day, 1);
                 TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(liaoXianQueryTime, version, liaoXianTagNames);
 
+                // 获取平均矿批、平均焦批、变料次数
+                Map<String, String> nameTotagFormulaMaps = new HashMap<>();
+                nameTotagFormulaMaps.put("平均矿批", "BF8_L2M_BX_OreConsume_1d_cur");
+                nameTotagFormulaMaps.put("平均焦批", "BF8_L2M_BX_CokeConsume_1d_cur");
+                nameTotagFormulaMaps.put("总批数", "BF8_L2M_BX_ChargeCount_1d_cur");
+                nameTotagFormulaMaps.put("变料次数", "BF8_L2C_SH_CurrentMatrixNumber_evt");
+                TagQueryParam tagQueryParam =
+                        new TagQueryParam(eachDateQuery.getQueryStartTime(), eachDateQuery.getQueryEndTime(),
+                                Lists.newArrayList(nameTotagFormulaMaps.values()));
+                String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), JSON.toJSONString(tagQueryParam));
+                Map<String, Double> tagFormulaToValueMap = new HashMap<>();
+                if (StringUtils.isNotBlank(jsonData)) {
+                    TagValueMapDTO tagValueMapDTO = JSON.parseObject(jsonData, TagValueMapDTO.class);
+                    Optional.ofNullable(tagValueMapDTO).map(TagValueMapDTO::getData)
+                            .orElse(new HashMap<>()).forEach((key, value) -> {
+                        List<Double> valueList = new ArrayList(value.values());
+                        if (nameTotagFormulaMaps.get("变料次数").equals(key)) {
+                            tagFormulaToValueMap.put(key, Double.valueOf(valueList.size()));
+                        }
+                        tagFormulaToValueMap.put(key, valueList.get(0));
+                    });
+                }
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
                 }
@@ -368,6 +392,25 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     if (StringUtils.isNotBlank(itemName)) {
                         ExcelWriterUtil.addCellData(cellDataList, row, col, defaultCellValue);
                         switch (itemName) {
+                            case "平均矿批":
+                            case "平均焦批": {
+                                Double batchNumber = tagFormulaToValueMap.get(nameTotagFormulaMaps.get("总批数"));
+                                Double value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
+                                if (Objects.isNull(batchNumber)) {
+                                    break;
+                                }
+                                if (Objects.nonNull(value)) {
+                                    BigDecimal bigDecimalValue = BigDecimal.valueOf(value)
+                                            .divide(BigDecimal.valueOf(batchNumber), 2, BigDecimal.ROUND_HALF_UP);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, bigDecimalValue);
+                                }
+                                break;
+                            }
+                            case "变料次数": {
+                                Double value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, value);
+                                break;
+                            }
                             case "料线-烧结矿":
                             case "料线-焦炭":
                             case "料线-小烧":
@@ -443,6 +486,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             int fixLineCount = 0;
             Sheet sheet = workbook.getSheet("技术经济指标及操作参数");
             Date date = allDayBeginTimeInCurrentMonth.get(0);
+            ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 2, date);
+            ExcelWriterUtil.replaceCurrentMonthInTitleWithSpace(sheet, 1, 0, allDayBeginTimeInCurrentMonth.get(0));
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             int currentMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -450,7 +495,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             if (currentMonth < 31) {
                 sheet.getRow(40).setZeroHeight(true);
             }
-            ExcelWriterUtil.replaceDaysOfMonthInTitle(sheet, 0, 7, date);
+
             // 标记行
             int tagFormulaNum = 6;
             int itemRowNum = 7;
@@ -514,7 +559,6 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     }
                 }
             }
-            ExcelWriterUtil.replaceCurrentMonthInTitleWithSpace(sheet, 1, 0, allDayBeginTimeInCurrentMonth.get(0));
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (NumberFormatException e) {
             log.error("处理 技术经济指标及操作参数 出错", e);
