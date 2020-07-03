@@ -535,6 +535,40 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return brandCodeToDescrMap;
     }
 
+    //获取Commit url
+    protected String getCommitInfoUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/comment/info";
+    }
+
+    /**
+     *获取commit info中的remark
+     * @param version
+     * @param date
+     * @param shift
+     * @param id
+     * @return
+     */
+    protected String getCommitInfo(String version, long date, int shift, int id) {
+        String commit = "";
+        String url = getCommitInfoUrl(version);
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("date", Objects.requireNonNull(date).toString());
+        queryParam.put("model", "SHIFT_LOG");
+        queryParam.put("shift", String.valueOf(shift));
+        queryParam.put("id", String.valueOf(id));
+        String result = httpUtil.get(url, queryParam);
+        if(StringUtils.isNotBlank(result)) {
+            CommentDataDTO commentDataDTO = JSON.parseObject(result, CommentDataDTO.class);
+            if(Objects.nonNull(commentDataDTO)) {
+                CommentData data = commentDataDTO.getData();
+                if(Objects.nonNull(data)) {
+                    commit = data.getRemark();
+                }
+            }
+        }
+        return commit;
+    }
+
     /**
      * 获取charge/rawdata的url
      * @param version
@@ -606,6 +640,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     protected String getLatestTagValueUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValue/latest";
     }
+
     /**
      * 获取高炉的种类Url
      * @param version
@@ -642,9 +677,30 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return url;
     }
 
-    protected String getRangeByTypeUrl (String version, String from, String to, String type) {
-        String url = String.format(httpProperties.getGlUrlVersion(version) + "/analysisValues/rangeByType?from=%s&to=%s&materialType=%s", from, to, type);
-        return url;
+    /**
+     * 查询BrandCode,可能有多个，最多三个
+     * @param version
+     * @param type
+     * @return 包含BrandCode的JSONArray
+     */
+    protected List<String> getBrandCodeData(String version, DateQuery dateQuery, String type) {
+        List<String> brandCodeData = new ArrayList<>();
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime", Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+        queryParam.put("endTime", Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+        queryParam.put("type", type);
+        String url = getBrandCodes(version);
+        String result = httpUtil.get(url, queryParam);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        if(null != jsonObject){
+            JSONArray data = jsonObject.getJSONArray("data");
+            if(null!= data){
+                for (Object o : data) {
+                    brandCodeData.add(String.valueOf(o));
+                }
+            }
+        }
+        return brandCodeData;
     }
 
     /**

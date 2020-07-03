@@ -127,23 +127,24 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             log.error("处理休风统计出错", e);
         }
     }
-    //大计事
+
+    //大记事
     private void handleDaJiShi(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
         try {
             List<CellData> resultList = new ArrayList<>();
-            Sheet sheet = workbook.getSheet("大计事");
+            Sheet sheet = workbook.getSheet("大记事");
 
-            int beginRow = 6;
+            int beginRow = 2;
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
-                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                DateQuery eachDateQuery = DateQueryUtil.buildTodayNoDelay(allDayBeginTimeInCurrentMonth.get(i));
                 for (int j = 1; j < 3; j++) {
-
-                    //ExcelWriterUtil.addCellData(cellDataList, row, j, val);
+                    String remark = getCommitInfo(version, eachDateQuery.getQueryEndTime(), j, 2);
+                    ExcelWriterUtil.addCellData(resultList, beginRow+i, (j-1)*8+1, remark);
                 }
             }
             ExcelWriterUtil.setCellValue(sheet, resultList);
         } catch (Exception e) {
-            log.error("处理大计事出错", e);
+            log.error("处理大记事出错", e);
         }
     }
 
