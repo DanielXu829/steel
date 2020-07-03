@@ -1,7 +1,6 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializeConfig;
@@ -95,6 +94,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             // 反面-烧结矿理化分析
             handAnalysisValues(excelDTO, workbook, version);
 
+            //反面-操作简析/大事记
+            handleCaoZuoJianxi(excelDTO, workbook, version);
         } catch (Exception e) {
             log.error("处理模板数据失败", e);
         } finally {
@@ -115,7 +116,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     }
 
     //开始--------------------正面-小时参数--------------------
-    protected void handleFacadeXiaoShiCanShu(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    private void handleFacadeXiaoShiCanShu(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         try {
             String queryUrl = getUrlTagNamesInRange(version);
 
@@ -127,10 +128,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 DateQuery query = this.getDateQueryBeforeOneDay(excelDTO);
                 DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(query.getRecordDate());
                 List<DateQuery> dateQueries = DateQueryUtil.buildDayHourOneEach(dateQuery.getStartTime(), dateQuery.getEndTime());
-                // evt为后缀的值需要此逻辑，防止取到前一天累计的值。
-//                DateQuery firstDateQuery = dateQueries.get(0);
-//                firstDateQuery.setStartTime(DateUtil.getDateBeginTime(firstDateQuery.getEndTime()));
-//                dateQueries.set(0, firstDateQuery);
 
                 // 直接拿到tag点名, 无需根据别名再去获取tag点名
                 List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
@@ -260,7 +257,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     }
 
     //开始--------------------正面-风口信息--------------------
-    protected void handleFengKouXinXi(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    private void handleFengKouXinXi(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         try {
             Sheet zhengMianSheet = workbook.getSheetAt(0);
             // 获取标志位的坐标
@@ -312,7 +309,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     //结束--------------------正面-风口信息--------------------
 
     //开始--------------------正面-变料信息--------------------
-    protected void handleBianLiaoXinXi(WriterExcelDTO excelDTO, Workbook workbook, String version){
+    private void handleBianLiaoXinXi(WriterExcelDTO excelDTO, Workbook workbook, String version){
         try {
             Sheet sheet = workbook.getSheetAt(0);
             // 获取标志位的坐标
@@ -558,6 +555,16 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
     }
 
+    private Integer getLatestTagValue(String version, Long time, String tagName) {
+        String url = getLatestTagValueUrl(version);
+        Map<String, String> param = new HashMap<>();
+        param.put("time", String.valueOf(Long.valueOf(time)));
+        param.put("tagname", tagName);
+        String result = httpUtil.get(url, param);
+        Integer val = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", Integer.class);
+        return val;
+    }
+
     /**
      * 整合料线变更数据
      * @param version
@@ -566,20 +573,15 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param tagValue
      * @param tag
      */
-    private void handleStartIndex(Workbook workbook, String version, String key, Map<Integer, Map<String, BigDecimal>> liaoXianMap, BigDecimal tagValue, String tag) {
-        String url = getLatestTagValueUrl(version);
+    private void handleStartIndex(Workbook workbook, String version, Long key, Map<Integer, Map<String, List<Long>>> liaoXianMap, Long tagValue, String tag) {
         //"BF8_L2C_SH_CurrentBatch_evt"
         String cellValue = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 2, 0);
-        Map<String, String> param = new HashMap<>();
-        param.put("time", String.valueOf(Long.valueOf(key)));
-        param.put("tagname", cellValue);
-        String result = httpUtil.get(url, param);
-        Integer val = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", Integer.class);
+        Integer val = getLatestTagValue(version, key, cellValue);
         if (val != null) {
             if (liaoXianMap.containsKey(val)) {
-                liaoXianMap.get(val).put(tag, tagValue);
+                liaoXianMap.get(val).put(tag, Lists.newArrayList(tagValue, key));
             } else {
-                liaoXianMap.put(val, new HashMap<String, BigDecimal>(){{ put("C", tagValue); }});
+                liaoXianMap.put(val, new HashMap<String, List<Long>>(){{ put(tag, Lists.newArrayList(tagValue, key)); }});
             }
         }
     }
@@ -607,45 +609,53 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String cokeSetLine = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 3, 0);
         String sinterSetLine = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 4, 0);
         String liSinterSetLine = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 5, 0);
+        String mainRuler = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 6, 0);
         String[] tagNames = new String[]{cokeSetLine, sinterSetLine, liSinterSetLine};
         query.put("tagnames", tagNames);
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String results = httpUtil.postJsonParams(queryUrl, jsonString);
-        Map<Integer, Map<String, BigDecimal>> liaoXianMap = new HashMap<Integer, Map<String, BigDecimal>>();
-        int index = 0;
-        for (String tagName:tagNames) {
-            JSONObject jsonDatas = FastJSONUtil.getJsonObjectByKey(results, Lists.newArrayList("data", tagName));
-            if (Objects.nonNull(jsonDatas) && jsonDatas.size() > 0) {
-                Set<String> keySet = jsonDatas.keySet();
-                for (String key:keySet) {
-                    BigDecimal tagValue = jsonDatas.getBigDecimal(key);
-                    if (tagName.equals(cokeSetLine))
-                        handleStartIndex(workbook, version, key, liaoXianMap, tagValue, "C");
-                    if (tagName.equals(sinterSetLine))
-                        handleStartIndex(workbook, version, key, liaoXianMap, tagValue, "OI");
-                    if (tagName.equals(liSinterSetLine))
-                        handleStartIndex(workbook, version, key, liaoXianMap, tagValue, "Os");
-                    index ++;
+
+        Map<Integer, Map<String, List<Long>>> liaoXianMap = new HashMap<Integer, Map<String, List<Long>>>();
+        if(StringUtils.isNotBlank(results)) {
+            TagValueMapDTO tagValueMapDTO = JSON.parseObject(results, TagValueMapDTO.class);
+            if(Objects.nonNull(tagValueMapDTO) && Objects.nonNull(tagValueMapDTO.getData())) {
+                Map<String, Map<Long, Double>> data = tagValueMapDTO.getData();
+                if(Objects.nonNull(data) && data.size() > 0) {
+                    for (String tagName:data.keySet()) {
+                        Map<Long, Double> map = data.get(tagName);
+                        if(Objects.nonNull(map) && map.size() > 0) {
+                            for (Long time : map.keySet()) {
+                                Long tagValue = map.get(time).longValue();
+                                handleStartIndex(workbook, version, time, liaoXianMap, tagValue, tagName);
+                            }
+                        }
+                    }
                 }
             }
         }
-        index = 0;
-        for(Map.Entry<Integer, Map<String, BigDecimal>> entry : liaoXianMap.entrySet()) {
+
+        int index = 0;
+        for(Map.Entry<Integer, Map<String, List<Long>>> entry : liaoXianMap.entrySet()) {
             Integer mapKey = entry.getKey();
-            Map<String, BigDecimal> mapValue = entry.getValue();
+            Map<String, List<Long>> mapValue = entry.getValue();
             ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex, mapKey);
+            Long time = 0L;
             for(String key : mapValue.keySet()){
-                BigDecimal val = mapValue.get(key);
-                if (key.equals("C")) {
+                Long val = mapValue.get(key).get(0);
+                Long timeVal = mapValue.get(key).get(1);
+                if(time < timeVal) {
+                    time = timeVal;
+                }
+                if (key.equals(cokeSetLine)) {
                     ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 3, val);
-                } else if (key.equals("基准")) {
-                    ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
-                } else {
+                }else {
                     ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5,
-                            mapValue.get("OI")+"/"+mapValue.get("Os"));
+                            mapValue.get(sinterSetLine).get(0)+ "/" + mapValue.get(liSinterSetLine).get(0));
                 }
             }
+            Integer val = getLatestTagValue(version, time, mainRuler);
+            ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
             index++;
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -659,7 +669,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param workbook
      * @param version
      */
-    protected void handleFirstRowData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    private void handleFirstRowData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         // 需要写入的单元格数据对象
         List<CellData> resultList = new ArrayList<>();
         try {
@@ -723,7 +733,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
     }
 
     // 反面-出铁
-    protected void handleTapData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    private void handleTapData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         // 需要写入的单元格数据对象
         List<CellData> resultList = new ArrayList<>();
         try {
@@ -790,7 +800,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             String[] timeItemArray = {"startTime", "slagTime", "endTime"};
             List<String> timeItemList = Arrays.asList(timeItemArray);
             //"BF8_L2M_SH_ChargeCount_evt"
-            String cellValue = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 6, 0);
+            String cellValue = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 7, 0);
             // 遍历标记行
             for (int i = 0; i < dataSize; i++) {
                 tapSgRow = tapSgRowData.get(i);
@@ -935,7 +945,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param type
      * @return
      */
-    protected void handOreBlockData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    private void handOreBlockData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         String brandCodeType = "LUMPORE";
         String oreBlockType = "LC";
         // 待填充的数据
@@ -1006,6 +1016,25 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             log.warn(url + " 接口中无数据");
             return;
         }
+        setAnalysisValue2Cell(sheet, cellDataList, arr, oreBlockList, tpcNoBeginRow, tpcNoBeginColumn, needHandle);
+    }
+
+    /**
+     * 取出AnalysisValue中的data，并给相应的cell赋值
+     * @param sheet
+     * @param cellDataList
+     * @param arr
+     * @param url
+     * @param queryParam
+     * @param tpcNoBeginRow
+     * @param tpcNoBeginColumn
+     * @return
+     */
+    private void setAnalysisValue2Cell(Sheet sheet, List<CellData> cellDataList, String[] arr, List<AnalysisValue> oreBlockList,
+                                       int tpcNoBeginRow, int tpcNoBeginColumn, boolean needHandle) {
+        if (oreBlockList == null || oreBlockList.isEmpty()) {
+            return;
+        }
         int dataSize = arr.length;
         for (AnalysisValue analysisValue : oreBlockList) {
             if (oreBlockList.indexOf(analysisValue) > 2) break;
@@ -1060,17 +1089,15 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param workbook
      * @param version
      */
-    protected void handAnalysisValue(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    private void handAnalysisValue(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         String heatType = "LG";
         String cokeType = "LC";
         String cokeBrandCode = "COKE";
-        String coalBrandCode = "COAL";
-        String heatPlaceHolder = "{热强度}";
+        String coalBrandCode = "FBFM-A_COAL";
         String cokePlaceHolderYe = "{焦炭.夜}";
         String cokePlaceHolderBai = "{焦炭.白}";
         String coalPlaceHolder = "{煤粉}";
-        String[] heatArr = {"M40", "M10", "CSR", "CRI"};
-        String[] cokeArr = {"H2O", "Ad", "Vdaf", "S"};
+        String[] cokeArr = {"H2O", "Ad", "Vdaf", "S", "M40", "M10", "CSR", "CRI"};
         // 根据需求，取回的煤粉数据中C取Fcad，S取Std
         String[] coalArr = {"Ad", "Vdaf", "Std", "Fcad", "S"};
         List<CellData> cellDataList = new ArrayList<>();
@@ -1079,35 +1106,30 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             Sheet sheet = workbook.getSheetAt(1);
             DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
             DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date.getRecordDate());
-            String from = Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString();
-            String to = Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString();
-
-            // 1. 获取AnalysisValue Url前缀
-            String url = getRangeByTypeUrl(version, from, to, coalBrandCode);
-            String heatUrl = getAnalysisValueUrl(version, to, "LG", "KM-L_COKE");
-            //先处理热力强度，因为只有一行数据
-            //再处理成分分析，分为煤粉和焦炭
-            // 2. 获取热强度数据，填充数据
-            handAnalysisValue2Cell(sheet, cellDataList, heatUrl, heatArr, heatPlaceHolder, false);
-            // 3. 获取焦炭数据，填充数据
             // 获取两班倒查询策略
             Date dateRun = this.getDateQueryBeforeOneDay(excelDTO).getRecordDate();
             List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
             for (int k = 0; k < dateQueries.size(); k++) {
                 DateQuery dateQuery1 = dateQueries.get(k);
-                String queryUrl = getRangeByTypeUrl(version, Objects.requireNonNull(dateQuery1.getQueryStartTime()).toString(),
-                        Objects.requireNonNull(dateQuery1.getQueryEndTime()).toString(), "COKE");
                 //夜班
                 if (dateQuery1.getStartTime().compareTo(dateQuery.getStartTime()) == 0) {
-                    handJiaoTan(sheet, queryUrl, cellDataList, cokeArr, cokePlaceHolderYe);
+                    handJiaoTan(sheet, version, dateQuery1, "COKE", cellDataList, cokeArr, cokePlaceHolderYe);
                 } else {
-                    handJiaoTan(sheet, queryUrl, cellDataList, cokeArr, cokePlaceHolderBai);
+                    handJiaoTan(sheet, version, dateQuery1, "COKE", cellDataList, cokeArr, cokePlaceHolderBai);
                 }
             }
             // 4. 获取煤粉数据，填充数据
-
-            handAnalysisValue2Cell(sheet, cellDataList, url, coalArr, coalPlaceHolder, true);
-
+            List<AnalysisValue> oreBlockList = getAnalysisValuesByBrandCode(version, String.valueOf(dateQuery.getQueryStartTime()),
+                    String.valueOf(dateQuery.getQueryEndTime()), coalBrandCode);
+            // 找到待填充的坐标
+            Cell tpcNoCell = PoiCustomUtil.getCellByValue(sheet, coalPlaceHolder);
+            if (Objects.isNull(tpcNoCell)) {
+                return;
+            }
+            // 待填充的行,列
+            int tpcNoBeginRow = tpcNoCell.getRowIndex();
+            int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
+            setAnalysisValue2Cell(sheet, cellDataList, coalArr, oreBlockList, tpcNoBeginRow, tpcNoBeginColumn, true);
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
             log.error("处理反面-块矿-矿种出错", e);
@@ -1123,19 +1145,11 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param arr
      * @param placeHolder
      */
-    private void handJiaoTan(Sheet sheet, String url, List<CellData> cellDataList, String[] arr, String placeHolder) {
-        String jsonData = httpUtil.get(url);
-        // 根据json映射对象DTO
-        AnalysisValueDTO analysisValueDTO = null;
-        if (StringUtils.isNotBlank(jsonData)) {
-            analysisValueDTO = JSON.parseObject(jsonData, AnalysisValueDTO.class);
-        }
-        if (Objects.isNull(analysisValueDTO)) {
-            return;
-        }
-        List<AnalysisValue> oreBlockList = analysisValueDTO.getData();
-        if (oreBlockList == null || oreBlockList.isEmpty()) {
-            log.warn(url + " 接口中无数据");
+    private void handJiaoTan(Sheet sheet, String version, DateQuery dateQuery, String brandCode, List<CellData> cellDataList,
+                             String[] arr, String placeHolder) {
+        List<String> noNeedHandleList = Arrays.asList("M40", "M10", "CSR", "CRI");
+        List<AnalysisValue> list = getAnalysisValuesRequestDataByCode(version, dateQuery, brandCode);
+        if (list == null || list.isEmpty()) {
             return;
         }
         int dataSize = arr.length;
@@ -1147,24 +1161,19 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         // 待填充的行,列
         int tpcNoBeginRow = tpcNoCell.getRowIndex();
         int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
-        for (AnalysisValue analysisValue : oreBlockList) {
-            if (oreBlockList.indexOf(analysisValue) > 2) break;
-            if (Objects.isNull(analysisValue)) return;
-            for (int j = 0; j < dataSize; j++){
-                Map<String, BigDecimal> values = analysisValue.getValues();
-                if (Objects.isNull(values)) return;
-                // 获取具体AnalysisValue数据
-                if (!values.containsKey(arr[j])) continue;
-                BigDecimal value = values.get(arr[j]);
-                int writeRow = tpcNoBeginRow;
-                int writeColumn = tpcNoBeginColumn + j;
-                if (value != null) {
-                    ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value.multiply(new BigDecimal(100)));
-                } else {
-                    // 填充具体数据
-                    ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, value);
-                }
-
+        for (int j = 0; j < dataSize; j++){
+            int finalJ = j;
+            BigDecimal averageValue = list.stream().map(AnalysisValue::getValues)
+                    .map(e -> e.get(arr[finalJ])).filter(e -> e != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(BigDecimal.valueOf(list.size()), 4, BigDecimal.ROUND_HALF_UP);
+            int writeRow = tpcNoBeginRow;
+            int writeColumn = tpcNoBeginColumn + j;
+            if (averageValue != null && !noNeedHandleList.contains(arr[j])) {
+                ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, averageValue.multiply(new BigDecimal(100)));
+            } else {
+                // 填充具体数据
+                ExcelWriterUtil.addCellData(cellDataList, writeRow, writeColumn, averageValue);
             }
         }
     }
@@ -1197,6 +1206,38 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         headers = arrList.toArray(new String[arrList.size()]);
     }
 
+    /**
+     * 处理烧结矿理化分析数据
+     * @param excelDTO
+     * @param workbook
+     * @param version
+     */
+    private void handAnalysisValues(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+        List<CellData> cellDataList = new ArrayList<>();
+        try {
+            // 反面sheet
+            Sheet sheet = workbook.getSheetAt(1);
+            DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
+            DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date.getRecordDate());
+            // 1. 获取AnalysisValues Url前缀
+            List<AnalysisValue> sinterList = getAnalysisValuesRequestDataByCode(version, dateQuery, "SINTER");
+            String placeHolder = "{矿种}";
+            String[] arr = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "B2", "Zn","Drum", "S+40",
+                    "S25-40", "S16-25", "S10-16", "S5-10", "S-5", "S-10", "SF"};
+            String[] handleArr = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "Zn"};
+            handAnalysisValuesData(sheet, sinterList, cellDataList, placeHolder, arr, handleArr, version, 6);
+
+            String placeHolder2 = "{球团}";
+            String[] arr2 = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "", "Zn"};
+            String[] handleArr2 = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "Zn"};
+            List<AnalysisValue> allAnalysisValues = getAnalysisValuesRequestDataByCode(version, dateQuery, "PELLETS");
+            //球团名称
+            handAnalysisValuesData(sheet, allAnalysisValues, cellDataList, placeHolder2, arr2, handleArr2, version, 5);
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理反面-烧结矿理化分析出错", e);
+        }
+    }
 
     /**
      * 处理烧结矿理化数据
@@ -1206,8 +1247,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param result
      * @param cellDataList
      */
-    private void handAnalysisValuesData(Sheet sheet, String result, List<CellData> cellDataList, String oreType,
-                                        String placeHolder, String[] arr, String[] handleArr, String version) {
+    private void handAnalysisValuesData(Sheet sheet, List<AnalysisValue> list, List<CellData> cellDataList,
+                                        String placeHolder, String[] arr, String[] handleArr, String version, int maxRow) {
 
         List< String> lcList = new ArrayList<String>(handleArr.length);
         Collections.addAll(lcList, handleArr);
@@ -1220,15 +1261,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         int beginRow = cell.getRowIndex();
         int coalBeginColumn = 1;
 
-        // 根据json映射对象DTO
-        AnalysisValueDTO analysisValueDTO = null;
-        if (StringUtils.isNotBlank(result)) {
-            analysisValueDTO = JSON.parseObject(result, AnalysisValueDTO.class);
-        }
-        if (Objects.isNull(analysisValueDTO)) {
-            return;
-        }
-        List<AnalysisValue> list = analysisValueDTO.getData();
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list)) {
             return;
         }
@@ -1252,7 +1284,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             }
         });
         Map<String, String> brandCodeToDescrMap = getBrandCodeToDescrMap(version);
-        for (int i = 0; i< list.size() && i < 12; i++) {
+        for (int i = 0; i< list.size() && i < maxRow; i++) {
             AnalysisValue analysisValue = list.get(i);
             if (Objects.isNull(analysisValue)) continue;
             Analysis analysis = analysisValue.getAnalysis();
@@ -1312,91 +1344,60 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         }
     }
 
+    private List<AnalysisValue> getAnalysisValuesRequestDataByCode(String version, DateQuery dateQuery, String brandCodeType) {
+        List<AnalysisValue> allAnalysisValues = new ArrayList<>();
+        List<String> list = getBrandCodeData(version, dateQuery, brandCodeType);
+        if(Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
+            for (String brandCode:list) {
+                allAnalysisValues.addAll(getAnalysisValuesByBrandCode(version, String.valueOf(dateQuery.getQueryStartTime()), String.valueOf(dateQuery.getQueryEndTime()), brandCode));
+            }
+        }
+        return allAnalysisValues;
+    }
+
     /**
-     * 处理烧结矿理化分析数据
+     * 处理反面大记事和操作简析
      * @param excelDTO
      * @param workbook
      * @param version
      */
-    protected void handAnalysisValues(WriterExcelDTO excelDTO, Workbook workbook, String version) {
-        List<CellData> cellDataList = new ArrayList<>();
+    private void handleCaoZuoJianxi(WriterExcelDTO excelDTO, Workbook workbook, String version) {
         try {
-            // 反面sheet
+            List<CellData> cellDataList = new ArrayList<CellData>();
             Sheet sheet = workbook.getSheetAt(1);
+            String url = getQueryBlastStatus(version);
             DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
-            DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date.getRecordDate());
-            // 1. 获取AnalysisValues Url前缀
-            String url = getAnalysisValuesUrl(version);
-            Map<String, String> queryParam = new HashMap();
-            queryParam.put("from", Objects.requireNonNull(dateQuery.getQueryStartTime()).toString());
-            queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
-            queryParam.put("brandCode", "S4_SINTER");
-            String result = httpUtil.get(url, queryParam);
-            String kuangZhong = "S4";
-            if (StringUtils.isBlank(result)) {
-                queryParam.put("brandCode", "S1_SINTER");
-                kuangZhong = "S1";
-                result = httpUtil.get(url, queryParam);
-            } else {
-                JSONObject jsonObject = JSON.parseObject(result);
-                if (Objects.nonNull(jsonObject)) {
-                    JSONArray jsonArray = jsonObject.getJSONArray("data");
-                    if (Objects.isNull(jsonArray) || jsonArray.size() == 0) {
-                        queryParam.put("brandCode", "S1_SINTER");
-                        kuangZhong = "S1";
-                        result = httpUtil.get(url, queryParam);
-                    }
-                } else {
-                    queryParam.put("brandCode", "S1_SINTER");
-                    kuangZhong = "S1";
-                    result = httpUtil.get(url, queryParam);
-                }
-            }
-            String placeHolder = "{矿种}";
-            String[] arr = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "B2", "Zn","Drum", "S+40",
-                    "S25-40", "S16-25", "S10-16", "S5-10", "S-5", "S-10", "SF"};
-            String[] handleArr = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "Zn"};
-            handAnalysisValuesData(sheet, result, cellDataList, kuangZhong, placeHolder, arr, handleArr, version);
-
-            String placeHolder2 = "{球团}";
-            String[] arr2 = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "", "Zn"};
-            String[] handleArr2 = {"TFe", "FeO", "CaO", "MgO", "SiO2", "S", "Zn"};
-            String queryUrl = getRangeByTypeUrl(version, Objects.requireNonNull(dateQuery.getQueryStartTime()).toString(),
-                    Objects.requireNonNull(dateQuery.getQueryEndTime()).toString(), "PELLETS");
-            String qiuTuanData = httpUtil.get(queryUrl);
-            //球团名称
-            handAnalysisValuesData(sheet, qiuTuanData, cellDataList, "", placeHolder2, arr2, handleArr2, version);
+            //id=1操作简析
+            handleCommitInfo(1, 1, version, sheet, cellDataList, "{操作简析.夜班}", date);
+            handleCommitInfo(2, 1, version, sheet, cellDataList, "{操作简析.白班}", date);
+            //id=1大记事
+            handleCommitInfo(1, 2, version, sheet, cellDataList, "{大记事.夜班}", date);
+            handleCommitInfo(2, 2, version, sheet, cellDataList, "{大记事.白班}", date);
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
-            log.error("处理反面-烧结矿理化分析出错", e);
+            log.error("处理反面-操作简析/大事记出错", e);
         }
     }
 
     /**
-     * 查询BrandCode,可能有多个，最多三个
+     * 获取commit info
+     * date 传当前天整点，shift  1 夜班  2 白班，model 写死
+     * @param shift
+     * @param id
      * @param version
-     * @param startTime
-     * @param endTime
-     * @param type
-     * @return 包含BrandCode的JSONArray
+     * @param workbook
+     * @param cellDataList
+     * @param placeHolder
+     * @param dateQuery
      */
-    private List<String> getBrandCodeData(String version, DateQuery dateQuery, String type) {
-        List<String> brandCodeData = new ArrayList<>();
-        Map<String, String> queryParam = new HashMap();
-        queryParam.put("startTime", Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
-        queryParam.put("endTime", Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
-        queryParam.put("type", type);
-        String url = getBrandCodes(version);
-        String result = httpUtil.get(url, queryParam);
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        if(null != jsonObject){
-            JSONArray data = jsonObject.getJSONArray("data");
-            if(null!= data){
-                for (Object o : data) {
-                    brandCodeData.add(String.valueOf(o));
-                }
-            }
-        }
-        return brandCodeData;
+    private void handleCommitInfo(int shift, int id, String version, Sheet sheet, List<CellData> cellDataList, String placeHolder, DateQuery dateQuery) {
+        // 获取标志位的坐标
+        //{操作简析.夜班}
+        Cell cell = PoiCustomUtil.getCellByValue(sheet, placeHolder);
+        int rowIndex = cell.getRowIndex();
+        int columnIndex = cell.getColumnIndex();
+        //id=1操作简析
+        String commit = getCommitInfo(version, dateQuery.getQueryEndTime(), shift, id);
+        ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, commit);
     }
 }

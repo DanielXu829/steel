@@ -123,7 +123,7 @@ public class TestJobGl extends SteelApplicationTests {
     }
 
     /**
-     * 测试 8高炉冷却水冷却壁月报
+     * 测试 8高炉月报汇总
      */
     @Test
     public void testYueBaoHuiZong8Job() {
