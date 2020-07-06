@@ -11,7 +11,9 @@ import com.cisdi.steel.dto.response.gl.*;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.gl.GLDataUtil;
+import com.cisdi.steel.module.job.util.FastJSONUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -519,6 +521,28 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
             }
         }
         return null;
+    }
+
+    protected TapSummaryListDTO getTapSummaryListDTO(String version, Date date) {
+        return getTapSummaryListDTO(version, date, "day");
+    }
+
+    protected TapSummaryListDTO getTapSummaryListDTO(String version, Date date, String workShift) {
+        TapSummaryListDTO tapSummaryListDTO = null;
+        Map<String, String> queryParam = new HashMap();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        queryParam.put("dateTime",  String.valueOf(dateBeginTime.getTime()));
+        queryParam.put("workShift",  workShift);
+
+        String tapSummaryListUrl = httpProperties.getGlUrlVersion(version) + "/report/tap/getTapSummary";
+        String tapSummaryListStr = httpUtil.get(tapSummaryListUrl, queryParam);
+        if (StringUtils.isNotBlank(tapSummaryListStr)) {
+            tapSummaryListDTO = JSON.parseObject(tapSummaryListStr, TapSummaryListDTO.class);
+            if (Objects.isNull(tapSummaryListDTO) || CollectionUtils.isEmpty(tapSummaryListDTO.getData())) {
+                log.warn("[{}] 的TapSummaryListDTO数据为空", dateBeginTime);
+            }
+        }
+        return tapSummaryListDTO;
     }
 
     /**

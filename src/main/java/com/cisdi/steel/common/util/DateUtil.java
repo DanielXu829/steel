@@ -102,7 +102,9 @@ public class DateUtil {
      */
     public static final String[] WEEKS = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
     public static final String NO_SEPARATOR = "yyyyMMddHHmmss";
-    public static final String NO_SEPARATOR_SSS = "yyyyMMddHHmmssSSS";
+
+    public static final List<String> WEEKS_THUR2WED = Arrays.asList("星期四", "星期五", "星期六", "星期日", "星期一", "星期二", "星期三");
+
     /**
      * 1个小时
      */
