@@ -9,7 +9,7 @@ public class TapSummary {
      */
     private String workDate;
     /**
-     * 班次。null全天，1夜班，2白班
+     * 班次。day工作日，today自然日，1夜班，2白班
      */
     private String workShift;
     /**
@@ -71,4 +71,39 @@ public class TapSummary {
      * 见渣率
      */
     private Double slagPercent;
+
+    /**
+     * 全天铁量差
+     */
+    private Double diffWeight;
+
+    /**
+     * 全天总灌数
+     */
+    private Integer tpcNum;
+
+    /**
+     * 炉温合格次数
+     */
+    private Integer lwQualifyNum;
+
+    /**
+     * 炉渣碱度合格次数
+     */
+    private Integer lzQualifyNum;
+
+    /**
+     * 铁水一级品率罐数
+     */
+    private Integer tsQualifyNum;
+
+    /**
+     * 硅硫合格罐数
+     */
+    private Integer glQualifyNum;
+
+    /**
+     * 皮重合格罐数
+     */
+    private Integer pzQualifyNum;
 }

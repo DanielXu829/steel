@@ -275,22 +275,4 @@ public class JiShuJingJiWriter extends BaseGaoLuWriter {
         sheet.getRow(itemRowNum - 1).setZeroHeight(true);
     }
 
-    protected TapSummaryListDTO getTapSummaryListDTO(String version, Date date) {
-        TapSummaryListDTO tapSummaryListDTO = null;
-        Map<String, String> queryParam = new HashMap();
-        Date dateBeginTime = DateUtil.getDateBeginTime(date);
-        queryParam.put("dateTime",  String.valueOf(dateBeginTime.getTime()));
-        queryParam.put("workShift",  "day");
-
-        String tapSummaryListUrl = httpProperties.getGlUrlVersion(version) + "/report/tap/getTapSummary";
-        String tapSummaryListStr = httpUtil.get(tapSummaryListUrl, queryParam);
-        if (StringUtils.isNotBlank(tapSummaryListStr)) {
-            tapSummaryListDTO = JSON.parseObject(tapSummaryListStr, TapSummaryListDTO.class);
-            if (Objects.isNull(tapSummaryListDTO) || CollectionUtils.isEmpty(tapSummaryListDTO.getData())) {
-                log.warn("[{}] 的TapSummaryListDTO数据为空", dateBeginTime);
-            }
-        }
-        return tapSummaryListDTO;
-    }
-
 }

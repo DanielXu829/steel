@@ -745,6 +745,29 @@ public class DateQueryUtil {
         return days;
     }
 
-    public static void getMonthStartTime() {
+    /**
+     * 记录每年的每天
+     *
+     * @return 结果
+     */
+    public static List<DateQuery> buildYearDayWithThur2Wed(Date date) {
+        DateQuery dateQuery = buildYear(date);
+
+        // 计算第一天从什么时候开始，如果第一天不是刚好Thursday，则需要往前推直到满一周
+        Date startTime = dateQuery.getStartTime();
+        String weekString = DateUtil.getWeekString(DateQueryUtil.getYearStartTime(startTime));
+        int beforeDays = DateUtil.WEEKS_THUR2WED.indexOf(weekString);
+
+        startTime = DateUtil.addDays(startTime, - beforeDays);
+
+        long betweenDays = DateUtil.getBetweenDays(startTime, date);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date currentDate = startTime;
+        for (int i = 0; i <= betweenDays; i++) {
+            DateQuery query = buildTodayNoDelay(currentDate);
+            queryList.add(query);
+            currentDate = DateUtil.addDays(currentDate, 1);
+        }
+        return queryList;
     }
 }

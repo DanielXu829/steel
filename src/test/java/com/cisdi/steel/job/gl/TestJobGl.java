@@ -3,13 +3,19 @@ package com.cisdi.steel.job.gl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.SteelApplicationTests;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.gl.*;
+import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
+import java.util.List;
 
 public class TestJobGl extends SteelApplicationTests {
 
@@ -200,6 +206,30 @@ public class TestJobGl extends SteelApplicationTests {
     @Test
     public void testLuZhaJianDuHeGeLv8Job() {
         luZhaJianDuHeGeLv8Job.execute(null);
+    }
+
+    /**
+     * 测试 8高炉有效出铁比率及出渣比率
+     */
+    @Autowired
+    private ChuTieXiaoLv8Job chuTieXiaoLv8Job;
+    @Test
+    public void testChuTieXiaoLv8Job() {
+        chuTieXiaoLv8Job.execute(null);
+    }
+
+    @Test
+    public void testBuildYearEach() {
+        Date current = new Date();
+        List<DateQuery> dateQueries = DateQueryUtil.buildYearDayWithThur2Wed(current);
+        System.out.println("本年的到今天截止的所有天：" + dateQueries);
+
+        System.out.println("本年的第一天：" + DateQueryUtil.getYearStartTime(current));
+        System.out.println("本年的第一天的开始时间：" + DateUtil.getDateBeginTime(DateQueryUtil.getYearStartTime(current)));
+        System.out.println("本年的第一天是星期几？：" + DateUtil.getWeekString(DateQueryUtil.getYearStartTime(current)));
+
+        System.out.println("本年的最后一天：" + DateQueryUtil.getYearEndTime(current));
+        System.out.println("本年的最后一天是星期几？：" + DateUtil.getWeekString(DateQueryUtil.getYearEndTime(current)));
     }
 
     @Test
