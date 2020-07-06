@@ -7,9 +7,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.dto.response.gl.*;
-import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
-import com.cisdi.steel.dto.response.gl.res.AnalysisValue;
+import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
+import com.cisdi.steel.dto.response.gl.MaterialExpendStcDTO;
+import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -265,20 +265,12 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     fixLineCount++;
                 }
                 int row = itemRowNum + 1 + fixLineCount + i;
-                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
-                Map<String, String> queryParam = eachDateQuery.getQueryParam();
-                TagQueryParam tagQueryParam =
-                        new TagQueryParam(eachDateQuery.getQueryStartTime(), eachDateQuery.getQueryEndTime(), tagFormulaList);
-                String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), JSON.toJSONString(tagQueryParam));
-                Map<String, Double> tagFormulaToValueMap = new HashMap<>();
-                if (StringUtils.isNotBlank(jsonData)) {
-                    TagValueMapDTO tagValueMapDTO = JSON.parseObject(jsonData, TagValueMapDTO.class);
-                    Optional.ofNullable(tagValueMapDTO).map(TagValueMapDTO::getData)
-                            .orElse(new HashMap<>()).forEach((key, value) -> {
-                                List<Double> valueList = new ArrayList(value.values());
-                                tagFormulaToValueMap.put(key, valueList.get(0));
-                            });
-                }
+                Date day = allDayBeginTimeInCurrentMonth.get(i);
+                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(day);
+                Date queryDate = DateUtil.addDays(day, 1);
+                TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(queryDate, version, tagFormulaList);
+                List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO).map(TagValueListDTO::getData).orElse(new ArrayList<>());
+                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream().collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
                 MaterialExpendStcDTO materialExpandStcDTO = getMaterialExpandStcDTO(version, eachDateQuery.getEndTime());
                 Map<String, List<MaterialExpend>> typeToMaterialExpendListMap =
                         Optional.ofNullable(materialExpandStcDTO).map(MaterialExpendStcDTO::getData).orElse(null);
@@ -296,10 +288,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     }
                     BigDecimal dryWgt = null;
                     if (itemName.startsWith("tag")) {
-                        Double doubleValue = tagFormulaToValueMap.get(itemName.split("-")[1]);
-                        if (Objects.nonNull(doubleValue)) {
-                            dryWgt = BigDecimal.valueOf(doubleValue);
-                        }
+                        dryWgt = tagFormulaToValueMap.get(itemName.split("-")[1]);
                     } else {
                         dryWgt = matCodeToDryWgtMap.get(itemName);
                     }
@@ -365,22 +354,12 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 nameTotagFormulaMaps.put("平均焦批", "BF8_L2M_BX_CokeConsume_1d_cur");
                 nameTotagFormulaMaps.put("总批数", "BF8_L2M_BX_ChargeCount_1d_cur");
                 nameTotagFormulaMaps.put("变料次数", "BF8_L2C_SH_CurrentMatrixNumber_evt");
-                TagQueryParam tagQueryParam =
-                        new TagQueryParam(eachDateQuery.getQueryStartTime(), eachDateQuery.getQueryEndTime(),
-                                Lists.newArrayList(nameTotagFormulaMaps.values()));
-                String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), JSON.toJSONString(tagQueryParam));
-                Map<String, Double> tagFormulaToValueMap = new HashMap<>();
-                if (StringUtils.isNotBlank(jsonData)) {
-                    TagValueMapDTO tagValueMapDTO = JSON.parseObject(jsonData, TagValueMapDTO.class);
-                    Optional.ofNullable(tagValueMapDTO).map(TagValueMapDTO::getData)
-                            .orElse(new HashMap<>()).forEach((key, value) -> {
-                        List<Double> valueList = new ArrayList(value.values());
-                        if (nameTotagFormulaMaps.get("变料次数").equals(key)) {
-                            tagFormulaToValueMap.put(key, Double.valueOf(valueList.size()));
-                        }
-                        tagFormulaToValueMap.put(key, valueList.get(0));
-                    });
-                }
+                ArrayList<String> tagNameList = Lists.newArrayList(nameTotagFormulaMaps.values());
+                TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(liaoXianQueryTime, version, tagNameList);
+                List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO)
+                        .map(TagValueListDTO::getData).orElse(new ArrayList<>());
+                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream()
+                        .collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
                 }
@@ -395,20 +374,20 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                         switch (itemName) {
                             case "平均矿批":
                             case "平均焦批": {
-                                Double batchNumber = tagFormulaToValueMap.get(nameTotagFormulaMaps.get("总批数"));
-                                Double value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
+                                BigDecimal batchNumber = tagFormulaToValueMap.get(nameTotagFormulaMaps.get("总批数"));
+                                BigDecimal value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
                                 if (Objects.isNull(batchNumber)) {
                                     break;
                                 }
                                 if (Objects.nonNull(value)) {
-                                    BigDecimal bigDecimalValue = BigDecimal.valueOf(value)
-                                            .divide(BigDecimal.valueOf(batchNumber), 2, BigDecimal.ROUND_HALF_UP);
+                                    BigDecimal bigDecimalValue = value
+                                            .divide(batchNumber, 2, BigDecimal.ROUND_HALF_UP);
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, bigDecimalValue);
                                 }
                                 break;
                             }
                             case "变料次数": {
-                                Double value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
+                                BigDecimal value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, value);
                                 break;
                             }
@@ -496,7 +475,6 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             if (currentMonth < 31) {
                 sheet.getRow(40).setZeroHeight(true);
             }
-
             // 标记行
             int tagFormulaNum = 6;
             int itemRowNum = 7;
@@ -504,48 +482,32 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             sheet.getRow(itemRowNum).setZeroHeight(true);
             // 获取excel占位符列
             List<String> tagFormulaList = PoiCustomUtil.getRowCelVal(sheet, tagFormulaNum);
+            List<String> tagFormulaListWithOutBlank = tagFormulaList.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
             List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
             Map<String, String> itemToTagFormulaMap = itemNameList.stream()
                     .collect(Collectors.toMap(key -> key,key -> tagFormulaList.get(itemNameList.indexOf(key)), (value1, value2) -> value1));
             List<CellData> cellDataList = new ArrayList<>();
             String [] needToMultiply100Array = {"熟料率"};
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
-                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
                 Date day = allDayBeginTimeInCurrentMonth.get(i);
-                BigDecimal defaultCellValue = new BigDecimal(0.0);
-                JSONObject queryJsonObject = new JSONObject();
-                Map<String, String> queryParam = eachDateQuery.getQueryParam();
-                String starttime = queryParam.get("starttime");
-                queryJsonObject.put("starttime", starttime);
-                String endtime = queryParam.get("endtime");
-                queryJsonObject.put("endtime", endtime);
-                queryJsonObject.put("tagnames", tagFormulaList);
-                String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), queryJsonObject.toJSONString());
-                if (StringUtils.isBlank(jsonData)) {
-                    continue;
-                }
-                JSONObject jsonObject = JSONObject.parseObject(jsonData).getJSONObject("data");
-                if (Objects.isNull(jsonObject)) {
-                    continue;
-                }
-                Map<String, Double> itemToValueMap = new HashMap<>();
+                Date queryDate = DateUtil.addDays(day, 1);
+                TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(queryDate, version, tagFormulaListWithOutBlank);
+                List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO)
+                        .map(TagValueListDTO::getData).orElse(new ArrayList<>());
+                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream()
+                        .collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
+                Map<String, BigDecimal> itemToValueMap = new HashMap<>();
                 for (Map.Entry<String, String> itemToTagFormulaEntry : itemToTagFormulaMap.entrySet()) {
-                    JSONObject timeValueJsonObject = jsonObject.getJSONObject(itemToTagFormulaEntry.getValue());
-                    if (Objects.isNull(timeValueJsonObject)) {
+                    String itemName = itemToTagFormulaEntry.getKey();
+                    String tagFormula = itemToTagFormulaEntry.getValue();
+                    BigDecimal value = tagFormulaToValueMap.get(tagFormula);
+                    if (Objects.isNull(value)) {
                         continue;
                     }
-                    List<Object> valueList = new ArrayList<>(timeValueJsonObject.values());
-                    if (CollectionUtils.isNotEmpty(valueList)) {
-                        String itemName = itemToTagFormulaEntry.getKey();
-                        String valueString = valueList.get(0).toString();
-                        Double doubleValue = Double.valueOf(valueString);
-                        if (Arrays.asList(needToMultiply100Array).contains(itemName)) {
-                            BigDecimal bigDecimalValue = BigDecimal.valueOf(doubleValue).multiply(BigDecimal.valueOf(100));
-                            itemToValueMap.put(itemName, bigDecimalValue.doubleValue());
-                        } else {
-                            itemToValueMap.put(itemName, doubleValue);
-                        }
+                    if (Arrays.asList(needToMultiply100Array).contains(itemName)) {
+                        value = value.multiply(BigDecimal.valueOf(100));
                     }
+                    itemToValueMap.put(itemName, value);
                 }
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
