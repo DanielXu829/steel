@@ -65,12 +65,12 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private Date startTime = null;
     private Date endTime = null;
     private List<String> categoriesList = new ArrayList<>();
-    private List<String> longTimeList = new ArrayList<>();
+    private List<Long> longTimeList = new ArrayList<>();
     private ReportCategoryTemplate currentTemplate;
     private DecimalFormat df2 = new DecimalFormat("0.00");
     private DecimalFormat df3 = new DecimalFormat("0.000");
     private String[] L1 = new String[]{
-            "BF8_L2M_HMMassAct_1d_cur","BF8_L2M_Productivity_1d","BF8_L2M_BX_CokeRate_1d_cur","BF8_L2M_BX_CoalRate_1d_cur",
+            "BF8_L2M_BX_HMMass_1d_cur","BF8_L2M_BX_Productivity_1d_cur","BF8_L2M_BX_CokeRate_1d_cur","BF8_L2M_BX_CoalRate_1d_cur",
             "BF8_L2M_BX_FuelRate_1d_cur","BF8_L2C_BD_HotBlastTemp1_1d_avg"
     };
     private String[] L3 = new String[]{
@@ -354,7 +354,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         handleAnalysisValues(getAnalysisValuesByType(version, dateQuery, "materialType", "COKE"), new String[]{"H2O", "Ad", "Vdaf"}, "COKE", Arrays.asList());
         handleAnalysisValues(getAnalysisValuesByCode(version, dateQuery, "LG", "KM-L_COKE"), new String[]{"M40", "M10", "CSR", "CRI"}, "COKE", Arrays.asList("M40", "M10", "CSR", "CRI"));
         //煤粉
-        handleAnalysisValues(getAnalysisValuesByType(version, dateQuery, "materialType", "COAL"), new String[]{"H2O", "Vdaf", "Fcad"}, "COAL", Arrays.asList());
+        handleAnalysisValues(getAnalysisValuesByCode(version, dateQuery, "LC", "FBFM-A_COAL"), new String[]{"H2O", "Vdaf", "Fcad"}, "COAL", Arrays.asList());
         //烧结
         List<AnalysisValue> sinterList = getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", "S4_SINTER");
         if(Objects.isNull(sinterList) || CollectionUtils.isEmpty(sinterList)) {
@@ -397,7 +397,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         String url = getUrl(version) + "/tagValues/latest/";
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", tagNames);
-        String chargeNoData = httpUtil.postJsonParams(url + date.getTime(), jsonObject.toJSONString());
+        String chargeNoData = httpUtil.postJsonParams(url + DateUtil.getDateEndTime(date).getTime(), jsonObject.toJSONString());
         List<TagValue> list = null;
         TagValueListDTO tagValueListDTO = null;
         if (StringUtils.isNotBlank(chargeNoData)) {
@@ -439,7 +439,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      */
     private Map<String, BigDecimal> getLuTiWenDuData(String version, String[] tagNames) {
         StringBuilder builder = new StringBuilder();
-        BigDecimal maxTemp = getMaxLuTiTemp(builder, version, tagNames, 0);
+        BigDecimal maxTemp = getMaxLuTiTemp(builder, version, tagNames, -1);
         Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
         tempMap.put(builder.toString(), maxTemp);
         return tempMap;
@@ -489,19 +489,19 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             String suffix = "_1d_max";
             //炉缸
             Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang);
-            BigDecimal luGangYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luGangMap.keySet().toArray(new String[luGangMap.keySet().size()]), -1);
+            BigDecimal luGangYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luGangMap.keySet().toArray(new String[luGangMap.keySet().size()]), -2);
             dealLuTiWenDuData(luGangMap, luGangYesterdayMax, 1, text1, text2, text3, text4, prefix, suffix);
             //炉腹
             Map<String, BigDecimal> luFuMap =  getLuTiWenDuData(version, luFu);
-            BigDecimal luFuYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luFuMap.keySet().toArray(new String[luFuMap.keySet().size()]), -1);
+            BigDecimal luFuYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luFuMap.keySet().toArray(new String[luFuMap.keySet().size()]), -2);
             dealLuTiWenDuData(luFuMap, luFuYesterdayMax, 2, text1, text2, text3, text4, prefix, suffix);
             //炉腰 5
             Map<String, BigDecimal> luYaoMap =  getLuTiWenDuData(version, luYao);
-            BigDecimal luYaoYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luYaoMap.keySet().toArray(new String[luYaoMap.keySet().size()]), -1);
+            BigDecimal luYaoYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, luYaoMap.keySet().toArray(new String[luYaoMap.keySet().size()]), -2);
             dealLuTiWenDuData(luYaoMap, luYaoYesterdayMax, 3, text1, text2, text3, text4, prefix, suffix);
             //炉身
             Map<String, BigDecimal> lushenMap =  getLuTiWenDuData(version, luShen);
-            BigDecimal lushenYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, lushenMap.keySet().toArray(new String[lushenMap.keySet().size()]), -1);
+            BigDecimal lushenYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, lushenMap.keySet().toArray(new String[lushenMap.keySet().size()]), -2);
             dealLuTiWenDuData(lushenMap, lushenYesterdayMax, 4, text1, text2, text3, text4, prefix, suffix);
 
             dealChart3(version);
@@ -556,7 +556,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      */
     private Map<String, BigDecimal> getMaxTempMap(String version, String[] tagNames) {
         StringBuilder builder = new StringBuilder();
-        BigDecimal maxTemp = getMaxTemp(builder, 0, version, tagNames);
+        BigDecimal maxTemp = getMaxTemp(builder, -1, version, tagNames);
         Map<String, BigDecimal> tempMap = new HashMap<String, BigDecimal>(){};
         tempMap.put(builder.toString(), maxTemp);
         return tempMap;
@@ -585,16 +585,16 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             //今日最高温度
             Map<String, BigDecimal> todayACMap = getMaxTempMap(version, luGangA_C);
             //昨日最高温度
-            BigDecimal maxACTemp = getMaxTemp(new StringBuilder(), -1, version, todayACMap.keySet().toArray(new String[todayACMap.keySet().size()]));
+            BigDecimal maxACTemp = getMaxTemp(new StringBuilder(), -2, version, todayACMap.keySet().toArray(new String[todayACMap.keySet().size()]));
             dealLuTiWenDuData(todayACMap, maxACTemp, 1, text1, text2, text3, text4, prefix, stuffix);
             Map<String, BigDecimal> todayDFMap = getMaxTempMap(version, luGangD_F);
-            BigDecimal maxDFTemp = getMaxTemp(new StringBuilder(), -1, version, todayDFMap.keySet().toArray(new String[todayDFMap.keySet().size()]));
+            BigDecimal maxDFTemp = getMaxTemp(new StringBuilder(), -2, version, todayDFMap.keySet().toArray(new String[todayDFMap.keySet().size()]));
             dealLuTiWenDuData(todayDFMap, maxDFTemp, 2, text1, text2, text3, text4, prefix, stuffix);
             Map<String, BigDecimal> todayGIMap = getMaxTempMap(version, luGangG_I);
-            BigDecimal maxGITemp = getMaxTemp(new StringBuilder(), -1, version, todayGIMap.keySet().toArray(new String[todayGIMap.keySet().size()]));
+            BigDecimal maxGITemp = getMaxTemp(new StringBuilder(), -2, version, todayGIMap.keySet().toArray(new String[todayGIMap.keySet().size()]));
             dealLuTiWenDuData(todayGIMap, maxGITemp, 3, text1, text2, text3, text4, prefix, stuffix);
             Map<String, BigDecimal> todayJMMap = getMaxTempMap(version, luGangJ_M);
-            BigDecimal maxJMTemp = getMaxTemp(new StringBuilder(), -1, version, todayJMMap.keySet().toArray(new String[todayJMMap.keySet().size()]));
+            BigDecimal maxJMTemp = getMaxTemp(new StringBuilder(), -2, version, todayJMMap.keySet().toArray(new String[todayJMMap.keySet().size()]));
             dealLuTiWenDuData(todayJMMap, maxJMTemp, 4, text1, text2, text3, text4, prefix, stuffix);
         } catch (Exception e) {
             log.error("处理铁口温度失败", e);
@@ -862,7 +862,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             dealChart1(data);
             dealChart2(data);
 
-            double increase = dealIncreaseYesterday(data, "BF8_L2M_HMMassAct_1d_cur");
+            double increase = dealIncreaseYesterday(data, "BF8_L2M_BX_HMMass_1d_cur");
             if (increase >= 0d) {
                 result.put("textOne1", "升高");
             } else {
@@ -886,7 +886,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             }
             result.put("countOne3", df2.format(Math.abs(increase)));
 
-            result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_HMMassAct_1d_cur", false)));
+            result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_BX_HMMass_1d_cur", false)));
             result.put("countOne5", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
             result.put("countOne6", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
             result.put("countOne7", df2.format(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
@@ -982,7 +982,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private void dealChart1(JSONObject data) {
-        List<Double> tagObject1 = getValuesByTag(data, "BF8_L2M_HMMassAct_1d_cur");
+        List<Double> tagObject1 = getValuesByTag(data, "BF8_L2M_BX_HMMass_1d_cur");
         List<Double> tagObject2 = getValuesByTag(data, "BF8_L2M_BX_FuelRate_1d_cur");
         List<Double> tempObject1 = new ArrayList<>(tagObject1);
         List<Double> tempObject2 = new ArrayList<>(tagObject2);
@@ -1242,10 +1242,15 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         JSONObject tagObject = data.getJSONObject(tagName);
         List<Double> vals = new ArrayList<>();
         Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
-        for (String time : longTimeList) {
+        for (Long time : longTimeList) {
             Double val = null;
             if (innerMap != null) {
-                BigDecimal big = (BigDecimal) innerMap.get(time);
+                //所有L2M_BX的点都是 写的0 其实9点出来  其余点都是22点出来
+                if(!tagName.contains("_L2M_BX_")) {
+                    //减去22小时，取L2M_BX数据
+                    time = time - 7200000;
+                }
+                BigDecimal big = (BigDecimal) innerMap.get(String.valueOf(time));
                 if (null != big) {
                     val = big.doubleValue();
                     if (val < 0) {
@@ -1316,14 +1321,14 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         while (startDate.before(endDate)) {
             // 拼接x坐标轴
             categoriesList.add(DateUtil.getFormatDateTime(DateUtil.addDays(startDate, -1), DateUtil.MMddChineseFormat));
-            longTimeList.add(startDate.getTime()+"");
+            longTimeList.add(startDate.getTime());
             // 递增日期
             cal.add(Calendar.DAY_OF_MONTH, 1);
             startDate = cal.getTime();
         }
 
         categoriesList.add(DateUtil.getFormatDateTime(DateUtil.addDays(endDate, -1), DateUtil.MMddChineseFormat));
-        longTimeList.add(endDate.getTime()+"");
+        longTimeList.add(endDate.getTime());
     }
 
     /**

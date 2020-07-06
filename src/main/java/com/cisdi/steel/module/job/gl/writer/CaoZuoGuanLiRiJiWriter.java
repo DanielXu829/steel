@@ -128,7 +128,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 DateQuery query = this.getDateQueryBeforeOneDay(excelDTO);
                 DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(query.getRecordDate());
                 List<DateQuery> dateQueries = DateQueryUtil.buildDayHourOneEach(dateQuery.getStartTime(), dateQuery.getEndTime());
-
+                // evt为后缀的值需要此逻辑，防止取到前一天累计的值。
+//                DateQuery firstDateQuery = dateQueries.get(0);
+//                firstDateQuery.setStartTime(DateUtil.addSecond(firstDateQuery.getStartTime(), 1));
+//                dateQueries.set(0, firstDateQuery);
                 // 直接拿到tag点名, 无需根据别名再去获取tag点名
                 List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
                 for (int rowNum = 0; rowNum < dateQueries.size(); rowNum++) {
@@ -1129,7 +1132,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             // 待填充的行,列
             int tpcNoBeginRow = tpcNoCell.getRowIndex();
             int tpcNoBeginColumn = tpcNoCell.getColumnIndex();
-            setAnalysisValue2Cell(sheet, cellDataList, coalArr, oreBlockList, tpcNoBeginRow, tpcNoBeginColumn, true);
+            String url = getAnalysisValueUrl(version, String.valueOf(dateQuery.getQueryEndTime()), "LC", coalBrandCode);
+            setAnalysisValue2Cell(sheet, cellDataList, coalArr, url,
+                    tpcNoBeginRow, tpcNoBeginColumn, true);
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
             log.error("处理反面-块矿-矿种出错", e);

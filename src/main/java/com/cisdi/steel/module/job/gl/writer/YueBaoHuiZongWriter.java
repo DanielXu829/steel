@@ -138,7 +138,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 DateQuery eachDateQuery = DateQueryUtil.buildTodayNoDelay(allDayBeginTimeInCurrentMonth.get(i));
                 for (int j = 1; j < 3; j++) {
-                    String remark = getCommitInfo(version, eachDateQuery.getQueryEndTime(), j, 2);
+                    String remark = getCommitInfo(version, eachDateQuery.getQueryStartTime(), j, 2);
                     ExcelWriterUtil.addCellData(resultList, beginRow+i, (j-1)*8+1, remark);
                 }
             }
