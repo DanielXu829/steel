@@ -440,7 +440,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 liaoXianMaps.put("料线-烧结矿", "BF8_L2C_TP_SinterSetLine_1d_avg");
                 liaoXianMaps.put("料线-焦炭", "BF8_L2C_TP_CokeSetLine_1d_avg");
                 liaoXianMaps.put("料线-小烧", "BF8_L2C_TP_LiSinterSetLine_1d_avg");
-                liaoXianMaps.put("料线-主尺", "BF8_L2C_MainRuler_1d_avg");
+                liaoXianMaps.put("料线-主尺", "BF8_L2C_MainRuler_evt");
                 ArrayList<String> liaoXianTagNames = Lists.newArrayList(liaoXianMaps.values());
                 Date liaoXianQueryTime = DateUtil.addDays(day, 1);
                 TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(liaoXianQueryTime, version, liaoXianTagNames);
@@ -497,7 +497,10 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                                             m.put(v.getName(), v.getVal()),HashMap::putAll);
                                     Object orignalVal = collect.get(liaoXianMaps.get(itemName));
                                     if (Objects.nonNull(orignalVal)) {
-                                        BigDecimal val = ((BigDecimal) orignalVal).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+                                        BigDecimal val = (BigDecimal) orignalVal;
+                                        if (!"料线-主尺".equals(itemName)) {
+                                            val = ((BigDecimal) orignalVal).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+                                        }
                                         ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                                     }
                                 }
