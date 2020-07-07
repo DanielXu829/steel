@@ -506,4 +506,12 @@ public class ExcelWriterUtil {
         stringCellValue = stringCellValue.replaceAll("%当月天数%", String.valueOf(currentMonth));
         titleCell.setCellValue(stringCellValue);
     }
+
+    public static void replaceCurrentDateInTitle(Sheet sheet, int row, int column, Date date) {
+        Cell titleCell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, row), column);
+        String stringCellValue = titleCell.getStringCellValue();
+        String currentMonth = DateFormatUtils.format(date, DateUtil.yyyyMMddChineseFormat);
+        stringCellValue = stringCellValue.replaceAll("%当前日期%", currentMonth);
+        titleCell.setCellValue(stringCellValue);
+    }
 }
