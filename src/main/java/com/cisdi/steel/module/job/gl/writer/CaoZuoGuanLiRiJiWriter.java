@@ -1421,7 +1421,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         int rowIndex = cell.getRowIndex();
         int columnIndex = cell.getColumnIndex();
         //id=1操作简析
-        String commit = getShiftLogCommitInfo(version, dateQuery.getQueryEndTime(), shift, id);
+        String commit = getShiftLogCommitInfo(version, dateQuery.getQueryStartTime(), shift, id);
         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, commit);
     }
 }
