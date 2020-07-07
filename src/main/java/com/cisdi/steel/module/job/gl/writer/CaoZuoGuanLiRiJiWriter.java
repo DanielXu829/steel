@@ -200,20 +200,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             DateQuery query = dayEach.get(i);
             Date queryStartTime = query.getStartTime();
             Date queryEndTime = query.getEndTime();
-
             if (tag.getTargetFormula().endsWith("_evt")) {
-                //如果是evt结尾的, 取时间范围内最大值
-                Double maxVal = 0.0d;
-                for (int j = 0; j < clockList.size(); j++) {
-                    Long tempTime = clockList.get(j);
-                    Date date = new Date(tempTime);
-                    if ((date.getTime() >= queryStartTime.getTime()) && (date.getTime() <= queryEndTime.getTime())) {
-                        Double defaultVal = tagValueMap.get(tempTime);
-                        if (defaultVal > maxVal) {
-                            maxVal = defaultVal;
-                        }
-                    }
-                }
+                //如果是evt结尾的, 取时间最大的值
+                Long key = Collections.max(clockList);
+                Double maxVal = tagValueMap.get(key);
                 ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, maxVal);
             } else {
                 // 其他情况，取时间范围内第一个值。
