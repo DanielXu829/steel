@@ -327,8 +327,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
 
             // 获取数据并填充
             DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(new Date(), -1));
-            List<ChargeVarInfo> chargeVarInfos = getChargeVarInfo(version, dateQuery, "D");
-            handleDangWeiJiaoDu (sheet, getChargeVarInfo(version, dateQuery, "M"));
+            List<ChargeVarInfo> chargeVarInfos = getChargeVarInfo(version, dateQuery, "M");
+            handleDangWeiJiaoDu (sheet, getChargeVarInfo(version, dateQuery, "D"));
             List<CellData> cellDataList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(chargeVarInfos)) {
                 //动态类型的添加顺序
@@ -1402,7 +1402,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         int rowIndex = cell.getRowIndex();
         int columnIndex = cell.getColumnIndex();
         //id=1操作简析
-        String commit = getCommitInfo(version, dateQuery.getQueryEndTime(), shift, id);
+        String commit = getShiftLogCommitInfo(version, dateQuery.getQueryEndTime(), shift, id);
         ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, commit);
     }
 }

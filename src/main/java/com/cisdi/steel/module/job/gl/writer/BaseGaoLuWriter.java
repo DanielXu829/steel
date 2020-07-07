@@ -545,6 +545,36 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return tapSummaryListDTO;
     }
 
+    protected TapSummary getTapSummary(String version, DateQuery dateQuery) {
+        TapSummary summary = null;
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
+        String result = httpUtil.get(getTapSummaryByRangeUrl(version), queryParam);
+        if(StringUtils.isNotBlank(result)) {
+            TapSummaryListDTO summaryDTO = JSON.parseObject(result, TapSummaryListDTO.class);
+            if(Objects.nonNull(summaryDTO) && Objects.nonNull(summaryDTO.getData()) && CollectionUtils.isNotEmpty(summaryDTO.getData())) {
+                summary = summaryDTO.getData().get(0);
+            }
+        }
+        return summary;
+    }
+
+    protected AnalysisValueDTO getAnalysisValueDTO(String version, DateQuery dateQuery, String brandCode) {
+        String url = getAnalysisValuesUrl(version);
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("from", Objects.requireNonNull(dateQuery.getQueryStartTime()).toString());
+        queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
+        queryParam.put("brandCode", brandCode);
+        String result = httpUtil.get(url, queryParam);
+        // 根据json映射对象DTO
+        AnalysisValueDTO analysisValueDTO = null;
+        if (StringUtils.isNotBlank(result)) {
+            analysisValueDTO = JSON.parseObject(result, AnalysisValueDTO.class);
+        }
+        return analysisValueDTO;
+    }
+
     /**
      * 获取无聊brandCode和描述map
      * @param version
@@ -568,11 +598,38 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      *获取commit info中的remark
      * @param version
      * @param date
+     * @param id
+     * @return
+     */
+    protected String getReportCommitInfo(String version, long date, int id) {
+        String commit = "";
+        String url = getCommitInfoUrl(version);
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("date", Objects.requireNonNull(date).toString());
+        queryParam.put("model", "REPORT");
+        queryParam.put("id", String.valueOf(id));
+        String result = httpUtil.get(url, queryParam);
+        if(StringUtils.isNotBlank(result)) {
+            CommentDataDTO commentDataDTO = JSON.parseObject(result, CommentDataDTO.class);
+            if(Objects.nonNull(commentDataDTO)) {
+                CommentData data = commentDataDTO.getData();
+                if(Objects.nonNull(data)) {
+                    commit = data.getRemark();
+                }
+            }
+        }
+        return commit;
+    }
+
+    /**
+     *获取commit info中的remark
+     * @param version
+     * @param date
      * @param shift
      * @param id
      * @return
      */
-    protected String getCommitInfo(String version, long date, int shift, int id) {
+    protected String getShiftLogCommitInfo(String version, long date, int shift, int id) {
         String commit = "";
         String url = getCommitInfoUrl(version);
         Map<String, String> queryParam = new HashMap();
@@ -645,6 +702,24 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      */
     protected String getLatestTagValuesUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValues/latest/";
+    }
+
+    /**
+     * 获取单个tag value
+     * @param version
+     * @param tagName
+     * @param date
+     * @return
+     */
+    protected BigDecimal getLatestTagValue(String version, String tagName, Date date) {
+        long time = date.getTime();
+        Map<String, String> param = new HashMap<>();
+        param.put("time", String.valueOf(time));
+        param.put("tagname", tagName);
+        String url = getLatestTagValueUrl(version);
+        String result = httpUtil.get(url, param);
+        BigDecimal tagValue = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", BigDecimal.class);
+        return tagValue;
     }
 
     /**
