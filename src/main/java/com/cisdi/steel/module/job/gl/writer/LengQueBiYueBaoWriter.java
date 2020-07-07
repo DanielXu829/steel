@@ -150,24 +150,6 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
     }
 
     /**
-     * 获取单个tag value
-     * @param version
-     * @param tagName
-     * @param date
-     * @return
-     */
-    private BigDecimal getLatestTagValue(String version, String tagName, Date date) {
-        long time = date.getTime();
-        Map<String, String> param = new HashMap<>();
-        param.put("time", String.valueOf(time));
-        param.put("tagname", tagName);
-        String url = getLatestTagValueUrl(version);
-        String result = httpUtil.get(url, param);
-        BigDecimal tagValue = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", BigDecimal.class);
-        return tagValue;
-    }
-
-    /**
      * 获取latest tag value list
      *
      * @param version

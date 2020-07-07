@@ -1,10 +1,10 @@
 package com.cisdi.steel.module.job.gl.writer;
 
 import cn.afterturn.easypoi.util.PoiCellUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
+import com.cisdi.steel.common.util.BeanUtils;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
@@ -67,10 +67,12 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             handleChuZhaTieMeiQiChenFen(workbook, version, allDayBeginTimeInCurrentMonth);
             // 原燃料消耗
             handleYuanRanLiaoXiaoHao(workbook, version, allDayBeginTimeInCurrentMonth);
-            //TODO 休风统计
-            handleXiuFenTongJi(workbook, version, allDayBeginTimeInCurrentMonth);
+            //炉底温度
+            handleLuDiWenDu(workbook, version, allDayBeginTimeInCurrentMonth);
             //大计事
             handleDaJiShi(workbook, version, allDayBeginTimeInCurrentMonth);
+            //冷却水冷却壁
+            handleLengQueShuiLengQueBi(workbook, version, allDayBeginTimeInCurrentMonth);
         } catch (Exception e) {
             log.error("处理 月报汇总 时产生错误", e);
             throw e;
@@ -87,45 +89,144 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
         return workbook;
     }
 
-    //TODO 休风统计
-    private void handleXiuFenTongJi(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
+    //冷却水冷却壁
+    private void handleLengQueShuiLengQueBi(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
         try {
             List<CellData> resultList = new ArrayList<>();
-            Sheet sheet = workbook.getSheet("休风统计");
-
-            int beginRow = 6;
+            Sheet sheet = workbook.getSheet("_data");
+            int beginRow = 3;
             int fixLineCount = 0;
-            // 标记行
-            int tagFormulaNum = 5;
-            sheet.getRow(tagFormulaNum).setZeroHeight(true);
-            // 获取excel占位符列
-            List<String> tagFormulaList = PoiCustomUtil.getRowCelVal(sheet, tagFormulaNum);
-            if (CollectionUtils.isEmpty(tagFormulaList)) {
-                return;
-            }
-            int itemDataSize = tagFormulaList.size();
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
-                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+                Date day = allDayBeginTimeInCurrentMonth.get(i);
+                // 计算行
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
                 }
-                int row = beginRow + fixLineCount + i;
-                for (int j = 1; j < itemDataSize; j++) {
-                    String item = tagFormulaList.get(j);
-                    Double val = null;
-                    if(StringUtils.isBlank(item)) {
-                        continue;
+                int rowIndex = beginRow + fixLineCount + i;
+
+                if (Objects.isNull(sheet)) {
+                    return;
+                }
+                // 直接拿到tag点名, 无需根据别名再去获取tag点名
+                List<String> tagNames = PoiCustomUtil.getRowCelVal(sheet, 2);
+                for (int j = 0; j < tagNames.size(); j++) {
+                    String tagName = tagNames.get(j);
+                    Double value = null;
+                    if(!tagName.contains(";")) {
+                        value = handleLengQueShui(version, tagName, day);
+                    } else {
+                        value = handleLengQueBi(version, tagName, day);
                     }
-                    String[] itemArray = item.split("_");
-                    switch (itemArray[0]) {
-                    }
-                    //ExcelWriterUtil.addCellData(resultList, row, j, val);
+                    ExcelWriterUtil.addCellData(resultList, rowIndex, j, value);
+                }
+                ExcelWriterUtil.setCellValue(sheet, resultList);
+            }
+        } catch (Exception e) {
+            log.error("处理冷却水冷却壁出错", e);
+        }
+    }
+
+    /**
+     * 处理一行冷却水数据
+     * @param version
+     * @param tagName
+     * @param date
+     * @return
+     */
+    private Double handleLengQueShui (String version, String tagName, Date date) {
+        String[] names = tagName.split(" - ");
+        BigDecimal value = null;
+        if (names.length == 2) {
+            value = getLatestTagValue(version, names[0], date).subtract(getLatestTagValue(version, names[1], date));
+        } else {
+            value = getLatestTagValue(version, tagName, date);
+        }
+        if (Objects.nonNull(value)) {
+            return value.doubleValue();
+        }
+        return null;
+    }
+
+    /**
+     * 处理冷却壁数据
+     * @param version
+     * @param tagName
+     * @param date
+     * @return
+     */
+    private Double handleLengQueBi (String version, String tagName, Date date) {
+        Double value = null;
+        String[] names = tagName.split(";");
+        List<String> tagNames = new ArrayList<>();
+        Collections.addAll(tagNames, names);
+        //处理一列数据
+        List<Double> list = new ArrayList<>();
+        for (String name : tagNames) {
+            BigDecimal tagValue = getLatestTagValue(version, name, date);
+            if (Objects.nonNull(tagValue)) {
+                list.add(tagValue.doubleValue());
+            }
+        }
+        if (list.size() > 0 && tagName.length() > 2) {
+            value = ExcelWriterUtil.executeSpecialList(tagName.substring(tagName.lastIndexOf("_") + 1, tagName.length() - 1), list);
+        }
+        return value;
+    }
+
+    //炉底温度
+    private void handleLuDiWenDu(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
+        try {
+            Sheet sheet = workbook.getSheet("_ludiwendu_dayno_all");
+            List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
+            List<CellData> cellDataList = new ArrayList<>();
+            for (int dateIndex = 0; dateIndex < allDayBeginTimeInCurrentMonth.size(); dateIndex++) {
+                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(dateIndex));
+                Map<String, Double> stringValueMap = jsonToMap(getTagData(getUrlTagNamesInRange(version), columns, eachDateQuery));
+                for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+                    Double value = stringValueMap.get(columns.get(columnIndex));
+                    ExcelWriterUtil.addCellData(cellDataList, dateIndex + 1, columnIndex, value);
                 }
             }
-            ExcelWriterUtil.setCellValue(sheet, resultList);
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
-            log.error("处理休风统计出错", e);
+            log.error("处理炉底温度出错", e);
         }
+    }
+
+    /**
+     * json字符串转map
+     * @param jsonData
+     * @return
+     */
+    private Map<String, Double> jsonToMap(String jsonData) {
+        JSONObject jsonObject = JSONObject.parseObject(jsonData).getJSONObject("data");
+        Map<String, Double> tagNameToValuemap = new HashMap<>();
+        for (Map.Entry<String, Object> stringObjectEntry : jsonObject.entrySet()) {
+            JSONObject timeToValue = (JSONObject) stringObjectEntry.getValue();
+            List<Object> arrayList = new ArrayList(timeToValue.values());
+            if (arrayList.size() > 0) {
+                tagNameToValuemap.put(stringObjectEntry.getKey(), new Double(arrayList.get(0).toString()));
+            }
+        }
+        return tagNameToValuemap;
+    }
+
+    /**
+     * 获取tag点数据
+     * @param url
+     * @param columns
+     * @param dateQuery
+     * @return
+     */
+    private String getTagData(String url, List<String> columns, DateQuery dateQuery) {
+        JSONObject jsonObject = new JSONObject();
+        Map<String, String> queryParam = dateQuery.getQueryParam();
+        String starttime = queryParam.get("starttime");
+        String endtime = queryParam.get("endtime");
+        jsonObject.put("starttime", starttime);
+        jsonObject.put("endtime", endtime);
+        jsonObject.put("tagnames", columns);
+        return httpUtil.postJsonParams(url, jsonObject.toJSONString());
     }
 
     //大记事
@@ -138,7 +239,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 DateQuery eachDateQuery = DateQueryUtil.buildTodayNoDelay(allDayBeginTimeInCurrentMonth.get(i));
                 for (int j = 1; j < 3; j++) {
-                    String remark = getCommitInfo(version, eachDateQuery.getQueryStartTime(), j, 2);
+                    String remark = getShiftLogCommitInfo(version, eachDateQuery.getQueryStartTime(), j, 2);
                     ExcelWriterUtil.addCellData(resultList, beginRow+i, (j-1)*8+1, remark);
                 }
             }
@@ -241,11 +342,6 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
         }
 
         return JSONObject.parseArray(dataArray.toJSONString(), String.class);
-    }
-
-    //
-    private void getAnalysisValueList() {
-
     }
 
     //原燃料消耗
@@ -555,6 +651,9 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     fixLineCount++;
                 }
                 int row = beginRow + fixLineCount + i;
+                TapSummary summary = getTapSummary(version, eachDateQuery);
+                AnalysisValueDTO hmAnalysisValue = getAnalysisValueDTO(version, eachDateQuery, "HM");
+                AnalysisValueDTO slagAnalysisValue = getAnalysisValueDTO(version, eachDateQuery, "SLAG");
                 for (int j = 1; j < itemDataSize; j++) {
                     String item = tagFormulaList.get(j);
                     Double val = null;
@@ -573,16 +672,27 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             break;
                         case "AnalysisValues":
                             if (itemArray.length == 4) {
-                                List<Double> list = getAnalysisValuesByKey(version, eachDateQuery, itemArray[1], itemArray[2]);
+                                List<Double> list = new ArrayList<>();
+                                if(itemArray[1].equals("HM")) {
+                                    list = getAnalysisValuesByKey(hmAnalysisValue, itemArray[1], itemArray[2]);
+                                } else if (itemArray[1].equals("SLAG")) {
+                                    list = getAnalysisValuesByKey(slagAnalysisValue, itemArray[1], itemArray[2]);
+                                }
                                 val = ExcelWriterUtil.executeSpecialList(itemArray[3], list);
                             }
                             break;
                         case "TapSummary":
                             if (itemArray.length == 2) {
-                                val = getTapSummaryByKey(version, eachDateQuery, itemArray[1]);
+                                val = getTapSummaryByKey(summary, itemArray[1]);
                                 if (itemArray[1].equals("hmRatio") || itemArray[1].equals("slagRatio")) {
                                     if(Objects.nonNull(val)) val = val * 100;
                                 }
+                            }
+                            break;
+                        case "CommitInfo":
+                            String remak = getReportCommitInfo(version, DateUtil.getDateBeginTime(eachDateQuery.getEndTime()).getTime(), 7);
+                            if(StringUtils.isNotBlank(remak)) {
+                                val = Double.parseDouble(remak);
                             }
                             break;
                         default:
@@ -604,15 +714,11 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
      * @param key
      * @return
      */
-    private Double getTapSummaryByKey (String version, DateQuery dateQuery, String key) {
+    private Double getTapSummaryByKey (TapSummary summary, String key) {
+        Map<String, Object> map = BeanUtils.beanToMap(summary);
         Double val = null;
-        Map<String, String> queryParam = new HashMap();
-        queryParam.put("startTime",  Objects.requireNonNull(dateQuery.getStartTime().getTime()).toString());
-        queryParam.put("endTime",  Objects.requireNonNull(dateQuery.getEndTime().getTime()).toString());
-        String result = httpUtil.get(getTapSummaryByRangeUrl(version), queryParam);
-        BigDecimal value = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), key, BigDecimal.class);
-        if(Objects.nonNull(value)) {
-            val = value.doubleValue();
+        if(Objects.nonNull(map) && Objects.nonNull(map.get(key))) {
+            val = Double.parseDouble(map.get(key).toString());
         }
         return val;
     }
@@ -625,33 +731,22 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
      * @param key
      * @return
      */
-    private List<Double> getAnalysisValuesByKey(String version, DateQuery dateQuery, String brandCode, String key) {
+    private List<Double> getAnalysisValuesByKey(AnalysisValueDTO analysisValueDTO, String brandCode, String key) {
         List<String> strList = new ArrayList<String>(){{add("B2");add("B4");}};
         List<AnalysisValue> list = null;
         List<Double> valueList = new ArrayList<>();
-        String url = getAnalysisValuesUrl(version);
-        Map<String, String> queryParam = new HashMap();
-        queryParam.put("from", Objects.requireNonNull(dateQuery.getQueryStartTime()).toString());
-        queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
-        queryParam.put("brandCode", brandCode);
-        String result = httpUtil.get(url, queryParam);
-        // 根据json映射对象DTO
-        AnalysisValueDTO analysisValueDTO = null;
-        if (StringUtils.isNotBlank(result)) {
-            analysisValueDTO = JSON.parseObject(result, AnalysisValueDTO.class);
-            if (Objects.nonNull(analysisValueDTO)) {
-                list = analysisValueDTO.getData();
-                if (Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
-                    for (AnalysisValue analysisValue:list) {
-                        Map<String, BigDecimal> values = analysisValue.getValues();
-                        if (Objects.nonNull(values)) {
-                            BigDecimal val = values.get(key);
-                            if(Objects.nonNull(val)) {
-                                if(!strList.contains(key)) {
-                                    val = val.multiply(new BigDecimal(100));
-                                }
-                                valueList.add(val.doubleValue());
+        if (Objects.nonNull(analysisValueDTO)) {
+            list = analysisValueDTO.getData();
+            if (Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
+                for (AnalysisValue analysisValue:list) {
+                    Map<String, BigDecimal> values = analysisValue.getValues();
+                    if (Objects.nonNull(values)) {
+                        BigDecimal val = values.get(key);
+                        if(Objects.nonNull(val)) {
+                            if(!strList.contains(key)) {
+                                val = val.multiply(new BigDecimal(100));
                             }
+                            valueList.add(val.doubleValue());
                         }
                     }
                 }
