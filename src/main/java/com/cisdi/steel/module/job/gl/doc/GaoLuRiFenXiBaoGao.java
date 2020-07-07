@@ -13,6 +13,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.dto.response.SuccessEntity;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
+import com.cisdi.steel.dto.response.gl.CommentDataDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.dto.response.sj.*;
@@ -848,16 +849,51 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         }
     }
 
+    private String getCommitInfo(String version, long date, int id) {
+        String commit = "";
+        String url = getUrl(version) + "/comment/info";
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("date", Objects.requireNonNull(date).toString());
+        queryParam.put("model", "REPORT");
+        queryParam.put("id", String.valueOf(id));
+        String result = httpUtil.get(url, queryParam);
+        if(StringUtils.isNotBlank(result)) {
+            CommentDataDTO commentDataDTO = JSON.parseObject(result, CommentDataDTO.class);
+            if(Objects.nonNull(commentDataDTO)) {
+                CommentData data = commentDataDTO.getData();
+                if(Objects.nonNull(data)) {
+                    commit = data.getRemark();
+                }
+            }
+        }
+        return commit;
+    }
+
     private void dealPart1(JSONObject data, String version) {
         try {
             dealPart(data, "partOne", L1, df2);
-            //一级品率
             Date date = DateUtil.addDays(new Date(), -1);
             DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
             //合格率
             String[] arr = new String[]{"lw", "lz", "ts", "gl"};
             for (String dataType:arr) {
                 dealQualifiedRate(version, dateQueryNoDelay, dataType);
+            }
+            //发电量
+            String commit = getCommitInfo(version, dateQueryNoDelay.getQueryEndTime(), 6);
+            if (StringUtils.isNotBlank(commit)) {
+                Double commitDay = Double.parseDouble(commit);
+                if (Objects.nonNull(commitDay)) {
+                    result.put("commit_day", df2.format(commitDay));
+                    //吨铁发电量=发电量*10000/日产量
+                    List<Double> valueObject = getValuesByTag(data, "BF8_L2M_BX_HMMass_1d_cur");
+                    if (Objects.nonNull(valueObject) && valueObject.size() > 0) {
+                        Double total = valueObject.get(valueObject.size() - 1);
+                        if (Objects.nonNull(total) && total != 0d) {
+                            result.put("commit_tap", df2.format((commitDay*10000)/total));
+                        }
+                    }
+                }
             }
             dealChart1(data);
             dealChart2(data);
