@@ -61,13 +61,17 @@ public class TestJobGl extends SteelApplicationTests {
     @Autowired
     private LuDiWenDu7Job luDiWenDu7Job;
 
-
     @Autowired
     private LengQueBiYueBaoJob lengQueBiYueBaoJob;
 
-
     @Autowired
     private YueBaoHuiZong8Job yueBaoHuiZong8Job;
+
+    @Autowired
+    private XiuFengTongJi8Job xiuFengTongJi8Job;
+
+    @Autowired
+    private XiuFengTongJi7Job xiuFengTongJi7Job;
 
     @Test
     public void test1() {
@@ -148,6 +152,16 @@ public class TestJobGl extends SteelApplicationTests {
     public void testJiShuJingJi8Job() {
         jiShuJingJi8Job.execute(null);
     }
+
+    /**
+     * 测试 7、8高炉休风统计
+     */
+    @Test
+    public void testXiuFengTongJiJob() {
+        //xiuFengTongJi7Job.execute(null);
+        xiuFengTongJi8Job.execute(null);
+    }
+
 
     /**
      * 测试 7、8高炉炉底温度月报表
@@ -242,6 +256,7 @@ public class TestJobGl extends SteelApplicationTests {
         testCaoZuoGuanLiRiJiJob();
         testLengQueBiYueBaoJob();
         testYueBaoHuiZong8Job();
+        testXiuFengTongJiJob();
     }
 
     @Test

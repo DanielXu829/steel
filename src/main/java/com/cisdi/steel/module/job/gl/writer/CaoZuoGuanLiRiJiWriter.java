@@ -8,6 +8,7 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
+import com.cisdi.steel.dto.response.gl.TagValueListDTO;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
 import com.cisdi.steel.dto.response.gl.TapTPCDTO;
 import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
@@ -128,10 +129,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 DateQuery query = this.getDateQueryBeforeOneDay(excelDTO);
                 DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(query.getRecordDate());
                 List<DateQuery> dateQueries = DateQueryUtil.buildDayHourOneEach(dateQuery.getStartTime(), dateQuery.getEndTime());
-                // evt为后缀的值需要此逻辑，防止取到前一天累计的值。
-//                DateQuery firstDateQuery = dateQueries.get(0);
-//                firstDateQuery.setStartTime(DateUtil.addSecond(firstDateQuery.getStartTime(), 1));
-//                dateQueries.set(0, firstDateQuery);
                 // 直接拿到tag点名, 无需根据别名再去获取tag点名
                 List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
                 for (int rowNum = 0; rowNum < dateQueries.size(); rowNum++) {
@@ -637,7 +634,23 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 }
             }
         }
-
+        //首先查询当天范围内的数据,如果当天没有数据，默认需要显示一条记录，这条记录就是直接查询C OL/OS 这三个点的最新值
+        if(liaoXianMap.size() == 0) {
+            TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(dateQuery.getEndTime(), version, Arrays.asList(tagNames));
+            if (Objects.nonNull(tagValueListDTO) && Objects.nonNull(tagValueListDTO.getData())) {
+                List<TagValue> list = tagValueListDTO.getData();
+                Map<String, List<Long>> map = new HashMap<>();
+                for (TagValue tagValue:list) {
+                    if (Objects.nonNull(tagValue) && StringUtils.isNotBlank(tagValue.getName()) && Objects.nonNull(tagValue.getVal())) {
+                        List<Long> longList = Arrays.asList(tagValue.getVal().longValue(), tagValue.getClock().getTime());
+                        map.put(tagValue.getName(), longList);
+                    }
+                }
+                if (map.size() > 0) {
+                    liaoXianMap.put(1, map);
+                }
+            }
+        }
         int index = 0;
         for(Map.Entry<Integer, Map<String, List<Long>>> entry : liaoXianMap.entrySet()) {
             Integer mapKey = entry.getKey();
@@ -1375,9 +1388,15 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             //id=1操作简析
             handleCommitInfo(1, 1, version, sheet, cellDataList, "{操作简析.夜班}", date);
             handleCommitInfo(2, 1, version, sheet, cellDataList, "{操作简析.白班}", date);
-            //id=1大记事
+            //id=2大记事
             handleCommitInfo(1, 2, version, sheet, cellDataList, "{大记事.夜班}", date);
             handleCommitInfo(2, 2, version, sheet, cellDataList, "{大记事.白班}", date);
+            //id=3调度主任
+            handleCommitInfo(1, 3, version, sheet, cellDataList, "{调度.夜班}", date);
+            handleCommitInfo(2, 3, version, sheet, cellDataList, "{调度.白班}", date);
+            //id=4工长
+            handleCommitInfo(1, 4, version, sheet, cellDataList, "{区工.夜班}", date);
+            handleCommitInfo(2, 4, version, sheet, cellDataList, "{区工.白班}", date);
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
         } catch (Exception e) {
             log.error("处理反面-操作简析/大事记出错", e);

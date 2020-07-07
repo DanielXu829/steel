@@ -10,6 +10,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.AnalysisValueDTO;
 import com.cisdi.steel.dto.response.gl.MaterialExpendStcDTO;
 import com.cisdi.steel.dto.response.gl.TagValueListDTO;
+import com.cisdi.steel.dto.response.gl.TapSummaryListDTO;
 import com.cisdi.steel.dto.response.gl.res.*;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -651,7 +652,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     fixLineCount++;
                 }
                 int row = beginRow + fixLineCount + i;
-                TapSummary summary = getTapSummary(version, eachDateQuery);
+                TapSummaryListDTO summary = getTapSummaryListDTO(version, eachDateQuery.getEndTime());
                 AnalysisValueDTO hmAnalysisValue = getAnalysisValueDTO(version, eachDateQuery, "HM");
                 AnalysisValueDTO slagAnalysisValue = getAnalysisValueDTO(version, eachDateQuery, "SLAG");
                 for (int j = 1; j < itemDataSize; j++) {
@@ -714,9 +715,13 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
      * @param key
      * @return
      */
-    private Double getTapSummaryByKey (TapSummary summary, String key) {
-        Map<String, Object> map = BeanUtils.beanToMap(summary);
+    private Double getTapSummaryByKey (TapSummaryListDTO tapSummaryListDTO, String key) {
         Double val = null;
+        TapSummary summary = null;
+        if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
+            summary = tapSummaryListDTO.getData().get(0);
+        }
+        Map<String, Object> map = BeanUtils.beanToMap(summary);
         if(Objects.nonNull(map) && Objects.nonNull(map.get(key))) {
             val = Double.parseDouble(map.get(key).toString());
         }

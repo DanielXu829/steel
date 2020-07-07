@@ -92,7 +92,9 @@ public enum JobEnum {
     gl_tieshuiyijipinlv("gl_tieshuiyijipinlv","8高炉铁水一级品率精益统计表"),
     gl_luzhajianduhegelv("gl_luzhajianduhegelv","8高炉炉渣碱度合格率精益统计表"),
     gl_chutiexiaolv("gl_chutiexiaolv","8高炉有效出铁比率及出渣比率"),
+    gl_xiufengtongji8("gl_xiufengtongji8","8高炉休风统计"),
     // 武钢7高炉
+    gl_xiufengtongji7("gl_xiufengtongji7","7高炉休风统计"),
     gl_shangliaozhuangliao7("gl_shangliaozhuangliao7","7高炉上料装料日报表"),
     gl_luliaoxiaohao7("gl_luliaoxiaohao7","7高炉炉料消耗月报表"),
     gl_kaoheyuebao7("gl_kaoheyuebao7","7高炉考核月报表"),
