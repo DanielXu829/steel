@@ -105,9 +105,9 @@ public class ChuTieXiaoLvWriter extends BaseGaoLuWriter {
                         case "slagRatio": {
                             // 获取有效出渣比率
                             if (Objects.nonNull(tapSummary)) {
-                                Double hmRatio = tapSummary.getHmRatio();
-                                if (Objects.nonNull(hmRatio)) {
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, hmRatio);
+                                Double slagRatio = tapSummary.getSlagRatio();
+                                if (Objects.nonNull(slagRatio)) {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, slagRatio);
                                 }
                             }
                             break;
