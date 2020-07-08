@@ -35,8 +35,9 @@ public class ExcelWriterUtil {
      * @param endRowNum 最下侧边框行
      * @param beginColumnNum 最左侧边框行
      * @param endColumnNum 最右侧边框行
+     * @param outLineBorderStyle 外侧边框的样式
      */
-    public static void setBorderStyle(Workbook workbook, Sheet sheet, int beginRowNum, int endRowNum, int beginColumnNum, int endColumnNum) {
+    public static void setBorderStyle(Workbook workbook, Sheet sheet, int beginRowNum, int endRowNum, int beginColumnNum, int endColumnNum, BorderStyle outLineBorderStyle) {
         //设置每个单元格的四周边框
         CellStyle cellNormalStyle = workbook.createCellStyle();
         cellNormalStyle.setBorderRight(BorderStyle.THIN);
@@ -49,7 +50,7 @@ public class ExcelWriterUtil {
         }
         // 最左侧列边框
         CellStyle cellLeftStyle = workbook.createCellStyle();
-        cellLeftStyle.setBorderLeft(BorderStyle.THICK);
+        cellLeftStyle.setBorderLeft(outLineBorderStyle);
         cellLeftStyle.setBorderBottom(BorderStyle.THIN);
         cellLeftStyle.setBorderRight(BorderStyle.THIN);
         for (int i = beginRowNum; i <= endRowNum; i++) {
@@ -58,7 +59,7 @@ public class ExcelWriterUtil {
         }
         // 最右侧边框
         CellStyle cellRightStyle = workbook.createCellStyle();
-        cellRightStyle.setBorderRight(BorderStyle.THICK);
+        cellRightStyle.setBorderRight(outLineBorderStyle);
         cellRightStyle.setBorderBottom(BorderStyle.THIN);
         for (int i = beginRowNum; i <= endRowNum; i++) {
             Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), endColumnNum);
@@ -66,23 +67,23 @@ public class ExcelWriterUtil {
         }
         // 最后一行下边框
         CellStyle cellBottomStyle = workbook.createCellStyle();
-        cellBottomStyle.setBorderBottom(BorderStyle.THICK);
+        cellBottomStyle.setBorderBottom(outLineBorderStyle);
         cellBottomStyle.setBorderRight(BorderStyle.THIN);
         Cell cell = null;
         for (int i = beginColumnNum; i <= endColumnNum; i++) {
             cell = ExcelWriterUtil.getCellOrCreate(sheet.getRow(endRowNum), i);
             if (i == beginColumnNum) {
                 CellStyle cellBottomLeftStyle = workbook.createCellStyle();
-                cellBottomLeftStyle.setBorderLeft(BorderStyle.THICK);
-                cellBottomLeftStyle.setBorderBottom(BorderStyle.THICK);
+                cellBottomLeftStyle.setBorderLeft(outLineBorderStyle);
+                cellBottomLeftStyle.setBorderBottom(outLineBorderStyle);
                 cellBottomLeftStyle.setBorderRight(BorderStyle.THIN);
                 cell.setCellStyle(cellBottomLeftStyle);
                 continue;
             }
             if (i == endColumnNum) {
                 CellStyle cellBottomRightStyle = workbook.createCellStyle();
-                cellBottomRightStyle.setBorderRight(BorderStyle.THICK);
-                cellBottomRightStyle.setBorderBottom(BorderStyle.THICK);
+                cellBottomRightStyle.setBorderRight(outLineBorderStyle);
+                cellBottomRightStyle.setBorderBottom(outLineBorderStyle);
                 cell.setCellStyle(cellBottomRightStyle);
                 continue;
             }

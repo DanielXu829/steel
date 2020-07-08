@@ -363,12 +363,11 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 }
                 int row = itemRowNum + 1 + fixLineCount + i;
                 Date day = allDayBeginTimeInCurrentMonth.get(i);
-                DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(day);
                 Date queryDate = DateUtil.addDays(day, 1);
                 TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(queryDate, version, tagFormulaList);
                 List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO).map(TagValueListDTO::getData).orElse(new ArrayList<>());
                 Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream().collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
-                MaterialExpendStcDTO materialExpandStcDTO = getMaterialExpandStcDTO(version, eachDateQuery.getEndTime());
+                MaterialExpendStcDTO materialExpandStcDTO = getMaterialExpandStcDTO(version, day);
                 Map<String, List<MaterialExpend>> typeToMaterialExpendListMap =
                         Optional.ofNullable(materialExpandStcDTO).map(MaterialExpendStcDTO::getData).orElse(null);
                 if (Objects.isNull(typeToMaterialExpendListMap) || typeToMaterialExpendListMap.isEmpty()) {
@@ -458,7 +457,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream()
                         .collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
 
-                List<CommentData> reportCommitInfo = getReportCommitInfo(version, dateQuery.getTime());
+                // 为了和前端统一，还是取当天的0点
+                List<CommentData> reportCommitInfo = getReportCommitInfo(version, day.getTime());
                 Map<String, Short> itemNameToIdMap = new HashMap<String, Short>() {{
                     put("滑料次数", Short.parseShort("1"));
                     put("蹦料次数", Short.parseShort("2"));

@@ -207,7 +207,7 @@ public class ShaoJieKuangLiHuaWriter extends AbstractExcelReadWriter {
         int lastRowNum = itemRowNum + dataSize;
         int lastRowNumOld = sheet.getLastRowNum();
         if (lastRowNum > (lastRowNumOld - 1)) {
-            ExcelWriterUtil.setBorderStyle(workbook, sheet, beginRowNum, lastRowNum, beginColumnNum, endColumnNum);
+            ExcelWriterUtil.setBorderStyle(workbook, sheet, beginRowNum, lastRowNum, beginColumnNum, endColumnNum, BorderStyle.MEDIUM);
         }
     }
 
