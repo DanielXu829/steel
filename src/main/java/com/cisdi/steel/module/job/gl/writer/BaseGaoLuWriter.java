@@ -601,7 +601,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      * @param id
      * @return
      */
-    protected String getReportCommitInfo(String version, long date, int id) {
+    protected String getReportCommitInfoById(String version, long date, int id) {
         String commit = "";
         String url = getCommitInfoUrl(version);
         Map<String, String> queryParam = new HashMap();
@@ -619,6 +619,28 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
             }
         }
         return commit;
+    }
+
+    /**
+     *获取commit info中的remark
+     * @param version
+     * @param date
+     * @return
+     */
+    protected List<CommentData> getReportCommitInfo(String version, long date) {
+        String url = getCommitInfoUrl(version);
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("date", Objects.requireNonNull(date).toString());
+        queryParam.put("model", "REPORT");
+        String result = httpUtil.get(url, queryParam);
+        List<CommentData> commentDataList = new ArrayList<>();
+        if (StringUtils.isNotBlank(result)) {
+            CommentDataListDTO commentDataListDTO = JSON.parseObject(result, CommentDataListDTO.class);
+            if (Objects.nonNull(commentDataListDTO)) {
+                commentDataList = commentDataListDTO.getData();
+            }
+        }
+        return commentDataList;
     }
 
     /**
