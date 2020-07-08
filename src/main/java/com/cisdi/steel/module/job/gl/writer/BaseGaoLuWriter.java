@@ -183,7 +183,6 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
     protected MaterialExpendStcDTO getMaterialExpandStcDTO(String version, Date date) {
         String materialExpendStcUrl = String.format(httpProperties.getGlUrlVersion(version) + "/report/material/materialExpend/stc?dateTime=%s", date.getTime());
         String materialExpendDTOStr = httpUtil.get(materialExpendStcUrl);
-        MaterialExpendStcDTO materialExpendStcDTO = null;
 
         return Optional.ofNullable(materialExpendDTOStr).map(e -> JSON.parseObject(e, MaterialExpendStcDTO.class)).orElse(null);
     }
