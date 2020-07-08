@@ -15,6 +15,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -114,15 +115,20 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
             Sheet qualityIndexSheet = workbook.getSheet("_zhiliangzhibiao");
             List<CellData> resultList = new ArrayList<>();
             Integer[] workTeams = {1, 2, 3, 4, null};
+            String[] workTeamName = {"甲班", "乙班", "丙班", "丁班","作业区"};
             String endTime = DateUtil.getFormatDateTime(dateQuery.getEndTime(), "yyyy-MM-dd 23:59:59");
             Date endDate = DateUtil.strToDate(endTime, "yyyy-MM-dd HH:mm:ss");
             for (int i = 0; i < workTeams.length; i++) {
                 Integer workTeam = workTeams[i];
                 String qualityIndexData = getQualityIndexData(endDate.getTime(), workTeam, version);
                 if (StringUtils.isNotBlank(qualityIndexData)) {
-                    JSONObject anaQualitySttcsJsonObject = JSON.parseObject(qualityIndexData);
-                    JSONArray anaQualitySttcsArray = anaQualitySttcsJsonObject.getJSONArray("data");
-                    List<AnaQualitySttcs> anaQualitySttcsList = JSON.parseObject(anaQualitySttcsArray.toJSONString(), new TypeReference<List<AnaQualitySttcs>>() {});
+                    List<AnaQualitySttcs> anaQualitySttcsList = Optional.ofNullable(JSON.parseObject(qualityIndexData))
+                            .map(e -> e.getJSONArray("data")).map(e -> JSONArray.parseObject(e.toJSONString(),
+                                    new TypeReference<List<AnaQualitySttcs>>() {})).orElse(null);
+                    if (CollectionUtils.isEmpty(anaQualitySttcsList)) {
+                        log.warn(String.format("4烧结作业区生产情况-质量指标统计-%s无数据", workTeamName[i]));
+                        continue;
+                    }
                     for (AnaQualitySttcs anaQualitySttcs : anaQualitySttcsList) {
                         ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
                         if (FEO.equals(anaQualitySttcs.getItem())) {
@@ -205,6 +211,14 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
                     ExcelWriterUtil.addCellData(resultList, workTeam, productPerHourColIndex, productPerHour);
                 }
             }
+
+            // 可停机
+            Cell canStopTimeCell = PoiCustomUtil.getCellByValue(sheet, "可停机");
+            int canDowntimeCellColIndex = canStopTimeCell.getColumnIndex();
+            String canStopTimeData = getCanStopTime(endDate.getTime(), version);
+            Double canStopTimeHour = Optional.ofNullable(JSONObject.parseObject(canStopTimeData))
+                    .map(e -> e.getJSONObject("data")).map(e -> e.getDouble("canStopTime")).orElse(null);
+            ExcelWriterUtil.addCellData(resultList, 1, canDowntimeCellColIndex, canStopTimeHour);
 
             ExcelWriterUtil.setCellValue(sheet, resultList);
         } catch (Exception e) {
@@ -292,6 +306,19 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
         queryParam.put("clock", Objects.requireNonNull(timestamp.toString()));
         queryParam.put("workTeam", Objects.requireNonNull(workTeam.toString()));
         String url = httpProperties.getSJUrlVersion(version) + "/report/productInfo";
+        return httpUtil.get(url, queryParam);
+    }
+
+    /**
+     * 获取生产情况的可停机时间
+     * @param timestamp
+     * @param version
+     * @return
+     */
+    private String getCanStopTime(Long timestamp, String version) {
+        String url = httpProperties.getSJUrlVersion(version) + "/report/canStopTime";
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("clock", Objects.requireNonNull(timestamp.toString()));
         return httpUtil.get(url, queryParam);
     }
 
