@@ -61,7 +61,7 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
 
         Sheet sheet = workbook.getSheetAt(1);
         // 标记行
-        int itemRowNum = 4;
+        int itemRowNum = 3;
         BigDecimal defaultCellValue = new BigDecimal(0.0);
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
@@ -146,7 +146,7 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
 
         Sheet sheet = workbook.getSheetAt(0);
         // 标记行
-        int itemRowNum = 6;
+        int itemRowNum = 5;
         BigDecimal defaultCellValue = new BigDecimal(0.0);
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
