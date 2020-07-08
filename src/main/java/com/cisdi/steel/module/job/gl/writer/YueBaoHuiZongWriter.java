@@ -442,8 +442,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 liaoXianMaps.put("料线-小烧", "BF8_L2C_TP_LiSinterSetLine_1d_avg");
                 liaoXianMaps.put("料线-主尺", "BF8_L2C_MainRuler_evt");
                 ArrayList<String> liaoXianTagNames = Lists.newArrayList(liaoXianMaps.values());
-                Date liaoXianQueryTime = DateUtil.addDays(day, 1);
-                TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(liaoXianQueryTime, version, liaoXianTagNames);
+                Date dateQuery = DateUtil.addDays(day, 1);
+                TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(dateQuery, version, liaoXianTagNames);
 
                 // 获取平均矿批、平均焦批、变料次数
                 Map<String, String> nameTotagFormulaMaps = new HashMap<>();
@@ -452,11 +452,30 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 nameTotagFormulaMaps.put("总批数", "BF8_L2M_BX_ChargeCount_1d_cur");
                 nameTotagFormulaMaps.put("变料次数", "BF8_L2C_SH_CurrentMatrixNumber_evt");
                 ArrayList<String> tagNameList = Lists.newArrayList(nameTotagFormulaMaps.values());
-                TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(liaoXianQueryTime, version, tagNameList);
+                TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(dateQuery, version, tagNameList);
                 List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO)
                         .map(TagValueListDTO::getData).orElse(new ArrayList<>());
                 Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream()
                         .collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
+
+                List<CommentData> reportCommitInfo = getReportCommitInfo(version, dateQuery.getTime());
+                Map<String, Short> itemNameToIdMap = new HashMap<String, Short>() {{
+                    put("滑料次数", Short.parseShort("1"));
+                    put("蹦料次数", Short.parseShort("2"));
+                    put("管道次数", Short.parseShort("3"));
+                    put("悬料次数", Short.parseShort("4"));
+                    put("坐料次数", Short.parseShort("5"));
+                    put("更换风管数", Short.parseShort("8"));
+                }};
+                Map<String, Integer> itemNameToValueMap = new HashMap<>();
+                itemNameToIdMap.forEach((name, id) -> {
+                    List<CommentData> commentDataList = reportCommitInfo.stream()
+                            .filter(e -> id == e.getId()).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(commentDataList)) {
+                        itemNameToValueMap.put(name, Integer.valueOf(commentDataList.get(0).getRemark()));
+                    }
+                });
+
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
                 }
@@ -486,6 +505,15 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             case "变料次数": {
                                 BigDecimal value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, value);
+                                break;
+                            }
+                            case "滑料次数":
+                            case "蹦料次数":
+                            case "管道次数":
+                            case "悬料次数":
+                            case "坐料次数":
+                            case "更换风管数": {
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, itemNameToValueMap.get(itemName));
                                 break;
                             }
                             case "料线-烧结矿":
@@ -609,6 +637,16 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     }
                     itemToValueMap.put(itemName, value);
                 }
+                DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(allDayBeginTimeInCurrentMonth.get(i));
+                TapJyDTO tapJyDTO = getTapJyDTO(version, dateQueryNoDelay, "ts", "day");
+                if (Objects.nonNull(tapJyDTO)) {
+                    BigDecimal yiJiPinTieLiang = tapJyDTO.getTl();
+                    BigDecimal yiJiPinLv = BigDecimal.valueOf(tapJyDTO.getFz())
+                            .divide(BigDecimal.valueOf(tapJyDTO.getFm()),2, BigDecimal.ROUND_HALF_UP)
+                            .multiply(BigDecimal.valueOf(100));
+                    itemToValueMap.put("一级品铁量", yiJiPinTieLiang);
+                    itemToValueMap.put("一级品率", yiJiPinLv);
+                }
                 if (i > 0 && i % 10 == 0) {
                     fixLineCount++;
                 }
@@ -694,7 +732,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             }
                             break;
                         case "CommitInfo":
-                            String remak = getReportCommitInfo(version, DateUtil.getDateBeginTime(eachDateQuery.getEndTime()).getTime(), 7);
+                            String remak = getReportCommitInfoById(version, DateUtil.getDateBeginTime(eachDateQuery.getEndTime()).getTime(), 7);
                             if(StringUtils.isNotBlank(remak)) {
                                 val = Double.parseDouble(remak);
                             }
