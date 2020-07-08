@@ -330,15 +330,23 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     add("批铁t");
                     add("焦比kg/t");
                 }};
+                int initSize = luLiaoList.size();
                 // 初始化动态生成的炉料变更种类
                 ChargeVarInfo info = chargeVarInfos.get(0);
+                for(ChargeVarInfo chargeVarInfo:chargeVarInfos) {
+                    if (Objects.nonNull(info) && Objects.nonNull(chargeVarInfo) &&
+                            Objects.nonNull(chargeVarInfo.getChargeVarMaterial()) &&
+                            Objects.nonNull(info.getChargeVarMaterial()) && chargeVarInfo.getChargeVarMaterial().size() > info.getChargeVarMaterial().size()) {
+                        info = chargeVarInfo;
+                    }
+                }
                 if (Objects.nonNull(info)) {
                     List<ChargeVarMaterial> chargeVarMaterials = info.getChargeVarMaterial();
                     if (Objects.nonNull(chargeVarMaterials) && CollectionUtils.isNotEmpty(chargeVarMaterials)) {
                         for (ChargeVarMaterial material:chargeVarMaterials) {
                             if (!luLiaoList.contains(material.getBrandName())) {
                                 ExcelWriterUtil.addCellData(cellDataList, typeRowIndex +
-                                        luLiaoList.size() - 9, typeColumnIndex, material.getBrandName()+"t");
+                                        luLiaoList.size() - initSize, typeColumnIndex, material.getBrandName()+"t");
                                 luLiaoList.add(material.getBrandName());
                             }
                         }
