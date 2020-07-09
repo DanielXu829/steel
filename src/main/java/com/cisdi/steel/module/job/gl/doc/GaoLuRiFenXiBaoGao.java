@@ -281,14 +281,6 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return brandCodeData;
     }
 
-    private String getAnalysisValuesByCodeUrl(String version, long time, String type, String brandCode) {
-        return String.format(getUrl(version) + "/analysisValue/clock/%s?type=%s&brandcode=%s", time, type, brandCode);
-    }
-
-    private String getAnalysisValuesByTypeUrl(String version) {
-        return getUrl(version) + "/analysisValues/rangeByType";
-    }
-
     private String getAnalysisValuesByCodeUrl(String version) {
         return getUrl(version) + "/analysisValues/rangeByCode";
     }
@@ -311,26 +303,8 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return analysisValueDTO.getData();
     }
 
-    private List<AnalysisValue> getAnalysisValuesByType(String version, DateQuery dateQuery, String name, String brandCode) {
-        return getAnalysisValuesByUrl(getAnalysisValuesByTypeUrl(version), dateQuery, name, brandCode);
-    }
-
     private List<AnalysisValue> getAnalysisValuesByBrandCode(String version, DateQuery dateQuery, String name, String brandCode) {
         return getAnalysisValuesByUrl(getAnalysisValuesByCodeUrl(version), dateQuery, name, brandCode);
-    }
-
-    private List<AnalysisValue> getAnalysisValuesByCode(String version, DateQuery dateQuery, String type, String brandCode) {
-        String url = getAnalysisValuesByCodeUrl(version, dateQuery.getQueryEndTime(), type, brandCode);
-        String data = httpUtil.get(url);
-        // 根据json映射对象DTO
-        AnalysisValueDTO analysisValueDTO = null;
-        if (StringUtils.isNotBlank(data)) {
-            analysisValueDTO = JSON.parseObject(data, AnalysisValueDTO.class);
-        }
-        if (Objects.isNull(analysisValueDTO)) {
-            return null;
-        }
-        return analysisValueDTO.getData();
     }
 
     private void handleAnalysisValues(List<AnalysisValue> analysisValues, String[] array, String prefix, List<String> list) {
@@ -349,32 +323,29 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         }
     }
 
-    private void dealPartTwo(String version) {
-        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(new Date(), -1));
-        //焦炭
-        handleAnalysisValues(getAnalysisValuesByType(version, dateQuery, "materialType", "COKE"), new String[]{"H2O", "Ad", "Vdaf"}, "COKE", Arrays.asList());
-        handleAnalysisValues(getAnalysisValuesByCode(version, dateQuery, "LG", "KM-L_COKE"), new String[]{"M40", "M10", "CSR", "CRI"}, "COKE", Arrays.asList("M40", "M10", "CSR", "CRI"));
-        //煤粉
-        handleAnalysisValues(getAnalysisValuesByCode(version, dateQuery, "LC", "FBFM-A_COAL"), new String[]{"H2O", "Vdaf", "Fcad"}, "COAL", Arrays.asList());
-        //烧结
-        List<AnalysisValue> sinterList = getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", "S4_SINTER");
-        if(Objects.isNull(sinterList) || CollectionUtils.isEmpty(sinterList)) {
-            sinterList = getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", "S1_SINTER");
-        }
-        handleAnalysisValues(sinterList, new String[]{"TFe", "FeO", "CaO", "SiO2", "MgO", "Al2O3", "B2"}, "SINTER", Arrays.asList("B2"));
-        //球团
-        handleAnalysisValues(getAnalysisValuesByType(version, dateQuery, "materialType", "PELLETS"), new String[]{"TFe", "CaO", "SiO2"}, "PELLETS", Arrays.asList());
-        //块矿
-        String brandCodeType = "LUMPORE";
-        String oreBlockType = "LC";
+    private List<AnalysisValue> getAnalysisValueList(String version, DateQuery dateQuery, String name, String brandCodeType) {
         List<AnalysisValue> allAnalysisValues = new ArrayList<>();
         List<String> list = getBrandCodeData(version, dateQuery, brandCodeType);
         if(Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
             for (String brandCode:list) {
-                allAnalysisValues.addAll(getAnalysisValuesByCode(version, dateQuery, oreBlockType, brandCode));
+                allAnalysisValues.addAll(getAnalysisValuesByBrandCode(version, dateQuery, name, brandCode));
             }
         }
-        handleAnalysisValues(allAnalysisValues, new String[]{"TFe", "SiO2", "Al2O3"}, brandCodeType, Arrays.asList());
+        return allAnalysisValues;
+    }
+
+    private void dealPartTwo(String version) {
+        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(new Date(), -1));
+        //焦炭
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "COKE"), new String[]{"H2O", "Ad", "Vdaf", "M40", "M10", "CSR", "CRI"}, "COKE", Arrays.asList("M40", "M10", "CSR", "CRI"));
+        //煤粉
+        handleAnalysisValues(getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", "FBFM-A_COAL"), new String[]{"H2O", "Vdaf", "Fcad"}, "COAL", Arrays.asList());
+        //烧结
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "SINTER"), new String[]{"TFe", "FeO", "CaO", "SiO2", "MgO", "Al2O3", "B2"}, "SINTER", Arrays.asList("B2"));
+        //球团
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "PELLETS"), new String[]{"TFe", "CaO", "SiO2"}, "PELLETS", Arrays.asList());
+        //块矿
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "LUMPORE"), new String[]{"TFe", "SiO2", "Al2O3"}, "LUMPORE", Arrays.asList());
     }
 
     private TagValue getLatestMaxTag(String version, String[] tagNames, int days) {

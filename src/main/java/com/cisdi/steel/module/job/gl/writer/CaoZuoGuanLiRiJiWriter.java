@@ -1362,7 +1362,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
 
     private List<AnalysisValue> getAnalysisValuesRequestDataByCode(String version, DateQuery dateQuery, String brandCodeType) {
         List<AnalysisValue> allAnalysisValues = new ArrayList<>();
-        List<String> list = getBrandCodeData(version, dateQuery, brandCodeType);
+        List<String> list = getBrandCodeData(version, DateQueryUtil.buildDayAheadTwoHour(dateQuery.getRecordDate()), brandCodeType);
         if(Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
             for (String brandCode:list) {
                 allAnalysisValues.addAll(getAnalysisValuesByBrandCode(version, String.valueOf(dateQuery.getQueryStartTime()), String.valueOf(dateQuery.getQueryEndTime()), brandCode));
