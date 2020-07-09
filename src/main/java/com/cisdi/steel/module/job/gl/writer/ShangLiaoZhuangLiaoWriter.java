@@ -57,7 +57,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
     private static final String SEQUENCE = "sequence";
     private static final String BATCHINDEX_WEIGHTTIME = "batchIndex.weighttime";
     private static final String BATCHINDEX_MATRIXNO = "batchIndex.matrixno";
-    private static final String BATCHINDEX_BATCHNO = "batchIndex.batchno";
+    private static final String INDEX_IN_DAY = "indexInDay";
     private static final String N_A = "N/A";
     private static final String ORE_TOTAL = "矿石总量";
     private static final String COKE_TOTAL = "焦炭总量";
@@ -262,8 +262,8 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
                             ExcelWriterUtil.addCellData(cellDataList, row, col, batchIndexDataMap.getMatrixno());
                             break;
                         }
-                        case BATCHINDEX_BATCHNO: {
-                            ExcelWriterUtil.addCellData(cellDataList, row, col, batchIndexDataMap.getBatchno());
+                        case INDEX_IN_DAY: {
+                            ExcelWriterUtil.addCellData(cellDataList, row, col, batchData.getIndexInDay());
                             break;
                         }
                         case N_A: {
