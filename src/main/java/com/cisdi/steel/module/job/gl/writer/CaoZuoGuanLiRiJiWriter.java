@@ -1113,7 +1113,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         String coalPlaceHolder = "{煤粉}";
         String[] cokeArr = {"H2O", "Ad", "Vdaf", "S", "M40", "M10", "CSR", "CRI"};
         // 根据需求，取回的煤粉数据中C取Fcad，S取Std
-        String[] coalArr = {"Ad", "Vdaf", "Std", "Fcad", "S"};
+        String[] coalArr = {"Ad", "Vdaf", "Std", "Fcad", "H2O"};
         List<CellData> cellDataList = new ArrayList<>();
         try {
             // 反面sheet
