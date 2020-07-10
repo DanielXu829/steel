@@ -523,6 +523,39 @@ public class DateQueryUtil {
     }
 
     /**
+     * 记录每年的每月
+     *
+     * @return 结果
+     */
+    public static List<DateQuery> buildYearMonthEach59(Date date) {
+        DateQuery dateQuery = buildYear(date);
+        Date startTime = dateQuery.getStartTime();
+        long betweenDays = DateUtil.getBetweenMonths(date);
+        List<DateQuery> queryList = new ArrayList<>();
+        Date currentDate = startTime;
+        for (int i = 1; i <= betweenDays; i++) {
+            DateQuery query = buildMonth59(currentDate);
+            queryList.add(query);
+            currentDate = DateUtil.addMonths(currentDate, 1);
+        }
+        return queryList;
+    }
+
+    /**
+     * 指定 月的时间范围
+     *
+     * @param date 指定月
+     * @return 结果
+     */
+    public static DateQuery buildMonth59(Date date) {
+        Date monthStartTime = getMonthStartTime(date);
+        Date beginTime = DateUtil.getDateBeginTime(monthStartTime);
+        Date monthEndTime = getMonthEndTime(date);
+        Date endTime = DateUtil.getDateEndTime59(monthEndTime);
+        return new DateQuery(beginTime, endTime, date);
+    }
+
+    /**
      * 指定 月的时间范围
      *
      * @param date 指定月

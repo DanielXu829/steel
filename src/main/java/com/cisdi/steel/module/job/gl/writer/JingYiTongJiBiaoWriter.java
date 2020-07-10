@@ -62,16 +62,20 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
         Sheet sheet = workbook.getSheetAt(1);
         // 标记行
         int itemRowNum = 3;
-        BigDecimal defaultCellValue = new BigDecimal(0.0);
+        int defaultCellValue = 0;
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
 
-        List<DateQuery> allMonthInCurrentYear = DateQueryUtil.buildYearMonthEach(DateUtil.addDays(new Date(), -1));
+        List<DateQuery> allMonthInCurrentYear = DateQueryUtil.buildYearMonthEach59(DateUtil.addDays(new Date(), -1));
 
         for (int i = 0; i < allMonthInCurrentYear.size(); i++) {
             // 通过api获取按天的精益数据
             DateQuery dateQueryNoDelay = allMonthInCurrentYear.get(i);
+            // 如果是
+            if (i == allMonthInCurrentYear.size() - 1) {
+                dateQueryNoDelay.setEndTime(DateUtil.getDateEndTime59(DateUtil.addDays(new Date(), -1)));
+            }
             // 判断当前是何种精益报表，使用不同的dataType
             String dataType = null;
             if (JobEnum.gl_luwenhegelv.getCode().equals(excelDTO.getJobEnum().getCode())) {
@@ -111,6 +115,8 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
                                 Integer fz = tapJyDTO.getFz();
                                 if (Objects.nonNull(fz)) {
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, fz);
+                                } else {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, defaultCellValue);
                                 }
                             }
                             break;
@@ -121,6 +127,8 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
                                 Integer fm = tapJyDTO.getFm();
                                 if (Objects.nonNull(fm)) {
                                     ExcelWriterUtil.addCellData(cellDataList, row, col, fm);
+                                } else {
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, defaultCellValue);
                                 }
                             }
                             break;
