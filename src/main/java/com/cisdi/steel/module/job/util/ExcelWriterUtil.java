@@ -28,17 +28,17 @@ import java.util.*;
 public class ExcelWriterUtil {
 
     /**
-     * 设置表格单元格样式（四周边框加粗）
+     * 设置表格单元格样式（左、右、下三周边框加粗）
      * @param workbook
      * @param sheet
-     * @param beginRowNum 最上侧边框行
+     * @param beginRowNum 数据起始行
      * @param endRowNum 最下侧边框行
-     * @param beginColumnNum 最左侧边框行
-     * @param endColumnNum 最右侧边框行
+     * @param beginColumnNum 最左侧边框列
+     * @param endColumnNum 最右侧边框列
      * @param outLineBorderStyle 外侧边框的样式
      */
     public static void setBorderStyle(Workbook workbook, Sheet sheet, int beginRowNum, int endRowNum, int beginColumnNum, int endColumnNum, BorderStyle outLineBorderStyle) {
-        //设置每个单元格的四周边框
+        // 设置每个单元格的四周边框-普通样式
         CellStyle cellNormalStyle = workbook.createCellStyle();
         cellNormalStyle.setBorderRight(BorderStyle.THIN);
         cellNormalStyle.setBorderBottom(BorderStyle.THIN);
@@ -48,7 +48,7 @@ public class ExcelWriterUtil {
                 cell.setCellStyle(cellNormalStyle);
             }
         }
-        // 最左侧列边框
+        // 最左侧列边框-只有左边加粗，右下、为普通
         CellStyle cellLeftStyle = workbook.createCellStyle();
         cellLeftStyle.setBorderLeft(outLineBorderStyle);
         cellLeftStyle.setBorderBottom(BorderStyle.THIN);
@@ -57,7 +57,7 @@ public class ExcelWriterUtil {
             Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), beginColumnNum);
             cell.setCellStyle(cellLeftStyle);
         }
-        // 最右侧边框
+        // 最右侧边框-只有右边加粗，左下、为普通
         CellStyle cellRightStyle = workbook.createCellStyle();
         cellRightStyle.setBorderRight(outLineBorderStyle);
         cellRightStyle.setBorderBottom(BorderStyle.THIN);
@@ -65,13 +65,14 @@ public class ExcelWriterUtil {
             Cell cell = ExcelWriterUtil.getCellOrCreate(ExcelWriterUtil.getRowOrCreate(sheet, i), endColumnNum);
             cell.setCellStyle(cellRightStyle);
         }
-        // 最后一行下边框
+        // 最后一行下边框 底部加粗
         CellStyle cellBottomStyle = workbook.createCellStyle();
         cellBottomStyle.setBorderBottom(outLineBorderStyle);
         cellBottomStyle.setBorderRight(BorderStyle.THIN);
-        Cell cell = null;
+        Cell cell;
         for (int i = beginColumnNum; i <= endColumnNum; i++) {
             cell = ExcelWriterUtil.getCellOrCreate(sheet.getRow(endRowNum), i);
+            // 最后一行 第一列单元格为 左-下加粗
             if (i == beginColumnNum) {
                 CellStyle cellBottomLeftStyle = workbook.createCellStyle();
                 cellBottomLeftStyle.setBorderLeft(outLineBorderStyle);
@@ -80,6 +81,7 @@ public class ExcelWriterUtil {
                 cell.setCellStyle(cellBottomLeftStyle);
                 continue;
             }
+            // 最后一行 最后一列单元格为 右-下加粗
             if (i == endColumnNum) {
                 CellStyle cellBottomRightStyle = workbook.createCellStyle();
                 cellBottomRightStyle.setBorderRight(outLineBorderStyle);
