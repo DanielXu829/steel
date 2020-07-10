@@ -309,7 +309,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         TapJyDTO tapJyDTO = null;
         Map<String, String> queryParam = new HashMap();
         queryParam.put("startTime",  String.valueOf(date.getStartTime().getTime()));
-        queryParam.put("endTime",  String.valueOf(date.getEndTime().getTime()));
+        queryParam.put("endTime",  String.valueOf(date.getStartTime().getTime()));
         queryParam.put("dataType",  dataType);
         queryParam.put("workShift",  workShift);
 
