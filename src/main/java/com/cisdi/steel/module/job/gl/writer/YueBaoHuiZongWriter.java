@@ -738,7 +738,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             }
                             break;
                         default:
-                            val = getLatestValue(version, String.valueOf(eachDateQuery.getRecordDate().getTime()), item);
+                            val = getLatestValue(version, String.valueOf(eachDateQuery.getQueryEndTime()), item);
                             break;
                     }
                     ExcelWriterUtil.addCellData(cellDataList, row, j, val);
