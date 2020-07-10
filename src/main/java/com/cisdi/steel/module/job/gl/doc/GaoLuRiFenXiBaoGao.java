@@ -854,7 +854,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                 dealQualifiedRate(version, dateQueryNoDelay, dataType);
             }
             //发电量
-            String commit = getCommitInfo(version, DateUtil.getDateBeginTime(dateQueryNoDelay.getEndTime()).getTime(), 6);
+            String commit = getCommitInfo(version, dateQueryNoDelay.getQueryStartTime(), 6);
             if (StringUtils.isNotBlank(commit)) {
                 Double commitDay = Double.parseDouble(commit);
                 if (Objects.nonNull(commitDay)) {
