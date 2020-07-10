@@ -144,13 +144,13 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         typeList.forEach(type -> typeNameToList.put(type, new HashSet<String>()));
         for (BatchMaterial batchMaterial : allBatchMaterialList) {
             typeNameToList.forEach((type, subTypeList) -> {
-                if (batchMaterial.getBrandcode().endsWith(type)) {
+                if (StringUtils.containsIgnoreCase(batchMaterial.getBrandcode(), type)) {
                     subTypeList.add(batchMaterial.getDescr());
                 }
             });
         }
         // 写入新的列
-        addNewItem(sheet, typeNameToList, COKE, "焦丁", "回用焦");
+        addNewItem(sheet, typeNameToList, COKE, "{coke_start}", "{coke_end}");
         addNewItem(sheet, typeNameToList, PELLETS, "程潮球团", "鄂州球团");
         addNewItem(sheet, typeNameToList, LUMPORE, "阿块", "纽曼混合块矿");
         addNewItem(sheet, typeNameToList, FLUX, "石灰石", "硅石");
@@ -192,7 +192,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
                     for (int columnNum = startItemCellColumnIndex; columnNum <= endItemCellColumnIndex; columnNum++) {
                         String cellValue = PoiCellUtil.getCellValue(sheet, rowIndex, columnNum);
                         // 此单元格值为空，可以写入新的小分类, 同时写入标记行
-                        if (StringUtils.isBlank(cellValue) || cellValue.endsWith("start}") || cellValue.endsWith("end}")) {
+                        if (StringUtils.isBlank(cellValue) || StringUtils.endsWithIgnoreCase(cellValue,"start}") || StringUtils.endsWithIgnoreCase(cellValue,"end}")) {
                             Cell cell = sheet.getRow(rowIndex).getCell(columnNum);
                             Cell itemCell = sheet.getRow(itemRowNum).getCell(columnNum);
                             if (i < newCokeList.size()) {
@@ -204,10 +204,10 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
                     }
                 }
             }
-            for (int columnNum = startItemCellColumnIndex; columnNum < endItemCellColumnIndex; columnNum++) {
+            for (int columnNum = startItemCellColumnIndex; columnNum <= endItemCellColumnIndex; columnNum++) {
                 String cellValue = PoiCellUtil.getCellValue(sheet, rowIndex, columnNum);
-                // 填充完后，如果单元格为空，则隐藏
-                if (StringUtils.isBlank(cellValue)) {
+                // 填充完后，如果单元格为空或者为标记项，则隐藏
+                if (StringUtils.isBlank(cellValue) || StringUtils.endsWithIgnoreCase(cellValue,"start}") || StringUtils.endsWithIgnoreCase(cellValue,"end}")) {
                     sheet.setColumnHidden(columnNum, true);
                 }
             }
@@ -271,14 +271,14 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
                             break;
                         }
                         case ORE_TOTAL : {
-                            BigDecimal oreTotal = materialsArray.stream().filter(m -> m.getBrandcode().endsWith(LUMPORE) ||
-                                    m.getBrandcode().endsWith(PELLETS) || m.getBrandcode().endsWith(SINTER))
+                            BigDecimal oreTotal = materialsArray.stream().filter(m -> StringUtils.containsIgnoreCase(m.getBrandcode(), LUMPORE) ||
+                                    StringUtils.containsIgnoreCase(m.getBrandcode(), PELLETS) || StringUtils.containsIgnoreCase(m.getBrandcode(), SINTER))
                                     .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
                             ExcelWriterUtil.addCellData(cellDataList, row, col, oreTotal);
                             break;
                         }
                         case COKE_TOTAL : {
-                            BigDecimal cokeTotal = materialsArray.stream().filter(m -> m.getBrandcode().endsWith(COKE))
+                            BigDecimal cokeTotal = materialsArray.stream().filter(m -> StringUtils.containsIgnoreCase(m.getBrandcode(), COKE))
                                     .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
                             ExcelWriterUtil.addCellData(cellDataList, row, col, cokeTotal);
                             break;
@@ -287,7 +287,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
                             // OL中：materials.brandcode后缀是SINTER
                             if (OL.equalsIgnoreCase(batchIndexDataMap.getTyp())) {
                                 BigDecimal val = materialsArray.stream()
-                                        .filter(m -> m.getBrandcode().endsWith(SINTER))
+                                        .filter(m -> StringUtils.containsIgnoreCase(m.getBrandcode(), SINTER))
                                         .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
@@ -297,7 +297,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
                             // OS中：materials.brandcode后缀是SINTER
                             if (OS.equalsIgnoreCase(batchIndexDataMap.getTyp())) {
                                 BigDecimal val = materialsArray.stream()
-                                        .filter(m -> m.getBrandcode().endsWith(SINTER))
+                                        .filter(m -> StringUtils.containsIgnoreCase(m.getBrandcode(), SINTER))
                                         .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                             }
