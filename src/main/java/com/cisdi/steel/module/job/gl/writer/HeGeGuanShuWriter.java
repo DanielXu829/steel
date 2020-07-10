@@ -73,10 +73,10 @@ public class HeGeGuanShuWriter extends BaseGaoLuWriter {
             }
 
             // 获取夜班数据
-            TapJyDTO tapJyDTONight = this.getTapJyDTO(version, dateQueryNoDelay, dataType, "1");
+            TapJyDTO tapJyDTONight = this.getTapJyDTO(version, dateQueryNoDelay.getQueryStartTime(), dateQueryNoDelay.getQueryStartTime(), dataType, "1");
 
             // 获取白班数据
-            TapJyDTO tapJyDTODayTime = this.getTapJyDTO(version, dateQueryNoDelay, dataType, "2");
+            TapJyDTO tapJyDTODayTime = this.getTapJyDTO(version, dateQueryNoDelay.getQueryStartTime(), dateQueryNoDelay.getQueryStartTime(), dataType, "2");
             if (Objects.isNull(tapJyDTONight) || Objects.isNull(tapJyDTODayTime)) {
                 log.error("获取精益信息失败");
             }
