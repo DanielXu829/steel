@@ -638,7 +638,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     itemToValueMap.put(itemName, value);
                 }
                 DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(allDayBeginTimeInCurrentMonth.get(i));
-                TapJyDTO tapJyDTO = getTapJyDTO(version, dateQueryNoDelay, "ts", "day");
+                TapJyDTO tapJyDTO = getTapJyDTO(version, dateQueryNoDelay.getQueryStartTime(), dateQueryNoDelay.getQueryStartTime(), "ts", "day");
                 if (Objects.nonNull(tapJyDTO)) {
                     BigDecimal yiJiPinTieLiang = tapJyDTO.getTl();
                     BigDecimal yiJiPinLv = BigDecimal.valueOf(tapJyDTO.getFz())

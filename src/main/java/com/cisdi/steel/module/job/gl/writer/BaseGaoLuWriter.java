@@ -305,11 +305,11 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      * @param version
      * @return api数据
      */
-    protected TapJyDTO getTapJyDTO(String version, DateQuery date, String dataType, String workShift) {
+    protected TapJyDTO getTapJyDTO(String version, long startTime, long endTimed, String dataType, String workShift) {
         TapJyDTO tapJyDTO = null;
         Map<String, String> queryParam = new HashMap();
-        queryParam.put("startTime",  String.valueOf(date.getStartTime().getTime()));
-        queryParam.put("endTime",  String.valueOf(date.getStartTime().getTime()));
+        queryParam.put("startTime",  String.valueOf(startTime));
+        queryParam.put("endTime",  String.valueOf(endTimed));
         queryParam.put("dataType",  dataType);
         queryParam.put("workShift",  workShift);
 
@@ -318,7 +318,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         if (StringUtils.isNotBlank(tapJyDTOStr)) {
             SuccessEntity<TapJyDTO> successEntity = JSON.parseObject(tapJyDTOStr, new TypeReference<SuccessEntity<TapJyDTO>>() {});
             if (Objects.isNull(successEntity) || Objects.isNull(successEntity.getData())) {
-                log.warn("根据时间[{}]获取的tapJyDTO数据为空", date.getStartTime());
+                log.warn("根据时间[{}]获取的tapJyDTO数据为空", startTime);
             } else {
                 tapJyDTO = successEntity.getData();
             }
