@@ -72,7 +72,7 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
         for (int i = 0; i < allMonthInCurrentYear.size(); i++) {
             // 通过api获取按天的精益数据
             DateQuery dateQueryNoDelay = allMonthInCurrentYear.get(i);
-
+            dateQueryNoDelay.setStartTime(dateQueryNoDelay.getEndTime());
             // 判断当前是何种精益报表，使用不同的dataType
             String dataType = null;
             if (JobEnum.gl_luwenhegelv.getCode().equals(excelDTO.getJobEnum().getCode())) {

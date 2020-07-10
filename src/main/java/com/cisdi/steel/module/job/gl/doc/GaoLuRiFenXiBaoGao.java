@@ -789,7 +789,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         TapJyDTO tapJyDTO = null;
         Map<String, String> queryParam = new HashMap();
         queryParam.put("startTime",  String.valueOf(date.getStartTime().getTime()));
-        queryParam.put("endTime",  String.valueOf(date.getEndTime().getTime()));
+        queryParam.put("endTime",  String.valueOf(date.getStartTime().getTime()));
         queryParam.put("dataType",  dataType);
         queryParam.put("workShift",  "day");
 
@@ -847,7 +847,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         try {
             dealPart(data, "partOne", L1, df2);
             Date date = DateUtil.addDays(new Date(), -1);
-            DateQuery dateQueryNoDelay = DateQueryUtil.buildDayAheadTwoHour(date);
+            DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
             //合格率
             String[] arr = new String[]{"lw", "lz", "ts", "gl"};
             for (String dataType:arr) {
