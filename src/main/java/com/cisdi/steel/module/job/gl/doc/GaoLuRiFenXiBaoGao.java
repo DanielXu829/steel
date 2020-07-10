@@ -309,6 +309,9 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
 
     private void handleAnalysisValues(List<AnalysisValue> analysisValues, String[] array, String prefix, List<String> list) {
         if(Objects.isNull(analysisValues) || CollectionUtils.isEmpty(analysisValues)) {
+            for (String item:array) {
+                result.put(prefix+"_"+item, " ");
+            }
             return;
         }
         for (String item:array) {
@@ -844,14 +847,14 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         try {
             dealPart(data, "partOne", L1, df2);
             Date date = DateUtil.addDays(new Date(), -1);
-            DateQuery dateQueryNoDelay = DateQueryUtil.buildTodayNoDelay(date);
+            DateQuery dateQueryNoDelay = DateQueryUtil.buildDayAheadTwoHour(date);
             //合格率
             String[] arr = new String[]{"lw", "lz", "ts", "gl"};
             for (String dataType:arr) {
                 dealQualifiedRate(version, dateQueryNoDelay, dataType);
             }
             //发电量
-            String commit = getCommitInfo(version, dateQueryNoDelay.getQueryEndTime(), 6);
+            String commit = getCommitInfo(version, DateUtil.getDateBeginTime(dateQueryNoDelay.getEndTime()).getTime(), 6);
             if (StringUtils.isNotBlank(commit)) {
                 Double commitDay = Double.parseDouble(commit);
                 if (Objects.nonNull(commitDay)) {
