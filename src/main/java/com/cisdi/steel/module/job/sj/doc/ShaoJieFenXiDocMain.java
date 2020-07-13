@@ -253,7 +253,7 @@ public class ShaoJieFenXiDocMain extends AbstractExportWordJob {
      */
     private JSONObject getDataByTag(String[] tagNames, Date date, String version) {
         String apiPath = "/tagValues/tagNames";
-        DateQuery dateQuery = DateQueryUtil.buildToday(date);
+        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date);
         JSONObject query = new JSONObject();
         query.put("start", dateQuery.getQueryStartTime());
         query.put("end", dateQuery.getQueryEndTime());
@@ -275,7 +275,7 @@ public class ShaoJieFenXiDocMain extends AbstractExportWordJob {
      */
     private List<AnalysisValue> getYuanLiaoZhiLiangByType(Date date, String materialType) {
         String apiPath = "/burdenMatAnalysisVal?pageSize=1&pageNum=1";
-        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(date);
+        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date);
         JSONObject query = new JSONObject();
         query.put("start", dateQuery.getStartTime());
         query.put("end", dateQuery.getEndTime());

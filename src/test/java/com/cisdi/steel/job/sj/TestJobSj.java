@@ -5,6 +5,7 @@ import com.cisdi.steel.module.job.sj.DuiChangYunXingTongJiJob;
 import com.cisdi.steel.module.job.sj.ShaoJieShengChan4Job;
 import com.cisdi.steel.module.job.sj.ZuoYeQuShengChanQingKuangJob;
 import com.cisdi.steel.module.job.sj.doc.HuanDuiCaoYeHuiYiJiYaoDocMain;
+import com.cisdi.steel.module.job.sj.doc.ShaoJieFenXiDocMain;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +22,9 @@ public class TestJobSj extends SteelApplicationTests {
 
     @Autowired
     private HuanDuiCaoYeHuiYiJiYaoDocMain huanDuiCaoYeHuiYiJiYaoDocMain;
+
+    @Autowired
+    private ShaoJieFenXiDocMain shaoJieFenXiDocMain;
 
     @Test
     public void test1() {
@@ -42,4 +46,8 @@ public class TestJobSj extends SteelApplicationTests {
         huanDuiCaoYeHuiYiJiYaoDocMain.mainTask();
     }
 
+    @Test
+    public void testShaoJieFenXiDocMain() {
+        shaoJieFenXiDocMain.mainTask();
+    }
 }

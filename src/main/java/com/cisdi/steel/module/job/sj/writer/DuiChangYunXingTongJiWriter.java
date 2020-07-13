@@ -68,7 +68,7 @@ public class DuiChangYunXingTongJiWriter extends AbstractExcelReadWriter {
 
         // 当天早上运行，查询截至前一天23:59:59
         Date searchDate = this.getDateQueryBeforeOneDay(excelDTO).getRecordDate();
-        String searchDateStr = DateUtil.getFormatDateTime(searchDate, "yyyy-MM-dd 23:59:59");
+        String searchDateStr = DateUtil.getFormatDateTime(searchDate, "yyyy-MM-dd 22:00:00");
         searchDate = DateUtil.strToDate(searchDateStr, "yyyy-MM-dd HH:mm:ss");
         Integer[] workTeams = {1, 2, 3, 4};
 
