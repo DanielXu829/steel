@@ -281,17 +281,28 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return brandCodeData;
     }
 
-    private String getAnalysisValuesByCodeUrl(String version) {
-        return getUrl(version) + "/analysisValues/rangeByCode";
+    private String getAnalysisValuesByCodeUrl(String version, DateQuery dateQuery, String name, String brandCode) {
+        return String.format(getUrl(version) + "/analysisValues/rangeByCode?from=%s&to=%s&%s=%s", dateQuery.getQueryStartTime(),
+                dateQuery.getQueryEndTime(), name, brandCode);
     }
 
-    private List<AnalysisValue> getAnalysisValuesByUrl(String url, DateQuery dateQuery, String name, String brandCode) {
-        Map<String, String> queryParam = new HashMap();
-        queryParam.put("from", Objects.requireNonNull(dateQuery.getQueryStartTime()).toString());
-        queryParam.put("to", Objects.requireNonNull(dateQuery.getQueryEndTime()).toString());
-        //materialType
-        queryParam.put(name, brandCode);
-        String data = httpUtil.get(url, queryParam);
+    private String getAnalysisValueUrl(String version, long time, String type, String brandCode) {
+        return String.format(getUrl(version) + "/analysisValue/clock/%s?type=%s&brandcode=%s", time, type, brandCode);
+    }
+
+    private List<AnalysisValue> getAnalysisValueList(String version, DateQuery dateQuery, String type, String brandCodeType) {
+        List<AnalysisValue> allAnalysisValues = new ArrayList<>();
+        List<String> list = getBrandCodeData(version, dateQuery, brandCodeType);
+        if(Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
+            for (String brandCode:list) {
+                allAnalysisValues.addAll(getAnalysisValuesByUrl(getAnalysisValueUrl(version, dateQuery.getQueryEndTime(), type, brandCode)));
+            }
+        }
+        return allAnalysisValues;
+    }
+
+    private List<AnalysisValue> getAnalysisValuesByUrl(String url) {
+        String data = httpUtil.get(url);
         // 根据json映射对象DTO
         AnalysisValueDTO analysisValueDTO = null;
         if (StringUtils.isNotBlank(data)) {
@@ -304,7 +315,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private List<AnalysisValue> getAnalysisValuesByBrandCode(String version, DateQuery dateQuery, String name, String brandCode) {
-        return getAnalysisValuesByUrl(getAnalysisValuesByCodeUrl(version), dateQuery, name, brandCode);
+        return getAnalysisValuesByUrl(getAnalysisValuesByCodeUrl(version, dateQuery, name, brandCode));
     }
 
     private void handleAnalysisValues(List<AnalysisValue> analysisValues, String[] array, String prefix, List<String> list) {
@@ -326,12 +337,12 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         }
     }
 
-    private List<AnalysisValue> getAnalysisValueList(String version, DateQuery dateQuery, String name, String brandCodeType) {
+    private List<AnalysisValue> getAnalysisValueList(String version, DateQuery dateQuery, String brandCodeType) {
         List<AnalysisValue> allAnalysisValues = new ArrayList<>();
         List<String> list = getBrandCodeData(version, dateQuery, brandCodeType);
         if(Objects.nonNull(list) && CollectionUtils.isNotEmpty(list)) {
             for (String brandCode:list) {
-                allAnalysisValues.addAll(getAnalysisValuesByBrandCode(version, dateQuery, name, brandCode));
+                allAnalysisValues.addAll(getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", brandCode));
             }
         }
         return allAnalysisValues;
@@ -340,15 +351,15 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private void dealPartTwo(String version) {
         DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(new Date(), -1));
         //焦炭
-        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "COKE"), new String[]{"H2O", "Ad", "Vdaf", "M40", "M10", "CSR", "CRI"}, "COKE", Arrays.asList("M40", "M10", "CSR", "CRI"));
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "COKE"), new String[]{"H2O", "Ad", "Vdaf", "M40", "M10", "CSR", "CRI"}, "COKE", Arrays.asList("M40", "M10", "CSR", "CRI"));
         //煤粉
         handleAnalysisValues(getAnalysisValuesByBrandCode(version, dateQuery, "brandCode", "FBFM-A_COAL"), new String[]{"H2O", "Vdaf", "Fcad"}, "COAL", Arrays.asList());
         //烧结
-        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "SINTER"), new String[]{"TFe", "FeO", "CaO", "SiO2", "MgO", "Al2O3", "B2"}, "SINTER", Arrays.asList("B2"));
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "SINTER"), new String[]{"TFe", "FeO", "CaO", "SiO2", "MgO", "Al2O3", "B2"}, "SINTER", Arrays.asList("B2"));
         //球团
-        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "PELLETS"), new String[]{"TFe", "CaO", "SiO2"}, "PELLETS", Arrays.asList());
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "PELLETS"), new String[]{"TFe", "CaO", "SiO2"}, "PELLETS", Arrays.asList());
         //块矿
-        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "brandCode", "LUMPORE"), new String[]{"TFe", "SiO2", "Al2O3"}, "LUMPORE", Arrays.asList());
+        handleAnalysisValues(getAnalysisValueList(version, dateQuery, "LC", "LUMPORE"), new String[]{"TFe", "SiO2", "Al2O3"}, "LUMPORE", Arrays.asList());
     }
 
     private TagValue getLatestMaxTag(String version, String[] tagNames, int days) {
@@ -868,6 +879,9 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                         }
                     }
                 }
+            } else {
+                result.put("commit_day", " ");
+                result.put("commit_tap", " ");
             }
             dealChart1(data);
             dealChart2(data);
@@ -896,10 +910,10 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             }
             result.put("countOne3", df2.format(Math.abs(increase)));
 
-            result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_BX_HMMass_1d_cur", false)));
-            result.put("countOne5", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CokeRate_1d_cur", true)));
-            result.put("countOne6", df2.format(dealMonthTotal(data, "BF8_L2M_BX_CoalRate_1d_cur", true)));
-            result.put("countOne7", df2.format(dealMonthTotal(data, "BF8_L2M_BX_FuelRate_1d_cur", true)));
+            result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_BX_HMMass_1d_cur")));
+            result.put("countOne5", df2.format(dealMonthTotalAvg(data, "BF8_L2M_BX_CokeRate_1d_cur")));
+            result.put("countOne6", df2.format(dealMonthTotalAvg(data, "BF8_L2M_BX_CoalRate_1d_cur")));
+            result.put("countOne7", df2.format(dealMonthTotalAvg(data, "BF8_L2M_BX_FuelRate_1d_cur")));
         } catch (Exception e) {
             log.error("高炉日生产分析报告处理part1失败", e);
         }
@@ -969,26 +983,49 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return result;
     }
 
-    private Double dealMonthTotal (JSONObject data, String tagName, Boolean isAvg) {
+    private Double dealMonthTotalAvg (JSONObject data, String tagName) {
+        String tagRiChanLiang = "BF8_L2M_BX_HMMass_1d_cur";
         Double result;
         Double total = 0d;
         Double count = 0d;
-        List<Double> tagObject = getValuesByTag(data, tagName);
-        if(Objects.nonNull(tagObject) && tagObject.size() > 0) {
-            for (Double item : tagObject) {
-                if (item != null) {
-                    total += item;
-                    count++;
+        List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), -1);
+        //3日燃料比累计=（1日燃料比*1日产量+2日燃料比*2日产量+3日燃料比*3日产量）/（1日产量+2日产量+3日产量）
+        List<Double> tag1Object = getValuesByTag(data, tagName);
+        //日产量
+        List<Double> tag2Object = getValuesByTag(data, tagRiChanLiang);
+        if(Objects.nonNull(tag1Object) && Objects.nonNull(list)&& tag1Object.size() > list.size() ) {
+            for(int i = tag1Object.size() - list.size() + 1; i < tag1Object.size(); i ++) {
+                Double item1 = tag1Object.get(i);
+                Double item2 = tag2Object.get(i);
+                if (item1 != null && item2 != null) {
+                    total += item1*item2;
+                    count += item2;
                 }
             }
         }
-        if (isAvg && count > 0d) {
+        if (count > 0d) {
             result = total / count;
         }
         else {
-            result = total;
+            result = 0d;
         }
         return result;
+    }
+
+    private Double dealMonthTotal (JSONObject data, String tagName) {
+        Double total = 0d;
+        Double count = 0d;
+        List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), -1);
+        List<Double> tagObject = getValuesByTag(data, tagName);
+        if(Objects.nonNull(tagObject) && Objects.nonNull(list)&& tagObject.size() > list.size() ) {
+            for(int i = tagObject.size() - list.size() + 1; i < tagObject.size(); i ++) {
+                Double item = tagObject.get(i);
+                if (item != null) {
+                    total += item;
+                }
+            }
+        }
+        return total;
     }
 
     private void dealChart1(JSONObject data) {
@@ -1322,15 +1359,14 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         // 今日零点，作为结束时间点
         Date endDate = cal.getTime();
         // 前推30天，作为开始时间点
-        cal.add(Calendar.DAY_OF_MONTH,-29);
+        cal.add(Calendar.MONTH, -1);
         Date startDate = cal.getTime();
 
         startTime = startDate;
         endTime = endDate;
-
-        while (startDate.before(endDate)) {
+        while (!DateUtil.isSameDay(startDate, DateUtil.addDays(endDate, -1))) {
             // 拼接x坐标轴
-            categoriesList.add(DateUtil.getFormatDateTime(DateUtil.addDays(startDate, -1), DateUtil.MMddChineseFormat));
+            categoriesList.add(DateUtil.getFormatDateTime(startDate, DateUtil.MMddChineseFormat));
             longTimeList.add(startDate.getTime());
             // 递增日期
             cal.add(Calendar.DAY_OF_MONTH, 1);
