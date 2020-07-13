@@ -134,7 +134,9 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
         for(int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i ++) {
             List<DateQuery> classDateQueries = DateQueryUtil.buildDay12HourEach(allDayBeginTimeInCurrentMonth.get(i));
             for(int j =1; j <= 2; j++)  {
-                List<Integer> chargeNos = handleChargeNoData(classDateQueries.get(j-1), version);
+                List<Integer> chargeNos = getChargeNo(classDateQueries.get(j-1), version);
+                chargeNos.sort(Integer::compareTo);
+                //List<Integer> chargeNos = handleChargeNoData(classDateQueries.get(j-1), version);
                 List<BatchData> list = new ArrayList<>();
                 List<List<BatchData>> batchDataListList = new ArrayList<>();
                 List<ChargeDTO> chargeDTOList = new ArrayList<>();
