@@ -122,7 +122,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         queryParam.put("starttime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
         queryParam.put("endtime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
         queryParam.put("tagname", tagName);
-        String chargeNoData = httpUtil.get(getChargeNoUrl(version), queryParam);
+        String chargeNoData = httpUtil.get(getTagValueUrl(version), queryParam);
 
         TagValueListDTO tagValueListDTO = null;
         if (StringUtils.isNotBlank(chargeNoData)) {
@@ -685,8 +685,33 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
      * @param version
      * @return
      */
-    protected String getChargeNoUrl(String version) {
+    protected String getTagValueUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/tagValues";
+    }
+
+    /**
+     * 获取/charge/chargeNo/range的url
+     * @param version
+     * @return
+     */
+    protected String getChargeNoUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/charge/chargeNo/range";
+    }
+
+    /**
+     * 获取chargeNo
+     * @param query
+     * @param version
+     * @return
+     */
+    protected List<Integer> getChargeNo(DateQuery query, String version) {
+        Map<String, String> queryParam = new HashMap();
+        queryParam.put("startTime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
+        queryParam.put("endTime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
+        String chargeNoData = httpUtil.get(getChargeNoUrl(version), queryParam);
+
+        return Optional.ofNullable(chargeNoData).map(JSONObject::parseObject).map(e -> e.getJSONArray("data"))
+                .map(e -> JSONObject.parseArray(e.toJSONString(), Integer.class)).orElse(new ArrayList<Integer>());
     }
 
     /**
