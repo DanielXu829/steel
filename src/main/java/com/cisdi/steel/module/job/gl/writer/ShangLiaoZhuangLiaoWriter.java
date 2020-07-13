@@ -78,8 +78,8 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
 
         DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
         DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date.getRecordDate());
-
-        List<Integer> chargeNos = handleChargeNoData(dateQuery, version);
+        List<Integer> chargeNos = getChargeNo(dateQuery, version);
+        chargeNos.sort(Integer::compareTo);
         List<List<BatchData>> batchDataListList = new ArrayList<>();
         for (Integer chargeNo : chargeNos) {
             ChargeDTO chargeDTO = getChargeDTO(version, chargeNo);
@@ -319,32 +319,4 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         }
         return cellDataList;
     }
-
-    /**
-     * 处理chargeNo 列表
-     * @param data
-     * @return
-     */
-    private List<Integer> handleChargeNoData(DateQuery query, String version) {
-        Map<String, String> queryParam = new HashMap();
-        queryParam.put("starttime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
-        queryParam.put("endtime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
-        queryParam.put("tagname", "BF8_L2M_AnaChargeEnd_evt");
-        String chargeNoData = httpUtil.get(getChargeNoUrl(version), queryParam);
-
-        List<Integer> chargeNos = new ArrayList<Integer>();
-        JSONArray dataArray = FastJSONUtil.convertJsonStringToJsonArray(chargeNoData);
-        if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
-            for (int i = 0; i < dataArray.size(); i++) {
-                JSONObject dataObj = dataArray.getJSONObject(i);
-                if (Objects.nonNull(dataObj) && StringUtils.isNotBlank(dataObj.getString("val"))) {
-                    chargeNos.add(dataObj.getInteger("val"));
-                }
-            }
-        }
-        // 排序
-        chargeNos.sort(Integer::compareTo);
-        return chargeNos;
-    }
-
 }
