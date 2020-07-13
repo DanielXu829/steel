@@ -944,4 +944,8 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return httpProperties.getGlUrlVersion(version) + "/report/tap/getTapSummaryByRange";
     }
 
+    protected String getBXMaterialUrl(String version) {
+        return httpProperties.getGlUrlVersion(version) + "/report/getBXMaterial/mt";
+    }
+
 }

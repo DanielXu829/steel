@@ -131,7 +131,8 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
     private void handleWeight(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
         Sheet sheet = workbook.getSheetAt(0);
         List<CellData> cellDataList = new ArrayList<>();
-        for(int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i ++) {
+        int size = allDayBeginTimeInCurrentMonth.size();
+        for(int i = 0; i < size; i ++) {
             List<DateQuery> classDateQueries = DateQueryUtil.buildDay12HourEach(allDayBeginTimeInCurrentMonth.get(i));
             for(int j =1; j <= 2; j++)  {
                 List<Integer> chargeNos = getChargeNo(classDateQueries.get(j-1), version);
@@ -155,20 +156,26 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
                 sheet.getRow(itemRowNum).setZeroHeight(true);//隐藏占位符行
                 List<String> cellValue = PoiCustomUtil.getRowCelVal(sheet, 3);
                 for (int columnNum = 0; columnNum < cellValue.size(); columnNum++) {
-                    if (StringUtils.isBlank(cellValue.get(columnNum))) {
+                    String flag = cellValue.get(columnNum);
+                    if (StringUtils.isBlank(flag)) {
                         continue;
                     }
-                    BigDecimal value = null;
-                    switch (cellValue.get(columnNum)) {
-                        case "大烧":
-                            value = getWeightsetByType(list, "SINTER","Ol");
-                            break;
-                        case "小烧":
-                            value = getWeightsetByType(list, "SINTER","Os");
-                            break;
-                        default:
-                            value = getWeightsetByDescr(list, cellValue.get(columnNum));
-                            break;
+                    BigDecimal value = new BigDecimal(0);
+                    String[] flagSplit = flag.split("_");
+                    if(flagSplit[0].equals("Weightset")) {
+                        switch (flagSplit[1]) {
+                            case "大烧":
+                                value = getWeightsetByType(list, "SINTER","Ol");
+                                break;
+                            case "小烧":
+                                value = getWeightsetByType(list, "SINTER","Os");
+                                break;
+                            default:
+                                value = getWeightsetByDescr(list, flagSplit[1]);
+                                break;
+                        }
+                    } else if (flagSplit[0].equals("Water")) {
+                        value = getWeightsetByBrandCode(version, list, flagSplit[1]);
                     }
                     ExcelWriterUtil.addCellData(cellDataList, i*2+j+3, columnNum, value);
                 }
@@ -181,10 +188,11 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
         for (int columnNum = 0; columnNum < cellValue.size(); columnNum++) {
             if (StringUtils.isBlank(cellValue.get(columnNum))) {
                 sheet.setColumnHidden(columnNum, true);
+                for(int i =3; i < size*2+3; i ++) {
+                    Cell cell = sheet.getRow(i).getCell(columnNum);
+                    PoiCustomUtil.setCellValue(cell, 0);
+                }
             } else {
-                sheet.setColumnHidden(columnNum, false);
-            }
-            if (columnNum==16) {
                 sheet.setColumnHidden(columnNum, false);
             }
         }
@@ -261,9 +269,9 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
                             Cell itemCellWater = sheet.getRow(itemRowNum).getCell(columnNum+11);
                             if (i < newCokeList.size()) {
                                 PoiCustomUtil.setCellValue(cell, newCokeList.get(i));
-                                PoiCustomUtil.setCellValue(itemCell, newCokeList.get(i));
+                                PoiCustomUtil.setCellValue(itemCell, "Weightset_"+newCokeList.get(i));
                                 PoiCustomUtil.setCellValue(cellWater, newCokeList.get(i));
-                                PoiCustomUtil.setCellValue(itemCellWater, newCokeList.get(i));
+                                PoiCustomUtil.setCellValue(itemCellWater, "Water_"+newCokeList.get(i));
                                 i++;
                             }
                         }
@@ -298,6 +306,32 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
             oCount = oCount.add(reduce);
         }
         return oCount;
+    }
+
+    private BigDecimal getWeightsetByBrandCode(String version, List<BatchData> data, String descr) {
+        BigDecimal value = new BigDecimal(0);
+        BatchMaterial material = null;
+        for (int i = 0; i < data.size(); i++) {
+            material = data.get(i).getMaterials().stream()
+                    .filter(m -> m.getDescr().equals(descr))
+                    .findAny().orElse(null);
+            if(Objects.nonNull(material)) {
+                break;
+            }
+        }
+        if(Objects.nonNull(material) && StringUtils.isNotBlank(material.getBrandcode())) {
+            //report/getBXMaterial/mt?brandCode=KM-L_COKE
+            String url = getBXMaterialUrl(version);
+            Map<String, String> queryMap = new HashMap<>();
+            queryMap.put("brandCode", material.getBrandcode());
+            String result = httpUtil.get(url, queryMap);
+            if(StringUtils.isNotBlank(result)) {
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                value = jsonObject.getBigDecimal("data");
+            }
+        }
+
+        return value;
     }
 
     /**
@@ -404,32 +438,5 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
      */
     private String getChargeRawData(String version, Integer chargeNo) {
         return httpUtil.get(getPrimaryUrl(version, chargeNo));
-    }
-
-    /**
-     * 处理chargeNo 列表
-     * @param data
-     * @return
-     */
-    private List<Integer> handleChargeNoData(DateQuery query, String version) {
-        Map<String, String> queryParam = new HashMap();
-        queryParam.put("starttime",  Objects.requireNonNull(query.getStartTime().getTime()).toString());
-        queryParam.put("endtime",  Objects.requireNonNull(query.getEndTime().getTime()).toString());
-        queryParam.put("tagname", "BF8_L2M_AnaChargeEnd_evt");
-        String chargeNoData = httpUtil.get(getChargeNoUrl(version), queryParam);
-
-        List<Integer> chargeNos = new ArrayList<Integer>();
-        JSONArray dataArray = FastJSONUtil.convertJsonStringToJsonArray(chargeNoData);
-        if (Objects.nonNull(dataArray) && dataArray.size() != 0) {
-            for (int i = 0; i < dataArray.size(); i++) {
-                JSONObject dataObj = dataArray.getJSONObject(i);
-                if (Objects.nonNull(dataObj) && StringUtils.isNotBlank(dataObj.getString("val"))) {
-                    chargeNos.add(dataObj.getInteger("val"));
-                }
-            }
-        }
-        // 排序
-        chargeNos.sort(Integer::compareTo);
-        return chargeNos;
     }
 }
