@@ -4,9 +4,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://10.64.11.221:3306/steel_linux?characterEncoding=utf8
+    url: jdbc:mysql://10.11.11.12:3306/steel_linux?characterEncoding=utf8&useSSL=false
     username: root
-    password: p@ssw0rd
+    password: Cisdi@123456
 
   thymeleaf:
     prefix: classpath:/templates/
