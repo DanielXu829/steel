@@ -35,8 +35,10 @@ import java.util.*;
 @SuppressWarnings("ALL")
 @Slf4j
 public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
-    private static final int shaoJieChengPinItemRowNum = 28;
-    private static final int yuanLiaoXingNengItemRowNum = 17;
+    private static final List<String> tagFormualsNeedToMutiply100 = Arrays.asList("ST4_L1R_SIN_103ASinInstanFl_12h_cur", "ST4_L1R_SIN_103BSinInstanFl_12h_cur",
+            "ST4_L1R_SIN_BF2CRFInstanFl_12h_cur", "ST4_L1R_SIN_CRF104InstanFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsFl_12h_cur");
+    private static final int shaoJieChengPinItemRowNum = 8;
+    private static final int yuanLiaoXingNengItemRowNum = 34;
     private Date dateRun;
 
     @Autowired
@@ -87,7 +89,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 }
 
                 // 获取两班倒查询策略
-                List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourEach(dateRun);
+                List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
                 handleCumulativeOperationRate(workbook, dateQueries, version);
                 for (int k = 0; k < dateQueries.size(); k++) {
                     DateQuery dateQuery = dateQueries.get(k);
@@ -138,13 +140,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             if (StringUtils.isBlank(data)) {
                 return null;
             }
-
             SuccessEntity<ProdStopRecordInfo> prodStopRecordDTO = JSON.parseObject(data, new TypeReference<SuccessEntity<ProdStopRecordInfo>>(){});
-            if (Objects.isNull(prodStopRecordDTO)) {
-                return null;
-            }
-
-            ProdStopRecordInfo prodStopRecordInfo = prodStopRecordDTO.getData();
+            ProdStopRecordInfo prodStopRecordInfo = Optional.ofNullable(prodStopRecordDTO)
+                    .map(SuccessEntity::getData).orElse(null);
             if (Objects.isNull(prodStopRecordInfo)) {
                 return null;
             }
@@ -153,16 +151,35 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 // 处理夜班停机记录
                 List<ProdStopRecord> nightProdStopRecords = prodStopRecordInfo.getNightProdStopRecords();
                 // excel中只有5行单元格
-                int nightMaxSize = 5;
+                int nightMaxSize = 8;
                 if (CollectionUtils.isNotEmpty(nightProdStopRecords)) {
-                    Cell nightDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.夜}");
-                    if (Objects.nonNull(nightDownTimeCell)) {
-                        int nightDownTimeBeginRow = nightDownTimeCell.getRowIndex();
-                        int nightDownTimeBeginColumn = nightDownTimeCell.getColumnIndex();
+                    Cell nightDownTimeBeginCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.夜}");
+                    if (Objects.nonNull(nightDownTimeBeginCell)) {
+                        int nightDownTimeBeginRow = nightDownTimeBeginCell.getRowIndex();
+                        int nightDownTimeBeginColumn = nightDownTimeBeginCell.getColumnIndex();
                         handleWriteDownTimeData(cellDataList, nightDownTimeBeginRow, nightDownTimeBeginColumn, nightProdStopRecords, nightMaxSize);
                     } else {
                         log.error("模板中{停机记录.停机起时.夜}占位符不存在");
                     }
+                }
+
+                Cell nightDownTimeTotalCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.共停.夜}");
+                if (Objects.nonNull(nightDownTimeTotalCell)) {
+                    int nightDownTimeTotalCellRow = nightDownTimeTotalCell.getRowIndex();
+                    int nightDownTimeTotalCellColumn = nightDownTimeTotalCell.getColumnIndex();
+                    ExcelWriterUtil.addCellData(cellDataList, nightDownTimeTotalCellRow, nightDownTimeTotalCellColumn, prodStopRecordInfo.getTotalStopTimeOfNight());
+                } else {
+                    log.error("模板中{停机记录.共停.夜}占位符不存在");
+                }
+
+                Cell nightDownTimesCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数.夜}");
+                if (Objects.nonNull(nightDownTimesCell)) {
+                    int nightDownTimesCellRow = nightDownTimesCell.getRowIndex();
+                    int nightDownTimesCellColumn = nightDownTimesCell.getColumnIndex();
+                    String value = "停机次数：" + prodStopRecordInfo.getTimeOfNight() + "次";
+                    ExcelWriterUtil.addCellData(cellDataList, nightDownTimesCellRow, nightDownTimesCellColumn, value);
+                } else {
+                    log.error("模板中{停机记录.停机次数.夜}占位符不存在");
                 }
             } catch (Exception e) {
                 log.error("处理夜班停机记录出错", e);
@@ -173,7 +190,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 List<ProdStopRecord> dayProdStopRecords = prodStopRecordInfo.getDayProdStopRecords();
                 Cell dayDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.白}");
                 // excel中只有5行单元格
-                int dayMaxSize = 5;
+                int dayMaxSize = 8;
                 if (CollectionUtils.isNotEmpty(dayProdStopRecords)) {
                     if (Objects.nonNull(dayDownTimeCell)) {
                         int dayDownTimeBeginRow = dayDownTimeCell.getRowIndex();
@@ -183,24 +200,43 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         log.error("模板中{停机记录.停机起时.白}占位符不存在");
                     }
                 }
+                Cell dayDownTimeTotalCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.共停.白}");
+                if (Objects.nonNull(dayDownTimeTotalCell)) {
+                    int dayDownTimeTotalCellRow = dayDownTimeTotalCell.getRowIndex();
+                    int dayDownTimeTotalCellColumn = dayDownTimeTotalCell.getColumnIndex();
+                    ExcelWriterUtil.addCellData(cellDataList, dayDownTimeTotalCellRow, dayDownTimeTotalCellColumn, prodStopRecordInfo.getTotalStopTimeOfDay());
+                } else {
+                    log.error("模板中{停机记录.共停.白}占位符不存在");
+                }
+
+                Cell dayDownTimesCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数.白}");
+                if (Objects.nonNull(dayDownTimesCell)) {
+                    int dayDownTimesCellRow = dayDownTimesCell.getRowIndex();
+                    int dayDownTimesCellColumn = dayDownTimesCell.getColumnIndex();
+                    String value = "停机次数：" + prodStopRecordInfo.getTimeOfDay() + "次";
+                    ExcelWriterUtil.addCellData(cellDataList, dayDownTimesCellRow, dayDownTimesCellColumn, value);
+                } else {
+                    log.error("模板中{停机记录.停机次数.白}占位符不存在");
+                }
             } catch (Exception e) {
                 log.error("处理白班停机记录出错", e);
             }
 
-            Cell totalStopTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.共停}");
-            if (Objects.nonNull(totalStopTimeCell)) {
-                int totalStopTime = prodStopRecordInfo.getTotalStopTime();
-                ExcelWriterUtil.addCellData(cellDataList, totalStopTimeCell.getRowIndex(), totalStopTimeCell.getColumnIndex(), totalStopTime);
+            Cell totalDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.共停}");
+            if (Objects.nonNull(totalDownTimeCell)) {
+                int totalDownTime = prodStopRecordInfo.getTotalStopTime();
+                ExcelWriterUtil.addCellData(cellDataList, totalDownTimeCell.getRowIndex(), totalDownTimeCell.getColumnIndex(), totalDownTime);
             } else {
                 log.error("模板中{停机记录.共停}占位符不存在");
             }
 
-            Cell timeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数}");
-            if (Objects.nonNull(timeCell)) {
-                int downTimes = prodStopRecordInfo.getTime();
-                ExcelWriterUtil.addCellData(cellDataList, timeCell.getRowIndex(), timeCell.getColumnIndex(), downTimes);
+            Cell totalDownTimesCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数.共停}");
+            if (Objects.nonNull(totalDownTimesCell)) {
+                int totalDownTimes = prodStopRecordInfo.getTime();
+                String value = "停机次数：" + totalDownTimes + "次";
+                ExcelWriterUtil.addCellData(cellDataList, totalDownTimesCell.getRowIndex(), totalDownTimesCell.getColumnIndex(), value);
             } else {
-                log.error("模板中{停机记录.停机次数}占位符不存在");
+                log.error("模板中{停机记录.停机次数.共停}占位符不存在");
             }
 
             return cellDataList;
@@ -270,13 +306,13 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         itemCategoryToName.put("石灰石", "limestone");
         itemCategoryToName.put("白云石", "dolomite");
         itemCategoryToName.put("返矿", "return_fine");
-        itemCategoryToName.put("燃料", "coke");
+        itemCategoryToName.put("煤粉", "coke");
 
         // 获取标记行的数据
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, yuanLiaoXingNengItemRowNum);
         for (int j = 0; j < materialTypeList.size(); j++) {
             // 获取excel单元格中项目的名称，来和接口进行对应
-            String itemCategory = PoiCellUtil.getCellValue(sheet1, yuanLiaoXingNengItemRowNum + j + 1, 7);
+            String itemCategory = PoiCellUtil.getCellValue(sheet1, yuanLiaoXingNengItemRowNum + j + 1, 15);
             itemCategory = itemCategory.trim();
             if (StringUtils.isNotBlank(itemCategory)) {
                 String materialType = itemCategoryToName.get(itemCategory);
@@ -330,72 +366,77 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      * @return
      */
     private List<CellData> handleShaoJieChengPinData(Sheet sheet1, DateQuery dateQuery, String version) {
-        List<CellData> cellDataList = new ArrayList();
-        // 根据type不同(LC,LG,LP),调用三个接口
-        String shaoJieChengPinLCData = getShaoJieChengPinData(dateQuery, version, "LC");
-        AnaValueDTO anaValueLcDTO = null;
-        if (StringUtils.isNotBlank(shaoJieChengPinLCData)) {
-            anaValueLcDTO = JSON.parseObject(shaoJieChengPinLCData, AnaValueDTO.class);
-        }
+        List<CellData> cellDataList = null;
+        try {
+            cellDataList = new ArrayList();
+            // 根据type不同(LC,LG,LP),调用三个接口
+            String shaoJieChengPinLCData = getShaoJieChengPinData(dateQuery, version, "LC");
+            AnaValueDTO anaValueLcDTO = null;
+            if (StringUtils.isNotBlank(shaoJieChengPinLCData)) {
+                anaValueLcDTO = JSON.parseObject(shaoJieChengPinLCData, AnaValueDTO.class);
+            }
 
-        String shaoJieChengPinLGData = getShaoJieChengPinData(dateQuery, version, "LG");
-        AnaValueDTO anaValueLgDTO = null;
-        if (StringUtils.isNotBlank(shaoJieChengPinLGData)) {
-            anaValueLgDTO = JSON.parseObject(shaoJieChengPinLGData, AnaValueDTO.class);
-        }
+            String shaoJieChengPinLGData = getShaoJieChengPinData(dateQuery, version, "LG");
+            AnaValueDTO anaValueLgDTO = null;
+            if (StringUtils.isNotBlank(shaoJieChengPinLGData)) {
+                anaValueLgDTO = JSON.parseObject(shaoJieChengPinLGData, AnaValueDTO.class);
+            }
 
-        String shaoJieChengPinLPData = getShaoJieChengPinData(dateQuery, version, "LP");
-        AnaValueDTO anaValueLpDTO = null;
-        if (StringUtils.isNotBlank(shaoJieChengPinLPData)) {
-            anaValueLpDTO = JSON.parseObject(shaoJieChengPinLPData, AnaValueDTO.class);
-        }
+            String shaoJieChengPinLPData = getShaoJieChengPinData(dateQuery, version, "LP");
+            AnaValueDTO anaValueLpDTO = null;
+            if (StringUtils.isNotBlank(shaoJieChengPinLPData)) {
+                anaValueLpDTO = JSON.parseObject(shaoJieChengPinLPData, AnaValueDTO.class);
+            }
 
-        // 根据type不同将数据封装到map中
-        Map<String, AnaValueDTO> dtoMap = new HashMap();
-        dtoMap.put("LC", anaValueLcDTO);
-        dtoMap.put("LG", anaValueLgDTO);
-        dtoMap.put("LP", anaValueLpDTO);
+            // 根据type不同将数据封装到map中
+            Map<String, AnaValueDTO> dtoMap = new HashMap();
+            dtoMap.put("LC", anaValueLcDTO);
+            dtoMap.put("LG", anaValueLgDTO);
+            dtoMap.put("LP", anaValueLpDTO);
 
-        List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, shaoJieChengPinItemRowNum);
+            List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, shaoJieChengPinItemRowNum);
 
-        for (int j = 0; j < 4; j++) {
-            String id = PoiCellUtil.getCellValue(sheet1, shaoJieChengPinItemRowNum + j + 1, 1);
-            // 去除小数点以及小数点后的数字
-            Integer idNumber = Integer.parseInt(id.split("\\.")[0]);
-            id = idNumber.toString();
-            if (itemNameList != null && !itemNameList.isEmpty()) {
-                for (int i = 0; i < itemNameList.size() ; i++) {
-                    String itemName = itemNameList.get(i);
-                    if (StringUtils.isNotBlank(itemName)) {
-                        String prefix = itemName.split("_")[0];
-                        AnaValueDTO anaValueDTO = dtoMap.get(prefix);
-                        if (Objects.nonNull(anaValueDTO)) {
-                            String itemNameTrue = itemName.substring(prefix.length() + 1);
-                            for (int k = 0; k < anaValueDTO.getData().size() ; k++) {
-                                // sampleId的最后两位(如果小于10,就取最后一位)与excel中的样编号进行对应
-                                String sampleId =  anaValueDTO.getData().get(k).getAnalysis().getSampleid();
-                                sampleId = sampleId.substring(sampleId.length() - 2);
-                                if (sampleId.startsWith("0")) {
-                                    sampleId = sampleId.substring(1);
-                                }
-                                if (sampleId.equals(id)) {
-                                    BigDecimal cellValue = anaValueDTO.getData().get(k).getValues().get(itemNameTrue);
-                                    ExcelWriterUtil.addCellData(cellDataList, shaoJieChengPinItemRowNum + j + 1, i, cellValue);
+            for (int j = 0; j < 4; j++) {
+                String id = PoiCellUtil.getCellValue(sheet1, shaoJieChengPinItemRowNum + j + 1, 9);
+                // 去除小数点以及小数点后的数字
+                Integer idNumber = Integer.parseInt(id.split("\\.")[0]);
+                id = idNumber.toString();
+                if (itemNameList != null && !itemNameList.isEmpty()) {
+                    for (int i = 0; i < itemNameList.size() ; i++) {
+                        String itemName = itemNameList.get(i);
+                        if (StringUtils.isNotBlank(itemName)) {
+                            String prefix = itemName.split("_")[0];
+                            AnaValueDTO anaValueDTO = dtoMap.get(prefix);
+                            if (Objects.nonNull(anaValueDTO)) {
+                                String itemNameTrue = itemName.substring(prefix.length() + 1);
+                                for (int k = 0; k < anaValueDTO.getData().size() ; k++) {
+                                    // sampleId的最后两位(如果小于10,就取最后一位)与excel中的样编号进行对应
+                                    String sampleId =  anaValueDTO.getData().get(k).getAnalysis().getSampleid();
+                                    sampleId = sampleId.substring(sampleId.length() - 2);
+                                    if (sampleId.startsWith("0")) {
+                                        sampleId = sampleId.substring(1);
+                                    }
+                                    if (sampleId.equals(id)) {
+                                        BigDecimal cellValue = anaValueDTO.getData().get(k).getValues().get(itemNameTrue);
+                                        ExcelWriterUtil.addCellData(cellDataList, shaoJieChengPinItemRowNum + j + 1, i, cellValue);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } finally {
+            return cellDataList;
         }
-
-        return cellDataList;
     }
 
     /**
      * 处理tag点数据
      * @param url
-     * @param columns
+     * @param columns tag点
      * @param dateQuery
      * @return
      */
@@ -417,9 +458,8 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         if (StringUtils.isBlank(result)) {
             return null;
         }
-
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        JSONObject data = jsonObject.getJSONObject("data");
+        JSONObject data = Optional.ofNullable(JSONObject.parseObject(result))
+                .map(e -> e.getJSONObject("data")).orElse(null);
         if (Objects.isNull(data)) {
             return null;
         }
@@ -463,7 +503,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         continue;
                     }
 
-                    List<DateQuery> dayEach = DateQueryUtil.buildDay12HourEach(dateRun);
+                    List<DateQuery> dayEach = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
                     int rowIndex = 1;
                     for (int j = 0; j < dayEach.size(); j++) {
                         DateQuery query = dayEach.get(j);
@@ -473,8 +513,11 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                             String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
                             Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
                             if (date.getTime() == recordDate.getTime()) {
-                                Object o = data.get(tempTime + "");
-                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, o);
+                                BigDecimal value = (BigDecimal) data.get(tempTime + "");
+                                if (tagFormualsNeedToMutiply100.contains(column)) {
+                                    value = value.multiply(BigDecimal.valueOf(12));
+                                }
+                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, value);
                                 break;
                             }
                         }

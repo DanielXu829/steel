@@ -312,15 +312,15 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             ExcelWriterUtil.addCellData(cellDataList, row, itemIndex, brandCodeToDescrMap.get(brandcode));
                             continue;
                         }
-                        BigDecimal sinterAverageValue = analysisValues.stream().map(AnalysisValue::getValues)
-                                .map(e -> e.get(item)).filter(e -> e != null)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                                .divide(BigDecimal.valueOf(analysisValues.size()), 4, BigDecimal.ROUND_HALF_UP);
+                        List<BigDecimal> valueList = analysisValues.stream().map(AnalysisValue::getValues)
+                                .map(e -> e.get(item)).filter(e -> e != null).collect(Collectors.toList());
+                        BigDecimal averageValue = valueList.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                                .divide(BigDecimal.valueOf(valueList.size()), 4, BigDecimal.ROUND_HALF_UP);
                         String unit = PoiCellUtil.getCellValue(sheet, itemRowNum - 1, itemIndex);
                         if ("%".equals(unit) && !Arrays.asList(itemsNoNeedToHandlePercent).contains(item)) {
-                            sinterAverageValue = sinterAverageValue.multiply(new BigDecimal("100"));
+                            averageValue = averageValue.multiply(new BigDecimal("100"));
                         }
-                        ExcelWriterUtil.addCellData(cellDataList, row, itemIndex, sinterAverageValue);
+                        ExcelWriterUtil.addCellData(cellDataList, row, itemIndex, averageValue);
                     }
                 }
             }
