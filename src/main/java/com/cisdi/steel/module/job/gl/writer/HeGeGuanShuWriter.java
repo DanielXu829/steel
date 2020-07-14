@@ -66,9 +66,9 @@ public class HeGeGuanShuWriter extends BaseGaoLuWriter {
 
             // 判断当前是何种精益报表，使用不同的dataType
             String dataType = null;
-            if (JobEnum.gl_guiliushuangmingzhong.getCode().equals(excelDTO.getJobEnum().getCode())) {
+            if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_guiliushuangmingzhong.getCode())) {
                 dataType = "gl";
-            } else if (JobEnum.gl_yuleiguanzhuang.getCode().equals(excelDTO.getJobEnum().getCode())){
+            } else if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_yuleiguanzhuang.getCode())){
                 dataType = "pz";
             }
 

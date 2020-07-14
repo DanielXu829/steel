@@ -78,11 +78,11 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
             }
             // 判断当前是何种精益报表，使用不同的dataType
             String dataType = null;
-            if (JobEnum.gl_luwenhegelv.getCode().equals(excelDTO.getJobEnum().getCode())) {
+            if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_luwenhegelv.getCode())) {
                 dataType = "lw";
-            } else if (JobEnum.gl_luzhajianduhegelv.getCode().equals(excelDTO.getJobEnum().getCode())){
+            } else if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_luzhajianduhegelv.getCode())){
                 dataType = "lz";
-            } else if (JobEnum.gl_tieshuiyijipinlv.getCode().equals(excelDTO.getJobEnum().getCode())){
+            } else if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_tieshuiyijipinlv.getCode())){
                 dataType = "ts";
             }
 
@@ -170,11 +170,11 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
 
             // 判断当前是何种精益报表，使用不同的dataType
             String dataType = null;
-            if (JobEnum.gl_luwenhegelv.getCode().equals(excelDTO.getJobEnum().getCode())) {
+            if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_luwenhegelv.getCode())) {
                 dataType = "lw";
-            } else if (JobEnum.gl_luzhajianduhegelv.getCode().equals(excelDTO.getJobEnum().getCode())){
+            } else if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_luzhajianduhegelv.getCode())){
                 dataType = "lz";
-            } else if (JobEnum.gl_tieshuiyijipinlv.getCode().equals(excelDTO.getJobEnum().getCode())){
+            } else if (excelDTO.getJobEnum().getCode().startsWith(JobEnum.gl_tieshuiyijipinlv.getCode())){
                 dataType = "ts";
             }
 

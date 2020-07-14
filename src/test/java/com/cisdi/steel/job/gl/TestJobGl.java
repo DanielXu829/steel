@@ -171,7 +171,7 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Test
     public void testBanChanRanLiaoBiJob() {
-        //banChanRanLiaoBi7Job.execute(null);
+        banChanRanLiaoBi7Job.execute(null);
         banChanRanLiaoBi8Job.execute(null);
     }
 
@@ -208,9 +208,12 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Autowired
     private LuWenHeGeLv8Job luWenHeGeLv8Job;
+    @Autowired
+    private LuWenHeGeLv7Job luWenHeGeLv7Job;
     @Test
     public void testLuWenHeGeLv8Job() {
         luWenHeGeLv8Job.execute(null);
+        luWenHeGeLv7Job.execute(null);
     }
 
     /**
