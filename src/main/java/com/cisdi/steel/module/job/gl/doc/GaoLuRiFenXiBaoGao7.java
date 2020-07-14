@@ -58,7 +58,7 @@ import static java.util.Comparator.comparing;
 
 @Component
 @Slf4j
-public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
+public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
     /**
      * doc最后结果
      */
@@ -71,123 +71,123 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private DecimalFormat df2 = new DecimalFormat("0.00");
     private DecimalFormat df3 = new DecimalFormat("0.000");
     private String[] L1 = new String[]{
-            "BF8_L2M_BX_HMMass_1d_cur","BF8_L2M_BX_Productivity_1d_cur","BF8_L2M_BX_CokeRate_1d_cur","BF8_L2M_BX_CoalRate_1d_cur",
-            "BF8_L2M_BX_FuelRate_1d_cur","BF8_L2C_BD_HotBlastTemp1_1d_avg"
+            "BF7_L2M_BX_HMMass_1d_cur","BF7_L2M_BX_Productivity_1d_cur","BF7_L2M_BX_CokeRate_1d_cur","BF7_L2M_BX_CoalRate_1d_cur",
+            "BF7_L2M_BX_FuelRate_1d_cur","BF7_L2C_BD_HotBlastTemp1_1d_avg"
     };
     private String[] L3 = new String[]{
-            "BF8_L2C_BD_BH_1d_avg","BF8_L2C_BD_ColdBlastFlow_1d_avg",
-            "BF8_L2C_BD_ColdBlastPress_1d_avg","BF8_L2M_PressDiff_1d_avg","BF8_L2C_BD_TopPress_1d_avg",
-            "BF8_L2M_HMTemp_1d_avg","BF8_L2M_BX_FuelRate_1d_cur","BF8_L2M_GasUtilization_1d_avg"
+            "BF7_L2C_BD_BH_1d_avg","BF7_L2C_BD_ColdBlastFlow_1d_avg",
+            "BF7_L2C_BD_ColdBlastPress_1d_avg","BF7_L2M_PressDiff_1d_avg","BF7_L2C_BD_TopPress_1d_avg",
+            "BF7_L2M_HMTemp_1d_avg","BF7_L2M_BX_FuelRate_1d_cur","BF7_L2M_GasUtilization_1d_avg"
     };
     private String[] L4 = new String[]{
-            "BF8_L2C_BD_SoftTempDiff_1d_avg"
+            "BF7_L2C_BD_SoftTempDiff_1d_avg"
     };
 
     private String[] luGang = new String[]{
-            "BF8_L2C_BD_TI0707C_1d_max", "BF8_L2C_BD_TI0708A_1d_max", "BF8_L2C_BD_TI0708B_1d_max", "BF8_L2C_BD_TI0708C_1d_max", "BF8_L2C_BD_TI0709A_1d_max", "BF8_L2C_BD_TI0709B_1d_max", "BF8_L2C_BD_TI0709C_1d_max", "BF8_L2C_BD_TI0710A_1d_max", "BF8_L2C_BD_TI0710B_1d_max",
-            "BF8_L2C_BD_TI0710C_1d_max", "BF8_L2C_BD_TI0711A_1d_max", "BF8_L2C_BD_TI0711B_1d_max", "BF8_L2C_BD_TI0711C_1d_max", "BF8_L2C_BD_TI0712A_1d_max", "BF8_L2C_BD_TI0712B_1d_max", "BF8_L2C_BD_TI0712C_1d_max", "BF8_L2C_BD_TI0713A_1d_max", "BF8_L2C_BD_TI0713B_1d_max", "BF8_L2C_BD_TI0713C_1d_max",
-            "BF8_L2C_BD_ATI0801A_1d_max", "BF8_L2C_BD_ATI0801B_1d_max", "BF8_L2C_BD_ATI0801C_1d_max", "BF8_L2C_BD_TI0802A_1d_max", "BF8_L2C_BD_TI0802B_1d_max", "BF8_L2C_BD_TI0802C_1d_max", "BF8_L2C_BD_TI0803A_1d_max", "BF8_L2C_BD_TI0803B_1d_max", "BF8_L2C_BD_TI0803C_1d_max", "BF8_L2C_BD_TI0804A_1d_max",
-            "BF8_L2C_BD_TI0804B_1d_max", "BF8_L2C_BD_TI0804C_1d_max", "BF8_L2C_BD_TI0805A_1d_max", "BF8_L2C_BD_TI0805B_1d_max", "BF8_L2C_BD_TI0805C_1d_max", "BF8_L2C_BD_TI0806A_1d_max", "BF8_L2C_BD_TI0806B_1d_max", "BF8_L2C_BD_TI0806C_1d_max", "BF8_L2C_BD_TI0807A_1d_max", "BF8_L2C_BD_TI0807B_1d_max",
-            "BF8_L2C_BD_TI0807C_1d_max", "BF8_L2C_BD_TI0808A_1d_max", "BF8_L2C_BD_TI0808B_1d_max", "BF8_L2C_BD_TI0808C_1d_max", "BF8_L2C_BD_TI0809A_1d_max", "BF8_L2C_BD_TI0809B_1d_max", "BF8_L2C_BD_TI0809C_1d_max", "BF8_L2C_BD_TI0810A_1d_max", "BF8_L2C_BD_TI0810B_1d_max", "BF8_L2C_BD_TI0810C_1d_max",
-            "BF8_L2C_BD_TI0811A_1d_max", "BF8_L2C_BD_TI0811B_1d_max", "BF8_L2C_BD_TI0811C_1d_max", "BF8_L2C_BD_TI0812A_1d_max", "BF8_L2C_BD_TI0812B_1d_max", "BF8_L2C_BD_TI0812C_1d_max", "BF8_L2C_BD_TI0813A_1d_max", "BF8_L2C_BD_TI0813B_1d_max", "BF8_L2C_BD_TI0813C_1d_max", "BF8_L2C_BD_TI0901A_1d_max",
-            "BF8_L2C_BD_TI0901B_1d_max", "BF8_L2C_BD_TI0901C_1d_max", "BF8_L2C_BD_TI0902A_1d_max", "BF8_L2C_BD_TI0902B_1d_max", "BF8_L2C_BD_TI0902C_1d_max", "BF8_L2C_BD_TI0903A_1d_max", "BF8_L2C_BD_TI0903B_1d_max", "BF8_L2C_BD_TI0903C_1d_max", "BF8_L2C_BD_TI0904A_1d_max", "BF8_L2C_BD_TI0904B_1d_max",
-            "BF8_L2C_BD_TI0904C_1d_max", "BF8_L2C_BD_TI0905A_1d_max", "BF8_L2C_BD_TI0905B_1d_max", "BF8_L2C_BD_TI0905C_1d_max", "BF8_L2C_BD_TI0906A_1d_max", "BF8_L2C_BD_TI0906B_1d_max", "BF8_L2C_BD_TI0906C_1d_max", "BF8_L2C_BD_TI0907A_1d_max", "BF8_L2C_BD_TI0907B_1d_max", "BF8_L2C_BD_TI0907C_1d_max",
-            "BF8_L2C_BD_TI0908A_1d_max", "BF8_L2C_BD_TI0908B_1d_max", "BF8_L2C_BD_TI0908C_1d_max", "BF8_L2C_BD_TI0909A_1d_max", "BF8_L2C_BD_TI0909B_1d_max", "BF8_L2C_BD_TI0909C_1d_max", "BF8_L2C_BD_TI0910A_1d_max", "BF8_L2C_BD_TI0910B_1d_max", "BF8_L2C_BD_TI0910C_1d_max", "BF8_L2C_BD_TI0911A_1d_max",
-            "BF8_L2C_BD_TI0911B_1d_max", "BF8_L2C_BD_TI0911C_1d_max", "BF8_L2C_BD_TI0912A_1d_max", "BF8_L2C_BD_TI0912B_1d_max", "BF8_L2C_BD_TI0912C_1d_max", "BF8_L2C_BD_TI0913A_1d_max", "BF8_L2C_BD_TI0913B_1d_max", "BF8_L2C_BD_TI0913C_1d_max", "BF8_L2C_BD_TI1001A_1d_max", "BF8_L2C_BD_TI1001B_1d_max",
-            "BF8_L2C_BD_TI1002A_1d_max", "BF8_L2C_BD_TI1002B_1d_max", "BF8_L2C_BD_TI1003A_1d_max", "BF8_L2C_BD_TI1003B_1d_max", "BF8_L2C_BD_TI1004A_1d_max", "BF8_L2C_BD_TI1004B_1d_max", "BF8_L2C_BD_TI1005A_1d_max", "BF8_L2C_BD_TI1005B_1d_max", "BF8_L2C_BD_TI1006A_1d_max", "BF8_L2C_BD_TI1006B_1d_max",
-            "BF8_L2C_BD_TI1007A_1d_max", "BF8_L2C_BD_TI1007B_1d_max", "BF8_L2C_BD_TI1008A_1d_max", "BF8_L2C_BD_TI1008B_1d_max", "BF8_L2C_BD_TI1009A_1d_max", "BF8_L2C_BD_TI1009B_1d_max", "BF8_L2C_BD_TI1010A_1d_max", "BF8_L2C_BD_TI1010B_1d_max", "BF8_L2C_BD_ATI1011A_1d_max", "BF8_L2C_BD_ATI1011B_1d_max",
-            "BF8_L2C_BD_TI1012A_1d_max", "BF8_L2C_BD_TI1012B_1d_max", "BF8_L2C_BD_TI1013A_1d_max", "BF8_L2C_BD_TI1013B_1d_max", "BF8_L2C_BD_TI1101A_1d_max", "BF8_L2C_BD_TI1101B_1d_max", "BF8_L2C_BD_TI1102A_1d_max", "BF8_L2C_BD_TI1102B_1d_max", "BF8_L2C_BD_TI1103A_1d_max", "BF8_L2C_BD_TI1103B_1d_max",
-            "BF8_L2C_BD_TI1104A_1d_max", "BF8_L2C_BD_TI1104B_1d_max", "BF8_L2C_BD_TI1105A_1d_max", "BF8_L2C_BD_TI1105B_1d_max", "BF8_L2C_BD_TI1106A_1d_max", "BF8_L2C_BD_TI1106B_1d_max","BF8_L2C_BD_TI1107A_1d_max", "BF8_L2C_BD_TI1107B_1d_max", "BF8_L2C_BD_TI1108A_1d_max", "BF8_L2C_BD_TI1108B_1d_max",
-            "BF8_L2C_BD_TI1109A_1d_max", "BF8_L2C_BD_TI1109B_1d_max", "BF8_L2C_BD_TI1110A_1d_max", "BF8_L2C_BD_TI1110B_1d_max", "BF8_L2C_BD_TI1111A_1d_max", "BF8_L2C_BD_TI1111B_1d_max", "BF8_L2C_BD_TI1112A_1d_max", "BF8_L2C_BD_TI1112B_1d_max", "BF8_L2C_BD_TI1113A_1d_max", "BF8_L2C_BD_TI1113B_1d_max",
-            "BF8_L2C_BD_TI2101_1d_max", "BF8_L2C_BD_TI2102_1d_max", "BF8_L2C_BD_TI2103_1d_max", "BF8_L2C_BD_TI2104_1d_max", "BF8_L2C_BD_TI2105_1d_max", "BF8_L2C_BD_TI2106_1d_max", "BF8_L2C_BD_TI2107_1d_max", "BF8_L2C_BD_TI2108_1d_max", "BF8_L2C_BD_TI2201_1d_max", "BF8_L2C_BD_TI2202_1d_max", "BF8_L2C_BD_TI2203_1d_max",
-            "BF8_L2C_BD_TI2204_1d_max", "BF8_L2C_BD_TI2205_1d_max", "BF8_L2C_BD_TI2206_1d_max", "BF8_L2C_BD_TI2207_1d_max", "BF8_L2C_BD_TI2208_1d_max", "BF8_L2C_BD_TI2301_1d_max", "BF8_L2C_BD_TI2302_1d_max", "BF8_L2C_BD_TI2303_1d_max", "BF8_L2C_BD_TI2304_1d_max", "BF8_L2C_BD_TI2305_1d_max", "BF8_L2C_BD_TI2307_1d_max",
-            "BF8_L2C_BD_TI2308_1d_max", "BF8_L2C_BD_TI2401_1d_max", "BF8_L2C_BD_TI2402_1d_max", "BF8_L2C_BD_TI2403_1d_max", "BF8_L2C_BD_TI2404_1d_max", "BF8_L2C_BD_TI2405_1d_max", "BF8_L2C_BD_TI2406_1d_max", "BF8_L2C_BD_TI2407_1d_max", "BF8_L2C_BD_TI2408_1d_max", "BF8_L2C_BD_TI2409_1d_max", "BF8_L2C_BD_TI2410_1d_max",
-            "BF8_L2C_BD_TI2306_1d_max"
+            "BF7_L2C_BD_TI0707C_1d_max", "BF7_L2C_BD_TI0708A_1d_max", "BF7_L2C_BD_TI0708B_1d_max", "BF7_L2C_BD_TI0708C_1d_max", "BF7_L2C_BD_TI0709A_1d_max", "BF7_L2C_BD_TI0709B_1d_max", "BF7_L2C_BD_TI0709C_1d_max", "BF7_L2C_BD_TI0710A_1d_max", "BF7_L2C_BD_TI0710B_1d_max",
+            "BF7_L2C_BD_TI0710C_1d_max", "BF7_L2C_BD_TI0711A_1d_max", "BF7_L2C_BD_TI0711B_1d_max", "BF7_L2C_BD_TI0711C_1d_max", "BF7_L2C_BD_TI0712A_1d_max", "BF7_L2C_BD_TI0712B_1d_max", "BF7_L2C_BD_TI0712C_1d_max", "BF7_L2C_BD_TI0713A_1d_max", "BF7_L2C_BD_TI0713B_1d_max", "BF7_L2C_BD_TI0713C_1d_max",
+            "BF7_L2C_BD_ATI0801A_1d_max", "BF7_L2C_BD_ATI0801B_1d_max", "BF7_L2C_BD_ATI0801C_1d_max", "BF7_L2C_BD_TI0802A_1d_max", "BF7_L2C_BD_TI0802B_1d_max", "BF7_L2C_BD_TI0802C_1d_max", "BF7_L2C_BD_TI0803A_1d_max", "BF7_L2C_BD_TI0803B_1d_max", "BF7_L2C_BD_TI0803C_1d_max", "BF7_L2C_BD_TI0804A_1d_max",
+            "BF7_L2C_BD_TI0804B_1d_max", "BF7_L2C_BD_TI0804C_1d_max", "BF7_L2C_BD_TI0805A_1d_max", "BF7_L2C_BD_TI0805B_1d_max", "BF7_L2C_BD_TI0805C_1d_max", "BF7_L2C_BD_TI0806A_1d_max", "BF7_L2C_BD_TI0806B_1d_max", "BF7_L2C_BD_TI0806C_1d_max", "BF7_L2C_BD_TI0807A_1d_max", "BF7_L2C_BD_TI0807B_1d_max",
+            "BF7_L2C_BD_TI0807C_1d_max", "BF7_L2C_BD_TI0808A_1d_max", "BF7_L2C_BD_TI0808B_1d_max", "BF7_L2C_BD_TI0808C_1d_max", "BF7_L2C_BD_TI0809A_1d_max", "BF7_L2C_BD_TI0809B_1d_max", "BF7_L2C_BD_TI0809C_1d_max", "BF7_L2C_BD_TI0810A_1d_max", "BF7_L2C_BD_TI0810B_1d_max", "BF7_L2C_BD_TI0810C_1d_max",
+            "BF7_L2C_BD_TI0811A_1d_max", "BF7_L2C_BD_TI0811B_1d_max", "BF7_L2C_BD_TI0811C_1d_max", "BF7_L2C_BD_TI0812A_1d_max", "BF7_L2C_BD_TI0812B_1d_max", "BF7_L2C_BD_TI0812C_1d_max", "BF7_L2C_BD_TI0813A_1d_max", "BF7_L2C_BD_TI0813B_1d_max", "BF7_L2C_BD_TI0813C_1d_max", "BF7_L2C_BD_TI0901A_1d_max",
+            "BF7_L2C_BD_TI0901B_1d_max", "BF7_L2C_BD_TI0901C_1d_max", "BF7_L2C_BD_TI0902A_1d_max", "BF7_L2C_BD_TI0902B_1d_max", "BF7_L2C_BD_TI0902C_1d_max", "BF7_L2C_BD_TI0903A_1d_max", "BF7_L2C_BD_TI0903B_1d_max", "BF7_L2C_BD_TI0903C_1d_max", "BF7_L2C_BD_TI0904A_1d_max", "BF7_L2C_BD_TI0904B_1d_max",
+            "BF7_L2C_BD_TI0904C_1d_max", "BF7_L2C_BD_TI0905A_1d_max", "BF7_L2C_BD_TI0905B_1d_max", "BF7_L2C_BD_TI0905C_1d_max", "BF7_L2C_BD_TI0906A_1d_max", "BF7_L2C_BD_TI0906B_1d_max", "BF7_L2C_BD_TI0906C_1d_max", "BF7_L2C_BD_TI0907A_1d_max", "BF7_L2C_BD_TI0907B_1d_max", "BF7_L2C_BD_TI0907C_1d_max",
+            "BF7_L2C_BD_TI0908A_1d_max", "BF7_L2C_BD_TI0908B_1d_max", "BF7_L2C_BD_TI0908C_1d_max", "BF7_L2C_BD_TI0909A_1d_max", "BF7_L2C_BD_TI0909B_1d_max", "BF7_L2C_BD_TI0909C_1d_max", "BF7_L2C_BD_TI0910A_1d_max", "BF7_L2C_BD_TI0910B_1d_max", "BF7_L2C_BD_TI0910C_1d_max", "BF7_L2C_BD_TI0911A_1d_max",
+            "BF7_L2C_BD_TI0911B_1d_max", "BF7_L2C_BD_TI0911C_1d_max", "BF7_L2C_BD_TI0912A_1d_max", "BF7_L2C_BD_TI0912B_1d_max", "BF7_L2C_BD_TI0912C_1d_max", "BF7_L2C_BD_TI0913A_1d_max", "BF7_L2C_BD_TI0913B_1d_max", "BF7_L2C_BD_TI0913C_1d_max", "BF7_L2C_BD_TI1001A_1d_max", "BF7_L2C_BD_TI1001B_1d_max",
+            "BF7_L2C_BD_TI1002A_1d_max", "BF7_L2C_BD_TI1002B_1d_max", "BF7_L2C_BD_TI1003A_1d_max", "BF7_L2C_BD_TI1003B_1d_max", "BF7_L2C_BD_TI1004A_1d_max", "BF7_L2C_BD_TI1004B_1d_max", "BF7_L2C_BD_TI1005A_1d_max", "BF7_L2C_BD_TI1005B_1d_max", "BF7_L2C_BD_TI1006A_1d_max", "BF7_L2C_BD_TI1006B_1d_max",
+            "BF7_L2C_BD_TI1007A_1d_max", "BF7_L2C_BD_TI1007B_1d_max", "BF7_L2C_BD_TI1008A_1d_max", "BF7_L2C_BD_TI1008B_1d_max", "BF7_L2C_BD_TI1009A_1d_max", "BF7_L2C_BD_TI1009B_1d_max", "BF7_L2C_BD_TI1010A_1d_max", "BF7_L2C_BD_TI1010B_1d_max", "BF7_L2C_BD_ATI1011A_1d_max", "BF7_L2C_BD_ATI1011B_1d_max",
+            "BF7_L2C_BD_TI1012A_1d_max", "BF7_L2C_BD_TI1012B_1d_max", "BF7_L2C_BD_TI1013A_1d_max", "BF7_L2C_BD_TI1013B_1d_max", "BF7_L2C_BD_TI1101A_1d_max", "BF7_L2C_BD_TI1101B_1d_max", "BF7_L2C_BD_TI1102A_1d_max", "BF7_L2C_BD_TI1102B_1d_max", "BF7_L2C_BD_TI1103A_1d_max", "BF7_L2C_BD_TI1103B_1d_max",
+            "BF7_L2C_BD_TI1104A_1d_max", "BF7_L2C_BD_TI1104B_1d_max", "BF7_L2C_BD_TI1105A_1d_max", "BF7_L2C_BD_TI1105B_1d_max", "BF7_L2C_BD_TI1106A_1d_max", "BF7_L2C_BD_TI1106B_1d_max","BF7_L2C_BD_TI1107A_1d_max", "BF7_L2C_BD_TI1107B_1d_max", "BF7_L2C_BD_TI1108A_1d_max", "BF7_L2C_BD_TI1108B_1d_max",
+            "BF7_L2C_BD_TI1109A_1d_max", "BF7_L2C_BD_TI1109B_1d_max", "BF7_L2C_BD_TI1110A_1d_max", "BF7_L2C_BD_TI1110B_1d_max", "BF7_L2C_BD_TI1111A_1d_max", "BF7_L2C_BD_TI1111B_1d_max", "BF7_L2C_BD_TI1112A_1d_max", "BF7_L2C_BD_TI1112B_1d_max", "BF7_L2C_BD_TI1113A_1d_max", "BF7_L2C_BD_TI1113B_1d_max",
+            "BF7_L2C_BD_TI2101_1d_max", "BF7_L2C_BD_TI2102_1d_max", "BF7_L2C_BD_TI2103_1d_max", "BF7_L2C_BD_TI2104_1d_max", "BF7_L2C_BD_TI2105_1d_max", "BF7_L2C_BD_TI2106_1d_max", "BF7_L2C_BD_TI2107_1d_max", "BF7_L2C_BD_TI2108_1d_max", "BF7_L2C_BD_TI2201_1d_max", "BF7_L2C_BD_TI2202_1d_max", "BF7_L2C_BD_TI2203_1d_max",
+            "BF7_L2C_BD_TI2204_1d_max", "BF7_L2C_BD_TI2205_1d_max", "BF7_L2C_BD_TI2206_1d_max", "BF7_L2C_BD_TI2207_1d_max", "BF7_L2C_BD_TI2208_1d_max", "BF7_L2C_BD_TI2301_1d_max", "BF7_L2C_BD_TI2302_1d_max", "BF7_L2C_BD_TI2303_1d_max", "BF7_L2C_BD_TI2304_1d_max", "BF7_L2C_BD_TI2305_1d_max", "BF7_L2C_BD_TI2307_1d_max",
+            "BF7_L2C_BD_TI2308_1d_max", "BF7_L2C_BD_TI2401_1d_max", "BF7_L2C_BD_TI2402_1d_max", "BF7_L2C_BD_TI2403_1d_max", "BF7_L2C_BD_TI2404_1d_max", "BF7_L2C_BD_TI2405_1d_max", "BF7_L2C_BD_TI2406_1d_max", "BF7_L2C_BD_TI2407_1d_max", "BF7_L2C_BD_TI2408_1d_max", "BF7_L2C_BD_TI2409_1d_max", "BF7_L2C_BD_TI2410_1d_max",
+            "BF7_L2C_BD_TI2306_1d_max"
     };
 
     private String[] luFu = new String[]{
-            "BF8_L2C_BD_TI2501_1d_max", "BF8_L2C_BD_TI2502_1d_max", "BF8_L2C_BD_TI2503_1d_max", "BF8_L2C_BD_TI2504_1d_max", "BF8_L2C_BD_TI2601_1d_max", "BF8_L2C_BD_TI2602_1d_max", "BF8_L2C_BD_TI2603_1d_max", "BF8_L2C_BD_TI2604_1d_max", "BF8_L2C_BD_TI2605_1d_max", "BF8_L2C_BD_TI2606_1d_max",
-            "BF8_L2C_BD_TI2607_1d_max", "BF8_L2C_BD_TI2608_1d_max", "BF8_L2C_BD_TI2609_1d_max", "BF8_L2C_BD_TI2610_1d_max", "BF8_L2C_BD_TI2611_1d_max", "BF8_L2C_BD_TI2612_1d_max", "BF8_L2C_BD_TI2613_1d_max"
+            "BF7_L2C_BD_TI2501_1d_max", "BF7_L2C_BD_TI2502_1d_max", "BF7_L2C_BD_TI2503_1d_max", "BF7_L2C_BD_TI2504_1d_max", "BF7_L2C_BD_TI2601_1d_max", "BF7_L2C_BD_TI2602_1d_max", "BF7_L2C_BD_TI2603_1d_max", "BF7_L2C_BD_TI2604_1d_max", "BF7_L2C_BD_TI2605_1d_max", "BF7_L2C_BD_TI2606_1d_max",
+            "BF7_L2C_BD_TI2607_1d_max", "BF7_L2C_BD_TI2608_1d_max", "BF7_L2C_BD_TI2609_1d_max", "BF7_L2C_BD_TI2610_1d_max", "BF7_L2C_BD_TI2611_1d_max", "BF7_L2C_BD_TI2612_1d_max", "BF7_L2C_BD_TI2613_1d_max"
     };
 
     private String[] luYao = new String[]{
-            "BF8_L2C_BD_TI2701_1d_max", "BF8_L2C_BD_TI2702_1d_max", "BF8_L2C_BD_TI2703_1d_max", "BF8_L2C_BD_TI2704_1d_max", "BF8_L2C_BD_TI2801_1d_max", "BF8_L2C_BD_TI2802_1d_max", "BF8_L2C_BD_TI2803_1d_max", "BF8_L2C_BD_TI2804_1d_max", "BF8_L2C_BD_TI2805_1d_max", "BF8_L2C_BD_TI2806_1d_max", "BF8_L2C_BD_TI2807_1d_max",
-            "BF8_L2C_BD_TI2808_1d_max", "BF8_L2C_BD_TI2809_1d_max", "BF8_L2C_BD_TI2810_1d_max", "BF8_L2C_BD_TI2811_1d_max", "BF8_L2C_BD_TI2812_1d_max", "BF8_L2C_BD_TI2813_1d_max"
+            "BF7_L2C_BD_TI2701_1d_max", "BF7_L2C_BD_TI2702_1d_max", "BF7_L2C_BD_TI2703_1d_max", "BF7_L2C_BD_TI2704_1d_max", "BF7_L2C_BD_TI2801_1d_max", "BF7_L2C_BD_TI2802_1d_max", "BF7_L2C_BD_TI2803_1d_max", "BF7_L2C_BD_TI2804_1d_max", "BF7_L2C_BD_TI2805_1d_max", "BF7_L2C_BD_TI2806_1d_max", "BF7_L2C_BD_TI2807_1d_max",
+            "BF7_L2C_BD_TI2808_1d_max", "BF7_L2C_BD_TI2809_1d_max", "BF7_L2C_BD_TI2810_1d_max", "BF7_L2C_BD_TI2811_1d_max", "BF7_L2C_BD_TI2812_1d_max", "BF7_L2C_BD_TI2813_1d_max"
     };
 
     private String[] luShen = new String[]{
-            "BF8_L2C_BD_TI2901_1d_max", "BF8_L2C_BD_TI2902_1d_max", "BF8_L2C_BD_TI2903_1d_max", "BF8_L2C_BD_TI2904_1d_max", "BF8_L2C_BD_TI3001_1d_max", "BF8_L2C_BD_TI3002_1d_max", "BF8_L2C_BD_TI3003_1d_max", "BF8_L2C_BD_TI3004_1d_max", "BF8_L2C_BD_TI3005_1d_max", "BF8_L2C_BD_TI3006_1d_max", "BF8_L2C_BD_TI3007_1d_max",
-            "BF8_L2C_BD_TI3008_1d_max", "BF8_L2C_BD_TI3009_1d_max", "BF8_L2C_BD_TI3010_1d_max", "BF8_L2C_BD_TI3011_1d_max", "BF8_L2C_BD_TI3012_1d_max", "BF8_L2C_BD_TI3013_1d_max", "BF8_L2C_BD_TI3101_1d_max", "BF8_L2C_BD_TI3102_1d_max", "BF8_L2C_BD_TI3103_1d_max", "BF8_L2C_BD_TI3104_1d_max", "BF8_L2C_BD_TI3105_1d_max",
-            "BF8_L2C_BD_TI3106_1d_max", "BF8_L2C_BD_TI3107_1d_max", "BF8_L2C_BD_TI3108_1d_max", "BF8_L2C_BD_TI3109_1d_max", "BF8_L2C_BD_TI3110_1d_max", "BF8_L2C_BD_TI3111_1d_max", "BF8_L2C_BD_TI3112_1d_max", "BF8_L2C_BD_TI3113_1d_max", "BF8_L2C_BD_TI3201_1d_max", "BF8_L2C_BD_TI3202_1d_max", "BF8_L2C_BD_TI3203_1d_max",
-            "BF8_L2C_BD_TI3204_1d_max", "BF8_L2C_BD_TI3301_1d_max", "BF8_L2C_BD_TI3302_1d_max", "BF8_L2C_BD_TI3303_1d_max", "BF8_L2C_BD_TI3304_1d_max", "BF8_L2C_BD_TI3305_1d_max", "BF8_L2C_BD_TI3306_1d_max", "BF8_L2C_BD_TI3307_1d_max", "BF8_L2C_BD_TI3308_1d_max", "BF8_L2C_BD_TI3309_1d_max", "BF8_L2C_BD_TI3310_1d_max",
-            "BF8_L2C_BD_TI3311_1d_max", "BF8_L2C_BD_TI3312_1d_max", "BF8_L2C_BD_TI3401_1d_max", "BF8_L2C_BD_TI3402_1d_max", "BF8_L2C_BD_TI3403_1d_max", "BF8_L2C_BD_TI3404_1d_max", "BF8_L2C_BD_TI3405_1d_max", "BF8_L2C_BD_TI3406_1d_max", "BF8_L2C_BD_TI3407_1d_max", "BF8_L2C_BD_TI3408_1d_max", "BF8_L2C_BD_TI3409_1d_max",
-            "BF8_L2C_BD_TI3410_1d_max", "BF8_L2C_BD_TI3411_1d_max", "BF8_L2C_BD_TI3412_1d_max", "BF8_L2C_BD_TI3501_1d_max", "BF8_L2C_BD_TI3502_1d_max", "BF8_L2C_BD_TI3503_1d_max", "BF8_L2C_BD_TI3504_1d_max", "BF8_L2C_BD_TI3505_1d_max", "BF8_L2C_BD_TI3506_1d_max", "BF8_L2C_BD_TI3507_1d_max", "BF8_L2C_BD_TI3508_1d_max",
-            "BF8_L2C_BD_TI3509_1d_max", "BF8_L2C_BD_TI3510_1d_max", "BF8_L2C_BD_TI3511_1d_max", "BF8_L2C_BD_TI3601_1d_max", "BF8_L2C_BD_TI3602_1d_max", "BF8_L2C_BD_TI3603_1d_max", "BF8_L2C_BD_TI3604_1d_max", "BF8_L2C_BD_TI3605_1d_max", "BF8_L2C_BD_TI3606_1d_max", "BF8_L2C_BD_TI3607_1d_max", "BF8_L2C_BD_TI3608_1d_max",
-            "BF8_L2C_BD_TI3609_1d_max", "BF8_L2C_BD_TI3610_1d_max"
+            "BF7_L2C_BD_TI2901_1d_max", "BF7_L2C_BD_TI2902_1d_max", "BF7_L2C_BD_TI2903_1d_max", "BF7_L2C_BD_TI2904_1d_max", "BF7_L2C_BD_TI3001_1d_max", "BF7_L2C_BD_TI3002_1d_max", "BF7_L2C_BD_TI3003_1d_max", "BF7_L2C_BD_TI3004_1d_max", "BF7_L2C_BD_TI3005_1d_max", "BF7_L2C_BD_TI3006_1d_max", "BF7_L2C_BD_TI3007_1d_max",
+            "BF7_L2C_BD_TI3008_1d_max", "BF7_L2C_BD_TI3009_1d_max", "BF7_L2C_BD_TI3010_1d_max", "BF7_L2C_BD_TI3011_1d_max", "BF7_L2C_BD_TI3012_1d_max", "BF7_L2C_BD_TI3013_1d_max", "BF7_L2C_BD_TI3101_1d_max", "BF7_L2C_BD_TI3102_1d_max", "BF7_L2C_BD_TI3103_1d_max", "BF7_L2C_BD_TI3104_1d_max", "BF7_L2C_BD_TI3105_1d_max",
+            "BF7_L2C_BD_TI3106_1d_max", "BF7_L2C_BD_TI3107_1d_max", "BF7_L2C_BD_TI3108_1d_max", "BF7_L2C_BD_TI3109_1d_max", "BF7_L2C_BD_TI3110_1d_max", "BF7_L2C_BD_TI3111_1d_max", "BF7_L2C_BD_TI3112_1d_max", "BF7_L2C_BD_TI3113_1d_max", "BF7_L2C_BD_TI3201_1d_max", "BF7_L2C_BD_TI3202_1d_max", "BF7_L2C_BD_TI3203_1d_max",
+            "BF7_L2C_BD_TI3204_1d_max", "BF7_L2C_BD_TI3301_1d_max", "BF7_L2C_BD_TI3302_1d_max", "BF7_L2C_BD_TI3303_1d_max", "BF7_L2C_BD_TI3304_1d_max", "BF7_L2C_BD_TI3305_1d_max", "BF7_L2C_BD_TI3306_1d_max", "BF7_L2C_BD_TI3307_1d_max", "BF7_L2C_BD_TI3308_1d_max", "BF7_L2C_BD_TI3309_1d_max", "BF7_L2C_BD_TI3310_1d_max",
+            "BF7_L2C_BD_TI3311_1d_max", "BF7_L2C_BD_TI3312_1d_max", "BF7_L2C_BD_TI3401_1d_max", "BF7_L2C_BD_TI3402_1d_max", "BF7_L2C_BD_TI3403_1d_max", "BF7_L2C_BD_TI3404_1d_max", "BF7_L2C_BD_TI3405_1d_max", "BF7_L2C_BD_TI3406_1d_max", "BF7_L2C_BD_TI3407_1d_max", "BF7_L2C_BD_TI3408_1d_max", "BF7_L2C_BD_TI3409_1d_max",
+            "BF7_L2C_BD_TI3410_1d_max", "BF7_L2C_BD_TI3411_1d_max", "BF7_L2C_BD_TI3412_1d_max", "BF7_L2C_BD_TI3501_1d_max", "BF7_L2C_BD_TI3502_1d_max", "BF7_L2C_BD_TI3503_1d_max", "BF7_L2C_BD_TI3504_1d_max", "BF7_L2C_BD_TI3505_1d_max", "BF7_L2C_BD_TI3506_1d_max", "BF7_L2C_BD_TI3507_1d_max", "BF7_L2C_BD_TI3508_1d_max",
+            "BF7_L2C_BD_TI3509_1d_max", "BF7_L2C_BD_TI3510_1d_max", "BF7_L2C_BD_TI3511_1d_max", "BF7_L2C_BD_TI3601_1d_max", "BF7_L2C_BD_TI3602_1d_max", "BF7_L2C_BD_TI3603_1d_max", "BF7_L2C_BD_TI3604_1d_max", "BF7_L2C_BD_TI3605_1d_max", "BF7_L2C_BD_TI3606_1d_max", "BF7_L2C_BD_TI3607_1d_max", "BF7_L2C_BD_TI3608_1d_max",
+            "BF7_L2C_BD_TI3609_1d_max", "BF7_L2C_BD_TI3610_1d_max"
     };
 
     private String[] luGangA_C = new String[]{
-        "BF8_L2C_BD_TI0601A_1d_max", "BF8_L2C_BD_TI0601B_1d_max", "BF8_L2C_BD_TI0601C_1d_max", "BF8_L2C_BD_TI0602A_1d_max",
-        "BF8_L2C_BD_TI0602B_1d_max", "BF8_L2C_BD_TI0602C_1d_max", "BF8_L2C_BD_TI0603A_1d_max", "BF8_L2C_BD_TI0603B_1d_max",
-        "BF8_L2C_BD_TI0603C_1d_max", "BF8_L2C_BD_TI0604A_1d_max", "BF8_L2C_BD_TI0604B_1d_max", "BF8_L2C_BD_TI0604C_1d_max",
-        "BF8_L2C_BD_TI0605A_1d_max", "BF8_L2C_BD_TI0605B_1d_max", "BF8_L2C_BD_TI0605C_1d_max", "BF8_L2C_BD_TI0606A_1d_max",
-        "BF8_L2C_BD_TI0606B_1d_max", "BF8_L2C_BD_TI0606C_1d_max", "BF8_L2C_BD_TI0607A_1d_max", "BF8_L2C_BD_TI0607B_1d_max",
-        "BF8_L2C_BD_TI0607C_1d_max", "BF8_L2C_BD_TI0608A_1d_max", "BF8_L2C_BD_TI0608B_1d_max", "BF8_L2C_BD_TI0608C_1d_max",
-        "BF8_L2C_BD_TI0609A_1d_max", "BF8_L2C_BD_TI0609B_1d_max", "BF8_L2C_BD_TI0609C_1d_max", "BF8_L2C_BD_TI0610A_1d_max",
-        "BF8_L2C_BD_TI0610B_1d_max", "BF8_L2C_BD_TI0610C_1d_max", "BF8_L2C_BD_TI0611A_1d_max", "BF8_L2C_BD_TI0611B_1d_max",
-        "BF8_L2C_BD_TI0611C_1d_max", "BF8_L2C_BD_TI0612A_1d_max", "BF8_L2C_BD_TI0612B_1d_max", "BF8_L2C_BD_TI0612C_1d_max",
-        "BF8_L2C_BD_TI0613A_1d_max", "BF8_L2C_BD_TI0613B_1d_max", "BF8_L2C_BD_TI0613C_1d_max", "BF8_L2C_BD_TI0701A_1d_max",
-        "BF8_L2C_BD_TI0701B_1d_max", "BF8_L2C_BD_TI0701C_1d_max", "BF8_L2C_BD_TI0702A_1d_max", "BF8_L2C_BD_TI0702B_1d_max",
-        "BF8_L2C_BD_TI0702C_1d_max", "BF8_L2C_BD_TI0703A_1d_max", "BF8_L2C_BD_TI0703B_1d_max", "BF8_L2C_BD_TI0703C_1d_max"
+            "BF7_L2C_BD_TI0601A_1d_max", "BF7_L2C_BD_TI0601B_1d_max", "BF7_L2C_BD_TI0601C_1d_max", "BF7_L2C_BD_TI0602A_1d_max",
+            "BF7_L2C_BD_TI0602B_1d_max", "BF7_L2C_BD_TI0602C_1d_max", "BF7_L2C_BD_TI0603A_1d_max", "BF7_L2C_BD_TI0603B_1d_max",
+            "BF7_L2C_BD_TI0603C_1d_max", "BF7_L2C_BD_TI0604A_1d_max", "BF7_L2C_BD_TI0604B_1d_max", "BF7_L2C_BD_TI0604C_1d_max",
+            "BF7_L2C_BD_TI0605A_1d_max", "BF7_L2C_BD_TI0605B_1d_max", "BF7_L2C_BD_TI0605C_1d_max", "BF7_L2C_BD_TI0606A_1d_max",
+            "BF7_L2C_BD_TI0606B_1d_max", "BF7_L2C_BD_TI0606C_1d_max", "BF7_L2C_BD_TI0607A_1d_max", "BF7_L2C_BD_TI0607B_1d_max",
+            "BF7_L2C_BD_TI0607C_1d_max", "BF7_L2C_BD_TI0608A_1d_max", "BF7_L2C_BD_TI0608B_1d_max", "BF7_L2C_BD_TI0608C_1d_max",
+            "BF7_L2C_BD_TI0609A_1d_max", "BF7_L2C_BD_TI0609B_1d_max", "BF7_L2C_BD_TI0609C_1d_max", "BF7_L2C_BD_TI0610A_1d_max",
+            "BF7_L2C_BD_TI0610B_1d_max", "BF7_L2C_BD_TI0610C_1d_max", "BF7_L2C_BD_TI0611A_1d_max", "BF7_L2C_BD_TI0611B_1d_max",
+            "BF7_L2C_BD_TI0611C_1d_max", "BF7_L2C_BD_TI0612A_1d_max", "BF7_L2C_BD_TI0612B_1d_max", "BF7_L2C_BD_TI0612C_1d_max",
+            "BF7_L2C_BD_TI0613A_1d_max", "BF7_L2C_BD_TI0613B_1d_max", "BF7_L2C_BD_TI0613C_1d_max", "BF7_L2C_BD_TI0701A_1d_max",
+            "BF7_L2C_BD_TI0701B_1d_max", "BF7_L2C_BD_TI0701C_1d_max", "BF7_L2C_BD_TI0702A_1d_max", "BF7_L2C_BD_TI0702B_1d_max",
+            "BF7_L2C_BD_TI0702C_1d_max", "BF7_L2C_BD_TI0703A_1d_max", "BF7_L2C_BD_TI0703B_1d_max", "BF7_L2C_BD_TI0703C_1d_max"
     };
 
     private String[] luGangD_F = new String[]{
-            "BF8_L2C_BD_TI0704A_1d_max", "BF8_L2C_BD_TI0704B_1d_max", "BF8_L2C_BD_TI0704C_1d_max", "BF8_L2C_BD_TI0705A_1d_max",
-            "BF8_L2C_BD_TI0705B_1d_max", "BF8_L2C_BD_TI0705C_1d_max", "BF8_L2C_BD_TI0706A_1d_max", "BF8_L2C_BD_TI0706B_1d_max",
-            "BF8_L2C_BD_TI0706C_1d_max", "BF8_L2C_BD_TI0707A_1d_max", "BF8_L2C_BD_TI0707B_1d_max", "BF8_L2C_BD_TI0707C_1d_max",
-            "BF8_L2C_BD_TI0708A_1d_max", "BF8_L2C_BD_TI0708B_1d_max", "BF8_L2C_BD_TI0708C_1d_max", "BF8_L2C_BD_TI0709A_1d_max",
-            "BF8_L2C_BD_TI0709B_1d_max", "BF8_L2C_BD_TI0709C_1d_max", "BF8_L2C_BD_TI0710A_1d_max", "BF8_L2C_BD_TI0710B_1d_max",
-            "BF8_L2C_BD_TI0710C_1d_max", "BF8_L2C_BD_TI0711A_1d_max", "BF8_L2C_BD_TI0711B_1d_max", "BF8_L2C_BD_TI0711C_1d_max",
-            "BF8_L2C_BD_TI0712A_1d_max", "BF8_L2C_BD_TI0712B_1d_max", "BF8_L2C_BD_TI0712C_1d_max", "BF8_L2C_BD_TI0713A_1d_max",
-            "BF8_L2C_BD_TI0713B_1d_max", "BF8_L2C_BD_TI0713C_1d_max", "BF8_L2C_BD_ATI0801A_1d_max", "BF8_L2C_BD_ATI0801B_1d_max",
-            "BF8_L2C_BD_ATI0801C_1d_max", "BF8_L2C_BD_TI0802A_1d_max", "BF8_L2C_BD_TI0802B_1d_max", "BF8_L2C_BD_TI0802C_1d_max",
-            "BF8_L2C_BD_TI0803A_1d_max", "BF8_L2C_BD_TI0803B_1d_max", "BF8_L2C_BD_TI0803C_1d_max", "BF8_L2C_BD_TI0804A_1d_max",
-            "BF8_L2C_BD_TI0804B_1d_max", "BF8_L2C_BD_TI0804C_1d_max", "BF8_L2C_BD_TI0805A_1d_max", "BF8_L2C_BD_TI0805B_1d_max",
-            "BF8_L2C_BD_TI0805C_1d_max", "BF8_L2C_BD_TI0806A_1d_max", "BF8_L2C_BD_TI0806B_1d_max", "BF8_L2C_BD_TI0806C_1d_max"
+            "BF7_L2C_BD_TI0704A_1d_max", "BF7_L2C_BD_TI0704B_1d_max", "BF7_L2C_BD_TI0704C_1d_max", "BF7_L2C_BD_TI0705A_1d_max",
+            "BF7_L2C_BD_TI0705B_1d_max", "BF7_L2C_BD_TI0705C_1d_max", "BF7_L2C_BD_TI0706A_1d_max", "BF7_L2C_BD_TI0706B_1d_max",
+            "BF7_L2C_BD_TI0706C_1d_max", "BF7_L2C_BD_TI0707A_1d_max", "BF7_L2C_BD_TI0707B_1d_max", "BF7_L2C_BD_TI0707C_1d_max",
+            "BF7_L2C_BD_TI0708A_1d_max", "BF7_L2C_BD_TI0708B_1d_max", "BF7_L2C_BD_TI0708C_1d_max", "BF7_L2C_BD_TI0709A_1d_max",
+            "BF7_L2C_BD_TI0709B_1d_max", "BF7_L2C_BD_TI0709C_1d_max", "BF7_L2C_BD_TI0710A_1d_max", "BF7_L2C_BD_TI0710B_1d_max",
+            "BF7_L2C_BD_TI0710C_1d_max", "BF7_L2C_BD_TI0711A_1d_max", "BF7_L2C_BD_TI0711B_1d_max", "BF7_L2C_BD_TI0711C_1d_max",
+            "BF7_L2C_BD_TI0712A_1d_max", "BF7_L2C_BD_TI0712B_1d_max", "BF7_L2C_BD_TI0712C_1d_max", "BF7_L2C_BD_TI0713A_1d_max",
+            "BF7_L2C_BD_TI0713B_1d_max", "BF7_L2C_BD_TI0713C_1d_max", "BF7_L2C_BD_ATI0801A_1d_max", "BF7_L2C_BD_ATI0801B_1d_max",
+            "BF7_L2C_BD_ATI0801C_1d_max", "BF7_L2C_BD_TI0802A_1d_max", "BF7_L2C_BD_TI0802B_1d_max", "BF7_L2C_BD_TI0802C_1d_max",
+            "BF7_L2C_BD_TI0803A_1d_max", "BF7_L2C_BD_TI0803B_1d_max", "BF7_L2C_BD_TI0803C_1d_max", "BF7_L2C_BD_TI0804A_1d_max",
+            "BF7_L2C_BD_TI0804B_1d_max", "BF7_L2C_BD_TI0804C_1d_max", "BF7_L2C_BD_TI0805A_1d_max", "BF7_L2C_BD_TI0805B_1d_max",
+            "BF7_L2C_BD_TI0805C_1d_max", "BF7_L2C_BD_TI0806A_1d_max", "BF7_L2C_BD_TI0806B_1d_max", "BF7_L2C_BD_TI0806C_1d_max"
     };
 
     private String[] luGangG_I = new String[]{
-            "BF8_L2C_BD_TI0807A_1d_max", "BF8_L2C_BD_TI0807B_1d_max", "BF8_L2C_BD_TI0807C_1d_max", "BF8_L2C_BD_TI0808A_1d_max",
-            "BF8_L2C_BD_TI0808B_1d_max", "BF8_L2C_BD_TI0808C_1d_max", "BF8_L2C_BD_TI0809A_1d_max", "BF8_L2C_BD_TI0809B_1d_max",
-            "BF8_L2C_BD_TI0809C_1d_max", "BF8_L2C_BD_TI0810A_1d_max", "BF8_L2C_BD_TI0810B_1d_max", "BF8_L2C_BD_TI0810C_1d_max",
-            "BF8_L2C_BD_TI0811A_1d_max", "BF8_L2C_BD_TI0811B_1d_max", "BF8_L2C_BD_TI0811C_1d_max", "BF8_L2C_BD_TI0812A_1d_max",
-            "BF8_L2C_BD_TI0812B_1d_max", "BF8_L2C_BD_TI0812C_1d_max", "BF8_L2C_BD_TI0813A_1d_max", "BF8_L2C_BD_TI0813B_1d_max",
-            "BF8_L2C_BD_TI0813C_1d_max", "BF8_L2C_BD_TI0901A_1d_max", "BF8_L2C_BD_TI0901B_1d_max", "BF8_L2C_BD_TI0901C_1d_max",
-            "BF8_L2C_BD_TI0902A_1d_max", "BF8_L2C_BD_TI0902B_1d_max", "BF8_L2C_BD_TI0902C_1d_max", "BF8_L2C_BD_TI0903A_1d_max",
-            "BF8_L2C_BD_TI0903B_1d_max", "BF8_L2C_BD_TI0903C_1d_max", "BF8_L2C_BD_TI0904A_1d_max", "BF8_L2C_BD_TI0904B_1d_max",
-            "BF8_L2C_BD_TI0904C_1d_max", "BF8_L2C_BD_TI0905A_1d_max", "BF8_L2C_BD_TI0905B_1d_max", "BF8_L2C_BD_TI0905C_1d_max",
-            "BF8_L2C_BD_TI0906A_1d_max", "BF8_L2C_BD_TI0906B_1d_max", "BF8_L2C_BD_TI0906C_1d_max", "BF8_L2C_BD_TI0907A_1d_max",
-            "BF8_L2C_BD_TI0907B_1d_max", "BF8_L2C_BD_TI0907C_1d_max", "BF8_L2C_BD_TI0908A_1d_max", "BF8_L2C_BD_TI0908B_1d_max",
-            "BF8_L2C_BD_TI0908C_1d_max", "BF8_L2C_BD_TI0909A_1d_max", "BF8_L2C_BD_TI0909B_1d_max", "BF8_L2C_BD_TI0909C_1d_max"
+            "BF7_L2C_BD_TI0807A_1d_max", "BF7_L2C_BD_TI0807B_1d_max", "BF7_L2C_BD_TI0807C_1d_max", "BF7_L2C_BD_TI0808A_1d_max",
+            "BF7_L2C_BD_TI0808B_1d_max", "BF7_L2C_BD_TI0808C_1d_max", "BF7_L2C_BD_TI0809A_1d_max", "BF7_L2C_BD_TI0809B_1d_max",
+            "BF7_L2C_BD_TI0809C_1d_max", "BF7_L2C_BD_TI0810A_1d_max", "BF7_L2C_BD_TI0810B_1d_max", "BF7_L2C_BD_TI0810C_1d_max",
+            "BF7_L2C_BD_TI0811A_1d_max", "BF7_L2C_BD_TI0811B_1d_max", "BF7_L2C_BD_TI0811C_1d_max", "BF7_L2C_BD_TI0812A_1d_max",
+            "BF7_L2C_BD_TI0812B_1d_max", "BF7_L2C_BD_TI0812C_1d_max", "BF7_L2C_BD_TI0813A_1d_max", "BF7_L2C_BD_TI0813B_1d_max",
+            "BF7_L2C_BD_TI0813C_1d_max", "BF7_L2C_BD_TI0901A_1d_max", "BF7_L2C_BD_TI0901B_1d_max", "BF7_L2C_BD_TI0901C_1d_max",
+            "BF7_L2C_BD_TI0902A_1d_max", "BF7_L2C_BD_TI0902B_1d_max", "BF7_L2C_BD_TI0902C_1d_max", "BF7_L2C_BD_TI0903A_1d_max",
+            "BF7_L2C_BD_TI0903B_1d_max", "BF7_L2C_BD_TI0903C_1d_max", "BF7_L2C_BD_TI0904A_1d_max", "BF7_L2C_BD_TI0904B_1d_max",
+            "BF7_L2C_BD_TI0904C_1d_max", "BF7_L2C_BD_TI0905A_1d_max", "BF7_L2C_BD_TI0905B_1d_max", "BF7_L2C_BD_TI0905C_1d_max",
+            "BF7_L2C_BD_TI0906A_1d_max", "BF7_L2C_BD_TI0906B_1d_max", "BF7_L2C_BD_TI0906C_1d_max", "BF7_L2C_BD_TI0907A_1d_max",
+            "BF7_L2C_BD_TI0907B_1d_max", "BF7_L2C_BD_TI0907C_1d_max", "BF7_L2C_BD_TI0908A_1d_max", "BF7_L2C_BD_TI0908B_1d_max",
+            "BF7_L2C_BD_TI0908C_1d_max", "BF7_L2C_BD_TI0909A_1d_max", "BF7_L2C_BD_TI0909B_1d_max", "BF7_L2C_BD_TI0909C_1d_max"
     };
 
     private String[] luGangJ_M = new String[]{
-            "BF8_L2C_BD_TI0910A_1d_max", "BF8_L2C_BD_TI0910B_1d_max", "BF8_L2C_BD_TI0910C_1d_max", "BF8_L2C_BD_TI0911A_1d_max",
-            "BF8_L2C_BD_TI0911B_1d_max", "BF8_L2C_BD_TI0911C_1d_max", "BF8_L2C_BD_TI0912A_1d_max", "BF8_L2C_BD_TI0912B_1d_max",
-            "BF8_L2C_BD_TI0912C_1d_max", "BF8_L2C_BD_TI0913A_1d_max", "BF8_L2C_BD_TI0913B_1d_max", "BF8_L2C_BD_TI0913C_1d_max",
-            "BF8_L2C_BD_TI1001A_1d_max", "BF8_L2C_BD_TI1001B_1d_max", "BF8_L2C_BD_TI1002A_1d_max", "BF8_L2C_BD_TI1002B_1d_max",
-            "BF8_L2C_BD_TI1003A_1d_max", "BF8_L2C_BD_TI1003B_1d_max", "BF8_L2C_BD_TI1004A_1d_max", "BF8_L2C_BD_TI1004B_1d_max",
-            "BF8_L2C_BD_TI1005A_1d_max", "BF8_L2C_BD_TI1005B_1d_max", "BF8_L2C_BD_TI1006A_1d_max", "BF8_L2C_BD_TI1006B_1d_max",
-            "BF8_L2C_BD_TI1007A_1d_max", "BF8_L2C_BD_TI1007B_1d_max", "BF8_L2C_BD_TI1008A_1d_max", "BF8_L2C_BD_TI1008B_1d_max",
-            "BF8_L2C_BD_TI1009A_1d_max", "BF8_L2C_BD_TI1009B_1d_max", "BF8_L2C_BD_TI1010A_1d_max", "BF8_L2C_BD_TI1010B_1d_max",
-            "BF8_L2C_BD_ATI1011A_1d_max", "BF8_L2C_BD_ATI1011B_1d_max", "BF8_L2C_BD_TI1012A_1d_max", "BF8_L2C_BD_TI1012B_1d_max",
-            "BF8_L2C_BD_TI1013A_1d_max", "BF8_L2C_BD_TI1013B_1d_max", "BF8_L2C_BD_TI1101A_1d_max", "BF8_L2C_BD_TI1101B_1d_max",
-            "BF8_L2C_BD_TI1102A_1d_max", "BF8_L2C_BD_TI1102B_1d_max", "BF8_L2C_BD_TI1103A_1d_max", "BF8_L2C_BD_TI1103B_1d_max",
-            "BF8_L2C_BD_TI1104A_1d_max", "BF8_L2C_BD_TI1104B_1d_max", "BF8_L2C_BD_TI1105A_1d_max", "BF8_L2C_BD_TI1105B_1d_max",
-            "BF8_L2C_BD_TI1106A_1d_max", "BF8_L2C_BD_TI1106B_1d_max", "BF8_L2C_BD_TI1107A_1d_max", "BF8_L2C_BD_TI1107B_1d_max",
-            "BF8_L2C_BD_TI1108A_1d_max", "BF8_L2C_BD_TI1108B_1d_max", "BF8_L2C_BD_TI1109A_1d_max", "BF8_L2C_BD_TI1109B_1d_max",
-            "BF8_L2C_BD_TI1110A_1d_max", "BF8_L2C_BD_TI1110B_1d_max", "BF8_L2C_BD_TI1111A_1d_max", "BF8_L2C_BD_TI1111B_1d_max",
-            "BF8_L2C_BD_TI1112A_1d_max", "BF8_L2C_BD_TI1112B_1d_max", "BF8_L2C_BD_TI1113A_1d_max", "BF8_L2C_BD_TI1113B_1d_max"
+            "BF7_L2C_BD_TI0910A_1d_max", "BF7_L2C_BD_TI0910B_1d_max", "BF7_L2C_BD_TI0910C_1d_max", "BF7_L2C_BD_TI0911A_1d_max",
+            "BF7_L2C_BD_TI0911B_1d_max", "BF7_L2C_BD_TI0911C_1d_max", "BF7_L2C_BD_TI0912A_1d_max", "BF7_L2C_BD_TI0912B_1d_max",
+            "BF7_L2C_BD_TI0912C_1d_max", "BF7_L2C_BD_TI0913A_1d_max", "BF7_L2C_BD_TI0913B_1d_max", "BF7_L2C_BD_TI0913C_1d_max",
+            "BF7_L2C_BD_TI1001A_1d_max", "BF7_L2C_BD_TI1001B_1d_max", "BF7_L2C_BD_TI1002A_1d_max", "BF7_L2C_BD_TI1002B_1d_max",
+            "BF7_L2C_BD_TI1003A_1d_max", "BF7_L2C_BD_TI1003B_1d_max", "BF7_L2C_BD_TI1004A_1d_max", "BF7_L2C_BD_TI1004B_1d_max",
+            "BF7_L2C_BD_TI1005A_1d_max", "BF7_L2C_BD_TI1005B_1d_max", "BF7_L2C_BD_TI1006A_1d_max", "BF7_L2C_BD_TI1006B_1d_max",
+            "BF7_L2C_BD_TI1007A_1d_max", "BF7_L2C_BD_TI1007B_1d_max", "BF7_L2C_BD_TI1008A_1d_max", "BF7_L2C_BD_TI1008B_1d_max",
+            "BF7_L2C_BD_TI1009A_1d_max", "BF7_L2C_BD_TI1009B_1d_max", "BF7_L2C_BD_TI1010A_1d_max", "BF7_L2C_BD_TI1010B_1d_max",
+            "BF7_L2C_BD_ATI1011A_1d_max", "BF7_L2C_BD_ATI1011B_1d_max", "BF7_L2C_BD_TI1012A_1d_max", "BF7_L2C_BD_TI1012B_1d_max",
+            "BF7_L2C_BD_TI1013A_1d_max", "BF7_L2C_BD_TI1013B_1d_max", "BF7_L2C_BD_TI1101A_1d_max", "BF7_L2C_BD_TI1101B_1d_max",
+            "BF7_L2C_BD_TI1102A_1d_max", "BF7_L2C_BD_TI1102B_1d_max", "BF7_L2C_BD_TI1103A_1d_max", "BF7_L2C_BD_TI1103B_1d_max",
+            "BF7_L2C_BD_TI1104A_1d_max", "BF7_L2C_BD_TI1104B_1d_max", "BF7_L2C_BD_TI1105A_1d_max", "BF7_L2C_BD_TI1105B_1d_max",
+            "BF7_L2C_BD_TI1106A_1d_max", "BF7_L2C_BD_TI1106B_1d_max", "BF7_L2C_BD_TI1107A_1d_max", "BF7_L2C_BD_TI1107B_1d_max",
+            "BF7_L2C_BD_TI1108A_1d_max", "BF7_L2C_BD_TI1108B_1d_max", "BF7_L2C_BD_TI1109A_1d_max", "BF7_L2C_BD_TI1109B_1d_max",
+            "BF7_L2C_BD_TI1110A_1d_max", "BF7_L2C_BD_TI1110B_1d_max", "BF7_L2C_BD_TI1111A_1d_max", "BF7_L2C_BD_TI1111B_1d_max",
+            "BF7_L2C_BD_TI1112A_1d_max", "BF7_L2C_BD_TI1112B_1d_max", "BF7_L2C_BD_TI1113A_1d_max", "BF7_L2C_BD_TI1113B_1d_max"
     };
 
     @Autowired
@@ -219,7 +219,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
 
     @Override
     public JobEnum getCurrentJob() {
-        return JobEnum.gl_rishengchanfenxibaogao_day;
+        return JobEnum.gl_rishengchanfenxibaogao_day7;
     }
 
     @Scheduled(cron = "0 0 10 * * ?")
@@ -245,7 +245,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         dealPart4(data);
         handleTapTempture(version);
         handleLuTiWenDu(version);
-        List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day.getCode(), LanguageEnum.cn_zh.getName(), "8高炉");
+        List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day7.getCode(), LanguageEnum.cn_zh.getName(), "7高炉");
         if (CollectionUtils.isNotEmpty(reportCategoryTemplates)) {
             currentTemplate = reportCategoryTemplates.get(0);
             String templatePath = currentTemplate.getTemplatePath();
@@ -471,7 +471,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             String text2 = "luti_temp";
             String text3 = "luti_differ_text";
             String text4 = "luti_temp_differ";
-            String prefix = "BF8_L2C_BD_";
+            String prefix = "BF7_L2C_BD_";
             String suffix = "_1d_max";
             //炉缸
             Map<String, BigDecimal> luGangMap =  getLuTiWenDuData(version, luGang);
@@ -559,7 +559,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             String text3 = "tap_temp_text";
             String text4 = "tap_temp_differ";
 
-            String prefix = "BF8_L2C_BD_";
+            String prefix = "BF7_L2C_BD_";
             String stuffix = "_1d_max";
             //默认值，防止接口中没有数据
             for(int i = 0; i < 4; i++) {
@@ -873,7 +873,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                 if (Objects.nonNull(commitDay)) {
                     result.put("commit_day", df2.format(commitDay));
                     //吨铁发电量=发电量*10000/日产量
-                    List<Double> valueObject = getValuesByTag(data, "BF8_L2M_BX_HMMass_1d_cur");
+                    List<Double> valueObject = getValuesByTag(data, "BF7_L2M_BX_HMMass_1d_cur");
                     if (Objects.nonNull(valueObject) && valueObject.size() > 0) {
                         Double total = valueObject.get(valueObject.size() - 1);
                         if (Objects.nonNull(total) && total != 0d) {
@@ -886,7 +886,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             dealChart1(data);
             dealChart2(data);
 
-            double increase = dealIncreaseYesterday(data, "BF8_L2M_BX_HMMass_1d_cur");
+            double increase = dealIncreaseYesterday(data, "BF7_L2M_BX_HMMass_1d_cur");
             if (increase >= 0d) {
                 result.put("textOne1", "升高");
             } else {
@@ -894,7 +894,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             }
             result.put("countOne1", df2.format(Math.abs(increase)));
 
-            increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CokeRate_1d_cur");
+            increase = dealIncreaseYesterday(data, "BF7_L2M_BX_CokeRate_1d_cur");
             if (increase >= 0d) {
                 result.put("textOne2", "升高");
             } else {
@@ -902,7 +902,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             }
             result.put("countOne2", df2.format(Math.abs(increase)));
 
-            increase = dealIncreaseYesterday(data, "BF8_L2M_BX_CoalRate_1d_cur");
+            increase = dealIncreaseYesterday(data, "BF7_L2M_BX_CoalRate_1d_cur");
             if (increase >= 0d) {
                 result.put("textOne3", "升高");
             } else {
@@ -910,10 +910,10 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
             }
             result.put("countOne3", df2.format(Math.abs(increase)));
 
-            result.put("countOne4", df2.format(dealMonthTotal(data, "BF8_L2M_BX_HMMass_1d_cur")));
-            result.put("countOne5", df2.format(dealMonthTotalAvg(data, "BF8_L2M_BX_CokeRate_1d_cur")));
-            result.put("countOne6", df2.format(dealMonthTotalAvg(data, "BF8_L2M_BX_CoalRate_1d_cur")));
-            result.put("countOne7", df2.format(dealMonthTotalAvg(data, "BF8_L2M_BX_FuelRate_1d_cur")));
+            result.put("countOne4", df2.format(dealMonthTotal(data, "BF7_L2M_BX_HMMass_1d_cur")));
+            result.put("countOne5", df2.format(dealMonthTotalAvg(data, "BF7_L2M_BX_CokeRate_1d_cur")));
+            result.put("countOne6", df2.format(dealMonthTotalAvg(data, "BF7_L2M_BX_CoalRate_1d_cur")));
+            result.put("countOne7", df2.format(dealMonthTotalAvg(data, "BF7_L2M_BX_FuelRate_1d_cur")));
         } catch (Exception e) {
             log.error("高炉日生产分析报告处理part1失败", e);
         }
@@ -922,17 +922,17 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     private void dealPart3(JSONObject data){
         try {
             dealPart(data, "partThree", L3, df2);
-            dealSingle(data, "partThree3", "BF8_L2C_BD_ColdBlastPress_1d_avg", df3);
-            dealSingle(data, "partThree4", "BF8_L2M_PressDiff_1d_avg", df3);
-            dealSingle(data, "partThree5", "BF8_L2C_BD_TopPress_1d_avg", df3);
-            result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF8_L2C_BD_BH_1d_avg",data)));
-            result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF8_L2C_BD_ColdBlastFlow_1d_avg",data)));
-            result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF8_L2C_BD_ColdBlastPress_1d_avg",data)));
-            result.put("offsetP", df3.format(dealOffset(0d,0.183d,"BF8_L2M_PressDiff_1d_avg",data)));
-            result.put("offsetTP", df3.format(dealOffset(0.228d,0.236d,"BF8_L2C_BD_TopPress_1d_avg",data)));
-            result.put("offsetPT", df2.format(dealOffset(1505d,1530d,"BF8_L2M_HMTemp_1d_avg",data)));
-            result.put("offsetFR", df2.format(dealOffset(515d,525d,"BF8_L2M_BX_FuelRate_1d_cur",data)));
-            result.put("offsetCO", df2.format(dealOffset(47d,52d,"BF8_L2M_GasUtilization_1d_avg",data)));
+            dealSingle(data, "partThree3", "BF7_L2C_BD_ColdBlastPress_1d_avg", df3);
+            dealSingle(data, "partThree4", "BF7_L2M_PressDiff_1d_avg", df3);
+            dealSingle(data, "partThree5", "BF7_L2C_BD_TopPress_1d_avg", df3);
+            result.put("offsetWet", df2.format(dealOffset(5d,10d,"BF7_L2C_BD_BH_1d_avg",data)));
+            result.put("offsetBV", df2.format(dealOffset(5700d,5900d,"BF7_L2C_BD_ColdBlastFlow_1d_avg",data)));
+            result.put("offsetBP", df3.format(dealOffset(0d,0.42d,"BF7_L2C_BD_ColdBlastPress_1d_avg",data)));
+            result.put("offsetP", df3.format(dealOffset(0d,0.183d,"BF7_L2M_PressDiff_1d_avg",data)));
+            result.put("offsetTP", df3.format(dealOffset(0.228d,0.236d,"BF7_L2C_BD_TopPress_1d_avg",data)));
+            result.put("offsetPT", df2.format(dealOffset(1505d,1530d,"BF7_L2M_HMTemp_1d_avg",data)));
+            result.put("offsetFR", df2.format(dealOffset(515d,525d,"BF7_L2M_BX_FuelRate_1d_cur",data)));
+            result.put("offsetCO", df2.format(dealOffset(47d,52d,"BF7_L2M_GasUtilization_1d_avg",data)));
         } catch (Exception e) {
             log.error("高炉日生产分析报告处理part3失败", e);
         }
@@ -984,7 +984,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private Double dealMonthTotalAvg (JSONObject data, String tagName) {
-        String tagRiChanLiang = "BF8_L2M_BX_HMMass_1d_cur";
+        String tagRiChanLiang = "BF7_L2M_BX_HMMass_1d_cur";
         Double result;
         Double total = 0d;
         Double count = 0d;
@@ -1029,8 +1029,8 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private void dealChart1(JSONObject data) {
-        List<Double> tagObject1 = getValuesByTag(data, "BF8_L2M_BX_HMMass_1d_cur");
-        List<Double> tagObject2 = getValuesByTag(data, "BF8_L2M_BX_FuelRate_1d_cur");
+        List<Double> tagObject1 = getValuesByTag(data, "BF7_L2M_BX_HMMass_1d_cur");
+        List<Double> tagObject2 = getValuesByTag(data, "BF7_L2M_BX_FuelRate_1d_cur");
         List<Double> tempObject1 = new ArrayList<>(tagObject1);
         List<Double> tempObject2 = new ArrayList<>(tagObject2);
         tempObject1.removeAll(Collections.singleton(null));
@@ -1068,8 +1068,8 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private void dealChart2(JSONObject data) {
-        List<Double> tagObject1 = getValuesByTag(data, "BF8_L2M_BX_CokeRate_1d_cur");
-        List<Double> tagObject2 = getValuesByTag(data, "BF8_L2M_BX_CoalRate_1d_cur");
+        List<Double> tagObject1 = getValuesByTag(data, "BF7_L2M_BX_CokeRate_1d_cur");
+        List<Double> tagObject2 = getValuesByTag(data, "BF7_L2M_BX_CoalRate_1d_cur");
         List<Double> tempObject1 = new ArrayList<>(tagObject1);
         List<Double> tempObject2 = new ArrayList<>(tagObject2);
         tempObject1.removeAll(Collections.singleton(null));
@@ -1107,7 +1107,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private void dealChart3(String version) {
-        String tagName = "BF8_L2C_BD_SoftTempDiff_1d_avg";
+        String tagName = "BF7_L2C_BD_SoftTempDiff_1d_avg";
         JSONObject data = getDataByTag(new String[]{tagName}, startTime, endTime, version);
         List<Double> tagObject1 = getValuesByTag(data, tagName);
         List<Double> tempObject1 = new ArrayList<>(tagObject1);
@@ -1225,7 +1225,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
     }
 
     private void dealChart5(String version) {
-        String prefix = "BF8_L2C_BD_";
+        String prefix = "BF7_L2C_BD_";
         String suffix = "_1d_max";
         List<Double> luGangList = getMaxLuTiWenDuList(version, luGang, prefix, suffix);
         List<Double> luFuList = getMaxLuTiWenDuList(version, luFu, prefix, suffix);
@@ -1384,7 +1384,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      * @return
      */
     private String getUrl(String version) {
-        return httpProperties.getUrlApiGLTwo();
+        return httpProperties.getUrlApiGLThree();
     }
 
     // word跨行并单元格
@@ -1433,7 +1433,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
      */
     private void comm(String path) {
         try {
-            String sequence = "8高炉";
+            String sequence = "7高炉";
             XWPFDocument doc = WordExportUtil.exportWord07(path, result);
 
             List<XWPFTable> tables = doc.getTables();
@@ -1451,7 +1451,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
 
             ReportIndex reportIndex = new ReportIndex();
             reportIndex.setSequence(sequence)
-                    .setReportCategoryCode(JobEnum.gl_rishengchanfenxibaogao_day.getCode())
+                    .setReportCategoryCode(JobEnum.gl_rishengchanfenxibaogao_day7.getCode())
                     .setName(fileName)
                     .setPath(filePath)
                     .setIndexLang(LanguageEnum.getByLang(currentTemplate.getTemplateLang()).getName())

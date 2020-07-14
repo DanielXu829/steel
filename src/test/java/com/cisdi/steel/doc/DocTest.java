@@ -5,6 +5,7 @@ import com.cisdi.steel.module.job.a1.doc.GaoLuDocMain2;
 import com.cisdi.steel.module.job.a3.doc.ShaoJieMain2;
 import com.cisdi.steel.module.job.a3.doc.ShaojieDocMain;
 import com.cisdi.steel.module.job.gl.doc.GaoLuRiFenXiBaoGao;
+import com.cisdi.steel.module.job.gl.doc.GaoLuRiFenXiBaoGao7;
 import com.cisdi.steel.module.job.sj.doc.HuanDuiCaoYeHuiYiJiYaoDocMain;
 import com.cisdi.steel.module.job.jh.doc.JiaoHuaShengChanZhenDuanBaoGao;
 import com.cisdi.steel.module.job.sj.doc.ShaoJieFenXiDocMain;
@@ -85,7 +86,7 @@ public class DocTest extends SteelApplicationTests {
     }
 
     /**
-     * 测试“高炉日生产分析报告”
+     * 测试“8高炉日生产分析报告”
      */
     @Autowired
     private GaoLuRiFenXiBaoGao gaoLuRiFenXiBaoGao;
@@ -93,6 +94,20 @@ public class DocTest extends SteelApplicationTests {
     public void testGaoLuRiFenXiBaoGao() {
         long start = System.currentTimeMillis();
         gaoLuRiFenXiBaoGao.mainTask();
+        long end = System.currentTimeMillis();
+
+        System.out.println(end - start);
+    }
+
+    /**
+     * 测试“7高炉日生产分析报告”
+     */
+    @Autowired
+    private GaoLuRiFenXiBaoGao7 gaoLuRiFenXiBaoGao7;
+    @Test
+    public void testGaoLuRiFenXiBaoGao7() {
+        long start = System.currentTimeMillis();
+        gaoLuRiFenXiBaoGao7.mainTask();
         long end = System.currentTimeMillis();
 
         System.out.println(end - start);

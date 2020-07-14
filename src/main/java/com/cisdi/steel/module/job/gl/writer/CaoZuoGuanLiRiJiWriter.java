@@ -151,11 +151,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @return
      */
     private List<CellData> handleEachRowData(List<String> tagNames, String queryUrl, DateQuery dateQuery, int rowIndex) {
-        List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementsByTargetNames(tagNames);
-        Map<String, TargetManagement> targetManagementMap = targetManagements.stream().collect(Collectors.toMap(TargetManagement::getTargetName, target -> target));
-        List<String> tagFormulas = targetManagements.stream().map(TargetManagement::getTargetFormula).collect(Collectors.toList());
         // 批量查询tag value
-        TagQueryParam tagQueryParam = new TagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagFormulas);
+        TagQueryParam tagQueryParam = new TagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagNames);
         String result = httpUtil.postJsonParams(queryUrl, JSON.toJSONString(tagQueryParam));
 
         List<CellData> resultList = new ArrayList<>();
@@ -167,14 +164,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             for (int columnIndex = 0; columnIndex < tagNames.size(); columnIndex++) {
                 String targetName = tagNames.get(columnIndex);
                 if (StringUtils.isNotBlank(targetName)) {
-                    TargetManagement targetManagement = targetManagementMap.get(targetName);
-                    if (Objects.nonNull(targetManagement)) {
-                        Map<Long, Double> tagValueMap = tagValueMaps.get(targetManagement.getTargetFormula());
-                        if (Objects.nonNull(tagValueMap)) {
-                            TargetManagement tag = targetManagementMap.get(targetName);
-                            List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(dateQuery.getQueryStartTime()), new Date(dateQuery.getQueryEndTime()));
-                            handleEachCellData(dayEach, tagValueMap, resultList, rowIndex, columnIndex, tag);
-                        }
+                    Map<Long, Double> tagValueMap = tagValueMaps.get(targetName);
+                    if (Objects.nonNull(tagValueMap)) {
+                        List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(dateQuery.getQueryStartTime()), new Date(dateQuery.getQueryEndTime()));
+                        handleEachCellData(dayEach, tagValueMap, resultList, rowIndex, columnIndex, targetName);
                     }
                 }
             }
@@ -193,14 +186,14 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param columnIndex
      * @param tag
      */
-    private void handleEachCellData(List<DateQuery> dayEach, Map<Long, Double> tagValueMap, List<CellData> resultList, int rowIndex, int columnIndex, TargetManagement tag) {
+    private void handleEachCellData(List<DateQuery> dayEach, Map<Long, Double> tagValueMap, List<CellData> resultList, int rowIndex, int columnIndex, String tag) {
         // 按照时间顺序从老到新排序
         List<Long> clockList = tagValueMap.keySet().stream().sorted().collect(Collectors.toList());
         for (int i = 0; i < dayEach.size(); i++) {
             DateQuery query = dayEach.get(i);
             Date queryStartTime = query.getStartTime();
             Date queryEndTime = query.getEndTime();
-            if (tag.getTargetFormula().endsWith("_evt")) {
+            if (tag.endsWith("_evt")) {
                 //如果是evt结尾的, 取时间最大的值
                 Long key = Collections.max(clockList);
                 Double maxVal = tagValueMap.get(key);

@@ -86,7 +86,7 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
 
         for(int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i ++) {
             List<DateQuery> class8DateQueries = DateQueryUtil.buildDay12HourEach(allDayBeginTimeInCurrentMonth.get(i));
-            List<DateQuery> class10DateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
+            List<DateQuery> class10DateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(DateUtil.addDays(allDayBeginTimeInCurrentMonth.get(i), 1));
             for(int k = 0; k < tagNames.size(); k++) {
                 String tagName = tagNames.get(k);
                 if(StringUtils.isBlank(tagName)) continue;
@@ -332,102 +332,6 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
         }
 
         return value;
-    }
-
-    /**
-     * 解析JSON数组，封装写入数据
-     * @param data
-     * @param prefix
-     * @param itemNameList
-     * @param itemRowNum
-     * @param itemColNum
-     * @return
-     */
-    private List<CellData> mapDataHandler(List<BatchData> data, List<String> itemNameList, Sheet sheet, Integer count) {
-        List<CellData> cellDataList = new ArrayList<>();
-        if (CollectionUtils.isEmpty(data)) {
-            return cellDataList;
-        }
-//        Ol大烧
-//        Os小烧
-//        冶金焦是  大焦  焦丁是小焦   回用焦丁是回用焦丁
-        // 计算本次o之和。
-        BigDecimal oCount = new BigDecimal(0);
-        List<BatchData> oCollect = data.stream()
-                .filter(p -> ("Ol".equalsIgnoreCase(p.getBatchIndex().getTyp()) || "Os".equalsIgnoreCase(p.getBatchIndex().getTyp())))
-                .collect(Collectors.toList());
-        for (int i = 0; i < oCollect.size(); i++) {
-            BigDecimal reduce = oCollect.get(i).getMaterials().stream()
-                    .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
-            oCount = oCount.add(reduce);
-        }
-        // 第一个C中的回用焦丁
-        BigDecimal c1HuiYongJiaoDing = data.get(0).getMaterials().stream()
-                .filter(m -> m.getDescr().endsWith("回用焦丁"))
-                .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        for (int i = 0; i < data.size(); i++) {
-            BatchData batchData = data.get(i);
-            if (Objects.isNull(batchData) || Objects.isNull(batchData.getBatchIndex()) || Objects.isNull(batchData.getMaterials())) {
-                continue;
-            }
-            BatchIndex batchIndexDataMap = batchData.getBatchIndex();
-            List<BatchMaterial> materialsArray = batchData.getMaterials();
-            int sequence = count + i + 1;
-            int row = sequence + itemRowNum;
-            // 遍历标记行所有的单元格
-            for (int j = 0; j < itemNameList.size(); j++) {
-                // 获取标记项单元格中的值
-                String itemName = itemNameList.get(j);
-                int col = j;
-                if (StringUtils.isNotBlank(itemName)) {
-                    switch (itemName) {
-                        case "矿石总量" : {
-                            //本次o之和 - 第一个C中的回用焦丁
-                            if ("C".equals(batchIndexDataMap.getTyp())) {
-                                BigDecimal val = oCount.add(c1HuiYongJiaoDing);
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                            } else {
-                                BigDecimal val = oCount.subtract(c1HuiYongJiaoDing);
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                            }
-                            break;
-                        }
-                        case "大烧" : {
-                            //第一个o中：materials.brandcode后缀是SINTER
-                            if ("O1".equals(batchIndexDataMap.getTyp())) {
-                                BigDecimal val = materialsArray.stream()
-                                        .filter(m -> m.getBrandcode().endsWith("SINTER"))
-                                        .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                            }
-                            break;
-                        }
-                        case "小烧" : {
-                            //第二个o中：materials.brandcode后缀是SINTER
-                            if ("Os".equals(batchIndexDataMap.getTyp())) {
-                                BigDecimal val = materialsArray.stream()
-                                        .filter(m -> m.getBrandcode().endsWith("SINTER"))
-                                        .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                            }
-                            break;
-                        }
-                        default: {
-                            //默认，materials中descr对应表头
-                            BigDecimal val = materialsArray.stream()
-                                    .filter(m -> itemName.equals(m.getDescr()))
-                                    .map(BatchMaterial::getWeightset).reduce(BigDecimal.ZERO, BigDecimal::add);
-                            if (val != null && val.doubleValue() > 0) {
-                                ExcelWriterUtil.addCellData(cellDataList, row, col, val);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return cellDataList;
     }
 
     /**
