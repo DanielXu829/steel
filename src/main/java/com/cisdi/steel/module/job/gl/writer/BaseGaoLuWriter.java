@@ -812,7 +812,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
     }
 
-    protected Map<String, Map<Long, Double>> getTagNamesInRangeTagValueMapDTO(String version, DateQuery dateQuery, List<String> tagNames) {
+    protected Map<String, LinkedHashMap<Long, Double>> getTagNamesInRangeTagValueMapDTO(String version, DateQuery dateQuery, List<String> tagNames) {
         Map<String, String> queryParam = new HashMap();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("tagnames", tagNames);
@@ -820,7 +820,7 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         jsonObject.put("endtime", dateQuery.getQueryEndTime());
         String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), jsonObject.toJSONString());
 
-        Map<String, Map<Long, Double>> tagFormulaToValueMap = null;
+        Map<String, LinkedHashMap<Long, Double>> tagFormulaToValueMap = null;
         if (StringUtils.isNotBlank(jsonData)) {
             TagValueMapDTO tagValueMapDTO = JSON.parseObject(jsonData, TagValueMapDTO.class);
             tagFormulaToValueMap = Optional.ofNullable

@@ -465,7 +465,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 // 变料次数调用getUrlTagNamesInRange接口，传22点-22点，返回数据的个数为变料次数
                 String totalBatchNumberTagFormula = itemToTagFormulaMap.get("变料次数");
                 List<String> tagNamesInRange = Arrays.asList(totalBatchNumberTagFormula);
-                Map<String, Map<Long, Double>> tagFormulaInRangeToValueMap = getTagNamesInRangeTagValueMapDTO(version, eachDateQuery, tagNamesInRange);
+                Map<String, LinkedHashMap<Long, Double>> tagFormulaInRangeToValueMap = getTagNamesInRangeTagValueMapDTO(version, eachDateQuery, tagNamesInRange);
                 Integer totalBatchNumber = Optional.ofNullable(tagFormulaInRangeToValueMap)
                         .map(e -> e.get(totalBatchNumberTagFormula)).map(Map::size).orElse(null);
                 tagFormulaToValueMap.put(totalBatchNumberTagFormula, BigDecimal.valueOf(totalBatchNumber));
