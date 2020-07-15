@@ -132,6 +132,15 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
         Sheet sheet = workbook.getSheetAt(0);
         List<CellData> cellDataList = new ArrayList<>();
         int size = allDayBeginTimeInCurrentMonth.size();
+        for(int columnNum =5; columnNum < 27; columnNum ++) {
+            for(int i = 4; i < size*2 + 4; i++) {
+                Cell cell = sheet.getRow(i).getCell(columnNum);
+                if(StringUtils.isBlank(PoiCellUtil.getCellValue(cell))){
+                    PoiCustomUtil.setCellValue(cell, 0);
+                }
+            }
+        }
+
         for(int i = 0; i < size; i ++) {
             List<DateQuery> classDateQueries = DateQueryUtil.buildDay12HourEach(allDayBeginTimeInCurrentMonth.get(i));
             for(int j =1; j <= 2; j++)  {
@@ -188,10 +197,6 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
         for (int columnNum = 0; columnNum < cellValue.size(); columnNum++) {
             if (StringUtils.isBlank(cellValue.get(columnNum))) {
                 sheet.setColumnHidden(columnNum, true);
-                for(int i =3; i < size*2+3; i ++) {
-                    Cell cell = sheet.getRow(i).getCell(columnNum);
-                    PoiCustomUtil.setCellValue(cell, 0);
-                }
             } else {
                 sheet.setColumnHidden(columnNum, false);
             }
@@ -270,7 +275,7 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
                             if (i < newCokeList.size()) {
                                 PoiCustomUtil.setCellValue(cell, newCokeList.get(i));
                                 PoiCustomUtil.setCellValue(itemCell, "Weightset_"+newCokeList.get(i));
-                                PoiCustomUtil.setCellValue(cellWater, newCokeList.get(i));
+                                PoiCustomUtil.setCellValue(cellWater, newCokeList.get(i)+"水份");
                                 PoiCustomUtil.setCellValue(itemCellWater, "Water_"+newCokeList.get(i));
                                 i++;
                             }

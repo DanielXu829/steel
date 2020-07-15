@@ -19,7 +19,6 @@ import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.FastJSONUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
-import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +54,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
 
     @Autowired
     protected TargetManagementMapper targetManagementMapper;
+
+    private static String tagSheetName = "_tagNames";
 
     /**
      * @param excelDTO 数据
@@ -158,7 +159,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         List<CellData> resultList = new ArrayList<>();
         if (StringUtils.isNotBlank(result)) {
             TagValueMapDTO tagValueMapDTO = JSON.parseObject(result, TagValueMapDTO.class);
-            Map<String, Map<Long, Double>> tagValueMaps = tagValueMapDTO.getData();
+            Map<String, LinkedHashMap<Long, Double>> tagValueMaps = tagValueMapDTO.getData();
             // 获取targetManagement map
 
             for (int columnIndex = 0; columnIndex < tagNames.size(); columnIndex++) {
@@ -431,9 +432,9 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         query.put("starttime", dateQuery.getQueryStartTime());
         query.put("endtime", dateQuery.getQueryEndTime());
         //"BF8_L2M_NetCokeTime_evt"
-        String cellValue = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 0, 0);
+        String cellValue = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 0, 0);
         //"BF8_L2M_CokeBatchWeight_evt"
-        String tagname = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 1, 0);
+        String tagname = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 1, 0);
         query.put("tagnames", new String[]{cellValue});
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
@@ -546,16 +547,6 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
     }
 
-    private Integer getLatestTagValue(String version, Long time, String tagName) {
-        String url = getLatestTagValueUrl(version);
-        Map<String, String> param = new HashMap<>();
-        param.put("time", String.valueOf(Long.valueOf(time)));
-        param.put("tagname", tagName);
-        String result = httpUtil.get(url, param);
-        Integer val = FastJSONUtil.getJsonValueByKey(result, Lists.newArrayList("data"), "val", Integer.class);
-        return val;
-    }
-
     /**
      * 整合料线变更数据
      * @param version
@@ -564,15 +555,15 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param tagValue
      * @param tag
      */
-    private void handleStartIndex(Workbook workbook, String version, Long key, Map<Integer, Map<String, List<Long>>> liaoXianMap, Long tagValue, String tag) {
+    private void handleStartIndex(Workbook workbook, String version, Long key, LinkedHashMap<BigDecimal, LinkedHashMap<String, List<Long>>> liaoXianMap, Long tagValue, String tag) {
         //"BF8_L2C_SH_CurrentBatch_evt"
-        String cellValue = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 2, 0);
-        Integer val = getLatestTagValue(version, key, cellValue);
+        String cellValue = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 2, 0);
+        BigDecimal val = getLatestTagValue(version, cellValue, new Date(key));
         if (val != null) {
             if (liaoXianMap.containsKey(val)) {
                 liaoXianMap.get(val).put(tag, Lists.newArrayList(tagValue, key));
             } else {
-                liaoXianMap.put(val, new HashMap<String, List<Long>>(){{ put(tag, Lists.newArrayList(tagValue, key)); }});
+                liaoXianMap.put(val, new LinkedHashMap<String, List<Long>>(){{ put(tag, Lists.newArrayList(tagValue, key)); }});
             }
         }
     }
@@ -597,40 +588,53 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
         query.put("starttime", String.valueOf(dateQuery.getQueryStartTime()));
         query.put("endtime", String.valueOf(dateQuery.getQueryEndTime()));
         // "BF8_L2C_TP_CokeSetLine_evt", "BF8_L2C_TP_SinterSetLine_evt", "BF8_L2C_TP_LiSinterSetLine_evt"
-        String cokeSetLine = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 3, 0);
-        String sinterSetLine = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 4, 0);
-        String liSinterSetLine = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 5, 0);
-        String mainRuler = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 6, 0);
-        String[] tagNames = new String[]{cokeSetLine, sinterSetLine, liSinterSetLine};
+        String cokeSetLine = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 3, 0);
+        String sinterSetLine = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 4, 0);
+        String liSinterSetLine = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 5, 0);
+        String mainRuler = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 6, 0);
+        String[] tagNames = new String[]{cokeSetLine, sinterSetLine, liSinterSetLine, mainRuler};
         query.put("tagnames", tagNames);
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String results = httpUtil.postJsonParams(queryUrl, jsonString);
-
-        Map<Integer, Map<String, List<Long>>> liaoXianMap = new HashMap<Integer, Map<String, List<Long>>>();
+        LinkedHashMap<BigDecimal, LinkedHashMap<String, List<Long>>> liaoXianMap = new LinkedHashMap<BigDecimal, LinkedHashMap<String, List<Long>>>();
         if(StringUtils.isNotBlank(results)) {
             TagValueMapDTO tagValueMapDTO = JSON.parseObject(results, TagValueMapDTO.class);
             if(Objects.nonNull(tagValueMapDTO) && Objects.nonNull(tagValueMapDTO.getData())) {
-                Map<String, Map<Long, Double>> data = tagValueMapDTO.getData();
+                Map<String, LinkedHashMap<Long, Double>> data = tagValueMapDTO.getData();
                 if(Objects.nonNull(data) && data.size() > 0) {
                     for (String tagName:data.keySet()) {
-                        Map<Long, Double> map = data.get(tagName);
+                        LinkedHashMap<Long, Double> map = data.get(tagName);
                         if(Objects.nonNull(map) && map.size() > 0) {
-                            for (Long time : map.keySet()) {
-                                Long tagValue = map.get(time).longValue();
-                                handleStartIndex(workbook, version, time, liaoXianMap, tagValue, tagName);
-                            }
+                            map.forEach((key,value)-> handleStartIndex(workbook, version, key, liaoXianMap, value.longValue(), tagName));
                         }
                     }
                 }
             }
         }
+        if(liaoXianMap.size() > 0) {
+            liaoXianMap.forEach((keyMap, valueMap) -> {
+                List<Long> timeList = new ArrayList<>();
+                valueMap.forEach((key, value) -> {
+                    timeList.addAll(value);
+                });
+
+                for(String tagName:tagNames) {
+                    List<Long> list = valueMap.get(tagName);
+                    //点位没有取到值
+                    if (Objects.isNull(list)) {
+                        BigDecimal val = getLatestTagValue(version, tagName, new Date(Collections.max(timeList)));
+                        valueMap.put(tagName, Arrays.asList(val.longValue()));
+                    }
+                }
+            });
+        }
         //首先查询当天范围内的数据,如果当天没有数据，默认需要显示一条记录，这条记录就是直接查询C OL/OS 这三个点的最新值
-        if(liaoXianMap.size() == 0) {
+        else {
             TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(dateQuery.getEndTime(), version, Arrays.asList(tagNames));
             if (Objects.nonNull(tagValueListDTO) && Objects.nonNull(tagValueListDTO.getData())) {
                 List<TagValue> list = tagValueListDTO.getData();
-                Map<String, List<Long>> map = new HashMap<>();
+                LinkedHashMap<String, List<Long>> map = new LinkedHashMap<>();
                 for (TagValue tagValue:list) {
                     if (Objects.nonNull(tagValue) && StringUtils.isNotBlank(tagValue.getName()) && Objects.nonNull(tagValue.getVal())) {
                         List<Long> longList = Arrays.asList(tagValue.getVal().longValue(), tagValue.getClock().getTime());
@@ -638,31 +642,28 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                     }
                 }
                 if (map.size() > 0) {
-                    liaoXianMap.put(1, map);
+                    liaoXianMap.put(new BigDecimal(1), map);
                 }
             }
         }
         int index = 0;
-        for(Map.Entry<Integer, Map<String, List<Long>>> entry : liaoXianMap.entrySet()) {
-            Integer mapKey = entry.getKey();
+        for(Map.Entry<BigDecimal, LinkedHashMap<String, List<Long>>> entry : liaoXianMap.entrySet()) {
+            BigDecimal mapKey = entry.getKey();
             Map<String, List<Long>> mapValue = entry.getValue();
             ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex, mapKey);
             Long time = 0L;
-            for(String key : mapValue.keySet()){
-                Long val = mapValue.get(key).get(0);
-                Long timeVal = mapValue.get(key).get(1);
-                if(time < timeVal) {
-                    time = timeVal;
-                }
+            for(String key : tagNames){
+                List<Long> list = mapValue.get(key);
+                Long val = Collections.min(list);
                 if (key.equals(cokeSetLine)) {
                     ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 3, val);
-                }else {
+                } else if (key.equals(mainRuler)) {
+                    ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
+                } else {
                     ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 5,
                             mapValue.get(sinterSetLine).get(0)+ "/" + mapValue.get(liSinterSetLine).get(0));
                 }
             }
-            Integer val = getLatestTagValue(version, time, mainRuler);
-            ExcelWriterUtil.addCellData(cellDataList, beginRowIndex + index, columnIndex + 7, val);
             index++;
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
@@ -807,7 +808,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             String[] timeItemArray = {"startTime", "slagTime", "endTime"};
             List<String> timeItemList = Arrays.asList(timeItemArray);
             //"BF8_L2M_SH_ChargeCount_evt"
-            String cellValue = PoiCustomUtil.getSheetCell(workbook, "_tagNames", 7, 0);
+            String cellValue = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 7, 0);
             // 遍历标记行
             for (int i = 0; i < dataSize; i++) {
                 tapSgRow = tapSgRowData.get(i);
