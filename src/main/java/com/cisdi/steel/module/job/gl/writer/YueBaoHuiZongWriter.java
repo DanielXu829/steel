@@ -138,7 +138,11 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
         String[] names = tagName.split(" - ");
         BigDecimal value = null;
         if (names.length == 2) {
-            value = getLatestTagValue(version, names[0], date).subtract(getLatestTagValue(version, names[1], date));
+            BigDecimal latestTagValueFirst = getLatestTagValue(version, names[0], date);
+            BigDecimal latestTagValueSecond = getLatestTagValue(version, names[1], date);
+            if (Objects.nonNull(latestTagValueFirst) && Objects.nonNull(latestTagValueSecond)) {
+                value = latestTagValueFirst.subtract(latestTagValueSecond);
+            }
         } else {
             value = getLatestTagValue(version, tagName, date);
         }
@@ -282,10 +286,12 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     } else {
                         List<String> brandCodeListByType = getBrandCodeListByType(version, from, to, type);
                         // 如果通过brandCode查出来无数据，则用下一个brandCode,直到有数据。
-                        for (String brandCode : brandCodeListByType) {
-                            analysisValueList = getAnalysisValuesByBrandCode(version, from, to, brandCode);
-                            if (CollectionUtils.isNotEmpty(analysisValueList)) {
-                                break;
+                        if (CollectionUtils.isNotEmpty(brandCodeListByType)) {
+                            for (String brandCode : brandCodeListByType) {
+                                analysisValueList = getAnalysisValuesByBrandCode(version, from, to, brandCode);
+                                if (CollectionUtils.isNotEmpty(analysisValueList)) {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -366,7 +372,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 Date queryDate = DateUtil.addDays(day, 1);
                 TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(queryDate, version, tagFormulaList);
                 List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO).map(TagValueListDTO::getData).orElse(new ArrayList<>());
-                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream().collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
+                Map<String, BigDecimal> tagFormulaToValueMap =
+                        tagValueList.stream().collect(HashMap::new, (m, v) -> m.put(v.getName(), v.getVal()), HashMap::putAll);
                 MaterialExpendStcDTO materialExpandStcDTO = getMaterialExpandStcDTO(version, day);
                 Map<String, List<MaterialExpend>> typeToMaterialExpendListMap =
                         Optional.ofNullable(materialExpandStcDTO).map(MaterialExpendStcDTO::getData).orElse(null);
@@ -402,14 +409,26 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
     //布料、风口及炉况情况
     private void handleBuLiaoFengKouLuKuang(Workbook workbook, String version, List<Date> allDayBeginTimeInCurrentMonth) {
         try {
-            int beginRow = 6;
+            int beginRow = 7;
             int fixLineCount = 0;
             Sheet sheet = workbook.getSheet("布料、风口及炉况情况");
             // 标记行
-            int itemRowNum = 5;
+            int tagFormulaRowNum = 5;
+            int itemRowNum = 6;
+            sheet.getRow(tagFormulaRowNum).setZeroHeight(true);
             sheet.getRow(itemRowNum).setZeroHeight(true);
             // 获取excel占位符列
+            List<String> tagFormulaItemList = PoiCustomUtil.getRowCelVal(sheet, tagFormulaRowNum);
             List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
+            // item和tag点的map
+            Map<String, String> itemToTagFormulaMap = new HashMap<>();
+            for (int i = 0; i < tagFormulaItemList.size(); i++) {
+                String tagFormulaItem = tagFormulaItemList.get(i);
+                String itemName = itemNameList.get(i);
+                if (tagFormulaItem.startsWith("tag")) {
+                    itemToTagFormulaMap.put(itemName, tagFormulaItem.split("-")[1]);
+                }
+            }
             List<CellData> cellDataList = new ArrayList<>();
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
@@ -434,29 +453,22 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 DateQuery dateQueryNodelay = DateQueryUtil.buildTodayNoDelay(day);
                 Map<String, List<BatchDistribution>> matrixDistrAvgInRangeMap = getMatrixDistrAvgInRangeMap(dateQueryNodelay, version);
 
-                // 获取料线数据
-                Map<String, String> liaoXianMaps = new HashMap<>();
-                liaoXianMaps.put("料线-烧结矿", "BF8_L2C_TP_SinterSetLine_1d_avg");
-                liaoXianMaps.put("料线-焦炭", "BF8_L2C_TP_CokeSetLine_1d_avg");
-                liaoXianMaps.put("料线-小烧", "BF8_L2C_TP_LiSinterSetLine_1d_avg");
-                liaoXianMaps.put("料线-主尺", "BF8_L2C_MainRuler_evt");
-                ArrayList<String> liaoXianTagNames = Lists.newArrayList(liaoXianMaps.values());
+                // tag点数据
                 Date dateQuery = DateUtil.addDays(day, 1);
-                TagValueListDTO liaoXianTagValueList = getLatestTagValueListDTO(dateQuery, version, liaoXianTagNames);
-
-                // 获取平均矿批、平均焦批、变料次数
-                Map<String, String> nameTotagFormulaMaps = new HashMap<>();
-                nameTotagFormulaMaps.put("平均矿批", "BF8_L2M_BX_OreConsume_1d_cur");
-                nameTotagFormulaMaps.put("平均焦批", "BF8_L2M_BX_CokeConsume_1d_cur");
-                nameTotagFormulaMaps.put("总批数", "BF8_L2M_BX_ChargeCount_1d_cur");
-                nameTotagFormulaMaps.put("变料次数", "BF8_L2C_SH_CurrentMatrixNumber_evt");
-                ArrayList<String> tagNameList = Lists.newArrayList(nameTotagFormulaMaps.values());
+                ArrayList<String> tagNameList = Lists.newArrayList(itemToTagFormulaMap.values());
                 TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(dateQuery, version, tagNameList);
                 List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO)
                         .map(TagValueListDTO::getData).orElse(new ArrayList<>());
-                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream()
-                        .collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
-
+                // tag点查询结果放在 tag-value的map里面
+                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream().collect(HashMap::new, (m,v)->
+                        m.put(v.getName(), v.getVal()), HashMap::putAll);
+                // 变料次数调用getUrlTagNamesInRange接口，传22点-22点，返回数据的个数为变料次数
+                String totalBatchNumberTagFormula = itemToTagFormulaMap.get("变料次数");
+                List<String> tagNamesInRange = Arrays.asList(totalBatchNumberTagFormula);
+                Map<String, Map<Long, Double>> tagFormulaInRangeToValueMap = getTagNamesInRangeTagValueMapDTO(version, eachDateQuery, tagNamesInRange);
+                Integer totalBatchNumber = Optional.ofNullable(tagFormulaInRangeToValueMap)
+                        .map(e -> e.get(totalBatchNumberTagFormula)).map(Map::size).orElse(null);
+                tagFormulaToValueMap.put(totalBatchNumberTagFormula, BigDecimal.valueOf(totalBatchNumber));
                 // 为了和前端统一，还是取当天的0点
                 List<CommentData> reportCommitInfo = getReportCommitInfo(version, day.getTime());
                 Map<String, Short> itemNameToIdMap = new HashMap<String, Short>() {{
@@ -490,20 +502,19 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                         switch (itemName) {
                             case "平均矿批":
                             case "平均焦批": {
-                                BigDecimal batchNumber = tagFormulaToValueMap.get(nameTotagFormulaMaps.get("总批数"));
-                                BigDecimal value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
+                                BigDecimal batchNumber = tagFormulaToValueMap.get(itemToTagFormulaMap.get("总批数"));
+                                BigDecimal value = tagFormulaToValueMap.get(itemToTagFormulaMap.get(itemName.substring(2)));
                                 if (Objects.isNull(batchNumber)) {
                                     break;
                                 }
                                 if (Objects.nonNull(value)) {
-                                    BigDecimal bigDecimalValue = value
-                                            .divide(batchNumber, 2, BigDecimal.ROUND_HALF_UP);
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, bigDecimalValue);
+                                    value = value.divide(batchNumber, 2, BigDecimal.ROUND_HALF_UP);
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, value);
                                 }
                                 break;
                             }
                             case "变料次数": {
-                                BigDecimal value = tagFormulaToValueMap.get(nameTotagFormulaMaps.get(itemName));
+                                BigDecimal value = tagFormulaToValueMap.get(itemToTagFormulaMap.get(itemName));
                                 ExcelWriterUtil.addCellData(cellDataList, row, col, value);
                                 break;
                             }
@@ -520,17 +531,13 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             case "料线-焦炭":
                             case "料线-小烧":
                             case "料线-主尺": {
-                                if(Objects.nonNull(liaoXianTagValueList) && CollectionUtils.isNotEmpty(liaoXianTagValueList.getData())) {
-                                    Map<String, Object> collect = liaoXianTagValueList.getData().stream().collect(HashMap::new, (m,v)->
-                                            m.put(v.getName(), v.getVal()),HashMap::putAll);
-                                    Object orignalVal = collect.get(liaoXianMaps.get(itemName));
-                                    if (Objects.nonNull(orignalVal)) {
-                                        BigDecimal val = (BigDecimal) orignalVal;
-                                        if (!"料线-主尺".equals(itemName)) {
-                                            val = ((BigDecimal) orignalVal).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
-                                        }
-                                        ExcelWriterUtil.addCellData(cellDataList, row, col, val);
+                                Object orignalVal = tagFormulaToValueMap.get(itemToTagFormulaMap.get(itemName));
+                                if (Objects.nonNull(orignalVal)) {
+                                    BigDecimal val = (BigDecimal) orignalVal;
+                                    if (!"料线-主尺".equals(itemName)) {
+                                        val = ((BigDecimal) orignalVal).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
                                     }
+                                    ExcelWriterUtil.addCellData(cellDataList, row, col, val);
                                 }
                                 break;
                             }
@@ -622,8 +629,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 TagValueListDTO tagValueListDTO = getLatestTagValueListDTO(queryDate, version, tagFormulaListWithOutBlank);
                 List<TagValue> tagValueList = Optional.ofNullable(tagValueListDTO)
                         .map(TagValueListDTO::getData).orElse(new ArrayList<>());
-                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream()
-                        .collect(Collectors.toMap(TagValue::getName, TagValue::getVal, (key1, key2) -> key2));
+                Map<String, BigDecimal> tagFormulaToValueMap = tagValueList.stream().collect(HashMap::new, (m,v)->
+                        m.put(v.getName(), v.getVal()), HashMap::putAll);
                 Map<String, BigDecimal> itemToValueMap = new HashMap<>();
                 for (Map.Entry<String, String> itemToTagFormulaEntry : itemToTagFormulaMap.entrySet()) {
                     String itemName = itemToTagFormulaEntry.getKey();
@@ -661,7 +668,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 }
             }
             ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             log.error("处理 技术经济指标及操作参数 出错", e);
         }
     }

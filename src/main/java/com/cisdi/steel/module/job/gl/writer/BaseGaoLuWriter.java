@@ -812,6 +812,23 @@ public abstract class BaseGaoLuWriter extends AbstractExcelReadWriter {
         return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
     }
 
+    protected Map<String, Map<Long, Double>> getTagNamesInRangeTagValueMapDTO(String version, DateQuery dateQuery, List<String> tagNames) {
+        Map<String, String> queryParam = new HashMap();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("tagnames", tagNames);
+        jsonObject.put("starttime", dateQuery.getQueryStartTime());
+        jsonObject.put("endtime", dateQuery.getQueryEndTime());
+        String jsonData = httpUtil.postJsonParams(getUrlTagNamesInRange(version), jsonObject.toJSONString());
+
+        Map<String, Map<Long, Double>> tagFormulaToValueMap = null;
+        if (StringUtils.isNotBlank(jsonData)) {
+            TagValueMapDTO tagValueMapDTO = JSON.parseObject(jsonData, TagValueMapDTO.class);
+            tagFormulaToValueMap = Optional.ofNullable
+                    (JSON.parseObject(jsonData, TagValueMapDTO.class)).map(TagValueMapDTO::getData).orElse(null);
+        }
+        return tagFormulaToValueMap;
+    }
+
     /**
      * 热强度和矿块信息
      * @param version
