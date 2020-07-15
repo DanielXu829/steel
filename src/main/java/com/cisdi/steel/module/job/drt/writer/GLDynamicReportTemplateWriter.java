@@ -76,7 +76,7 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
         List<CellData> resultList = new ArrayList<>();
         if (StringUtils.isNotBlank(result)) {
             TagValueMapDTO tagValueMapDTO = JSON.parseObject(result, TagValueMapDTO.class);
-            Map<String, Map<Long, Double>> tagValueMaps = tagValueMapDTO.getData();
+            Map<String, LinkedHashMap<Long, Double>> tagValueMaps = tagValueMapDTO.getData();
             // 获取targetManagement map
 
             for (int columnIndex = 0; columnIndex < tagNames.size(); columnIndex++) {
