@@ -41,6 +41,9 @@ public class TestJobGl extends SteelApplicationTests {
     private ShangLiaoZhuangLiao8Job shangLiaoZhuangLiao8Job;
 
     @Autowired
+    private ShangLiaoZhuangLiao7Job shangLiaoZhuangLiao7Job;
+
+    @Autowired
     private BuLiaoZhiDuBianDongJiZai8Job buLiaoZhiDuBianDongJiZai8Job;
 
     @Autowired
@@ -63,6 +66,9 @@ public class TestJobGl extends SteelApplicationTests {
 
     @Autowired
     private YueBaoHuiZong8Job yueBaoHuiZong8Job;
+
+    @Autowired
+    private YueBaoHuiZong7Job yueBaoHuiZong7Job;
 
     @Autowired
     private XiuFengTongJi8Job xiuFengTongJi8Job;
@@ -104,6 +110,7 @@ public class TestJobGl extends SteelApplicationTests {
     @Test
     public void testShangLiaoZhuangLiao8Job() {
         shangLiaoZhuangLiao8Job.execute(null);
+        shangLiaoZhuangLiao7Job.execute(null);
     }
 
     @Test
@@ -146,6 +153,7 @@ public class TestJobGl extends SteelApplicationTests {
     @Test
     public void testYueBaoHuiZong8Job() {
         yueBaoHuiZong8Job.execute(null);
+        yueBaoHuiZong7Job.execute(null);
     }
 
     /**

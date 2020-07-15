@@ -10,9 +10,11 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.SuccessEntity;
 import com.cisdi.steel.dto.response.sj.AnaValueDTO;
+import com.cisdi.steel.dto.response.sj.YardRunInfoDTO;
 import com.cisdi.steel.dto.response.sj.res.AnalysisValue;
 import com.cisdi.steel.dto.response.sj.res.ProdStopRecord;
 import com.cisdi.steel.dto.response.sj.res.ProdStopRecordInfo;
+import com.cisdi.steel.dto.response.sj.res.YardRunInfo;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -35,7 +37,7 @@ import java.util.*;
 @SuppressWarnings("ALL")
 @Slf4j
 public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
-    private static final List<String> tagFormualsNeedToMutiply100 = Arrays.asList("ST4_L1R_SIN_103ASinInstanFl_12h_cur", "ST4_L1R_SIN_103BSinInstanFl_12h_cur",
+    private static final List<String> tagFormualsNeedToMutiply12 = Arrays.asList("ST4_L1R_SIN_103ASinInstanFl_12h_cur", "ST4_L1R_SIN_103BSinInstanFl_12h_cur",
             "ST4_L1R_SIN_BF2CRFInstanFl_12h_cur", "ST4_L1R_SIN_CRF104InstanFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsFl_12h_cur");
     private static final int shaoJieChengPinItemRowNum = 8;
     private static final int yuanLiaoXingNengItemRowNum = 34;
@@ -68,6 +70,8 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
         dateRun = this.getDateQuery(excelDTO).getRecordDate();
         int numberOfSheets = workbook.getNumberOfSheets();
+        // 获取两班倒查询策略
+        List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
         // 处理tag点的数据
         for (int i = 0; i < numberOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
@@ -87,9 +91,6 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         }
                     }
                 }
-
-                // 获取两班倒查询策略
-                List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
                 handleCumulativeOperationRate(workbook, dateQueries, version);
                 for (int k = 0; k < dateQueries.size(); k++) {
                     DateQuery dateQuery = dateQueries.get(k);
@@ -106,7 +107,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         //  接口直接写入的数据：烧结成品质量
         Sheet sheet1 = workbook.getSheetAt(0);
         sheet1.getRow(shaoJieChengPinItemRowNum).setZeroHeight(true);
-        DateQuery dateQuery = DateQueryUtil.buildTodayNoDelay(dateRun);
+        DateQuery dateQuery = DateQueryUtil.build24HoursFromTen(dateRun);
         List<CellData> cellDataList1  = handleShaoJieChengPinData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList1);
 
@@ -116,9 +117,12 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         ExcelWriterUtil.setCellValue(sheet1, cellDataList2);
 
         // 接口写入数据：停机记录
-        DateQuery dateQuery1 = DateQueryUtil.build24HoursFromEight(dateRun);
+        DateQuery dateQuery1 = DateQueryUtil.build24HoursFromTen(dateRun);
         List<CellData> cellDataList3  = handleDownTimeRecordData(sheet1, dateQuery1, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList3);
+
+        // 接口写入 堆料时间、取料时间
+        handleYardRunInfo(sheet1, version);
 
         // 清除标记项(例如:{停机记录.停机起时.夜})
         PoiCustomUtil.clearPlaceHolder(sheet1);
@@ -433,6 +437,25 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         }
     }
 
+    private void handleYardRunInfo(Sheet sheet, String version) {
+        List<CellData> cellDataList = new ArrayList<>();
+        YardRunInfo yarnRunStatisticOfNight = getYarnRunStatisticData(version, dateRun.getTime(), 2);
+        YardRunInfo yarnRunStatisticOfDay = getYarnRunStatisticData(version, dateRun.getTime(), 1);
+
+        Cell pushMatTimeNightCell = PoiCustomUtil.getCellByValue(sheet, "{堆料时间.夜}");
+        int pushMatTimeNightCellRowIndex = pushMatTimeNightCell.getRowIndex();
+        int pushMatTimeNightCellColumnIndex = pushMatTimeNightCell.getColumnIndex();
+        ExcelWriterUtil.addCellData(cellDataList, pushMatTimeNightCellRowIndex, pushMatTimeNightCellColumnIndex, yarnRunStatisticOfNight.getPushMatTime());
+        ExcelWriterUtil.addCellData(cellDataList, pushMatTimeNightCellRowIndex + 1, pushMatTimeNightCellColumnIndex, yarnRunStatisticOfDay.getPushMatTime());
+
+        Cell pullMatTimeNightCell = PoiCustomUtil.getCellByValue(sheet, "{取料时间.夜}");
+        int pullMatTimeNightCellRowIndex = pullMatTimeNightCell.getRowIndex();
+        int pullMatTimeNightCellColumnIndex = pullMatTimeNightCell.getColumnIndex();
+        ExcelWriterUtil.addCellData(cellDataList, pullMatTimeNightCellRowIndex, pullMatTimeNightCellColumnIndex, yarnRunStatisticOfNight.getPullMatTime());
+        ExcelWriterUtil.addCellData(cellDataList, pullMatTimeNightCellRowIndex + 1, pullMatTimeNightCellColumnIndex, yarnRunStatisticOfDay.getPullMatTime());
+
+        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+    }
     /**
      * 处理tag点数据
      * @param url
@@ -514,7 +537,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                             Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
                             if (date.getTime() == recordDate.getTime()) {
                                 BigDecimal value = (BigDecimal) data.get(tempTime + "");
-                                if (tagFormualsNeedToMutiply100.contains(column)) {
+                                if (tagFormualsNeedToMutiply12.contains(column)) {
                                     value = value.multiply(BigDecimal.valueOf(12));
                                 }
                                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, value);
@@ -663,4 +686,15 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return httpProperties.getSJUrlVersion(version) + "/stopRecord/time";
     }
 
+    private String getYarnRunStatisticsUrl(String version) {
+        return httpProperties.getSJUrlVersion(version) + "/report/yarnRunStatisticsForDay";
+    }
+
+    private YardRunInfo getYarnRunStatisticData(String version, Long timestamp, Integer workType) {
+        String url = String.format("%s?clock=%s&workType=%s",getYarnRunStatisticsUrl(version), timestamp, workType);
+        String jsonData = httpUtil.get(url);
+        YardRunInfoDTO yardRunInfoDTO = JSON.parseObject(jsonData, YardRunInfoDTO.class);
+        return Optional.ofNullable(yardRunInfoDTO)
+                .map(YardRunInfoDTO::getData).orElse(new YardRunInfo());
+    }
 }
