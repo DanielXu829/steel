@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @SuppressWarnings("ALL")
@@ -284,17 +285,14 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      */
     private List<CellData> handleYuanLiaoXingNengData(Sheet sheet1, DateQuery dateQuery, String version) {
         List<CellData> cellDataList = new ArrayList();
-        List<String> materialTypeList = new ArrayList();
-        materialTypeList.add("ore_blending");
-        materialTypeList.add("quicklime");
-        materialTypeList.add("dust");
-        materialTypeList.add("limestone");
-        materialTypeList.add("dolomite");
-        materialTypeList.add("return_fine");
-        materialTypeList.add("coke");
-        Map<String, AnaValueDTO> dtoMap = new HashMap();
+        List<String> itemCategoryList = Arrays.asList("混匀粉", "生石灰PL8", "生石灰PL9", "石灰石", "白云石", "返矿", "煤粉");
+        List<String> materialTypeList = Arrays.asList("ore_blending", "quicklime", "dust",
+                "limestone", "dolomite", "return_fine", "coke");
+        Map<String, String> itemCategoryToNameMap = itemCategoryList.stream().collect(Collectors
+                .toMap(key -> key, key -> materialTypeList.get(itemCategoryList.indexOf(key))));
 
         // 获取不同接口的数据(7个接口),并映射到 DTO中
+        Map<String, AnaValueDTO> dtoMap = new HashMap();
         for (int i = 0; i < materialTypeList.size(); i++) {
             String data = getYuanLiaoXingNengData(dateQuery, version, materialTypeList.get(i));
             AnaValueDTO anaValueFenDTO = null;
@@ -303,59 +301,44 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             }
             dtoMap.put(materialTypeList.get(i), anaValueFenDTO);
         }
-        Map<String, String> itemCategoryToName = new HashMap();
-        itemCategoryToName.put("混匀粉", "ore_blending");
-        itemCategoryToName.put("生石灰(PL8)", "quicklime");
-        itemCategoryToName.put("生石灰(PL9)", "dust");
-        itemCategoryToName.put("石灰石", "limestone");
-        itemCategoryToName.put("白云石", "dolomite");
-        itemCategoryToName.put("返矿", "return_fine");
-        itemCategoryToName.put("煤粉", "coke");
-
         // 获取标记行的数据
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, yuanLiaoXingNengItemRowNum);
         for (int j = 0; j < materialTypeList.size(); j++) {
             // 获取excel单元格中项目的名称，来和接口进行对应
             String itemCategory = PoiCellUtil.getCellValue(sheet1, yuanLiaoXingNengItemRowNum + j + 1, 15);
             itemCategory = itemCategory.trim();
-            if (StringUtils.isNotBlank(itemCategory)) {
-                String materialType = itemCategoryToName.get(itemCategory);
-                if (StringUtils.isNotBlank(materialType)) {
-                    AnaValueDTO anaValueDTO = dtoMap.get(materialType);
-                    if (Objects.isNull(anaValueDTO)) {
-                        continue;
-                    }
-                    if (itemNameList != null && !itemNameList.isEmpty()) {
-                        for (int i = 0; i < itemNameList.size() ; i++) {
-                            String itemName = itemNameList.get(i);
-                            if (StringUtils.isNotBlank(itemName)) {
-                                // 标记项以YL开头
-                                if (itemName.startsWith("YL")) {
-                                    // 将"YL_"截取掉
-                                    String itemNameTrue = itemName.substring(3);
-                                    List<AnalysisValue> dataList = anaValueDTO.getData();
-                                    if (dataList != null && !dataList.isEmpty()) {
-                                        int dataSize = dataList.size();
-                                        // 如果数据不止一条，就取prodUnitCode并不为空的那一条数据
-                                        if (dataSize > 1) {
-                                            for (int k = 0; k < dataSize; k++) {
-                                                String prodUnitCode = dataList.get(k).getAnalysis().getProdUnitCode();
-                                                if (StringUtils.isNotBlank(prodUnitCode)) {
-                                                    BigDecimal bigDecimal = dataList.get(k).getValues().get(itemNameTrue);
-                                                    ExcelWriterUtil.addCellData(cellDataList, yuanLiaoXingNengItemRowNum + j + 1, i, bigDecimal);
-                                                }
-                                            }
-                                        } else {
-                                            // 如果只有一条，就取该条数据
-                                            BigDecimal bigDecimal = dataList.get(0).getValues().get(itemNameTrue);
-                                            ExcelWriterUtil.addCellData(cellDataList, yuanLiaoXingNengItemRowNum + j + 1, i, bigDecimal);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            String materialType = itemCategoryToNameMap.get(itemCategory);
+            List<AnalysisValue> dataList =
+                    Optional.ofNullable(dtoMap.get(materialType)).map(AnaValueDTO::getData).orElse(null);
+            if (CollectionUtils.isEmpty(dataList)) {
+                continue;
+            }
+            for (int i = 0; i < itemNameList.size(); i++) {
+                String itemName = itemNameList.get(i);
+                // 标记项以YL开头
+                if (StringUtils.isBlank(itemName) || itemName.split("_").length <= 1) {
+                    continue;
                 }
+                String itemNamePrefix = itemName.split("_")[0];
+                String itemNameTrue = itemName.split("_")[1];
+                // 如果数据不止一条，就取prodUnitCode并不为空的那一条数据
+                AnalysisValue analysisValue = dataList.stream().filter(e -> StringUtils
+                        .isNotBlank(e.getAnalysis().getProdUnitCode())).findFirst().orElse(null);
+                BigDecimal bigDecimal;
+                if (Objects.nonNull(analysisValue)) {
+                    bigDecimal = analysisValue.getValues().get(itemNameTrue);
+                } else {
+                    // 如果只有一条，就取该条数据
+                    bigDecimal = dataList.get(0).getValues().get(itemNameTrue);
+                }
+                int rowIndex;
+                int columnIndex = i;
+                if ("coke".equals(itemNamePrefix) && "coke".equals(materialType)) {
+                    rowIndex = yuanLiaoXingNengItemRowNum + 1;
+                } else {
+                    rowIndex = yuanLiaoXingNengItemRowNum + j + 1;
+                }
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, bigDecimal);
             }
         }
 
