@@ -98,9 +98,7 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         for (int i = 0; i < batchDataListList.size(); i++) {
             List<BatchData> batchDataList = batchDataListList.get(i);
             // 过滤出22点-22点之间的数据
-            batchDataList = batchDataList.stream().filter(batchData -> batchData.getBatchIndex().getWeighttime().getTime() >= dateQuery.getStartTime().getTime()
-                    && batchData.getBatchIndex().getWeighttime().getTime() <= dateQuery.getEndTime().getTime()).collect(Collectors.toList());
-            if (Objects.nonNull(batchDataList) && CollectionUtils.isNotEmpty(batchDataList)) {
+            if (CollectionUtils.isNotEmpty(batchDataList)) {
                 List<CellData> cellDataList = mapDataHandler(batchDataList, itemNameList, sheet, count);
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
                 count = count + batchDataList.size();
@@ -119,11 +117,10 @@ public class ShangLiaoZhuangLiaoWriter extends BaseGaoLuWriter {
         }
 
         // 替换当前日期
-        Date currentDate = DateUtil.addDays(new Date(), -1);
         for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
             Sheet tempSheet = workbook.getSheetAt(i);
             if (!Objects.isNull(tempSheet) && !workbook.isSheetHidden(i)) {
-                ExcelWriterUtil.replaceCurrentDateInTitle(tempSheet, 0, 1, currentDate);
+                ExcelWriterUtil.replaceCurrentDateInTitle(tempSheet, 0, 1, date.getRecordDate());
                 PoiCustomUtil.clearPlaceHolder(tempSheet);
             }
         }
