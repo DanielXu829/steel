@@ -85,7 +85,7 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
         List<CellData> cellDataList = new ArrayList<>();
 
         for(int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i ++) {
-            List<DateQuery> class8DateQueries = DateQueryUtil.buildDay12HourEach(allDayBeginTimeInCurrentMonth.get(i));
+            List<DateQuery> class8DateQueries = DateQueryUtil.buildDay12HourEachList(allDayBeginTimeInCurrentMonth.get(i));
             List<DateQuery> class10DateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(DateUtil.addDays(allDayBeginTimeInCurrentMonth.get(i), 1));
             for(int k = 0; k < tagNames.size(); k++) {
                 String tagName = tagNames.get(k);
@@ -93,12 +93,15 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
                 for(int j =1; j <= 2; j++) {
                     DateQuery dateQuery = null;
                     //i*2+j
+                    BigDecimal value = null;
                     if(tagName.contains("_L2M_BX_")) {
                         dateQuery = class10DateQueries.get(j-1);
+                        value = getLatestTagValue(version, tagName, dateQuery.getEndTime());
+
                     } else {
                         dateQuery = class8DateQueries.get(j-1);
+                        value = getLatestTagValue(version, tagName, dateQuery.getStartTime());
                     }
-                    BigDecimal value = getLatestTagValue(version, tagName, dateQuery.getEndTime());
                     if(Objects.nonNull(value)) {
                         if(tagName.contains("_ShiftSchedule_evt")) {
                             int shift = value.intValue();
