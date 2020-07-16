@@ -353,6 +353,25 @@ public class DateQueryUtil {
 
     /**
      * 构建每12小时时间段
+     *  夜班：晚上0点-早上12点
+     *  白班：早上12点-晚上24点
+     * @param date 指定时间
+     * @return 结果
+     */
+    public static List<DateQuery> buildDay12HourEachList(Date date) {
+        List<DateQuery> queryList = new ArrayList<>();
+        Date dateBeginTime = DateUtil.getDateBeginTime(date);
+        Date nightWorkEndTime = DateUtil.addHours(dateBeginTime, 12);
+        Date dayWorkEndTime = DateUtil.addHours(nightWorkEndTime, 12);
+        queryList.add(new DateQuery(dateBeginTime, nightWorkEndTime, dateBeginTime));
+        queryList.add(new DateQuery(nightWorkEndTime, dayWorkEndTime, nightWorkEndTime));
+
+        return queryList;
+    }
+
+
+    /**
+     * 构建每12小时时间段
      *  夜班：晚上8点-早上8点
      *  白班：早上8点-晚上8点
      * @param date 指定时间

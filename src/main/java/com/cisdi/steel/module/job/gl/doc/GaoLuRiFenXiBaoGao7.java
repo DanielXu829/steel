@@ -243,6 +243,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         handleCaoZuoCanShu(version);
         dealPart3(data);
         dealPart4(data);
+        dealChart3(data);
         handleTapTempture(version);
         handleLuTiWenDu(version);
         List<ReportCategoryTemplate> reportCategoryTemplates = reportCategoryTemplateService.selectTemplateInfo(JobEnum.gl_rishengchanfenxibaogao_day7.getCode(), LanguageEnum.cn_zh.getName(), "7高炉");
@@ -490,7 +491,6 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
             BigDecimal lushenYesterdayMax =  getMaxLuTiTemp(new StringBuilder(), version, lushenMap.keySet().toArray(new String[lushenMap.keySet().size()]), -2);
             dealLuTiWenDuData(lushenMap, lushenYesterdayMax, 4, text1, text2, text3, text4, prefix, suffix);
 
-            dealChart3(version);
             dealChart4(version);
             dealChart5(version);
         } catch (Exception e) {
@@ -677,7 +677,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
                         if (realVal.compareTo(up) > 0) {
                             lm.put("gap", realVal.subtract(up).toString());
                         } else if (realVal.compareTo(low) < 0) {
-                            lm.put("gap", low.subtract(realVal).toString());
+                            lm.put("gap", realVal.subtract(low).toString());
                         } else {
                             lm.put("gap", 0+"");
                         }
@@ -697,7 +697,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
                     avg = "<" + low;
                     if (realVal != null) {
                         if (realVal.compareTo(low) < 0) {
-                            lm.put("gap", low.subtract(realVal).toString());
+                            lm.put("gap", realVal.subtract(low).toString());
                         } else {
                             lm.put("gap", 0+"");
                         }
@@ -751,7 +751,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
                             Double partTwo14 = Double.valueOf((String)result.get("partTwo14"));
                             doubleValue = partTwo13/partTwo14;
                         }
-                        result.put(prefix + (i + 1), doubleValue == null ? 0d : df.format(doubleValue));
+                        result.put(prefix + (i + 1), doubleValue == null ? df.format(0d):df.format(doubleValue));
                     }
                 }
             }
@@ -767,14 +767,14 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
      * @param df
      * @return
      */
-    private String getDataBeforeDays(JSONObject data, String tagName, DecimalFormat df) {
-        String result = "";
+    private Double getDataBeforeDays(JSONObject data, String tagName, DecimalFormat df) {
+        Double result = 0d;
         if (data != null && data.size() > 0) {
             Double doubleValue = 0d;
             List<Double> valueObject = getValuesByTag(data, tagName);
             if (Objects.nonNull(valueObject) && valueObject.size() > 0) {
                 doubleValue = valueObject.get(valueObject.size() - 1 - 1);
-                result = doubleValue == null ? "" : df.format(doubleValue);
+                result = doubleValue == null ? 0d : doubleValue;
             }
         }
         return result;
@@ -941,12 +941,8 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
     private void dealPart4(JSONObject data) {
         try {
             dealPart(data, "partFour", L4, df2);
-            String yesterdayData = getDataBeforeDays(data, L4[0], df2);
-            if (StringUtils.isNotBlank(yesterdayData)) {
-                result.put("yesterday_temp", yesterdayData);
-            } else {
-                result.put("yesterday_temp", " ");
-            }
+            Double yesterdayData = getDataBeforeDays(data, L4[0], df2);
+            result.put("yesterday_temp", df2.format(yesterdayData));
         } catch (Exception e) {
             log.error("高炉日生产分析报告处理part4失败", e);
         }
@@ -1106,14 +1102,15 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         result.put("jfreechartImg2", image1);
     }
 
-    private void dealChart3(String version) {
+    private void dealChart3(JSONObject data) {
         String tagName = "BF7_L2C_BD_SoftTempDiff_1d_avg";
-        JSONObject data = getDataByTag(new String[]{tagName}, startTime, endTime, version);
         List<Double> tagObject1 = getValuesByTag(data, tagName);
-        List<Double> tempObject1 = new ArrayList<>(tagObject1);
-        tempObject1.removeAll(Collections.singleton(null));
-        double max1 = tempObject1.size() > 0 ? Collections.max(tempObject1) * 1.2 : 6.0;
-        double min1 = tempObject1.size() > 0 ? Collections.min(tempObject1) * 0.8 : 0.0;
+        tagObject1.removeAll(Collections.singleton(null));
+        double max1 = tagObject1.size() > 0 ? Collections.max(tagObject1) * 1.2 : 6.0;
+        double min1 = tagObject1.size() > 0 ? Collections.min(tagObject1) * 0.8 : 0.0;
+        if (max1 == min1) {
+            return;
+        }
         double[] rangStarts = {min1};
         double[] rangEnds = {max1};
         // 标注类别
@@ -1174,6 +1171,9 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         double min4 = luGangJ_MList.size() > 0 ? Collections.min(luGangJ_MList) * 0.8 : 0.0;
         double max = Math.max((Math.max((Math.max(max1, max2)), max3)), max4);
         double min = Math.min((Math.min((Math.min(min1, min2)), min3)), min4);
+        if (max == min) {
+            return;
+        }
         double[] rangStarts = {min,min,min,min};
         double[] rangEnds = {max,max,max,max};
         // 标注类别
@@ -1246,6 +1246,9 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         double min4 = luShenList.size() > 0 ? Collections.min(luShenList) * 0.8 : 0.0;
         double max = Math.max((Math.max((Math.max(max1, max2)), max3)), max4);
         double min = Math.min((Math.min((Math.min(min1, min2)), min3)), min4);
+        if (max == min) {
+            return;
+        }
         double[] rangStarts = {min,min,min,min};
         double[] rangEnds = {max,max,max,max};
         // 标注类别
@@ -1290,7 +1293,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         List<Double> vals = new ArrayList<>();
         Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
         for (Long time : longTimeList) {
-            Double val = null;
+            Double val = 0d;
             if (innerMap != null) {
                 //所有L2M_BX的点都是 写的0 其实9点出来  其余点都是22点出来
                 if(!tagName.contains("_L2M_BX_")) {
@@ -1301,7 +1304,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
                 if (null != big) {
                     val = big.doubleValue();
                     if (val < 0) {
-                        val = null;
+                        val = 0d;
                     }
                 }
             }
@@ -1364,17 +1367,14 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
 
         startTime = startDate;
         endTime = endDate;
-        while (!DateUtil.isSameDay(startDate, DateUtil.addDays(endDate, -1))) {
+        while (!DateUtil.isSameDay(startDate, endDate)) {
             // 拼接x坐标轴
             categoriesList.add(DateUtil.getFormatDateTime(startDate, DateUtil.MMddChineseFormat));
-            longTimeList.add(startDate.getTime());
             // 递增日期
             cal.add(Calendar.DAY_OF_MONTH, 1);
             startDate = cal.getTime();
+            longTimeList.add(startDate.getTime());
         }
-
-        categoriesList.add(DateUtil.getFormatDateTime(DateUtil.addDays(endDate, -1), DateUtil.MMddChineseFormat));
-        longTimeList.add(endDate.getTime());
     }
 
     /**
