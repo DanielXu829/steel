@@ -59,6 +59,9 @@ public class TestJobGl extends SteelApplicationTests {
     private CaoZuoGuanLiRiJiJob caoZuoGuanLiRiJiJob;
 
     @Autowired
+    private CaoZuoGuanLiRiJi7Job caoZuoGuanLiRiJi7Job;
+
+    @Autowired
     private LuDiWenDu8Job luDiWenDu8Job;
 
     @Autowired
@@ -136,15 +139,8 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Test
     public void testCaoZuoGuanLiRiJiJob() {
+        caoZuoGuanLiRiJi7Job.execute(null);
         caoZuoGuanLiRiJiJob.execute(null);
-    }
-
-    /**
-     * 测试 8高炉冷却水冷却壁月报
-     */
-    @Test
-    public void testLengQueBiYueBaoJob() {
-        lengQueBiYueBaoJob.execute(null);
     }
 
     /**
@@ -184,20 +180,15 @@ public class TestJobGl extends SteelApplicationTests {
     }
 
     /**
-     * 测试 7、8高炉炉底温度月报表
-     */
-    @Test
-    public void testLuDiWenDu() {
-        luDiWenDu8Job.execute(null);
-    }
-
-    /**
      * 测试 8高炉鱼雷罐装载率
      */
     @Autowired
     private YuLeiGuanZhuangZaiLv8Job yuLeiGuanZhuangZaiLv8Job;
+    @Autowired
+    private YuLeiGuanZhuangZaiLv7Job yuLeiGuanZhuangZaiLv7Job;
     @Test
     public void testYuLeiGuanZhuangZaiLv8Job() {
+        yuLeiGuanZhuangZaiLv7Job.execute(null);
         yuLeiGuanZhuangZaiLv8Job.execute(null);
     }
 
@@ -206,8 +197,11 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Autowired
     private GuiLiuShuangMingZhongLv8Job guiLiuShuangMingZhongLv8Job;
+    @Autowired
+    private GuiLiuShuangMingZhongLv7Job guiLiuShuangMingZhongLv7Job;
     @Test
     public void testGuiLiuShuangMingZhongLv8Job() {
+        guiLiuShuangMingZhongLv7Job.execute(null);
         guiLiuShuangMingZhongLv8Job.execute(null);
     }
 
@@ -229,8 +223,13 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Autowired
     private TieShuiYiJiPinLv8Job tieShuiYiJiPinLv8Job;
+
+    @Autowired
+    private TieShuiYiJiPinLv7Job tieShuiYiJiPinLv7Job;
+
     @Test
     public void testTieShuiYiJiPinLv8Job() {
+        tieShuiYiJiPinLv7Job.execute(null);
         tieShuiYiJiPinLv8Job.execute(null);
     }
 
@@ -239,8 +238,11 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Autowired
     private LuZhaJianDuHeGeLv8Job luZhaJianDuHeGeLv8Job;
+    @Autowired
+    private LuZhaJianDuHeGeLv7Job luZhaJianDuHeGeLv7Job;
     @Test
     public void testLuZhaJianDuHeGeLv8Job() {
+        luZhaJianDuHeGeLv7Job.execute(null);
         luZhaJianDuHeGeLv8Job.execute(null);
     }
 
@@ -249,8 +251,11 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Autowired
     private ChuTieXiaoLv8Job chuTieXiaoLv8Job;
+    @Autowired
+    private ChuTieXiaoLv7Job chuTieXiaoLv7Job;
     @Test
     public void testChuTieXiaoLv8Job() {
+        chuTieXiaoLv7Job.execute(null);
         chuTieXiaoLv8Job.execute(null);
     }
 
@@ -276,7 +281,6 @@ public class TestJobGl extends SteelApplicationTests {
         testKaoHeYueBao();
         testJiShuJingJi8Job();
         testCaoZuoGuanLiRiJiJob();
-        testLengQueBiYueBaoJob();
         testYueBaoHuiZong8Job();
         testXiuFengTongJiJob();
     }

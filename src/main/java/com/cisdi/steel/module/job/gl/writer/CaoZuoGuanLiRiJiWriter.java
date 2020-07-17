@@ -252,9 +252,13 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             int fengkouNumMaxIndex = columnIndex + 36;
             // 填充风口信息
             BfBlastMainInfo bfBlastMainInfo = getBfBlastMainInfo(version);
-            for (int i = 0; i < 36; i++) {
-                BfBlastMain bfBlastMain = bfBlastMainInfo.getBfBlastMains().get(i);
-                ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2+columnIndex, bfBlastMain.getBlastDiameter());
+            if (Objects.nonNull(bfBlastMainInfo) && Objects.nonNull(bfBlastMainInfo.getBfBlastMains())
+                    && CollectionUtils.isNotEmpty(bfBlastMainInfo.getBfBlastMains())) {
+                List<BfBlastMain> bfBlastMains = bfBlastMainInfo.getBfBlastMains();
+                for (int i = 0; i < bfBlastMains.size(); i++) {
+                    BfBlastMain bfBlastMain = bfBlastMainInfo.getBfBlastMains().get(i);
+                    ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2+columnIndex, bfBlastMain.getBlastDiameter());
+                }
             }
             String url = getQueryBlastStatus(version);
             DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
@@ -750,12 +754,12 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             DateQuery date = this.getDateQueryBeforeOneDay(excelDTO);
             DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(date.getRecordDate());
             // 处理出铁数据
-            List<String> tapNoList = handleTapData(workbook, sheet, 6, dateQuery, resultList, version, null);
+            List<String> tapNoList = handleTapData(workbook, sheet, 6, dateQuery, resultList, version, null, 16);
             // 处理罐号重量数据
             if (CollectionUtils.isNotEmpty(tapNoList)) {
                 handleTpcInfoData(sheet, resultList, tapNoList, version);
             }
-            tapNoList = handleTapData(workbook, sheet, 26, dateQuery, resultList, version, tapNoList);
+            tapNoList = handleTapData(workbook, sheet, 26, dateQuery, resultList, version, tapNoList, 14);
 
             ExcelWriterUtil.setCellValue(sheet, resultList);
         } catch (Exception e) {
@@ -771,7 +775,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param version
      * @return tapNoList
      */
-    private List<String> handleTapData(Workbook workbook, Sheet sheet, int itemRowNum, DateQuery dateQuery, List<CellData> resultList, String version, List<String> tapNoList) {
+    private List<String> handleTapData(Workbook workbook, Sheet sheet, int itemRowNum, DateQuery dateQuery,
+                                       List<CellData> resultList, String version, List<String> tapNoList, int maxRow) {
         // 铁次(tapNo)list，用于调接口罐号重量接口
         if (tapNoList == null) {
             tapNoList = new ArrayList<>();
@@ -810,7 +815,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             //"BF8_L2M_SH_ChargeCount_evt"
             String cellValue = PoiCustomUtil.getSheetCell(workbook, tagSheetName, 7, 0);
             // 遍历标记行
-            for (int i = 0; i < dataSize; i++) {
+            for (int i = 0; i < dataSize && i < maxRow; i++) {
                 tapSgRow = tapSgRowData.get(i);
                 tapNoList.add(tapSgRow.getTapNo());
                 // 将对象转为Map,key为对象引用名
