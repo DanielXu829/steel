@@ -445,10 +445,10 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     bfBlastResultMap.put("tuyereOutboardCount", bfBlastResult.getTuyereOutboardCount());
                     bfBlastResultMap.put("tuyereAdjustCount", bfBlastResult.getTuyereAdjustCount());
                     bfBlastResultMap.put("tuyereBlockCount", bfBlastResult.getTuyereBlockCount());
-                    bfBlastResultMap.put("blastArea", bfBlastResult.getBlastArea());
                     bfBlastResultMap.put("blastChangeCount", bfBlastResult.getBlastChangeCount());
                 }
-
+                BigDecimal blastIntakeArea = getBlastIntakeArea(version, String.valueOf(DateUtil.getDateEndTime22(day).getTime()));
+                bfBlastResultMap.put("blastArea", blastIntakeArea);
                 // 获取布料矩阵
                 DateQuery dateQueryNodelay = DateQueryUtil.buildTodayNoDelay(day);
                 Map<String, List<BatchDistribution>> matrixDistrAvgInRangeMap = getMatrixDistrAvgInRangeMap(dateQueryNodelay, version);
