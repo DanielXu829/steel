@@ -500,6 +500,13 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     if (StringUtils.isNotBlank(itemName)) {
                         ExcelWriterUtil.addCellData(cellDataList, row, col, defaultCellValue);
                         switch (itemName) {
+                            case "总批数":
+                            case "矿批":
+                            case "焦批": {
+                                BigDecimal value = tagFormulaToValueMap.get(itemToTagFormulaMap.get(itemName));
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, value);
+                                break;
+                            }
                             case "平均矿批":
                             case "平均焦批": {
                                 BigDecimal batchNumber = tagFormulaToValueMap.get(itemToTagFormulaMap.get("总批数"));
