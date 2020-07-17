@@ -224,11 +224,11 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * @param rowIndex
      * @param columnIndex
      */
-    private void handleFengKouHuaiFou (String url, DateQuery dateQuery, List<CellData> cellDataList, Long dateTime, int rowIndex, int columnIndex) {
+    private void handleFengKouHuaiFou (String url, DateQuery dateQuery, List<CellData> cellDataList, Long dateTime, int rowIndex, int columnIndex, int size) {
         Map<String, String> queryParam = new HashMap();
         queryParam.put("time", Objects.requireNonNull(dateTime).toString());
         String jsonData = httpUtil.get(url, queryParam);
-        for (int i = 0; i < 36; i++) {
+        for (int i = 0; i < size; i++) {
             Integer val = FastJSONUtil.getJsonValueByKey(jsonData, Lists.newArrayList("data"), String.valueOf(i+1), Integer.class);
             if (Objects.nonNull(val) && val != 0) {
                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2 + columnIndex, "×");
@@ -249,12 +249,13 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             int rowIndex = fengKouZhiJing.getRowIndex();
             int columnIndex = fengKouZhiJing.getColumnIndex();
             List<CellData> cellDataList = new ArrayList<CellData>();
-            int fengkouNumMaxIndex = columnIndex + 36;
+            int size = 32;
             // 填充风口信息
             BfBlastMainInfo bfBlastMainInfo = getBfBlastMainInfo(version);
             if (Objects.nonNull(bfBlastMainInfo) && Objects.nonNull(bfBlastMainInfo.getBfBlastMains())
                     && CollectionUtils.isNotEmpty(bfBlastMainInfo.getBfBlastMains())) {
                 List<BfBlastMain> bfBlastMains = bfBlastMainInfo.getBfBlastMains();
+                size = bfBlastMains.size();
                 for (int i = 0; i < bfBlastMains.size(); i++) {
                     BfBlastMain bfBlastMain = bfBlastMainInfo.getBfBlastMains().get(i);
                     ExcelWriterUtil.addCellData(cellDataList, rowIndex, i*2+columnIndex, bfBlastMain.getBlastDiameter());
@@ -269,10 +270,10 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 DateQuery dateQuery1 = dateQueries.get(k);
                 if (dateQuery1.getStartTime().compareTo(dateQuery.getStartTime()) == 0) {
                     //夜班/接班
-                    handleFengKouHuaiFou(url, dateQuery, cellDataList, dateQuery1.getQueryEndTime(), rowIndex + 1, columnIndex);
+                    handleFengKouHuaiFou(url, dateQuery, cellDataList, dateQuery1.getQueryEndTime(), rowIndex + 1, columnIndex, size);
                 } else {
                     //白班/交班
-                    handleFengKouHuaiFou(url, dateQuery, cellDataList, dateQuery1.getQueryEndTime(), rowIndex + 2, columnIndex);
+                    handleFengKouHuaiFou(url, dateQuery, cellDataList, dateQuery1.getQueryEndTime(), rowIndex + 2, columnIndex, size);
                 }
             }
             ExcelWriterUtil.setCellValue(zhengMianSheet, cellDataList);
