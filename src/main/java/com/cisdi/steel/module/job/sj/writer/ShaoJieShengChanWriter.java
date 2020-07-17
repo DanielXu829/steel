@@ -92,6 +92,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         }
                     }
                 }
+                // 特殊处理累计作业率
                 handleCumulativeOperationRate(workbook, dateQueries, version);
                 for (int k = 0; k < dateQueries.size(); k++) {
                     DateQuery dateQuery = dateQueries.get(k);
@@ -454,13 +455,19 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         } else {
             query.put("end", dateQuery.getQueryEndTime());
         }
-
         query.put("start", dateQuery.getQueryStartTime());
-        query.put("tagNames", columns);
+        // 将需用分号拼接的tag点拆分，放入columns中，
+        // 例如 "ST4_L1R_SIN_1OreBldBunkLvl_12h_cur;ST4_L1R_SIN_2OreBldBunkLvl_12h_cur" 拆开
+        List<String> extraTagNames = columns.stream().filter(e -> e.contains(";")).map(e -> Arrays.asList(e.split(";")))
+                .flatMap(Collection::stream).collect(Collectors.toList());
+        // 用于查询接口的tag点list-columnsForQuery
+        List<String> columnsForQuery = new ArrayList<>();
+        columnsForQuery.addAll(columns);
+        columnsForQuery.addAll(extraTagNames);
+        query.put("tagNames", columnsForQuery);
         SerializeConfig serializeConfig = new SerializeConfig();
         String jsonString = JSONObject.toJSONString(query, serializeConfig);
         String result = httpUtil.postJsonParams(url, jsonString);
-
         if (StringUtils.isBlank(result)) {
             return null;
         }
@@ -470,7 +477,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             return null;
         }
 
-        return handlerData(columns, data, dateQuery);
+        return handlerData(columns, data);
     }
 
     /**
@@ -480,62 +487,98 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return
      */
-    private List<CellData> handlerData(List<String> columns, JSONObject jsonObject, DateQuery dateQuery) {
+    private List<CellData> handlerData(List<String> columns, JSONObject jsonObject) {
         List<CellData> cellDataList = new ArrayList<>();
         for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
             String column = columns.get(columnIndex);
-            if (StringUtils.isNotBlank(column)) {
-                JSONObject data = jsonObject.getJSONObject(column);
-                if (Objects.nonNull(data)) {
-                    Set<String> keys = data.keySet();
-                    Long[] list = new Long[keys.size()];
-                    int k = 0;
-                    for (String key : keys) {
-                        list[k] = Long.valueOf(key);
-                        k++;
-                    }
-                    // 按照时间顺序排序
-                    Arrays.sort(list);
-
-                    if(column.indexOf("_1d_") > -1) {
-                        // 该tag点需要特殊处理, 获取当前运行时间，如果超过下午8点，就写入第一和第二行,如果没超过就只写第一行
-                        Date itemTime = DateUtil.addHours(DateUtil.getDateBeginTime(dateRun), 20);
-                        if (dateRun.getTime() < itemTime.getTime()) {
-                            ExcelWriterUtil.addCellData(cellDataList, 1, columnIndex, data.get(list[0]));
-                        } else {
-                            ExcelWriterUtil.addCellData(cellDataList, 1, columnIndex, data.get(list[0]));
-                            ExcelWriterUtil.addCellData(cellDataList, 2, columnIndex, data.get(list[0]));
-                        }
+            if (StringUtils.isBlank(column)) {
+                continue;
+            }
+            // 需要拆分的单元格，拆分完之后从jsonObject中取出来
+            if (column.contains(";")) {
+                try {
+                    String[] columnSplit = column.split(";");
+                    String executeWay = columnSplit[0];
+                    List<String> tagNames = new ArrayList<>(Arrays.asList(columnSplit));
+                    tagNames.remove(0);
+                    final int index = columnIndex;
+                    List<CellData> cellDataListOfSpecialValues = tagNames.stream().map(tagName -> handleColumn(tagName, index, jsonObject.getJSONObject(tagName)))
+                            .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream).collect(Collectors.toList());
+                    if (CollectionUtils.isEmpty(cellDataListOfSpecialValues)) {
                         continue;
                     }
-
-                    List<DateQuery> dayEach = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
-                    int rowIndex = 1;
-                    for (int j = 0; j < dayEach.size(); j++) {
-                        DateQuery query = dayEach.get(j);
-                        Date recordDate = query.getEndTime();
-                        for (int i = 0; i < list.length; i++) {
-                            Long tempTime = list[i];
-                            String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
-                            Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
-                            if (date.getTime() == recordDate.getTime()) {
-                                BigDecimal value = (BigDecimal) data.get(tempTime + "");
-                                if (tagFormualsNeedToMutiply12.contains(column)) {
-                                    value = value.multiply(BigDecimal.valueOf(12));
-                                }
-                                ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, value);
-                                break;
-                            }
-                        }
-                        rowIndex += 1;
-                    }
+                    // 有可能返回两行的数据 进行分组
+                    Map<Integer, List<CellData>> rowIndexToCellDataListMap = cellDataListOfSpecialValues.stream()
+                            .collect(Collectors.groupingBy(CellData::getRowIndex));
+                    rowIndexToCellDataListMap.forEach((rowIndex, cellDataListOfRow) -> {
+                        List<Double> specialValues = cellDataListOfRow.stream().map(CellData::getCellValue)
+                                .filter(Objects::nonNull).map(e -> Double.parseDouble(e.toString())).collect(Collectors.toList());
+                        double value = ExcelWriterUtil.executeSpecialList(executeWay, specialValues);
+                        cellDataList.add(new CellData(rowIndex, index, value));
+                    });
+                } catch (Exception e) {
+                    log.error(column + " 特殊计算tag点出错", e);
+                }
+            } else {
+                JSONObject data = jsonObject.getJSONObject(column);
+                // 处理正常一个tag点的单元格
+                List<CellData> singleCellDataList = handleColumn(column, columnIndex, data);
+                if (CollectionUtils.isNotEmpty(singleCellDataList)) {
+                    cellDataList.addAll(singleCellDataList);
                 }
             }
+        }
+        System.out.println(cellDataList);
+        return cellDataList;
+    }
+
+    private List<CellData> handleColumn(String column, int columnIndex, JSONObject data) {
+        List<CellData> cellDataList = new ArrayList<>();
+        if (Objects.isNull(data)) {
+            return cellDataList;
+        }
+        Set<String> keys = data.keySet();
+        List<Long> timestampList = data.keySet().stream().map(Long::valueOf).collect(Collectors.toList());
+        // 按照时间顺序排序
+        timestampList.sort(Comparator.comparing((Long::longValue)));
+
+        // 处理一天的tag点
+        if (column.contains("_1d_")) {
+            // 该tag点需要特殊处理, 获取当前运行时间，如果超过下午8点，就写入第一和第二行,如果没超过就只写第一行
+            Date itemTime = DateUtil.addHours(DateUtil.getDateBeginTime(dateRun), 22);
+            Object value = data.get(timestampList.get(0));
+            if (dateRun.getTime() < itemTime.getTime()) {
+                cellDataList.add(new CellData(1, columnIndex, value));
+                return cellDataList;
+            } else {
+                cellDataList.add(new CellData(1, columnIndex, value));
+                cellDataList.add(new CellData(2, columnIndex, value));
+                return cellDataList;
+            }
+        }
+
+        List<DateQuery> dayEach = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
+        int rowIndex = 1;
+        for (int j = 0; j < dayEach.size(); j++) {
+            DateQuery query = dayEach.get(j);
+            Date queryEndTime = query.getEndTime();
+            for (int i = 0; i < timestampList.size(); i++) {
+                Long tempTime = timestampList.get(i);
+                String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
+                Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
+                if (date.getTime() == queryEndTime.getTime()) {
+                    BigDecimal value = (BigDecimal) data.get(tempTime + "");
+                    if (tagFormualsNeedToMutiply12.contains(column)) {
+                        value = value.multiply(BigDecimal.valueOf(12));
+                    }
+                    cellDataList.add(new CellData(rowIndex, columnIndex, value));
+                }
+            }
+            rowIndex += 1;
         }
 
         return cellDataList;
     }
-
 
     /**
      * 调用api获取停机记录
