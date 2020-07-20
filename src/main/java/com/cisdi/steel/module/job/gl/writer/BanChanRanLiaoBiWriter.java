@@ -187,7 +187,7 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
                                 break;
                         }
                     } else if (flagSplit[0].equals("Water")) {
-                        value = getWeightsetByBrandCode(version, list, flagSplit[1]);
+                        value = getWeightsetByBrandCode(version, list, flagSplit[1], classDateQueries.get(j-1).getQueryEndTime());
                     }
                     ExcelWriterUtil.addCellData(cellDataList, i*2+j+3, columnNum, value);
                 }
@@ -316,7 +316,7 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
         return oCount;
     }
 
-    private BigDecimal getWeightsetByBrandCode(String version, List<BatchData> data, String descr) {
+    private BigDecimal getWeightsetByBrandCode(String version, List<BatchData> data, String descr, long time) {
         BigDecimal value = new BigDecimal(0);
         BatchMaterial material = null;
         for (int i = 0; i < data.size(); i++) {
@@ -332,6 +332,7 @@ public class BanChanRanLiaoBiWriter extends BaseGaoLuWriter {
             String url = getBXMaterialUrl(version);
             Map<String, String> queryMap = new HashMap<>();
             queryMap.put("brandCode", material.getBrandcode());
+            queryMap.put("time", Long.toString(time));
             String result = httpUtil.get(url, queryMap);
             if(StringUtils.isNotBlank(result)) {
                 JSONObject jsonObject = JSONObject.parseObject(result);

@@ -84,110 +84,142 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
     };
 
     private String[] luGang = new String[]{
-            "BF7_L2C_BD_TI0707C_1d_max", "BF7_L2C_BD_TI0708A_1d_max", "BF7_L2C_BD_TI0708B_1d_max", "BF7_L2C_BD_TI0708C_1d_max", "BF7_L2C_BD_TI0709A_1d_max", "BF7_L2C_BD_TI0709B_1d_max", "BF7_L2C_BD_TI0709C_1d_max", "BF7_L2C_BD_TI0710A_1d_max", "BF7_L2C_BD_TI0710B_1d_max",
-            "BF7_L2C_BD_TI0710C_1d_max", "BF7_L2C_BD_TI0711A_1d_max", "BF7_L2C_BD_TI0711B_1d_max", "BF7_L2C_BD_TI0711C_1d_max", "BF7_L2C_BD_TI0712A_1d_max", "BF7_L2C_BD_TI0712B_1d_max", "BF7_L2C_BD_TI0712C_1d_max", "BF7_L2C_BD_TI0713A_1d_max", "BF7_L2C_BD_TI0713B_1d_max", "BF7_L2C_BD_TI0713C_1d_max",
-            "BF7_L2C_BD_ATI0801A_1d_max", "BF7_L2C_BD_ATI0801B_1d_max", "BF7_L2C_BD_ATI0801C_1d_max", "BF7_L2C_BD_TI0802A_1d_max", "BF7_L2C_BD_TI0802B_1d_max", "BF7_L2C_BD_TI0802C_1d_max", "BF7_L2C_BD_TI0803A_1d_max", "BF7_L2C_BD_TI0803B_1d_max", "BF7_L2C_BD_TI0803C_1d_max", "BF7_L2C_BD_TI0804A_1d_max",
-            "BF7_L2C_BD_TI0804B_1d_max", "BF7_L2C_BD_TI0804C_1d_max", "BF7_L2C_BD_TI0805A_1d_max", "BF7_L2C_BD_TI0805B_1d_max", "BF7_L2C_BD_TI0805C_1d_max", "BF7_L2C_BD_TI0806A_1d_max", "BF7_L2C_BD_TI0806B_1d_max", "BF7_L2C_BD_TI0806C_1d_max", "BF7_L2C_BD_TI0807A_1d_max", "BF7_L2C_BD_TI0807B_1d_max",
-            "BF7_L2C_BD_TI0807C_1d_max", "BF7_L2C_BD_TI0808A_1d_max", "BF7_L2C_BD_TI0808B_1d_max", "BF7_L2C_BD_TI0808C_1d_max", "BF7_L2C_BD_TI0809A_1d_max", "BF7_L2C_BD_TI0809B_1d_max", "BF7_L2C_BD_TI0809C_1d_max", "BF7_L2C_BD_TI0810A_1d_max", "BF7_L2C_BD_TI0810B_1d_max", "BF7_L2C_BD_TI0810C_1d_max",
-            "BF7_L2C_BD_TI0811A_1d_max", "BF7_L2C_BD_TI0811B_1d_max", "BF7_L2C_BD_TI0811C_1d_max", "BF7_L2C_BD_TI0812A_1d_max", "BF7_L2C_BD_TI0812B_1d_max", "BF7_L2C_BD_TI0812C_1d_max", "BF7_L2C_BD_TI0813A_1d_max", "BF7_L2C_BD_TI0813B_1d_max", "BF7_L2C_BD_TI0813C_1d_max", "BF7_L2C_BD_TI0901A_1d_max",
-            "BF7_L2C_BD_TI0901B_1d_max", "BF7_L2C_BD_TI0901C_1d_max", "BF7_L2C_BD_TI0902A_1d_max", "BF7_L2C_BD_TI0902B_1d_max", "BF7_L2C_BD_TI0902C_1d_max", "BF7_L2C_BD_TI0903A_1d_max", "BF7_L2C_BD_TI0903B_1d_max", "BF7_L2C_BD_TI0903C_1d_max", "BF7_L2C_BD_TI0904A_1d_max", "BF7_L2C_BD_TI0904B_1d_max",
-            "BF7_L2C_BD_TI0904C_1d_max", "BF7_L2C_BD_TI0905A_1d_max", "BF7_L2C_BD_TI0905B_1d_max", "BF7_L2C_BD_TI0905C_1d_max", "BF7_L2C_BD_TI0906A_1d_max", "BF7_L2C_BD_TI0906B_1d_max", "BF7_L2C_BD_TI0906C_1d_max", "BF7_L2C_BD_TI0907A_1d_max", "BF7_L2C_BD_TI0907B_1d_max", "BF7_L2C_BD_TI0907C_1d_max",
-            "BF7_L2C_BD_TI0908A_1d_max", "BF7_L2C_BD_TI0908B_1d_max", "BF7_L2C_BD_TI0908C_1d_max", "BF7_L2C_BD_TI0909A_1d_max", "BF7_L2C_BD_TI0909B_1d_max", "BF7_L2C_BD_TI0909C_1d_max", "BF7_L2C_BD_TI0910A_1d_max", "BF7_L2C_BD_TI0910B_1d_max", "BF7_L2C_BD_TI0910C_1d_max", "BF7_L2C_BD_TI0911A_1d_max",
-            "BF7_L2C_BD_TI0911B_1d_max", "BF7_L2C_BD_TI0911C_1d_max", "BF7_L2C_BD_TI0912A_1d_max", "BF7_L2C_BD_TI0912B_1d_max", "BF7_L2C_BD_TI0912C_1d_max", "BF7_L2C_BD_TI0913A_1d_max", "BF7_L2C_BD_TI0913B_1d_max", "BF7_L2C_BD_TI0913C_1d_max", "BF7_L2C_BD_TI1001A_1d_max", "BF7_L2C_BD_TI1001B_1d_max",
-            "BF7_L2C_BD_TI1002A_1d_max", "BF7_L2C_BD_TI1002B_1d_max", "BF7_L2C_BD_TI1003A_1d_max", "BF7_L2C_BD_TI1003B_1d_max", "BF7_L2C_BD_TI1004A_1d_max", "BF7_L2C_BD_TI1004B_1d_max", "BF7_L2C_BD_TI1005A_1d_max", "BF7_L2C_BD_TI1005B_1d_max", "BF7_L2C_BD_TI1006A_1d_max", "BF7_L2C_BD_TI1006B_1d_max",
-            "BF7_L2C_BD_TI1007A_1d_max", "BF7_L2C_BD_TI1007B_1d_max", "BF7_L2C_BD_TI1008A_1d_max", "BF7_L2C_BD_TI1008B_1d_max", "BF7_L2C_BD_TI1009A_1d_max", "BF7_L2C_BD_TI1009B_1d_max", "BF7_L2C_BD_TI1010A_1d_max", "BF7_L2C_BD_TI1010B_1d_max", "BF7_L2C_BD_ATI1011A_1d_max", "BF7_L2C_BD_ATI1011B_1d_max",
-            "BF7_L2C_BD_TI1012A_1d_max", "BF7_L2C_BD_TI1012B_1d_max", "BF7_L2C_BD_TI1013A_1d_max", "BF7_L2C_BD_TI1013B_1d_max", "BF7_L2C_BD_TI1101A_1d_max", "BF7_L2C_BD_TI1101B_1d_max", "BF7_L2C_BD_TI1102A_1d_max", "BF7_L2C_BD_TI1102B_1d_max", "BF7_L2C_BD_TI1103A_1d_max", "BF7_L2C_BD_TI1103B_1d_max",
-            "BF7_L2C_BD_TI1104A_1d_max", "BF7_L2C_BD_TI1104B_1d_max", "BF7_L2C_BD_TI1105A_1d_max", "BF7_L2C_BD_TI1105B_1d_max", "BF7_L2C_BD_TI1106A_1d_max", "BF7_L2C_BD_TI1106B_1d_max","BF7_L2C_BD_TI1107A_1d_max", "BF7_L2C_BD_TI1107B_1d_max", "BF7_L2C_BD_TI1108A_1d_max", "BF7_L2C_BD_TI1108B_1d_max",
-            "BF7_L2C_BD_TI1109A_1d_max", "BF7_L2C_BD_TI1109B_1d_max", "BF7_L2C_BD_TI1110A_1d_max", "BF7_L2C_BD_TI1110B_1d_max", "BF7_L2C_BD_TI1111A_1d_max", "BF7_L2C_BD_TI1111B_1d_max", "BF7_L2C_BD_TI1112A_1d_max", "BF7_L2C_BD_TI1112B_1d_max", "BF7_L2C_BD_TI1113A_1d_max", "BF7_L2C_BD_TI1113B_1d_max",
-            "BF7_L2C_BD_TI2101_1d_max", "BF7_L2C_BD_TI2102_1d_max", "BF7_L2C_BD_TI2103_1d_max", "BF7_L2C_BD_TI2104_1d_max", "BF7_L2C_BD_TI2105_1d_max", "BF7_L2C_BD_TI2106_1d_max", "BF7_L2C_BD_TI2107_1d_max", "BF7_L2C_BD_TI2108_1d_max", "BF7_L2C_BD_TI2201_1d_max", "BF7_L2C_BD_TI2202_1d_max", "BF7_L2C_BD_TI2203_1d_max",
-            "BF7_L2C_BD_TI2204_1d_max", "BF7_L2C_BD_TI2205_1d_max", "BF7_L2C_BD_TI2206_1d_max", "BF7_L2C_BD_TI2207_1d_max", "BF7_L2C_BD_TI2208_1d_max", "BF7_L2C_BD_TI2301_1d_max", "BF7_L2C_BD_TI2302_1d_max", "BF7_L2C_BD_TI2303_1d_max", "BF7_L2C_BD_TI2304_1d_max", "BF7_L2C_BD_TI2305_1d_max", "BF7_L2C_BD_TI2307_1d_max",
-            "BF7_L2C_BD_TI2308_1d_max", "BF7_L2C_BD_TI2401_1d_max", "BF7_L2C_BD_TI2402_1d_max", "BF7_L2C_BD_TI2403_1d_max", "BF7_L2C_BD_TI2404_1d_max", "BF7_L2C_BD_TI2405_1d_max", "BF7_L2C_BD_TI2406_1d_max", "BF7_L2C_BD_TI2407_1d_max", "BF7_L2C_BD_TI2408_1d_max", "BF7_L2C_BD_TI2409_1d_max", "BF7_L2C_BD_TI2410_1d_max",
-            "BF7_L2C_BD_TI2306_1d_max"
+            "BF7_L2C_BD_ATI261_1d_max", "BF7_L2C_BD_ATI262_1d_max", "BF7_L2C_BD_ATI263_1d_max", "BF7_L2C_BD_ATI264_1d_max",
+            "BF7_L2C_BD_ATI265_1d_max", "BF7_L2C_BD_ATI266_1d_max", "BF7_L2C_BD_ATI267_1d_max", "BF7_L2C_BD_ATI268_1d_max",
+            "BF7_L2C_BD_ATI361_1d_max", "BF7_L2C_BD_ATI362_1d_max", "BF7_L2C_BD_ATI363_1d_max", "BF7_L2C_BD_ATI364_1d_max",
+            "BF7_L2C_BD_ATI365_1d_max", "BF7_L2C_BD_ATI366_1d_max", "BF7_L2C_BD_ATI367_1d_max", "BF7_L2C_BD_ATI368_1d_max",
+            "BF7_L2C_BD_ATI461_1d_max", "BF7_L2C_BD_ATI462_1d_max", "BF7_L2C_BD_ATI463_1d_max", "BF7_L2C_BD_ATI464_1d_max",
+            "BF7_L2C_BD_ATI465_1d_max", "BF7_L2C_BD_ATI466_1d_max", "BF7_L2C_BD_ATI467_1d_max", "BF7_L2C_BD_ATI468_1d_max"
     };
 
     private String[] luFu = new String[]{
-            "BF7_L2C_BD_TI2501_1d_max", "BF7_L2C_BD_TI2502_1d_max", "BF7_L2C_BD_TI2503_1d_max", "BF7_L2C_BD_TI2504_1d_max", "BF7_L2C_BD_TI2601_1d_max", "BF7_L2C_BD_TI2602_1d_max", "BF7_L2C_BD_TI2603_1d_max", "BF7_L2C_BD_TI2604_1d_max", "BF7_L2C_BD_TI2605_1d_max", "BF7_L2C_BD_TI2606_1d_max",
-            "BF7_L2C_BD_TI2607_1d_max", "BF7_L2C_BD_TI2608_1d_max", "BF7_L2C_BD_TI2609_1d_max", "BF7_L2C_BD_TI2610_1d_max", "BF7_L2C_BD_TI2611_1d_max", "BF7_L2C_BD_TI2612_1d_max", "BF7_L2C_BD_TI2613_1d_max"
+            "BF7_L2C_BD_ATI601_1d_max", "BF7_L2C_BD_ATI602_1d_max", "BF7_L2C_BD_ATI603_1d_max", "BF7_L2C_BD_ATI604_1d_max",
+            "BF7_L2C_BD_ATI611_1d_max", "BF7_L2C_BD_ATI612_1d_max", "BF7_L2C_BD_ATI613_1d_max", "BF7_L2C_BD_ATI614_1d_max",
+            "BF7_L2C_BD_ATI615_1d_max", "BF7_L2C_BD_ATI616_1d_max", "BF7_L2C_BD_ATI617_1d_max", "BF7_L2C_BD_ATI618_1d_max",
+            "BF7_L2C_BD_ATI619_1d_max", "BF7_L2C_BD_ATI620_1d_max", "BF7_L2C_BD_ATI621_1d_max", "BF7_L2C_BD_ATI622_1d_max"
     };
 
     private String[] luYao = new String[]{
-            "BF7_L2C_BD_TI2701_1d_max", "BF7_L2C_BD_TI2702_1d_max", "BF7_L2C_BD_TI2703_1d_max", "BF7_L2C_BD_TI2704_1d_max", "BF7_L2C_BD_TI2801_1d_max", "BF7_L2C_BD_TI2802_1d_max", "BF7_L2C_BD_TI2803_1d_max", "BF7_L2C_BD_TI2804_1d_max", "BF7_L2C_BD_TI2805_1d_max", "BF7_L2C_BD_TI2806_1d_max", "BF7_L2C_BD_TI2807_1d_max",
-            "BF7_L2C_BD_TI2808_1d_max", "BF7_L2C_BD_TI2809_1d_max", "BF7_L2C_BD_TI2810_1d_max", "BF7_L2C_BD_TI2811_1d_max", "BF7_L2C_BD_TI2812_1d_max", "BF7_L2C_BD_TI2813_1d_max"
+            "BF7_L2C_BD_ATI701_1d_max", "BF7_L2C_BD_ATI702_1d_max", "BF7_L2C_BD_ATI703_1d_max", "BF7_L2C_BD_ATI711_1d_max",
+            "BF7_L2C_BD_ATI712_1d_max", "BF7_L2C_BD_ATI713_1d_max", "BF7_L2C_BD_ATI714_1d_max", "BF7_L2C_BD_ATI715_1d_max",
+            "BF7_L2C_BD_ATI716_1d_max", "BF7_L2C_BD_ATI717_1d_max", "BF7_L2C_BD_ATI718_1d_max", "BF7_L2C_BD_ATI719_1d_max",
+            "BF7_L2C_BD_ATI720_1d_max", "BF7_L2C_BD_ATI721_1d_max", "BF7_L2C_BD_ATI722_1d_max"
     };
 
     private String[] luShen = new String[]{
-            "BF7_L2C_BD_TI2901_1d_max", "BF7_L2C_BD_TI2902_1d_max", "BF7_L2C_BD_TI2903_1d_max", "BF7_L2C_BD_TI2904_1d_max", "BF7_L2C_BD_TI3001_1d_max", "BF7_L2C_BD_TI3002_1d_max", "BF7_L2C_BD_TI3003_1d_max", "BF7_L2C_BD_TI3004_1d_max", "BF7_L2C_BD_TI3005_1d_max", "BF7_L2C_BD_TI3006_1d_max", "BF7_L2C_BD_TI3007_1d_max",
-            "BF7_L2C_BD_TI3008_1d_max", "BF7_L2C_BD_TI3009_1d_max", "BF7_L2C_BD_TI3010_1d_max", "BF7_L2C_BD_TI3011_1d_max", "BF7_L2C_BD_TI3012_1d_max", "BF7_L2C_BD_TI3013_1d_max", "BF7_L2C_BD_TI3101_1d_max", "BF7_L2C_BD_TI3102_1d_max", "BF7_L2C_BD_TI3103_1d_max", "BF7_L2C_BD_TI3104_1d_max", "BF7_L2C_BD_TI3105_1d_max",
-            "BF7_L2C_BD_TI3106_1d_max", "BF7_L2C_BD_TI3107_1d_max", "BF7_L2C_BD_TI3108_1d_max", "BF7_L2C_BD_TI3109_1d_max", "BF7_L2C_BD_TI3110_1d_max", "BF7_L2C_BD_TI3111_1d_max", "BF7_L2C_BD_TI3112_1d_max", "BF7_L2C_BD_TI3113_1d_max", "BF7_L2C_BD_TI3201_1d_max", "BF7_L2C_BD_TI3202_1d_max", "BF7_L2C_BD_TI3203_1d_max",
-            "BF7_L2C_BD_TI3204_1d_max", "BF7_L2C_BD_TI3301_1d_max", "BF7_L2C_BD_TI3302_1d_max", "BF7_L2C_BD_TI3303_1d_max", "BF7_L2C_BD_TI3304_1d_max", "BF7_L2C_BD_TI3305_1d_max", "BF7_L2C_BD_TI3306_1d_max", "BF7_L2C_BD_TI3307_1d_max", "BF7_L2C_BD_TI3308_1d_max", "BF7_L2C_BD_TI3309_1d_max", "BF7_L2C_BD_TI3310_1d_max",
-            "BF7_L2C_BD_TI3311_1d_max", "BF7_L2C_BD_TI3312_1d_max", "BF7_L2C_BD_TI3401_1d_max", "BF7_L2C_BD_TI3402_1d_max", "BF7_L2C_BD_TI3403_1d_max", "BF7_L2C_BD_TI3404_1d_max", "BF7_L2C_BD_TI3405_1d_max", "BF7_L2C_BD_TI3406_1d_max", "BF7_L2C_BD_TI3407_1d_max", "BF7_L2C_BD_TI3408_1d_max", "BF7_L2C_BD_TI3409_1d_max",
-            "BF7_L2C_BD_TI3410_1d_max", "BF7_L2C_BD_TI3411_1d_max", "BF7_L2C_BD_TI3412_1d_max", "BF7_L2C_BD_TI3501_1d_max", "BF7_L2C_BD_TI3502_1d_max", "BF7_L2C_BD_TI3503_1d_max", "BF7_L2C_BD_TI3504_1d_max", "BF7_L2C_BD_TI3505_1d_max", "BF7_L2C_BD_TI3506_1d_max", "BF7_L2C_BD_TI3507_1d_max", "BF7_L2C_BD_TI3508_1d_max",
-            "BF7_L2C_BD_TI3509_1d_max", "BF7_L2C_BD_TI3510_1d_max", "BF7_L2C_BD_TI3511_1d_max", "BF7_L2C_BD_TI3601_1d_max", "BF7_L2C_BD_TI3602_1d_max", "BF7_L2C_BD_TI3603_1d_max", "BF7_L2C_BD_TI3604_1d_max", "BF7_L2C_BD_TI3605_1d_max", "BF7_L2C_BD_TI3606_1d_max", "BF7_L2C_BD_TI3607_1d_max", "BF7_L2C_BD_TI3608_1d_max",
-            "BF7_L2C_BD_TI3609_1d_max", "BF7_L2C_BD_TI3610_1d_max"
+            "BF7_L2C_BD_ATI801_1d_max", "BF7_L2C_BD_ATI802_1d_max", "BF7_L2C_BD_ATI803_1d_max", "BF7_L2C_BD_ATI804_1d_max",
+            "BF7_L2C_BD_ATI805_1d_max", "BF7_L2C_BD_ATI806_1d_max", "BF7_L2C_BD_ATI807_1d_max", "BF7_L2C_BD_ATI808_1d_max",
+            "BF7_L2C_BD_ATI809_1d_max", "BF7_L2C_BD_ATI810_1d_max", "BF7_L2C_BD_ATI811_1d_max", "BF7_L2C_BD_ATI812_1d_max",
+            "BF7_L2C_BD_ATI821_1d_max", "BF7_L2C_BD_ATI822_1d_max", "BF7_L2C_BD_ATI823_1d_max", "BF7_L2C_BD_ATI824_1d_max",
+            "BF7_L2C_BD_ATI901_1d_max", "BF7_L2C_BD_ATI902_1d_max", "BF7_L2C_BD_ATI903_1d_max", "BF7_L2C_BD_ATI904_1d_max",
+            "BF7_L2C_BD_ATI911_1d_max", "BF7_L2C_BD_ATI912_1d_max", "BF7_L2C_BD_ATI913_1d_max", "BF7_L2C_BD_ATI914_1d_max",
+            "BF7_L2C_BD_ATI915_1d_max", "BF7_L2C_BD_ATI916_1d_max", "BF7_L2C_BD_ATI917_1d_max", "BF7_L2C_BD_ATI918_1d_max",
+            "BF7_L2C_BD_ATI919_1d_max", "BF7_L2C_BD_ATI920_1d_max", "BF7_L2C_BD_ATI921_1d_max", "BF7_L2C_BD_ATI922_1d_max",
+            "BF7_L2C_BD_ATIA01_1d_max", "BF7_L2C_BD_ATIA02_1d_max", "BF7_L2C_BD_ATIA03_1d_max", "BF7_L2C_BD_ATIA04_1d_max",
+            "BF7_L2C_BD_ATIA05_1d_max", "BF7_L2C_BD_ATIA06_1d_max", "BF7_L2C_BD_ATIA07_1d_max", "BF7_L2C_BD_ATIA08_1d_max",
+            "BF7_L2C_BD_ATIA09_1d_max", "BF7_L2C_BD_ATIA10_1d_max", "BF7_L2C_BD_ATIA11_1d_max", "BF7_L2C_BD_ATIA12_1d_max",
+            "BF7_L2C_BD_ATIB01_1d_max", "BF7_L2C_BD_ATIB02_1d_max", "BF7_L2C_BD_ATIB03_1d_max", "BF7_L2C_BD_ATIB04_1d_max",
+            "BF7_L2C_BD_ATIB05_1d_max", "BF7_L2C_BD_ATIB06_1d_max", "BF7_L2C_BD_ATIB07_1d_max", "BF7_L2C_BD_ATIB08_1d_max",
+            "BF7_L2C_BD_ATIB09_1d_max", "BF7_L2C_BD_ATIB10_1d_max", "BF7_L2C_BD_ATIB11_1d_max", "BF7_L2C_BD_ATIB12_1d_max",
+            "BF7_L2C_BD_ATIC01_1d_max", "BF7_L2C_BD_ATIC02_1d_max", "BF7_L2C_BD_ATIC03_1d_max", "BF7_L2C_BD_ATIC04_1d_max",
+            "BF7_L2C_BD_ATIC05_1d_max", "BF7_L2C_BD_ATIC06_1d_max", "BF7_L2C_BD_ATIC07_1d_max", "BF7_L2C_BD_ATIC08_1d_max",
+            "BF7_L2C_BD_ATIC09_1d_max", "BF7_L2C_BD_ATIC10_1d_max", "BF7_L2C_BD_ATIC11_1d_max", "BF7_L2C_BD_ATIC12_1d_max",
+            "BF7_L2C_BD_ATIE01_1d_max", "BF7_L2C_BD_ATIE02_1d_max", "BF7_L2C_BD_ATIE03_1d_max", "BF7_L2C_BD_ATIE04_1d_max",
+            "BF7_L2C_BD_ATIE05_1d_max", "BF7_L2C_BD_ATIE06_1d_max", "BF7_L2C_BD_ATIE07_1d_max", "BF7_L2C_BD_ATIE08_1d_max",
+            "BF7_L2C_BD_ATIE09_1d_max", "BF7_L2C_BD_ATIE10_1d_max", "BF7_L2C_BD_ATIE11_1d_max", "BF7_L2C_BD_ATIE12_1d_max"
     };
 
     private String[] luGangA_C = new String[]{
-            "BF7_L2C_BD_TI0601A_1d_max", "BF7_L2C_BD_TI0601B_1d_max", "BF7_L2C_BD_TI0601C_1d_max", "BF7_L2C_BD_TI0602A_1d_max",
-            "BF7_L2C_BD_TI0602B_1d_max", "BF7_L2C_BD_TI0602C_1d_max", "BF7_L2C_BD_TI0603A_1d_max", "BF7_L2C_BD_TI0603B_1d_max",
-            "BF7_L2C_BD_TI0603C_1d_max", "BF7_L2C_BD_TI0604A_1d_max", "BF7_L2C_BD_TI0604B_1d_max", "BF7_L2C_BD_TI0604C_1d_max",
-            "BF7_L2C_BD_TI0605A_1d_max", "BF7_L2C_BD_TI0605B_1d_max", "BF7_L2C_BD_TI0605C_1d_max", "BF7_L2C_BD_TI0606A_1d_max",
-            "BF7_L2C_BD_TI0606B_1d_max", "BF7_L2C_BD_TI0606C_1d_max", "BF7_L2C_BD_TI0607A_1d_max", "BF7_L2C_BD_TI0607B_1d_max",
-            "BF7_L2C_BD_TI0607C_1d_max", "BF7_L2C_BD_TI0608A_1d_max", "BF7_L2C_BD_TI0608B_1d_max", "BF7_L2C_BD_TI0608C_1d_max",
-            "BF7_L2C_BD_TI0609A_1d_max", "BF7_L2C_BD_TI0609B_1d_max", "BF7_L2C_BD_TI0609C_1d_max", "BF7_L2C_BD_TI0610A_1d_max",
-            "BF7_L2C_BD_TI0610B_1d_max", "BF7_L2C_BD_TI0610C_1d_max", "BF7_L2C_BD_TI0611A_1d_max", "BF7_L2C_BD_TI0611B_1d_max",
-            "BF7_L2C_BD_TI0611C_1d_max", "BF7_L2C_BD_TI0612A_1d_max", "BF7_L2C_BD_TI0612B_1d_max", "BF7_L2C_BD_TI0612C_1d_max",
-            "BF7_L2C_BD_TI0613A_1d_max", "BF7_L2C_BD_TI0613B_1d_max", "BF7_L2C_BD_TI0613C_1d_max", "BF7_L2C_BD_TI0701A_1d_max",
-            "BF7_L2C_BD_TI0701B_1d_max", "BF7_L2C_BD_TI0701C_1d_max", "BF7_L2C_BD_TI0702A_1d_max", "BF7_L2C_BD_TI0702B_1d_max",
-            "BF7_L2C_BD_TI0702C_1d_max", "BF7_L2C_BD_TI0703A_1d_max", "BF7_L2C_BD_TI0703B_1d_max", "BF7_L2C_BD_TI0703C_1d_max"
+            "BF7_L2C_BD_ATI101A_1d_max", "BF7_L2C_BD_ATI101B_1d_max", "BF7_L2C_BD_ATI101C_1d_max", "BF7_L2C_BD_ATI102A_1d_max",
+            "BF7_L2C_BD_ATI102B_1d_max", "BF7_L2C_BD_ATI102C_1d_max", "BF7_L2C_BD_ATI103A_1d_max", "BF7_L2C_BD_ATI103B_1d_max",
+            "BF7_L2C_BD_ATI103C_1d_max", "BF7_L2C_BD_ATI104A_1d_max", "BF7_L2C_BD_ATI104B_1d_max", "BF7_L2C_BD_ATI104C_1d_max",
+            "BF7_L2C_BD_ATI104D_1d_max", "BF7_L2C_BD_ATI105A_1d_max", "BF7_L2C_BD_ATI105B_1d_max", "BF7_L2C_BD_ATI105C_1d_max",
+            "BF7_L2C_BD_ATI106A_1d_max", "BF7_L2C_BD_ATI106B_1d_max", "BF7_L2C_BD_ATI106C_1d_max", "BF7_L2C_BD_ATI107A_1d_max",
+            "BF7_L2C_BD_ATI107B_1d_max", "BF7_L2C_BD_ATI107C_1d_max", "BF7_L2C_BD_ATI108A_1d_max", "BF7_L2C_BD_ATI108B_1d_max",
+            "BF7_L2C_BD_ATI108C_1d_max", "BF7_L2C_BD_ATI109A_1d_max", "BF7_L2C_BD_ATI109B_1d_max", "BF7_L2C_BD_ATI109C_1d_max",
+            "BF7_L2C_BD_ATI110A_1d_max", "BF7_L2C_BD_ATI110B_1d_max", "BF7_L2C_BD_ATI110C_1d_max", "BF7_L2C_BD_ATI111A_1d_max",
+            "BF7_L2C_BD_ATI111B_1d_max", "BF7_L2C_BD_ATI111C_1d_max", "BF7_L2C_BD_ATI112A_1d_max", "BF7_L2C_BD_ATI112B_1d_max",
+            "BF7_L2C_BD_ATI112C_1d_max", "BF7_L2C_BD_ATI121A_1d_max", "BF7_L2C_BD_ATI121B_1d_max", "BF7_L2C_BD_ATI121C_1d_max",
+            "BF7_L2C_BD_ATI121D_1d_max", "BF7_L2C_BD_ATI122A_1d_max", "BF7_L2C_BD_ATI122B_1d_max", "BF7_L2C_BD_ATI122C_1d_max",
+            "BF7_L2C_BD_ATI122D_1d_max", "BF7_L2C_BD_ATI123A_1d_max", "BF7_L2C_BD_ATI123B_1d_max", "BF7_L2C_BD_ATI123C_1d_max",
+            "BF7_L2C_BD_ATI123D_1d_max", "BF7_L2C_BD_ATI124A_1d_max", "BF7_L2C_BD_ATI124B_1d_max", "BF7_L2C_BD_ATI124C_1d_max",
+            "BF7_L2C_BD_ATI124D_1d_max", "BF7_L2C_BD_ATI124E_1d_max", "BF7_L2C_BD_ATI125A_1d_max", "BF7_L2C_BD_ATI125B_1d_max",
+            "BF7_L2C_BD_ATI125C_1d_max", "BF7_L2C_BD_ATI125D_1d_max", "BF7_L2C_BD_ATI126A_1d_max", "BF7_L2C_BD_ATI126B_1d_max",
+            "BF7_L2C_BD_ATI126C_1d_max", "BF7_L2C_BD_ATI126D_1d_max", "BF7_L2C_BD_ATI127A_1d_max", "BF7_L2C_BD_ATI127B_1d_max",
+            "BF7_L2C_BD_ATI127C_1d_max", "BF7_L2C_BD_ATI127D_1d_max", "BF7_L2C_BD_ATI128A_1d_max", "BF7_L2C_BD_ATI128B_1d_max",
+            "BF7_L2C_BD_ATI128C_1d_max", "BF7_L2C_BD_ATI128D_1d_max", "BF7_L2C_BD_ATI129A_1d_max", "BF7_L2C_BD_ATI129B_1d_max",
+            "BF7_L2C_BD_ATI129C_1d_max", "BF7_L2C_BD_ATI129D_1d_max", "BF7_L2C_BD_ATI130A_1d_max", "BF7_L2C_BD_ATI130B_1d_max",
+            "BF7_L2C_BD_ATI130C_1d_max", "BF7_L2C_BD_ATI130D_1d_max"
     };
 
     private String[] luGangD_F = new String[]{
-            "BF7_L2C_BD_TI0704A_1d_max", "BF7_L2C_BD_TI0704B_1d_max", "BF7_L2C_BD_TI0704C_1d_max", "BF7_L2C_BD_TI0705A_1d_max",
-            "BF7_L2C_BD_TI0705B_1d_max", "BF7_L2C_BD_TI0705C_1d_max", "BF7_L2C_BD_TI0706A_1d_max", "BF7_L2C_BD_TI0706B_1d_max",
-            "BF7_L2C_BD_TI0706C_1d_max", "BF7_L2C_BD_TI0707A_1d_max", "BF7_L2C_BD_TI0707B_1d_max", "BF7_L2C_BD_TI0707C_1d_max",
-            "BF7_L2C_BD_TI0708A_1d_max", "BF7_L2C_BD_TI0708B_1d_max", "BF7_L2C_BD_TI0708C_1d_max", "BF7_L2C_BD_TI0709A_1d_max",
-            "BF7_L2C_BD_TI0709B_1d_max", "BF7_L2C_BD_TI0709C_1d_max", "BF7_L2C_BD_TI0710A_1d_max", "BF7_L2C_BD_TI0710B_1d_max",
-            "BF7_L2C_BD_TI0710C_1d_max", "BF7_L2C_BD_TI0711A_1d_max", "BF7_L2C_BD_TI0711B_1d_max", "BF7_L2C_BD_TI0711C_1d_max",
-            "BF7_L2C_BD_TI0712A_1d_max", "BF7_L2C_BD_TI0712B_1d_max", "BF7_L2C_BD_TI0712C_1d_max", "BF7_L2C_BD_TI0713A_1d_max",
-            "BF7_L2C_BD_TI0713B_1d_max", "BF7_L2C_BD_TI0713C_1d_max", "BF7_L2C_BD_ATI0801A_1d_max", "BF7_L2C_BD_ATI0801B_1d_max",
-            "BF7_L2C_BD_ATI0801C_1d_max", "BF7_L2C_BD_TI0802A_1d_max", "BF7_L2C_BD_TI0802B_1d_max", "BF7_L2C_BD_TI0802C_1d_max",
-            "BF7_L2C_BD_TI0803A_1d_max", "BF7_L2C_BD_TI0803B_1d_max", "BF7_L2C_BD_TI0803C_1d_max", "BF7_L2C_BD_TI0804A_1d_max",
-            "BF7_L2C_BD_TI0804B_1d_max", "BF7_L2C_BD_TI0804C_1d_max", "BF7_L2C_BD_TI0805A_1d_max", "BF7_L2C_BD_TI0805B_1d_max",
-            "BF7_L2C_BD_TI0805C_1d_max", "BF7_L2C_BD_TI0806A_1d_max", "BF7_L2C_BD_TI0806B_1d_max", "BF7_L2C_BD_TI0806C_1d_max"
+            "BF7_L2C_BD_ATI131A_1d_max", "BF7_L2C_BD_ATI131B_1d_max", "BF7_L2C_BD_ATI131C_1d_max", "BF7_L2C_BD_ATI131D_1d_max",
+            "BF7_L2C_BD_ATI132A_1d_max", "BF7_L2C_BD_ATI132B_1d_max", "BF7_L2C_BD_ATI132C_1d_max", "BF7_L2C_BD_ATI132D_1d_max",
+            "BF7_L2C_BD_ATI201A_1d_max", "BF7_L2C_BD_ATI201B_1d_max", "BF7_L2C_BD_ATI201C_1d_max", "BF7_L2C_BD_ATI201D_1d_max",
+            "BF7_L2C_BD_ATI201E_1d_max", "BF7_L2C_BD_ATI202A_1d_max", "BF7_L2C_BD_ATI202B_1d_max", "BF7_L2C_BD_ATI202C_1d_max",
+            "BF7_L2C_BD_ATI202D_1d_max", "BF7_L2C_BD_ATI202E_1d_max", "BF7_L2C_BD_ATI203A_1d_max", "BF7_L2C_BD_ATI203B_1d_max",
+            "BF7_L2C_BD_ATI203C_1d_max", "BF7_L2C_BD_ATI203D_1d_max", "BF7_L2C_BD_ATI203E_1d_max", "BF7_L2C_BD_ATI204A_1d_max",
+            "BF7_L2C_BD_ATI204B_1d_max", "BF7_L2C_BD_ATI204C_1d_max", "BF7_L2C_BD_ATI204D_1d_max", "BF7_L2C_BD_ATI204E_1d_max",
+            "BF7_L2C_BD_ATI204F_1d_max", "BF7_L2C_BD_ATI205A_1d_max", "BF7_L2C_BD_ATI205B_1d_max", "BF7_L2C_BD_ATI205C_1d_max",
+            "BF7_L2C_BD_ATI205D_1d_max", "BF7_L2C_BD_ATI205E_1d_max", "BF7_L2C_BD_ATI206A_1d_max", "BF7_L2C_BD_ATI206B_1d_max",
+            "BF7_L2C_BD_ATI206C_1d_max", "BF7_L2C_BD_ATI206D_1d_max", "BF7_L2C_BD_ATI206E_1d_max", "BF7_L2C_BD_ATI207A_1d_max",
+            "BF7_L2C_BD_ATI207B_1d_max", "BF7_L2C_BD_ATI207C_1d_max", "BF7_L2C_BD_ATI207D_1d_max", "BF7_L2C_BD_ATI207E_1d_max",
+            "BF7_L2C_BD_ATI208A_1d_max", "BF7_L2C_BD_ATI208B_1d_max", "BF7_L2C_BD_ATI208C_1d_max", "BF7_L2C_BD_ATI208D_1d_max",
+            "BF7_L2C_BD_ATI208E_1d_max", "BF7_L2C_BD_ATI209A_1d_max", "BF7_L2C_BD_ATI209B_1d_max", "BF7_L2C_BD_ATI209C_1d_max",
+            "BF7_L2C_BD_ATI209D_1d_max", "BF7_L2C_BD_ATI209E_1d_max", "BF7_L2C_BD_ATI210A_1d_max", "BF7_L2C_BD_ATI210B_1d_max",
+            "BF7_L2C_BD_ATI210C_1d_max", "BF7_L2C_BD_ATI210D_1d_max", "BF7_L2C_BD_ATI210E_1d_max", "BF7_L2C_BD_ATI211A_1d_max",
+            "BF7_L2C_BD_ATI211B_1d_max", "BF7_L2C_BD_ATI211C_1d_max", "BF7_L2C_BD_ATI211D_1d_max", "BF7_L2C_BD_ATI211E_1d_max",
+            "BF7_L2C_BD_ATI212A_1d_max", "BF7_L2C_BD_ATI212B_1d_max", "BF7_L2C_BD_ATI212C_1d_max", "BF7_L2C_BD_ATI212D_1d_max",
+            "BF7_L2C_BD_ATI212E_1d_max", "BF7_L2C_BD_ATI221A_1d_max", "BF7_L2C_BD_ATI221B_1d_max", "BF7_L2C_BD_ATI221C_1d_max",
+            "BF7_L2C_BD_ATI222A_1d_max", "BF7_L2C_BD_ATI222B_1d_max", "BF7_L2C_BD_ATI222C_1d_max", "BF7_L2C_BD_ATI223A_1d_max",
+            "BF7_L2C_BD_ATI223B_1d_max", "BF7_L2C_BD_ATI223C_1d_max", "BF7_L2C_BD_ATI224A_1d_max", "BF7_L2C_BD_ATI224B_1d_max",
+            "BF7_L2C_BD_ATI224C_1d_max"
     };
 
     private String[] luGangG_I = new String[]{
-            "BF7_L2C_BD_TI0807A_1d_max", "BF7_L2C_BD_TI0807B_1d_max", "BF7_L2C_BD_TI0807C_1d_max", "BF7_L2C_BD_TI0808A_1d_max",
-            "BF7_L2C_BD_TI0808B_1d_max", "BF7_L2C_BD_TI0808C_1d_max", "BF7_L2C_BD_TI0809A_1d_max", "BF7_L2C_BD_TI0809B_1d_max",
-            "BF7_L2C_BD_TI0809C_1d_max", "BF7_L2C_BD_TI0810A_1d_max", "BF7_L2C_BD_TI0810B_1d_max", "BF7_L2C_BD_TI0810C_1d_max",
-            "BF7_L2C_BD_TI0811A_1d_max", "BF7_L2C_BD_TI0811B_1d_max", "BF7_L2C_BD_TI0811C_1d_max", "BF7_L2C_BD_TI0812A_1d_max",
-            "BF7_L2C_BD_TI0812B_1d_max", "BF7_L2C_BD_TI0812C_1d_max", "BF7_L2C_BD_TI0813A_1d_max", "BF7_L2C_BD_TI0813B_1d_max",
-            "BF7_L2C_BD_TI0813C_1d_max", "BF7_L2C_BD_TI0901A_1d_max", "BF7_L2C_BD_TI0901B_1d_max", "BF7_L2C_BD_TI0901C_1d_max",
-            "BF7_L2C_BD_TI0902A_1d_max", "BF7_L2C_BD_TI0902B_1d_max", "BF7_L2C_BD_TI0902C_1d_max", "BF7_L2C_BD_TI0903A_1d_max",
-            "BF7_L2C_BD_TI0903B_1d_max", "BF7_L2C_BD_TI0903C_1d_max", "BF7_L2C_BD_TI0904A_1d_max", "BF7_L2C_BD_TI0904B_1d_max",
-            "BF7_L2C_BD_TI0904C_1d_max", "BF7_L2C_BD_TI0905A_1d_max", "BF7_L2C_BD_TI0905B_1d_max", "BF7_L2C_BD_TI0905C_1d_max",
-            "BF7_L2C_BD_TI0906A_1d_max", "BF7_L2C_BD_TI0906B_1d_max", "BF7_L2C_BD_TI0906C_1d_max", "BF7_L2C_BD_TI0907A_1d_max",
-            "BF7_L2C_BD_TI0907B_1d_max", "BF7_L2C_BD_TI0907C_1d_max", "BF7_L2C_BD_TI0908A_1d_max", "BF7_L2C_BD_TI0908B_1d_max",
-            "BF7_L2C_BD_TI0908C_1d_max", "BF7_L2C_BD_TI0909A_1d_max", "BF7_L2C_BD_TI0909B_1d_max", "BF7_L2C_BD_TI0909C_1d_max"
+            "BF7_L2C_BD_ATI225A_1d_max", "BF7_L2C_BD_ATI225B_1d_max", "BF7_L2C_BD_ATI225C_1d_max", "BF7_L2C_BD_ATI226A_1d_max",
+            "BF7_L2C_BD_ATI226B_1d_max", "BF7_L2C_BD_ATI226C_1d_max", "BF7_L2C_BD_ATI227A_1d_max", "BF7_L2C_BD_ATI227B_1d_max",
+            "BF7_L2C_BD_ATI227C_1d_max", "BF7_L2C_BD_ATI228A_1d_max", "BF7_L2C_BD_ATI228B_1d_max", "BF7_L2C_BD_ATI228C_1d_max",
+            "BF7_L2C_BD_ATI229A_1d_max", "BF7_L2C_BD_ATI229B_1d_max", "BF7_L2C_BD_ATI229C_1d_max", "BF7_L2C_BD_ATI230A_1d_max",
+            "BF7_L2C_BD_ATI230B_1d_max", "BF7_L2C_BD_ATI230C_1d_max", "BF7_L2C_BD_ATI231A_1d_max", "BF7_L2C_BD_ATI231B_1d_max",
+            "BF7_L2C_BD_ATI231C_1d_max", "BF7_L2C_BD_ATI232A_1d_max", "BF7_L2C_BD_ATI232B_1d_max", "BF7_L2C_BD_ATI232C_1d_max",
+            "BF7_L2C_BD_ATI301A_1d_max", "BF7_L2C_BD_ATI301B_1d_max", "BF7_L2C_BD_ATI301C_1d_max", "BF7_L2C_BD_ATI302A_1d_max",
+            "BF7_L2C_BD_ATI302B_1d_max", "BF7_L2C_BD_ATI302C_1d_max", "BF7_L2C_BD_ATI303A_1d_max", "BF7_L2C_BD_ATI303B_1d_max",
+            "BF7_L2C_BD_ATI303C_1d_max", "BF7_L2C_BD_ATI304A_1d_max", "BF7_L2C_BD_ATI304B_1d_max", "BF7_L2C_BD_ATI304C_1d_max",
+            "BF7_L2C_BD_ATI305A_1d_max", "BF7_L2C_BD_ATI305B_1d_max", "BF7_L2C_BD_ATI305C_1d_max", "BF7_L2C_BD_ATI306A_1d_max",
+            "BF7_L2C_BD_ATI306B_1d_max", "BF7_L2C_BD_ATI306C_1d_max", "BF7_L2C_BD_ATI307A_1d_max", "BF7_L2C_BD_ATI307B_1d_max",
+            "BF7_L2C_BD_ATI307C_1d_max", "BF7_L2C_BD_ATI308A_1d_max", "BF7_L2C_BD_ATI308B_1d_max", "BF7_L2C_BD_ATI308C_1d_max",
+            "BF7_L2C_BD_ATI309A_1d_max", "BF7_L2C_BD_ATI309B_1d_max", "BF7_L2C_BD_ATI309C_1d_max", "BF7_L2C_BD_ATI310A_1d_max",
+            "BF7_L2C_BD_ATI310B_1d_max", "BF7_L2C_BD_ATI310C_1d_max", "BF7_L2C_BD_ATI311A_1d_max", "BF7_L2C_BD_ATI311B_1d_max",
+            "BF7_L2C_BD_ATI311C_1d_max", "BF7_L2C_BD_ATI312A_1d_max", "BF7_L2C_BD_ATI312B_1d_max", "BF7_L2C_BD_ATI312C_1d_max",
+            "BF7_L2C_BD_ATI321A_1d_max", "BF7_L2C_BD_ATI321B_1d_max", "BF7_L2C_BD_ATI321C_1d_max", "BF7_L2C_BD_ATI322A_1d_max",
+            "BF7_L2C_BD_ATI322B_1d_max", "BF7_L2C_BD_ATI322C_1d_max", "BF7_L2C_BD_ATI323A_1d_max", "BF7_L2C_BD_ATI323B_1d_max",
+            "BF7_L2C_BD_ATI323C_1d_max", "BF7_L2C_BD_ATI324A_1d_max", "BF7_L2C_BD_ATI324B_1d_max", "BF7_L2C_BD_ATI324C_1d_max",
+            "BF7_L2C_BD_ATI325A_1d_max", "BF7_L2C_BD_ATI325B_1d_max", "BF7_L2C_BD_ATI325C_1d_max", "BF7_L2C_BD_ATI326A_1d_max",
+            "BF7_L2C_BD_ATI326B_1d_max", "BF7_L2C_BD_ATI326C_1d_max"
     };
 
-    private String[] luGangJ_M = new String[]{
-            "BF7_L2C_BD_TI0910A_1d_max", "BF7_L2C_BD_TI0910B_1d_max", "BF7_L2C_BD_TI0910C_1d_max", "BF7_L2C_BD_TI0911A_1d_max",
-            "BF7_L2C_BD_TI0911B_1d_max", "BF7_L2C_BD_TI0911C_1d_max", "BF7_L2C_BD_TI0912A_1d_max", "BF7_L2C_BD_TI0912B_1d_max",
-            "BF7_L2C_BD_TI0912C_1d_max", "BF7_L2C_BD_TI0913A_1d_max", "BF7_L2C_BD_TI0913B_1d_max", "BF7_L2C_BD_TI0913C_1d_max",
-            "BF7_L2C_BD_TI1001A_1d_max", "BF7_L2C_BD_TI1001B_1d_max", "BF7_L2C_BD_TI1002A_1d_max", "BF7_L2C_BD_TI1002B_1d_max",
-            "BF7_L2C_BD_TI1003A_1d_max", "BF7_L2C_BD_TI1003B_1d_max", "BF7_L2C_BD_TI1004A_1d_max", "BF7_L2C_BD_TI1004B_1d_max",
-            "BF7_L2C_BD_TI1005A_1d_max", "BF7_L2C_BD_TI1005B_1d_max", "BF7_L2C_BD_TI1006A_1d_max", "BF7_L2C_BD_TI1006B_1d_max",
-            "BF7_L2C_BD_TI1007A_1d_max", "BF7_L2C_BD_TI1007B_1d_max", "BF7_L2C_BD_TI1008A_1d_max", "BF7_L2C_BD_TI1008B_1d_max",
-            "BF7_L2C_BD_TI1009A_1d_max", "BF7_L2C_BD_TI1009B_1d_max", "BF7_L2C_BD_TI1010A_1d_max", "BF7_L2C_BD_TI1010B_1d_max",
-            "BF7_L2C_BD_ATI1011A_1d_max", "BF7_L2C_BD_ATI1011B_1d_max", "BF7_L2C_BD_TI1012A_1d_max", "BF7_L2C_BD_TI1012B_1d_max",
-            "BF7_L2C_BD_TI1013A_1d_max", "BF7_L2C_BD_TI1013B_1d_max", "BF7_L2C_BD_TI1101A_1d_max", "BF7_L2C_BD_TI1101B_1d_max",
-            "BF7_L2C_BD_TI1102A_1d_max", "BF7_L2C_BD_TI1102B_1d_max", "BF7_L2C_BD_TI1103A_1d_max", "BF7_L2C_BD_TI1103B_1d_max",
-            "BF7_L2C_BD_TI1104A_1d_max", "BF7_L2C_BD_TI1104B_1d_max", "BF7_L2C_BD_TI1105A_1d_max", "BF7_L2C_BD_TI1105B_1d_max",
-            "BF7_L2C_BD_TI1106A_1d_max", "BF7_L2C_BD_TI1106B_1d_max", "BF7_L2C_BD_TI1107A_1d_max", "BF7_L2C_BD_TI1107B_1d_max",
-            "BF7_L2C_BD_TI1108A_1d_max", "BF7_L2C_BD_TI1108B_1d_max", "BF7_L2C_BD_TI1109A_1d_max", "BF7_L2C_BD_TI1109B_1d_max",
-            "BF7_L2C_BD_TI1110A_1d_max", "BF7_L2C_BD_TI1110B_1d_max", "BF7_L2C_BD_TI1111A_1d_max", "BF7_L2C_BD_TI1111B_1d_max",
-            "BF7_L2C_BD_TI1112A_1d_max", "BF7_L2C_BD_TI1112B_1d_max", "BF7_L2C_BD_TI1113A_1d_max", "BF7_L2C_BD_TI1113B_1d_max"
+    private String[] luGangJ_L = new String[]{
+            "BF7_L2C_BD_ATI327A_1d_max", "BF7_L2C_BD_ATI327B_1d_max", "BF7_L2C_BD_ATI327C_1d_max", "BF7_L2C_BD_ATI328A_1d_max",
+            "BF7_L2C_BD_ATI328B_1d_max", "BF7_L2C_BD_ATI328C_1d_max", "BF7_L2C_BD_ATI329A_1d_max", "BF7_L2C_BD_ATI329B_1d_max",
+            "BF7_L2C_BD_ATI329C_1d_max", "BF7_L2C_BD_ATI330A_1d_max", "BF7_L2C_BD_ATI330B_1d_max", "BF7_L2C_BD_ATI330C_1d_max",
+            "BF7_L2C_BD_ATI331A_1d_max", "BF7_L2C_BD_ATI331B_1d_max", "BF7_L2C_BD_ATI331C_1d_max", "BF7_L2C_BD_ATI332A_1d_max",
+            "BF7_L2C_BD_ATI332B_1d_max", "BF7_L2C_BD_ATI332C_1d_max", "BF7_L2C_BD_ATI341A_1d_max", "BF7_L2C_BD_ATI341B_1d_max",
+            "BF7_L2C_BD_ATI341C_1d_max", "BF7_L2C_BD_ATI342A_1d_max", "BF7_L2C_BD_ATI342B_1d_max", "BF7_L2C_BD_ATI342C_1d_max",
+            "BF7_L2C_BD_ATI343A_1d_max", "BF7_L2C_BD_ATI343B_1d_max", "BF7_L2C_BD_ATI343C_1d_max", "BF7_L2C_BD_ATI344A_1d_max",
+            "BF7_L2C_BD_ATI344B_1d_max", "BF7_L2C_BD_ATI344C_1d_max", "BF7_L2C_BD_ATI345A_1d_max", "BF7_L2C_BD_ATI345B_1d_max",
+            "BF7_L2C_BD_ATI345C_1d_max", "BF7_L2C_BD_ATI346A_1d_max", "BF7_L2C_BD_ATI346B_1d_max", "BF7_L2C_BD_ATI346C_1d_max",
+            "BF7_L2C_BD_ATI347A_1d_max", "BF7_L2C_BD_ATI347B_1d_max", "BF7_L2C_BD_ATI347C_1d_max", "BF7_L2C_BD_ATI348A_1d_max",
+            "BF7_L2C_BD_ATI348B_1d_max", "BF7_L2C_BD_ATI348C_1d_max", "BF7_L2C_BD_ATI349A_1d_max", "BF7_L2C_BD_ATI349B_1d_max",
+            "BF7_L2C_BD_ATI349C_1d_max", "BF7_L2C_BD_ATI350A_1d_max", "BF7_L2C_BD_ATI350B_1d_max", "BF7_L2C_BD_ATI350C_1d_max",
+            "BF7_L2C_BD_ATI351A_1d_max", "BF7_L2C_BD_ATI351B_1d_max", "BF7_L2C_BD_ATI351C_1d_max", "BF7_L2C_BD_ATI352A_1d_max",
+            "BF7_L2C_BD_ATI352B_1d_max", "BF7_L2C_BD_ATI352C_1d_max", "BF7_L2C_BD_ATI401A_1d_max", "BF7_L2C_BD_ATI401B_1d_max",
+            "BF7_L2C_BD_ATI402A_1d_max", "BF7_L2C_BD_ATI402B_1d_max", "BF7_L2C_BD_ATI403A_1d_max", "BF7_L2C_BD_ATI403B_1d_max",
+            "BF7_L2C_BD_ATI404A_1d_max", "BF7_L2C_BD_ATI404B_1d_max", "BF7_L2C_BD_ATI405A_1d_max", "BF7_L2C_BD_ATI405B_1d_max",
+            "BF7_L2C_BD_ATI406A_1d_max", "BF7_L2C_BD_ATI406B_1d_max", "BF7_L2C_BD_ATI407A_1d_max", "BF7_L2C_BD_ATI407B_1d_max",
+            "BF7_L2C_BD_ATI408A_1d_max", "BF7_L2C_BD_ATI408B_1d_max", "BF7_L2C_BD_ATI409A_1d_max", "BF7_L2C_BD_ATI409B_1d_max",
+            "BF7_L2C_BD_ATI410A_1d_max", "BF7_L2C_BD_ATI410B_1d_max", "BF7_L2C_BD_ATI411A_1d_max", "BF7_L2C_BD_ATI411B_1d_max",
+            "BF7_L2C_BD_ATI412A_1d_max", "BF7_L2C_BD_ATI412B_1d_max"
     };
 
     @Autowired
@@ -579,7 +611,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
             Map<String, BigDecimal> todayGIMap = getMaxTempMap(version, luGangG_I);
             BigDecimal maxGITemp = getMaxTemp(new StringBuilder(), -2, version, todayGIMap.keySet().toArray(new String[todayGIMap.keySet().size()]));
             dealLuTiWenDuData(todayGIMap, maxGITemp, 3, text1, text2, text3, text4, prefix, stuffix);
-            Map<String, BigDecimal> todayJMMap = getMaxTempMap(version, luGangJ_M);
+            Map<String, BigDecimal> todayJMMap = getMaxTempMap(version, luGangJ_L);
             BigDecimal maxJMTemp = getMaxTemp(new StringBuilder(), -2, version, todayJMMap.keySet().toArray(new String[todayJMMap.keySet().size()]));
             dealLuTiWenDuData(todayJMMap, maxJMTemp, 4, text1, text2, text3, text4, prefix, stuffix);
         } catch (Exception e) {
@@ -1155,7 +1187,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         List<Double> luGangA_CList = getMaxLuGangList(version, luGangA_C);
         List<Double> luGangD_FList = getMaxLuGangList(version, luGangD_F);
         List<Double> luGangG_IList = getMaxLuGangList(version, luGangG_I);
-        List<Double> luGangJ_MList = getMaxLuGangList(version, luGangJ_M);
+        List<Double> luGangJ_MList = getMaxLuGangList(version, luGangJ_L);
 
         luGangA_CList.removeAll(Collections.singleton(null));
         luGangD_FList.removeAll(Collections.singleton(null));
@@ -1188,7 +1220,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         series3.add(new Serie("G-I", luGangG_IList.toArray()));
         // 标注类别
         Vector<Serie> series4 = new Vector<>();
-        series4.add(new Serie("J-M", luGangJ_MList.toArray()));
+        series4.add(new Serie("J-L", luGangJ_MList.toArray()));
 
         List<Vector<Serie>> vectors = new ArrayList<>();
         vectors.add(series1);
