@@ -53,7 +53,7 @@ public class LengQueBiYueBaoWriter extends BaseGaoLuWriter {
 //                Date day = eachDateQuery.getRecordDate();
                 Date day = allDayBeginTimeInCurrentMonth.get(i);
                 // 计算行
-                if (i > 0 && i % 10 == 0) {
+                if (i == 10 || i == 20) {
                     fixLineCount++;
                 }
                 int rowIndex = beginRow + fixLineCount + i;
