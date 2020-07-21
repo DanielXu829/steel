@@ -275,13 +275,14 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 String from = Objects.requireNonNull(eachDateQuery.getStartTime().getTime()).toString();
                 String to = Objects.requireNonNull(eachDateQuery.getEndTime().getTime()).toString();
                 Map<String, List<AnalysisValue>> itemPrefixToValues = new HashMap<>();
-                List<String> typeList = Arrays.asList("S4_SINTER", "PELLETS", "LUMPORE", "COKE", "FBFM-A_COAL");
+                List<String> typeList = Arrays.asList("SINTER", "PELLETS", "LUMPORE", "COKE", "FBFM-A_COAL");
                 List<String> prefixList = Arrays.asList("SJK", "QT", "KK", "JT", "PCM");
                 Map<String, String> typeToPrefixMap = typeList.stream()
                         .collect(Collectors.toMap(key -> key, key -> prefixList.get(typeList.indexOf(key))));
                 typeToPrefixMap.forEach((type, prefix) -> {
                     List<AnalysisValue> analysisValueList = new ArrayList<>();
-                    if ("S4_SINTER".equals(type) || "FBFM-A_COAL".equals(type)) {
+                    // 喷吹煤  brandcode为 FBFM-A_COAL 写死
+                    if ("FBFM-A_COAL".equals(type)) {
                         analysisValueList = getAnalysisValuesByBrandCode(version, from, to, type);
                     } else {
                         List<String> brandCodeListByType = getBrandCodeListByType(version, from, to, type);
