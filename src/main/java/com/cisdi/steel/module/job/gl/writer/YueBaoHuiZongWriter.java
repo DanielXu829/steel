@@ -99,6 +99,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             int fixLineCount = 0;
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 Date day = allDayBeginTimeInCurrentMonth.get(i);
+                day = DateUtil.addDays(day, 1);
                 // 计算行跳过
                 if (i == 10 || i == 20) {
                     fixLineCount++;
