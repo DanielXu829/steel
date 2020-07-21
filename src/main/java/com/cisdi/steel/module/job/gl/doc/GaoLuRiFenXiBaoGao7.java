@@ -441,7 +441,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
     }
 
     private BigDecimal getMaxLuTiTemp(StringBuilder builder, String version, String[] tagNames, int days) {
-        BigDecimal maxTemp = null;
+        BigDecimal maxTemp = new BigDecimal(0);
         TagValue tagValue = getLatestMaxTag(version, tagNames, days);
         if (Objects.nonNull(tagValue)) {
             maxTemp = tagValue.getVal();
