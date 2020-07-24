@@ -72,6 +72,11 @@ public class DateUtil {
     public static final String ddChineseFormat = "dd日";
 
     /**
+     * 几月
+     */
+    public static final String MMChineseFormat = "MM月";
+
+    /**
      * 几日几时
      */
     public static final String ddHHChineseFormat = "dd日HH时";
