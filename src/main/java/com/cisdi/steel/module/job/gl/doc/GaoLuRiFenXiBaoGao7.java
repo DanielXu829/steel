@@ -254,7 +254,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         return JobEnum.gl_rishengchanfenxibaogao_day7;
     }
 
-    @Scheduled(cron = "0 0 10 * * ?")
+    @Scheduled(cron = "0 10 10 * * ?")
     //@Scheduled(cron = "0 30/ 0 * * ?")
     //@Scheduled(cron = "0 10/30 * * * ?")
     public void mainTask() {
@@ -1016,7 +1016,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         Double result;
         Double total = 0d;
         Double count = 0d;
-        List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), -1);
+        List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 0);
         //3日燃料比累计=（1日燃料比*1日产量+2日燃料比*2日产量+3日燃料比*3日产量）/（1日产量+2日产量+3日产量）
         List<Double> tag1Object = getValuesByTag(data, tagName);
         //日产量
@@ -1043,7 +1043,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
     private Double dealMonthTotal (JSONObject data, String tagName) {
         Double total = 0d;
         Double count = 0d;
-        List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), -1);
+        List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 0);
         List<Double> tagObject = getValuesByTag(data, tagName);
         if(Objects.nonNull(tagObject) && Objects.nonNull(list)&& tagObject.size() > list.size() ) {
             for(int i = tagObject.size() - list.size() + 1; i < tagObject.size(); i ++) {
