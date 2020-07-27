@@ -322,6 +322,9 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                         }
                         List<BigDecimal> valueList = analysisValues.stream().map(AnalysisValue::getValues)
                                 .map(e -> e.get(item)).filter(e -> e != null).collect(Collectors.toList());
+                        if (CollectionUtils.isEmpty(valueList)) {
+                            continue;
+                        }
                         BigDecimal averageValue = valueList.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
                                 .divide(BigDecimal.valueOf(valueList.size()), 6, BigDecimal.ROUND_HALF_UP);
                         String unit = PoiCellUtil.getCellValue(sheet, itemRowNum - 1, itemIndex);
