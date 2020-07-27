@@ -219,16 +219,18 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
         String datePart = FileNameHandlerUtil.handlerName(templateTypeEnum, dateQuery);
 
         //自动配煤报表 单独特殊处理到分钟
-        if (StringUtils.isNotBlank(code) && (JobEnum.jh_zidongpeimei.getCode().equals(code)
-                || JobEnum.jh_ck12zidongpeimeinew.getCode().equals(code)
-                || JobEnum.jh_ck45zidongpeimei.getCode().equals(code)
-                || JobEnum.gl_peiliaodan.getCode().equals(code)
-                || JobEnum.gl_peiliaodan7.getCode().equals(code)
-                || JobEnum.gl_peiliaodan6.getCode().equals(code))) {
-            // yyyy-MM-dd_HH_mm
-            datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
-        } else if (StringUtils.isNotBlank(code) && JobEnum.sj_liushaogycanshu.getCode().equals(code)) {
-            datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
+        if (StringUtils.isNotBlank(code)) {
+            if ((JobEnum.jh_zidongpeimei.getCode().equals(code)
+                    || JobEnum.jh_ck12zidongpeimeinew.getCode().equals(code)
+                    || JobEnum.jh_ck45zidongpeimei.getCode().equals(code)
+                    || JobEnum.gl_peiliaodan.getCode().equals(code)
+                    || JobEnum.gl_peiliaodan7.getCode().equals(code)
+                    || JobEnum.gl_peiliaodan6.getCode().equals(code))) {
+                // yyyy-MM-dd_HH_mm
+                datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
+            } else if (JobEnum.sj_liushaogycanshu.getCode().equals(code) || JobEnum.sj_shengchan4.getCode().equals(code)) {
+                datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
+            }
         }
         return templateName + "_" + datePart + "." + fileExtension;
     }
