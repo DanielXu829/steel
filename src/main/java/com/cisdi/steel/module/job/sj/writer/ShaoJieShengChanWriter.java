@@ -38,10 +38,14 @@ import java.util.stream.Collectors;
 @SuppressWarnings("ALL")
 @Slf4j
 public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
+    // 需要乘以12的点位
     private static final List<String> TAG_FORMUALS_NEED_TO_MUTIPLY_12 = Arrays.asList("ST4_L1R_SIN_103ASinInstanFl_12h_cur", "ST4_L1R_SIN_103BSinInstanFl_12h_cur",
             "ST4_L1R_SIN_BF2CRFInstanFl_12h_cur", "ST4_L1R_SIN_CRF104InstanFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsFl_12h_cur");
-    private static final int SHAO_JIE_CHENG_PIN_ITEM_ROW_NUM = 8;
-    private static final int YUAN_LIAO_XING_NENG_ITEM_ROW_NUM = 34;
+    // 取开始时间的点位
+    private static final List<String> TAG_FORMUALS_GET_DATA_BY_BEGIN_TIME = Arrays.asList("ST4_MESR_SIN_SinterDayConfirmY_1d_cur",
+            "ST4_L1R_SIN_ProductPerHour_1d_avg", "ST4_MESR_SIN_SinterUF_1d_cur", "ST4_L2R_SIN_ProductRatio_1d_cur");
+    private static int shaojieChengPinItemRowNum = 8;
+    private static int yuanRanLiaoXingNengItemRowNum = 36;
     private static final String GET_VERSION_FAILED_MESSAGE = "在模板中获取version失败";
     private static final String TargetName_PREFIX = "ZP";
     public static final String END = "end";
@@ -73,7 +77,8 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      */
     private Workbook getMapHandler1(WriterExcelDTO excelDTO, String version) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
-        dateRun = this.getDateQuery(excelDTO).getRecordDate();
+        // 当天运行前一天的报表
+        dateRun = DateUtil.addDays(getDateQuery(excelDTO).getRecordDate(), -1);
         int numberOfSheets = workbook.getNumberOfSheets();
         // 获取两班倒查询策略
         List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
@@ -112,19 +117,24 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
 
         //  接口直接写入的数据：烧结成品质量
         Sheet sheet1 = workbook.getSheetAt(0);
-        sheet1.getRow(SHAO_JIE_CHENG_PIN_ITEM_ROW_NUM).setZeroHeight(true);
+        // 标记行
+        shaojieChengPinItemRowNum = Optional.ofNullable(PoiCustomUtil.getCellByValue(sheet1, "LC_TFe"))
+                .map(Cell::getRowIndex).orElse(shaojieChengPinItemRowNum);
+        sheet1.getRow(shaojieChengPinItemRowNum).setZeroHeight(true);
         DateQuery dateQuery = DateQueryUtil.build24HoursFromTen(dateRun);
         List<CellData> cellDataList1  = handleShaoJieChengPinData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList1);
 
         // 接口直接写入的数据：原料性能
-        sheet1.getRow(YUAN_LIAO_XING_NENG_ITEM_ROW_NUM).setZeroHeight(true);
+        // 标记行
+        yuanRanLiaoXingNengItemRowNum = Optional.ofNullable(PoiCustomUtil.getCellByValue(sheet1, "coke_FCd"))
+                .map(Cell::getRowIndex).orElse(yuanRanLiaoXingNengItemRowNum);
+        sheet1.getRow(yuanRanLiaoXingNengItemRowNum).setZeroHeight(true);
         List<CellData> cellDataList2  = handleYuanLiaoXingNengData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList2);
 
         // 接口写入数据：停机记录
-        DateQuery dateQuery1 = DateQueryUtil.build24HoursFromTen(dateRun);
-        List<CellData> cellDataList3  = handleDownTimeRecordData(sheet1, dateQuery1, version);
+        List<CellData> cellDataList3  = handleDownTimeRecordData(sheet1, dateQuery, version);
         ExcelWriterUtil.setCellValue(sheet1, cellDataList3);
 
         // 接口写入 堆料时间、取料时间
@@ -200,7 +210,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 List<ProdStopRecord> dayProdStopRecords = prodStopRecordInfo.getDayProdStopRecords();
                 Cell dayDownTimeCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机起时.白}");
                 // excel中只有5行单元格
-                int dayMaxSize = 8;
+                int dayMaxSize = 10;
                 if (CollectionUtils.isNotEmpty(dayProdStopRecords)) {
                     if (Objects.nonNull(dayDownTimeCell)) {
                         int dayDownTimeBeginRow = dayDownTimeCell.getRowIndex();
@@ -307,10 +317,10 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             dtoMap.put(materialTypeList.get(i), anaValueFenDTO);
         }
         // 获取标记行的数据
-        List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, YUAN_LIAO_XING_NENG_ITEM_ROW_NUM);
+        List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, yuanRanLiaoXingNengItemRowNum);
         for (int j = 0; j < materialTypeList.size(); j++) {
             // 获取excel单元格中项目的名称，来和接口进行对应
-            String itemCategory = PoiCellUtil.getCellValue(sheet1, YUAN_LIAO_XING_NENG_ITEM_ROW_NUM + j + 1, 15);
+            String itemCategory = PoiCellUtil.getCellValue(sheet1, yuanRanLiaoXingNengItemRowNum + j + 1, 15);
             itemCategory = itemCategory.trim();
             String materialType = itemCategoryToNameMap.get(itemCategory);
             List<AnalysisValue> dataList =
@@ -339,9 +349,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 int rowIndex;
                 int columnIndex = i;
                 if ("coke".equals(itemNamePrefix) && "coke".equals(materialType)) {
-                    rowIndex = YUAN_LIAO_XING_NENG_ITEM_ROW_NUM + 1;
+                    rowIndex = yuanRanLiaoXingNengItemRowNum + 1;
                 } else {
-                    rowIndex = YUAN_LIAO_XING_NENG_ITEM_ROW_NUM + j + 1;
+                    rowIndex = yuanRanLiaoXingNengItemRowNum + j + 1;
                 }
                 ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, bigDecimal);
             }
@@ -371,12 +381,12 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 }
             });
 
-            List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, SHAO_JIE_CHENG_PIN_ITEM_ROW_NUM);
+            List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, shaojieChengPinItemRowNum);
             if (CollectionUtils.isEmpty(itemNameList)) {
                 return cellDataList;
             }
             for (int j = 0; j < 4; j++) {
-                String id = PoiCellUtil.getCellValue(sheet1, SHAO_JIE_CHENG_PIN_ITEM_ROW_NUM + j + 1, 9);
+                String id = PoiCellUtil.getCellValue(sheet1, shaojieChengPinItemRowNum + j + 1, 9);
                 // 去除小数点以及小数点后的数字 excel取出来的数值会带小数点
                 Integer idNumber = Integer.parseInt(id.split("\\.")[0]);
                 id = idNumber.toString();
@@ -401,7 +411,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                         }
                         if (sampleId.equals(id)) {
                             BigDecimal cellValue = anaValueDTO.getData().get(k).getValues().get(itemNameTrue);
-                            ExcelWriterUtil.addCellData(cellDataList, SHAO_JIE_CHENG_PIN_ITEM_ROW_NUM + j + 1, i, cellValue);
+                            ExcelWriterUtil.addCellData(cellDataList, shaojieChengPinItemRowNum + j + 1, i, cellValue);
                         }
                     }
                 }
@@ -415,8 +425,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
 
     private void handleYardRunInfo(Sheet sheet, String version) {
         List<CellData> cellDataList = new ArrayList<>();
-        YardRunInfo yarnRunStatisticOfNight = getYarnRunStatisticData(version, dateRun.getTime(), 2);
-        YardRunInfo yarnRunStatisticOfDay = getYarnRunStatisticData(version, dateRun.getTime(), 1);
+        List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
+        YardRunInfo yarnRunStatisticOfNight = getYarnRunStatisticData(version, dateQueries.get(0).getQueryEndTime(), 2);
+        YardRunInfo yarnRunStatisticOfDay = getYarnRunStatisticData(version,dateQueries.get(1).getQueryEndTime(), 1);
 
         Cell pushMatTimeNightCell = PoiCustomUtil.getCellByValue(sheet, "{堆料时间.夜}");
         int pushMatTimeNightCellRowIndex = pushMatTimeNightCell.getRowIndex();
@@ -535,23 +546,23 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
 
         // 处理一天的tag点
         if (column.contains("_1d_")) {
+            // dateRun的前一天22点到22点
             DateQuery dateAheadTwoHourQuery = DateQueryUtil.buildDayAheadTwoHour(dateRun);
+            Long dayStartTimeAheadTwoHour = dateAheadTwoHourQuery.getQueryStartTime();
             Long dayEndTimeAheadTwoHour = dateAheadTwoHourQuery.getQueryEndTime();
-            // 如果结果中没有22点的时间戳 则返回
-            if (timestampList.stream().noneMatch(e -> dayEndTimeAheadTwoHour.equals(e))) {
+            Long queryTime = TAG_FORMUALS_GET_DATA_BY_BEGIN_TIME.contains(column) ? dayStartTimeAheadTwoHour : dayEndTimeAheadTwoHour;
+            // 如果结果中没有查询所需的时间戳 则返回
+            if (timestampList.stream().noneMatch(e -> queryTime.equals(e))) {
                 return cellDataList;
             }
-            Object value = data.get(dayEndTimeAheadTwoHour);
-            if (dateRun.getTime() < dayEndTimeAheadTwoHour) {
-                cellDataList.add(new CellData(1, columnIndex, value));
-                return cellDataList;
-            } else {
-                cellDataList.add(new CellData(1, columnIndex, value));
-                cellDataList.add(new CellData(2, columnIndex, value));
-                return cellDataList;
-            }
+            Object value = data.get(queryTime);
+            cellDataList.add(new CellData(1, columnIndex, value));
+            cellDataList.add(new CellData(2, columnIndex, value));
+
+            return cellDataList;
         }
 
+        // 处理12h的tag点
         List<DateQuery> dayEach = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
         int rowIndex = 1;
         for (int j = 0; j < dayEach.size(); j++) {

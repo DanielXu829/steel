@@ -228,7 +228,7 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                     || JobEnum.gl_peiliaodan6.getCode().equals(code))) {
                 // yyyy-MM-dd_HH_mm
                 datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
-            } else if (JobEnum.sj_liushaogycanshu.getCode().equals(code) || JobEnum.sj_shengchan4.getCode().equals(code)) {
+            } else if (JobEnum.sj_liushaogycanshu.getCode().equals(code)) {
                 datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
             }
         }
