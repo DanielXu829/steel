@@ -11,10 +11,7 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.SuccessEntity;
 import com.cisdi.steel.dto.response.sj.AnaValueDTO;
 import com.cisdi.steel.dto.response.sj.YardRunInfoDTO;
-import com.cisdi.steel.dto.response.sj.res.AnalysisValue;
-import com.cisdi.steel.dto.response.sj.res.ProdStopRecord;
-import com.cisdi.steel.dto.response.sj.res.ProdStopRecordInfo;
-import com.cisdi.steel.dto.response.sj.res.YardRunInfo;
+import com.cisdi.steel.dto.response.sj.res.*;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -139,6 +136,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
 
         // 接口写入 堆料时间、取料时间
         handleYardRunInfo(sheet1, version);
+
+        // 接口写入 堆2、堆6、堆场库存
+        handleYardRunInfoOf26B(sheet1, version);
 
         // 清除标记项(例如:{停机记录.停机起时.夜})
         PoiCustomUtil.clearPlaceHolder(sheet1);
@@ -424,24 +424,57 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     }
 
     private void handleYardRunInfo(Sheet sheet, String version) {
-        List<CellData> cellDataList = new ArrayList<>();
-        List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
-        YardRunInfo yarnRunStatisticOfNight = getYarnRunStatisticData(version, dateQueries.get(0).getQueryEndTime(), 2);
-        YardRunInfo yarnRunStatisticOfDay = getYarnRunStatisticData(version,dateQueries.get(1).getQueryEndTime(), 1);
+        try {
+            List<CellData> cellDataList = new ArrayList<>();
+            List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
+            YardRunInfo yarnRunStatisticOfNight = getYarnRunStatisticData(version, dateQueries.get(0).getQueryEndTime(), 2);
+            YardRunInfo yarnRunStatisticOfDay = getYarnRunStatisticData(version,dateQueries.get(1).getQueryEndTime(), 1);
 
-        Cell pushMatTimeNightCell = PoiCustomUtil.getCellByValue(sheet, "{堆料时间.夜}");
-        int pushMatTimeNightCellRowIndex = pushMatTimeNightCell.getRowIndex();
-        int pushMatTimeNightCellColumnIndex = pushMatTimeNightCell.getColumnIndex();
-        ExcelWriterUtil.addCellData(cellDataList, pushMatTimeNightCellRowIndex, pushMatTimeNightCellColumnIndex, yarnRunStatisticOfNight.getPushMatTime());
-        ExcelWriterUtil.addCellData(cellDataList, pushMatTimeNightCellRowIndex + 1, pushMatTimeNightCellColumnIndex, yarnRunStatisticOfDay.getPushMatTime());
+            Cell pushMatTimeNightCell = PoiCustomUtil.getCellByValue(sheet, "{堆料时间.夜}");
+            int pushMatTimeNightCellRowIndex = pushMatTimeNightCell.getRowIndex();
+            int pushMatTimeNightCellColumnIndex = pushMatTimeNightCell.getColumnIndex();
+            ExcelWriterUtil.addCellData(cellDataList, pushMatTimeNightCellRowIndex, pushMatTimeNightCellColumnIndex, yarnRunStatisticOfNight.getPushMatTime());
+            ExcelWriterUtil.addCellData(cellDataList, pushMatTimeNightCellRowIndex + 1, pushMatTimeNightCellColumnIndex, yarnRunStatisticOfDay.getPushMatTime());
 
-        Cell pullMatTimeNightCell = PoiCustomUtil.getCellByValue(sheet, "{取料时间.夜}");
-        int pullMatTimeNightCellRowIndex = pullMatTimeNightCell.getRowIndex();
-        int pullMatTimeNightCellColumnIndex = pullMatTimeNightCell.getColumnIndex();
-        ExcelWriterUtil.addCellData(cellDataList, pullMatTimeNightCellRowIndex, pullMatTimeNightCellColumnIndex, yarnRunStatisticOfNight.getPullMatTime());
-        ExcelWriterUtil.addCellData(cellDataList, pullMatTimeNightCellRowIndex + 1, pullMatTimeNightCellColumnIndex, yarnRunStatisticOfDay.getPullMatTime());
+            Cell pullMatTimeNightCell = PoiCustomUtil.getCellByValue(sheet, "{取料时间.夜}");
+            int pullMatTimeNightCellRowIndex = pullMatTimeNightCell.getRowIndex();
+            int pullMatTimeNightCellColumnIndex = pullMatTimeNightCell.getColumnIndex();
+            ExcelWriterUtil.addCellData(cellDataList, pullMatTimeNightCellRowIndex, pullMatTimeNightCellColumnIndex, yarnRunStatisticOfNight.getPullMatTime());
+            ExcelWriterUtil.addCellData(cellDataList, pullMatTimeNightCellRowIndex + 1, pullMatTimeNightCellColumnIndex, yarnRunStatisticOfDay.getPullMatTime());
 
-        ExcelWriterUtil.setCellValue(sheet, cellDataList);
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理堆料时间、取料时间出错", e);
+        }
+    }
+
+    private void handleYardRunInfoOf26B(Sheet sheet, String version) {
+        try {
+            List<CellData> cellDataList = new ArrayList<>();
+            DateQuery dateQuery = DateQueryUtil.build24HoursFromTen(dateRun);
+            String url = String.format("%s?clock=%s", getYarnRunStatisticsFor26BUrl(version), dateQuery.getQueryEndTime());
+            String jsonData = httpUtil.get(url);
+            JSONObject jsonObject = Optional.ofNullable(JSONObject.parseObject(jsonData))
+                    .map(e -> e.getJSONObject("data")).orElse(null);
+            if (Objects.isNull(jsonObject)) {
+                return;
+            }
+            // jsonObject转为Map
+            Map<String, Long> itemToValueMap = new HashMap<>();
+            for (Map.Entry entry : jsonObject.entrySet()) {
+                itemToValueMap.put(entry.getKey().toString(), (Long) entry.getValue());
+            }
+            // 写入excel, {map的key} 作为excel中的占位符
+            itemToValueMap.forEach((item, value) -> {
+                Cell cell = PoiCustomUtil.getCellByValue(sheet, "{" + item + "}");
+                int rowIndex = cell.getRowIndex();
+                int columnIndex = cell.getColumnIndex();
+                ExcelWriterUtil.addCellData(cellDataList, rowIndex, columnIndex, value);
+            });
+            ExcelWriterUtil.setCellValue(sheet, cellDataList);
+        } catch (Exception e) {
+            log.error("处理堆2、堆6、库存出错", e);
+        }
     }
     /**
      * 处理tag点数据
@@ -728,5 +761,18 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         YardRunInfoDTO yardRunInfoDTO = JSON.parseObject(jsonData, YardRunInfoDTO.class);
         return Optional.ofNullable(yardRunInfoDTO)
                 .map(YardRunInfoDTO::getData).orElse(new YardRunInfo());
+    }
+
+    private String getYarnRunStatisticsFor26BUrl(String version) {
+        return httpProperties.getSJUrlVersion(version) + "/report/yarnRunStatisticsFor26B";
+    }
+
+    private YardRunInfoOf26B getYarnRunStatisticsFor26BData(String version, Long timestamp) {
+        String url = String.format("%s?clock=%s", getYarnRunStatisticsFor26BUrl(version), timestamp);
+        String jsonData = httpUtil.get(url);
+        SuccessEntity<YardRunInfoOf26B> successEntity = JSON.parseObject(jsonData,
+                new TypeReference<SuccessEntity<YardRunInfoOf26B>>() {});
+        return Optional.ofNullable(successEntity).map(SuccessEntity::getData)
+                .orElse(new YardRunInfoOf26B());
     }
 }

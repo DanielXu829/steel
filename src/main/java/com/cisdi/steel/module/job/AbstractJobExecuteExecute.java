@@ -230,6 +230,9 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
                 datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH_mm");
             } else if (JobEnum.sj_liushaogycanshu.getCode().equals(code)) {
                 datePart = DateUtil.getFormatDateTime(dateQuery.getRecordDate(), "yyyy-MM-dd_HH");
+            } else if (JobEnum.sj_shengchan4.getCode().equals(code)) {
+                Date currentDate = DateUtil.addDays(dateQuery.getRecordDate(), -1);
+                datePart = DateUtil.getFormatDateTime(currentDate, "yyyy-MM-dd");
             }
         }
         return templateName + "_" + datePart + "." + fileExtension;
