@@ -460,9 +460,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 return;
             }
             // jsonObject转为Map
-            Map<String, Long> itemToValueMap = new HashMap<>();
+            Map<String, Object> itemToValueMap = new HashMap<>();
             for (Map.Entry entry : jsonObject.entrySet()) {
-                itemToValueMap.put(entry.getKey().toString(), (Long) entry.getValue());
+                itemToValueMap.put(entry.getKey().toString(), entry.getValue());
             }
             // 写入excel, {map的key} 作为excel中的占位符
             itemToValueMap.forEach((item, value) -> {
