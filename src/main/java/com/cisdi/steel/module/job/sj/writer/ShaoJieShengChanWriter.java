@@ -38,9 +38,12 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     // 需要乘以12的点位
     private static final List<String> TAG_FORMUALS_NEED_TO_MUTIPLY_12 = Arrays.asList("ST4_L1R_SIN_103ASinInstanFl_12h_cur", "ST4_L1R_SIN_103BSinInstanFl_12h_cur",
             "ST4_L1R_SIN_BF2CRFInstanFl_12h_cur", "ST4_L1R_SIN_CRF104InstanFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsFl_12h_cur");
+    private static final List<String> TAG_FORMUALS_NEED_TO_divide_100 = Arrays.asList("ST4_L1R_SIN_1To5OreBldUseP_12h_avg", "ST4_L1R_SIN_8ATo8BQuLimeUseP_12h_avg",
+            "ST4_L1R_SIN_13To14LimeUseP_12h_avg", "ST4_L1R_SIN_15To16DoloUseP_12h_avg", "ST4_L1R_SIN_10To12CoReFineUseP_12h_avg", "ST4_L1R_SIN_6To7FuelUseP_12h_avg");
     // 取开始时间的点位
     private static final List<String> TAG_FORMUALS_GET_DATA_BY_BEGIN_TIME = Arrays.asList("ST4_MESR_SIN_SinterDayConfirmY_1d_cur",
             "ST4_L1R_SIN_ProductPerHour_1d_avg", "ST4_MESR_SIN_SinterUF_1d_cur", "ST4_L2R_SIN_ProductRatio_1d_cur");
+
     private static int shaojieChengPinItemRowNum = 8;
     private static int yuanRanLiaoXingNengItemRowNum = 36;
     private static final String GET_VERSION_FAILED_MESSAGE = "在模板中获取version失败";
@@ -609,6 +612,8 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                     BigDecimal value = (BigDecimal) data.get(tempTime + "");
                     if (TAG_FORMUALS_NEED_TO_MUTIPLY_12.contains(column)) {
                         value = value.multiply(BigDecimal.valueOf(12));
+                    } else if (TAG_FORMUALS_NEED_TO_divide_100.contains(column)) {
+                        value = value.divide(BigDecimal.valueOf(100), 4, BigDecimal.ROUND_HALF_UP);
                     }
                     cellDataList.add(new CellData(rowIndex, columnIndex, value));
                 }
