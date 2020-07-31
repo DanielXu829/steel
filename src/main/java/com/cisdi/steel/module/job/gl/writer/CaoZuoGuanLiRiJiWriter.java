@@ -102,7 +102,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             log.error("处理模板数据失败", e);
         } finally {
             //Date currentDate = new Date();
-            Date currentDate = DateUtil.addDays(new Date(), -1);
+            Date currentDate = DateUtil.addDays(getDateQuery(excelDTO).getRecordDate(), -1);
             for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet=workbook.getSheetAt(i);
                 // 清除标记项(例如:{块矿.矿种})
@@ -312,7 +312,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
             int typeColumnIndex = typeCell.getColumnIndex();
 
             // 获取数据并填充
-            DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(new Date(), -1));
+            Date dateRun = DateUtil.addDays(getDateQuery(excelDTO).getRecordDate(), -1);
+            DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(dateRun);
             List<ChargeVarInfo> chargeVarInfos = getChargeVarInfo(version, dateQuery, "M");
             handleDangWeiJiaoDu (sheet, getChargeVarInfo(version, dateQuery, "D"));
             List<CellData> cellDataList = new ArrayList<>();
@@ -409,7 +410,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
                 }
                 ExcelWriterUtil.setCellValue(sheet, cellDataList);
             }
-            handleLiaoXianBianGeng(workbook, sheet, version);
+            handleLiaoXianBianGeng(workbook, excelDTO, sheet, version);
             handJingJiaoJiLu(workbook, sheet, version, dateQuery);
         } catch (Exception e) {
             log.error("处理正面-变料信息出错", e);
@@ -579,7 +580,7 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
      * 处理料线变更数据
      * @param version
      */
-    private void handleLiaoXianBianGeng (Workbook workbook, Sheet sheet, String version) {
+    private void handleLiaoXianBianGeng (Workbook workbook, WriterExcelDTO excelDTO, Sheet sheet, String version) {
         //{挡位.角度}
         Cell cell = PoiCustomUtil.getCellByValue(sheet, "{开始批次}");
         if (Objects.isNull(cell)) {
@@ -590,7 +591,8 @@ public class CaoZuoGuanLiRiJiWriter extends BaseGaoLuWriter {
 
         List<CellData> cellDataList = new ArrayList<>();
         String queryUrl = getUrlTagNamesInRange(version);
-        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(DateUtil.addDays(new Date(), -1));
+        Date dateRun = DateUtil.addDays(getDateQuery(excelDTO).getRecordDate(), -1);
+        DateQuery dateQuery = DateQueryUtil.buildDayAheadTwoHour(dateRun);
         JSONObject query = new JSONObject();
         query.put("starttime", String.valueOf(dateQuery.getQueryStartTime()));
         query.put("endtime", String.valueOf(dateQuery.getQueryEndTime()));

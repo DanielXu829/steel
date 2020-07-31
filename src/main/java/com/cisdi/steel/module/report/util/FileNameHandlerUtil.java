@@ -33,17 +33,23 @@ public class FileNameHandlerUtil {
                 flag = true;
             }
         }
+        //目前日报表和月报表需要拿前一天的数据，因此文件名应该是前一天的
+        Date currentDate = DateUtil.addDays(dateQuery.getRecordDate(), -1);
 
         if (Objects.nonNull(dateQuery.getDelay()) && !dateQuery.getDelay()) {
             // 延迟时间生成，表明是手动生成
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(dateQuery.getRecordDate());
             calendar.add(Calendar.HOUR_OF_DAY, 1);
-            String time = DateUtil.getFormatDateTime(calendar.getTime(), "yyyy-MM-dd HH");
-            return time;
+            switch (templateTypeEnum) {
+                // 重新生成日报表 文件名应该是recordDate的前一天的
+                case report_day:
+                    return hourName(currentDate, flag);
+                default:
+                    return DateUtil.getFormatDateTime(calendar.getTime(), "yyyy-MM-dd HH");
+            }
         }
-        //目前日报表和月报表需要拿前一天的数据，因此文件名应该是前一天的
-        Date currentDate = DateUtil.addDays(dateQuery.getRecordDate(), -1);
+
         switch (templateTypeEnum) {
             case report_hour:
                 return hourName(dateQuery.getRecordDate(), flag);
