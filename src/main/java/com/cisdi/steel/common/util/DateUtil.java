@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>Description:  操作时间的工具类 </p>
@@ -943,5 +944,19 @@ public class DateUtil {
         }
 
         return dates;
+    }
+
+    /**
+     * 获取当月从1号开始到当前日期，每一天的结束时间24:00:00,
+     * @param date
+     * @param beforeDays  当前日期往前的天数
+     * @return
+     */
+    public static List<Date> getAllDayEndTimeInCurrentMonthBeforeDays(Date date, int beforeDays) {
+        List<Date> allDayBeginTimeInCurrentMonth = getAllDayBeginTimeInCurrentMonthBeforeDays(date, beforeDays);
+        List<Date> allDayEndTimeInCurrentMonth = allDayBeginTimeInCurrentMonth.stream()
+                .map(e -> DateUtil.addDays(e, 1)).collect(Collectors.toList());
+
+        return allDayEndTimeInCurrentMonth;
     }
 }

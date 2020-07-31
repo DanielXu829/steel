@@ -71,7 +71,7 @@ public class ChuTieXiaoLvWriter extends BaseGaoLuWriter {
 
             // 获取tapSummary
             TapSummary tapSummary = null;
-            TapSummaryListDTO tapSummaryListDTO = getTapSummaryListDTO(version, dateQueryNoDelay.getStartTime(), "today");
+            TapSummaryListDTO tapSummaryListDTO = getTapSummaryListDTO(version, dateQueryNoDelay.getStartTime(), "day");
             if (Objects.nonNull(tapSummaryListDTO) && CollectionUtils.isNotEmpty(tapSummaryListDTO.getData())) {
                 tapSummary = tapSummaryListDTO.getData().get(0);
             }
