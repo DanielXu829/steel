@@ -1011,33 +1011,26 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         return result;
     }
 
-    private Double dealMonthTotalAvg (JSONObject data, String tagName) {
+    private Double dealMonthTotalAvg(JSONObject data, String tagName) {
         String tagRiChanLiang = "BF7_L2M_BX_HMMass_1d_cur";
-        Double result;
         Double total = 0d;
         Double count = 0d;
+        List<Date> allDayEndTimeInCurrentMonth = DateUtil.getAllDayEndTimeInCurrentMonthBeforeDays(new Date(), 1);
         List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 0);
-        //3日燃料比累计=（1日燃料比*1日产量+2日燃料比*2日产量+3日燃料比*3日产量）/（1日产量+2日产量+3日产量）
-        List<Double> tag1Object = getValuesByTag(data, tagName);
-        //日产量
-        List<Double> tag2Object = getValuesByTag(data, tagRiChanLiang);
-        if(Objects.nonNull(tag1Object) && Objects.nonNull(list)&& tag1Object.size() >= list.size() ) {
-            for(int i = tag1Object.size() - list.size() + 1; i < tag1Object.size(); i ++) {
-                Double item1 = tag1Object.get(i);
-                Double item2 = tag2Object.get(i);
-                if (item1 != null && item2 != null) {
-                    total += item1*item2;
-                    count += item2;
-                }
+        Map<Long, Double> timeToValueMapByTagName = getTimeToValueMapByTag(data, tagName);
+        Map<Long, Double> timeToValueMapByTagRiChanLiang = getTimeToValueMapByTag(data, tagRiChanLiang);
+        for (Date date : allDayEndTimeInCurrentMonth) {
+            long timestamp = date.getTime();
+            Double tagValue = timeToValueMapByTagName.get(timestamp);
+            //日产量
+            Double riChanLiangValue = timeToValueMapByTagRiChanLiang.get(timestamp);
+            if (tagValue != null && riChanLiangValue != null) {
+                total += tagValue*riChanLiangValue;
+                count += riChanLiangValue;
             }
         }
-        if (count > 0d) {
-            result = total / count;
-        }
-        else {
-            result = 0d;
-        }
-        return result;
+        // 3日燃料比累计=（1日燃料比*1日产量+2日燃料比*2日产量+3日燃料比*3日产量）/（1日产量+2日产量+3日产量）
+        return count > 0d ? total / count : 0d;
     }
 
     private Double dealMonthTotal(JSONObject data, String tagName) {
