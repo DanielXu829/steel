@@ -989,7 +989,7 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         List<Double> tag1Object = getValuesByTag(data, tagName);
         //日产量
         List<Double> tag2Object = getValuesByTag(data, tagRiChanLiang);
-        if(Objects.nonNull(tag1Object) && Objects.nonNull(list)&& tag1Object.size() > list.size() ) {
+        if(Objects.nonNull(tag1Object) && Objects.nonNull(list)&& tag1Object.size() >= list.size() ) {
             for(int i = tag1Object.size() - list.size() + 1; i < tag1Object.size(); i ++) {
                 Double item1 = tag1Object.get(i);
                 Double item2 = tag2Object.get(i);
@@ -1008,19 +1008,12 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
         return result;
     }
 
-    private Double dealMonthTotal (JSONObject data, String tagName) {
+    private Double dealMonthTotal(JSONObject data, String tagName) {
         Double total = 0d;
-        Double count = 0d;
-        List<Date> list = DateUtil.getAllDayBeginTimeInCurrentMonthBeforeDays(new Date(), 0);
-        List<Double> tagObject = getValuesByTag(data, tagName);
-        if(Objects.nonNull(tagObject) && Objects.nonNull(list)&& tagObject.size() > list.size() ) {
-            for(int i = tagObject.size() - list.size() + 1; i < tagObject.size(); i ++) {
-                Double item = tagObject.get(i);
-                if (item != null) {
-                    total += item;
-                }
-            }
-        }
+        List<Date> allDayEndTimeInCurrentMonth = DateUtil.getAllDayEndTimeInCurrentMonthBeforeDays(new Date(), 1);
+        Map<Long, Double> timeToValueMapByTag = getTimeToValueMapByTag(data, tagName);
+        total = allDayEndTimeInCurrentMonth.stream().map(e -> timeToValueMapByTag.get(e.getTime()))
+                .filter(Objects::nonNull).reduce((x, y) -> x + y).orElse(total);
         return total;
     }
 
@@ -1283,6 +1276,34 @@ public class GaoLuRiFenXiBaoGao extends AbstractExportWordJob {
                 categoriesList.toArray(), CategoryLabelPositions.UP_45, true, rangStarts, rangEnds, 4, stack, ystack);
         WordImageEntity image1 = image(Chart1);
         result.put("jfreechartImg5", image1);
+    }
+
+    private Map<Long, Double> getTimeToValueMapByTag(JSONObject data, String tagName) {
+        Map<Long, Double> timeToValueMap = new HashMap<Long, Double>();
+        if(Objects.isNull(data)) {
+            return timeToValueMap;
+        }
+        JSONObject tagObject = data.getJSONObject(tagName);
+        Map<String, Object> innerMap = tagObject == null ? null : tagObject.getInnerMap();
+        for (Long time : longTimeList) {
+            Double val = 0d;
+            if (innerMap != null) {
+                //所有L2M_BX的点都是 写的0 其实9点出来  其余点都是22点出来
+                if(!tagName.contains("_L2M_BX_")) {
+                    //减去22小时，取L2M_BX数据
+                    time = time - 7200000;
+                }
+                BigDecimal big = (BigDecimal) innerMap.get(String.valueOf(time));
+                if (null != big) {
+                    val = big.doubleValue();
+                    if (val < 0) {
+                        val = 0d;
+                    }
+                }
+            }
+            timeToValueMap.put(time, val);
+        }
+        return timeToValueMap;
     }
 
     private List<Double> getValuesByTag (JSONObject data, String tagName) {
