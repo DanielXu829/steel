@@ -99,8 +99,8 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             int fixLineCount = 0;
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 Date day = allDayBeginTimeInCurrentMonth.get(i);
-                // 计算行
-                if (i > 0 && i % 10 == 0) {
+                // 计算行跳过
+                if (i == 10 || i == 20) {
                     fixLineCount++;
                 }
                 int rowIndex = beginRow + fixLineCount + i;
@@ -267,7 +267,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             sheet.getRow(itemRowNum).setZeroHeight(true);
             Map<String, String> brandCodeToDescrMap = getBrandCodeToDescrMap(version);
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
-                if (i > 0 && i % 10 == 0) {
+                if  (i == 10 || i == 20) {
                     fixLineCount++;
                 }
                 int row = itemRowNum + 1 + fixLineCount + i;
@@ -364,7 +364,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     .map(e -> e.split("-")[1]).collect(Collectors.toList());
             sheet.getRow(itemRowNum).setZeroHeight(true);
             for (int i = 0, daySize = allDayBeginTimeInCurrentMonth.size(); i < daySize; i++) {
-                if (i > 0 && i % 10 == 0) {
+                if  (i == 10 || i == 20) {
                     fixLineCount++;
                 }
                 int row = itemRowNum + 1 + fixLineCount + i;
@@ -488,7 +488,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     }
                 });
 
-                if (i > 0 && i % 10 == 0) {
+                if  (i == 10 || i == 20) {
                     fixLineCount++;
                 }
                 int row = itemRowNum + 1 + fixLineCount + i;
@@ -661,7 +661,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                     itemToValueMap.put("一级品铁量", yiJiPinTieLiang);
                     itemToValueMap.put("一级品率", yiJiPinLv);
                 }
-                if (i > 0 && i % 10 == 0) {
+                if  (i == 10 || i == 20) {
                     fixLineCount++;
                 }
                 int row = itemRowNum + 1 + fixLineCount + i;
@@ -703,7 +703,7 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
             int itemDataSize = tagFormulaList.size();
             for (int i = 0; i < allDayBeginTimeInCurrentMonth.size(); i++) {
                 DateQuery eachDateQuery = DateQueryUtil.buildDayAheadTwoHour(allDayBeginTimeInCurrentMonth.get(i));
-                if (i > 0 && i % 10 == 0) {
+                if  (i == 10 || i == 20) {
                     fixLineCount++;
                 }
                 int row = beginRow + fixLineCount + i;

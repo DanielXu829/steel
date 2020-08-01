@@ -184,7 +184,7 @@ public class JingYiTongJiBiaoWriter extends BaseGaoLuWriter {
             }
 
             // 计算行
-            if (i > 0 && i%10 ==0) {
+            if (i == 10 || i == 20) {
                 fixLineCount++;
             }
             int row = itemRowNum + 1 + fixLineCount + i;
