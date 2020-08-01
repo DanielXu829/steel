@@ -45,6 +45,8 @@ public class FileNameHandlerUtil {
                 // 重新生成日报表 文件名应该是recordDate的前一天的
                 case report_day:
                     return hourName(currentDate, flag);
+                case report_month:
+                    return DateUtil.getFormatDateTime(currentDate, "yyyy-MM-dd");
                 default:
                     return DateUtil.getFormatDateTime(calendar.getTime(), "yyyy-MM-dd HH");
             }

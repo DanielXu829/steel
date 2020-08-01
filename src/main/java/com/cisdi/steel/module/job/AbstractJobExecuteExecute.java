@@ -167,8 +167,25 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * 替换模板文件使用 生成后的文件 作为模板
      */
     protected void replaceTemplatePath(ReportIndex reportIndex, ReportCategoryTemplate template) {
+        Date recordDate = reportIndex.getRecordDate();
+        ReportTemplateTypeEnum templateTypeEnum = ReportTemplateTypeEnum.getType(template.getTemplateType());
         String templatePath = reportIndexService.existTemplate(reportIndex);
-        if (StringUtils.isNotBlank(templatePath) && !"1".equals(template.getAttr1())) {
+
+        Boolean useNewReportPath = true;
+        if (StringUtils.isBlank(templatePath)) {
+            useNewReportPath = false;
+        }
+        if ("1".equals(template.getAttr1())) {
+            useNewReportPath = false;
+        }
+        // 对于月报表 对于每个月的2号会生成新月的报表
+        // 如果设置是基于最新模板模板, 会导致前一个月的数据被带到这个月，而且日期占位符也没了,
+        // 所以如果是月报表，日期为2号，还是使用原始模板
+        if (templateTypeEnum.equals(ReportTemplateTypeEnum.report_month) && 2 == DateUtil.getDayOfMonth(recordDate)) {
+            useNewReportPath = false;
+        }
+
+        if (useNewReportPath) {
             // 修改为生成后文件名称
             template.setTemplatePath(templatePath);
         }
