@@ -10,12 +10,11 @@ import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.TargetManagementService;
 import com.cisdi.steel.module.report.util.TargetManagementUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -102,25 +101,20 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
      */
     @Override
     public ApiResult insertRecord(TargetManagement record) {
-        if (null != record) {
-            String targetName = record.getTargetName();
-            if ((record.getIsLeaf() == 1) && StringUtils.isNotBlank(targetName)) {
-                LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
-                wrapper.eq(TargetManagement::getTargetName, targetName);
-                List<TargetManagement> list = targetManagementMapper.selectList(wrapper);
-                if (Objects.isNull(list) || list.size() < 1) {
-                    this.save(record);
-                } else {
-                    return ApiUtil.fail("新增失败，指标名重复");
-                }
-            } else {
-                this.save(record);
-            }
-
-            return ApiUtil.success();
+        if (Objects.isNull(record) || Objects.isNull(record.getWrittenName())) {
+            return ApiUtil.unprocesableEntity();
         }
-
-        return ApiUtil.fail();
+        String targetName;
+        int isLeaf = record.getIsLeaf();
+        // 如果是叶子，就生成uuid 作为targetName, 否则 targetName为writtenName
+        if (isLeaf == 1) {
+            targetName = UUID.randomUUID().toString();
+        } else {
+            targetName = record.getWrittenName();
+        }
+        record.setTargetName(targetName);
+        this.save(record);
+        return ApiUtil.success();
     }
 
     /**
@@ -130,36 +124,25 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
      */
     @Override
     public ApiResult updateRecord(TargetManagement record) {
-        if (null != record) {
-            // 报错信息
-            String errMsg = null;
-            // 指标名
-            String targetName = record.getTargetName();
-            if ((record.getIsLeaf() == 1) && StringUtils.isNotBlank(targetName)) {
-                LambdaQueryWrapper<TargetManagement> wrapper = new QueryWrapper<TargetManagement>().lambda();
-                wrapper.eq(TargetManagement::getTargetName, targetName);
-                List<TargetManagement> list = targetManagementMapper.selectList(wrapper);
-
-                if(null != list){
-                    Long id = record.getId();
-                    if((list.size() == 1)&&(!id.equals(list.get(0).getId()))){
-                        errMsg = "指标名与其他指标冲突."+id+":"+list.get(0).getId();
-                    }else if (list.size()>1){
-                        errMsg = "指标名存在多个，请清理后重试";
-                    }
-                }
-            }
-
-            if(null == errMsg){
-                this.updateById(record);
-            }else{
-                return ApiUtil.fail(errMsg);
-            }
-
-            return ApiUtil.success();
+        if (Objects.isNull(record) || Objects.isNull(record.getWrittenName())) {
+            return ApiUtil.unprocesableEntity();
         }
-
-        return ApiUtil.fail();
+        String targetName = record.getTargetName();
+        int isLeaf = record.getIsLeaf();
+        if (isLeaf == 1) {
+            if (StringUtils.isBlank(record.getTargetFormula())) {
+                return ApiUtil.fail("指标公式不能为空");
+            }
+            if (StringUtils.isBlank(targetName)) {
+                targetName = UUID.randomUUID().toString();
+                record.setTargetName(targetName);
+            }
+        } else {
+            targetName = record.getWrittenName();
+            record.setTargetName(targetName);
+        }
+        this.updateById(record);
+        return ApiUtil.success();
     }
 
     /**
@@ -191,7 +174,7 @@ public class TargetManagementServiceImpl extends BaseServiceImpl<TargetManagemen
             //遍历完,则退出递归
             for (TargetManagement nextChild : childsList) {
                 //判断子集对象是否还有子节点
-                if (!CollectionUtils.isEmpty(childsList)) {
+                if (CollectionUtils.isNotEmpty(childsList)) {
                     //有下一个子节点,继续递归
                     removeTargetManagement(list, nextChild);
                 }
