@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.baomidou.mybatisplus.annotation.Version;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+import java.util.List;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -44,6 +46,9 @@ public class ReportTemplateTags extends Model<ReportTemplateTags> {
      */
     private Integer sequence;
 
+    private Long topParentId;
+
+    private List<TargetManagement> targetManagements;
 
     @Override
     protected Serializable pkVal() {
