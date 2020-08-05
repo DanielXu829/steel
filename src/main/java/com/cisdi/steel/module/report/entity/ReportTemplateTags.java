@@ -48,8 +48,6 @@ public class ReportTemplateTags extends Model<ReportTemplateTags> {
 
     private Long topParentId;
 
-    private List<TargetManagement> targetManagements;
-
     @Override
     protected Serializable pkVal() {
         return this.id;

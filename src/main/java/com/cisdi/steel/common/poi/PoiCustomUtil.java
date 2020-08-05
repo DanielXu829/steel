@@ -4,9 +4,11 @@ import cn.afterturn.easypoi.util.PoiCellUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.dto.MetadataDTO;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +24,7 @@ import java.util.*;
  * @author leaf
  * @version 1.0
  */
+@Slf4j
 public class PoiCustomUtil {
 
     /**
@@ -454,6 +457,18 @@ public class PoiCustomUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static CellRangeAddress addMergedRegion(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol) {
+        try {
+            CellRangeAddress cellRangeAddress = new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
+            RegionUtil.setBorderTop(CellStyle.BORDER_THICK, cellRangeAddress, sheet);
+            sheet.addMergedRegion(cellRangeAddress);
+            return cellRangeAddress;
+        } catch (Exception var6) {
+            log.error("发生了一次合并单元格错误,{},{},{},{}", new Integer[]{firstRow, lastRow, firstCol, lastCol});
+            return null;
+        }
     }
 
 }

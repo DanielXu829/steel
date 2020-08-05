@@ -51,8 +51,6 @@ public class ReportTemplateConfig extends Model<ReportTemplateConfig> {
      */
     private Integer timeDivideType;
 
-    private TimeDivideEnum timeDivideEnum;
-
     /**
      * 开始时间
      */
