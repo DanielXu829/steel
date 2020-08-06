@@ -195,6 +195,7 @@ public enum JobEnum {
     sj_duichangyunxingtongji("sj_duichangyunxingtongji", "堆场运行统计"),
     sj_zuoyequshengchanqingkuang("sj_zuoyequshengchanqingkuang", "4烧结作业区每月生产情况"),
     sj_huanduicaoyehuiyijiyao("sj_huanduicaoyehuiyijiyao", "换堆操业会议纪要"),
+    sj_meizhouchanliangfenxi("sj_meizhouchanliangfenxi", "4烧结每周产量分析"),
 
     // 原供料
     gl_chejianwuliaowaipai("ygl_chejianwuliaowaipai", "供料车间物料外排统计表"),
