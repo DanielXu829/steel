@@ -67,6 +67,11 @@ public class DateUtil {
     public static final String MMddChineseFormat = "MM月dd日";
 
     /**
+     * 几日
+     */
+    public static final String ddChineseFormat = "dd日";
+
+    /**
      * 几年几月几日 小时分钟
      */
     public static final String yyyyMMddHHmmChineseFormat = "yyyy年MM月dd日 HH时mm分";
@@ -559,6 +564,7 @@ public class DateUtil {
         return beginTime;
     }
 
+
     /**
      * 取得本周的开始日期
      *
@@ -568,6 +574,41 @@ public class DateUtil {
     public static String getThisWeekBeginTimeString(String format) {
         DateFormat df = new SimpleDateFormat(format);
         return df.format(getThisWeekBeginTime());
+    }
+
+    /**
+     * 获取一周7天的日期
+     * @param date
+     * @return
+     */
+    public static List<Date> getDaysOfWeek(Date date) {
+        Date weekBeginTime = getWeekBeginTime(date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(weekBeginTime);
+        List<Date> datesOfWeek = new ArrayList<>();
+        datesOfWeek.add(cal.getTime());
+        for (int i = 0; i < 6; i++) {
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            datesOfWeek.add(cal.getTime());
+        }
+        return datesOfWeek;
+    }
+
+    /**
+     * 获取 指定日期是本周的第几天
+     * @param date
+     * @return
+     */
+    public static int getDayOfWeekDay(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int weekDay = cal.get(Calendar.DAY_OF_WEEK);
+        if (weekDay == 1) {
+            weekDay = 7;
+        } else {
+            weekDay = weekDay - 1;
+        }
+        return weekDay;
     }
 
 
