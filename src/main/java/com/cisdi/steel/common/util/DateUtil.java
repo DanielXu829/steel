@@ -1001,6 +1001,11 @@ public class DateUtil {
         return allDayEndTimeInCurrentMonth;
     }
 
+    /**
+     * 获取日期是当月的第几天
+     * @param date
+     * @return
+     */
     public static int getDayOfMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
