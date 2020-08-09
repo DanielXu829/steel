@@ -85,6 +85,7 @@
             `report_index`
         WHERE
             is_hidden = '0'
+            AND del_flag = 0
             AND report_category_code = #{code}
             AND create_time between  from_unixtime(#{startTime}) and from_unixtime(#{endTime})
         ORDER BY
@@ -133,6 +134,7 @@
                 AND DATE_FORMAT(record_date,'%Y-%m-%d')=DATE_FORMAT(#{currDate},'%Y-%m-%d')
             </if>
             <if test="indexType=='report_month'">
+                AND DATE_FORMAT(record_date,'%d') != 1
                 AND DATE_FORMAT(record_date,'%Y-%m')=DATE_FORMAT(#{currDate},'%Y-%m')
             </if>
             <if test="indexType=='report_year'">

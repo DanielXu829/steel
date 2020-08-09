@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
-import com.cisdi.steel.common.constant.Constants;
-import com.cisdi.steel.common.exception.BusinessException;
 import com.cisdi.steel.common.exception.LeafException;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
@@ -16,20 +14,20 @@ import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportIndexDTO;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
 import com.cisdi.steel.module.report.service.ReportIndexService;
-import com.cisdi.steel.module.sys.entity.SysConfig;
 import com.cisdi.steel.module.sys.mapper.SysConfigMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -152,7 +150,13 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         Date now = new Date();
         reportIndex.setUpdateTime(now);
         reportIndex.setHidden("0");
-        ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
+        ReportIndex report;
+        // 月报表月初特殊处理
+        if (ReportTemplateTypeEnum.report_month.getCode().equals(reportIndex.getIndexType())) {
+            report = getCurrentMonthReport(reportIndex);
+        } else {
+            report = reportIndexMapper.selectIdByParamter(reportIndex);
+        }
 
         if (Objects.isNull(report)
                 || (Objects.isNull(reportIndex.getId()) && JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode()))
@@ -177,6 +181,7 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 otherHand(f, reportIndex, report, now);
             } else {
                 if (!reportIndex.getPath().equals(report.getPath())) {
+                    // 新报表名称变了，删除原始文件
                     FileUtils.deleteFile(report.getPath());
                 }
                 if (Objects.nonNull(reportIndex.getId())) {
@@ -186,6 +191,48 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 this.updateById(reportIndex);
             }
         }
+    }
+
+    /**
+     * description 因为每天的数据是在第二天运行，所以每月1号实际运行出来是上个月最后一天
+     * 获取本月的月报表
+     * @param reportIndex
+     * @return
+     */
+    private ReportIndex getCurrentMonthReport(ReportIndex reportIndex) {
+        Date currDate = reportIndex.getCurrDate();
+        int dayOfMonth = DateUtil.getDayOfMonth(currDate);
+        // CurrentDate是1号，则查找(创建时间在上个月2号到这个月1号之间)的报表
+        if (dayOfMonth == 1) {
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.setTime(currDate);
+            calendar1.add(Calendar.MONTH, -1);
+            calendar1.set(Calendar.DAY_OF_MONTH, 2);
+            Date beginTime = calendar1.getTime();
+            beginTime = DateUtil.getDateBeginTime(beginTime);
+
+            Calendar calendar2 = Calendar.getInstance();
+            calendar2.setTime(currDate);
+            calendar2.set(Calendar.DAY_OF_MONTH, 1);
+            Date endTime = calendar2.getTime();
+            endTime = DateUtil.getDateEndTime59(endTime);
+
+            List<ReportIndex> reportList = reportIndexMapper.queryReport(reportIndex.getReportCategoryCode(), beginTime.getTime()/1000, endTime.getTime()/1000);
+            if (CollectionUtils.isNotEmpty(reportList)) {
+                return reportList.get(0);
+            }
+        } else if (dayOfMonth == 2) {
+            // recordDate 是2号，则查找今天新生成的报表(为了排除1号，所以这样写)
+            Date dateBeginTime = DateUtil.getDateBeginTime(currDate);
+            Date dateEndTime59 = DateUtil.getDateEndTime59(currDate);
+            List<ReportIndex> reportList = reportIndexMapper.queryReport(reportIndex.getReportCategoryCode(), dateBeginTime.getTime()/1000, dateEndTime59.getTime()/1000);
+            if (CollectionUtils.isNotEmpty(reportList)) {
+                return reportList.get(0);
+            }
+        } else {
+            return reportIndexMapper.selectIdByParamter(reportIndex);
+        }
+        return null;
     }
 
     private void otherHand(boolean f, ReportIndex reportIndex, ReportIndex report, Date date) {
@@ -303,7 +350,12 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
 
     @Override
     public String existTemplate(ReportIndex reportIndex) {
-        ReportIndex report = reportIndexMapper.selectIdByParamter(reportIndex);
+        ReportIndex report;
+        if (ReportTemplateTypeEnum.report_month.getCode().equals(reportIndex.getIndexType())) {
+            report = getCurrentMonthReport(reportIndex);
+        } else {
+            report = reportIndexMapper.selectIdByParamter(reportIndex);
+        }
         // 判断数据库是否存在报表
         if (Objects.isNull(report) || Objects.isNull(report.getPath())
                 || JobEnum.jh_zidongpeimei.getCode().equals(reportIndex.getReportCategoryCode())

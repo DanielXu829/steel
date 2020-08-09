@@ -516,13 +516,11 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                             case "平均焦批": {
                                 BigDecimal batchNumber = tagFormulaToValueMap.get(itemToTagFormulaMap.get("总批数"));
                                 BigDecimal value = tagFormulaToValueMap.get(itemToTagFormulaMap.get(itemName.substring(2)));
-                                if (Objects.isNull(batchNumber)) {
+                                if (Objects.isNull(batchNumber) || Objects.isNull(value) || BigDecimal.ZERO.equals(batchNumber)) {
                                     break;
                                 }
-                                if (Objects.nonNull(value)) {
-                                    value = value.divide(batchNumber, 2, BigDecimal.ROUND_HALF_UP);
-                                    ExcelWriterUtil.addCellData(cellDataList, row, col, value);
-                                }
+                                value = value.divide(batchNumber, 2, BigDecimal.ROUND_HALF_UP);
+                                ExcelWriterUtil.addCellData(cellDataList, row, col, value);
                                 break;
                             }
                             case "变料次数": {
@@ -660,11 +658,13 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 TapJyDTO tapJyDTO = getTapJyDTO(version, dateQueryNoDelay.getQueryStartTime(), dateQueryNoDelay.getQueryStartTime(), "ts", "day");
                 if (Objects.nonNull(tapJyDTO)) {
                     BigDecimal yiJiPinTieLiang = tapJyDTO.getTl();
-                    BigDecimal yiJiPinLv = BigDecimal.valueOf(tapJyDTO.getFz())
-                            .divide(BigDecimal.valueOf(tapJyDTO.getFm()),2, BigDecimal.ROUND_HALF_UP)
-                            .multiply(BigDecimal.valueOf(100));
+                    BigDecimal fz = BigDecimal.valueOf(tapJyDTO.getFz());
+                    BigDecimal fm = BigDecimal.valueOf(tapJyDTO.getFm());
+                    if (Objects.nonNull(fz) && Objects.nonNull(fm) && !BigDecimal.ZERO.equals(fm)) {
+                        BigDecimal yiJiPinLv = fz.divide(fm, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100));
+                        itemToValueMap.put("一级品率", yiJiPinLv);
+                    }
                     itemToValueMap.put("一级品铁量", yiJiPinTieLiang);
-                    itemToValueMap.put("一级品率", yiJiPinLv);
                 }
                 if  (i == 10 || i == 20) {
                     fixLineCount++;

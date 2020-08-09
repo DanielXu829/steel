@@ -193,6 +193,12 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         return null;
     }
 
+    /**
+     * 获取子节点和父节点之间的层级数
+     * @param targetId
+     * @param parentId
+     * @return
+     */
     private Integer getHierarchyBetweenTag(Long targetId, Long parentId) {
         Integer number = 1;
         // 没有父节点 返回一层
@@ -220,6 +226,14 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         return null;
     }
 
+    /**
+     * 创建主sheet(第一个sheet)
+     * @param workbook
+     * @param templateConfigDTO
+     * @param tagsMap
+     * @param topTypeToTagsMap
+     * @param tagsSheetName
+     */
     private void createReportMainSheet(Workbook workbook, ReportTemplateConfigDTO templateConfigDTO,
                                        LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap,
                                        LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap,
@@ -232,8 +246,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         int tagsMapSize = tagsMap.keySet().size();
         //创建第一个sheet
         Sheet firstSheet = workbook.createSheet(firstSheetName);
-        //添加空白行
-        // Row firstBlankRow = ExcelWriterUtil.getRowOrCreate(firstSheet, 0);
         //设置标题及样式
         Row secondTitleRow = ExcelWriterUtil.getRowOrCreate(firstSheet, REPORT_TITLE_ROW_INDEX);
         PoiCustomUtil.addMergedRegion(firstSheet, 1, 1, 1, tagsMapSize + 1);
