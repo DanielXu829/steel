@@ -151,11 +151,18 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
         reportIndex.setUpdateTime(now);
         reportIndex.setHidden("0");
         ReportIndex report;
-        // 月报表月初特殊处理
-        if (ReportTemplateTypeEnum.report_month.getCode().equals(reportIndex.getIndexType())) {
-            report = getCurrentMonthReport(reportIndex);
-        } else {
-            report = reportIndexMapper.selectIdByParamter(reportIndex);
+        ReportTemplateTypeEnum reportTypeEnum = ReportTemplateTypeEnum.getType(reportIndex.getIndexType());
+        // 月报表、周报表、年报表特殊处理
+        switch (reportTypeEnum) {
+            case report_month:
+                report = getCurrentMonthReport(reportIndex);
+                break;
+            case report_week:
+                report = getCurrentWeekReport(reportIndex);
+                break;
+            default:
+                report = reportIndexMapper.selectIdByParamter(reportIndex);
+                break;
         }
 
         if (Objects.isNull(report)
@@ -231,6 +238,36 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             }
         } else {
             return reportIndexMapper.selectIdByParamter(reportIndex);
+        }
+        return null;
+    }
+
+    /**
+     * description 因为每天的数据是在第二天运行，所以每周星期一实际运行出来是上周的报表
+     * 获取本周的周报表
+     * @param reportIndex
+     * @return
+     */
+    private ReportIndex getCurrentWeekReport(ReportIndex reportIndex) {
+        Date currDate = reportIndex.getCurrDate();
+        int dayOfWeek = DateUtil.getDayOfWeekDay(currDate);
+        if (dayOfWeek == 1) {
+            // 如果是星期一 则获取上周的周报（周二到周一生成的）
+            Date lastWeekTuesdayBeginTime = DateUtil.getDateBeginTime(DateUtil.addDays(currDate, -6));
+            Date currentDateEndTime59 = DateUtil.getDateEndTime59(currDate);
+            List<ReportIndex> reportList = reportIndexMapper.queryReport(reportIndex.getReportCategoryCode(), lastWeekTuesdayBeginTime.getTime()/1000, currentDateEndTime59.getTime()/1000);
+            if (CollectionUtils.isNotEmpty(reportList)) {
+                return reportList.get(0);
+            }
+        } else {
+            // 如果不是星期一 获取本周二到周日的日报
+            Date thisWeekBeginTime = DateUtil.getWeekBeginTime(currDate);
+            Date thisWeekTuesdayBeginTime = DateUtil.getDateBeginTime(DateUtil.addDays(thisWeekBeginTime, 1));
+            Date thisWeekSundayEndTime59 = DateUtil.getDateEndTime59(DateUtil.addDays(thisWeekBeginTime, 6));
+            List<ReportIndex> reportList = reportIndexMapper.queryReport(reportIndex.getReportCategoryCode(), thisWeekTuesdayBeginTime.getTime()/1000, thisWeekSundayEndTime59.getTime()/1000);
+            if (CollectionUtils.isNotEmpty(reportList)) {
+                return reportList.get(0);
+            }
         }
         return null;
     }
@@ -351,10 +388,17 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
     @Override
     public String existTemplate(ReportIndex reportIndex) {
         ReportIndex report;
-        if (ReportTemplateTypeEnum.report_month.getCode().equals(reportIndex.getIndexType())) {
-            report = getCurrentMonthReport(reportIndex);
-        } else {
-            report = reportIndexMapper.selectIdByParamter(reportIndex);
+        ReportTemplateTypeEnum reportTypeEnum = ReportTemplateTypeEnum.getType(reportIndex.getIndexType());
+        switch (reportTypeEnum) {
+            case report_month:
+                report = getCurrentMonthReport(reportIndex);
+                break;
+            case report_week:
+                report = getCurrentWeekReport(reportIndex);
+                break;
+            default:
+                report = reportIndexMapper.selectIdByParamter(reportIndex);
+                break;
         }
         // 判断数据库是否存在报表
         if (Objects.isNull(report) || Objects.isNull(report.getPath())

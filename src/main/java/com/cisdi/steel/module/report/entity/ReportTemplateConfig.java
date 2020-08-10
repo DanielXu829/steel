@@ -52,19 +52,30 @@ public class ReportTemplateConfig extends Model<ReportTemplateConfig> {
     private Integer timeDivideType;
 
     /**
-     * 开始时间
+     * 时间分类  "1"-表示时间范围；"2"-表示“最近多少小时/天/月”。
+     */
+    private String timeType;
+
+    /**
+     * 开始时间  对应 timeType="1"
      */
     private String startTimeslot;
 
     /**
-     * 结束时间
+     * 结束时间 对应 timeType="1"
      */
     private String endTimeslot;
+
 
     /**
      * 时间间隔
      */
     private String timeslotInterval;
+
+    /**
+     * 最近多少小时/天/月  对应 timeType = "2"
+     */
+    private Integer lastTimeslot;
 
     /**
      * 是否添加平均值
