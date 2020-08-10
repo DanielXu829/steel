@@ -167,23 +167,16 @@ public abstract class AbstractJobExecuteExecute implements IJobExecute {
      * 替换模板文件使用 生成后的文件 作为模板
      */
     protected void replaceTemplatePath(ReportIndex reportIndex, ReportCategoryTemplate template) {
+        if ("1".equals(template.getAttr1())) {
+            return;
+        }
         Date recordDate = reportIndex.getRecordDate();
         ReportTemplateTypeEnum templateTypeEnum = ReportTemplateTypeEnum.getType(template.getTemplateType());
         String templatePath = reportIndexService.existTemplate(reportIndex);
 
-        Boolean useNewReportPath = true;
-        if (StringUtils.isBlank(templatePath)) {
-            useNewReportPath = false;
-        }
-        if ("1".equals(template.getAttr1())) {
-            useNewReportPath = false;
-        }
-
-        if (useNewReportPath) {
-            // 修改为生成后文件名称
+        if (StringUtils.isNotBlank(templatePath)) {
             template.setTemplatePath(templatePath);
         }
-
     }
 
     /**
