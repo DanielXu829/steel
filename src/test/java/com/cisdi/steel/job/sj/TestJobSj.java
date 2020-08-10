@@ -2,6 +2,7 @@ package com.cisdi.steel.job.sj;
 
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.module.job.sj.DuiChangYunXingTongJiJob;
+import com.cisdi.steel.module.job.sj.MeiZhouChanLiangFenXiJob;
 import com.cisdi.steel.module.job.sj.ShaoJieShengChan4Job;
 import com.cisdi.steel.module.job.sj.ZuoYeQuShengChanQingKuangJob;
 import com.cisdi.steel.module.job.sj.doc.HuanDuiCaoYeHuiYiJiYaoDocMain;
@@ -26,6 +27,9 @@ public class TestJobSj extends SteelApplicationTests {
     @Autowired
     private ShaoJieFenXiDocMain shaoJieFenXiDocMain;
 
+    @Autowired
+    private MeiZhouChanLiangFenXiJob meiZhouChanLiangFenXiJob;
+
     @Test
     public void test1() {
         shaoJieShengChanJob4.execute(null);
@@ -49,5 +53,10 @@ public class TestJobSj extends SteelApplicationTests {
     @Test
     public void testShaoJieFenXiDocMain() {
         shaoJieFenXiDocMain.mainTask();
+    }
+
+    @Test
+    public void testMeiZhouChanLiangFenXiJob() {
+        meiZhouChanLiangFenXiJob.execute(null);
     }
 }
