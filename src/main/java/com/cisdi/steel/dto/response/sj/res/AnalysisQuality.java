@@ -8,6 +8,7 @@ public class AnalysisQuality {
     private BigDecimal up;
     private BigDecimal center;
     private BigDecimal range;
+    private BigDecimal firstGrade;
     private String unit;
     private String itemOs;
 
@@ -49,6 +50,14 @@ public class AnalysisQuality {
 
     public void setRange(BigDecimal range) {
         this.range = range;
+    }
+
+    public BigDecimal getFirstGrade() {
+        return firstGrade;
+    }
+
+    public void setFirstGrade(BigDecimal firstGrade) {
+        this.firstGrade = firstGrade;
     }
 
     public String getUnit() {

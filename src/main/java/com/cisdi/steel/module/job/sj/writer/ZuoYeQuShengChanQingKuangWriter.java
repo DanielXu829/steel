@@ -95,16 +95,24 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
                 List<AnalysisQuality> analysisQualityList = JSON.parseObject(analysisQualityArray.toJSONString(), new TypeReference<List<AnalysisQuality>>() {});
                 for (AnalysisQuality item : analysisQualityList) {
                     String itemOs = item.getItemOs();
-                    String content;
                     if (RO.equals(itemOs)) {
-                        content = itemOs + "±" + item.getRange();
+                        String content1 = itemOs + "±" + item.getRange();
+                        String content2 = itemOs + "±" + item.getFirstGrade();
+                        Cell cellRo1 = PoiCustomUtil.getCellByValue(firstSheet, "{{RO1}}");
+                        if (Objects.nonNull(cellRo1)) {
+                            PoiCustomUtil.setCellValue(cellRo1, content1);
+                        }
+                        Cell cellRo2 = PoiCustomUtil.getCellByValue(firstSheet, "{{RO1}}");
+                        if (Objects.nonNull(cellRo2)) {
+                            PoiCustomUtil.setCellValue(cellRo2, content2);
+                        }
                     } else {
                         String unit = item.getUnit() == null ? "%" : item.getUnit();
-                        content = itemOs + "（" + item.getCenter() + unit + "±" + item.getRange() + "）";
-                    }
-                    Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + itemOs + "}}");
-                    if (Objects.nonNull(cell)) {
-                        PoiCustomUtil.setCellValue(cell, content);
+                        String content = itemOs + "（" + item.getCenter() + unit + "±" + item.getRange() + "）";
+                        Cell cell = PoiCustomUtil.getCellByValue(firstSheet, "{{" + itemOs + "}}");
+                        if (Objects.nonNull(cell)) {
+                            PoiCustomUtil.setCellValue(cell, content);
+                        }
                     }
                 }
             }
@@ -130,18 +138,19 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
                         continue;
                     }
                     for (AnaQualitySttcs anaQualitySttcs : anaQualitySttcsList) {
-                        ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
                         if (FEO.equals(anaQualitySttcs.getItem())) {
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 2, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 3, anaQualitySttcs.getQualifiedRate());
                         }
                         if (RO.equals(anaQualitySttcs.getItem())) {
                             ExcelWriterUtil.addCellData(resultList, i + 1, 4, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 5, anaQualitySttcs.getQualifiedRate());
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 6, anaQualitySttcs.getGradeOneQualifiedRate());
                         }
                         if (MGO.equals(anaQualitySttcs.getItem())) {
-                            ExcelWriterUtil.addCellData(resultList, i + 1, 6, anaQualitySttcs.getUnqualified());
-                            ExcelWriterUtil.addCellData(resultList, i + 1, 7, anaQualitySttcs.getQualifiedRate());
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 7, anaQualitySttcs.getUnqualified());
+                            ExcelWriterUtil.addCellData(resultList, i + 1, 8, anaQualitySttcs.getQualifiedRate());
                         }
                     }
                 }
@@ -244,6 +253,9 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
             writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "flux", version);
             writeMatConsume(sheet, resultList, MATERIAL_CLASS, endDate.getTime(), "fuel", version);
             writeMatConsume(sheet, resultList, MATERIAL_TYPE, endDate.getTime(), "limestone", version);
+            writeMatConsume(sheet, resultList, MATERIAL_TYPE, endDate.getTime(), "dolomite", version);
+            writeMatConsume(sheet, resultList, MATERIAL_TYPE, endDate.getTime(), "quicklime", version);
+            writeMatConsume(sheet, resultList, MATERIAL_TYPE, endDate.getTime(), "return_fine", version);
 
             ExcelWriterUtil.setCellValue(sheet, resultList);
         } catch (Exception e) {
