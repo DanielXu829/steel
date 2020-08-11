@@ -94,6 +94,7 @@ public enum JobEnum {
     gl_chutiexiaolv("gl_chutiexiaolv","8高炉有效出铁比率及出渣比率"),
     gl_xiufengtongji8("gl_xiufengtongji8","8高炉休风统计"),
     gl_banchanranliaobi8("gl_banchanranliaobi8","8高班产燃料比"),
+    gl_gongyinenghaotongJi8("gl_gongyinenghaotongJi8", "8高炉TRT工艺能耗统计表"),
     // 武钢7高炉
     gl_banchanranliaobi7("gl_banchanranliaobi7","7高班产燃料比"),
     gl_xiufengtongji7("gl_xiufengtongji7","7高炉休风统计"),

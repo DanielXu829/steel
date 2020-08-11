@@ -1,15 +1,12 @@
 package com.cisdi.steel.job.gl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.SteelApplicationTests;
 import com.cisdi.steel.common.util.DateUtil;
-import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.job.gl.*;
+import com.cisdi.steel.module.job.gl.doc.GaoLuRiFenXiBaoGao;
+import com.cisdi.steel.module.job.gl.doc.GaoLuRiFenXiBaoGao7;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
-import com.cisdi.steel.module.report.entity.ReportIndex;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +109,7 @@ public class TestJobGl extends SteelApplicationTests {
 
     @Test
     public void testShangLiaoZhuangLiao8Job() {
-        shangLiaoZhuangLiao8Job.execute(null);
+//        shangLiaoZhuangLiao8Job.execute(null);
         shangLiaoZhuangLiao7Job.execute(null);
     }
 
@@ -139,7 +136,7 @@ public class TestJobGl extends SteelApplicationTests {
      */
     @Test
     public void testCaoZuoGuanLiRiJiJob() {
-        caoZuoGuanLiRiJi7Job.execute(null);
+//        caoZuoGuanLiRiJi7Job.execute(null);
         caoZuoGuanLiRiJiJob.execute(null);
     }
 
@@ -149,7 +146,7 @@ public class TestJobGl extends SteelApplicationTests {
     @Test
     public void testYueBaoHuiZong8Job() {
         yueBaoHuiZong8Job.execute(null);
-        yueBaoHuiZong7Job.execute(null);
+//        yueBaoHuiZong7Job.execute(null);
     }
 
     /**
@@ -176,7 +173,7 @@ public class TestJobGl extends SteelApplicationTests {
     @Test
     public void testBanChanRanLiaoBiJob() {
         banChanRanLiaoBi7Job.execute(null);
-        banChanRanLiaoBi8Job.execute(null);
+//        banChanRanLiaoBi8Job.execute(null);
     }
 
     /**
@@ -255,7 +252,7 @@ public class TestJobGl extends SteelApplicationTests {
     private ChuTieXiaoLv7Job chuTieXiaoLv7Job;
     @Test
     public void testChuTieXiaoLv8Job() {
-        chuTieXiaoLv7Job.execute(null);
+//        chuTieXiaoLv7Job.execute(null);
         chuTieXiaoLv8Job.execute(null);
     }
 
@@ -292,5 +289,25 @@ public class TestJobGl extends SteelApplicationTests {
         test3();
         test4();
         test5();
+    }
+
+    @Autowired
+    private GaoLuRiFenXiBaoGao7 gaoLuRiFenXiBaoGao7;
+
+    @Autowired
+    private GaoLuRiFenXiBaoGao gaoLuRiFenXiBaoGao8;
+
+    // 测试日分析
+    @Test
+    public void testRifenxi() {
+        gaoLuRiFenXiBaoGao7.mainTask();
+        gaoLuRiFenXiBaoGao8.mainTask();
+    }
+    @Autowired
+    private TRTGongYiNengHaoTongJi8Job trtGongYiNengHaoTongJi8Job;
+
+    @Test
+    public void testTRTGongYINengHao() {
+        trtGongYiNengHaoTongJi8Job.execute(null);
     }
 }

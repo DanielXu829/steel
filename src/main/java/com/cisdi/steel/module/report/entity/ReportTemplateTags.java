@@ -48,6 +48,10 @@ public class ReportTemplateTags extends Model<ReportTemplateTags> {
 
     private Long topParentId;
 
+    private String tagTimeSuffix;
+
+    private String tagCalSuffix;
+
     @Override
     protected Serializable pkVal() {
         return this.id;
