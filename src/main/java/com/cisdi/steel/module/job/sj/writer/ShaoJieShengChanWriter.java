@@ -43,7 +43,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     // 取开始时间的点位
     private static final List<String> TAG_FORMUALS_GET_DATA_BY_BEGIN_TIME = Arrays.asList("ST4_MESR_SIN_SinterDayConfirmY_1d_cur",
             "ST4_L1R_SIN_ProductPerHour_1d_avg", "ST4_MESR_SIN_SinterUF_1d_cur", "ST4_L2R_SIN_ProductRatio_1d_cur");
-
+    // 点位需要自己减前一个时间点的数据
+    private static final List<String> TAG_FORMUALS_NEED_TO_SUBTRACT_BEFORE = Arrays.asList("ST4_L1R_SIN_103ASinAccFl_12h_cur", "ST4_L1R_SIN_103BSinAccFl_12h_cur",
+            "ST4_L1R_SIN_CRF104AccFl_12h_cur", "ST4_L1R_SIN_BF2CRFAccFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsAcc_12h_cur");
     private static int shaojieChengPinItemRowNum = 8;
     private static int yuanRanLiaoXingNengItemRowNum = 36;
     private static final String GET_VERSION_FAILED_MESSAGE = "在模板中获取version失败";
@@ -92,13 +94,11 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 // 根据别名获取tag点名
                 for (int j = 0; j < columns.size(); j++) {
-                    if (columns.get(j).startsWith(TargetName_PREFIX)) {
-                        String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
-                        if (StringUtils.isBlank(tagName)) {
-                            columns.set(j, StringUtils.EMPTY);
-                        } else {
-                            columns.set(j, tagName);
-                        }
+                    String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
+                    if (StringUtils.isBlank(tagName)) {
+                        columns.set(j, StringUtils.EMPTY);
+                    } else {
+                        columns.set(j, tagName);
                     }
                 }
                 // 特殊处理累计作业率
@@ -106,7 +106,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 for (int k = 0; k < dateQueries.size(); k++) {
                     DateQuery dateQuery = dateQueries.get(k);
                     if (dateQuery.getRecordDate().before(new Date())) {
-                        List<CellData> cellDataList = this.mapDataHandler(getTagUrl(version), columns, dateQuery);
+                        List<CellData> cellDataList = this.mapDataHandler(getTagUrl(version), columns, dateQuery, k + 1);
                         ExcelWriterUtil.setCellValue(sheet, cellDataList);
                     } else {
                         break;
@@ -486,7 +486,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return
      */
-    private List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery) {
+    protected List<CellData> mapDataHandler(String url, List<String> columns, DateQuery dateQuery, int k) {
         JSONObject query = new JSONObject();
         Date date = new Date();
         if (dateQuery.getQueryEndTime() > date.getTime()) {
@@ -516,7 +516,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             return null;
         }
 
-        return handlerData(columns, data);
+        return handlerData(columns, data, dateQuery, k);
     }
 
     /**
@@ -526,7 +526,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
      * @param dateQuery
      * @return
      */
-    private List<CellData> handlerData(List<String> columns, JSONObject jsonObject) {
+    private List<CellData> handlerData(List<String> columns, JSONObject jsonObject, DateQuery dateQuery, int k) {
         List<CellData> cellDataList = new ArrayList<>();
         for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
             String column = columns.get(columnIndex);
@@ -541,7 +541,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                     List<String> tagNames = new ArrayList<>(Arrays.asList(columnSplit));
                     tagNames.remove(0);
                     final int index = columnIndex;
-                    List<CellData> cellDataListOfSpecialValues = tagNames.stream().map(tagName -> handleColumn(tagName, index, jsonObject.getJSONObject(tagName)))
+                    List<CellData> cellDataListOfSpecialValues = tagNames.stream().map(tagName -> handleColumn(tagName, index, jsonObject.getJSONObject(tagName), dateQuery, k))
                             .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream).collect(Collectors.toList());
                     if (CollectionUtils.isEmpty(cellDataListOfSpecialValues)) {
                         continue;
@@ -561,7 +561,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             } else {
                 JSONObject data = jsonObject.getJSONObject(column);
                 // 处理正常一个tag点的单元格
-                List<CellData> singleCellDataList = handleColumn(column, columnIndex, data);
+                List<CellData> singleCellDataList = handleColumn(column, columnIndex, data, dateQuery, k);
                 if (CollectionUtils.isNotEmpty(singleCellDataList)) {
                     cellDataList.addAll(singleCellDataList);
                 }
@@ -570,7 +570,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         return cellDataList;
     }
 
-    private List<CellData> handleColumn(String column, int columnIndex, JSONObject data) {
+    private List<CellData> handleColumn(String column, int columnIndex, JSONObject data, DateQuery dateQuery, int k) {
         List<CellData> cellDataList = new ArrayList<>();
         if (Objects.isNull(data)) {
             return cellDataList;
@@ -599,28 +599,24 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         }
 
         // 处理12h的tag点
-        List<DateQuery> dayEach = DateQueryUtil.buildDay12HourAheadTwoHour(dateRun);
-        int rowIndex = 1;
-        for (int j = 0; j < dayEach.size(); j++) {
-            DateQuery query = dayEach.get(j);
-            Date queryEndTime = query.getEndTime();
-            for (int i = 0; i < timestampList.size(); i++) {
-                Long tempTime = timestampList.get(i);
-                String formatDateTime = DateUtil.getFormatDateTime(new Date(tempTime), "yyyy-MM-dd HH:00:00");
-                Date date = DateUtil.strToDate(formatDateTime, DateUtil.fullFormat);
-                if (date.getTime() == queryEndTime.getTime()) {
-                    BigDecimal value = (BigDecimal) data.get(tempTime + "");
-                    if (TAG_FORMUALS_NEED_TO_MUTIPLY_12.contains(column)) {
-                        value = value.multiply(BigDecimal.valueOf(12));
-                    } else if (TAG_FORMUALS_NEED_TO_divide_100.contains(column)) {
-                        value = value.divide(BigDecimal.valueOf(100), 4, BigDecimal.ROUND_HALF_UP);
-                    }
-                    cellDataList.add(new CellData(rowIndex, columnIndex, value));
+        Long queryStartTime = dateQuery.getQueryStartTime();
+        Long queryEndTime = dateQuery.getQueryEndTime();
+        if (timestampList.contains(queryEndTime)) {
+            BigDecimal queryStartValue = (BigDecimal) data.get(String.valueOf(queryStartTime));
+            BigDecimal queryEndValue = (BigDecimal) data.get(String.valueOf(queryEndTime));
+            BigDecimal value;
+            if (timestampList.contains(queryStartTime) && TAG_FORMUALS_NEED_TO_SUBTRACT_BEFORE.contains(column)) {
+                value = queryEndValue.subtract(queryStartValue);
+            } else {
+                value = queryEndValue;
+                if (TAG_FORMUALS_NEED_TO_MUTIPLY_12.contains(column)) {
+                    value = value.multiply(BigDecimal.valueOf(12));
+                } else if (TAG_FORMUALS_NEED_TO_divide_100.contains(column)) {
+                    value = value.divide(BigDecimal.valueOf(100), 4, BigDecimal.ROUND_HALF_UP);
                 }
             }
-            rowIndex += 1;
+            cellDataList.add(new CellData(k, columnIndex, value));
         }
-
         return cellDataList;
     }
 
