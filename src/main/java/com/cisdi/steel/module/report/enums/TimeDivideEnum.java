@@ -1,20 +1,31 @@
 package com.cisdi.steel.module.report.enums;
 
+import com.cisdi.steel.common.exception.LeafException;
+
 public enum TimeDivideEnum {
-    HOUR("小时", "1h", "avg", 1),
-    DAY("天", "1d", "avg", 2),
+    HOUR("时", "1h", 1),
+    DAY("天", "1d", 2),
+    MONTH("月", "1d",3),
     ;
 
     private String divideType;
     private String timeType;
-    private String calType;
     private Integer code;
 
-    TimeDivideEnum(String divideType, String timeType, String calType, Integer code) {
+    TimeDivideEnum(String divideType, String timeType, Integer code) {
         this.divideType = divideType;
         this.timeType = timeType;
-        this.calType = calType;
         this.code = code;
+    }
+
+    public static TimeDivideEnum getEnumByCode(Integer code) {
+        TimeDivideEnum[] values = TimeDivideEnum.values();
+        for (TimeDivideEnum value : values) {
+            if (value.code.equals(code)) {
+                return value;
+            }
+        }
+        throw new LeafException("时间划分类型不存在");
     }
 
     public String getDivideType() {
@@ -23,10 +34,6 @@ public enum TimeDivideEnum {
 
     public String getTimeType() {
         return timeType;
-    }
-
-    public String getCalType() {
-        return calType;
     }
 
     public Integer getCode() {

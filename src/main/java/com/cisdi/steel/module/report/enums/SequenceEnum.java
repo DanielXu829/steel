@@ -1,5 +1,7 @@
 package com.cisdi.steel.module.report.enums;
 
+import com.cisdi.steel.common.exception.LeafException;
+
 /**
  * 工序和excel版本对应关系
  */
@@ -27,6 +29,16 @@ public enum SequenceEnum {
             }
         }
         return null;
+    }
+
+    public static SequenceEnum getSequenceEnumByCode(String sequenceCode) {
+        SequenceEnum[] values = SequenceEnum.values();
+        for (SequenceEnum value : values) {
+            if (value.getSequenceCode().equals(sequenceCode)) {
+                return value;
+            }
+        }
+        throw new LeafException("工序类型不存在");
     }
 
     public String getSequenceCode(){

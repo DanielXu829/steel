@@ -6,6 +6,7 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
 import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
+import com.cisdi.steel.module.job.drt.dto.HandleDataDTO;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
@@ -32,27 +33,24 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
 
-    protected void handleData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    protected void handleData(HandleDataDTO handleDataDTO) {
+        Workbook workbook = handleDataDTO.getWorkbook();
+        WriterExcelDTO excelDTO = handleDataDTO.getExcelDTO();
+        List<DateQuery> dateQuerys = handleDataDTO.getDateQuerys();
+        String version = handleDataDTO.getVersion();
+        HashMap<String, TargetManagement> targetManagementMap = handleDataDTO.getTargetManagementMap();
+        Boolean needToWriteTime = handleDataDTO.getNeedToWriteTime();
+
+
         String queryUrl = getUrl(excelDTO.getTemplate().getSequence(), version);
-
         // 动态报表生成的模板默认取第二个sheet。
-        Sheet sheet = workbook.getSheetAt(1);
-        String sheetName = sheet.getSheetName();
-        String[] sheetSplit = sheetName.split("_");
-        if (sheetSplit.length == 4) {
-            DateQuery dateQuery = this.getDateQuery(excelDTO);
-            List<DateQuery> dateQueries = this.getHandlerData(sheetSplit, dateQuery.getRecordDate());
-            // evt为后缀的值需要此逻辑，防止取到前一天累计的值。
-            DateQuery firstDateQuery = dateQueries.get(0);
-            firstDateQuery.setStartTime(DateUtil.getDateBeginTime(firstDateQuery.getEndTime()));
-            dateQueries.set(0, firstDateQuery);
+        Sheet mainSheet = workbook.getSheetAt(0);
+        Sheet tagSheet = workbook.getSheetAt(1);
 
-            // 直接拿到tag点名, 无需根据别名再去获取tag点名
-            List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
-            for (int rowNum = 0; rowNum < dateQueries.size(); rowNum++) {
-                List<CellData> cellDataList = handleEachRowData(tagNames, queryUrl, dateQueries.get(rowNum), rowNum + 1);
-                ExcelWriterUtil.setCellValue(sheet, cellDataList);
-            }
+        // 直接拿到tag点名, 无需根据别名再去获取tag点名
+        for (int rowNum = 0; rowNum < dateQuerys.size(); rowNum++) {
+            List<CellData> cellDataList = handleEachRowData(targetManagementMap, queryUrl, dateQuerys.get(rowNum), rowNum + 1);
+            ExcelWriterUtil.setCellValue(tagSheet, cellDataList);
         }
     }
 
@@ -65,10 +63,10 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
      * @param rowIndex
      * @return
      */
-    private List<CellData> handleEachRowData(List<String> tagNames, String queryUrl, DateQuery dateQuery, int rowIndex) {
-        List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementsByTargetNames(tagNames);
-        Map<String, TargetManagement> targetManagementMap = targetManagements.stream().collect(Collectors.toMap(TargetManagement::getTargetName, target -> target));
-        List<String> tagFormulas = targetManagements.stream().map(TargetManagement::getTargetFormula).collect(Collectors.toList());
+    private List<CellData> handleEachRowData(HashMap<String, TargetManagement> targetManagementMap, String queryUrl, DateQuery dateQuery, int rowIndex) {
+        Set<String> tagFormulasSet = targetManagementMap.keySet();
+        // 拼接后的公式
+        List<String> tagFormulas = new ArrayList<>(tagFormulasSet);
         // 批量查询tag value
         TagQueryParam tagQueryParam = new TagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagFormulas);
         String result = httpUtil.postJsonParams(queryUrl, JSON.toJSONString(tagQueryParam));
@@ -78,17 +76,14 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
             TagValueMapDTO tagValueMapDTO = JSON.parseObject(result, TagValueMapDTO.class);
             Map<String, LinkedHashMap<Long, Double>> tagValueMaps = tagValueMapDTO.getData();
             // 获取targetManagement map
-
-            for (int columnIndex = 0; columnIndex < tagNames.size(); columnIndex++) {
-                String targetName = tagNames.get(columnIndex);
-                if (StringUtils.isNotBlank(targetName)) {
-                    TargetManagement targetManagement = targetManagementMap.get(targetName);
+            for (int columnIndex = 0; columnIndex < tagFormulas.size(); columnIndex++) {
+                String tagFormula = tagFormulas.get(columnIndex);
+                if (StringUtils.isNotBlank(tagFormula)) {
+                    TargetManagement targetManagement = targetManagementMap.get(tagFormula);
                     if (Objects.nonNull(targetManagement)) {
-                        Map<Long, Double> tagValueMap = tagValueMaps.get(targetManagement.getTargetFormula());
+                        Map<Long, Double> tagValueMap = tagValueMaps.get(tagFormula);
                         if (Objects.nonNull(tagValueMap)) {
-                            TargetManagement tag = targetManagementMap.get(targetName);
-                            List<DateQuery> dayEach = DateQueryUtil.buildDayHourOneEach(new Date(dateQuery.getQueryStartTime()), new Date(dateQuery.getQueryEndTime()));
-                            handleEachCellData(dayEach, tagValueMap, resultList, rowIndex, columnIndex, tag);
+                            handleEachCellData(dateQuery, tagValueMap, resultList, rowIndex, columnIndex, tagFormula, targetManagement);
                         }
                     }
                 }
@@ -108,38 +103,26 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
      * @param columnIndex
      * @param tag
      */
-    private void handleEachCellData(List<DateQuery> dayEach, Map<Long, Double> tagValueMap, List<CellData> resultList, int rowIndex, int columnIndex, TargetManagement tag) {
+    private void handleEachCellData(DateQuery dateQuery, Map<Long, Double> tagValueMap, List<CellData> resultList,
+                                    int rowIndex, int columnIndex, String tagFormula, TargetManagement tag) {
         // 按照时间顺序从老到新排序
         List<Long> clockList = tagValueMap.keySet().stream().sorted().collect(Collectors.toList());
-        for (int i = 0; i < dayEach.size(); i++) {
-            DateQuery query = dayEach.get(i);
-            Date queryStartTime = query.getStartTime();
-            Date queryEndTime = query.getEndTime();
+        Date queryStartTime = dateQuery.getStartTime();
+        Date queryEndTime = dateQuery.getEndTime();
 
-            if (tag.getTargetFormula().endsWith("_evt")) {
-                //如果是evt结尾的, 取时间范围内最大值
-                Double maxVal = 0.0d;
-                for (int j = 0; j < clockList.size(); j++) {
-                    Long tempTime = clockList.get(j);
-                    Date date = new Date(tempTime);
-                    if ((date.getTime() >= queryStartTime.getTime()) && (date.getTime() <= queryEndTime.getTime())) {
-                        Double defaultVal = tagValueMap.get(tempTime);
-                        if (defaultVal > maxVal) {
-                            maxVal = defaultVal;
-                        }
-                    }
-                }
-                ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, maxVal);
-            } else {
-                // 其他情况，取时间范围内第一个值。
-                for (int j = 0; j < clockList.size(); j++) {
-                    Long tempTime = clockList.get(j);
-                    Date date = new Date(tempTime);
-                    if ((date.getTime() >= queryStartTime.getTime()) && (date.getTime() <= queryEndTime.getTime())) {
-                        Double val = tagValueMap.get(tempTime);
-                        ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, val);
-                        break;
-                    }
+        if (tagFormula.endsWith("_evt")) {
+            //如果是evt结尾的, 取时间范围内最大值
+            Double maxVal = tagValueMap.values().stream().max(Comparator.comparing(Double::doubleValue)).orElse(null);
+            ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, maxVal);
+        } else {
+            // 其他情况，取时间范围内第一个值。
+            for (int j = 0; j < clockList.size(); j++) {
+                Long tempTime = clockList.get(j);
+                Date date = new Date(tempTime);
+                if (DateUtil.isDayBetweenAnotherTwoDays(date, queryStartTime, queryEndTime)) {
+                    Double val = tagValueMap.get(tempTime);
+                    ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, val);
+                    break;
                 }
             }
         }
