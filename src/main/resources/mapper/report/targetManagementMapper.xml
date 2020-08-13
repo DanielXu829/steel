@@ -63,5 +63,11 @@
         <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
+        order by field (
+            target_name,
+            <foreach collection="list" separator="," item="item">
+                #{item}
+            </foreach>
+        )
     </select>
 </mapper>

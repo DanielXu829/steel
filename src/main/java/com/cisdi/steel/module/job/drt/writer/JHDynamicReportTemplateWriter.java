@@ -30,8 +30,8 @@ public class JHDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
     @Autowired
     private TargetManagementMapper targetManagementMapper;
 
-    @Override
-    protected void handleData(WriterExcelDTO excelDTO, Workbook workbook, String version) {
+    protected void handleData(WriterExcelDTO excelDTO, Workbook workbook, String version,
+                              HashMap<String, TargetManagement> targetManagementMap, List<DateQuery> dateQuerys) {
         Sheet sheet = workbook.getSheetAt(1);
         // 以下划线开头的sheet 表示 隐藏表 待处理
         String sheetName = sheet.getSheetName();

@@ -15,6 +15,8 @@ import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.enums.SequenceEnum;
+import com.cisdi.steel.module.report.enums.TimeDivideEnum;
+import com.cisdi.steel.module.report.enums.TimeTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportTemplateConfigMapper;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
@@ -23,18 +25,16 @@ import com.cisdi.steel.module.report.service.TargetManagementService;
 import com.cisdi.steel.module.report.util.ExcelStyleUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sun.java2d.pipe.Region;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -150,7 +150,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 // 过滤topParentId为空的tag，然后根据topParentId进行分组
                 Map<Long, List<ReportTemplateTags>> topParentIdToReportTemplateTags =
                         reportTemplateTagsList.stream().filter(e -> Objects.nonNull(e.getTopParentId()))
-                        .collect(Collectors.groupingBy(ReportTemplateTags::getTopParentId));
+                                .collect(Collectors.groupingBy(ReportTemplateTags::getTopParentId));
                 // 顶级分类和底层tag点的map
                 LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap = new LinkedHashMap<>();
                 for (ReportTemplateTags reportTemplateTags : reportTemplateTagsList) {
@@ -383,29 +383,85 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 topParentColumnIndex += sonTagSizeOfCurrentTopParent;
             }
         }
-
-        // 在第一个sheet中填充点位信息
-        // 计算填充需填充点位的行数。以及对应的最大行数
-        int interval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval());
-        Integer startTimeSlot = Integer.valueOf(reportTemplateConfig.getStartTimeslot());
-        Integer endTimeSlot = Integer.valueOf(reportTemplateConfig.getEndTimeslot());
-        int maxRow = (endTimeSlot - startTimeSlot)/interval;
-        if (startTimeSlot >= endTimeSlot) {
-            //处理焦化报表时间跨天的情况
-            maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval;
+        // 生成时间
+        // 获取时间范围类型
+        String timeUnit = ":00";
+        int interval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval()); // 时间间隔
+        Integer startTimeSlot = null, endTimeSlot = null, maxRow = null;
+        TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(reportTemplateConfig.getTimeDivideType());
+        TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(reportTemplateConfig.getTimeType());
+        if (timeTypeEnum.equals(TimeTypeEnum.TIME_RANGE)) {
+            startTimeSlot = Integer.valueOf(reportTemplateConfig.getStartTimeslot());
+            endTimeSlot = Integer.valueOf(reportTemplateConfig.getEndTimeslot());
+            maxRow = (endTimeSlot - startTimeSlot) / interval;
+            switch (timeDivideEnum) {
+                case HOUR:
+                    if (startTimeSlot >= endTimeSlot) {
+                        //处理焦化报表时间跨天的情况
+                        maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval;
+                    }
+                    break;
+                case DAY:
+                    if (startTimeSlot >= endTimeSlot) {
+                        // 处理焦化报表时间跨天的情况
+                        maxRow = (endTimeSlot + (31 - startTimeSlot)) / interval;
+                    }
+                    timeUnit = timeDivideEnum.getDivideType();
+                    break;
+                default:
+                    // 月
+                    if (startTimeSlot >= endTimeSlot) {
+                        // 处理焦化报表时间跨天的情况
+                        maxRow = (endTimeSlot + (12 - startTimeSlot)) / interval;
+                    }
+                    timeUnit = timeDivideEnum.getDivideType();;
+                    break;
+            }
+        } else {
+            maxRow = Integer.valueOf(reportTemplateConfig.getLastTimeslot()) / interval;
         }
 
+        LocalDateTime now = LocalDateTime.now();
         int firstDataRowIndex = lastRowOfTagNames + 2;
+
+        DateTimeFormatter df = null;
+        LocalDateTime startMinus = now.minusHours(maxRow * interval);
+        LocalDateTime startDays = now.minusDays(maxRow * interval);
+        LocalDateTime startMonths = now.minusMonths(maxRow * interval);
         for (int i = 0; i <= maxRow; i++) {
             Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
             Cell timeCell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex - 1);
             //添加时间信息
-            int timeSlot = i * interval + startTimeSlot;
-            String timeStr = timeSlot + ":00";
-            //处理焦化报表时间跨天的情况
-            if (timeSlot > 24) {
-                timeStr = timeSlot - 24 + ":00";
+            // 构造时间信息
+            String timeStr = "";
+            int timeSlot = 0;
+            if (timeTypeEnum.equals(TimeTypeEnum.RECENT_TIME)) {
+                switch (timeDivideEnum) {
+                    case HOUR:
+                        df = DateTimeFormatter.ofPattern("dd日 HH时");
+                        timeStr = startMinus.plusHours(i * interval).format(df);
+                        break;
+                    case DAY:
+                        df = DateTimeFormatter.ofPattern("MM-dd日");
+                        timeStr = startDays.plusDays(i * interval).format(df);
+                        break;
+                    default:
+                        df = DateTimeFormatter.ofPattern("yy-MM月");
+                        timeStr = startMonths.plusMonths(i * interval).format(df);
+                        break;
+                }
+            } else {
+                timeSlot = i * interval + startTimeSlot;
+                timeStr = timeSlot + timeUnit;
             }
+
+            //处理时间跨天的情况
+            if (reportTemplateConfig.getTimeDivideType() == 1 && timeSlot > 24) {
+                timeStr = timeSlot - 24 + timeUnit;
+            }
+            // TODO 日期跨月的情况
+            // TODO 月份跨年的情况
+
             timeCell.setCellValue(timeStr);
             timeCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));//设置样式
             // 循环点位列表
@@ -616,7 +672,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     }
 
     /**
-     * 创建tags sheet并且填充点位信息
+     * 创建tags sheet并且填充点位信息(填充report_template_tags的id)
      * @param workbook
      * @param tagsMap
      * @param tagsSheetName

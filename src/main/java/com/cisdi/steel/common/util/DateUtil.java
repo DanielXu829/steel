@@ -1011,4 +1011,78 @@ public class DateUtil {
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
+
+    /**
+     * 获取指定日期的整点时间
+     * @return
+     */
+    public static Date getHourTimeByDateAndHourNumber(Date date, Integer hour) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取指定日期当月的指定天  时间设定为22点(武钢目前默认是22点到22点的查询策略)
+     * @param date
+     * @param dayOfMonth
+     * @return
+     */
+    public static Date getDayTimeByDateAndDayNumber(Date date, Integer dayOfMonth) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        int maxDateOfCurrentMonth = calendar.getActualMaximum(Calendar.DATE);
+        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth <= maxDateOfCurrentMonth ? dayOfMonth : maxDateOfCurrentMonth);
+        return calendar.getTime();
+    }
+
+    /**
+     * 取指定日期当年的指定月 日期设定为月最后一天22点
+     * @param date
+     * @param monthOfYear
+     * @return
+     */
+    public static Date getDayTimeByDateAndMonthNumber(Date date, Integer monthOfYear) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        int maxMonthOfCurrentYear = calendar.getActualMaximum(Calendar.MONTH);
+        calendar.set(Calendar.MONTH, monthOfYear - 1 <= maxMonthOfCurrentYear ? monthOfYear - 1 : maxMonthOfCurrentYear);
+        return calendar.getTime();
+    }
+
+
+
+    /**
+     * date1是否小于等于date2
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static Boolean isDayBeforeOrEqualAnotherDay(Date date1, Date date2) {
+        return date1.getTime() <= date2.getTime();
+    }
+
+    /**
+     * 第一个date1是否处于date2和date3之间
+     * @param date1
+     * @param date2
+     * @param date3
+     * @return
+     */
+    public static Boolean isDayBetweenAnotherTwoDays(Date date1, Date date2, Date date3) {
+        return date1.getTime() >= date2.getTime() && date1.getTime() <= date3.getTime();
+    }
 }
