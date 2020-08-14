@@ -393,7 +393,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         if (timeTypeEnum.equals(TimeTypeEnum.TIME_RANGE)) {
             startTimeSlot = Integer.valueOf(reportTemplateConfig.getStartTimeslot());
             endTimeSlot = Integer.valueOf(reportTemplateConfig.getEndTimeslot());
-            maxRow = (endTimeSlot - startTimeSlot) / interval;
+            maxRow = (endTimeSlot - startTimeSlot) / interval + 1;
             switch (timeDivideEnum) {
                 case HOUR:
                     if (startTimeSlot >= endTimeSlot) {
@@ -425,10 +425,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         int firstDataRowIndex = lastRowOfTagNames + 2;
 
         DateTimeFormatter df = null;
-        LocalDateTime startMinus = now.minusHours(maxRow * interval);
-        LocalDateTime startDays = now.minusDays(maxRow * interval);
-        LocalDateTime startMonths = now.minusMonths(maxRow * interval);
-        for (int i = 0; i <= maxRow; i++) {
+        LocalDateTime startHours = now.minusHours((maxRow - 1) * interval);
+        LocalDateTime startDays = now.minusDays((maxRow - 1) * interval);
+        LocalDateTime startMonths = now.minusMonths((maxRow - 1) * interval);
+        for (int i = 0; i < maxRow; i++) {
             Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
             Cell timeCell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex - 1);
             //添加时间信息
@@ -439,7 +439,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 switch (timeDivideEnum) {
                     case HOUR:
                         df = DateTimeFormatter.ofPattern("dd日 HH时");
-                        timeStr = startMinus.plusHours(i * interval).format(df);
+                        timeStr = startHours.plusHours(i * interval).format(df);
                         break;
                     case DAY:
                         df = DateTimeFormatter.ofPattern("MM-dd日");

@@ -72,6 +72,11 @@ public class DateUtil {
     public static final String ddChineseFormat = "dd日";
 
     /**
+     * 几日几时
+     */
+    public static final String ddHHChineseFormat = "dd日HH时";
+
+    /**
      * 几年几月几日 小时分钟
      */
     public static final String yyyyMMddHHmmChineseFormat = "yyyy年MM月dd日 HH时mm分";
@@ -1063,7 +1068,19 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-
+    /**
+     * 获取当前整点时间
+     * @param date
+     * @return
+     */
+    public static Date getCurrentHourTimeOfDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
 
     /**
      * date1是否小于等于date2

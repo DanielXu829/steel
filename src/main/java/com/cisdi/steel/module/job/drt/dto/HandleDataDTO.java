@@ -2,6 +2,7 @@ package com.cisdi.steel.module.job.drt.dto;
 
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.date.DateQuery;
+import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,5 @@ public class HandleDataDTO {
     private String version;
     private HashMap<String, TargetManagement> targetManagementMap;
     private List<DateQuery> dateQuerys;
-    // 需要写入最新时间列
-    private Boolean needToWriteTime;
+    private ReportTemplateConfig reportTemplateConfig;
 }

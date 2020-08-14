@@ -5,11 +5,12 @@ import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.jh.res.JHTagValueListDTO;
 import com.cisdi.steel.dto.response.jh.res.TagValue;
+import com.cisdi.steel.module.job.drt.dto.HandleDataDTO;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.job.util.date.DateQueryUtil;
+import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @SuppressWarnings("ALL")
@@ -30,25 +30,28 @@ public class JHDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
     @Autowired
     private TargetManagementMapper targetManagementMapper;
 
-    protected void handleData(WriterExcelDTO excelDTO, Workbook workbook, String version,
-                              HashMap<String, TargetManagement> targetManagementMap, List<DateQuery> dateQuerys) {
-        Sheet sheet = workbook.getSheetAt(1);
-        // 以下划线开头的sheet 表示 隐藏表 待处理
-        String sheetName = sheet.getSheetName();
-        String[] sheetSplit = sheetName.split("_");
-        if (sheetSplit.length == 4) {
-            DateQuery dateQuery = this.getDateQuery(excelDTO);
-            List<DateQuery> dateQueries = DateQueryUtil.buildDay2HourFromYesEighteen(dateQuery.getRecordDate());
-            List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet);
-            String queryUrl = getUrl(version);
+    protected void handleData(HandleDataDTO handleDataDTO) {
+        Workbook workbook = handleDataDTO.getWorkbook();
+        WriterExcelDTO excelDTO = handleDataDTO.getExcelDTO();
+        List<DateQuery> dateQuerys = handleDataDTO.getDateQuerys();
+        String version = handleDataDTO.getVersion();
+        HashMap<String, TargetManagement> targetManagementMap = handleDataDTO.getTargetManagementMap();
+        ReportTemplateConfig reportTemplateConfig = handleDataDTO.getReportTemplateConfig();
 
-            for (int i = 0; i < dateQueries.size(); i++) {
-                DateQuery item = dateQueries.get(i);
-                if (item.getRecordDate().before(new Date())) {
-                    int rowIndex = i + 1;
-                    List<CellData> cellDataList = this.mapDataHandler(rowIndex, queryUrl, tagNames, item);
-                    ExcelWriterUtil.setCellValue(sheet, cellDataList);
-                }
+
+        Sheet mainSheet = workbook.getSheetAt(0);
+        Sheet tagSheet = workbook.getSheetAt(1);
+        // 写入时间列
+        writeTimeColumn(mainSheet, reportTemplateConfig, dateQuerys);
+        // 以下划线开头的sheet 表示 隐藏表 待处理
+        List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(tagSheet);
+        String queryUrl = getUrl(version);
+        for (int i = 0; i < dateQuerys.size(); i++) {
+            DateQuery item = dateQuerys.get(i);
+            if (item.getRecordDate().before(new Date())) {
+                int rowIndex = i + 1;
+                List<CellData> cellDataList = this.mapDataHandler(targetManagementMap, queryUrl, dateQuerys.get(i), rowIndex);
+                ExcelWriterUtil.setCellValue(tagSheet, cellDataList);
             }
         }
     }
@@ -62,17 +65,20 @@ public class JHDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    private List<CellData> mapDataHandler(Integer rowIndex, String url, List<String> tagNames, DateQuery dateQuery) {
+    private List<CellData> mapDataHandler(HashMap<String, TargetManagement> targetManagementMap, String queryUrl,
+                                          DateQuery dateQuery, Integer rowIndex) {
         List<CellData> cellDataList = new ArrayList<>();
-        List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementsByTargetNames(tagNames);
-        List<String> tagFormulas = targetManagements.stream().map(TargetManagement::getTargetFormula).collect(Collectors.toList());
-        JHTagValueListDTO jhTagValueListDTO = getTagListData(url, tagFormulas, dateQuery);
+        Set<String> tagFormulasSet = targetManagementMap.keySet();
+        // 拼接后的公式
+        List<String> tagFormulas = new ArrayList<>(tagFormulasSet);
+        JHTagValueListDTO jhTagValueListDTO = getTagListData(queryUrl, tagFormulas, dateQuery);
 
         if (Objects.nonNull(jhTagValueListDTO) && MapUtils.isNotEmpty(jhTagValueListDTO.getData())) {
             for (int i = 0; i < tagFormulas.size(); i++) {
                 String column = tagFormulas.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     // 可能是处理方法加tag点的组合。 e.g: max,tag1,tag2 需要根据最前面的方式做特殊处理
+                    // 动态报表没有设计此情况，只有单个tag点
                     String[] columnSplit = column.split(",");
                     if (Objects.nonNull(columnSplit) && columnSplit.length > 2) {
                         List<Double> specialValues = new ArrayList<Double>();
