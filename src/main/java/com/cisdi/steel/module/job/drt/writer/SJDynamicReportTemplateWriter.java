@@ -1,10 +1,12 @@
 package com.cisdi.steel.module.job.drt.writer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
-import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
+import com.cisdi.steel.dto.response.sj.req.SjTagQueryParam;
 import com.cisdi.steel.module.job.drt.dto.HandleDataDTO;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
+public class SJDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
 
     protected void handleData(HandleDataDTO handleDataDTO) {
         Workbook workbook = handleDataDTO.getWorkbook();
@@ -53,6 +55,7 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
             ExcelWriterUtil.setCellValue(tagSheet, cellDataList);
         }
     }
+
     /**
      * 处理每行数据
      *
@@ -62,8 +65,7 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
      * @param rowIndex
      * @return
      */
-    private List<CellData> handleEachRowData(HashMap<String, TargetManagement> targetManagementMap,
-                                             String queryUrl, DateQuery dateQuery, int rowIndex) {
+    private List<CellData> handleEachRowData(HashMap<String, TargetManagement> targetManagementMap, String queryUrl, DateQuery dateQuery, int rowIndex) {
         Set<String> tagFormulasSet = targetManagementMap.keySet();
         // 拼接后的公式
         List<String> tagFormulas = new ArrayList<>(tagFormulasSet);
@@ -133,7 +135,9 @@ public class GLDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
     }
 
     protected String getJsonResult(DateQuery dateQuery, String queryUrl, List<String> tagFormulas) {
-        TagQueryParam tagQueryParam = new TagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagFormulas);
-        return httpUtil.postJsonParams(queryUrl, JSON.toJSONString(tagQueryParam));
+        SjTagQueryParam sjTagQueryParam = new SjTagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagFormulas);
+        SerializeConfig serializeConfig = new SerializeConfig();
+        String queryJsonString = JSONObject.toJSONString(sjTagQueryParam, serializeConfig);
+        return httpUtil.postJsonParams(queryUrl, queryJsonString);
     }
 }

@@ -1,11 +1,13 @@
 package com.cisdi.steel.module.job.drt.writer;
 
+import com.cisdi.steel.common.exception.LeafException;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.drt.dto.HandleDataDTO;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
@@ -17,12 +19,15 @@ import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -105,6 +110,9 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             case JH910:
                 writer = applicationContext.getBean(JHDynamicReportTemplateWriter.class);
                 break;
+            case SJ4:
+                writer = applicationContext.getBean(SJDynamicReportTemplateWriter.class);
+                break;
         }
 
         String timeType = reportTemplateConfig.getTimeType();
@@ -115,7 +123,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
                 .version(version)
                 .targetManagementMap(targetManagementMap)
                 .dateQuerys(dateQuerys)
-                .needToWriteTime(TimeTypeEnum.RECENT_TIME.equals(timeType))
+                .reportTemplateConfig(reportTemplateConfig)
                 .build();
 
         if (writer == null){
@@ -215,9 +223,9 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             case HOUR:
                 return getDateQuerysByRecentHours(recordDate, lastTimeslot, timeslotInterval);
             case DAY:
-                return getDateQuerysByRecentHours(recordDate, lastTimeslot, timeslotInterval);
+                return getDateQuerysByRecentDays(recordDate, lastTimeslot, timeslotInterval);
             case MONTH:
-                return getDateQuerysByRecentHours(recordDate, lastTimeslot, timeslotInterval);
+                return getDateQuerysByRecentMonths(recordDate, lastTimeslot, timeslotInterval);
         }
         return null;
     }
@@ -241,6 +249,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             startDate = DateUtil.getHourTimeByDateAndHourNumber(DateUtil.addDays(recordDate, -1), startHour);
         }
         Date endDate = DateUtil.getHourTimeByDateAndHourNumber(recordDate, endHour);
+        endDate = DateUtils.addHours(endDate, interval);
         Date queryEndDate = DateUtils.addHours(startDate, interval);
         while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
             DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);
@@ -252,7 +261,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
     }
 
     /**
-     * 天范围查询策略
+     * 天范围查询策略  当日的22点到第二天的22点
      * @param recordDate
      * @param startDay
      * @param endDay
@@ -270,6 +279,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             startDate = DateUtil.getDayTimeByDateAndDayNumber(DateUtil.addMonths(recordDate, -1), startDay);
         }
         Date endDate = DateUtil.getDayTimeByDateAndDayNumber(recordDate, endDay);
+        endDate = DateUtil.addDays(endDate, interval);// 补充最后一天的查询条件
         Date queryEndDate = DateUtils.addDays(startDate, interval);
         while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
             DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);
@@ -281,6 +291,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
     }
 
     protected List<DateQuery> getDateQuerysBymonthRange(Date recordDate, Integer startMonth, Integer endMonth, Integer interval) {
+        // TODO 测试
         List<DateQuery> dateQueries = new ArrayList<>();
         Date startDate;
         if (startMonth < endMonth) {
@@ -301,9 +312,107 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         return dateQueries;
     }
 
-    protected List<DateQuery> getDateQuerysByRecentHours(Date recordDate, Integer lastTimeslot, Integer timeslotInterval) {
-        // TODO 最近小时
-        return null;
+    /**
+     * 最近多少小时查询策略
+     * @param recordDate
+     * @param lastTimeslot
+     * @param interval
+     * @return
+     */
+    protected List<DateQuery> getDateQuerysByRecentHours(Date recordDate, Integer lastTimeslot, Integer interval) {
+        Date endDate = DateUtil.getCurrentHourTimeOfDate(recordDate);
+        endDate = DateUtils.addHours(endDate, interval); // 补充最后一小时的查询条件
+        List<DateQuery> dateQueries = new ArrayList<>();
+        Date startDate = DateUtils.addHours(endDate, -lastTimeslot);
+        Date queryEndDate = DateUtils.addHours(startDate, interval);
+        while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
+            DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);
+            dateQueries.add(dateQuery);
+            startDate = queryEndDate;
+            queryEndDate = DateUtils.addHours(queryEndDate, interval);
+        }
+        return dateQueries;
+    }
+
+    /**
+     * 最近多少天查询策略
+     * @param recordDate
+     * @param lastTimeslot
+     * @param interval
+     * @return
+     */
+    protected List<DateQuery> getDateQuerysByRecentDays(Date recordDate, Integer lastTimeslot, Integer interval) {
+        List<DateQuery> dateQueries = new ArrayList<>();
+        Date endDate = DateUtil.getHourTimeByDateAndHourNumber(recordDate, 22); // 当天22点
+        // 最早的日期
+        Date startDate = DateUtil.addDays(endDate, 1 - lastTimeslot);
+        endDate = DateUtil.addDays(endDate, interval);
+        Date queryEndDate = DateUtils.addDays(startDate, interval);
+        while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
+            DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);
+            dateQueries.add(dateQuery);
+            startDate = queryEndDate;
+            queryEndDate = DateUtils.addDays(queryEndDate, interval);
+        }
+        return dateQueries;
+    }
+
+    // TODO 月不明确 得先明确
+    protected List<DateQuery> getDateQuerysByRecentMonths(Date recordDate, Integer lastTimeslot, Integer interval) {
+        List<DateQuery> dateQueries = new ArrayList<>();
+        Date endDate = DateUtil.getHourTimeByDateAndHourNumber(recordDate, 22); // 当天22点
+        // 最早的日期
+        Date startDate = DateUtil.addMonths(endDate, 1 - lastTimeslot);
+        endDate = DateUtil.addMonths(endDate, interval);
+        Date queryEndDate = DateUtils.addHours(startDate, interval);
+        while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
+            DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);
+            dateQueries.add(dateQuery);
+            startDate = queryEndDate;
+            queryEndDate = DateUtils.addDays(queryEndDate, interval);
+        }
+        return dateQueries;
+    }
+
+    /**
+     * 写入时间列
+     * @param mainSheet
+     * @param reportTemplateConfig
+     * @param dateQuerys
+     */
+    protected void writeTimeColumn(Sheet mainSheet, ReportTemplateConfig reportTemplateConfig, List<DateQuery> dateQuerys) {
+        Cell timeTitleCell = PoiCustomUtil.getCellByValue(mainSheet,"时间");
+        int rowIndex = timeTitleCell.getRowIndex();
+        int columnIndex = timeTitleCell.getColumnIndex();
+        String timeType = reportTemplateConfig.getTimeType();
+        TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(timeType);
+        if (!TimeTypeEnum.RECENT_TIME.equals(timeTypeEnum)) {
+            return;
+        }
+        Integer timeDivideType = reportTemplateConfig.getTimeDivideType();
+        TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(timeDivideType);
+        for (int i = 0; i < dateQuerys.size(); i++) {
+            DateQuery dateQuery = dateQuerys.get(i);
+            Row timeRow = ExcelWriterUtil.getRowOrCreate(mainSheet, rowIndex + i + 1);
+            Cell timeCell = ExcelWriterUtil.getCellOrCreate(timeRow, columnIndex);
+            SimpleDateFormat format;
+            String dateString = "";
+            switch (timeDivideEnum) {
+                case HOUR:
+                    format = new SimpleDateFormat(DateUtil.ddHHChineseFormat);
+                    dateString = format.format(dateQuery.getStartTime());
+                    break;
+                case DAY:
+                    format = new SimpleDateFormat(DateUtil.MMddChineseFormat);
+                    dateString = format.format(dateQuery.getStartTime());
+                    break;
+                case MONTH:
+                    format = new SimpleDateFormat(DateUtil.yyyyMM);
+                    dateString = format.format(dateQuery.getStartTime());
+                    break;
+            }
+            PoiCustomUtil.setCellValue(timeCell, dateString);
+        }
     }
 
     /**
@@ -312,8 +421,21 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
      * @param workbook
      * @param version
      */
-    protected  void handleData(HandleDataDTO handleDataDTO) {
 
+    protected String getUrl(String sequence, String version) {
+        SequenceEnum sequenceEnum= SequenceEnum.getSequenceEnumByCode(sequence);
+        switch (sequenceEnum) {
+            case GL8:
+                return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
+            case SJ4:
+                return httpProperties.getSJUrlVersion(version) + "/tagValues/tagNames";
+            case JH910:
+                return httpProperties.getJHUrlVersion(version) + "/jhTagValue/getNewTagValue";
+        }
+        throw new LeafException(String.format("%s的接口url不存在", sequence));
     }
 
+    protected void handleData(HandleDataDTO handleDataDTO) {
+        throw new RuntimeException("没有对应的子类解析器writer");
+    }
 }
