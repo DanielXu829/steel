@@ -48,9 +48,20 @@ public class ReportTemplateTags extends Model<ReportTemplateTags> {
 
     private Long topParentId;
 
+    /**
+     * tag点时间后缀
+     */
     private String tagTimeSuffix;
 
+    /**
+     * tag点计算后缀
+     */
     private String tagCalSuffix;
+
+    /**
+     * tag点小数点位数
+     */
+    private Integer decimalScale;
 
     @Override
     protected Serializable pkVal() {

@@ -6,6 +6,9 @@ import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.job.AbstractExcelReadWriter;
 import com.cisdi.steel.module.job.drt.dto.HandleDataDTO;
+import com.cisdi.steel.module.job.drt.writer.strategy.query.HandleQueryDataStrategy;
+import com.cisdi.steel.module.job.drt.writer.strategy.query.HandleQueryDataStrategyContext;
+import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
@@ -52,6 +55,9 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
     @Autowired
     private ReportTemplateConfigService reportTemplateConfigService;
 
+    @Autowired
+    private HandleQueryDataStrategyContext handleQueryDataStrategyContext;
+
     /**
      * @param excelDTO 数据
      * @return
@@ -97,26 +103,23 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             TargetManagement targetManagement = targetManagements.get(i);
             targetManagementMap.put(newTagFormula, targetManagement);
         }
-        List<DateQuery> dateQuerys = getDateQuerys(recordDate, reportTemplateConfig);
-
         // 构建DateQuery
-        // 时间细分-小时，时间范围
-        DynamicReportTemplateWriter writer = null;
+        List<DateQuery> dateQuerys = getDateQuerys(recordDate, reportTemplateConfig);
         SequenceEnum sequenceEnum = SequenceEnum.getSequenceEnumByCode(template.getSequence());
-        switch (sequenceEnum) {
-            case GL8:
-                writer = applicationContext.getBean(GLDynamicReportTemplateWriter.class);
-                break;
-            case JH910:
-                writer = applicationContext.getBean(JHDynamicReportTemplateWriter.class);
-                break;
-            case SJ4:
-                writer = applicationContext.getBean(SJDynamicReportTemplateWriter.class);
-                break;
-        }
-
-        String timeType = reportTemplateConfig.getTimeType();
-        TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(timeType);
+        /**
+            DynamicReportTemplateWriter writer = null;
+            switch (sequenceEnum) {
+                case GL8:
+                    writer = applicationContext.getBean(GLDynamicReportTemplateWriter.class);
+                    break;
+                case JH910:
+                    writer = applicationContext.getBean(JHDynamicReportTemplateWriter.class);
+                    break;
+                case SJ4:
+                    writer = applicationContext.getBean(SJDynamicReportTemplateWriter.class);
+                    break;
+            }
+        */
         HandleDataDTO handleDataDTO = HandleDataDTO.builder()
                 .excelDTO(excelDTO)
                 .workbook(workbook)
@@ -124,14 +127,16 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
                 .targetManagementMap(targetManagementMap)
                 .dateQuerys(dateQuerys)
                 .reportTemplateConfig(reportTemplateConfig)
+                .sequenceEnum(sequenceEnum)
                 .build();
-
-        if (writer == null){
-            throw new RuntimeException("没有对应的子类解析器writer");
-        } else {
-            writer.handleData(handleDataDTO);
-        }
-
+        handleData(handleDataDTO);
+        /**
+            if (writer == null){
+                throw new RuntimeException("没有对应的子类解析器writer");
+            } else {
+                writer.handleData(handleDataDTO);
+            }
+        */
         return workbook;
     }
 
@@ -291,7 +296,6 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
     }
 
     protected List<DateQuery> getDateQuerysBymonthRange(Date recordDate, Integer startMonth, Integer endMonth, Integer interval) {
-        // TODO 测试
         List<DateQuery> dateQueries = new ArrayList<>();
         Date startDate;
         if (startMonth < endMonth) {
@@ -347,6 +351,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         // 最早的日期
         Date startDate = DateUtil.addDays(endDate, 1 - lastTimeslot);
         endDate = DateUtil.addDays(endDate, interval);
+        // 补充最后一天的查询条件
         Date queryEndDate = DateUtils.addDays(startDate, interval);
         while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
             DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);
@@ -357,19 +362,26 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         return dateQueries;
     }
 
-    // TODO 月不明确 得先明确
+    /**
+     * 最近多少月
+     * @param recordDate
+     * @param lastTimeslot
+     * @param interval
+     * @return
+     */
     protected List<DateQuery> getDateQuerysByRecentMonths(Date recordDate, Integer lastTimeslot, Integer interval) {
         List<DateQuery> dateQueries = new ArrayList<>();
-        Date endDate = DateUtil.getHourTimeByDateAndHourNumber(recordDate, 22); // 当天22点
+        Date endDate = DateUtil.getHourTimeByMonthAndDayAndHourNumber(recordDate, 1, 22); // 当月第一天的22点
         // 最早的日期
         Date startDate = DateUtil.addMonths(endDate, 1 - lastTimeslot);
         endDate = DateUtil.addMonths(endDate, interval);
-        Date queryEndDate = DateUtils.addHours(startDate, interval);
+        // 补充最后一个月的查询条件
+        Date queryEndDate = DateUtils.addMonths(startDate, interval);
         while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
             DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);
             dateQueries.add(dateQuery);
             startDate = queryEndDate;
-            queryEndDate = DateUtils.addDays(queryEndDate, interval);
+            queryEndDate = DateUtils.addMonths(queryEndDate, interval);
         }
         return dateQueries;
     }
@@ -399,11 +411,11 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             String dateString = "";
             switch (timeDivideEnum) {
                 case HOUR:
-                    format = new SimpleDateFormat(DateUtil.ddHHChineseFormat);
+                    format = new SimpleDateFormat(DateUtil.yyyyMMddHHChineseFormat);
                     dateString = format.format(dateQuery.getStartTime());
                     break;
                 case DAY:
-                    format = new SimpleDateFormat(DateUtil.MMddChineseFormat);
+                    format = new SimpleDateFormat(DateUtil.yyyyMMddChineseFormat);
                     dateString = format.format(dateQuery.getStartTime());
                     break;
                 case MONTH:
@@ -423,7 +435,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
      */
 
     protected String getUrl(String sequence, String version) {
-        SequenceEnum sequenceEnum= SequenceEnum.getSequenceEnumByCode(sequence);
+        SequenceEnum sequenceEnum = SequenceEnum.getSequenceEnumByCode(sequence);
         switch (sequenceEnum) {
             case GL8:
                 return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";
@@ -436,6 +448,94 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
     }
 
     protected void handleData(HandleDataDTO handleDataDTO) {
-        throw new RuntimeException("没有对应的子类解析器writer");
+        Workbook workbook = handleDataDTO.getWorkbook();
+        WriterExcelDTO excelDTO = handleDataDTO.getExcelDTO();
+        List<DateQuery> dateQuerys = handleDataDTO.getDateQuerys();
+        String version = handleDataDTO.getVersion();
+        HashMap<String, TargetManagement> targetManagementMap = handleDataDTO.getTargetManagementMap();
+        ReportTemplateConfig reportTemplateConfig = handleDataDTO.getReportTemplateConfig();
+        SequenceEnum sequenceEnum = handleDataDTO.getSequenceEnum();
+        // 动态报表生成的模板默认取第二个sheet。
+        Sheet mainSheet = workbook.getSheetAt(0);
+        Sheet tagSheet = workbook.getSheetAt(1);
+        // 写入时间列
+        writeTimeColumn(mainSheet, reportTemplateConfig, dateQuerys);
+
+        HandleQueryDataStrategy handleStrategy =
+                handleQueryDataStrategyContext.getHandleQueryDataStrategy(sequenceEnum.getSequenceCode());
+
+        for (int rowNum = 0; rowNum < dateQuerys.size(); rowNum++) {
+            List<CellData> cellDataList = handleEachRowData(handleDataDTO, handleStrategy, dateQuerys.get(rowNum), rowNum + 1);
+            ExcelWriterUtil.setCellValue(tagSheet, cellDataList);
+        }
+    }
+
+    /**
+     * 处理每行数据
+     * @param handleDataDTO
+     * @param handleStrategy
+     * @param dateQuery
+     * @param rowIndex
+     * @return
+     */
+    private List<CellData> handleEachRowData(HandleDataDTO handleDataDTO,
+                                             HandleQueryDataStrategy handleStrategy, DateQuery dateQuery, int rowIndex) {
+        Workbook workbook = handleDataDTO.getWorkbook();
+        WriterExcelDTO excelDTO = handleDataDTO.getExcelDTO();
+        List<DateQuery> dateQuerys = handleDataDTO.getDateQuerys();
+        String version = handleDataDTO.getVersion();
+        HashMap<String, TargetManagement> targetManagementMap = handleDataDTO.getTargetManagementMap();
+        ReportTemplateConfig reportTemplateConfig = handleDataDTO.getReportTemplateConfig();
+        SequenceEnum sequenceEnum = handleDataDTO.getSequenceEnum();
+
+        Set<String> tagFormulasSet = targetManagementMap.keySet();
+        // 拼接后的公式
+        List<String> tagFormulas = new ArrayList<>(tagFormulasSet);
+        // 批量查询tag value
+        List<CellData> resultList = new ArrayList<>();
+        Map<String, LinkedHashMap<Long, Double>> tagValueMaps
+                = handleStrategy.getTagValueMaps(dateQuery, version, tagFormulas);
+        if (Objects.isNull(tagValueMaps)) {
+            return resultList;
+        }
+        for (int columnIndex = 0; columnIndex < tagFormulas.size(); columnIndex++) {
+            String tagFormula = tagFormulas.get(columnIndex);
+            if (StringUtils.isBlank(tagFormula)) {
+                continue;
+            }
+            Map<Long, Double> tagValueMap = tagValueMaps.get(tagFormula);
+            if (Objects.isNull(tagValueMap)) {
+                continue;
+            }
+            // 按照时间顺序从老到新排序
+            List<Long> clockList = tagValueMap.keySet().stream().sorted().collect(Collectors.toList());
+            Date queryStartTime = dateQuery.getStartTime();
+            Date queryEndTime = dateQuery.getEndTime();
+
+            if (tagFormula.endsWith("_evt")) {
+                //如果是evt结尾的, 取时间范围内最大值
+                Double maxVal = tagValueMap.values().stream().max(Comparator.comparing(Double::doubleValue)).orElse(null);
+                ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, maxVal);
+            } else {
+                // 默认取开始时间点
+                if (clockList.contains(queryStartTime.getTime())) {
+                    Double queryEndValue = tagValueMap.get(queryStartTime.getTime());
+                    ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, queryEndValue);
+                } else {
+                    // 取第一个值
+                    for (int j = 0; j < clockList.size(); j++) {
+                        Long tempTime = clockList.get(j);
+                        Date date = new Date(tempTime);
+                        if (DateUtil.isDayBetweenAnotherTwoDays(date, queryStartTime, queryEndTime)) {
+                            Double val = tagValueMap.get(tempTime);
+                            ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, val);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return resultList;
     }
 }

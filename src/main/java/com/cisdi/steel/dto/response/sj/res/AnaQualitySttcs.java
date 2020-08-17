@@ -8,6 +8,8 @@ public class AnaQualitySttcs {
     private Integer unqualified;
     private BigDecimal qualifiedRate;
     private BigDecimal gradeOneQualifiedRate;
+    private BigDecimal targetValue;
+    private BigDecimal incentiveValue;
 
     public String getItem() {
         return item;
@@ -47,5 +49,21 @@ public class AnaQualitySttcs {
 
     public void setGradeOneQualifiedRate(BigDecimal gradeOneQualifiedRate) {
         this.gradeOneQualifiedRate = gradeOneQualifiedRate;
+    }
+
+    public BigDecimal getTargetValue() {
+        return targetValue;
+    }
+
+    public void setTargetValue(BigDecimal targetValue) {
+        this.targetValue = targetValue;
+    }
+
+    public BigDecimal getIncentiveValue() {
+        return incentiveValue;
+    }
+
+    public void setIncentiveValue(BigDecimal incentiveValue) {
+        this.incentiveValue = incentiveValue;
     }
 }

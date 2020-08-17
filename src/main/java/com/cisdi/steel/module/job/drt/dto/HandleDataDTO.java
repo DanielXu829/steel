@@ -4,6 +4,7 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
 import com.cisdi.steel.module.report.entity.TargetManagement;
+import com.cisdi.steel.module.report.enums.SequenceEnum;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -22,4 +23,5 @@ public class HandleDataDTO {
     private HashMap<String, TargetManagement> targetManagementMap;
     private List<DateQuery> dateQuerys;
     private ReportTemplateConfig reportTemplateConfig;
+    private SequenceEnum sequenceEnum;
 }
