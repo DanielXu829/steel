@@ -6,6 +6,7 @@ import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
+import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -56,12 +58,12 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     private static final String firstSheetName = "报表";
     public static final int REPORT_TITLE_ROW_INDEX = 1; // 标题行
     public static final int TARGET_NAME_BEGIN_ROW = 2; // 顶层节点行
-    private static final int firstDataRowIndex = 4;//从开始填充点位的行开始，下标从0开始
     private static final int firstDataColumnIndex = 2;//从开始填充点位的列开始，下标从0开始，并且排除时间列
     private static final int heightInPoints = 18;//普通行高度
     private static final int heightInPointsHeader = 25;//参数表头行高度
     private static final int heightInPointsTitle = 45;//大标题行高度
     private static final int cellWidth = 14 * 256;//普通列宽度
+    private static final int timeCellWidth = 18 * 256;//普通列宽度
     private static final String avarageFormula = "IFERROR(AVERAGE(%s:%s), \"\")";
     //默认小数点位
     private static final int defaultScale = 2;
@@ -264,9 +266,14 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         // 项目
         Row tagsNameRow = ExcelWriterUtil.getRowOrCreate(firstSheet, TARGET_NAME_BEGIN_ROW);
         PoiMergeCellUtil.addMergedRegion(firstSheet, TARGET_NAME_BEGIN_ROW, lastRowOfTagNames,1, 1);
+        // 设置项目单元格的样式
+        for (int i = TARGET_NAME_BEGIN_ROW; i <= lastRowOfTagNames; i++) {
+            Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, i);
+            Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, firstDataColumnIndex - 1);
+            itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
+        }
         Cell tagsNameRowFirstCell = ExcelWriterUtil.getCellOrCreate(tagsNameRow, firstDataColumnIndex - 1);
         tagsNameRowFirstCell.setCellValue("项目");
-        tagsNameRowFirstCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
         tagsNameRow.setHeightInPoints(heightInPointsHeader);
         // 时间
         Row unitRow = ExcelWriterUtil.getRowOrCreate(firstSheet, lastRowOfTagNames + 1);
@@ -274,7 +281,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         unitRowFirstCell.setCellValue("时间");
         unitRowFirstCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
         unitRow.setHeightInPoints(heightInPointsHeader);
-        firstSheet.setColumnWidth(firstDataColumnIndex - 1, cellWidth);
+        firstSheet.setColumnWidth(firstDataColumnIndex - 1, timeCellWidth);
 
         // 填充表头,添加具体的tags name和unit
         int topParentColumnIndex = firstDataColumnIndex;
@@ -291,16 +298,24 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 TargetManagement targetManagement = allTargetManagements.get(reportTemplateTags.getTargetId());
                 tagCell.setCellValue(targetManagement.getWrittenName());
                 tagCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
+                // 写入单位
+                Cell unitCell = ExcelWriterUtil.getCellOrCreate(unitRow, topParentColumnIndex);
+                unitCell.setCellValue(tagsMap.get(reportTemplateTags).getUnit());
+                unitCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                 topParentColumnIndex++;
             } else {
                 // 多级表头
                 Long topParentId = Long.valueOf(String.valueOf(key));
                 int sonTagSizeOfCurrentTopParent = tagsList.size();
                 // 横向合并一级表头
-                Cell topParentCell = ExcelWriterUtil.getCellOrCreate(tagsNameRow, topParentColumnIndex);
-                topParentCell.setCellValue(allTargetManagements.get(topParentId).getWrittenName());
-                topParentCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                 PoiMergeCellUtil.addMergedRegion(firstSheet, TARGET_NAME_BEGIN_ROW, TARGET_NAME_BEGIN_ROW, topParentColumnIndex, topParentColumnIndex + sonTagSizeOfCurrentTopParent - 1);
+                Cell topParentCell = ExcelWriterUtil.getCellOrCreate(tagsNameRow, topParentColumnIndex);
+                for (int i = topParentColumnIndex; i <= topParentColumnIndex + sonTagSizeOfCurrentTopParent - 1; i++) {
+                    Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, TARGET_NAME_BEGIN_ROW);
+                    Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, i);
+                    itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
+                }
+                topParentCell.setCellValue(allTargetManagements.get(topParentId).getWrittenName());
 
                 for (int tagIndex = 0; tagIndex < sonTagSizeOfCurrentTopParent; tagIndex++) {
                     ReportTemplateTags reportTemplateTags = tagsList.get(tagIndex);
@@ -327,14 +342,19 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     if (numbersNeedToMerge > 0) {
                         // 上下合并空余行数和子节点单元格
                         PoiMergeCellUtil.addMergedRegion(firstSheet, lastRowOfTagNames - numbersNeedToMerge, lastRowOfTagNames, eachSonTagColumn, eachSonTagColumn);
+                        for (int i = lastRowOfTagNames - numbersNeedToMerge; i <= lastRowOfTagNames; i++) {
+                            Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, i);
+                            Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, eachSonTagColumn);
+                            itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
+                        }
                         Row tagOfMergeBeginRow = ExcelWriterUtil.getRowOrCreate(firstSheet, lastRowOfTagNames - numbersNeedToMerge);
                         lastTagCell = ExcelWriterUtil.getCellOrCreate(tagOfMergeBeginRow, eachSonTagColumn);
                     } else {
                         // 写入最后子节点数据
                         lastTagCell = ExcelWriterUtil.getCellOrCreate(lastTagsNameRow, eachSonTagColumn);
+                        lastTagCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                     }
                     lastTagCell.setCellValue(allTargetManagements.get(targetId).getWrittenName());
-                    lastTagCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                     // 写入单位
                     Cell unitCell = ExcelWriterUtil.getCellOrCreate(unitRow, eachSonTagColumn);
                     unitCell.setCellValue(tagsMap.get(reportTemplateTags).getUnit());
@@ -383,6 +403,12 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 topParentColumnIndex += sonTagSizeOfCurrentTopParent;
             }
         }
+        // 写入时间列数据 写入tag点引用公式 平均值公式
+        setTimeAndFormula(firstSheet, workbook, reportTemplateConfig, tagsMap, tagsSheetName, lastRowOfTagNames);
+    }
+
+    private void setTimeAndFormula(Sheet firstSheet, Workbook workbook, ReportTemplateConfig reportTemplateConfig, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap,
+                                     String tagsSheetName, int lastRowOfTagNames) {
         // 生成时间
         // 获取时间范围类型
         String timeUnit = ":00";
@@ -398,13 +424,13 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 case HOUR:
                     if (startTimeSlot >= endTimeSlot) {
                         //处理焦化报表时间跨天的情况
-                        maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval;
+                        maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval + 1;
                     }
                     break;
                 case DAY:
                     if (startTimeSlot >= endTimeSlot) {
                         // 处理焦化报表时间跨天的情况
-                        maxRow = (endTimeSlot + (31 - startTimeSlot)) / interval;
+                        maxRow = (endTimeSlot + (31 - startTimeSlot)) / interval + 1;
                     }
                     timeUnit = timeDivideEnum.getDivideType();
                     break;
@@ -412,7 +438,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     // 月
                     if (startTimeSlot >= endTimeSlot) {
                         // 处理焦化报表时间跨天的情况
-                        maxRow = (endTimeSlot + (12 - startTimeSlot)) / interval;
+                        maxRow = (endTimeSlot + (12 - startTimeSlot)) / interval + 1;
                     }
                     timeUnit = timeDivideEnum.getDivideType();;
                     break;
@@ -428,6 +454,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         LocalDateTime startHours = now.minusHours((maxRow - 1) * interval);
         LocalDateTime startDays = now.minusDays((maxRow - 1) * interval);
         LocalDateTime startMonths = now.minusMonths((maxRow - 1) * interval);
+        DecimalFormat decimalFormat = new DecimalFormat();
         for (int i = 0; i < maxRow; i++) {
             Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
             Cell timeCell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex - 1);
@@ -438,27 +465,38 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             if (timeTypeEnum.equals(TimeTypeEnum.RECENT_TIME)) {
                 switch (timeDivideEnum) {
                     case HOUR:
-                        df = DateTimeFormatter.ofPattern("dd日 HH时");
+                        df = DateTimeFormatter.ofPattern(DateUtil.yyyyMMddHHChineseFormat);
                         timeStr = startHours.plusHours(i * interval).format(df);
                         break;
                     case DAY:
-                        df = DateTimeFormatter.ofPattern("MM-dd日");
+                        df = DateTimeFormatter.ofPattern(DateUtil.yyyyMMddChineseFormat);
                         timeStr = startDays.plusDays(i * interval).format(df);
                         break;
                     default:
-                        df = DateTimeFormatter.ofPattern("yy-MM月");
+                        df = DateTimeFormatter.ofPattern(DateUtil.yyyyMM);
                         timeStr = startMonths.plusMonths(i * interval).format(df);
                         break;
                 }
             } else {
+                decimalFormat.applyPattern("00");
                 timeSlot = i * interval + startTimeSlot;
-                timeStr = timeSlot + timeUnit;
+                String formatTimeSlot = decimalFormat.format(timeSlot);
+                timeStr = formatTimeSlot + timeUnit;
+                // 处理时间跨天、跨月、跨年的情况
+                switch (timeDivideEnum) {
+                    case HOUR:
+                        if (timeSlot > 24) {
+                            timeStr = timeSlot - 24 + timeUnit;
+                        }
+                }
             }
 
-            //处理时间跨天的情况
+            // 处理时间跨天的情况
+            /**
             if (reportTemplateConfig.getTimeDivideType() == 1 && timeSlot > 24) {
                 timeStr = timeSlot - 24 + timeUnit;
             }
+            */
             // TODO 日期跨月的情况
             // TODO 月份跨年的情况
 
@@ -472,9 +510,8 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 cell.setCellFormula(formula.replaceAll("cell%", tagsSheetName + "!" + columnLetter + (i + 2)));
                 cell.setCellType(CellType.FORMULA);
                 // 设置单元格样式及小数点位
-                TargetManagement targetManagement = tagsMap.get(reportTemplateTags);
-                Integer scaleObj = targetManagement.getScale();
-                int scale = scaleObj != null ? scaleObj.intValue() : defaultScale;
+                Integer decimalScale = reportTemplateTags.getDecimalScale();
+                int scale = decimalScale != null ? decimalScale : defaultScale;
                 CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, scale);
                 //设置样式
                 cell.setCellStyle(cellStyle);
@@ -483,6 +520,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             }
         }
 
+        int tagsMapSize = tagsMap.keySet().size();
         //添加汇总值到最后
         if ("1".equals(reportTemplateConfig.getIsAddAvg())) {
             Row summaryRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstSheet.getLastRowNum() + 1);
@@ -516,19 +554,23 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         }
     }
 
-
+    /**
+     * 创建excel
+     * @param templateConfigDTO
+     * @param tagsMap
+     * @param topTypeToTagsMap
+     * @return
+     * @throws Exception
+     */
     private String generateReportTemplateExcel(ReportTemplateConfigDTO templateConfigDTO, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap, LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap) throws Exception {
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
         Workbook workbook = new XSSFWorkbook();
         String tagsSheetName =  "_tags_day_hour" + reportTemplateConfig.getTimeslotInterval();
         //创建报表主sheet。
-        // createReportSheet(workbook, reportTemplateConfig, tagsMap, tagsSheetName);
         createReportMainSheet(workbook, templateConfigDTO, tagsMap, topTypeToTagsMap, tagsSheetName);
-
         // 创建tags sheet并且填充点位信息
         createTagsSheet(workbook, tagsMap, tagsSheetName);
-
-        // 创建“dictionary”sheet并填充版本信息
+        // 创建dictionary sheet并填充版本信息
         createDictionarySheet(workbook, reportTemplateConfig.getSequenceCode());
 
         String tempPath = jobProperties.getTempPath();
@@ -543,132 +585,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         fos.close();
 
         return excelFileName;
-    }
-
-    /**
-     * 使用原生poi创建excel
-     * @param workbook
-     * @param reportTemplateConfig
-     * @param tagsMap
-     * @param tagsSheetName
-     */
-    private void createReportSheet(Workbook workbook, ReportTemplateConfig reportTemplateConfig, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap, String tagsSheetName) {
-        int tagsMapSize = tagsMap.keySet().size();
-        //创建第一个sheet
-        Sheet firstSheet = workbook.createSheet(firstSheetName);
-        //添加空白行
-        Row firstBlankRow = ExcelWriterUtil.getRowOrCreate(firstSheet, 0);
-        //设置标题及样式
-        Row secondTitleRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex - 3);
-        PoiMergeCellUtil.addMergedRegion(firstSheet, 1,1,1, tagsMapSize + 1);
-        for (int j = 1; j <= tagsMapSize + 1; j++) {
-            Cell cell = ExcelWriterUtil.getCellOrCreate(secondTitleRow, j);
-            cell.setCellStyle(ExcelStyleUtil.getHeaderTitleStyle(workbook));
-        }
-        Cell titleCell = ExcelWriterUtil.getCellOrCreate(secondTitleRow, 1);
-        titleCell.setCellValue(reportTemplateConfig.getTemplateName());
-        secondTitleRow.setHeightInPoints(heightInPointsTitle);//设置行高
-        CellStyle headerTitleStyle = ExcelStyleUtil.getHeaderTitleStyle(workbook);
-        titleCell.setCellStyle(headerTitleStyle);
-
-        Row tagsNameRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex - 2);
-        Cell tagsNameRowFirstCell = ExcelWriterUtil.getCellOrCreate(tagsNameRow, firstDataColumnIndex - 1);
-        tagsNameRowFirstCell.setCellValue("项目");
-        tagsNameRowFirstCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
-        tagsNameRow.setHeightInPoints(heightInPointsHeader);
-
-        Row unitRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex - 1);
-        Cell unitRowFirstCell = ExcelWriterUtil.getCellOrCreate(unitRow, firstDataColumnIndex - 1);
-        unitRowFirstCell.setCellValue("时间");
-        unitRowFirstCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
-        unitRow.setHeightInPoints(heightInPointsHeader);
-        firstSheet.setColumnWidth(firstDataColumnIndex - 1, cellWidth);
-
-        // 填充表头,添加具体的tags name和unit
-        int tagsIndex = firstDataColumnIndex;
-        for (ReportTemplateTags reportTemplateTags : tagsMap.keySet()) {
-            Cell tagsNameCell = ExcelWriterUtil.getCellOrCreate(tagsNameRow, tagsIndex);
-            tagsNameCell.setCellValue(tagsMap.get(reportTemplateTags).getWrittenName());
-            tagsNameCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
-            Cell unitCell = ExcelWriterUtil.getCellOrCreate(unitRow, tagsIndex);
-            unitCell.setCellValue(tagsMap.get(reportTemplateTags).getUnit());
-            unitCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
-            tagsIndex++;
-        }
-
-        // 在第一个sheet中填充点位信息
-        // 计算填充需填充点位的行数。以及对应的最大行数
-        int interval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval());
-        Integer startTimeSlot = Integer.valueOf(reportTemplateConfig.getStartTimeslot());
-        Integer endTimeSlot = Integer.valueOf(reportTemplateConfig.getEndTimeslot());
-        int maxRow = (endTimeSlot - startTimeSlot)/interval;
-        if (startTimeSlot >= endTimeSlot) {
-            //处理焦化报表时间跨天的情况
-            maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval;
-        }
-
-        for (int i = 0; i <= maxRow; i++) {
-            Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
-            Cell timeCell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex - 1);
-            //添加时间信息
-            int timeSlot = i * interval + startTimeSlot;
-            String timeStr = timeSlot + ":00";
-            //处理焦化报表时间跨天的情况
-            if (timeSlot > 24) {
-                timeStr = timeSlot - 24 + ":00";
-            }
-            timeCell.setCellValue(timeStr);
-            timeCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));//设置样式
-            // 循环点位列表
-            int j = 0;
-            for (ReportTemplateTags reportTemplateTags : tagsMap.keySet()) {
-                String columnLetter = letterArray[j];
-                Cell cell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex + j);
-                cell.setCellFormula(formula.replaceAll("cell%", tagsSheetName + "!" + columnLetter + (i + 2)));
-                cell.setCellType(CellType.FORMULA);
-                // 设置单元格样式及小数点位
-                TargetManagement targetManagement = tagsMap.get(reportTemplateTags);
-                Integer scaleObj = targetManagement.getScale();
-                int scale = scaleObj != null ? scaleObj.intValue() : defaultScale;
-                CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, scale);
-                //设置样式
-                cell.setCellStyle(cellStyle);
-
-                j++;
-            }
-        }
-
-        //添加汇总值到最后
-        if ("1".equals(reportTemplateConfig.getIsAddAvg())) {
-            Row summaryRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstSheet.getLastRowNum() + 1);
-            Cell averageCell = ExcelWriterUtil.getCellOrCreate(summaryRow, 1);
-            averageCell.setCellValue("平均值");
-            averageCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));
-
-            for (int j = 0; j < tagsMapSize; j++) {
-                Cell cell = ExcelWriterUtil.getCellOrCreate(summaryRow, firstDataColumnIndex + j);
-                String columnLetter = letterArray[firstDataColumnIndex + j];
-                String avgBegin = columnLetter + (firstDataRowIndex + 1);
-                String avgEnd = columnLetter + (firstDataRowIndex + maxRow);
-                String formula = String.format(avarageFormula, avgBegin, avgEnd);
-                cell.setCellFormula(formula);
-                cell.setCellType(CellType.FORMULA);
-                // 设置平均值单元格样式和小数点位
-                CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, defaultScale);
-                cell.setCellStyle(cellStyle);
-            }
-        }
-
-        // 循环设置所有的行高和列宽, 包含平均值列
-        for (int i = 0; i <= maxRow + 1; i++) {
-            Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
-            dataRow.setHeightInPoints(heightInPoints);
-        }
-        int j = 0;
-        for (ReportTemplateTags reportTemplateTags : tagsMap.keySet()) {
-            firstSheet.setColumnWidth(firstDataColumnIndex + j, cellWidth);
-            j++;
-        }
     }
 
     /**

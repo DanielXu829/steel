@@ -54,7 +54,6 @@ public class MeiZhouChanLiangFenXiWriter extends BaseShaoJieWriter {
         daysOfWeek.forEach(e -> dateQueryList.add(DateQueryUtil.buildDayAheadTwoHour(e)));
 
         handleTagSheet(tagSheet, version, dateQueryList);
-        handleYunZhuanLv(mainSheet, version, dateQueryList);
         handleAverageDataOfLastWeek(mainSheet, version, dateQueryList);
         handleDateOfWeek(mainSheet, daysOfWeek);
         PoiCustomUtil.clearPlaceHolder(mainSheet);
@@ -64,8 +63,6 @@ public class MeiZhouChanLiangFenXiWriter extends BaseShaoJieWriter {
     private void handleTagSheet(Sheet tagSheet, String version, List<DateQuery> dateQueryList) {
         // 获取本周一到本周日的日期
         try {
-            // 以开始进行查询的tag点（S111产量， S111台时）
-            List<String> tagsQueryInStartTime = Arrays.asList("ST4_MESR_SIN_SinterDayConfirmY_1d_cur", "ST4_L1R_SIN_ProductPerHour_1d_avg");
             List<String> columns = PoiCustomUtil.getFirstRowCelVal(tagSheet);
             List<String> targetFormulas = targetManagementMapper.selectTargetFormulasByTargetNames(columns);
             List<CellData> cellDataListOfTagSheet = new ArrayList<>();
@@ -92,12 +89,7 @@ public class MeiZhouChanLiangFenXiWriter extends BaseShaoJieWriter {
                     if (Objects.isNull(dataOfColumn)) {
                         continue;
                     }
-                    Object value;
-                    if (tagsQueryInStartTime.contains(column)) {
-                        value = dataOfColumn.get(queryStartTime);
-                    } else {
-                        value = dataOfColumn.get(queryEndTime);
-                    }
+                    Object value = dataOfColumn.get(queryEndTime);
                     ExcelWriterUtil.addCellData(cellDataListOfTagSheet, dateQueryIndex + 1, columnIndex, value);
                 }
             }

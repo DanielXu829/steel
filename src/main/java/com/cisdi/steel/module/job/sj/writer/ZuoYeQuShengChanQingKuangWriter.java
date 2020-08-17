@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Component
@@ -142,15 +143,33 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
                             ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 2, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 3, anaQualitySttcs.getQualifiedRate());
+                            if (i == 4) {
+                                BigDecimal targetValue = anaQualitySttcs.getTargetValue();
+                                BigDecimal incentiveValue = anaQualitySttcs.getIncentiveValue();
+                                String value = String.format("%s%%/%s%%", targetValue, incentiveValue);
+                                ExcelWriterUtil.addCellData(resultList, 6, 2, value);
+                            }
                         }
                         if (RO.equals(anaQualitySttcs.getItem())) {
                             ExcelWriterUtil.addCellData(resultList, i + 1, 4, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 5, anaQualitySttcs.getQualifiedRate());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 6, anaQualitySttcs.getGradeOneQualifiedRate());
+                            if (i == 4) {
+                                BigDecimal targetValue = anaQualitySttcs.getTargetValue();
+                                BigDecimal incentiveValue = anaQualitySttcs.getIncentiveValue();
+                                String value = String.format("%s%%/%s%%", targetValue, incentiveValue);
+                                ExcelWriterUtil.addCellData(resultList, 6, 4, value);
+                            }
                         }
                         if (MGO.equals(anaQualitySttcs.getItem())) {
                             ExcelWriterUtil.addCellData(resultList, i + 1, 7, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 8, anaQualitySttcs.getQualifiedRate());
+                            if (i == 4) {
+                                BigDecimal targetValue = anaQualitySttcs.getTargetValue();
+                                BigDecimal incentiveValue = anaQualitySttcs.getIncentiveValue();
+                                String value = String.format("%s%%/%s%%", targetValue, incentiveValue);
+                                ExcelWriterUtil.addCellData(resultList, 6, 7, value);
+                            }
                         }
                     }
                 }
@@ -295,6 +314,7 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
 
     /**
      * 获取质量指标表体数据
+     * 不传workTeam为目标值和激励值以及作业区
      * @param timestamp
      * @param workTeam
      * @param version

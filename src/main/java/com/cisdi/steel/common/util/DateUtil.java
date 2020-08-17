@@ -80,6 +80,11 @@ public class DateUtil {
      * 几年几月几日 小时分钟
      */
     public static final String yyyyMMddHHmmChineseFormat = "yyyy年MM月dd日 HH时mm分";
+
+    /**
+     * 几年几月几日 小时分钟
+     */
+    public static final String yyyyMMddHHChineseFormat = "yyyy年MM月dd日 HH时";
     /**
      * 几年几月几日
      */
@@ -1032,6 +1037,21 @@ public class DateUtil {
     }
 
     /**
+     * 获取当前月的指定天的指定整点时间
+     * @return
+     */
+    public static Date getHourTimeByMonthAndDayAndHourNumber(Date date, Integer day, Integer hour) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        return calendar.getTime();
+    }
+
+    /**
      * 获取指定日期当月的指定天  时间设定为22点(武钢目前默认是22点到22点的查询策略)
      * @param date
      * @param dayOfMonth
@@ -1050,7 +1070,7 @@ public class DateUtil {
     }
 
     /**
-     * 取指定日期当年的指定月 日期设定为月最后一天22点
+     * 取指定日期当年的指定月 日期设定为当月22点
      * @param date
      * @param monthOfYear
      * @return

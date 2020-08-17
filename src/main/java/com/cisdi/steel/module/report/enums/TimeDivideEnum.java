@@ -4,7 +4,7 @@ import com.cisdi.steel.common.exception.LeafException;
 
 public enum TimeDivideEnum {
     HOUR("时", "1h", 1),
-    DAY("天", "1d", 2),
+    DAY("日", "1d", 2),
     MONTH("月", "1d",3),
     ;
 
