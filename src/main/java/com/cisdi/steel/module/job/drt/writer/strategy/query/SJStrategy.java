@@ -4,13 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
 import com.cisdi.steel.dto.response.sj.req.SjTagQueryParam;
-import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.enums.SequenceEnum;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -19,13 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class SJStrategy implements HandleQueryDataStrategy {
-    @Autowired
-    protected HttpProperties httpProperties;
-
-    @Autowired
-    protected HttpUtil httpUtil;
-
+public class SJStrategy extends BaseStrategy {
     @Override
     public String getQueryUrl(String version) {
         return httpProperties.getSJUrlVersion(version) + "/tagValues/tagNames";
@@ -37,11 +28,11 @@ public class SJStrategy implements HandleQueryDataStrategy {
     }
 
     @Override
-    public String getJsonResult(DateQuery dateQuery, String queryUrl, List<String> tagFormulas) {
+    public String getJsonResult(DateQuery dateQuery, String version, List<String> tagFormulas) {
         SjTagQueryParam sjTagQueryParam = new SjTagQueryParam(dateQuery.getQueryStartTime(), dateQuery.getQueryEndTime(), tagFormulas);
         SerializeConfig serializeConfig = new SerializeConfig();
         String queryJsonString = JSONObject.toJSONString(sjTagQueryParam, serializeConfig);
-        return httpUtil.postJsonParams(queryUrl, queryJsonString);
+        return httpUtil.postJsonParams(getQueryUrl(version), queryJsonString);
     }
 
     @Override
