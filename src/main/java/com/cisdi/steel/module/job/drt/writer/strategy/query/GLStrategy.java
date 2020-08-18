@@ -2,13 +2,10 @@ package com.cisdi.steel.module.job.drt.writer.strategy.query;
 
 import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.dto.response.gl.TagValueMapDTO;
 import com.cisdi.steel.dto.response.gl.req.TagQueryParam;
-import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.enums.SequenceEnum;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -17,13 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class GLStrategy implements HandleQueryDataStrategy {
-    @Autowired
-    protected HttpProperties httpProperties;
-
-    @Autowired
-    protected HttpUtil httpUtil;
-
+public class GLStrategy extends BaseStrategy {
     @Override
     public String getQueryUrl(String version) {
         return httpProperties.getGlUrlVersion(version) + "/getTagValues/tagNamesInRange";

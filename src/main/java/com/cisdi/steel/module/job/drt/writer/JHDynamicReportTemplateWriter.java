@@ -35,7 +35,6 @@ public class JHDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
         WriterExcelDTO excelDTO = handleDataDTO.getExcelDTO();
         List<DateQuery> dateQuerys = handleDataDTO.getDateQuerys();
         String version = handleDataDTO.getVersion();
-        HashMap<String, TargetManagement> targetManagementMap = handleDataDTO.getTargetManagementMap();
         ReportTemplateConfig reportTemplateConfig = handleDataDTO.getReportTemplateConfig();
 
 
@@ -50,7 +49,7 @@ public class JHDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
             DateQuery item = dateQuerys.get(i);
             if (item.getRecordDate().before(new Date())) {
                 int rowIndex = i + 1;
-                List<CellData> cellDataList = this.mapDataHandler(targetManagementMap, queryUrl, dateQuerys.get(i), rowIndex);
+                List<CellData> cellDataList = this.mapDataHandler(queryUrl, dateQuerys.get(i), rowIndex);
                 ExcelWriterUtil.setCellValue(tagSheet, cellDataList);
             }
         }
@@ -65,12 +64,11 @@ public class JHDynamicReportTemplateWriter extends DynamicReportTemplateWriter {
      * @param dateQuery
      * @return List<CellData>
      */
-    private List<CellData> mapDataHandler(HashMap<String, TargetManagement> targetManagementMap, String queryUrl,
+    private List<CellData> mapDataHandler(String queryUrl,
                                           DateQuery dateQuery, Integer rowIndex) {
         List<CellData> cellDataList = new ArrayList<>();
-        Set<String> tagFormulasSet = targetManagementMap.keySet();
         // 拼接后的公式
-        List<String> tagFormulas = new ArrayList<>(tagFormulasSet);
+        List<String> tagFormulas = new ArrayList<>();
         JHTagValueListDTO jhTagValueListDTO = getTagListData(queryUrl, tagFormulas, dateQuery);
 
         if (Objects.nonNull(jhTagValueListDTO) && MapUtils.isNotEmpty(jhTagValueListDTO.getData())) {
