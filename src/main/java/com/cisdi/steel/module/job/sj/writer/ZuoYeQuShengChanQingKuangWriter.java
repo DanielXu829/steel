@@ -96,6 +96,11 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
                 List<AnalysisQuality> analysisQualityList = JSON.parseObject(analysisQualityArray.toJSONString(), new TypeReference<List<AnalysisQuality>>() {});
                 for (AnalysisQuality item : analysisQualityList) {
                     String itemOs = item.getItemOs();
+                    Cell cellTargetIncentive = PoiCustomUtil.getCellByValue(firstSheet, String.format("{{%s目标激励}}", itemOs));
+                    BigDecimal targetValue = item.getTargetValue();
+                    BigDecimal incentiveValue = item.getIncentiveValue();
+                    String value = String.format("%s%%/%s%%", targetValue, incentiveValue);
+                    PoiCustomUtil.setCellValue(cellTargetIncentive, value);
                     if (RO.equals(itemOs)) {
                         String content1 = itemOs + "±" + item.getRange();
                         String content2 = itemOs + "±" + item.getFirstGrade();
@@ -143,33 +148,15 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
                             ExcelWriterUtil.addCellData(resultList, i + 1, 1, anaQualitySttcs.getTotal());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 2, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 3, anaQualitySttcs.getQualifiedRate());
-                            if (i == 4) {
-                                BigDecimal targetValue = anaQualitySttcs.getTargetValue();
-                                BigDecimal incentiveValue = anaQualitySttcs.getIncentiveValue();
-                                String value = String.format("%s%%/%s%%", targetValue, incentiveValue);
-                                ExcelWriterUtil.addCellData(resultList, 6, 2, value);
-                            }
                         }
                         if (RO.equals(anaQualitySttcs.getItem())) {
                             ExcelWriterUtil.addCellData(resultList, i + 1, 4, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 5, anaQualitySttcs.getQualifiedRate());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 6, anaQualitySttcs.getGradeOneQualifiedRate());
-                            if (i == 4) {
-                                BigDecimal targetValue = anaQualitySttcs.getTargetValue();
-                                BigDecimal incentiveValue = anaQualitySttcs.getIncentiveValue();
-                                String value = String.format("%s%%/%s%%", targetValue, incentiveValue);
-                                ExcelWriterUtil.addCellData(resultList, 6, 4, value);
-                            }
                         }
                         if (MGO.equals(anaQualitySttcs.getItem())) {
                             ExcelWriterUtil.addCellData(resultList, i + 1, 7, anaQualitySttcs.getUnqualified());
                             ExcelWriterUtil.addCellData(resultList, i + 1, 8, anaQualitySttcs.getQualifiedRate());
-                            if (i == 4) {
-                                BigDecimal targetValue = anaQualitySttcs.getTargetValue();
-                                BigDecimal incentiveValue = anaQualitySttcs.getIncentiveValue();
-                                String value = String.format("%s%%/%s%%", targetValue, incentiveValue);
-                                ExcelWriterUtil.addCellData(resultList, 6, 7, value);
-                            }
                         }
                     }
                 }
@@ -308,7 +295,7 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
      * @return
      */
     private String getQualityIndexTableHead(String version) {
-        String url = httpProperties.getSJUrlVersion(version) + "/report/qualitySttcs/tableHead";
+        String url = httpProperties.getSJUrlVersion(version) + "/customReport/qualitySttcs/tableHead";
         return httpUtil.get(url);
     }
 
@@ -326,7 +313,7 @@ public class ZuoYeQuShengChanQingKuangWriter extends AbstractExcelReadWriter {
         if (Objects.nonNull(workTeam)) {
             queryParam.put("workTeam", Objects.requireNonNull(workTeam.toString()));
         }
-        String url = httpProperties.getSJUrlVersion(version) + "/report/qualitySttcs/clock";
+        String url = httpProperties.getSJUrlVersion(version) + "/customReport/qualitySttcs/clock";
         return httpUtil.get(url, queryParam);
     }
 

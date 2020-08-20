@@ -129,16 +129,6 @@ public class TRTGongYiNengHaoTongJiWriter extends BaseGaoLuWriter {
                 Double val = tagValueMap.get(queryEndTime.getTime());
                 if (Objects.nonNull(val)) {
                     ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, val);
-                } else {
-                    for (int j = 0; j < clockList.size(); j++) {
-                        Long tempTime = clockList.get(j);
-                        Date date = new Date(tempTime);
-                        if ((date.getTime() >= queryStartTime.getTime()) && (date.getTime() <= queryEndTime.getTime())) {
-                            val = tagValueMap.get(tempTime);
-                            ExcelWriterUtil.addCellData(resultList, rowIndex, columnIndex, val);
-                            break;
-                        }
-                    }
                 }
             }
         }
