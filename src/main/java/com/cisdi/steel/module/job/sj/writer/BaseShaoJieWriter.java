@@ -34,7 +34,7 @@ public abstract class BaseShaoJieWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getYarnRunStatisticsForFullDayUrl(String version) {
-        return httpProperties.getSJUrlVersion(version) + "/report/yarnRunStatisticsForFullDay";
+        return httpProperties.getSJUrlVersion(version) + "/customReport/yarnRunStatisticsForFullDay";
     }
 
     /**
@@ -54,11 +54,20 @@ public abstract class BaseShaoJieWriter extends AbstractExcelReadWriter {
      * @return
      */
     protected String getAnalysisOfOutPut(String version) {
-        return httpProperties.getSJUrlVersion(version) + "/report/analysisOfOutPut";
+        return httpProperties.getSJUrlVersion(version) + "/customReport/analysisOfOutPut";
     }
 
     protected String getAnalysisOfOutPutData(String version, Long timestamp) {
         String analysisOfOutPutUrl = getAnalysisOfOutPut(version);
         return httpUtil.get(analysisOfOutPutUrl + "?clock=" + timestamp);
+    }
+
+    protected String getWorkTeamUrl(String version) {
+        return httpProperties.getSJUrlVersion(version) + "/report/getWorkTeam";
+    }
+
+    protected String getWorkTeam(String version, Long timestamp) {
+        String workTeamUrl = getWorkTeamUrl(version);
+        return httpUtil.get(workTeamUrl + "?clock=" + timestamp);
     }
 }

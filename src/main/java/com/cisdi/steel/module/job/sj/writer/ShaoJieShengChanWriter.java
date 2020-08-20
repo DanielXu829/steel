@@ -45,7 +45,8 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
             "ST4_L1R_SIN_ProductPerHour_1d_avg", "ST4_MESR_SIN_SinterUF_1d_cur", "ST4_L2R_SIN_ProductRatio_1d_cur");
     // 点位需要自己减前一个时间点的数据
     private static final List<String> TAG_FORMUALS_NEED_TO_SUBTRACT_BEFORE = Arrays.asList("ST4_L1R_SIN_103ASinAccFl_12h_cur", "ST4_L1R_SIN_103BSinAccFl_12h_cur",
-            "ST4_L1R_SIN_CRF104AccFl_12h_cur", "ST4_L1R_SIN_BF2CRFAccFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsAcc_12h_cur");
+            "ST4_L1R_SIN_CRF104AccFl_12h_cur", "ST4_L1R_SIN_BF2CRFAccFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsAcc_12h_cur",
+            "ST4_L1R_SIN_Stk2AccFl_12h_cur", "ST4_L1R_SIN_Stk6AccFl_12h_cur");
     private static int shaojieChengPinItemRowNum = 8;
     private static int yuanRanLiaoXingNengItemRowNum = 36;
     private static final String GET_VERSION_FAILED_MESSAGE = "在模板中获取version失败";
@@ -753,7 +754,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     }
 
     private String getYarnRunStatisticsUrl(String version) {
-        return httpProperties.getSJUrlVersion(version) + "/report/yarnRunStatisticsForDay";
+        return httpProperties.getSJUrlVersion(version) + "/customReport/yarnRunStatisticsForDay";
     }
 
     private YardRunInfo getYarnRunStatisticData(String version, Long timestamp, Integer workType) {
@@ -765,7 +766,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     }
 
     private String getYarnRunStatisticsFor26BUrl(String version) {
-        return httpProperties.getSJUrlVersion(version) + "/report/yarnRunStatisticsFor26B";
+        return httpProperties.getSJUrlVersion(version) + "/customReport/yarnRunStatisticsFor26B";
     }
 
     private YardRunInfoOf26B getYarnRunStatisticsFor26BData(String version, Long timestamp) {

@@ -11,6 +11,8 @@ public class AnalysisQuality {
     private BigDecimal firstGrade;
     private String unit;
     private String itemOs;
+    private BigDecimal targetValue;
+    private BigDecimal incentiveValue;
 
     public String getItem() {
         return item;
@@ -74,5 +76,21 @@ public class AnalysisQuality {
 
     public void setItemOs(String itemOs) {
         this.itemOs = itemOs;
+    }
+
+    public BigDecimal getTargetValue() {
+        return targetValue;
+    }
+
+    public void setTargetValue(BigDecimal targetValue) {
+        this.targetValue = targetValue;
+    }
+
+    public BigDecimal getIncentiveValue() {
+        return incentiveValue;
+    }
+
+    public void setIncentiveValue(BigDecimal incentiveValue) {
+        this.incentiveValue = incentiveValue;
     }
 }
