@@ -62,8 +62,9 @@ public class ChuTieXiaoLvWriter extends BaseGaoLuWriter {
         // 获取excel占位符列
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet, itemRowNum);
         List<CellData> cellDataList = new ArrayList<>();
-
-        List<DateQuery> allDayBeginTimeInCurrentYear = DateQueryUtil.buildYearDayWithThur2Wed(DateUtil.addDays(new Date(), -1));
+        DateQuery dateQuery = getDateQuery(excelDTO);
+        Date date = DateUtil.addDays(dateQuery.getRecordDate(), -1);
+        List<DateQuery> allDayBeginTimeInCurrentYear = DateQueryUtil.buildYearDayWithThur2Wed(date);
 
         for (int i = 0; i < allDayBeginTimeInCurrentYear.size(); i++) {
             // 通过api获取按天的精益数据
@@ -120,10 +121,8 @@ public class ChuTieXiaoLvWriter extends BaseGaoLuWriter {
             }
         }
         ExcelWriterUtil.setCellValue(sheet, cellDataList);
-        // 替换当月天数和当前月份
-        Date currentDate = DateUtil.addDays(new Date(), -1);
         // 替换第一个sheet中的标题中的年份
-        ExcelWriterUtil.replaceCurrentYearInTitle(sheet, 0, 1, currentDate);
+        ExcelWriterUtil.replaceCurrentYearInTitle(sheet, 0, 1, date);
         // 隐藏标题行
         sheet.getRow(itemRowNum).setZeroHeight(true);
     }

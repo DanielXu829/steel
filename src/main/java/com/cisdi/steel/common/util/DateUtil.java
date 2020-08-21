@@ -1023,6 +1023,17 @@ public class DateUtil {
     }
 
     /**
+     * 获取日期是当年的第几天
+     * @param date
+     * @return
+     */
+    public static int getDayOfYear(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.DAY_OF_YEAR);
+    }
+
+    /**
      * 获取指定日期的整点时间
      * @return
      */

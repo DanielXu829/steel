@@ -303,11 +303,20 @@ public class TestJobGl extends SteelApplicationTests {
         gaoLuRiFenXiBaoGao7.mainTask();
         gaoLuRiFenXiBaoGao8.mainTask();
     }
+
     @Autowired
     private TRTGongYiNengHaoTongJi8Job trtGongYiNengHaoTongJi8Job;
 
     @Test
     public void testTRTGongYINengHao() {
         trtGongYiNengHaoTongJi8Job.execute(null);
+    }
+
+    @Autowired
+    private TRTJiXieJianKong8Job trtJiXieJianKong8Job;
+
+    @Test
+    public void testTRTJiXieJianKong() {
+        trtJiXieJianKong8Job.execute(null);
     }
 }
