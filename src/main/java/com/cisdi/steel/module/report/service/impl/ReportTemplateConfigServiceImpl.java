@@ -293,11 +293,15 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             if (key instanceof ReportTemplateTags) {
                 // 上下合并空行
                 PoiMergeCellUtil.addMergedRegion(firstSheet, TARGET_NAME_BEGIN_ROW, lastRowOfTagNames, topParentColumnIndex, topParentColumnIndex);
+                for (int i = TARGET_NAME_BEGIN_ROW; i <= lastRowOfTagNames; i++) {
+                    Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, i);
+                    Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, topParentColumnIndex);
+                    itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
+                }
                 Cell tagCell = ExcelWriterUtil.getCellOrCreate(tagsNameRow, topParentColumnIndex);
                 ReportTemplateTags reportTemplateTags = tagsList.get(0);
                 TargetManagement targetManagement = allTargetManagements.get(reportTemplateTags.getTargetId());
                 tagCell.setCellValue(targetManagement.getWrittenName());
-                tagCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                 // 写入单位
                 Cell unitCell = ExcelWriterUtil.getCellOrCreate(unitRow, topParentColumnIndex);
                 unitCell.setCellValue(tagsMap.get(reportTemplateTags).getUnit());
@@ -488,17 +492,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                         if (timeSlot > 24) {
                             timeStr = timeSlot - 24 + timeUnit;
                         }
+                    // TODO 日期跨月的情况
+                    // TODO 月份跨年的情况
                 }
             }
-
-            // 处理时间跨天的情况
-            /**
-            if (reportTemplateConfig.getTimeDivideType() == 1 && timeSlot > 24) {
-                timeStr = timeSlot - 24 + timeUnit;
-            }
-            */
-            // TODO 日期跨月的情况
-            // TODO 月份跨年的情况
 
             timeCell.setCellValue(timeStr);
             timeCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));//设置样式
