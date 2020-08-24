@@ -74,12 +74,17 @@ public class ShengChanFenXiZhouBaoWriter extends BaseShaoJieWriter{
                     break;
                 }
                 Date date = daysOfWeek.get(dateIndex);
+                // 22-22
+                DateQuery dateQueryAllDay = DateQueryUtil.buildDayAheadTwoHour(date);
+                // 22-10 10-22
                 List<DateQuery> dateQueries = DateQueryUtil.buildDay12HourAheadTwoHour(date);
-                DateQuery dateQuery = dateQueries.get(1);
-                Long queryStartTime = dateQuery.getQueryStartTime();
-                Long queryEndTime = dateQuery.getQueryEndTime();
-                SjTagQueryParam sjTagQueryParam = new SjTagQueryParam(queryStartTime,
-                        queryEndTime, targetFormulas);
+                // 22-10
+                DateQuery dateQuery = dateQueries.get(0);
+                Long query10hTime = dateQuery.getQueryEndTime();
+                Long query22hStartTime = dateQueryAllDay.getQueryStartTime();
+                Long query22hEndTime = dateQueryAllDay.getQueryEndTime();
+                SjTagQueryParam sjTagQueryParam = new SjTagQueryParam(query22hStartTime,
+                        query22hEndTime, targetFormulas);
                 String tagValueJsonData = getTagValue(version, sjTagQueryParam);
                 JSONObject data = Optional.ofNullable(JSONObject.parseObject(tagValueJsonData))
                         .map(e -> e.getJSONObject("data")).orElse(null);
@@ -93,10 +98,16 @@ public class ShengChanFenXiZhouBaoWriter extends BaseShaoJieWriter{
                     if (Objects.isNull(dataOfColumn)) {
                         continue;
                     }
-                    Object valueOf10 = dataOfColumn.get(queryStartTime);
-                    Object valueOf22 = dataOfColumn.get(queryEndTime);
-                    ExcelWriterUtil.addCellData(cellDataListOfTagSheet, dateIndex * 2 + 2, columnIndex, valueOf10);
-                    ExcelWriterUtil.addCellData(cellDataListOfTagSheet, dateIndex * 2 + 3, columnIndex, valueOf22);
+                    // 天的点位查询开始 时间
+                    if (column.contains("_1d_")) {
+                        Object valueOf22Start = dataOfColumn.get(query22hStartTime);
+                        ExcelWriterUtil.addCellData(cellDataListOfTagSheet, dateIndex + 2, columnIndex, valueOf22Start);
+                    } else {
+                        Object valueOf10 = dataOfColumn.get(query10hTime);
+                        Object valueOf22End = dataOfColumn.get(query22hEndTime);
+                        ExcelWriterUtil.addCellData(cellDataListOfTagSheet, dateIndex * 2 + 2, columnIndex, valueOf10);
+                        ExcelWriterUtil.addCellData(cellDataListOfTagSheet, dateIndex * 2 + 3, columnIndex, valueOf22End);
+                    }
                 }
             }
             ExcelWriterUtil.setCellValue(tagSheet, cellDataListOfTagSheet);
