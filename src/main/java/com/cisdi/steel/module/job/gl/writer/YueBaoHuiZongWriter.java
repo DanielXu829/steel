@@ -473,7 +473,9 @@ public class YueBaoHuiZongWriter extends BaseGaoLuWriter {
                 Map<String, LinkedHashMap<Long, Double>> tagFormulaInRangeToValueMap = getTagNamesInRangeTagValueMapDTO(version, eachDateQuery, tagNamesInRange);
                 Integer totalBatchNumber = Optional.ofNullable(tagFormulaInRangeToValueMap)
                         .map(e -> e.get(totalBatchNumberTagFormula)).map(Map::size).orElse(null);
-                tagFormulaToValueMap.put(totalBatchNumberTagFormula, BigDecimal.valueOf(totalBatchNumber));
+                if (Objects.nonNull(totalBatchNumber)) {
+                    tagFormulaToValueMap.put(totalBatchNumberTagFormula, BigDecimal.valueOf(totalBatchNumber));
+                }
                 // 为了和前端统一，还是取当天的0点
                 List<CommentData> reportCommitInfo = getReportCommitInfo(version, day.getTime());
                 Map<String, Short> itemNameToIdMap = new HashMap<String, Short>() {{
