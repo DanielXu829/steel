@@ -484,16 +484,26 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             } else {
                 decimalFormat.applyPattern("00");
                 timeSlot = i * interval + startTimeSlot;
-                String formatTimeSlot = decimalFormat.format(timeSlot);
-                timeStr = formatTimeSlot + timeUnit;
+                timeStr = decimalFormat.format(timeSlot) + timeUnit;
                 // 处理时间跨天、跨月、跨年的情况
                 switch (timeDivideEnum) {
                     case HOUR:
                         if (timeSlot > 24) {
-                            timeStr = timeSlot - 24 + timeUnit;
+                            timeStr = decimalFormat.format(timeSlot - 24) + timeUnit;
                         }
-                    // TODO 日期跨月的情况
-                    // TODO 月份跨年的情况
+                        break;
+                    // 日期跨月的情况
+                    case DAY:
+                        if (timeSlot > 31) {
+                            timeStr = decimalFormat.format(timeSlot - 31) + timeUnit;
+                        }
+                        break;
+                    // 月份跨年的情况
+                    case MONTH:
+                        if (timeSlot > 12) {
+                            timeStr = decimalFormat.format(timeSlot - 12) + timeUnit;
+                        }
+                        break;
                 }
             }
 
@@ -517,7 +527,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             }
         }
 
-        int tagsMapSize = tagsMap.keySet().size();
         //添加汇总值到最后
         if ("1".equals(reportTemplateConfig.getIsAddAvg())) {
             Row summaryRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstSheet.getLastRowNum() + 1);
@@ -525,17 +534,21 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             averageCell.setCellValue("平均值");
             averageCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));
 
-            for (int j = 0; j < tagsMapSize; j++) {
-                Cell cell = ExcelWriterUtil.getCellOrCreate(summaryRow, firstDataColumnIndex + j);
-                String columnLetter = letterArray[firstDataColumnIndex + j];
+            int k = 0;
+            for (ReportTemplateTags reportTemplateTags : tagsMap.keySet()) {
+                Cell cell = ExcelWriterUtil.getCellOrCreate(summaryRow, firstDataColumnIndex + k);
+                String columnLetter = letterArray[firstDataColumnIndex + k];
                 String avgBegin = columnLetter + (firstDataRowIndex + 1);
                 String avgEnd = columnLetter + (firstDataRowIndex + maxRow);
                 String formula = String.format(avarageFormula, avgBegin, avgEnd);
                 cell.setCellFormula(formula);
                 cell.setCellType(CellType.FORMULA);
                 // 设置平均值单元格样式和小数点位
-                CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, defaultScale);
+                Integer decimalScale = reportTemplateTags.getDecimalScale();
+                int scale = decimalScale != null ? decimalScale : defaultScale;
+                CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, scale);
                 cell.setCellStyle(cellStyle);
+                k++;
             }
         }
 

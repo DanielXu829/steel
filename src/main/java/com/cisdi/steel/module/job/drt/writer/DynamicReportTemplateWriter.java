@@ -161,9 +161,6 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         int columnIndex = timeTitleCell.getColumnIndex();
         String timeType = reportTemplateConfig.getTimeType();
         TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(timeType);
-        if (!TimeTypeEnum.RECENT_TIME.equals(timeTypeEnum)) {
-            return;
-        }
         Integer timeDivideType = reportTemplateConfig.getTimeDivideType();
         TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(timeDivideType);
         for (int i = 0; i < dateQuerys.size(); i++) {
@@ -172,19 +169,37 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             Cell timeCell = ExcelWriterUtil.getCellOrCreate(timeRow, columnIndex);
             SimpleDateFormat format;
             String dateString = "";
-            switch (timeDivideEnum) {
-                case HOUR:
-                    format = new SimpleDateFormat(DateUtil.yyyyMMddHHChineseFormat);
-                    dateString = format.format(dateQuery.getStartTime());
-                    break;
-                case DAY:
-                    format = new SimpleDateFormat(DateUtil.yyyyMMddChineseFormat);
-                    dateString = format.format(dateQuery.getStartTime());
-                    break;
-                case MONTH:
-                    format = new SimpleDateFormat(DateUtil.yyyyMM);
-                    dateString = format.format(dateQuery.getStartTime());
-                    break;
+            if (TimeTypeEnum.TIME_RANGE.equals(timeTypeEnum)) {
+                // 每个月的月底日期不确定，特殊处理
+                switch (timeDivideEnum) {
+                    case HOUR:
+                        format = new SimpleDateFormat(DateUtil.hhmmFormat);
+                        dateString = format.format(dateQuery.getStartTime());
+                        break;
+                    case DAY:
+                        format = new SimpleDateFormat(DateUtil.ddChineseFormat);
+                        dateString = format.format(dateQuery.getStartTime());
+                        break;
+                    case MONTH:
+                        format = new SimpleDateFormat(DateUtil.MMChineseFormat);
+                        dateString = format.format(dateQuery.getStartTime());
+                        break;
+                }
+            } else {
+                switch (timeDivideEnum) {
+                    case HOUR:
+                        format = new SimpleDateFormat(DateUtil.yyyyMMddHHChineseFormat);
+                        dateString = format.format(dateQuery.getStartTime());
+                        break;
+                    case DAY:
+                        format = new SimpleDateFormat(DateUtil.yyyyMMddChineseFormat);
+                        dateString = format.format(dateQuery.getStartTime());
+                        break;
+                    case MONTH:
+                        format = new SimpleDateFormat(DateUtil.yyyyMM);
+                        dateString = format.format(dateQuery.getStartTime());
+                        break;
+                }
             }
             PoiCustomUtil.setCellValue(timeCell, dateString);
         }
