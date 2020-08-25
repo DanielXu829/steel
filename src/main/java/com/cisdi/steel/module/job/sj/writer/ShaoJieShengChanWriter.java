@@ -47,8 +47,10 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     private static final List<String> TAG_FORMUALS_NEED_TO_SUBTRACT_BEFORE = Arrays.asList("ST4_L1R_SIN_103ASinAccFl_12h_cur", "ST4_L1R_SIN_103BSinAccFl_12h_cur",
             "ST4_L1R_SIN_CRF104AccFl_12h_cur", "ST4_L1R_SIN_BF2CRFAccFl_12h_cur", "ST4_L1R_SIN_Bed103BedMatInsAcc_12h_cur",
             "ST4_L1R_SIN_StkPilAccAmt_12h_cur", "ST4_L1R_SIN_ReclAccAct_12h_cur");
-    private static int shaojieChengPinItemRowNum = 8;
-    private static int yuanRanLiaoXingNengItemRowNum = 36;
+    private static int shaojieChengPinItemRowNum = 34; // 烧结成品item行
+    private static int shaojieChengPinItemColumnNum = 1; // 烧结成品样号列
+    private static int yuanRanLiaoXingNengItemRowNum = 25; // 原燃料性能item行
+    private static int yuanRanLiaoXingNengItemColumnNum = 8; // 原燃料性能item列
     private static final String GET_VERSION_FAILED_MESSAGE = "在模板中获取version失败";
     private static final String TargetName_PREFIX = "ZP";
     public static final String END = "end";
@@ -200,7 +202,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 if (Objects.nonNull(nightDownTimesCell)) {
                     int nightDownTimesCellRow = nightDownTimesCell.getRowIndex();
                     int nightDownTimesCellColumn = nightDownTimesCell.getColumnIndex();
-                    String value = "停机次数：" + prodStopRecordInfo.getTimeOfNight() + "次";
+                    Integer value = prodStopRecordInfo.getTimeOfNight();
                     ExcelWriterUtil.addCellData(cellDataList, nightDownTimesCellRow, nightDownTimesCellColumn, value);
                 } else {
                     log.error("模板中{停机记录.停机次数.夜}占位符不存在");
@@ -237,7 +239,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 if (Objects.nonNull(dayDownTimesCell)) {
                     int dayDownTimesCellRow = dayDownTimesCell.getRowIndex();
                     int dayDownTimesCellColumn = dayDownTimesCell.getColumnIndex();
-                    String value = "停机次数：" + prodStopRecordInfo.getTimeOfDay() + "次";
+                    Integer value = prodStopRecordInfo.getTimeOfDay();
                     ExcelWriterUtil.addCellData(cellDataList, dayDownTimesCellRow, dayDownTimesCellColumn, value);
                 } else {
                     log.error("模板中{停机记录.停机次数.白}占位符不存在");
@@ -256,9 +258,8 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
 
             Cell totalDownTimesCell = PoiCustomUtil.getCellByValue(sheet, "{停机记录.停机次数.共停}");
             if (Objects.nonNull(totalDownTimesCell)) {
-                int totalDownTimes = prodStopRecordInfo.getTime();
-                String value = "停机次数：" + totalDownTimes + "次";
-                ExcelWriterUtil.addCellData(cellDataList, totalDownTimesCell.getRowIndex(), totalDownTimesCell.getColumnIndex(), value);
+                Integer totalDownTimes = prodStopRecordInfo.getTime();
+                ExcelWriterUtil.addCellData(cellDataList, totalDownTimesCell.getRowIndex(), totalDownTimesCell.getColumnIndex(), totalDownTimes);
             } else {
                 log.error("模板中{停机记录.停机次数.共停}占位符不存在");
             }
@@ -324,7 +325,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
         List<String> itemNameList = PoiCustomUtil.getRowCelVal(sheet1, yuanRanLiaoXingNengItemRowNum);
         for (int j = 0; j < materialTypeList.size(); j++) {
             // 获取excel单元格中项目的名称，来和接口进行对应
-            String itemCategory = PoiCellUtil.getCellValue(sheet1, yuanRanLiaoXingNengItemRowNum + j + 1, 15);
+            String itemCategory = PoiCellUtil.getCellValue(sheet1, yuanRanLiaoXingNengItemRowNum + j + 1, yuanRanLiaoXingNengItemColumnNum);
             itemCategory = itemCategory.trim();
             String materialType = itemCategoryToNameMap.get(itemCategory);
             List<AnalysisValue> dataList =
@@ -390,7 +391,7 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 return cellDataList;
             }
             for (int j = 0; j < 4; j++) {
-                String id = PoiCellUtil.getCellValue(sheet1, shaojieChengPinItemRowNum + j + 1, 9);
+                String id = PoiCellUtil.getCellValue(sheet1, shaojieChengPinItemRowNum + j + 1, shaojieChengPinItemColumnNum);
                 // 去除小数点以及小数点后的数字 excel取出来的数值会带小数点
                 Integer idNumber = Integer.parseInt(id.split("\\.")[0]);
                 id = idNumber.toString();
