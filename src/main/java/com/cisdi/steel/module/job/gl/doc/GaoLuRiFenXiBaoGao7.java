@@ -254,7 +254,7 @@ public class GaoLuRiFenXiBaoGao7 extends AbstractExportWordJob {
         return JobEnum.gl_rishengchanfenxibaogao_day7;
     }
 
-    @Scheduled(cron = "0 10 10 * * ?")
+    @Scheduled(cron = "0 0 6-11 * * ?")
     //@Scheduled(cron = "0 30/ 0 * * ?")
     //@Scheduled(cron = "0 10/30 * * * ?")
     public void mainTask() {
