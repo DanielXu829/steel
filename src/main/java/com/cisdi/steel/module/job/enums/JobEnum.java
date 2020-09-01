@@ -109,7 +109,9 @@ public enum JobEnum {
     gl_guiliushuangmingzhong7("gl_guiliushuangmingzhong7","7高炉硅硫双命中率"),
     gl_chutiexiaolv7("gl_chutiexiaolv7","7高炉有效出铁比率及出渣比率"),
     gl_rishengchanfenxibaogao_day7("gl_rishengchanfenxibaogao_day7", "高炉日生产分析报告"),
-    // 焦化
+    gl_jixiejiankong7("gl_jixiejiankong7", "7高炉TRT机械监控表"),
+    gl_gongyinenghaotongJi7("gl_gongyinenghaotongJi7", "7高炉TRT工艺能耗统计表"),
+    // 焦化te
     jh_zidongpeimei("jh_zidongpeimei", "配煤-自动配煤报表（班）"),
     jh_ck12zidongpeimeinew("jh_ck12zidongpeimeinew", "CK12-配煤-自动配煤报表（班）-New"),
     jh_ck45zidongpeimei("jh_ck45zidongpeimei", "CK45-配煤-自动配煤报表"),
