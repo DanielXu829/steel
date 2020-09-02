@@ -14,12 +14,12 @@ import java.util.List;
  */
 public interface ReportTemplateTagsService extends IBaseService<ReportTemplateTags> {
 
-    public List<ReportTemplateTags> selectByConfigId(Long configId);
+    public List<ReportTemplateTags> selectBySheetId(Long configId);
 
     /**
      * 根据模板配置id删除
      * @param configId
      * @return
      */
-    public int deleteByConfigId(Long configId);
+    public int deleteBySheetId(Long configId);
 }

@@ -47,7 +47,8 @@ public class ReportTemplateConfigServiceTest extends SteelApplicationTests {
         tags2.setTargetId(154L);
         tags2.setSequence(2);
         ArrayList<ReportTemplateTags> reportTemplateTags = Lists.newArrayList(tags1, tags2);
-        configDTO.setReportTemplateTags(reportTemplateTags);
+        // TODO
+//        configDTO.setReportTemplateTags(reportTemplateTags);
 
         reportTemplateConfigService.saveOrUpdateDTO(configDTO);
     }
@@ -67,5 +68,11 @@ public class ReportTemplateConfigServiceTest extends SteelApplicationTests {
         ReportTemplateConfigDTO dtoById = reportTemplateConfigService.getDTOById(318L);
 
         reportTemplateConfigService.generateTemplate(dtoById);
+    }
+
+    @Test
+    public void testReportTemplateConfig() {
+        ReportTemplateConfigDTO reportTemplateConfigDTO = new ReportTemplateConfigDTO();
+        System.out.println(1);
     }
 }

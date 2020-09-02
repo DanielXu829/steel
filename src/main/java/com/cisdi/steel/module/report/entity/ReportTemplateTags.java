@@ -32,9 +32,9 @@ public class ReportTemplateTags extends Model<ReportTemplateTags> {
     private Long id;
 
     /**
-     * 外键，对应report_tempalte_config中的主键
+     * 对应report_template_sheet中的id
      */
-    private Long templateConfigId;
+    private Long templateSheetId;
 
     /**
      * 外键，对应target_management中的主键

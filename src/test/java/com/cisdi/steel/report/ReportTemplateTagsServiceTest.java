@@ -26,7 +26,7 @@ public class ReportTemplateTagsServiceTest extends SteelApplicationTests {
 
     @Test
     public void test_selectByConfigId(){
-        List<ReportTemplateTags> reportTemplateTags = reportTemplateTagsService.selectByConfigId(1L);
+        List<ReportTemplateTags> reportTemplateTags = reportTemplateTagsService.selectBySheetId(1L);
         System.out.println(reportTemplateTags);
     }
 

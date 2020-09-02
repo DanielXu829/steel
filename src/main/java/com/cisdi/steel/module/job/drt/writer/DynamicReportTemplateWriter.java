@@ -75,13 +75,16 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         }
         ReportTemplateConfigDTO reportTemplateConfigDTO =
                 reportTemplateConfigService.getDTOById(template.getTemplateConfigId());
-        if (reportTemplateConfigDTO == null || reportTemplateConfigDTO.getReportTemplateConfig() == null
-                || reportTemplateConfigDTO.getReportTemplateTags() == null) {
-            log.error("动态报表配置信息为空！");
-            throw new RuntimeException("动态报表配置信息为空");
-        }
+        // TODO
+//        if (reportTemplateConfigDTO == null || reportTemplateConfigDTO.getReportTemplateConfig() == null
+//                || reportTemplateConfigDTO.getReportTemplateTags() == null) {
+//            log.error("动态报表配置信息为空！");
+//            throw new RuntimeException("动态报表配置信息为空");
+//        }
         ReportTemplateConfig reportTemplateConfig = reportTemplateConfigDTO.getReportTemplateConfig();
-        List<ReportTemplateTags> reportTemplateTags = reportTemplateConfigDTO.getReportTemplateTags();
+        // TODO
+//        List<ReportTemplateTags> reportTemplateTags = reportTemplateConfigDTO.getReportTemplateTags();
+        List<ReportTemplateTags> reportTemplateTags = null;
 
         Sheet sheet = workbook.getSheetAt(1); // tagSheet
         List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet); // 获取tagSheet首行的tagName

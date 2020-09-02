@@ -12,7 +12,9 @@ import com.cisdi.steel.module.job.dto.CellData;
 import com.cisdi.steel.module.job.dto.SheetRowCellData;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
+import com.cisdi.steel.module.report.dto.ReportTemplateSheetDTO;
 import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
+import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.enums.SequenceEnum;
@@ -21,6 +23,7 @@ import com.cisdi.steel.module.report.enums.TimeTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportTemplateConfigMapper;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
+import com.cisdi.steel.module.report.service.ReportTemplateSheetService;
 import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
 import com.cisdi.steel.module.report.service.TargetManagementService;
 import com.cisdi.steel.module.report.util.ExcelStyleUtil;
@@ -32,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
@@ -73,47 +78,66 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
 
     @Autowired
     private JobProperties jobProperties;
-
+    @Autowired
+    private ReportTemplateSheetService reportTemplateSheetService;
     @Autowired
     private ReportTemplateTagsService reportTemplateTagsService;
-
     @Autowired
     private TargetManagementService targetManagementService;
-
     @Autowired
     private ReportTemplateConfigMapper reportTemplateConfigMapper;
-
     @Autowired
     private TargetManagementMapper targetManagementMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO) {
-
-        //生成临时模板文件。
+        // 生成临时模板文件。
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
         if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0){
+            // 如果id存在则更新，不存在则新增
             this.updateRecord(reportTemplateConfig);
         } else {
             this.insertRecord(reportTemplateConfig);
         }
 
         long configId = reportTemplateConfig.getId();
-        List<ReportTemplateTags> reportTemplateTags = templateConfigDTO.getReportTemplateTags();
-        //清空参数列表后再插入
-        reportTemplateTagsService.deleteByConfigId(configId);
-        reportTemplateTags.stream().forEach(tag -> {
-            tag.setTemplateConfigId(configId);
-            reportTemplateTagsService.insertRecord(tag);
+        // 清空每个sheet的tag
+        List<ReportTemplateSheet> reportTemplateSheets =
+                reportTemplateSheetService.selectByConfigId(configId);
+        List<Long> templateSheetIds = reportTemplateSheets.stream().map(ReportTemplateSheet::getId)
+                .collect(Collectors.toList());
+        templateSheetIds.forEach(id -> reportTemplateTagsService.deleteBySheetId(id));
+        // 清空sheet列表
+        reportTemplateSheetService.deleteByConfigId(configId);
+        List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = templateConfigDTO.getReportTemplateSheetDTOs();
+        List<ReportTemplateSheet> reportTemplateSheetList = new ArrayList<>();
+        reportTemplateSheetDTOs.forEach(sheetDto -> {
+            ReportTemplateSheet templateSheet = sheetDto.getReportTemplateSheet();
+            templateSheet.setTemplateConfigId(configId);
+            reportTemplateSheetList.add(templateSheet);
         });
-        log.info("保存模板配置成功，ID: " + reportTemplateConfig.getId());
+        // 保存sheet
+        reportTemplateSheetService.saveBatch(reportTemplateSheetList);
 
+        for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
+            ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
+            Long sheetId = reportTemplateSheet.getId();
+            List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
+            for (ReportTemplateTags reportTemplateTags : reportTemplateTagsList) {
+                reportTemplateTags.setTemplateSheetId(sheetId);
+            }
+            reportTemplateTagsService.saveBatch(reportTemplateTagsList);
+        }
+
+        log.info("保存模板配置成功，ID: " + reportTemplateConfig.getId());
         //生成临时模板文件。
+        // TODO
         String templateFilePath = this.generateTemplate(templateConfigDTO);
         log.info("成功生成模板文件，文件路径：" + templateFilePath);
 
         //修改templatePath
-        reportTemplateConfig.setTemplatePath(templateFilePath);
+        reportTemplateConfig.setTemplatePath(null);
         this.updateRecord(reportTemplateConfig);
 
         return true;
@@ -123,31 +147,52 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     public ReportTemplateConfigDTO getDTOById(Long id) {
         ReportTemplateConfig reportTemplateConfig = reportTemplateConfigMapper.selectById(id);
         if (reportTemplateConfig != null) {
-            ReportTemplateConfigDTO configDTO = new ReportTemplateConfigDTO();
-            configDTO.setReportTemplateConfig(reportTemplateConfig);
-
-            //查询tags
-            List<ReportTemplateTags> reportTemplateTags = reportTemplateTagsService.selectByConfigId(reportTemplateConfig.getId());
-            configDTO.setReportTemplateTags(reportTemplateTags);
-
-            return configDTO;
+            ReportTemplateConfigDTO reportTemplateConfigDTO = new ReportTemplateConfigDTO();
+            reportTemplateConfigDTO.setReportTemplateConfig(reportTemplateConfig);
+            List<ReportTemplateSheet> reportTemplateSheets =
+                    reportTemplateSheetService.selectByConfigId(reportTemplateConfig.getId());
+            List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = new ArrayList<>();
+            for (ReportTemplateSheet reportTemplateSheet : reportTemplateSheets) {
+                List<ReportTemplateTags> reportTemplateTags =
+                        reportTemplateTagsService.selectBySheetId(reportTemplateSheet.getId());
+                ReportTemplateSheetDTO reportTemplateSheetDTO = new ReportTemplateSheetDTO();
+                reportTemplateSheetDTO.setReportTemplateSheet(reportTemplateSheet);
+                reportTemplateSheetDTO.setReportTemplateTagsList(reportTemplateTags);
+                reportTemplateSheetDTOs.add(reportTemplateSheetDTO);
+            }
+            reportTemplateConfigDTO.setReportTemplateSheetDTOs(reportTemplateSheetDTOs);
+            return reportTemplateConfigDTO;
         }
         return null;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
+    // TODO 批量删除
     public ApiResult deleteRecord(BaseId record) {
-        reportTemplateTagsService.deleteByConfigId(record.getId());
-        reportTemplateConfigMapper.deleteById(record.getId());
-
+        Long configId = record.getId();
+        List<ReportTemplateSheet> reportTemplateSheets
+                = reportTemplateSheetService.selectByConfigId(configId);
+        for (ReportTemplateSheet reportTemplateSheet : reportTemplateSheets) {
+            reportTemplateTagsService.deleteBySheetId(reportTemplateSheet.getId());
+        }
+        reportTemplateSheetService.deleteByConfigId(configId);
+        reportTemplateConfigMapper.deleteById(configId);
         return ApiUtil.success("删除成功");
     }
 
+
     public String generateTemplate(ReportTemplateConfigDTO templateConfigDTO) {
         //通过templateConfig获取所有配置项。
+        List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = templateConfigDTO.getReportTemplateSheetDTOs();
+        for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
+            ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
+            List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
+        }
         try {
-            List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateTags();
+            // TODO
+//            List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateTags();
+            List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateSheetDTOs().get(0).getReportTemplateTagsList();
             if (CollectionUtils.isNotEmpty(reportTemplateTagsList)) {
                 // 过滤topParentId为空的tag，然后根据topParentId进行分组
                 Map<Long, List<ReportTemplateTags>> topParentIdToReportTemplateTags =
@@ -236,11 +281,13 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
      * @param topTypeToTagsMap
      * @param tagsSheetName
      */
-    private void createReportMainSheet(Workbook workbook, ReportTemplateConfigDTO templateConfigDTO,
+    private void createReportSheet(Workbook workbook, ReportTemplateConfigDTO templateConfigDTO,
                                        LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap,
                                        LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap,
                                        String tagsSheetName) {
-        List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateTags();
+        // TODO
+//        List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateTags();
+        List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateSheetDTOs().get(0).getReportTemplateTagsList();
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
         // 获取最大层级
         Integer maxHierarchy = reportTemplateTagsList.stream().map(e -> getHierarchyBetweenTag(e.getTargetId(), e.getTopParentId()))
@@ -573,13 +620,20 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
      * @throws Exception
      */
     private String generateReportTemplateExcel(ReportTemplateConfigDTO templateConfigDTO, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap, LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap) throws Exception {
-        ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
         Workbook workbook = new XSSFWorkbook();
-        String tagsSheetName =  "_tags_day_hour" + reportTemplateConfig.getTimeslotInterval();
-        //创建报表主sheet。
-        createReportMainSheet(workbook, templateConfigDTO, tagsMap, topTypeToTagsMap, tagsSheetName);
-        // 创建tags sheet并且填充点位信息
-        createTagsSheet(workbook, tagsMap, tagsSheetName);
+        ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
+        List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = templateConfigDTO.getReportTemplateSheetDTOs();
+        for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
+            ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
+            List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
+            //创建每个report sheet
+            String sheetName = reportTemplateSheet.getSheetName();
+            String tagsSheetName =  "_tag_sheet_" + sheetName;
+            createReportSheet(workbook, templateConfigDTO, tagsMap, topTypeToTagsMap, tagsSheetName);
+            // 创建tags sheet并且填充点位信息
+            createTagsSheet(workbook, tagsMap, tagsSheetName);
+        }
+
         // 创建dictionary sheet并填充版本信息
         createDictionarySheet(workbook, reportTemplateConfig.getSequenceCode());
 
