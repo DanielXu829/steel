@@ -9,6 +9,8 @@ import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 
 /**
@@ -72,7 +74,9 @@ public class ReportTemplateConfigServiceTest extends SteelApplicationTests {
 
     @Test
     public void testReportTemplateConfig() {
-        ReportTemplateConfigDTO reportTemplateConfigDTO = new ReportTemplateConfigDTO();
-        System.out.println(1);
+        ReportTemplateConfigDTO reportTemplateConfigDTO =
+                reportTemplateConfigService.getDTOById(494l);
+        reportTemplateConfigDTO.setReportTemplateConfig(null);
+        ReportTemplateConfig reportTemplateConfig = reportTemplateConfigDTO.getReportTemplateConfig();
     }
 }

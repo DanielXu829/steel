@@ -2,7 +2,7 @@ package com.cisdi.steel.module.job.drt.writer.strategy.query;
 
 import com.cisdi.steel.module.job.strategy.Key;
 import com.cisdi.steel.module.job.util.date.DateQuery;
-import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
+import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -40,8 +40,8 @@ public interface HandleQueryDataStrategy extends Key {
     /**
      * 生成查询策略
      * @param recordDate
-     * @param reportTemplateConfig
+     * @param reportTemplateSheet
      * @return
      */
-    List<DateQuery> getDateQueries(Date recordDate, ReportTemplateConfig reportTemplateConfig);
+    List<DateQuery> getDateQueries(Date recordDate, ReportTemplateSheet reportTemplateSheet);
 }

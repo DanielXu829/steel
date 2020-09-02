@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.job.drt.writer;
 
+import com.cisdi.steel.common.constant.DynamicReportConstants;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
@@ -12,10 +13,8 @@ import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
-import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
-import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
-import com.cisdi.steel.module.report.entity.ReportTemplateTags;
-import com.cisdi.steel.module.report.entity.TargetManagement;
+import com.cisdi.steel.module.report.dto.ReportTemplateSheetDTO;
+import com.cisdi.steel.module.report.entity.*;
 import com.cisdi.steel.module.report.enums.*;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
@@ -29,6 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,47 +77,43 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         }
         ReportTemplateConfigDTO reportTemplateConfigDTO =
                 reportTemplateConfigService.getDTOById(template.getTemplateConfigId());
-        // TODO
-//        if (reportTemplateConfigDTO == null || reportTemplateConfigDTO.getReportTemplateConfig() == null
-//                || reportTemplateConfigDTO.getReportTemplateTags() == null) {
-//            log.error("动态报表配置信息为空！");
-//            throw new RuntimeException("动态报表配置信息为空");
-//        }
         ReportTemplateConfig reportTemplateConfig = reportTemplateConfigDTO.getReportTemplateConfig();
-        // TODO
-//        List<ReportTemplateTags> reportTemplateTags = reportTemplateConfigDTO.getReportTemplateTags();
-        List<ReportTemplateTags> reportTemplateTags = null;
-
-        Sheet sheet = workbook.getSheetAt(1); // tagSheet
-        List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(sheet); // 获取tagSheet首行的tagName
-        reportTemplateTags = reportTemplateTags.stream().sorted(Comparator.comparing(ReportTemplateTags::getSequence))
-                .collect(Collectors.toList()); // 根据sequence排序
-        if (tagNames.size() != reportTemplateTags.size()) {
-            throw new RuntimeException("动态报表tagSheet和配置中的tag点数量不一致");
+        List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = reportTemplateConfigDTO.getReportTemplateSheetDTOs();
+        // 对每个sheet进行数据写入
+        for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
+            ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
+            List<ReportTemplateTags> sheetTagList = reportTemplateSheetDTO.getReportTemplateTagsList();
+            sheetTagList.sort(Comparator.comparing(ReportTemplateTags::getSequence)); // 根据sequence排序
+            String sheetName = reportTemplateSheet.getSheetName();
+            String tagsSheetName =  "_tag_sheet_" + sheetName;
+            Sheet tagSheet = workbook.getSheet(tagsSheetName);
+            List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(tagSheet); // 获取tagSheet首行的tagName
+            if (tagNames.size() != sheetTagList.size()) {
+                throw new RuntimeException("动态报表tagSheet和配置中的tag点数量不一致");
+            }
+            List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementsByTargetNames(tagNames);
+            List<String> oldTagFormulas = targetManagements.stream().map(TargetManagement::getTargetFormula)
+                    .collect(Collectors.toList());
+            List<String> newTagFormulas = joinSuffix(oldTagFormulas, sheetTagList); // 拼接tag点前缀和后缀
+            SequenceEnum sequenceEnum = SequenceEnum.getSequenceEnumByCode(template.getSequence());
+            HandleQueryDataStrategy handleStrategy =
+                    handleQueryDataStrategyContext.getHandleQueryDataStrategy(sequenceEnum.getSequenceCode());
+            List<DateQuery> dateQuerys = handleStrategy.getDateQueries(recordDate, reportTemplateSheet); // 获取查询策略
+            if (CollectionUtils.isEmpty(dateQuerys)) {
+                log.error("生成查询策略失败！");
+                throw new RuntimeException("生成查询策略失败！");
+            }
+            HandleDataDTO handleDataDTO = HandleDataDTO.builder()
+                    .excelDTO(excelDTO)
+                    .workbook(workbook)
+                    .version(version)
+                    .newTagFormulas(newTagFormulas)
+                    .dateQuerys(dateQuerys)
+                    .reportTemplateSheet(reportTemplateSheet)
+                    .handleStrategy(handleStrategy)
+                    .build();
+            handleData(handleDataDTO);
         }
-        List<TargetManagement> targetManagements = targetManagementMapper.selectTargetManagementsByTargetNames(tagNames);
-        List<String> oldTagFormulas = targetManagements.stream().map(TargetManagement::getTargetFormula)
-                .collect(Collectors.toList());
-        List<String> newTagFormulas = joinSuffix(oldTagFormulas, reportTemplateTags); // 拼接tag点前缀和后缀
-        SequenceEnum sequenceEnum = SequenceEnum.getSequenceEnumByCode(template.getSequence());
-        HandleQueryDataStrategy handleStrategy =
-                handleQueryDataStrategyContext.getHandleQueryDataStrategy(sequenceEnum.getSequenceCode());
-        List<DateQuery> dateQuerys = handleStrategy.getDateQueries(recordDate, reportTemplateConfig); // 获取查询策略
-        if (CollectionUtils.isEmpty(dateQuerys)) {
-            log.error("生产查询策略失败！");
-            throw new RuntimeException("生产查询策略失败！");
-        }
-        HandleDataDTO handleDataDTO = HandleDataDTO.builder()
-                .excelDTO(excelDTO)
-                .workbook(workbook)
-                .version(version)
-                .newTagFormulas(newTagFormulas)
-                .dateQuerys(dateQuerys)
-                .reportTemplateConfig(reportTemplateConfig)
-                .handleStrategy(handleStrategy)
-                .build();
-        handleData(handleDataDTO);
-
         return workbook;
     }
 
@@ -158,13 +156,13 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
      * @param reportTemplateConfig
      * @param dateQuerys
      */
-    protected void writeTimeColumn(Sheet mainSheet, ReportTemplateConfig reportTemplateConfig, List<DateQuery> dateQuerys) {
+    protected void writeTimeColumn(Sheet mainSheet, ReportTemplateSheet reportTemplateSheet, List<DateQuery> dateQuerys) {
         Cell timeTitleCell = PoiCustomUtil.getCellByValue(mainSheet,"时间");
         int rowIndex = timeTitleCell.getRowIndex();
         int columnIndex = timeTitleCell.getColumnIndex();
-        String timeType = reportTemplateConfig.getTimeType();
+        String timeType = reportTemplateSheet.getTimeType();
         TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(timeType);
-        Integer timeDivideType = reportTemplateConfig.getTimeDivideType();
+        Integer timeDivideType = reportTemplateSheet.getTimeDivideType();
         TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(timeDivideType);
         for (int i = 0; i < dateQuerys.size(); i++) {
             DateQuery dateQuery = dateQuerys.get(i);
@@ -214,16 +212,14 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
      */
     protected void handleData(HandleDataDTO handleDataDTO) {
         Workbook workbook = handleDataDTO.getWorkbook();
-        WriterExcelDTO excelDTO = handleDataDTO.getExcelDTO();
         List<DateQuery> dateQuerys = handleDataDTO.getDateQuerys();
-        ReportTemplateConfig reportTemplateConfig = handleDataDTO.getReportTemplateConfig();
-
-        // 动态报表生成的模板默认取第二个sheet。
-        Sheet mainSheet = workbook.getSheetAt(0);
-        Sheet tagSheet = workbook.getSheetAt(1);
-        // 写入时间列
-        writeTimeColumn(mainSheet, reportTemplateConfig, dateQuerys);
-
+        ReportTemplateSheet reportTemplateSheet = handleDataDTO.getReportTemplateSheet();
+        String sheetName = reportTemplateSheet.getSheetName();
+        String tagSheetName = DynamicReportConstants.TAG_SHEET_NAME_PREFIX + sheetName;
+        Sheet reportSheet = workbook.getSheet(sheetName);
+        Sheet tagSheet = workbook.getSheet(tagSheetName);
+        writeTimeColumn(reportSheet, reportTemplateSheet, dateQuerys); // 写入时间列
+        // 写入每行数据
         for (int rowNum = 0; rowNum < dateQuerys.size(); rowNum++) {
             List<CellData> cellDataList = handleEachRowData(handleDataDTO, dateQuerys.get(rowNum), rowNum + 1);
             ExcelWriterUtil.setCellValue(tagSheet, cellDataList);

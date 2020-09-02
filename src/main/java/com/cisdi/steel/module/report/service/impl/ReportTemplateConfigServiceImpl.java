@@ -3,6 +3,7 @@ package com.cisdi.steel.module.report.service.impl;
 import cn.afterturn.easypoi.util.PoiMergeCellUtil;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.base.vo.BaseId;
+import com.cisdi.steel.common.constant.DynamicReportConstants;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
@@ -18,6 +19,7 @@ import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.enums.SequenceEnum;
+import com.cisdi.steel.module.report.enums.TemplateTypeEnum;
 import com.cisdi.steel.module.report.enums.TimeDivideEnum;
 import com.cisdi.steel.module.report.enums.TimeTypeEnum;
 import com.cisdi.steel.module.report.mapper.ReportTemplateConfigMapper;
@@ -35,8 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
@@ -47,14 +47,15 @@ import java.util.stream.Collectors;
 
 /**
  * <p>Description: 报表动态模板配置 服务实现类 </p>
- * <P>Date: 2019-12-11 </P>
+ * <P>Date: 2020-09-02 </P>
  *
  * @author cisdi
  * @version 1.0
  */
 @Service
 @Slf4j
-public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTemplateConfigMapper, ReportTemplateConfig> implements ReportTemplateConfigService {
+public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTemplateConfigMapper
+        , ReportTemplateConfig> implements ReportTemplateConfigService {
 
     //点位数据占位公式
     private static final String formula = "IF(cell%=\"\",\"\",cell%)";
@@ -69,7 +70,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     private static final int heightInPointsTitle = 45;//大标题行高度
     private static final int cellWidth = 14 * 256;//普通列宽度
     private static final int timeCellWidth = 18 * 256;//普通列宽度
-    private static final String avarageFormula = "IFERROR(AVERAGE(%s:%s), \"\")";
+    private static final String AVERAGE_FORMULA = "IFERROR(AVERAGE(%s:%s), \"\")";
     //默认小数点位
     private static final int defaultScale = 2;
     private Map<Long, TargetManagement> allTargetManagements;
@@ -91,10 +92,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO) {
+    public void saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO) {
         // 生成临时模板文件。
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
-        if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0){
+        if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0) {
             // 如果id存在则更新，不存在则新增
             this.updateRecord(reportTemplateConfig);
         } else {
@@ -129,18 +130,14 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             }
             reportTemplateTagsService.saveBatch(reportTemplateTagsList);
         }
-
-        log.info("保存模板配置成功，ID: " + reportTemplateConfig.getId());
-        //生成临时模板文件。
-        // TODO
+        // 生成临时模板文件
         String templateFilePath = this.generateTemplate(templateConfigDTO);
+        log.info("保存模板配置成功，ID: " + reportTemplateConfig.getId());
         log.info("成功生成模板文件，文件路径：" + templateFilePath);
 
-        //修改templatePath
-        reportTemplateConfig.setTemplatePath(null);
+        // 修改templatePath
+        reportTemplateConfig.setTemplatePath(templateFilePath);
         this.updateRecord(reportTemplateConfig);
-
-        return true;
     }
 
     @Override
@@ -181,63 +178,29 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         return ApiUtil.success("删除成功");
     }
 
-
+    /**
+     * 生成模板文件
+     * @param templateConfigDTO
+     * @return
+     */
     public String generateTemplate(ReportTemplateConfigDTO templateConfigDTO) {
         //通过templateConfig获取所有配置项。
-        List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = templateConfigDTO.getReportTemplateSheetDTOs();
-        for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
-            ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
-            List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
-        }
         try {
-            // TODO
-//            List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateTags();
-            List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateSheetDTOs().get(0).getReportTemplateTagsList();
-            if (CollectionUtils.isNotEmpty(reportTemplateTagsList)) {
-                // 过滤topParentId为空的tag，然后根据topParentId进行分组
-                Map<Long, List<ReportTemplateTags>> topParentIdToReportTemplateTags =
-                        reportTemplateTagsList.stream().filter(e -> Objects.nonNull(e.getTopParentId()))
-                                .collect(Collectors.groupingBy(ReportTemplateTags::getTopParentId));
-                // 顶级分类和底层tag点的map
-                LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap = new LinkedHashMap<>();
-                for (ReportTemplateTags reportTemplateTags : reportTemplateTagsList) {
-                    Long topParentId = reportTemplateTags.getTopParentId();
-                    if (Objects.isNull(topParentId)) {
-                        List<ReportTemplateTags> tagList = new ArrayList<>();
-                        tagList.add(reportTemplateTags);
-                        // 没有顶层分类，则key设置为本身
-                        topTypeToTagsMap.put(reportTemplateTags, tagList);
-                    } else {
-                        if (!topTypeToTagsMap.containsKey(topParentId)) {
-                            topTypeToTagsMap.put(topParentId, topParentIdToReportTemplateTags.get(topParentId));
-                        }
-                    }
-                }
-
-                allTargetManagements = targetManagementMapper.selectAllTargetManagement();
-
-                // 原始代码
-                List<Long> targetIds = reportTemplateTagsList.stream().map(ReportTemplateTags::getTargetId).collect(Collectors.toList());
-                //通过配置获取所有tag management.
-                Collection<TargetManagement> targetManagements = targetManagementService.listByIds(targetIds);
-
-                //构建target map。
-                LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap = new LinkedHashMap<ReportTemplateTags, TargetManagement>();
-                for (int i = 0; i < reportTemplateTagsList.size(); i++) {
-                    ReportTemplateTags reportTemplateTags = reportTemplateTagsList.get(i);
-                    TargetManagement targetManagement = targetManagements.stream().filter(target -> target.getId().equals(reportTemplateTags.getTargetId())).collect(Collectors.toList()).get(0);
-                    tagsMap.put(reportTemplateTags, targetManagement);
-                }
-
-                String generatedExcelFilePath = generateReportTemplateExcel(templateConfigDTO, tagsMap, topTypeToTagsMap);
-                log.debug("生成报表临时模板文件: " + generatedExcelFilePath);
-                return generatedExcelFilePath;
+            allTargetManagements = targetManagementMapper.selectAllTargetManagement();
+            Integer templateType = templateConfigDTO.getReportTemplateConfig().getTemplateType();
+            TemplateTypeEnum templateTypeEnum = TemplateTypeEnum.getByCode(templateType);
+            String generatedExcelFilePath;
+            switch (templateTypeEnum) {
+                default:
+                    generatedExcelFilePath = generateReportTemplateExcel(templateConfigDTO);
+                    break;
             }
+            log.debug("生成报表临时模板文件: " + generatedExcelFilePath);
+            return generatedExcelFilePath;
         } catch (Exception e) {
             log.error("根据报表配置生成模板文件失败", e);
+            throw new RuntimeException(e.getMessage());
         }
-
-        return null;
     }
 
     /**
@@ -276,46 +239,44 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     /**
      * 创建主sheet(第一个sheet)
      * @param workbook
-     * @param templateConfigDTO
+     * @param templateSheetDTO
      * @param tagsMap
      * @param topTypeToTagsMap
      * @param tagsSheetName
      */
-    private void createReportSheet(Workbook workbook, ReportTemplateConfigDTO templateConfigDTO,
+    private void createReportSheet(Workbook workbook, ReportTemplateSheetDTO templateSheetDTO,
                                        LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap,
                                        LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap,
                                        String tagsSheetName) {
-        // TODO
-//        List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateTags();
-        List<ReportTemplateTags> reportTemplateTagsList = templateConfigDTO.getReportTemplateSheetDTOs().get(0).getReportTemplateTagsList();
-        ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
+        List<ReportTemplateTags> reportTemplateTagsList = templateSheetDTO.getReportTemplateTagsList();
+        ReportTemplateSheet reportTemplateSheet = templateSheetDTO.getReportTemplateSheet();
         // 获取最大层级
         Integer maxHierarchy = reportTemplateTagsList.stream().map(e -> getHierarchyBetweenTag(e.getTargetId(), e.getTopParentId()))
                 .max(Integer::compareTo).orElse(0);
         int tagsMapSize = tagsMap.keySet().size();
-        //创建第一个sheet
-        Sheet firstSheet = workbook.createSheet(firstSheetName);
-        //设置标题及样式
-        Row secondTitleRow = ExcelWriterUtil.getRowOrCreate(firstSheet, REPORT_TITLE_ROW_INDEX);
-        PoiCustomUtil.addMergedRegion(firstSheet, 1, 1, 1, tagsMapSize + 1);
+        // 创建reportSheet
+        Sheet reportSheet = workbook.createSheet(reportTemplateSheet.getSheetName());
+        // 设置标题及样式
+        Row secondTitleRow = ExcelWriterUtil.getRowOrCreate(reportSheet, REPORT_TITLE_ROW_INDEX);
+        PoiCustomUtil.addMergedRegion(reportSheet, 1, 1, 1, tagsMapSize + 1);
         for (int j = 1; j <= tagsMapSize + 1; j++) {
             Cell cell = ExcelWriterUtil.getCellOrCreate(secondTitleRow, j);
             cell.setCellStyle(ExcelStyleUtil.getHeaderTitleStyle(workbook));
         }
         Cell titleCell = ExcelWriterUtil.getCellOrCreate(secondTitleRow, 1);
-        titleCell.setCellValue(reportTemplateConfig.getTemplateName());
+        titleCell.setCellValue(reportTemplateSheet.getSheetTitle());
         secondTitleRow.setHeightInPoints(heightInPointsTitle);//设置行高
         CellStyle headerTitleStyle = ExcelStyleUtil.getHeaderTitleStyle(workbook);
         titleCell.setCellStyle(headerTitleStyle);
 
         int lastRowOfTagNames = REPORT_TITLE_ROW_INDEX + maxHierarchy; // 子节点tag点行号
-        Row lastTagsNameRow = ExcelWriterUtil.getRowOrCreate(firstSheet, lastRowOfTagNames);
+        Row lastTagsNameRow = ExcelWriterUtil.getRowOrCreate(reportSheet, lastRowOfTagNames);
         // 项目
-        Row tagsNameRow = ExcelWriterUtil.getRowOrCreate(firstSheet, TARGET_NAME_BEGIN_ROW);
-        PoiMergeCellUtil.addMergedRegion(firstSheet, TARGET_NAME_BEGIN_ROW, lastRowOfTagNames,1, 1);
+        Row tagsNameRow = ExcelWriterUtil.getRowOrCreate(reportSheet, TARGET_NAME_BEGIN_ROW);
+        PoiMergeCellUtil.addMergedRegion(reportSheet, TARGET_NAME_BEGIN_ROW, lastRowOfTagNames,1, 1);
         // 设置项目单元格的样式
         for (int i = TARGET_NAME_BEGIN_ROW; i <= lastRowOfTagNames; i++) {
-            Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, i);
+            Row itemRow = ExcelWriterUtil.getRowOrCreate(reportSheet, i);
             Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, firstDataColumnIndex - 1);
             itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
         }
@@ -323,12 +284,12 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         tagsNameRowFirstCell.setCellValue("项目");
         tagsNameRow.setHeightInPoints(heightInPointsHeader);
         // 时间
-        Row unitRow = ExcelWriterUtil.getRowOrCreate(firstSheet, lastRowOfTagNames + 1);
+        Row unitRow = ExcelWriterUtil.getRowOrCreate(reportSheet, lastRowOfTagNames + 1);
         Cell unitRowFirstCell = ExcelWriterUtil.getCellOrCreate(unitRow, firstDataColumnIndex - 1);
         unitRowFirstCell.setCellValue("时间");
         unitRowFirstCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
         unitRow.setHeightInPoints(heightInPointsHeader);
-        firstSheet.setColumnWidth(firstDataColumnIndex - 1, timeCellWidth);
+        reportSheet.setColumnWidth(firstDataColumnIndex - 1, timeCellWidth);
 
         // 填充表头,添加具体的tags name和unit
         int topParentColumnIndex = firstDataColumnIndex;
@@ -339,9 +300,9 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             // 没有topParent的点
             if (key instanceof ReportTemplateTags) {
                 // 上下合并空行
-                PoiMergeCellUtil.addMergedRegion(firstSheet, TARGET_NAME_BEGIN_ROW, lastRowOfTagNames, topParentColumnIndex, topParentColumnIndex);
+                PoiMergeCellUtil.addMergedRegion(reportSheet, TARGET_NAME_BEGIN_ROW, lastRowOfTagNames, topParentColumnIndex, topParentColumnIndex);
                 for (int i = TARGET_NAME_BEGIN_ROW; i <= lastRowOfTagNames; i++) {
-                    Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, i);
+                    Row itemRow = ExcelWriterUtil.getRowOrCreate(reportSheet, i);
                     Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, topParentColumnIndex);
                     itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                 }
@@ -359,10 +320,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 Long topParentId = Long.valueOf(String.valueOf(key));
                 int sonTagSizeOfCurrentTopParent = tagsList.size();
                 // 横向合并一级表头
-                PoiMergeCellUtil.addMergedRegion(firstSheet, TARGET_NAME_BEGIN_ROW, TARGET_NAME_BEGIN_ROW, topParentColumnIndex, topParentColumnIndex + sonTagSizeOfCurrentTopParent - 1);
+                PoiMergeCellUtil.addMergedRegion(reportSheet, TARGET_NAME_BEGIN_ROW, TARGET_NAME_BEGIN_ROW, topParentColumnIndex, topParentColumnIndex + sonTagSizeOfCurrentTopParent - 1);
                 Cell topParentCell = ExcelWriterUtil.getCellOrCreate(tagsNameRow, topParentColumnIndex);
                 for (int i = topParentColumnIndex; i <= topParentColumnIndex + sonTagSizeOfCurrentTopParent - 1; i++) {
-                    Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, TARGET_NAME_BEGIN_ROW);
+                    Row itemRow = ExcelWriterUtil.getRowOrCreate(reportSheet, TARGET_NAME_BEGIN_ROW);
                     Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, i);
                     itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                 }
@@ -382,7 +343,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                         TargetManagement parentTargetManagement = targetManagement;
                         for (Integer i = 0; i < hierarchyBetweenTag - 2; i++) {
                             parentTargetManagement = allTargetManagements.get(parentTargetManagement.getParentId());
-                            Row tagsRow = ExcelWriterUtil.getRowOrCreate(firstSheet, lastRowOfTagNames - i - 1 - numbersNeedToMerge);
+                            Row tagsRow = ExcelWriterUtil.getRowOrCreate(reportSheet, lastRowOfTagNames - i - 1 - numbersNeedToMerge);
                             Cell tagCell = ExcelWriterUtil.getCellOrCreate(tagsRow, eachSonTagColumn);
                             tagCell.setCellValue(parentTargetManagement.getWrittenName());
                             tagCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
@@ -392,13 +353,13 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     Cell lastTagCell;
                     if (numbersNeedToMerge > 0) {
                         // 上下合并空余行数和子节点单元格
-                        PoiMergeCellUtil.addMergedRegion(firstSheet, lastRowOfTagNames - numbersNeedToMerge, lastRowOfTagNames, eachSonTagColumn, eachSonTagColumn);
+                        PoiMergeCellUtil.addMergedRegion(reportSheet, lastRowOfTagNames - numbersNeedToMerge, lastRowOfTagNames, eachSonTagColumn, eachSonTagColumn);
                         for (int i = lastRowOfTagNames - numbersNeedToMerge; i <= lastRowOfTagNames; i++) {
-                            Row itemRow = ExcelWriterUtil.getRowOrCreate(firstSheet, i);
+                            Row itemRow = ExcelWriterUtil.getRowOrCreate(reportSheet, i);
                             Cell itemCell = ExcelWriterUtil.getCellOrCreate(itemRow, eachSonTagColumn);
                             itemCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
                         }
-                        Row tagOfMergeBeginRow = ExcelWriterUtil.getRowOrCreate(firstSheet, lastRowOfTagNames - numbersNeedToMerge);
+                        Row tagOfMergeBeginRow = ExcelWriterUtil.getRowOrCreate(reportSheet, lastRowOfTagNames - numbersNeedToMerge);
                         lastTagCell = ExcelWriterUtil.getCellOrCreate(tagOfMergeBeginRow, eachSonTagColumn);
                     } else {
                         // 写入最后子节点数据
@@ -415,7 +376,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 // 横向合并连续且相同名称的单元格
                 for (int rowIndex = TARGET_NAME_BEGIN_ROW + 1; rowIndex < lastRowOfTagNames; rowIndex++) {
                     List<Cell> cellList = new ArrayList<>();
-                    Row rowToMergeSameCell = ExcelWriterUtil.getRowOrCreate(firstSheet, rowIndex);
+                    Row rowToMergeSameCell = ExcelWriterUtil.getRowOrCreate(reportSheet, rowIndex);
                     for (int tagIndex = 0; tagIndex < sonTagSizeOfCurrentTopParent; tagIndex++) {
                         int eachSonTagColumn = tagIndex + topParentColumnIndex;
                         Cell cell = ExcelWriterUtil.getCellOrCreate(rowToMergeSameCell, eachSonTagColumn);
@@ -445,7 +406,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                         int sameCellRowIndex = cell.getRowIndex();
                         int sameCellColumnIndex = cell.getColumnIndex();
                         if (cellSameTime > 1) {
-                            PoiMergeCellUtil.addMergedRegion(firstSheet, sameCellRowIndex, sameCellRowIndex, sameCellColumnIndex, sameCellColumnIndex + cellSameTime - 1);
+                            PoiMergeCellUtil.addMergedRegion(reportSheet, sameCellRowIndex, sameCellRowIndex, sameCellColumnIndex, sameCellColumnIndex + cellSameTime - 1);
                         }
                     }
                 }
@@ -455,21 +416,21 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             }
         }
         // 写入时间列数据 写入tag点引用公式 平均值公式
-        setTimeAndFormula(firstSheet, workbook, reportTemplateConfig, tagsMap, tagsSheetName, lastRowOfTagNames);
+        setTimeAndFormula(reportSheet, workbook, reportTemplateSheet, tagsMap, tagsSheetName, lastRowOfTagNames);
     }
 
-    private void setTimeAndFormula(Sheet firstSheet, Workbook workbook, ReportTemplateConfig reportTemplateConfig, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap,
+    private void setTimeAndFormula(Sheet firstSheet, Workbook workbook, ReportTemplateSheet reportTemplateSheet, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap,
                                      String tagsSheetName, int lastRowOfTagNames) {
         // 生成时间
         // 获取时间范围类型
         String timeUnit = ":00";
-        int interval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval()); // 时间间隔
+        int interval = Integer.valueOf(reportTemplateSheet.getTimeslotInterval()); // 时间间隔
         Integer startTimeSlot = null, endTimeSlot = null, maxRow = null;
-        TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(reportTemplateConfig.getTimeDivideType());
-        TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(reportTemplateConfig.getTimeType());
+        TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(reportTemplateSheet.getTimeDivideType());
+        TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(reportTemplateSheet.getTimeType());
         if (timeTypeEnum.equals(TimeTypeEnum.TIME_RANGE)) {
-            startTimeSlot = Integer.valueOf(reportTemplateConfig.getStartTimeslot());
-            endTimeSlot = Integer.valueOf(reportTemplateConfig.getEndTimeslot());
+            startTimeSlot = Integer.valueOf(reportTemplateSheet.getStartTimeslot());
+            endTimeSlot = Integer.valueOf(reportTemplateSheet.getEndTimeslot());
             maxRow = (endTimeSlot - startTimeSlot) / interval + 1;
             switch (timeDivideEnum) {
                 case HOUR:
@@ -495,7 +456,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     break;
             }
         } else {
-            maxRow = Integer.valueOf(reportTemplateConfig.getLastTimeslot()) / interval;
+            maxRow = Integer.valueOf(reportTemplateSheet.getLastTimeslot()) / interval;
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -575,7 +536,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         }
 
         //添加汇总值到最后
-        if ("1".equals(reportTemplateConfig.getIsAddAvg())) {
+        if ("1".equals(reportTemplateSheet.getIsAddAvg())) {
             Row summaryRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstSheet.getLastRowNum() + 1);
             Cell averageCell = ExcelWriterUtil.getCellOrCreate(summaryRow, 1);
             averageCell.setCellValue("平均值");
@@ -587,7 +548,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 String columnLetter = letterArray[firstDataColumnIndex + k];
                 String avgBegin = columnLetter + (firstDataRowIndex + 1);
                 String avgEnd = columnLetter + (firstDataRowIndex + maxRow);
-                String formula = String.format(avarageFormula, avgBegin, avgEnd);
+                String formula = String.format(AVERAGE_FORMULA, avgBegin, avgEnd);
                 cell.setCellFormula(formula);
                 cell.setCellType(CellType.FORMULA);
                 // 设置平均值单元格样式和小数点位
@@ -614,22 +575,33 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     /**
      * 创建excel
      * @param templateConfigDTO
-     * @param tagsMap
-     * @param topTypeToTagsMap
      * @return
      * @throws Exception
      */
-    private String generateReportTemplateExcel(ReportTemplateConfigDTO templateConfigDTO, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap, LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap) throws Exception {
+    private String generateReportTemplateExcel(ReportTemplateConfigDTO templateConfigDTO) throws Exception {
         Workbook workbook = new XSSFWorkbook();
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
         List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = templateConfigDTO.getReportTemplateSheetDTOs();
+        reportTemplateSheetDTOs.sort(Comparator.comparing(e -> e.getReportTemplateSheet().getSequence()));
         for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
             ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
             List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
             //创建每个report sheet
             String sheetName = reportTemplateSheet.getSheetName();
-            String tagsSheetName =  "_tag_sheet_" + sheetName;
-            createReportSheet(workbook, templateConfigDTO, tagsMap, topTypeToTagsMap, tagsSheetName);
+            String tagsSheetName = DynamicReportConstants.TAG_SHEET_NAME_PREFIX + sheetName;
+            LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap = getTopTypeToTagsMap(reportTemplateSheetDTO);
+            // 原始代码
+            List<Long> targetIds = reportTemplateTagsList.stream().map(ReportTemplateTags::getTargetId).collect(Collectors.toList());
+            // 通过配置获取所有targetmanagement
+            Collection<TargetManagement> targetManagements = targetManagementService.listByIds(targetIds);
+            // 构建target map。
+            LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap = new LinkedHashMap<ReportTemplateTags, TargetManagement>();
+            for (int i = 0; i < reportTemplateTagsList.size(); i++) {
+                ReportTemplateTags reportTemplateTags = reportTemplateTagsList.get(i);
+                TargetManagement targetManagement = targetManagements.stream().filter(target -> target.getId().equals(reportTemplateTags.getTargetId())).collect(Collectors.toList()).get(0);
+                tagsMap.put(reportTemplateTags, targetManagement);
+            }
+            createReportSheet(workbook, reportTemplateSheetDTO, tagsMap, topTypeToTagsMap, tagsSheetName);
             // 创建tags sheet并且填充点位信息
             createTagsSheet(workbook, tagsMap, tagsSheetName);
         }
@@ -649,6 +621,35 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         fos.close();
 
         return excelFileName;
+    }
+
+    public LinkedHashMap<Object, List<ReportTemplateTags>> getTopTypeToTagsMap(ReportTemplateSheetDTO reportTemplateSheetDTO) {
+        //通过templateConfig获取所有配置项。
+        List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
+        if (CollectionUtils.isNotEmpty(reportTemplateTagsList)) {
+            // 过滤topParentId为空的tag，然后根据topParentId进行分组
+            Map<Long, List<ReportTemplateTags>> topParentIdToReportTemplateTags =
+                    reportTemplateTagsList.stream().filter(e -> Objects.nonNull(e.getTopParentId()))
+                            .collect(Collectors.groupingBy(ReportTemplateTags::getTopParentId));
+            // 顶级分类和底层tag点的map
+            LinkedHashMap<Object, List<ReportTemplateTags>> topTypeToTagsMap = new LinkedHashMap<>();
+            for (ReportTemplateTags reportTemplateTags : reportTemplateTagsList) {
+                Long topParentId = reportTemplateTags.getTopParentId();
+                if (Objects.isNull(topParentId)) {
+                    List<ReportTemplateTags> tagList = new ArrayList<>();
+                    tagList.add(reportTemplateTags);
+                    // 没有顶层分类，则key设置为本身
+                    topTypeToTagsMap.put(reportTemplateTags, tagList);
+                } else {
+                    if (!topTypeToTagsMap.containsKey(topParentId)) {
+                        topTypeToTagsMap.put(topParentId, topParentIdToReportTemplateTags.get(topParentId));
+                    }
+                }
+            }
+            return topTypeToTagsMap;
+
+        }
+        return null;
     }
 
     /**
