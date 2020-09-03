@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 public class ReportTemplateConfigDTO {
-    @NotNull
+    @NotNull(message = "模板配置信息不能为空")
     @Valid
     private ReportTemplateConfig reportTemplateConfig;
     @NotEmpty(message = "模板sheet列表不能为空")

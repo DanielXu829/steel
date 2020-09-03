@@ -56,7 +56,7 @@ public class ReportTemplateConfigController {
             reportTemplateConfigService.saveOrUpdateDTO(configDTO);
         } catch (Exception e) {
             log.error("保存报表模板失败", e);
-            return ApiUtil.fail(e.getMessage());
+            return ApiUtil.fail("保存报表模板失败");
         }
         return ApiUtil.success("保存报表模板成功", configDTO);
     }

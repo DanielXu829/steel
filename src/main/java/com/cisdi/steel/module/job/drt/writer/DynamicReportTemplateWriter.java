@@ -1,6 +1,5 @@
 package com.cisdi.steel.module.job.drt.writer;
 
-import com.cisdi.steel.common.constant.DynamicReportConstants;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
@@ -18,6 +17,7 @@ import com.cisdi.steel.module.report.entity.*;
 import com.cisdi.steel.module.report.enums.*;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
+import com.cisdi.steel.module.report.util.ReportConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -28,9 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -84,8 +81,8 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
             ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
             List<ReportTemplateTags> sheetTagList = reportTemplateSheetDTO.getReportTemplateTagsList();
             sheetTagList.sort(Comparator.comparing(ReportTemplateTags::getSequence)); // 根据sequence排序
-            String sheetName = reportTemplateSheet.getSheetName();
-            String tagsSheetName =  "_tag_sheet_" + sheetName;
+            String sheetName = reportTemplateSheet.getSheetTitle();
+            String tagsSheetName =  ReportConstants.TAG_SHEET_NAME_PREFIX + sheetName;
             Sheet tagSheet = workbook.getSheet(tagsSheetName);
             List<String> tagNames = PoiCustomUtil.getFirstRowCelVal(tagSheet); // 获取tagSheet首行的tagName
             if (tagNames.size() != sheetTagList.size()) {
@@ -214,8 +211,8 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         Workbook workbook = handleDataDTO.getWorkbook();
         List<DateQuery> dateQuerys = handleDataDTO.getDateQuerys();
         ReportTemplateSheet reportTemplateSheet = handleDataDTO.getReportTemplateSheet();
-        String sheetName = reportTemplateSheet.getSheetName();
-        String tagSheetName = DynamicReportConstants.TAG_SHEET_NAME_PREFIX + sheetName;
+        String sheetName = reportTemplateSheet.getSheetTitle();
+        String tagSheetName = ReportConstants.TAG_SHEET_NAME_PREFIX + sheetName;
         Sheet reportSheet = workbook.getSheet(sheetName);
         Sheet tagSheet = workbook.getSheet(tagSheetName);
         writeTimeColumn(reportSheet, reportTemplateSheet, dateQuerys); // 写入时间列

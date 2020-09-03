@@ -39,7 +39,6 @@ public class ReportTemplateConfig extends Model<ReportTemplateConfig> {
     /**
      * 模板的名称
      */
-    @NotBlank(message = "模板名称不能为空")
     private String templateName;
 
     /**

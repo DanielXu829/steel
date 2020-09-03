@@ -5,6 +5,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class TargetManagementUtil {
 
@@ -83,6 +85,37 @@ public class TargetManagementUtil {
      */
     public static boolean hasChild(List<TargetManagement> list, TargetManagement t) {
         return getChildList(list, t).size() > 0;
+    }
+
+    /**
+     * 获取子节点和父节点之间的层级数
+     * @param targetId
+     * @param parentId
+     * @return
+     */
+    public static Integer getHierarchyBetweenTag(Map<Long, TargetManagement> allTargetManagements, Long targetId, Long parentId) {
+        Integer number = 1;
+        // 没有父节点 返回一层
+        if (Objects.isNull(parentId)) {
+            return number;
+        }
+        // 同一个点 返回一层
+        if (targetId == parentId) {
+            return number;
+        }
+        Long tmpTargetId = targetId;
+        TargetManagement targetManagement = allTargetManagements.get(tmpTargetId);
+        while (targetManagement.getParentId() != ReportConstants.TOP_PARENT_ID) {
+            tmpTargetId = targetManagement.getParentId();
+            number++;
+            if (tmpTargetId.equals(parentId)) {
+                return number;
+            } else {
+                targetManagement = allTargetManagements.get(tmpTargetId);
+            }
+        }
+        // targetId和parentId之间没有父子关系
+        return null;
     }
 
 }

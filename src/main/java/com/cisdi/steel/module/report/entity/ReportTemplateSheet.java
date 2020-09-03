@@ -18,7 +18,7 @@ public class ReportTemplateSheet extends Model<ReportTemplateSheet> {
     private Long id;
 
     /**
-     * 对应report_tempalte_config中的id
+     * 对应report_template_config中的id
      */
     private Long templateConfigId;
 
@@ -26,11 +26,6 @@ public class ReportTemplateSheet extends Model<ReportTemplateSheet> {
      * sheet的标题
      */
     private String sheetTitle;
-
-    /**
-     * sheet的名称
-     */
-    private String sheetName;
 
     /**
      * 时间划分方式
