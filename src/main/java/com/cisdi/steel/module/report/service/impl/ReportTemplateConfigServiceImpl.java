@@ -22,10 +22,7 @@ import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
 import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.module.report.entity.TargetManagement;
-import com.cisdi.steel.module.report.enums.SequenceEnum;
-import com.cisdi.steel.module.report.enums.TemplateTypeEnum;
-import com.cisdi.steel.module.report.enums.TimeDivideEnum;
-import com.cisdi.steel.module.report.enums.TimeTypeEnum;
+import com.cisdi.steel.module.report.enums.*;
 import com.cisdi.steel.module.report.mapper.ReportTemplateConfigMapper;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
@@ -45,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
@@ -198,8 +196,9 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
             Integer templateType = reportTemplateConfig.getTemplateType();
             String templateName = reportTemplateConfig.getTemplateName();
+            // TODO 前端没传，默认给个值
             if (StringUtils.isBlank(templateName)) {
-                templateName = UUID.randomUUID().toString();
+                templateName = templateConfigDTO.getReportTemplateSheetDTOs().get(0).getReportTemplateSheet().getSheetTitle();
                 reportTemplateConfig.setTemplateName(templateName);
             }
             TemplateTypeEnum templateTypeEnum = TemplateTypeEnum.getByCode(templateType);
@@ -233,43 +232,52 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         reportTemplateSheetDTOs.sort(Comparator.comparing(e -> e.getReportTemplateSheet().getSequence()));
         WordTitleConfigDTO wordTitleConfigDTO = WordTitleConfigDTO.getDefaultWordTitleConfigDTO();
         XWPFDocument document = new XWPFDocument();
-        if (Objects.nonNull(templateName)) {
-            // 文档标题
-            ExportWordUtil.createParagraph(document, templateName, wordTitleConfigDTO);
-        }
+        // 文档标题
+        ExportWordUtil.createParagraph(document, templateName, wordTitleConfigDTO);
         // 时间行
         wordTitleConfigDTO.setFontSize(16).setParagraphAlignment(ParagraphAlignment.LEFT);
         ExportWordUtil.createParagraph(document, "时间：{{current_date}}", wordTitleConfigDTO);
 
-        int tagIndex = 1;
+        int sheetIndex = 1;
         for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
-            // TODO 判断是纯文本还是图片
-            // TODO 设置页眉
-            // TODO 行间距
             ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
             List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
             reportTemplateTagsList.sort(Comparator.comparing(ReportTemplateTags::getSequence));
             // 创建每个段落
+            // TODO 设置页眉
+            // TODO 行间距
             String sheetTitle = reportTemplateSheet.getSheetTitle();
             wordTitleConfigDTO.setFontSize(16).setIsBold(true);
             ExportWordUtil.createParagraph(document, sheetTitle, wordTitleConfigDTO);
             wordTitleConfigDTO.setFontSize(12).setIsBold(false);
-            StringJoiner joiner = new StringJoiner("、", "今日", "。");
-            for (ReportTemplateTags reportTemplateTags : reportTemplateTagsList) {
-                Long targetId = reportTemplateTags.getTargetId();
-                TargetManagement targetManagement = allTargetManagements.get(targetId);
-                StringBuilder singleTagText = new StringBuilder();
-                StringBuilder singleTargetText = singleTagText.append(targetManagement.getWrittenName())
-                        .append(String.format("{{target%s}}", tagIndex))
-                        .append(targetManagement.getUnit())
-                        .append("、").append("较昨日")
-                        .append(String.format("{{compare%s}}", tagIndex))
-                        .append(String.format("{{difference%s}}", tagIndex))
-                        .append(targetManagement.getUnit());
-                joiner.add(singleTargetText);
-                tagIndex++;
+            // 判断是纯文本还是图片
+            WordTypeEnum wordTypeEnum =
+                    WordTypeEnum.getByCode(reportTemplateSheet.getWordType());
+            switch (wordTypeEnum) {
+                case LINE_CHART:
+                    ExportWordUtil.createParagraph(document, String.format("{{chart%s}}", sheetIndex), wordTitleConfigDTO);
+                    break;
+                default:
+                    StringJoiner joiner = new StringJoiner("、", "今日", "。");
+                    int tagIndex = 1;
+                    for (ReportTemplateTags reportTemplateTags : reportTemplateTagsList) {
+                        Long targetId = reportTemplateTags.getTargetId();
+                        TargetManagement targetManagement = allTargetManagements.get(targetId);
+                        StringBuilder singleTagText = new StringBuilder();
+                        StringBuilder singleTargetText = singleTagText.append(targetManagement.getWrittenName())
+                                .append(String.format("{{sheet%s_tag%s}}", sheetIndex, tagIndex))
+                                .append(targetManagement.getUnit())
+                                .append("、").append("较昨日")
+                                .append(String.format("{{sheet%s_compare%s}}", sheetIndex, tagIndex))
+                                .append(String.format("{{sheet%s_difference%s}}", sheetIndex, tagIndex))
+                                .append(targetManagement.getUnit());
+                        joiner.add(singleTargetText);
+                        tagIndex++;
+                    }
+                    ExportWordUtil.createParagraph(document, joiner.toString(), wordTitleConfigDTO);
+                    break;
             }
-            ExportWordUtil.createParagraph(document, joiner.toString(), wordTitleConfigDTO);
+            sheetIndex++;
         }
 
         String tempPath = jobProperties.getTempPath();

@@ -4,7 +4,10 @@ import cn.afterturn.easypoi.word.WordExportUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.module.job.config.JobProperties;
 import com.cisdi.steel.module.job.drt.dto.DrtWriterDTO;
+import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
+import com.cisdi.steel.module.report.dto.ReportTemplateSheetDTO;
 import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
+import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
 import com.cisdi.steel.module.report.service.ReportIndexService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @SuppressWarnings("ALL")
@@ -29,6 +33,13 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
     public XWPFDocument drtWriter(DrtWriterDTO drtWriterDTO) {
         ReportCategoryTemplate currentTemplate = drtWriterDTO.getTemplate();
         Date recordDate = drtWriterDTO.getDateQuery().getRecordDate();
+        ReportCategoryTemplate template = drtWriterDTO.getTemplate();
+
+        ReportTemplateConfigDTO reportTemplateConfigDTO =
+                reportTemplateConfigService.getDTOById(template.getTemplateConfigId());
+        ReportTemplateConfig reportTemplateConfig = reportTemplateConfigDTO.getReportTemplateConfig();
+        List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = reportTemplateConfigDTO.getReportTemplateSheetDTOs();
+
 
         HashMap<String, Object> result = new HashMap<>();
         Date date = DateUtil.addDays(new Date(), -1);
