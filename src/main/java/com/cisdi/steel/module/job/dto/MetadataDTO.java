@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.job.dto;
 
 import com.cisdi.steel.common.util.DateUtil;
+import com.cisdi.steel.module.job.drt.dto.DrtWriterDTO;
 import com.cisdi.steel.module.job.enums.JobExecuteEnum;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.enums.ReportTemplateTypeEnum;
@@ -119,6 +120,33 @@ public class MetadataDTO {
         this.buildType = Objects.isNull(excelDTO.getJobExecuteEnum()) ? JobExecuteEnum.automatic.getName() : excelDTO.getJobExecuteEnum().getName();
         this.excelFile = excelDTO.getExcelPathInfo().getSaveFilePath();
         this.buildStartTime = DateUtil.getFormatDateTime(excelDTO.getStartTime(), DateUtil.fullFormat);
+        this.buildEndTime = DateUtil.getFormatDateTime(date, DateUtil.fullFormat);
+    }
+
+    /**
+     * 默认构造器
+     * 开始时间尚未设置
+     *
+     * @param drtWriterDTO 数据
+     */
+    public MetadataDTO(DrtWriterDTO drtWriterDTO) {
+        Date date = new Date();
+        this.dateTime = Objects.isNull(drtWriterDTO.getDateQuery()) ? date : drtWriterDTO.getDateQuery().getRecordDate();
+        this.templateName = drtWriterDTO.getTemplate().getTemplateName();
+        String templateType = drtWriterDTO.getTemplate().getTemplateType();
+        this.type = ReportTemplateTypeEnum.getType(templateType).getName();
+        this.templatePath = drtWriterDTO.getTemplate().getTemplatePath();
+        this.autoBuild = "Enable";
+        this.build = drtWriterDTO.getTemplate().getBuild();
+        this.buildUnit = drtWriterDTO.getTemplate().getBuildUnit();
+        this.autoBuildDelay = drtWriterDTO.getTemplate().getBuildDelay();
+        this.autoBuildDelayUnit = drtWriterDTO.getTemplate().getBuildDelayUnit();
+        this.language = drtWriterDTO.getTemplate().getTemplateLang();
+        this.blowingInDate = DateUtil.getFormatDateTime(date, DateUtil.yyyyMMddFormat);
+
+        this.buildType = Objects.isNull(drtWriterDTO.getJobExecuteEnum()) ? JobExecuteEnum.automatic.getName() : drtWriterDTO.getJobExecuteEnum().getName();
+        this.excelFile = drtWriterDTO.getExcelPathInfo().getSaveFilePath();
+        this.buildStartTime = DateUtil.getFormatDateTime(drtWriterDTO.getStartTime(), DateUtil.fullFormat);
         this.buildEndTime = DateUtil.getFormatDateTime(date, DateUtil.fullFormat);
     }
 

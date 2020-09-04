@@ -180,15 +180,7 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
     @TableField("template_config_id")
     private Long templateConfigId;
 
-    /**
-     * 动态报表创建时间 普通报表为空
-     */
-    @TableField(exist = false)
     private Date createdTime;
 
-    /**
-     * 动态报表更新时间  普通报表为空
-     */
-    @TableField(exist = false)
     private Date updatedTime;
 }

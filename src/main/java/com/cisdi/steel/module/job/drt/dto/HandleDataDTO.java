@@ -16,7 +16,7 @@ import java.util.List;
 @Accessors(chain = true)
 @Builder(toBuilder = true)
 public class HandleDataDTO {
-    private WriterExcelDTO excelDTO;
+    private DrtWriterDTO drtWriterDTO;
     private Workbook workbook;
     private String version;
     private List<String> newTagFormulas;

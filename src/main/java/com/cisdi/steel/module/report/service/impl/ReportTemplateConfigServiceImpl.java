@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.report.service.impl;
 
 import cn.afterturn.easypoi.util.PoiMergeCellUtil;
+import com.alibaba.fastjson.JSON;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.exception.LeafException;
@@ -40,14 +41,10 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
@@ -103,10 +100,14 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     public void saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO) {
         // 生成临时模板文件。
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
+        reportTemplateConfig.setTemplateConfigJsonString(JSON.toJSONString(templateConfigDTO));
         if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0) {
             // 如果id存在则更新，不存在则新增
+            reportTemplateConfig.setUpdatedTime(new Date());
             this.updateRecord(reportTemplateConfig);
         } else {
+            reportTemplateConfig.setCreatedTime(new Date());
+            reportTemplateConfig.setUpdatedTime(new Date());
             this.insertRecord(reportTemplateConfig);
         }
 

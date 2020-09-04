@@ -1,14 +1,15 @@
 package com.cisdi.steel.module.job.drt.writer;
 
+import cn.afterturn.easypoi.cache.manager.POICacheManager;
 import com.cisdi.steel.common.poi.PoiCustomUtil;
 import com.cisdi.steel.common.util.DateUtil;
 import com.cisdi.steel.common.util.StringUtils;
-import com.cisdi.steel.module.job.AbstractExcelReadWriter;
+import com.cisdi.steel.module.job.drt.dto.DrtWriterDTO;
 import com.cisdi.steel.module.job.drt.dto.HandleDataDTO;
 import com.cisdi.steel.module.job.drt.writer.strategy.query.HandleQueryDataStrategy;
 import com.cisdi.steel.module.job.drt.writer.strategy.query.HandleQueryDataStrategyContext;
 import com.cisdi.steel.module.job.dto.CellData;
-import com.cisdi.steel.module.job.dto.WriterExcelDTO;
+import com.cisdi.steel.module.job.dto.MetadataDTO;
 import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
@@ -20,50 +21,32 @@ import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
 import com.cisdi.steel.module.report.util.ReportConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * <p>Description: 动态报表 执行处理类 </p>
- * <p>Copyright: Copyright (c) 2019 </p>
- * <P>Date: 2020/1/7 </P>
+ * <p>Copyright: Copyright (c) 2020 </p>
+ * <P>Date: 2020/09/04</P>
  *
  * @version 1.0
  */
 @Component
 @SuppressWarnings("ALL")
 @Slf4j
-public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
+public class DrtExcelWriter extends DrtAbstractWriter implements IDrtWriter<Workbook> {
 
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    protected TargetManagementMapper targetManagementMapper;
-
-    @Autowired
-    private ReportTemplateConfigService reportTemplateConfigService;
-
-    @Autowired
-    private HandleQueryDataStrategyContext handleQueryDataStrategyContext;
-
-    /**
-     * @param excelDTO 数据
-     * @return
-     */
     @Override
-    public Workbook excelExecute(WriterExcelDTO excelDTO) {
-        ReportCategoryTemplate template = excelDTO.getTemplate();
-        Date recordDate = excelDTO.getDateQuery().getRecordDate();
+    public Workbook drtWriter(DrtWriterDTO drtWriterDTO) {
+        ReportCategoryTemplate template = drtWriterDTO.getTemplate();
+        Date recordDate = drtWriterDTO.getDateQuery().getRecordDate();
         Workbook workbook = getWorkbook(template.getTemplatePath());
         String version = null;
         try {
@@ -101,7 +84,7 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
                 throw new RuntimeException("生成查询策略失败！");
             }
             HandleDataDTO handleDataDTO = HandleDataDTO.builder()
-                    .excelDTO(excelDTO)
+                    .drtWriterDTO(drtWriterDTO)
                     .workbook(workbook)
                     .version(version)
                     .newTagFormulas(newTagFormulas)
@@ -111,40 +94,10 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
                     .build();
             handleData(handleDataDTO);
         }
-        return workbook;
-    }
 
-    /**
-     * 拼接tagformula前缀和后缀
-     * @param tagNames
-     * @param reportTemplateTags
-     * @return
-     */
-    protected List<String> joinSuffix(List<String> tagNames, List<ReportTemplateTags> reportTemplateTags) {
-        List<String> tagTimeSuffixCodeList = TagTimeSuffixEnum.getTagTimeSuffixCodeList();
-        List<String> tagCalSuffixCodeList = TagCalSuffixEnum.getTagCalSuffixCodeList();
-        List<String> newTagFormulas = new ArrayList<>();
-        // 截取最后两位原始后缀 拼接配置的后缀
-        for (int i = 0; i < tagNames.size(); i++) {
-            String tagName = tagNames.get(i);
-            ReportTemplateTags reportTemplateTag = reportTemplateTags.get(i);
-            for (String calCode : tagCalSuffixCodeList) {
-                if (StringUtils.endsWith(tagName, "_" + calCode)) {
-                    tagName = tagName.substring(0, tagName.length() - calCode.length() - 1);
-                    break;
-                }
-            }
-            for (String timeCode : tagTimeSuffixCodeList) {
-                if (StringUtils.endsWith(tagName, "_" + timeCode)) {
-                    tagName = tagName.substring(0, tagName.length() - timeCode.length() - 1);
-                    break;
-                }
-            }
-            List<String> stringsNeedToJoin = Arrays.asList(tagName, reportTemplateTag.getTagTimeSuffix(),
-                    reportTemplateTag.getTagCalSuffix());
-            newTagFormulas.add(String.join("_", stringsNeedToJoin));
-        }
-        return newTagFormulas;
+        // 构建元数据
+        this.buildMetadata(workbook, drtWriterDTO);
+        return workbook;
     }
 
     /**
@@ -280,5 +233,40 @@ public class DynamicReportTemplateWriter extends AbstractExcelReadWriter {
         }
 
         return resultList;
+    }
+
+    /**
+     * 构建元数据
+     * 默认取_metadata
+     *
+     * @param workbook 当前文件
+     * @param drtWriterDTO 数据
+     */
+    public static void buildMetadata(Workbook workbook, DrtWriterDTO drtWriterDTO) {
+        if (Objects.nonNull(workbook)) {
+            Sheet sheet = workbook.getSheet("_metadata");
+            MetadataDTO metadataDTO = new MetadataDTO(drtWriterDTO);
+            if (Objects.nonNull(sheet)) {
+                // buildMetadata(sheet, metadataDTO);
+                PoiCustomUtil.writeAllMetadata(sheet, metadataDTO);
+            } else {
+                sheet = workbook.createSheet("_metadata");
+                PoiCustomUtil.writeAllMetadata(sheet, metadataDTO);
+            }
+        }
+    }
+
+    /**
+     * 获取操作的文件
+     *
+     * @param templatePath 模板路径
+     * @return 文件
+     */
+    protected final Workbook getWorkbook(String templatePath) {
+        try {
+            return WorkbookFactory.create(POICacheManager.getFile(templatePath));
+        } catch (IOException | InvalidFormatException e) {
+            throw new NullPointerException("模板路径不存在" + templatePath);
+        }
     }
 }
