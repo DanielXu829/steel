@@ -1,9 +1,13 @@
 package com.cisdi.steel.module.report.dto;
 
 import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
+import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import lombok.Data;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -11,6 +15,9 @@ import java.util.List;
  */
 @Data
 public class ReportTemplateConfigDTO {
+    @NotNull(message = "模板配置信息不能为空")
+    @Valid
     private ReportTemplateConfig reportTemplateConfig;
-    private List<ReportTemplateTags> reportTemplateTags;
+    @NotEmpty(message = "模板sheet列表不能为空")
+    private List<ReportTemplateSheetDTO> reportTemplateSheetDTOs;
 }

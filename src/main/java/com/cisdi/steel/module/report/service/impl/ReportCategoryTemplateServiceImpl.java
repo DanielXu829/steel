@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -179,7 +179,8 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
                 newReportCategory.setDelFlag("0");
                 reportCategoryMapper.insert(newReportCategory);
             }
-
+            record.setCreatedTime(new Date());
+            record.setUpdatedTime(new Date());
             this.save(record);
         }
 
@@ -225,7 +226,7 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
                     return ApiUtil.fail("保存失败, 请重新上传模板");
                 }
             }
-            
+            record.setUpdatedTime(new Date());
             this.updateById(record);
         } else {
             log.error("该文件不存在：" + record.getTemplatePath() + "  模板更新失败");

@@ -19,21 +19,21 @@ public interface ReportTemplateConfigService extends IBaseService<ReportTemplate
      * @param templateConfigDTO
      * @return
      */
-    public boolean saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO);
+    void saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO);
 
     /**
      * 查询整个报表模板配置，包含参数列表
      * @param id
      * @return
      */
-    public ReportTemplateConfigDTO getDTOById(Long id);
+    ReportTemplateConfigDTO getDTOById(Long id);
 
     /**
      * 生成模板
      * @param reportTemplateConfigDTO
      * @return 临时文件生成路径
      */
-    public String generateTemplate(ReportTemplateConfigDTO reportTemplateConfigDTO);
+    String generateTemplate(ReportTemplateConfigDTO reportTemplateConfigDTO);
 
 
 }

@@ -42,7 +42,7 @@ public abstract class AbstractExportJob implements Job, Serializable {
         Objects.requireNonNull(jobHandler, "没有执行的类");
         try {
             log.debug(getCurrentJob().getName() + "       开始执行");
-            // 如果jobExecutionContext中report category code不为空，则修改报表的job code为此值
+            // 如果jobExecutionContext中report category code不为空，代表是动态报表，则修改报表的job code为此值
             JobEnum currentJob = getCurrentJob();
             if (Objects.nonNull(jobExecutionContext)) {
                 JobDataMap mergedJobDataMap = jobExecutionContext.getMergedJobDataMap();

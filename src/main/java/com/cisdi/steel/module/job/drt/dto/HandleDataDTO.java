@@ -4,6 +4,7 @@ import com.cisdi.steel.module.job.drt.writer.strategy.query.HandleQueryDataStrat
 import com.cisdi.steel.module.job.dto.WriterExcelDTO;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
+import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,11 +16,11 @@ import java.util.List;
 @Accessors(chain = true)
 @Builder(toBuilder = true)
 public class HandleDataDTO {
-    private WriterExcelDTO excelDTO;
+    private DrtWriterDTO drtWriterDTO;
     private Workbook workbook;
     private String version;
     private List<String> newTagFormulas;
     private List<DateQuery> dateQuerys;
-    private ReportTemplateConfig reportTemplateConfig;
+    private ReportTemplateSheet reportTemplateSheet;
     private HandleQueryDataStrategy handleStrategy;
 }

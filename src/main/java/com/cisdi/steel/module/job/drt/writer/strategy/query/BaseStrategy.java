@@ -5,6 +5,7 @@ import com.cisdi.steel.config.http.HttpUtil;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
+import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
 import com.cisdi.steel.module.report.enums.TimeDivideEnum;
 import com.cisdi.steel.module.report.enums.TimeTypeEnum;
 import org.apache.commons.lang3.time.DateUtils;
@@ -24,18 +25,18 @@ public abstract class BaseStrategy implements HandleQueryDataStrategy {
     /**
      * 生成查询策略
      * @param recordDate
-     * @param reportTemplateConfig
+     * @param reportTemplateSheet
      * @return
      */
     @Override
-    public List<DateQuery> getDateQueries(Date recordDate, ReportTemplateConfig reportTemplateConfig) {
-        String timeType = reportTemplateConfig.getTimeType();
+    public List<DateQuery> getDateQueries(Date recordDate, ReportTemplateSheet reportTemplateSheet) {
+        String timeType = reportTemplateSheet.getTimeType();
         TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(timeType);
         switch (timeTypeEnum) {
             case TIME_RANGE:
-                return getTimeRangeDateQuerys(recordDate, reportTemplateConfig);
+                return getTimeRangeDateQuerys(recordDate, reportTemplateSheet);
             case RECENT_TIME:
-                return getRecentTimeDateQuerys(recordDate, reportTemplateConfig);
+                return getRecentTimeDateQuerys(recordDate, reportTemplateSheet);
         }
         return null;
     }
@@ -43,15 +44,15 @@ public abstract class BaseStrategy implements HandleQueryDataStrategy {
     /**
      * 时间范围查询策略
      * @param recordDate
-     * @param reportTemplateConfig
+     * @param reportTemplateSheet
      * @return
      */
-    protected List<DateQuery> getTimeRangeDateQuerys(Date recordDate, ReportTemplateConfig reportTemplateConfig) {
-        Integer timeDivideType = reportTemplateConfig.getTimeDivideType();
+    protected List<DateQuery> getTimeRangeDateQuerys(Date recordDate, ReportTemplateSheet reportTemplateSheet) {
+        Integer timeDivideType = reportTemplateSheet.getTimeDivideType();
         TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(timeDivideType);
-        Integer startTimeslot = Integer.valueOf(reportTemplateConfig.getStartTimeslot());
-        Integer endTimeslot = Integer.valueOf(reportTemplateConfig.getEndTimeslot());
-        Integer timeslotInterval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval());
+        Integer startTimeslot = Integer.valueOf(reportTemplateSheet.getStartTimeslot());
+        Integer endTimeslot = Integer.valueOf(reportTemplateSheet.getEndTimeslot());
+        Integer timeslotInterval = Integer.valueOf(reportTemplateSheet.getTimeslotInterval());
         switch (timeDivideEnum) {
             case HOUR:
                 return getDateQuerysByHourRange(recordDate, startTimeslot, endTimeslot, timeslotInterval);
@@ -65,14 +66,14 @@ public abstract class BaseStrategy implements HandleQueryDataStrategy {
 
     /**
      * 最近时间查询策略
-     * @param reportTemplateConfig
+     * @param reportTemplateSheet
      * @return
      */
-    protected List<DateQuery> getRecentTimeDateQuerys(Date recordDate, ReportTemplateConfig reportTemplateConfig) {
-        Integer timeDivideType = reportTemplateConfig.getTimeDivideType();
+    protected List<DateQuery> getRecentTimeDateQuerys(Date recordDate, ReportTemplateSheet reportTemplateSheet) {
+        Integer timeDivideType = reportTemplateSheet.getTimeDivideType();
         TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(timeDivideType);
-        Integer timeslotInterval = Integer.valueOf(reportTemplateConfig.getTimeslotInterval());
-        Integer lastTimeslot = reportTemplateConfig.getLastTimeslot();
+        Integer timeslotInterval = Integer.valueOf(reportTemplateSheet.getTimeslotInterval());
+        Integer lastTimeslot = reportTemplateSheet.getLastTimeslot();
         switch (timeDivideEnum) {
             case HOUR:
                 return getDateQuerysByRecentHours(recordDate, lastTimeslot, timeslotInterval);

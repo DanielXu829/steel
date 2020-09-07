@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 /**
  * <p>Description: 报表动态模板配置 前端控制器 </p>
  * <P>Date: 2019-12-11 </P>
@@ -49,23 +51,14 @@ public class ReportTemplateConfigController {
      * @return
      */
     @PostMapping(value = "/saveOrUpdateDTO")
-    public ApiResult saveOrUpdateDTO(@RequestBody ReportTemplateConfigDTO configDTO) {
-        if (configDTO == null || configDTO.getReportTemplateConfig() == null || CollectionUtils.isEmpty(configDTO.getReportTemplateTags())) {
-            return ApiUtil.fail("请求数据不完整，请检查提交的数据");
-        }
-        if (StringUtils.isBlank(configDTO.getReportTemplateConfig().getTemplateName())) {
-            return ApiUtil.fail("模板名称不能为空");
-        }
-
+    public ApiResult saveOrUpdateDTO(@Valid @RequestBody ReportTemplateConfigDTO configDTO) {
         try {
-            boolean isSuccess = reportTemplateConfigService.saveOrUpdateDTO(configDTO);
-            if (isSuccess) {
-                return ApiUtil.success("保存报表模板成功", configDTO);
-            }
+            reportTemplateConfigService.saveOrUpdateDTO(configDTO);
         } catch (Exception e) {
             log.error("保存报表模板失败", e);
+            return ApiUtil.fail("保存报表模板失败");
         }
-        return ApiUtil.fail("保存报表模板失败");
+        return ApiUtil.success("保存报表模板成功", configDTO);
     }
 
     /**

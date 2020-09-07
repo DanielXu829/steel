@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.module.report.mapper.ReportTemplateTagsMapper;
-import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,36 +24,28 @@ public class ReportTemplateTagsServiceImpl extends BaseServiceImpl<ReportTemplat
     @Autowired
     private ReportTemplateTagsMapper reportTemplateTagsMapper;
 
-    @Autowired
-    private TargetManagementMapper targetManagementMapper;
-
     /**
-     * 根据模板配置查询
-     * @param configId
+     * 根据SheetId查询
+     * @param sheetId
      * @return
      */
-    public List<ReportTemplateTags> selectByConfigId(Long configId){
-
+    public List<ReportTemplateTags> selectBySheetId(Long sheetId){
         LambdaQueryWrapper<ReportTemplateTags> wrapper = new QueryWrapper<ReportTemplateTags>().lambda();
-        wrapper.eq(true, ReportTemplateTags::getTemplateConfigId, configId);
+        wrapper.eq(true, ReportTemplateTags::getTemplateSheetId, sheetId);
         wrapper.orderByAsc(ReportTemplateTags::getSequence);
-        List<ReportTemplateTags> reportTemplateTags = reportTemplateTagsMapper.selectList(wrapper);
-
-        return reportTemplateTags;
+        return reportTemplateTagsMapper.selectList(wrapper);
     }
 
 
     /**
-     * 根据模板配置id删除
-     * @param configId
+     * 根据sheetId删除
+     * @param sheetId
      * @return
      */
-    public int deleteByConfigId(Long configId){
-
+    public int deleteBySheetId(Long sheetId){
         LambdaQueryWrapper<ReportTemplateTags> wrapper = new QueryWrapper<ReportTemplateTags>().lambda();
-        wrapper.eq(true, ReportTemplateTags::getTemplateConfigId, configId);
+        wrapper.eq(true, ReportTemplateTags::getTemplateSheetId, sheetId);
         return reportTemplateTagsMapper.delete(wrapper);
-
     }
 
 }

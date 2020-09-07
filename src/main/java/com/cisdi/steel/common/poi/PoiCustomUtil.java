@@ -399,7 +399,7 @@ public class PoiCustomUtil {
      * @param sheet       指定sheet
      * @param metadataDTO 数据
      */
-    private static void writeAllMetadata(Sheet sheet, MetadataDTO metadataDTO) {
+    public static void writeAllMetadata(Sheet sheet, MetadataDTO metadataDTO) {
         Map<String, Object> map = metadataDTO.buildMap();
         int index = 0;
         for (String key : map.keySet()) {

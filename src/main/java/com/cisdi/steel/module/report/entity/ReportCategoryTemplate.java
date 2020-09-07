@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>Description: 分类模板配置 实体类 </p>
@@ -178,4 +179,8 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
      */
     @TableField("template_config_id")
     private Long templateConfigId;
+
+    private Date createdTime;
+
+    private Date updatedTime;
 }
