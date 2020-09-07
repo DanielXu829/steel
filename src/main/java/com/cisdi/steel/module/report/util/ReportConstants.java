@@ -9,4 +9,11 @@ public final class ReportConstants {
     public static final String DICTIONARY_SHEET_NAME = "_dictionary";
     public static final String VERSION = "version";
 
+    public static final String SHEET = "sheet";
+    // word模板中比较占位符（填充升高，降低）
+    public static final String PLACEHOLDER_COMPARE = "compare";
+    // word模板中变化数量占位符
+    public static final String PLACEHOLDER_DIFFERENCE = "difference";
+    // word中chart占位符
+    public static final String PLACEHOLDER_CHART = "chart";
 }

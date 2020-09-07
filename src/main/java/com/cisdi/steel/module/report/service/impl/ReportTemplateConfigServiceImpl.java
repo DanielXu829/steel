@@ -34,6 +34,7 @@ import com.cisdi.steel.module.report.util.ReportConstants;
 import com.cisdi.steel.module.report.util.TargetManagementUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
@@ -42,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
@@ -255,7 +255,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     WordTypeEnum.getByCode(reportTemplateSheet.getWordType());
             switch (wordTypeEnum) {
                 case LINE_CHART:
-                    ExportWordUtil.createParagraph(document, String.format("{{chart%s}}", sheetIndex), wordTitleConfigDTO);
+                    List<List<ReportTemplateTags>> listGroups = ListUtils.partition(reportTemplateTagsList, 2);
+                    for (int i = 1; i <= listGroups.size(); i++) {
+                        ExportWordUtil.createParagraph(document, String.format("{{sheet%s_chart%s}}", sheetIndex, i), wordTitleConfigDTO);
+                    }
                     break;
                 default:
                     StringJoiner joiner = new StringJoiner("、", "今日", "。");
@@ -359,6 +362,11 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         return excelFileName;
     }
 
+    /**
+     * key为顶层节点,value为底层节点list
+     * @param reportTemplateTagsList
+     * @return
+     */
     public LinkedHashMap<Object, List<ReportTemplateTags>> getTopTypeToTagsMap(List<ReportTemplateTags> reportTemplateTagsList) {
         //通过templateConfig获取所有配置项。
         if (CollectionUtils.isNotEmpty(reportTemplateTagsList)) {

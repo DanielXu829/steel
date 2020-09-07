@@ -70,4 +70,25 @@
             </foreach>
         )
     </select>
+
+    <select id="listByIds" parameterType="java.util.List" resultType="com.cisdi.steel.module.report.entity.TargetManagement">
+        SELECT
+            *
+        FROM
+            target_management
+        WHERE
+            id
+        IN
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        order by field (
+            id,
+            <foreach collection="list" separator="," item="item">
+                #{item}
+            </foreach>
+        )
+
+    </select>
+
 </mapper>

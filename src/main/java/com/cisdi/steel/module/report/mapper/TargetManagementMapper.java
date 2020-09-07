@@ -62,4 +62,6 @@ public interface TargetManagementMapper extends BaseMapper<TargetManagement> {
      * @return 别名对应的tag点集合
      */
     List<TargetManagement> selectTargetManagementsByTargetNames(List<String> targetNames);
+
+    List<TargetManagement> listByIds(List<Long> ids);
 }
