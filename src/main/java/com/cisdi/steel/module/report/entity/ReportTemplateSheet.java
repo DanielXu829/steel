@@ -28,9 +28,9 @@ public class ReportTemplateSheet extends Model<ReportTemplateSheet> {
     private String sheetTitle;
 
     /**
-     * 针对word，有两种(0代表纯文本，1代表图表折线图，目前只支持折线图)
+     * 针对word，有两种(1代表纯文本，2代表图表折线图，目前只支持折线图)
      */
-    private Integer wordType = 0;
+    private Integer wordType = 2;
 
     /**
      * 时间划分方式
