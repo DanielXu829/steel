@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum TemplateTypeEnum {
-    EXCEL(0, ".xlsx"),
-    WORD(1, ".docx");
+    EXCEL(1, ".xlsx"),
+    WORD(2, ".docx");
 
     private final int code;
     private final String endSuffix;
@@ -20,6 +20,6 @@ public enum TemplateTypeEnum {
                 return templateTypeEnum;
             }
         }
-        throw new LeafException("模板类型不存在,请传入0或者1");
+        throw new LeafException("模板类型不存在,请传入1或者2");
     }
 }

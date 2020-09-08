@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class DrtAbstractWriter {
@@ -128,11 +127,11 @@ public abstract class DrtAbstractWriter {
 
     /**
      * 获取坐标轴最大值
-     * @param tempObject1
+     * @param valueList
      * @return
      */
-    protected Double getAxisMaxValue(List<Double> tempObject1) {
-        Double max = Collections.max(tempObject1);
+    protected Double getAxisMaxValue(List<Double> valueList) {
+        Double max = valueList.stream().mapToDouble(e -> e).max().orElse(100d);
         if (max < 0) {
             return max * 0.8;
         }
@@ -141,11 +140,11 @@ public abstract class DrtAbstractWriter {
 
     /**
      * 获取坐标轴最小值
-     * @param tempObject1
+     * @param valueList
      * @return
      */
-    protected Double getAxisMinValue(List<Double> tempObject1) {
-        Double min = Collections.min(tempObject1);
+    protected Double getAxisMinValue(List<Double> valueList) {
+        Double min = valueList.stream().mapToDouble(e -> e).min().orElse(0d);
         if (min < 0) {
             return min * 1.2;
         }

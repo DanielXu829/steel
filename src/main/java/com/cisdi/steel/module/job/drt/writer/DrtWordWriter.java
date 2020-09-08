@@ -17,7 +17,10 @@ import com.cisdi.steel.module.report.enums.SequenceEnum;
 import com.cisdi.steel.module.report.enums.WordTypeEnum;
 import com.cisdi.steel.module.report.service.ReportIndexService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.tools.ant.util.DateUtils;
 import org.jfree.chart.JFreeChart;
@@ -79,8 +82,7 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
             sheetIndex++;
         }
 
-        Date date = DateUtil.addDays(recordDate, -1);
-        result.put("current_date", DateUtils.format(date, DateUtil.yyyyMMddChineseFormat));
+        result.put("current_date", DateUtils.format(recordDate, DateUtil.yyyyMMddChineseFormat));
 
         try {
             XWPFDocument document = WordExportUtil.exportWord07(currentTemplate.getTemplatePath(), result);
@@ -161,18 +163,22 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
                 Map<String, LinkedHashMap<Long, Double>> tagValueMaps
                         = handleStrategy.getTagValueMaps(dateQuery, version, tagFormulas);
                 Map<String, Double> tagNameToValueMap = getTagFormulaToValueMap(tagValueMaps, dateQuery, tagFormulas);
+                if (MapUtils.isEmpty(tagNameToValueMap)) {
+                    continue;
+                }
                 for (String tagFormula : tagFormulas) {
                     tagNameToValueListMap.get(tagFormula).add(tagNameToValueMap.get(tagFormula));
                 }
             }
 
-            // tag点分组，一组两个点，两个点对应一个chart
+            // tag点分组，一组两个点，一组对应一个chart
             List<List<String>> tagListGroups = ListUtils.partition(tagFormulas, 2);
             int chartIndex = 1;
             for (List<String> tagListGroup : tagListGroups) {
                 List<Vector<Serie>> vectors = new ArrayList<>();
                 List<String> yLableList = new ArrayList<>();
-                double min1 = 0, max1 = 100, min2 = 0, max2 = 100;
+                Double min1 = null, max1 = null, min2 = null, max2 = null;
+//                Double min1 = 0d, max1 = 100d, min2 = 0d, max2 = 100d;
                 int tagListSize = tagListGroup.size();
                 for (int i = 0; i < tagListSize; i++) {
                     String tagFormula = tagListGroup.get(i);
@@ -180,38 +186,53 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
                     TargetManagement targetManagement = tagFormulaToTargetMap.get(tagFormula);
                     String writtenName = targetManagement.getWrittenName();
                     List<Double> values = tagNameToValueListMap.get(tagFormula);
+                    if (CollectionUtils.isEmpty(values)) {
+                        continue;
+                    }
+                    // 过滤出list中的null数据
+                    List<Double> valueListWithOutNullData =
+                            values.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                    if (CollectionUtils.isEmpty(valueListWithOutNullData)) {
+                        continue;
+                    }
                     if (i == 0) {
-                        min1 = getAxisMinValue(values);
-                        max1 = getAxisMaxValue(values);
+                        // 如果为空，代表第一个点无数据
+                        min1 = getAxisMinValue(valueListWithOutNullData);
+                        max1 = getAxisMaxValue(valueListWithOutNullData);
                     } else {
-                        min2 = getAxisMinValue(values);
-                        max2 = getAxisMaxValue(values);
+                        // 如果为空，代表第二个点无数据
+                        min2 = getAxisMinValue(valueListWithOutNullData);
+                        max2 = getAxisMaxValue(valueListWithOutNullData);
                     }
                     series.add(new Serie(writtenName, values.toArray()));
                     vectors.add(series);
                     yLableList.add(writtenName);
                 }
-                String title1 = "";
-                String categoryAxisLabel1 = "";
-                String[] yLabels = yLableList.stream().toArray(String[]::new);
-
-                int[] stack = {1, 1};
-                int[] ystack = {1, 2};
-
-                JFreeChart Chart;
-                // y轴只有两条或者1条
-                if (tagListSize == 2) {
-                    Chart = ChartFactory.createLineChart(title1,
-                            categoryAxisLabel1, yLabels, vectors,
-                            dateStrList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, 2, stack, ystack);
+                if (CollectionUtils.isNotEmpty(vectors)) {
+                    int vectorSize = vectors.size();
+                    String title1 = "";
+                    String categoryAxisLabel1 = "";
+                    String[] yLabels = yLableList.stream().toArray(String[]::new);
+                    int[] stack = {1, 1};
+                    int[] ystack = {1, 2};
+                    JFreeChart Chart;
+                    // y轴只有两条或者1条
+                    if (vectorSize == 2) {
+                        Chart = ChartFactory.createLineChart(title1,
+                                categoryAxisLabel1, yLabels, vectors,
+                                dateStrList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, 2, stack, ystack);
+                    } else {
+                        min1 = Objects.nonNull(min1)? min1 : min2;
+                        max1 = Objects.nonNull(max1)? max1 : max2;
+                        Chart = ChartFactory.createLineChart(title1,
+                                categoryAxisLabel1, yLabels, vectors,
+                                dateStrList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 0, 0, 0, 1, stack, ystack);
+                    }
+                    WordImageEntity image1 = image(Chart);
+                    result.put(String.format("sheet%s_chart%s", sheetIndex, chartIndex), image1);
                 } else {
-                    Chart = ChartFactory.createLineChart(title1,
-                            categoryAxisLabel1, yLabels, vectors,
-                            dateStrList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 0, 0, 0, 1, stack, ystack);
+                    result.put(String.format("sheet%s_chart%s", sheetIndex, chartIndex), StringUtils.SPACE);
                 }
-
-                WordImageEntity image1 = image(Chart);
-                result.put(String.format("sheet%s_chart%s", sheetIndex, chartIndex), image1);
                 chartIndex++;
             }
         } catch (Exception e) {

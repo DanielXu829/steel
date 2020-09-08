@@ -36,12 +36,12 @@ public class ReportTemplateConfig extends Model<ReportTemplateConfig> {
     private String templateName;
 
     /**
-     * 模板类型： 0：excel 1： word
+     * 模板类型： 1：excel 2： word
      */
     private Integer templateType;
 
     /**
-     * 是否为单sheet 1为单sheet， 0为多sheet
+     * 是否为单sheet 1为单sheet， 2为多sheet
      */
     private Integer isSingleSheet;
 

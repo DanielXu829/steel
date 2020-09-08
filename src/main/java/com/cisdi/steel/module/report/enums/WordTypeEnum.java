@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum WordTypeEnum {
-    PLAIN_TEXT(0, "纯文本"),
-    LINE_CHART(1, "折线图");
+    PLAIN_TEXT(1, "纯文本"),
+    LINE_CHART(2, "折线图");
 
     private final int code;
     private final String name;
