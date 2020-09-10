@@ -183,4 +183,16 @@ public class ReportCategoryTemplate extends Model<ReportCategoryTemplate> {
     private Date createdTime;
 
     private Date updatedTime;
+
+    /**
+     * 文件类型 1代表excel 2代表word
+     */
+    @TableField(exist = false)
+    private Integer fileType;
+
+    /**
+     * 1代表 单页面 2代表多页面
+     */
+    @TableField(exist = false)
+    private Integer pageSizeType;
 }

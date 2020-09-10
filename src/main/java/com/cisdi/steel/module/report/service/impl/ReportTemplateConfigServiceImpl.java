@@ -98,6 +98,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     public void saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO) {
         // 生成临时模板文件。
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
+        reportTemplateConfig.setTemplateConfigJsonString("");
         reportTemplateConfig.setTemplateConfigJsonString(JSON.toJSONString(templateConfigDTO));
         if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0) {
             // 如果id存在则更新，不存在则新增
@@ -196,7 +197,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
             Integer templateType = reportTemplateConfig.getTemplateType();
             String templateName = reportTemplateConfig.getTemplateName();
-            // TODO 前端没传，默认给个值
             if (StringUtils.isBlank(templateName)) {
                 templateName = templateConfigDTO.getReportTemplateSheetDTOs().get(0).getReportTemplateSheet().getSheetTitle();
                 reportTemplateConfig.setTemplateName(templateName);
@@ -681,7 +681,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             for (ReportTemplateTags reportTemplateTags : tagsMap.keySet()) {
                 String columnLetter = letterArray[j];
                 Cell cell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex + j);
-                cell.setCellFormula(formula.replaceAll("cell%", tagsSheetName + "!" + columnLetter + (i + 2)));
+                cell.setCellFormula(formula.replaceAll("cell%", "'" + tagsSheetName + "'!" + columnLetter + (i + 2)));
                 cell.setCellType(CellType.FORMULA);
                 // 设置单元格样式及小数点位
                 Integer decimalScale = reportTemplateTags.getDecimalScale();

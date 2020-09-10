@@ -8,11 +8,12 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum TemplateTypeEnum {
-    EXCEL(1, ".xlsx"),
-    WORD(2, ".docx");
+    EXCEL(1, ".xlsx", "excel"),
+    WORD(2, ".docx", "word");
 
     private final int code;
     private final String endSuffix;
+    private final String fileType;
 
     public static TemplateTypeEnum getByCode(int code) {
         for (TemplateTypeEnum templateTypeEnum : TemplateTypeEnum.values()) {
