@@ -178,7 +178,6 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
                 List<Vector<Serie>> vectors = new ArrayList<>();
                 List<String> yLableList = new ArrayList<>();
                 Double min1 = null, max1 = null, min2 = null, max2 = null;
-//                Double min1 = 0d, max1 = 100d, min2 = 0d, max2 = 100d;
                 int tagListSize = tagListGroup.size();
                 for (int i = 0; i < tagListSize; i++) {
                     String tagFormula = tagListGroup.get(i);
