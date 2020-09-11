@@ -98,6 +98,11 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     public void saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO) {
         // 生成临时模板文件。
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
+        if (StringUtils.isBlank(reportTemplateConfig.getTemplateName())) {
+            // 如果templateName为空，代表是excel，默认取第一个sheet的title
+            reportTemplateConfig.setTemplateName(templateConfigDTO.getReportTemplateSheetDTOs()
+                    .get(0).getReportTemplateSheet().getSheetTitle());
+        }
         reportTemplateConfig.setTemplateConfigJsonString("");
         reportTemplateConfig.setTemplateConfigJsonString(JSON.toJSONString(templateConfigDTO));
         if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0) {
@@ -237,14 +242,27 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         // 时间行
         wordTitleConfigDTO.setFontSize(16).setParagraphAlignment(ParagraphAlignment.LEFT);
         ExportWordUtil.createParagraph(document, "时间：{{current_date}}", wordTitleConfigDTO);
-
+        // TODO 页眉未生效
+        /**
+            CTSectPr sectPr = document.getDocument().getBody().addNewSectPr();
+            XWPFHeaderFooterPolicy policy = new XWPFHeaderFooterPolicy(document, sectPr);
+            CTP ctpHeader = CTP.Factory.newInstance();
+            CTR ctrHeader = ctpHeader.addNewR();
+            CTText ctHeader = ctrHeader.addNewT();
+            String headerText = "ctpHeader";
+            ctHeader.setStringValue(headerText);
+            XWPFParagraph headerParagraph = new XWPFParagraph(ctpHeader, document);
+            headerParagraph.setAlignment(ParagraphAlignment.RIGHT);
+            XWPFParagraph[] parsHeader = new XWPFParagraph[1];
+            parsHeader[0] = headerParagraph;
+            policy.createHeader(XWPFHeaderFooterPolicy.DEFAULT, parsHeader);
+        **/
         int sheetIndex = 1;
         for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
             ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
             List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
             reportTemplateTagsList.sort(Comparator.comparing(ReportTemplateTags::getSequence));
             // 创建每个段落
-            // TODO 设置页眉
             // TODO 行间距
             String sheetTitle = reportTemplateSheet.getSheetTitle();
             wordTitleConfigDTO.setFontSize(16).setIsBold(true);
