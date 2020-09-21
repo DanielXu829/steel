@@ -35,5 +35,16 @@ public interface ReportTemplateConfigService extends IBaseService<ReportTemplate
      */
     String generateTemplate(ReportTemplateConfigDTO reportTemplateConfigDTO);
 
-
+    /**
+     * 生成excel临时文件
+     * @param reportTemplateConfigDTO
+     * @return
+     */
+    String generateTemporaryFile(ReportTemplateConfigDTO reportTemplateConfigDTO);
+    /**
+     * 生成临时excel图片
+     * @param reportTemplateConfigDTO
+     * @return
+     */
+    String generateExcelImage(ReportTemplateConfigDTO reportTemplateConfigDTO);
 }

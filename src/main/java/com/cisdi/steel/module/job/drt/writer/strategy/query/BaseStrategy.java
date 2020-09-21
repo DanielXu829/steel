@@ -133,6 +133,9 @@ public abstract class BaseStrategy implements HandleQueryDataStrategy {
             // 开始时间为前一个月
             startDate = DateUtil.getDayTimeByDateAndDayNumber(DateUtil.addMonths(recordDate, -1), startDay);
         }
+        // 获取当前日
+        int recordDayOfMonth = DateUtil.getDayOfMonth(recordDate);
+        endDay = recordDayOfMonth < endDay? recordDayOfMonth : endDay;
         Date endDate = DateUtil.getDayTimeByDateAndDayNumber(recordDate, endDay);
         endDate = DateUtil.addDays(endDate, interval);// 补充最后一天的查询条件
         Date queryEndDate = DateUtils.addDays(startDate, interval);
@@ -155,7 +158,11 @@ public abstract class BaseStrategy implements HandleQueryDataStrategy {
             // 开始时间为前一年
             startDate = DateUtil.getDayTimeByDateAndMonthNumber(DateUtil.addYears(recordDate, -1), startMonth);
         }
+        // 获取当前月
+        int recordMonthOfYear = DateUtil.getMonthOfYear(recordDate) + 1;
+        endMonth = recordMonthOfYear < endMonth? recordMonthOfYear : endMonth;
         Date endDate = DateUtil.getDayTimeByDateAndMonthNumber(recordDate, endMonth);
+        endDate = DateUtil.addMonths(endDate, interval); // 补充最后一天的查询条件
         Date queryEndDate = DateUtils.addMonths(startDate, interval);
         while (DateUtil.isDayBeforeOrEqualAnotherDay(queryEndDate, endDate)) {
             DateQuery dateQuery = new DateQuery(startDate, queryEndDate, recordDate);

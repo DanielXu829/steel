@@ -23,6 +23,7 @@ job:
   file-path: /u01/reports
   template-Path: /u01/templates
   temp-path: /tmp
+  temp-image-path: /tmp/images
 
 posyspath: /root/lic/
 popassword: 111111

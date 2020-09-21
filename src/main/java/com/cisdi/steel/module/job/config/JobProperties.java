@@ -37,4 +37,9 @@ public class JobProperties {
      */
     private String emptyPath;
 
+    /**
+     * 临时excel图片存储目录
+     */
+    private String tempImagePath;
+
 }

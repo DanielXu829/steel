@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.report.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
@@ -63,6 +64,7 @@ public class ReportTemplateConfig extends Model<ReportTemplateConfig> {
     /**
      * 动态报表配置信息json字符串
      */
+    @JSONField(serialize = false)
     private String templateConfigJsonString;
 
     @Override

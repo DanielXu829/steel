@@ -1028,6 +1028,17 @@ public class DateUtil {
     }
 
     /**
+     * 获取日期是当年的第几月
+     * @param date
+     * @return
+     */
+    public static int getMonthOfYear(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.MONTH);
+    }
+
+    /**
      * 获取日期是当年的第几天
      * @param date
      * @return
