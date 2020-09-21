@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cisdi.steel.module.report.mapper.ReportTemporaryFileMapper">
+    <delete id="deleteAll">
+        DELETE FROM temporary_file
+    </delete>
+
+    <select id="selectAll" resultType="com.cisdi.steel.module.report.entity.ReportTemporaryFile">
+        SELECT * FROM temporary_file
+    </select>
+
+    <insert id="insertOne" parameterType="com.cisdi.steel.module.report.entity.ReportTemporaryFile">
+        INSERT INTO temporary_file(file_path, file_type) VALUES(#{filePath}, #{fileType})
+    </insert>
+</mapper>

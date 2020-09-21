@@ -1,15 +1,16 @@
 package com.cisdi.steel.module.job.a1.doc;
 
-import com.cisdi.steel.common.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.block.BlockBorder;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.awt.*;
-import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
@@ -40,7 +41,15 @@ public class ChartFactory {
         return simsun;
     }
 
-
+    /**
+     *
+     * @param title
+     * @param categoryAxisLabel 横坐标标签
+     * @param valueAxisLabel 纵坐标标签
+     * @param series
+     * @param categories
+     * @return
+     */
     public static JFreeChart createBarChart(String title,
                                             String categoryAxisLabel, String valueAxisLabel,
                                             Vector<Serie> series, String[] categories) {
@@ -215,6 +224,60 @@ public class ChartFactory {
         return chart;
     }
 
+    /**
+     * 多y轴的柱状图
+     * @param title
+     * @param categoryAxisLabel
+     * @param valueAxisLabel
+     * @param series
+     * @param categories
+     * @return
+     */
+    public static JFreeChart createMultipleYAxisBarChart(String title,
+                                            String categoryAxisLabel, String valueAxisLabel,
+                                            Vector<Serie> series, String[] categories) {
+        // 1：创建数据集合
+        DefaultCategoryDataset dataset = ChartUtils
+                .createDefaultCategoryDataset(series, categories);
+        JFreeChart chart = org.jfree.chart.ChartFactory.createBarChart(title,
+                categoryAxisLabel, valueAxisLabel, dataset);
+
+        CategoryPlot categoryPlot = chart.getCategoryPlot();
+        for (int i = 0; i < series.size(); i++) {
+            Serie serie = series.get(i);
+            NumberAxis axis = new NumberAxis();
+            // 修改第i个Y轴的显示效果
+            axis.setRange(0, 500);
+            axis.setLabel(serie.getName());
+            axis.setVisible(true);
+            categoryPlot.setRangeAxis(i, axis);
+        }
+        // 横坐标间隔显示，每两个显示一次
+        int batch = 2;
+        CategoryAxis domainAxis = categoryPlot.getDomainAxis();
+        for (int i = 0; i < categories.length; i++) {
+            String category = categories[i];
+            if (i % batch == 0) {
+                domainAxis.setTickLabelPaint(category, Color.black);
+            } else {
+                // 设置背景色为白色
+                domainAxis.setTickLabelPaint(category, Color.white);
+            }
+        }
+        // 3:设置抗锯齿，防止字体显示不清楚
+        ChartUtils.setAntiAlias(chart);// 抗锯齿
+        // 4:对柱子进行渲染
+        ChartUtils.setBarRenderer(chart.getCategoryPlot(), false);//
+        CategoryAxis categoryaxis = categoryPlot.getDomainAxis();//X轴
+        categoryaxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
+        // 5:对其他部分进行渲染
+        ChartUtils.setXAixs(chart.getCategoryPlot());// X坐标轴渲染
+        ChartUtils.setYAixs(chart.getCategoryPlot(), 0);// Y坐标轴渲染
+        // 设置标注无边框
+        chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
+        ChartUtils.setLegendShow(chart, 0, true);
+        return chart;
+    }
     /**
      * 生成折线图
      *

@@ -8,7 +8,9 @@ import lombok.Getter;
 @Getter
 public enum WordTypeEnum {
     PLAIN_TEXT(1, "纯文本"),
-    LINE_CHART(2, "折线图");
+    LINE_CHART(2, "折线图"),
+    BAR_CHART(3, "柱状图"),
+    EXCEL_CHART(6, "excel图");
 
     private final int code;
     private final String name;
@@ -19,6 +21,7 @@ public enum WordTypeEnum {
                 return wordTypeEnum;
             }
         }
-        throw new LeafException("word模板类型不存在");
+        // 不存在默认使用折线图
+        return WordTypeEnum.LINE_CHART;
     }
 }

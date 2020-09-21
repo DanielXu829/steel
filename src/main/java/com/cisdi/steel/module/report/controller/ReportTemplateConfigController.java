@@ -1,17 +1,16 @@
 package com.cisdi.steel.module.report.controller;
 
-import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.base.vo.PageQuery;
+import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
-import com.cisdi.steel.common.util.StringUtils;
 import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -59,6 +58,40 @@ public class ReportTemplateConfigController {
             return ApiUtil.fail("保存报表模板失败");
         }
         return ApiUtil.success("保存报表模板成功", configDTO);
+    }
+
+    /**
+     * 在线预览模板文件
+     * @param configDTO
+     * @return
+     */
+    @PostMapping(value = "/viewTemplateFile")
+    public ApiResult viewTemplateFile(@Valid @RequestBody ReportTemplateConfigDTO configDTO) {
+        try {
+            String templateFilePath = reportTemplateConfigService.generateTemporaryFile(configDTO);
+            return ApiUtil.success("生成临时模板文件成功", templateFilePath);
+        } catch (Exception e) {
+            log.error("生成临时模板文件失败", e);
+            return ApiUtil.fail("生成临时模板文件失败");
+        }
+    }
+
+    /**
+     * 生成excel预览图片
+     * @param configDTO
+     * @return
+     */
+    @PostMapping(value = "/getExcelImage")
+    public ApiResult getExcelImage(@Valid @RequestBody ReportTemplateConfigDTO configDTO) {
+        try {
+            String code = reportTemplateConfigService.generateExcelImage(configDTO);
+            if (code == null) {
+                return ApiUtil.fail("获取excel图片失败");
+            }
+            return ApiUtil.success("获取excel图片成功", code);
+        } catch (Exception e) {
+            return ApiUtil.fail("生成excel临时预览图片失败");
+        }
     }
 
     /**

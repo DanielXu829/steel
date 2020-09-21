@@ -18,12 +18,10 @@ import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
 import com.cisdi.steel.module.report.dto.ReportTemplateSheetDTO;
 import com.cisdi.steel.module.report.dto.WordTitleConfigDTO;
-import com.cisdi.steel.module.report.entity.ReportTemplateConfig;
-import com.cisdi.steel.module.report.entity.ReportTemplateSheet;
-import com.cisdi.steel.module.report.entity.ReportTemplateTags;
-import com.cisdi.steel.module.report.entity.TargetManagement;
+import com.cisdi.steel.module.report.entity.*;
 import com.cisdi.steel.module.report.enums.*;
 import com.cisdi.steel.module.report.mapper.ReportTemplateConfigMapper;
+import com.cisdi.steel.module.report.mapper.ReportTemporaryFileMapper;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
 import com.cisdi.steel.module.report.service.ReportTemplateSheetService;
@@ -42,9 +40,11 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sun.misc.BASE64Encoder;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -92,6 +92,8 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     private ReportTemplateConfigMapper reportTemplateConfigMapper;
     @Autowired
     private TargetManagementMapper targetManagementMapper;
+    @Autowired
+    private ReportTemporaryFileMapper reportTemporaryFileMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -103,7 +105,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             reportTemplateConfig.setTemplateName(templateConfigDTO.getReportTemplateSheetDTOs()
                     .get(0).getReportTemplateSheet().getSheetTitle());
         }
-        reportTemplateConfig.setTemplateConfigJsonString("");
         reportTemplateConfig.setTemplateConfigJsonString(JSON.toJSONString(templateConfigDTO));
         if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0) {
             // 如果id存在则更新，不存在则新增
@@ -151,6 +152,73 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         // 修改templatePath
         reportTemplateConfig.setTemplatePath(templateFilePath);
         this.updateRecord(reportTemplateConfig);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String generateTemporaryFile(ReportTemplateConfigDTO templateConfigDTO) {
+        ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
+        String templateName = reportTemplateConfig.getTemplateName();
+        if (StringUtils.isBlank(templateName)) {
+            templateName = templateConfigDTO.getReportTemplateSheetDTOs()
+                    .get(0).getReportTemplateSheet().getSheetTitle();
+            // 如果templateName为空，代表是excel，默认取第一个sheet的title
+            reportTemplateConfig.setTemplateName(templateName);
+        }
+
+        String templateFilePath = this.generateTemplate(templateConfigDTO);
+        reportTemporaryFileMapper.insertOne(new ReportTemporaryFile().setFilePath(templateFilePath).setFileType(0));
+        return templateFilePath;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String generateExcelImage(ReportTemplateConfigDTO templateConfigDTO) {
+        ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
+        String templateName = reportTemplateConfig.getTemplateName();
+        if (StringUtils.isBlank(templateName)) {
+            templateName = templateConfigDTO.getReportTemplateSheetDTOs()
+                    .get(0).getReportTemplateSheet().getSheetTitle();
+            // 如果templateName为空，代表是excel，默认取第一个sheet的title
+            reportTemplateConfig.setTemplateName(templateName);
+        }
+
+        String templateFilePath = this.generateTemplate(templateConfigDTO);
+        String tempImagePath = jobProperties.getTempImagePath();
+        String imageFilePath = new StringBuilder()
+                .append(tempImagePath)
+                .append(File.separator)
+                .append(templateName)
+                .append("_")
+                .append(System.currentTimeMillis())
+                .append(".png")
+                .toString();
+        com.spire.xls.Workbook wb = new com.spire.xls.Workbook();
+        wb.loadFromFile(templateFilePath);
+        com.spire.xls.Worksheet worksheet = wb.getWorksheets().get(0);
+        worksheet.saveToImage(imageFilePath);
+        log.info("成功生成excel临时文件，文件路径：" + templateFilePath);
+        log.info("成功生成excel临时预览图片，文件路径：" + imageFilePath);
+        reportTemporaryFileMapper.insertOne(new ReportTemporaryFile().setFilePath(templateFilePath).setFileType(0));
+        reportTemporaryFileMapper.insertOne(new ReportTemporaryFile().setFilePath(imageFilePath).setFileType(1));
+
+        File imageFile = new File(imageFilePath);
+        try (
+            FileInputStream fileInputStream = new FileInputStream(imageFile);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ) {
+            BufferedImage image = ImageIO.read(fileInputStream);
+            if (image != null) {
+                ImageIO.write(image, "png", byteArrayOutputStream);
+            }
+            BASE64Encoder encoder = new BASE64Encoder();
+            String base64 = encoder.encodeBuffer(byteArrayOutputStream.toByteArray()).trim();
+            base64 = base64.replaceAll("\n", "").replaceAll("\r", "");
+            return "data:image/jpg;base64," + base64;
+        } catch (IOException e) {
+            log.error("生成excel临时预览图片失败", e);
+            throw new LeafException("生成excel临时预览图片失败");
+        }
     }
 
     @Override
@@ -277,6 +345,9 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     for (int i = 1; i <= listGroups.size(); i++) {
                         ExportWordUtil.createParagraph(document, String.format("{{sheet%s_chart%s}}", sheetIndex, i), wordTitleConfigDTO);
                     }
+                    break;
+                case BAR_CHART:
+                    ExportWordUtil.createParagraph(document, String.format("{{sheet%s_chart%s}}", sheetIndex, 1), wordTitleConfigDTO);
                     break;
                 default:
                     StringJoiner joiner = new StringJoiner("、", "今日", "。");

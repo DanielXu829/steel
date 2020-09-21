@@ -75,6 +75,9 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
                 case PLAIN_TEXT:
                     handlePlainText(result, version, sheetIndex, reportTemplateSheet, handleStrategy, dateQuerys, tagFormulaToTargetMap);
                     break;
+                case BAR_CHART:
+                    handleBarChart(result, version, sheetIndex, reportTemplateSheet, handleStrategy, dateQuerys, tagFormulaToTargetMap);
+                    break;
                 default:
                     handleChart(result, version, sheetIndex, reportTemplateSheet, handleStrategy, dateQuerys, tagFormulaToTargetMap);
                     break;
@@ -137,6 +140,72 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
             log.error("处理纯文本部分出错", e);
         }
     }
+
+    /**
+     * 生成柱状图
+     * @param result
+     * @param version
+     * @param sheetIndex
+     * @param reportTemplateSheet
+     * @param handleStrategy
+     * @param dateQueries
+     * @param tagFormulaToTargetMap
+     */
+    private void handleBarChart(HashMap<String, Object> result, String version, int sheetIndex, ReportTemplateSheet reportTemplateSheet,
+                                HandleQueryDataStrategy handleStrategy, List<DateQuery> dateQueries,
+                                Map<String, TargetManagement> tagFormulaToTargetMap) {
+        List<String> dateStrList = getDateStrList(reportTemplateSheet, dateQueries);
+
+        List<String> tagFormulas = new ArrayList<>(tagFormulaToTargetMap.keySet());
+        Map<String, List<Double>> tagNameToValueListMap = new HashMap<>();
+        for (String tagFormula : tagFormulas) {
+            tagNameToValueListMap.put(tagFormula, new ArrayList<Double>());
+        }
+        for (DateQuery dateQuery : dateQueries) {
+            // 调api批量查询tag点数据
+            Map<String, LinkedHashMap<Long, Double>> tagValueMaps
+                    = handleStrategy.getTagValueMaps(dateQuery, version, tagFormulas);
+            if (MapUtils.isEmpty(tagValueMaps)) {
+                for (String tagFormula : tagFormulas) {
+                    tagNameToValueListMap.get(tagFormula).add(0d);
+                }
+                continue;
+            }
+            // 当前dateQuery下的key value
+            Map<String, Double> tagNameToValueMap = getTagFormulaToValueMap(tagValueMaps, dateQuery, tagFormulas);
+            if (MapUtils.isEmpty(tagNameToValueMap)) {
+                for (String tagFormula : tagFormulas) {
+                    tagNameToValueListMap.get(tagFormula).add(0d);
+                }
+                continue;
+            }
+            for (String tagFormula : tagFormulas) {
+                tagNameToValueListMap.get(tagFormula).add(tagNameToValueMap.get(tagFormula));
+            }
+        }
+
+        Vector<Serie> series = new Vector<Serie>();
+        for (String tagFormula : tagFormulas) {
+            List<Double> tagValueList = tagNameToValueListMap.get(tagFormula);
+            if (CollectionUtils.isEmpty(tagValueList)) {
+                continue;
+            }
+            TargetManagement targetManagement = tagFormulaToTargetMap.get(tagFormula);
+            String writtenName = targetManagement.getWrittenName();
+            series.add(new Serie(writtenName, tagValueList.toArray(new Double[tagValueList.size()])));
+        }
+
+        String title = "";
+        String categoryAxisLabel = "";
+        String valueAxisLabel = "";
+        String[] xAxisTimes = dateStrList.toArray(new String[dateStrList.size()]);
+        JFreeChart chart = ChartFactory.createMultipleYAxisBarChart(title,
+                categoryAxisLabel, valueAxisLabel, series, xAxisTimes);
+        WordImageEntity image1 = image(chart);
+        int chartIndex = 1;
+        result.put(String.format("sheet%s_chart%s", sheetIndex, chartIndex), image1);
+    }
+
     /**
      * 生成折线图
      * @param version
@@ -214,20 +283,20 @@ public class DrtWordWriter extends DrtAbstractWriter implements IDrtWriter<XWPFD
                     String[] yLabels = yLableList.stream().toArray(String[]::new);
                     int[] stack = {1, 1};
                     int[] ystack = {1, 2};
-                    JFreeChart Chart;
+                    JFreeChart chart;
                     // y轴只有两条或者1条
                     if (vectorSize == 2) {
-                        Chart = ChartFactory.createLineChart(title1,
+                        chart = ChartFactory.createLineChart(title1,
                                 categoryAxisLabel1, yLabels, vectors,
                                 dateStrList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, min2, max2, 0, 0, 2, stack, ystack);
                     } else {
                         min1 = Objects.nonNull(min1)? min1 : min2;
                         max1 = Objects.nonNull(max1)? max1 : max2;
-                        Chart = ChartFactory.createLineChart(title1,
-                                categoryAxisLabel1, yLabels, vectors,
-                                dateStrList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1, 0, 0, 0, 0, 1, stack, ystack);
+                        chart = ChartFactory.createLineChart(title1, categoryAxisLabel1, yLabels, vectors,
+                                dateStrList.toArray(), CategoryLabelPositions.UP_45, true, min1, max1,
+                                0, 0, 0, 0, 1, stack, ystack);
                     }
-                    WordImageEntity image1 = image(Chart);
+                    WordImageEntity image1 = image(chart);
                     result.put(String.format("sheet%s_chart%s", sheetIndex, chartIndex), image1);
                 } else {
                     result.put(String.format("sheet%s_chart%s", sheetIndex, chartIndex), StringUtils.SPACE);
