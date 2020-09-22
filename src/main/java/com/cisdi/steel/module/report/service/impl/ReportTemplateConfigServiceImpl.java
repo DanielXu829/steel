@@ -196,9 +196,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         File file = new File(templateFilePath);
         try ( InputStream fileInputStream1 = new FileInputStream(file);){
             wb.loadFromStream(fileInputStream1);
+            log.error("worksheet长度为: " + wb.getWorksheets().getCount());
             com.spire.xls.Worksheet worksheet = wb.getWorksheets().get(0);
             worksheet.saveToImage(imageFilePath);
-        } catch(IOException e) {
+        } catch(Exception e) {
             log.error("生成excel临时预览图片失败", e);
             throw new LeafException("生成excel临时预览图片失败");
         }
