@@ -193,9 +193,16 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 .append(".png")
                 .toString();
         com.spire.xls.Workbook wb = new com.spire.xls.Workbook();
-        wb.loadFromFile(templateFilePath);
-        com.spire.xls.Worksheet worksheet = wb.getWorksheets().get(0);
-        worksheet.saveToImage(imageFilePath);
+        File file = new File(templateFilePath);
+        try ( InputStream fileInputStream1 = new FileInputStream(file);){
+            wb.loadFromStream(fileInputStream1);
+            com.spire.xls.Worksheet worksheet = wb.getWorksheets().get(0);
+            worksheet.saveToImage(imageFilePath);
+        } catch(IOException e) {
+            log.error("生成excel临时预览图片失败", e);
+            throw new LeafException("生成excel临时预览图片失败");
+        }
+
         log.info("成功生成excel临时文件，文件路径：" + templateFilePath);
         log.info("成功生成excel临时预览图片，文件路径：" + imageFilePath);
         reportTemporaryFileMapper.insertOne(new ReportTemporaryFile().setFilePath(templateFilePath).setFileType(0));
