@@ -51,12 +51,7 @@ public class ReportTemplateConfigController {
      */
     @PostMapping(value = "/saveOrUpdateDTO")
     public ApiResult saveOrUpdateDTO(@Valid @RequestBody ReportTemplateConfigDTO configDTO) {
-        try {
-            reportTemplateConfigService.saveOrUpdateDTO(configDTO);
-        } catch (Exception e) {
-            log.error("保存报表模板失败", e);
-            return ApiUtil.fail("保存报表模板失败");
-        }
+        reportTemplateConfigService.saveOrUpdateDTO(configDTO);
         return ApiUtil.success("保存报表模板成功", configDTO);
     }
 
@@ -83,15 +78,11 @@ public class ReportTemplateConfigController {
      */
     @PostMapping(value = "/getExcelImage")
     public ApiResult getExcelImage(@Valid @RequestBody ReportTemplateConfigDTO configDTO) {
-        try {
-            String code = reportTemplateConfigService.generateExcelImage(configDTO);
-            if (code == null) {
-                return ApiUtil.fail("获取excel图片失败");
-            }
-            return ApiUtil.success("获取excel图片成功", code);
-        } catch (Exception e) {
-            return ApiUtil.fail("生成excel临时预览图片失败");
+        String code = reportTemplateConfigService.generateExcelImage(configDTO);
+        if (code == null) {
+            return ApiUtil.fail("获取excel图片失败");
         }
+        return ApiUtil.success("获取excel图片成功", code);
     }
 
     /**
