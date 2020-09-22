@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface ReportTemporaryFileMapper extends BaseMapper<ReportTemporaryFile> {
-     void deleteAll();
+     Integer deleteAll();
 
      List<ReportTemporaryFile> selectAll();
 

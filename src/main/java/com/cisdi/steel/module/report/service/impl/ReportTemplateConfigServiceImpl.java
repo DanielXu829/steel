@@ -105,9 +105,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             reportTemplateConfig.setTemplateName(templateConfigDTO.getReportTemplateSheetDTOs()
                     .get(0).getReportTemplateSheet().getSheetTitle());
         }
+        // 保存配置信息json串
         reportTemplateConfig.setTemplateConfigJsonString(JSON.toJSONString(templateConfigDTO));
+        // 如果id存在则更新，不存在则新增
         if (reportTemplateConfig.getId() != null && reportTemplateConfig.getId() > 0) {
-            // 如果id存在则更新，不存在则新增
             reportTemplateConfig.setUpdatedTime(new Date());
             this.updateRecord(reportTemplateConfig);
         } else {
@@ -125,6 +126,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         templateSheetIds.forEach(id -> reportTemplateTagsService.deleteBySheetId(id));
         // 清空sheet列表
         reportTemplateSheetService.deleteByConfigId(configId);
+        // 组装sheet数据
         List<ReportTemplateSheetDTO> reportTemplateSheetDTOs = templateConfigDTO.getReportTemplateSheetDTOs();
         List<ReportTemplateSheet> reportTemplateSheetList = new ArrayList<>();
         reportTemplateSheetDTOs.forEach(sheetDto -> {
@@ -135,20 +137,17 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         // 保存sheet
         reportTemplateSheetService.saveBatch(reportTemplateSheetList);
 
+        // 组装tag数据
         for (ReportTemplateSheetDTO reportTemplateSheetDTO : reportTemplateSheetDTOs) {
             ReportTemplateSheet reportTemplateSheet = reportTemplateSheetDTO.getReportTemplateSheet();
-            Long sheetId = reportTemplateSheet.getId();
             List<ReportTemplateTags> reportTemplateTagsList = reportTemplateSheetDTO.getReportTemplateTagsList();
-            for (ReportTemplateTags reportTemplateTags : reportTemplateTagsList) {
-                reportTemplateTags.setTemplateSheetId(sheetId);
-            }
+            reportTemplateTagsList.forEach(e -> e.setTemplateSheetId(reportTemplateSheet.getId()));
             reportTemplateTagsService.saveBatch(reportTemplateTagsList);
         }
         // 生成临时模板文件
         String templateFilePath = this.generateTemplate(templateConfigDTO);
         log.info("保存模板配置成功，ID: " + reportTemplateConfig.getId());
         log.info("成功生成模板文件，文件路径：" + templateFilePath);
-
         // 修改templatePath
         reportTemplateConfig.setTemplatePath(templateFilePath);
         this.updateRecord(reportTemplateConfig);
@@ -287,8 +286,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             log.debug("生成报表临时模板文件: " + generatedExcelFilePath);
             return generatedExcelFilePath;
         } catch (Exception e) {
-            log.error("根据报表配置生成模板文件失败", e);
-            throw new LeafException(e.getMessage());
+            throw new LeafException("根据报表配置生成临时模板文件失败");
         }
     }
 
