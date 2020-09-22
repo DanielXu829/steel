@@ -78,11 +78,17 @@ public class ReportTemplateConfigController {
      */
     @PostMapping(value = "/getExcelImage")
     public ApiResult getExcelImage(@Valid @RequestBody ReportTemplateConfigDTO configDTO) {
-        String code = reportTemplateConfigService.generateExcelImage(configDTO);
-        if (code == null) {
+        String code = null;
+        try {
+            code = reportTemplateConfigService.generateExcelImage(configDTO);
+            if (code == null) {
+                return ApiUtil.fail("获取excel图片失败");
+            }
+            return ApiUtil.success("获取excel图片成功", code);
+        } catch (Exception e) {
+            log.error(e.getMessage());
             return ApiUtil.fail("获取excel图片失败");
         }
-        return ApiUtil.success("获取excel图片成功", code);
     }
 
     /**
