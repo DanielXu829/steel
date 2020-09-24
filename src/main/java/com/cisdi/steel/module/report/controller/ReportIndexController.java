@@ -1,6 +1,8 @@
 package com.cisdi.steel.module.report.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.cisdi.steel.common.base.vo.BaseId;
+import com.cisdi.steel.common.exception.LeafException;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.common.util.DateUtil;
@@ -13,9 +15,12 @@ import com.cisdi.steel.module.job.ExportWordJobContext;
 import com.cisdi.steel.module.job.config.HttpProperties;
 import com.cisdi.steel.module.job.enums.JobEnum;
 import com.cisdi.steel.module.report.dto.ReportPathDTO;
+import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.entity.ReportIndex;
+import com.cisdi.steel.module.report.enums.TemplateBuildEnum;
 import com.cisdi.steel.module.report.mapper.ReportIndexMapper;
 import com.cisdi.steel.module.report.query.ReportIndexQuery;
+import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import com.cisdi.steel.module.report.service.ReportIndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +51,9 @@ public class ReportIndexController {
 
     @Autowired
     private ReportIndexMapper reportIndexMapper;
+
+    @Autowired
+    private ReportCategoryTemplateService reportCategoryTemplateService;
 
     /**
      * 构造器注入
@@ -171,7 +179,19 @@ public class ReportIndexController {
     @PostMapping(value = "/reloadIndex")
     public ApiResult reloadIndex(@RequestBody ReportIndexQuery reportIndexQuery) {
         ReportIndex reportIndex = reportIndexMapper.selectById(reportIndexQuery.getId());
-        if (Objects.nonNull(reportIndex)) {
+        if (Objects.isNull(reportIndex)) {
+            LeafException.castException(String.format("id为%s的报表不存在", reportIndexQuery.getId()));
+        }
+        LambdaQueryWrapper<ReportCategoryTemplate> wrapper = new LambdaQueryWrapper();
+        wrapper.eq(ReportCategoryTemplate::getReportCategoryCode, reportIndex.getReportCategoryCode());
+        ReportCategoryTemplate template = reportCategoryTemplateService.getOne(wrapper);
+        if (Objects.isNull(template)) {
+            LeafException.castException(String.format("编码为%s的模板不存在", reportIndex.getReportCategoryCode()));
+        }
+        // 如果是动态报表
+        if (TemplateBuildEnum.isReportDynamic(template.getIsDynamicReport())) {
+            exportJobContext.executeDynamicReport(reportIndex, template);
+        } else {
             if (reportIndex.getPath().endsWith(".doc") || reportIndex.getPath().endsWith(".docx")) {
                 exportWordJobContext.executeByIndexId(reportIndexQuery.getId());
             } else {

@@ -21,4 +21,13 @@ public enum TemplateBuildEnum {
         }
         throw new LeafException("报表构建枚举类型不存在");
     }
+
+    /**
+     * 是否是动态报表
+     * @param code
+     * @return
+     */
+    public static boolean isReportDynamic(String code) {
+        return DynamicTemplate.code.equals(code);
+    }
 }
