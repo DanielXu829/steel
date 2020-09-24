@@ -44,4 +44,12 @@ public class LeafException extends RuntimeException {
     public LeafException(){
 
     }
+
+    /**
+     * 抛出LeafException工具方法
+     * @param message
+     */
+    public static void castException(String message) {
+        throw new LeafException(message);
+    }
 }
