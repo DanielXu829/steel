@@ -13,6 +13,7 @@ import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
+import com.cisdi.steel.module.report.mapper.TargetManagementOldMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -35,6 +36,9 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
 
     @Autowired
     private TargetManagementMapper targetManagementMapper;
+
+    @Autowired
+    private TargetManagementOldMapper targetManagementOldMapper;
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -113,8 +117,10 @@ public class JiaoLuJiaReWriter extends AbstractExcelReadWriter {
                 String column = columns.get(i);
                 if (StringUtils.isNotBlank(column)) {
                     // 获取别名对应的tag点
-                    //column = targetManagementMapper.selectTargetFormulaByTargetName(column);
                     TargetManagement targetManagement = targetManagementMapper.selectTargetByTargetName(column);
+                    if (targetManagement == null) {
+                        targetManagement = targetManagementOldMapper.selectTargetByTargetName(column);
+                    }
                     column = targetManagement.getTargetFormula();
                     Integer scale = targetManagement.getScale();
                     queryParam.put("tagNames", column);
