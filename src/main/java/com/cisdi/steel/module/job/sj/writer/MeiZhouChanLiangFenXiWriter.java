@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
+import com.cisdi.steel.module.report.mapper.TargetManagementOldMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,6 +33,9 @@ public class MeiZhouChanLiangFenXiWriter extends BaseShaoJieWriter {
 
     @Autowired
     private TargetManagementMapper targetManagementMapper;
+
+    @Autowired
+    private TargetManagementOldMapper targetManagementOldMapper;
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -64,7 +68,17 @@ public class MeiZhouChanLiangFenXiWriter extends BaseShaoJieWriter {
         // 获取本周一到本周日的日期
         try {
             List<String> columns = PoiCustomUtil.getFirstRowCelVal(tagSheet);
-            List<String> targetFormulas = targetManagementMapper.selectTargetFormulasByTargetNames(columns);
+            for (int j = 0; j < columns.size(); j++) {
+                String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
+                if (StringUtils.isBlank(tagName)) {
+                    tagName = targetManagementOldMapper.selectTargetFormulaByTargetName(columns.get(j));
+                }
+                if (StringUtils.isBlank(tagName)) {
+                    columns.set(j, StringUtils.EMPTY);
+                } else {
+                    columns.set(j, tagName);
+                }
+            }
             List<CellData> cellDataListOfTagSheet = new ArrayList<>();
             for (int dateQueryIndex = 0, dateQuerySize = dateQueryList.size(); dateQueryIndex < dateQuerySize; dateQueryIndex++) {
                 int dayOfWeekDay = DateUtil.getDayOfWeekDay(dateRun);
@@ -75,15 +89,15 @@ public class MeiZhouChanLiangFenXiWriter extends BaseShaoJieWriter {
                 Long queryStartTime = dateAheadTwoHourQuery.getQueryStartTime();
                 Long queryEndTime = dateAheadTwoHourQuery.getQueryEndTime();
                 SjTagQueryParam sjTagQueryParam = new SjTagQueryParam(queryStartTime,
-                        queryEndTime, targetFormulas);
+                        queryEndTime, columns);
                 String tagValueJsonData = getTagValue(version, sjTagQueryParam);
                 JSONObject data = Optional.ofNullable(JSONObject.parseObject(tagValueJsonData))
                         .map(e -> e.getJSONObject("data")).orElse(null);
                 if (Objects.isNull(data)) {
                     continue;
                 }
-                for (int columnIndex = 0, columnSize = targetFormulas.size(); columnIndex < columnSize; columnIndex++) {
-                    String column = targetFormulas.get(columnIndex);
+                for (int columnIndex = 0, columnSize = columns.size(); columnIndex < columnSize; columnIndex++) {
+                    String column = columns.get(columnIndex);
 
                     JSONObject dataOfColumn = data.getJSONObject(column);
                     if (Objects.isNull(dataOfColumn)) {

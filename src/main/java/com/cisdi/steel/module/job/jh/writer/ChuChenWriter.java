@@ -11,6 +11,7 @@ import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
+import com.cisdi.steel.module.report.mapper.TargetManagementOldMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -25,6 +26,9 @@ import java.util.*;
 public class ChuChenWriter extends AbstractExcelReadWriter {
     @Autowired
     private TargetManagementMapper targetManagementMapper;
+
+    @Autowired
+    private TargetManagementOldMapper targetManagementOldMapper;
 
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
@@ -49,14 +53,15 @@ public class ChuChenWriter extends AbstractExcelReadWriter {
                 List<String> columns = PoiCustomUtil.getFirstRowCelVal(sheet);
                 StringBuffer buffer = new StringBuffer();
                 for (int j = 0; j < columns.size(); j++) {
-                    if (columns.get(j).startsWith("ZP")) {
-                        String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
-                        if (StringUtils.isBlank(tagName)) {
-                            columns.set(j, "");
-                        } else {
-                            columns.set(j, tagName);
-                            buffer = buffer.append(columns.get(j).concat(","));
-                        }
+                    String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
+                    if (StringUtils.isBlank(tagName)) {
+                        tagName = targetManagementOldMapper.selectTargetFormulaByTargetName(columns.get(j));
+                    }
+                    if (StringUtils.isBlank(tagName)) {
+                        columns.set(j, "");
+                    } else {
+                        columns.set(j, tagName);
+                        buffer = buffer.append(columns.get(j).concat(","));
                     }
                 }
                 String searchParam = buffer.toString();

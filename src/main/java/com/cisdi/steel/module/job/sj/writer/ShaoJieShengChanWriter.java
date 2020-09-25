@@ -19,6 +19,7 @@ import com.cisdi.steel.module.job.util.ExcelWriterUtil;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.job.util.date.DateQueryUtil;
 import com.cisdi.steel.module.report.mapper.TargetManagementMapper;
+import com.cisdi.steel.module.report.mapper.TargetManagementOldMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -60,6 +61,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
     @Autowired
     private TargetManagementMapper targetManagementMapper;
 
+    @Autowired
+    private TargetManagementOldMapper targetManagementOldMapper;
+
     @Override
     public Workbook excelExecute(WriterExcelDTO excelDTO) {
         Workbook workbook = this.getWorkbook(excelDTO.getTemplate().getTemplatePath());
@@ -98,6 +102,9 @@ public class ShaoJieShengChanWriter extends AbstractExcelReadWriter {
                 // 根据别名获取tag点名
                 for (int j = 0; j < columns.size(); j++) {
                     String tagName = targetManagementMapper.selectTargetFormulaByTargetName(columns.get(j));
+                    if (StringUtils.isBlank(tagName)) {
+                        tagName = targetManagementOldMapper.selectTargetFormulaByTargetName(columns.get(j));
+                    }
                     if (StringUtils.isBlank(tagName)) {
                         columns.set(j, StringUtils.EMPTY);
                     } else {
