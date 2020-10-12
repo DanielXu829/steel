@@ -46,6 +46,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -67,6 +68,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     private static final String formula = "IF(cell%=\"\",\"\",cell%)";
     private static final String[] letterArray = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 
+    public static final String AVERAGE = "平均值";
     public static final int REPORT_TITLE_ROW_INDEX = 1; // 标题行
     public static final int TARGET_NAME_BEGIN_ROW = 2; // 顶层节点行
     private static final int firstDataColumnIndex = 2;//从开始填充点位的列开始，下标从0开始，并且排除时间列
@@ -688,21 +690,23 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             switch (timeDivideEnum) {
                 case HOUR:
                     if (startTimeSlot >= endTimeSlot) {
-                        //处理焦化报表时间跨天的情况
+                        //处理时间跨天的情况
                         maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval + 1;
                     }
                     break;
                 case DAY:
                     if (startTimeSlot >= endTimeSlot) {
-                        // 处理焦化报表时间跨天的情况
-                        maxRow = (endTimeSlot + (31 - startTimeSlot)) / interval + 1;
+                        // 处理时间跨月的情况
+                        LocalDate date = LocalDate.now().minusMonths(1);
+                        int lastMonthDayLength = date.lengthOfMonth();
+                        maxRow = (endTimeSlot + (lastMonthDayLength - startTimeSlot)) / interval + 1;
                     }
                     timeUnit = timeDivideEnum.getDivideType();
                     break;
                 default:
                     // 月
                     if (startTimeSlot >= endTimeSlot) {
-                        // 处理焦化报表时间跨天的情况
+                        // 处理时间跨年的情况
                         maxRow = (endTimeSlot + (12 - startTimeSlot)) / interval + 1;
                     }
                     timeUnit = timeDivideEnum.getDivideType();;
@@ -755,8 +759,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                         break;
                     // 日期跨月的情况
                     case DAY:
-                        if (timeSlot > 31) {
-                            timeStr = decimalFormat.format(timeSlot - 31) + timeUnit;
+                        LocalDate date = LocalDate.now().minusMonths(1);
+                        int lastMonthDayLength = date.lengthOfMonth();
+                        if (timeSlot > lastMonthDayLength) {
+                            timeStr = decimalFormat.format(timeSlot - lastMonthDayLength) + timeUnit;
                         }
                         break;
                     // 月份跨年的情况
@@ -792,7 +798,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         if ("1".equals(reportTemplateSheet.getIsAddAvg())) {
             Row summaryRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstSheet.getLastRowNum() + 1);
             Cell averageCell = ExcelWriterUtil.getCellOrCreate(summaryRow, 1);
-            averageCell.setCellValue("平均值");
+            averageCell.setCellValue(AVERAGE);
             averageCell.setCellStyle(ExcelStyleUtil.getCellStyle(workbook));
 
             int k = 0;
@@ -819,7 +825,9 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
             dataRow.setHeightInPoints(heightInPoints);
         }
         int j = 0;
-        for (ReportTemplateTags reportTemplateTags : tagsMap.keySet()) {
+        for (TargetManagement targetManagement : tagsMap.values()) {
+            Long defaultWidth = targetManagement.getDefaultWidth();
+            int cellWidth = defaultWidth == null? this.cellWidth : defaultWidth.intValue() * 256;
             firstSheet.setColumnWidth(firstDataColumnIndex + j, cellWidth);
             j++;
         }
