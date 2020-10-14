@@ -100,7 +100,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveOrUpdateDTO(ReportTemplateConfigDTO templateConfigDTO) {
-        // 生成临时模板文件。
+        // 生成临时模板文件
         ReportTemplateConfig reportTemplateConfig = templateConfigDTO.getReportTemplateConfig();
         if (StringUtils.isBlank(reportTemplateConfig.getTemplateName())) {
             // 如果templateName为空，代表是excel，默认取第一个sheet的title
@@ -541,7 +541,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         // 时间
         Row unitRow = ExcelWriterUtil.getRowOrCreate(reportSheet, lastRowOfTagNames + 1);
         Cell unitRowFirstCell = ExcelWriterUtil.getCellOrCreate(unitRow, firstDataColumnIndex - 1);
-        unitRowFirstCell.setCellValue("时间");
+        unitRowFirstCell.setCellValue(ReportConstants.TIME);
         unitRowFirstCell.setCellStyle(ExcelStyleUtil.getHeaderStyle(workbook));
         unitRow.setHeightInPoints(heightInPointsHeader);
         reportSheet.setColumnWidth(firstDataColumnIndex - 1, timeCellWidth);
@@ -666,7 +666,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     }
                 }
 
-                // 下一个topParentIndex
+                // 横向找下一个topParentIndex
                 topParentColumnIndex += sonTagSizeOfCurrentTopParent;
             }
         }
@@ -674,15 +674,23 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         setTimeAndFormula(reportSheet, workbook, reportTemplateSheet, tagsMap, tagsSheetName, lastRowOfTagNames);
     }
 
+    /**
+     * 写出时间列
+     * @param firstSheet
+     * @param workbook
+     * @param reportTemplateSheet
+     * @param tagsMap
+     * @param tagsSheetName
+     * @param lastRowOfTagNames
+     */
     private void setTimeAndFormula(Sheet firstSheet, Workbook workbook, ReportTemplateSheet reportTemplateSheet, LinkedHashMap<ReportTemplateTags, TargetManagement> tagsMap,
                                    String tagsSheetName, int lastRowOfTagNames) {
-        // 生成时间
-        // 获取时间范围类型
         String timeUnit = ":00";
         int interval = Integer.valueOf(reportTemplateSheet.getTimeslotInterval()); // 时间间隔
-        Integer startTimeSlot = null, endTimeSlot, maxRow;
+        Integer startTimeSlot = null, endTimeSlot = null, maxRow;
         TimeDivideEnum timeDivideEnum = TimeDivideEnum.getEnumByCode(reportTemplateSheet.getTimeDivideType());
         TimeTypeEnum timeTypeEnum = TimeTypeEnum.getEnumByCode(reportTemplateSheet.getTimeType());
+        // 时间范围
         if (timeTypeEnum.equals(TimeTypeEnum.TIME_RANGE)) {
             startTimeSlot = Integer.valueOf(reportTemplateSheet.getStartTimeslot());
             endTimeSlot = Integer.valueOf(reportTemplateSheet.getEndTimeslot());
@@ -693,6 +701,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                         //处理时间跨天的情况
                         maxRow = (endTimeSlot + (24 - startTimeSlot)) / interval + 1;
                     }
+                    timeUnit = ":00";
                     break;
                 case DAY:
                     if (startTimeSlot >= endTimeSlot) {
@@ -713,13 +722,13 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     break;
             }
         } else {
+            // (最近多少天)的最大行数
             maxRow = Integer.valueOf(reportTemplateSheet.getLastTimeslot()) / interval;
         }
 
+        int firstDataRowIndex = lastRowOfTagNames + 2; // 时间的开始行号
+        DateTimeFormatter df;
         LocalDateTime now = LocalDateTime.now();
-        int firstDataRowIndex = lastRowOfTagNames + 2;
-
-        DateTimeFormatter df = null;
         LocalDateTime startHours = now.minusHours((maxRow - 1) * interval);
         LocalDateTime startDays = now.minusDays((maxRow - 1) * interval);
         LocalDateTime startMonths = now.minusMonths((maxRow - 1) * interval);
@@ -727,10 +736,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         for (int i = 0; i < maxRow; i++) {
             Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
             Cell timeCell = ExcelWriterUtil.getCellOrCreate(dataRow, firstDataColumnIndex - 1);
-            //添加时间信息
             // 构造时间信息
             String timeStr = "";
             int timeSlot = 0;
+            // 写入(最近多少天)的时间
             if (timeTypeEnum.equals(TimeTypeEnum.RECENT_TIME)) {
                 switch (timeDivideEnum) {
                     case HOUR:
@@ -747,6 +756,7 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                         break;
                 }
             } else {
+                // 写入(时间范围)的时间
                 decimalFormat.applyPattern("00");
                 timeSlot = i * interval + startTimeSlot;
                 timeStr = decimalFormat.format(timeSlot) + timeUnit;
@@ -761,8 +771,10 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                     case DAY:
                         LocalDate date = LocalDate.now().minusMonths(1);
                         int lastMonthDayLength = date.lengthOfMonth();
-                        if (timeSlot > lastMonthDayLength) {
-                            timeStr = decimalFormat.format(timeSlot - lastMonthDayLength) + timeUnit;
+                        if (startTimeSlot >= endTimeSlot) {
+                            if (timeSlot > lastMonthDayLength) {
+                                timeStr = decimalFormat.format(timeSlot - lastMonthDayLength) + timeUnit;
+                            }
                         }
                         break;
                     // 月份跨年的情况
@@ -789,7 +801,6 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
                 CellStyle cellStyle = ExcelStyleUtil.getCellStyle(workbook, scale);
                 //设置样式
                 cell.setCellStyle(cellStyle);
-
                 j++;
             }
         }
@@ -820,10 +831,12 @@ public class ReportTemplateConfigServiceImpl extends BaseServiceImpl<ReportTempl
         }
 
         // 循环设置所有的行高和列宽, 包含平均值列
+        // 设置行高
         for (int i = 0; i <= maxRow + 1; i++) {
             Row dataRow = ExcelWriterUtil.getRowOrCreate(firstSheet, firstDataRowIndex + i);
             dataRow.setHeightInPoints(heightInPoints);
         }
+        // 设置列宽
         int j = 0;
         for (TargetManagement targetManagement : tagsMap.values()) {
             Long defaultWidth = targetManagement.getDefaultWidth();

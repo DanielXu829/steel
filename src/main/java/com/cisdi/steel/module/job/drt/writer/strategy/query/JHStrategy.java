@@ -6,6 +6,7 @@ import com.cisdi.steel.dto.response.jh.res.JHTagValueListDTO;
 import com.cisdi.steel.dto.response.jh.res.TagValue;
 import com.cisdi.steel.module.job.util.date.DateQuery;
 import com.cisdi.steel.module.report.enums.SequenceEnum;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -40,11 +41,11 @@ public class JHStrategy extends BaseStrategy {
         }
         // 去除返回json字符串中的total : xxx, 防止解析JSON失败
         String totalRegex = "\"total\":.*?,";
-        result = result.replaceFirst(totalRegex, "");
+        result = result.replaceFirst(totalRegex, StringUtils.EMPTY);
         JHTagValueListDTO jhTagValueListDTO = JSON.parseObject(result, JHTagValueListDTO.class);
         LinkedHashMap<String, List<TagValue>> jhTagValueMap =
                 Optional.ofNullable(jhTagValueListDTO).map(JHTagValueListDTO::getData).orElse(null);
-        if (Objects.isNull(jhTagValueMap) || jhTagValueMap.isEmpty()) {
+        if (MapUtils.isEmpty(jhTagValueMap)) {
             return null;
         }
         Map<String, LinkedHashMap<Long, Double>> tagValueMaps = new HashMap<>();

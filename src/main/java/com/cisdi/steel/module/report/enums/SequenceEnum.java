@@ -6,11 +6,9 @@ import com.cisdi.steel.common.exception.LeafException;
  * 工序和excel版本对应关系
  */
 public enum SequenceEnum {
-    // 秒
     GL8("8高炉", "8.0"),
-    // 分钟
+    GL7("7高炉", "7.0"),
     SJ4("4烧结", "4"),
-    // 小时
     JH910("焦化910", "910");
 
     private String sequenceCode;
