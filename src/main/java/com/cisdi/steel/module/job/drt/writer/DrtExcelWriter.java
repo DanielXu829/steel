@@ -99,13 +99,13 @@ public class DrtExcelWriter extends DrtAbstractWriter implements IDrtWriter<Work
     }
 
     /**
-     * 写入时间列
+     * 通过DateQueries来构建时间，并写入时间列
      * @param mainSheet
      * @param reportTemplateConfig
      * @param dateQuerys
      */
     protected void writeTimeColumn(Sheet mainSheet, ReportTemplateSheet reportTemplateSheet, List<DateQuery> dateQuerys) {
-        Cell timeTitleCell = PoiCustomUtil.getCellByValue(mainSheet,"时间");
+        Cell timeTitleCell = PoiCustomUtil.getCellByValue(mainSheet, ReportConstants.TIME);
         int rowIndex = timeTitleCell.getRowIndex();
         int columnIndex = timeTitleCell.getColumnIndex();
         String timeType = reportTemplateSheet.getTimeType();
@@ -116,40 +116,35 @@ public class DrtExcelWriter extends DrtAbstractWriter implements IDrtWriter<Work
             DateQuery dateQuery = dateQuerys.get(i);
             Row timeRow = ExcelWriterUtil.getRowOrCreate(mainSheet, rowIndex + i + 1);
             Cell timeCell = ExcelWriterUtil.getCellOrCreate(timeRow, columnIndex);
-            SimpleDateFormat format;
-            String dateString = "";
+            SimpleDateFormat timeFormat = new SimpleDateFormat(DateUtil.hhmmFormat);
+            String dateString = StringUtils.EMPTY;
             if (TimeTypeEnum.TIME_RANGE.equals(timeTypeEnum)) {
-                // 每个月的月底日期不确定，特殊处理
                 switch (timeDivideEnum) {
                     case HOUR:
-                        format = new SimpleDateFormat(DateUtil.hhmmFormat);
-                        dateString = format.format(dateQuery.getStartTime());
+                        timeFormat = new SimpleDateFormat(DateUtil.hhmmFormat);
                         break;
                     case DAY:
-                        format = new SimpleDateFormat(DateUtil.ddChineseFormat);
-                        dateString = format.format(dateQuery.getStartTime());
+                        timeFormat = new SimpleDateFormat(DateUtil.ddChineseFormat);
                         break;
                     case MONTH:
-                        format = new SimpleDateFormat(DateUtil.MMChineseFormat);
-                        dateString = format.format(dateQuery.getStartTime());
+                        timeFormat = new SimpleDateFormat(DateUtil.MMChineseFormat);
                         break;
                 }
             } else {
                 switch (timeDivideEnum) {
                     case HOUR:
-                        format = new SimpleDateFormat(DateUtil.yyyyMMddHHChineseFormat);
-                        dateString = format.format(dateQuery.getStartTime());
+                        timeFormat = new SimpleDateFormat(DateUtil.yyyyMMddHHChineseFormat);
                         break;
                     case DAY:
-                        format = new SimpleDateFormat(DateUtil.yyyyMMddChineseFormat);
-                        dateString = format.format(dateQuery.getStartTime());
+                        timeFormat = new SimpleDateFormat(DateUtil.yyyyMMddChineseFormat);
                         break;
                     case MONTH:
-                        format = new SimpleDateFormat(DateUtil.yyyyMM);
-                        dateString = format.format(dateQuery.getStartTime());
+                        timeFormat = new SimpleDateFormat(DateUtil.yyyyMM);
                         break;
                 }
             }
+            // 格式化时间显示
+            dateString = timeFormat.format(dateQuery.getStartTime());
             PoiCustomUtil.setCellValue(timeCell, dateString);
         }
     }

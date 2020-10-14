@@ -8,6 +8,7 @@ public final class ReportConstants {
     public static final String TAG_SHEET_NAME_PREFIX = "_tag_sheet_";
     public static final String DICTIONARY_SHEET_NAME = "_dictionary";
     public static final String VERSION = "version";
+    public static final String TIME = "时间";
 
     public static final String SHEET = "sheet";
     // word模板中比较占位符（填充升高，降低）
