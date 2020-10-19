@@ -8,12 +8,10 @@ import com.cisdi.steel.module.report.dto.ReportTemplateConfigDTO;
 import com.cisdi.steel.module.report.service.ReportTemplateConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * <p>Description: 报表动态模板配置 前端控制器 </p>
@@ -103,6 +101,11 @@ public class ReportTemplateConfigController {
             log.error("获取报表模板失败", e);
         }
         return ApiUtil.fail("获取报表模板失败");
+    }
+
+    @GetMapping(value = "/get/{id}")
+    public ApiResult getById(@PathVariable("id") Long id) {
+        return reportTemplateConfigService.getById(id);
     }
 
     /**

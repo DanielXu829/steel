@@ -25,7 +25,6 @@ public class ReportTemporaryFileServiceImpl implements ReportTemporaryFileServic
         reportTemporaryFiles.forEach(file -> {
             FileUtils.deleteFile(file.getFilePath());
             reportTemporaryFileMapper.deleteById(file.getId());
-            System.out.println("删除的文件id：" + file.getId());
         });
         log.info("清除临时文件成功");
     }
