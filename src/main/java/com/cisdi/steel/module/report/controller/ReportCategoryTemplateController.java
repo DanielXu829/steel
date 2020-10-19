@@ -8,10 +8,7 @@ import com.cisdi.steel.module.report.entity.ReportCategoryTemplate;
 import com.cisdi.steel.module.report.query.ReportCategoryTemplateQuery;
 import com.cisdi.steel.module.report.service.ReportCategoryTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -42,6 +39,11 @@ public class ReportCategoryTemplateController {
     @PostMapping(value = "/pageList")
     public ApiResult pageList(@RequestBody ReportCategoryTemplateQuery query) {
         return baseService.pageList(query);
+    }
+
+    @GetMapping(value = "/get/{id}")
+    public ApiResult getById(@PathVariable("id") Long id) {
+        return baseService.getById(id);
     }
 
     /**

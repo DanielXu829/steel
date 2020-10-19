@@ -110,6 +110,19 @@ public class ReportCategoryTemplateServiceImpl extends BaseServiceImpl<ReportCat
     }
 
     @Override
+    public ApiResult<ReportCategoryTemplate> getById(Long id) {
+        ReportCategoryTemplate reportCategoryTemplate = baseMapper.selectById(id);
+        LambdaQueryWrapper<ReportCategory> reportWrapper = new QueryWrapper<ReportCategory>().lambda();
+        reportWrapper.eq(ReportCategory::getCode, reportCategoryTemplate.getReportCategoryCode());
+        ReportCategory reportCategory = reportCategoryMapper.selectOne(reportWrapper);
+        long categoryParentId = reportCategory.getParentId();
+        ReportCategory parentReportCategory = reportCategoryMapper.selectById(categoryParentId);
+        reportCategoryTemplate.setCategoryParentId(categoryParentId);
+        reportCategoryTemplate.setCategoryName(parentReportCategory.getName());
+        return ApiUtil.success(reportCategoryTemplate);
+    }
+
+    @Override
     public List<ReportCategoryTemplate> selectTemplateInfo(String code, String lang, String sequence) {
         if (StringUtils.isBlank(code)) {
             throw new BusinessException("生成模板编码不能为空");

@@ -25,6 +25,8 @@ public interface ReportCategoryTemplateService extends IBaseService<ReportCatego
      */
     ApiResult pageList(ReportCategoryTemplateQuery query);
 
+    ApiResult getById(Long id);
+
     /**
      * 通过编码查询模板信息
      *
