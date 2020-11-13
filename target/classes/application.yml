@@ -1,0 +1,98 @@
+#Spring
+spring:
+    application:
+        name: steel
+#profile
+    profiles:
+        active: local
+#datasource
+    datasource:
+        # druid
+      driver-class-name: com.mysql.jdbc.Driver
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        minimum-idle: 5
+        maximum-pool-size: 15
+        auto-commit: true
+        idle-timeout: 30000
+        pool-name: DatebookHikariCP
+        max-lifetime: 1800000
+        connection-timeout: 30000
+        connection-test-query: SELECT 1
+    servlet:
+      # 文件上传
+      multipart:
+        enabled: true
+        max-file-size: 10MB
+        max-request-size: 10MB
+    # quartz配置
+    quartz:
+      # jdbc配置
+      job-store-type: jdbc
+      properties:
+        org.quartz.scheduler.instanceName: clusteredScheduler
+        org.quartz.scheduler.instanceId: AUTO
+        org.quartz.jobStore.class: org.quartz.impl.jdbcjobstore.JobStoreTX
+        org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+        # 表前缀
+        org.quartz.jobStore.tablePrefix: QRTZ_
+        # 是否集群配置
+        org.quartz.jobStore.isClustered: true
+        # 设置集群检查间隔1h
+        org.quartz.jobStore.clusterCheckinInterval: 10000
+        # 是否使用job存储配置
+        org.quartz.jobStore.useProperties: false
+        # 开启线程配置
+        properties.org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool
+        # 线程的数量
+        org.quartz.threadPool.threadCount: 66
+        # 线程的优先级
+        org.quartz.threadPool.threadPriority: 5
+        # 是否初始化线程
+        org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread: true
+        org.quartz.plugin.triggHistory.class: org.quartz.plugins.history.LoggingJobHistoryPlugin
+        org.quartz.plugin.shutdownhook.class: org.quartz.plugins.management.ShutdownHookPlugin
+        org.quartz.plugin.shutdownhook.cleanShutdown: true
+
+# 请求的根路径
+#http:
+#  url:
+#   urlApiGLOne: http://10.66.3.202:9001
+#   urlApiGLTwo: http://10.66.3.204:9001
+#   urlApiNJOne: http://10.66.3.220:8080
+#   urlApiJHOne:  http://10.66.3.201:8099
+#   urlApiYGLOne: http://10.66.3.210:8181
+#   urlApiSJOne: http://10.66.3.205:9001
+#   urlApiSJTwo: http://10.66.3.206:9001
+http:
+  url:
+#   urlApiGLOne: http://10.64.11.202:9001
+    urlApiGLTwo: http://10.11.11.4:9001
+    urlApiGLThree: http://10.11.11.3:9001
+    #urlApiGLTwo: http://localhost:9904
+    #urlApiGLTwo: http://10.64.11.203:9001
+    #urlApiGLTwo: http://172.20.10.7:9904
+#   urlApiGLThree: http://10.64.11.204:9001
+#   urlApiNJOne: http://10.64.11.220:8080
+    urlApiJHOne:  http://10.11.11.10:9001
+    #urlApiJHOne: http://localhost:9910
+    #urlApiJHOne:  http://10.64.11.209:8099
+    #urlApiJHOne:  http://172.20.61.27:9910
+#   urlApiJHTwo:  http://10.64.11.208:8080
+#   urlApiJHThree:  http://10.64.11.207:8080
+#   urlApiYGLOne: http://10.64.11.210:8181
+#   urlApiSJTwo: http://10.64.11.205:9001
+#   urlApiSJOne: http://10.64.11.206:9001
+    urlApiSJThree: http://10.11.11.7:9001
+    #urlApiSJThree: http://172.20.61.27:9907
+    #urlApiSJThree: http://10.64.11.205:9001
+
+# mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*Mapper.xml
+  global-config:
+    banner: false
+    db-config:
+      db-type: mysql
+      # 主键策略 默认自增
+      id-type: AUTO

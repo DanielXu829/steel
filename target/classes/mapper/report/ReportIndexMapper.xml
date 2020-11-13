@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cisdi.steel.module.report.mapper.ReportIndexMapper">
+
+    <resultMap id="BaseResultMap" type="com.cisdi.steel.module.report.entity.ReportIndex">
+    </resultMap>
+
+    <update id="updateByMoreParamter">
+        UPDATE report_index
+        SET is_hidden ='1',update_time=#{currDate}
+        <where>
+            report_category_code =#{reportCategoryCode}
+            AND index_lang =#{indexLang}
+            AND is_hidden = '0'
+            AND sequence =#{sequence}
+            <if test="indexType=='report_day' or indexType=='report_class' or indexType=='report_four_hour'  or indexType=='report_hour'">
+                AND DATE_FORMAT(create_time,'%Y-%m-%d')=DATE_FORMAT(#{currDate},'%Y-%m-%d')
+            </if>
+            <if test="indexType=='report_month'">
+                AND DATE_FORMAT(create_time,'%Y-%m')=DATE_FORMAT(#{currDate},'%Y-%m')
+            </if>
+            <if test="indexType=='report_year'">
+                AND DATE_FORMAT(create_time,'%Y')=DATE_FORMAT(#{currDate},'%Y')
+            </if>
+        </where>
+    </update>
+    <sql id="queryLike">
+        <if test="parentCode!=null and parentCode!=''">
+            AND report_category_code like concat(#{parentCode},'%')
+        </if>
+        <if test="reportCategoryCode!=null and reportCategoryCode!=''">
+            AND report_category_code=#{reportCategoryCode}
+        </if>
+        <if test="name!=null and name!=''">
+            AND `name`=#{name}
+        </if>
+        <if test="path!=null and path!=''">
+            AND path=#{path}
+        </if>
+        <if test="indexType!=null and indexType!=''">
+            AND index_type=#{indexType}
+        </if>
+        <if test="indexLang!=null and indexLang!=''">
+            AND index_lang=#{indexLang}
+        </if>
+        <if test="sequence!=null and sequence!=''">
+            <if test="sequence=='5烧结' or sequence=='6烧结'">
+                AND sequence LIKE concat('%',#{sequence},'%')
+            </if>
+            <if test="sequence!='5烧结' and sequence!='6烧结'">
+                AND sequence=#{sequence}
+            </if>
+        </if>
+    </sql>
+
+    <select id="queryLastOne" resultType="com.cisdi.steel.module.report.entity.ReportIndex">
+        SELECT *
+        FROM
+            `report_index`
+        WHERE
+            is_hidden = '0'
+            AND report_category_code = #{code}
+        ORDER BY
+            create_time DESC
+        LIMIT 1
+    </select>
+
+    <select id="queryReportToday" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        `report_index`
+        <where>
+            is_hidden='0'
+            AND del_flag = 0
+            AND index_type IN ( 'report_day' )
+            AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
+            <include refid="queryLike"/>
+        </where>
+    </select>
+
+    <select id="queryReport" resultMap="BaseResultMap">
+        SELECT *
+        FROM
+            `report_index`
+        WHERE
+            is_hidden = '0'
+            AND del_flag = 0
+            AND report_category_code = #{code}
+            AND create_time between  from_unixtime(#{startTime}) and from_unixtime(#{endTime})
+        ORDER BY
+            create_time
+    </select>
+
+    <select id="queryReportMonth" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        `report_index`
+        <where>
+            is_hidden='0'
+            AND del_flag = 0
+            AND index_type IN ( 'report_month' )
+            AND DATE_FORMAT(create_time,'%Y-%m') = #{toDay}
+            <include refid="queryLike"/>
+        </where>
+    </select>
+    <select id="queryReportOther" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        `report_index`
+        <where>
+            is_hidden='0'
+            AND del_flag = 0
+            AND index_type NOT IN ( 'report_month','4hour_report','report_day' )
+            AND DATE_FORMAT(create_time,'%Y-%m-%d') = #{toDay}
+            <include refid="queryLike"/>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+    <select id="selectIdByParamter" resultType="com.cisdi.steel.module.report.entity.ReportIndex">
+        select * from report_index
+        <where>
+            report_category_code =#{reportCategoryCode}
+            AND index_lang =#{indexLang}
+            AND sequence =#{sequence}
+            AND index_type=#{indexType}
+            AND del_flag = 0
+            <if test="id!=null">
+                AND id=#{id}
+            </if>
+            <if test="indexType=='report_day' or indexType=='report_class' or indexType=='report_four_hour'  or indexType=='report_hour'">
+                AND DATE_FORMAT(record_date,'%Y-%m-%d')=DATE_FORMAT(#{currDate},'%Y-%m-%d')
+            </if>
+            <if test="indexType=='report_month'">
+                AND DATE_FORMAT(record_date,'%d') != 1
+                AND DATE_FORMAT(record_date,'%Y-%m')=DATE_FORMAT(#{currDate},'%Y-%m')
+            </if>
+            <if test="indexType=='report_year'">
+                AND DATE_FORMAT(record_date,'%Y')=DATE_FORMAT(#{currDate},'%Y')
+            </if>
+        </where>
+        order by update_time desc
+        limit 1
+    </select>
+    <select id="selectIdByParamter1" resultType="com.cisdi.steel.module.report.entity.ReportIndex">
+        select * from report_index
+        <where>
+            report_category_code =#{reportCategoryCode}
+            AND index_lang =#{indexLang}
+            AND sequence =#{sequence}
+        </where>
+        order by update_time desc
+        limit 1
+    </select>
+</mapper>

@@ -1,0 +1,29 @@
+#startup
+server:
+  port: 8181
+
+spring:
+  datasource:
+    url: jdbc:mysql://10.11.11.12:3306/steel_linux?characterEncoding=utf8&useSSL=false
+    username: root
+    password: Cisdi@123456
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+logging:
+  config: classpath:config/logback-dev.xml
+
+
+# 执行定时器相关参数配置
+job:
+#  file-path: /root/reports
+  file-path: /u01/reports
+  template-Path: /u01/templates
+  temp-path: /tmp
+  temp-image-path: /tmp
+
+posyspath: /root/lic/
+popassword: 111111

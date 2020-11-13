@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cisdi.steel.module.report.mapper.ReportCategoryMapper">
+
+
+    <select id="queryPerms" resultType="java.util.Map">
+        SELECT
+            rc.perms AS perms,
+            role.role_name AS roleName
+        FROM
+            `sys_user_role` sr
+            LEFT JOIN sys_role role ON role.role_id = sr.role_id
+            LEFT JOIN sys_role_menu sm ON role.role_id = sr.role_id
+            LEFT JOIN report_category rc ON rc.id = sm.menu_id
+        WHERE
+            sr.user_id =#{userId}
+    </select>
+</mapper>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title th:text="${fileName}"></title>
+
+    <style type="text/css">
+        html {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            background: #fff;
+            color: #333;
+            font-family: Arial, Tahoma, sans-serif;
+            font-size: 12px;
+            font-weight: normal;
+            height: 100%;
+            margin: 0;
+            overflow-y: hidden;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .form {
+            height: 100%;
+        }
+
+        div {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script type="text/javascript" th:src="${docserviceApiUrl}"></script>
+    <script type="text/javascript" language="javascript" th:inline="javascript">
+
+        var docEditor;
+        var fileName = [[${fileName}]];
+        var fileType = [[${fileType}]];
+
+        var innerAlert = function (message) {
+            console.log(message.error);
+            if (console && console.log){
+                console.log(message);
+            }
+        };
+
+        var onReady = function () {
+            innerAlert("Document editor ready");
+        };
+
+        var onDocumentStateChange = function (event) {
+            var title = document.title.replace(/\*$/g, "");
+            document.title = title + (event.data ? "*" : "");
+        };
+
+        var onRequestEditRights = function () {
+            location.href = location.href.replace(RegExp("action=view\&?", "i"), "");
+        };
+
+        var onError = function (event) {
+            if (event) {
+                innerAlert(event.data);
+            }
+        };
+
+        var onWarning = function (event) {
+            console.log("ONLYOFFICE Document Editor reports an warning: code " + event.data.warningCode +"---"+event.data.code+ ", description " + event.data.warningDescription);
+        };
+
+        var onInfo = function (event) {
+            console.log("ONLYOFFICE Document Editor is opened in mode " + event.data.error);
+        };
+
+        var onOutdatedVersion = function (event) {
+            location.reload(true);
+        };
+
+        var connectEditor = function () {
+
+            docEditor = new DocsAPI.DocEditor("iframeEditor",
+                {
+                    width: "100%",
+                    height: "100%",
+                    type: [[${type}]],
+                    documentType: [[${documentType}]],
+
+                    document: {
+                        title: [[${fileName}]],
+                        url: [[${fileUri}]],
+                        fileType: [[${fileType}]],
+                        key: [[${fileKey}]],
+                        info: {
+                            author: "Me",
+                            created: [[${documentCreated}]],
+                        },
+
+                        permissions: {
+                            comment: true,
+                            download: true,
+                            edit: true,
+                            fillForms: true,
+                            print: true,
+                            review: true
+                        }
+                    },
+                    editorConfig: {
+                        mode: [[${editorMode}]],
+                        // mode: [[${editorMode}]],
+                        lang: "zh-CN",
+                        callbackUrl: [[${callbackUrl}]],
+
+                        user: {
+                            id: [[${editorUserId}]],
+                            name: "OnlyOffice",
+                        },
+                        embedded: {
+                            saveUrl: [[${fileUri}]],
+                            embedUrl: [[${fileUri}]],
+                            shareUrl: [[${fileUri}]],
+                            toolbarDocked: "top",
+                        },
+                        customization: {
+                            about: true,
+                            feedback: true,
+                            forcesave: true,
+                            goback: {
+                                // url: "https://www.onlyoffice.com/",
+                                url: "http://10.11.11.11:92/#/cn/system/report/list"
+                            }
+                        }
+                    },
+                    events: {
+                        "onReady": onReady,
+                        "onDocumentStateChange": onDocumentStateChange,
+                        'onRequestEditRights': onRequestEditRights,
+                        "onError": onError,
+                        "onInfo": onInfo,
+                        "onWarning": onWarning,
+                        "onOutdatedVersion": onOutdatedVersion,
+                    }
+                });
+        };
+
+        if (window.addEventListener) {
+            window.addEventListener("load", connectEditor);
+        } else if (window.attachEvent) {
+            window.attachEvent("load", connectEditor);
+        }
+
+        function getXmlHttp() {
+            var xmlhttp;
+            try {
+                xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch (e) {
+                try {
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (ex) {
+                    xmlhttp = false;
+                }
+            }
+            if (!xmlhttp && typeof XMLHttpRequest !== "undefined") {
+                xmlhttp = new XMLHttpRequest();
+            }
+            return xmlhttp;
+        }
+
+    </script>
+
+</head>
+<body>
+<div class="form">
+    <div id="iframeEditor"></div>
+</div>
+</body>
+</html>

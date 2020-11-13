@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cisdi.steel.module.report.mapper.ReportTemplateTagsMapper">
+    <select id="test"   resultType="com.cisdi.steel.module.report.entity.TargetManagement">
+        select
+            target_formula
+        from
+            target_management
+        where
+            id
+            in(select target_id from report_template_tags where template_sheet_id = #{sheetId});
+    </select>
+</mapper>

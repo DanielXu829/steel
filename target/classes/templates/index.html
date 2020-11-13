@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/pageoffice.js" id="po_js_main"></script>
+    <style>
+        .pobmodal-overlay {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div style="text-align:center;">
+    <b>在线编辑测试</b><br>
+    <div th:each="demo,demoStat : ${list}">
+        <a th:href="${demo.path}" th:text="${demo.name}">在线Office测试</a><br>
+    </div>
+</div>
+</body>
+</html>

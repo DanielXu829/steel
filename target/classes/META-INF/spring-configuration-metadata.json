@@ -1,0 +1,113 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url",
+      "type": "com.cisdi.steel.module.job.config.HttpProperties"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.JobProperties",
+      "name": "job",
+      "type": "com.cisdi.steel.module.job.config.JobProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-g-l-one",
+      "description": "6高炉 6",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-g-l-three",
+      "description": "7高炉 7",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-g-l-two",
+      "description": "8高炉 8",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-j-h-one",
+      "description": "67焦化的接口地址",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-j-h-three",
+      "description": "45焦化的接口地址",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-j-h-two",
+      "description": "12焦化的接口地址",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-n-j-one",
+      "description": "能介的接口地址",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-s-j-one",
+      "description": "5号烧结",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-s-j-three",
+      "description": "4号烧结",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-s-j-two",
+      "description": "6号烧结",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.HttpProperties",
+      "name": "http.url.url-api-y-g-l-one",
+      "description": "原供料的接口地址",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.JobProperties",
+      "name": "job.empty-path",
+      "description": "空模板路径",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.JobProperties",
+      "name": "job.file-path",
+      "description": "存储的文件路径",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.JobProperties",
+      "name": "job.temp-image-path",
+      "description": "临时excel图片存储目录",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.JobProperties",
+      "name": "job.temp-path",
+      "description": "临时存储文件目录",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.cisdi.steel.module.job.config.JobProperties",
+      "name": "job.template-path",
+      "description": "模板存储的路径",
+      "type": "java.lang.String"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cisdi.steel.module.quartz.mapper.QuartzMapper">
+
+    <select id="selectQuartzList" resultType="com.cisdi.steel.module.quartz.entity.QuartzEntity">
+        SELECT
+        job.JOB_NAME AS jobName,
+        job.JOB_GROUP AS jobGroup,
+        job.DESCRIPTION AS description,
+        job.JOB_CLASS_NAME AS jobClassName,
+        cron.CRON_EXPRESSION AS cronExpression,
+        tri.TRIGGER_NAME AS triggerName,
+        tri.TRIGGER_STATE AS triggerState,
+        tri.NEXT_FIRE_TIME AS nextFireTime,
+        tri.PREV_FIRE_TIME AS prevFireTime,
+        job.JOB_NAME AS oldJobName,
+        job.JOB_GROUP AS oldJobGroup
+        FROM
+        QRTZ_JOB_DETAILS AS job
+        LEFT JOIN QRTZ_TRIGGERS AS tri ON job.JOB_NAME = tri.JOB_NAME
+        LEFT JOIN QRTZ_CRON_TRIGGERS AS cron ON cron.TRIGGER_NAME = tri.TRIGGER_NAME
+        <where>
+            tri.TRIGGER_TYPE = 'CRON'
+            <if test="jobName !=null and jobName !=''">
+                and job.JOB_NAME like CONCAT(#{jobName},'%')
+            </if>
+            <if test="jobGroup !=null and jobGroup !=''">
+                and job.JOB_GROUP like CONCAT(#{jobGroup},'%')
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectQuartzByCode" resultType="com.cisdi.steel.module.quartz.entity.QuartzEntity">
+        SELECT
+        job.JOB_NAME AS jobName,
+        job.JOB_GROUP AS jobGroup,
+        job.DESCRIPTION AS description,
+        job.JOB_CLASS_NAME AS jobClassName,
+        cron.CRON_EXPRESSION AS cronExpression,
+        tri.TRIGGER_NAME AS triggerName,
+        tri.TRIGGER_STATE AS triggerState,
+        tri.NEXT_FIRE_TIME AS nextFireTime,
+        tri.PREV_FIRE_TIME AS prevFireTime,
+        job.JOB_NAME AS oldJobName,
+        job.JOB_GROUP AS oldJobGroup
+        FROM
+        QRTZ_JOB_DETAILS AS job
+        LEFT JOIN QRTZ_TRIGGERS AS tri ON job.JOB_NAME = tri.JOB_NAME
+        LEFT JOIN QRTZ_CRON_TRIGGERS AS cron ON cron.TRIGGER_NAME = tri.TRIGGER_NAME
+        <where>
+            tri.TRIGGER_TYPE = 'CRON'
+            <if test="jobName !=null and jobName !=''">
+                and job.JOB_NAME =#{jobName}
+            </if>
+            and job.JOB_GROUP='所有'
+        </where>
+    </select>
+
+    <select id="selectQuartzByCodeList" resultType="com.cisdi.steel.module.quartz.entity.QuartzEntity">
+        SELECT
+        job.JOB_NAME AS jobName,
+        job.JOB_GROUP AS jobGroup,
+        job.DESCRIPTION AS description,
+        job.JOB_CLASS_NAME AS jobClassName,
+        cron.CRON_EXPRESSION AS cronExpression,
+        tri.TRIGGER_NAME AS triggerName,
+        tri.TRIGGER_STATE AS triggerState,
+        tri.NEXT_FIRE_TIME AS nextFireTime,
+        tri.PREV_FIRE_TIME AS prevFireTime,
+        job.JOB_NAME AS oldJobName,
+        job.JOB_GROUP AS oldJobGroup
+        FROM
+        QRTZ_JOB_DETAILS AS job
+        LEFT JOIN QRTZ_TRIGGERS AS tri ON job.JOB_NAME = tri.JOB_NAME
+        LEFT JOIN QRTZ_CRON_TRIGGERS AS cron ON cron.TRIGGER_NAME = tri.TRIGGER_NAME
+        <where>
+            tri.TRIGGER_TYPE = 'CRON'
+            <if test="jobNameList != null and jobNameList.size > 0">
+                and job.JOB_NAME in
+                <foreach collection="jobNameList" item="jobName" open="(" separator="," close=")">
+                    #{jobName}
+                </foreach>
+            </if>
+            and job.JOB_GROUP='所有'
+        </where>
+    </select>
+
+    <select id="selectAllGroupName" resultType="java.lang.String">
+        SELECT
+            distinct job.JOB_GROUP
+        FROM
+            QRTZ_JOB_DETAILS AS job
+    </select>
+    <select id="selectQuartzCount" resultType="java.lang.Long">
+        SELECT
+        count(1)
+        FROM
+        QRTZ_JOB_DETAILS AS job
+        LEFT JOIN QRTZ_TRIGGERS AS tri ON job.JOB_NAME = tri.JOB_NAME
+        LEFT JOIN QRTZ_CRON_TRIGGERS AS cron ON cron.TRIGGER_NAME = tri.TRIGGER_NAME
+        <where>
+            tri.TRIGGER_TYPE = 'CRON'
+            <if test="jobName !=null and jobName !=''">
+                and job.JOB_NAME like CONCAT(#{jobName},'%')
+            </if>
+            <if test="jobGroup !=null and jobGroup !=''">
+                and job.JOB_GROUP like CONCAT(#{jobGroup},'%')
+            </if>
+        </where>
+    </select>
+    <select id="selectErrorRecord" resultType="com.cisdi.steel.module.quartz.entity.QuartzEntity">
+        select JOB_NAME as jobName,
+           JOB_GROUP as jobGroup
+           FROM QRTZ_TRIGGERS
+           where TRIGGER_STATE  = 'ERROR'
+    </select>
+</mapper>
