@@ -89,7 +89,7 @@
     -->
     <logger name="com.cisdi.steel" level="debug" additivity="true"/>
     <!--默认开发配置-->
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="console"/>
         <appender-ref ref="normalLog"/>
         <appender-ref ref="errorLog"/>

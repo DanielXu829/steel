@@ -1,8 +1,12 @@
 package com.cisdi.steel.module.report.mapper;
 
+import com.cisdi.steel.module.report.entity.TargetManagement;
 import org.apache.ibatis.annotations.Mapper;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>Description: 报表动态模板 - 参数列表 Mapper 接口 </p>
@@ -13,5 +17,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 @Mapper
 public interface ReportTemplateTagsMapper extends BaseMapper<ReportTemplateTags> {
+    List<TargetManagement> test(@Param("sheetId") Long sheetId);
 
 }

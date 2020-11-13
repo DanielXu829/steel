@@ -3,12 +3,16 @@ package com.cisdi.steel.module.report.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
+import com.cisdi.steel.common.resp.ApiResult;
+import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
+import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.ReportTemplateTagsMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -47,5 +51,10 @@ public class ReportTemplateTagsServiceImpl extends BaseServiceImpl<ReportTemplat
         wrapper.eq(true, ReportTemplateTags::getTemplateSheetId, sheetId);
         return reportTemplateTagsMapper.delete(wrapper);
     }
+    public ApiResult<List<TargetManagement>> test(Long sheetId) {
 
+        List<TargetManagement> names = reportTemplateTagsMapper.test(sheetId);
+
+        return ApiUtil.success(names);
+    }
 }

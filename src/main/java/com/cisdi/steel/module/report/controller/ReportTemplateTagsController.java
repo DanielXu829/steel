@@ -3,12 +3,15 @@ package com.cisdi.steel.module.report.controller;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.base.vo.PageQuery;
+import com.cisdi.steel.module.report.entity.TargetManagement;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * <p>Description: 报表动态模板 - 参数列表 前端控制器 </p>
@@ -70,4 +73,10 @@ public class ReportTemplateTagsController {
         return baseService.deleteRecord(baseId);
     }
 
+    @PostMapping(value = "/test")
+    public ApiResult test(@RequestParam String sheetId) {
+//
+        Long sheetIdS = Long.valueOf(sheetId);
+        return baseService.test(sheetIdS);
+    }
 }

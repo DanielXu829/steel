@@ -1,7 +1,9 @@
 package com.cisdi.steel.module.report.service;
 
+import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.common.base.service.IBaseService;
+import com.cisdi.steel.module.report.entity.TargetManagement;
 
 import java.util.List;
 
@@ -22,4 +24,6 @@ public interface ReportTemplateTagsService extends IBaseService<ReportTemplateTa
      * @return
      */
     public int deleteBySheetId(Long configId);
+
+    ApiResult<List<TargetManagement>> test(Long sheetId);
 }
