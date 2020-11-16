@@ -10,10 +10,15 @@ import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.ReportTemplateTagsMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Description: 报表动态模板 - 参数列表 服务实现类 </p>
@@ -51,10 +56,15 @@ public class ReportTemplateTagsServiceImpl extends BaseServiceImpl<ReportTemplat
         wrapper.eq(true, ReportTemplateTags::getTemplateSheetId, sheetId);
         return reportTemplateTagsMapper.delete(wrapper);
     }
-    public ApiResult<List<TargetManagement>> test(Long sheetId) {
-
-        List<TargetManagement> names = reportTemplateTagsMapper.test(sheetId);
-
-        return ApiUtil.success(names);
+    /** 通过sheetId查询出表对应的点 */
+    @Cacheable(value = "tags")
+    public List<String> selectTagNameBySheetId(String sheetId) {
+        List<String> names = reportTemplateTagsMapper.selectTagNameBySheetId(sheetId);
+        return names;
+    }
+    /** 通过sheetId查询出对应点的字段*/
+    @Cacheable(value = "ids")
+    public ApiResult<List<TargetManagement>> test1(String sheetId) {
+        return ApiUtil.success(reportTemplateTagsMapper.test1(sheetId));
     }
 }

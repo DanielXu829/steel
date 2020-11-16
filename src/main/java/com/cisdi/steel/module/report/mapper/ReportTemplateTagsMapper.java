@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ import java.util.List;
  */
 @Mapper
 public interface ReportTemplateTagsMapper extends BaseMapper<ReportTemplateTags> {
-    List<TargetManagement> test(@Param("sheetId") Long sheetId);
+    @Cacheable()
+    List<String> selectTagNameBySheetId(@Param("sheetId") String sheetId);
+
+    List<TargetManagement> test1(@Param("sheetId") String sheetId);
 
 }

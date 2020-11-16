@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cisdi.steel.module.report.mapper.ReportTemplateTagsMapper">
-    <select id="test"   resultType="com.cisdi.steel.module.report.entity.TargetManagement">
+    <select id="selectTagNameBySheetId"   resultType="java.lang.String">
         select
             target_formula
         from
             target_management
         where
             id
-            in(select target_id from report_template_tags where template_sheet_id = #{sheetId});
+            in(select target_id from report_template_tags where template_sheet_id = #{sheetId} ORDER BY sequence)
+    </select>
+    <select id="test1"   resultType="Map">
+        SELECT
+	        t.written_name,
+	        t.unit,
+	        t.target_formula,
+	        t2.decimal_scale
+        FROM
+	        target_management t inner JOIN
+	        report_template_tags t2
+        on
+            t2.target_id = t.id
+        WHERE
+	t.id IN ( SELECT target_id FROM report_template_tags WHERE template_sheet_id = #{sheetId} ORDER BY sequence )
     </select>
 </mapper>

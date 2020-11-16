@@ -80,6 +80,13 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+        </dependency>
+
 
         <!--获取字节的mimeType-->
         <dependency>
@@ -109,6 +116,10 @@
             <version>1.0.19</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
         <!--quartz依赖 start -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -137,6 +148,7 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
 
         <!--fastJson start-->
         <dependency>
