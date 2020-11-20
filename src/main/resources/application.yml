@@ -96,3 +96,4 @@ mybatis-plus:
       db-type: mysql
       # 主键策略 默认自增
       id-type: AUTO
+

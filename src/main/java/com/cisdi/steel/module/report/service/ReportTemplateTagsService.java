@@ -26,5 +26,5 @@ public interface ReportTemplateTagsService extends IBaseService<ReportTemplateTa
     public int deleteBySheetId(Long configId);
 
     List<String> selectTagNameBySheetId(String sheetId);
-    ApiResult<List<TargetManagement>> test1(String sheetId);
+    List<String> test1(String sheetId);
 }

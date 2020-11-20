@@ -96,3 +96,13 @@ mybatis-plus:
       db-type: mysql
       # 主键策略 默认自增
       id-type: AUTO
+
+      spring:
+        redis:
+          host: 127.0.0.1
+          lettuce:
+            pool:
+              maxActive: 100
+              maxIdle: 100
+              minIdle: 0
+          port: 6379

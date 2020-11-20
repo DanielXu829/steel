@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.report.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.base.vo.BaseId;
@@ -11,6 +12,7 @@ import com.cisdi.steel.module.report.entity.TargetManagement;
 import io.swagger.annotations.ResponseHeader;
 import jdk.nashorn.internal.runtime.linker.LinkerCallSite;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,6 +41,9 @@ public class ReportTemplateTagsController {
      * 构造器注入
      */
     private final ReportTemplateTagsService baseService;
+
+    /*@Value("${http.url.urlApiSJThree}")
+    String url = "http://10.21.41.27:92/bf2/getTagValues/tagNamesInRange/report";*/
 
     @Autowired
     public ReportTemplateTagsController(ReportTemplateTagsService baseService) {
@@ -89,7 +95,7 @@ public class ReportTemplateTagsController {
         return baseService.selectTagNameBySheetId(sheetId);
     }
     @PostMapping(value="/param")
-    public ApiResult test1(@RequestParam String sheetId){
+    public List<String> test1(@RequestParam String sheetId){
         return baseService.test1(sheetId);
     }
     @PostMapping("/report")
@@ -106,10 +112,44 @@ public class ReportTemplateTagsController {
         map.put("starttime",starttime);
         map.put("endtime",endtime);
         String str2 = JSON.toJSONString(map);
-        String result = OkHttpUtil.postJsonParams("http://119.84.70.208:92/bf2/getTagValues/tagNamesInRange/report",str2);
+        String result = OkHttpUtil.postJsonParams("http://10.21.41.27:92/bf2/getTagValues/tagNamesInRange/report",str2);
         JSONObject resultjsonObject  =(JSONObject) JSONObject.parse(result);
-        ApiResult<List<TargetManagement>> str3 = baseService.test1(sheetId);
-        resultjsonObject.put("dataMap",str3);
-        return ApiUtil.success(resultjsonObject);
+        JSONArray dataArray = resultjsonObject.getJSONArray("data");
+        return ApiUtil.success(dataArray);
     }
+
+    /**
+     * 将data中的val和clock根据name对dataMap中的target_formula进行分组，
+     * 分别作为一个字段追加到对应的dataMap中。
+     * 最后将多余的data删除
+     * @param resultjsonObject 包含data和dataMap的json对象
+     */
+    private void groupValueByName(JSONObject resultjsonObject) {
+        JSONArray titleJsonArray = resultjsonObject.getJSONArray("dataMap");
+        JSONArray dataJsonArray = resultjsonObject.getJSONArray("data");
+        for (Object o : titleJsonArray) {
+            JSONObject titleJsonObject = (JSONObject) o;
+            String targetFormula = titleJsonObject.getString("target_formula");
+
+            appendNewField(dataJsonArray, titleJsonObject, targetFormula);
+        }
+        resultjsonObject.remove("data");
+        resultjsonObject.put("dataMap", titleJsonArray);
+    }
+
+    private void appendNewField(JSONArray dataJsonArray, JSONObject titleJsonObject, String targetFormula) {
+        List<Double> dataList = new ArrayList<>();
+        List<Long> clockList = new ArrayList<>();
+        for (Object o1 : dataJsonArray) {
+            JSONObject data = (JSONObject) o1;
+            if (data.getString("name").equals(targetFormula)) {
+                dataList.add(data.getDouble("val"));
+                clockList.add(data.getLong("clock"));
+            }
+        }
+        titleJsonObject.put("dataList", dataList);
+        titleJsonObject.put("clockList", clockList);
+    }
+
+
 }

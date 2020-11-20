@@ -21,6 +21,6 @@ public interface ReportTemplateTagsMapper extends BaseMapper<ReportTemplateTags>
     @Cacheable()
     List<String> selectTagNameBySheetId(@Param("sheetId") String sheetId);
 
-    List<TargetManagement> test1(@Param("sheetId") String sheetId);
+    List<String> test1(@Param("sheetId") String sheetId);
 
 }

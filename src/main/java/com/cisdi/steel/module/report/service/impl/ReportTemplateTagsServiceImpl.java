@@ -57,14 +57,12 @@ public class ReportTemplateTagsServiceImpl extends BaseServiceImpl<ReportTemplat
         return reportTemplateTagsMapper.delete(wrapper);
     }
     /** 通过sheetId查询出表对应的点 */
-    @Cacheable(value = "tags")
     public List<String> selectTagNameBySheetId(String sheetId) {
         List<String> names = reportTemplateTagsMapper.selectTagNameBySheetId(sheetId);
         return names;
     }
     /** 通过sheetId查询出对应点的字段*/
-    @Cacheable(value = "ids")
-    public ApiResult<List<TargetManagement>> test1(String sheetId) {
-        return ApiUtil.success(reportTemplateTagsMapper.test1(sheetId));
+    public List<String> test1(String sheetId) {
+        return reportTemplateTagsMapper.test1(sheetId);
     }
 }

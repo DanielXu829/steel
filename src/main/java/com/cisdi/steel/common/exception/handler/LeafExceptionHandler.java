@@ -230,7 +230,7 @@ public class LeafExceptionHandler {
      */
     @ExceptionHandler(JSONException.class)
     public ApiResult jsonConvert(Exception e) {
-        log.error(e.getMessage());
+      log.error(e.getMessage());
         return ApiUtil.notAcceptable();
     }
 }
