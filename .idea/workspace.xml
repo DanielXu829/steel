@@ -2,24 +2,40 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2f0e3979-0a30-4445-9710-5720c06e85f5" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/2020-11-16T062612.200.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/2020-11-16T062751.200.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/2020-11-16T062849.200.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/2020-11-16T063420.200.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/2020-11-16T063451.200.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/2020-11-16T063555.200.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/http-client.cookies" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/http-requests-log.http" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_lang_commons_lang_2_5.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_1_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_lettuce_lettuce_core_5_0_5_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_buffer_4_1_29_Final.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_codec_4_1_29_Final.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_common_4_1_29_Final.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_handler_4_1_29_Final.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_resolver_4_1_29_Final.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_transport_4_1_29_Final.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_projectreactor_reactor_core_3_1_10_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__net_sf_ezmorph_ezmorph_1_0_6.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__net_sf_json_lib_json_lib_jdk15_2_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_reactivestreams_reactive_streams_1_0_2.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_boot_spring_boot_starter_cache_2_0_6_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_boot_spring_boot_starter_data_redis_2_0_6_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_data_spring_data_commons_2_0_11_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_data_spring_data_keyvalue_2_0_11_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_data_spring_data_redis_2_0_11_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_spring_oxm_5_0_10_RELEASE.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/common/util/RedisUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/cisdi/steel/report/BootsRedisApplicationTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/META-INF/steel.kotlin_module" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/cisdi/steel/common/util/RedisUtils.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/cisdi/steel/config/RedisConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/cisdi/steel/report/BootsRedisApplicationTest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/common/exception/handler/LeafExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/common/exception/handler/LeafExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/controller/ReportTemplateTagsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/controller/ReportTemplateTagsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/mapper/ReportTemplateTagsMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/mapper/ReportTemplateTagsMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/service/ReportTemplateTagsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/service/ReportTemplateTagsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/service/impl/ReportTemplateTagsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cisdi/steel/module/report/service/impl/ReportTemplateTagsServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-local.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-local.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/cisdi/steel/SteelApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/cisdi/steel/SteelApplicationTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/steel.iml" beforeDir="false" afterPath="$PROJECT_DIR$/steel.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application-local.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application-local.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/controller/ReportTemplateTagsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/controller/ReportTemplateTagsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/mapper/ReportTemplateTagsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/mapper/ReportTemplateTagsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/service/ReportTemplateTagsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/service/ReportTemplateTagsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/service/impl/ReportTemplateTagsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cisdi/steel/module/report/service/impl/ReportTemplateTagsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/cisdi/steel/SteelApplicationTests.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/com/cisdi/steel/SteelApplicationTests.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,12 +86,12 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="extract.method.default.visibility" value="private" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../easy-excel-for-json-connection" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.completion" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -329,7 +345,7 @@
       <workItem from="1605617632496" duration="20403000" />
       <workItem from="1605745689075" duration="6017000" />
       <workItem from="1605758932762" duration="13564000" />
-      <workItem from="1605832026145" duration="903000" />
+      <workItem from="1605832026145" duration="1506000" />
     </task>
     <task id="LOCAL-00001" summary="report">
       <created>1605244302230</created>
@@ -359,7 +375,21 @@
       <option name="project" value="LOCAL" />
       <updated>1605525283108</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="report">
+      <created>1605844917613</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1605844917613</updated>
+    </task>
+    <task id="LOCAL-00006" summary="report">
+      <created>1605845090427</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1605845090427</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -402,18 +432,18 @@
       <screen x="0" y="0" width="1280" height="689" />
     </state>
     <state x="520" y="51" width="569" height="595" key="#xdebugger.evaluate/0.0.1280.689@0.0.1280.689" timestamp="1605785057792" />
-    <state x="262" y="0" key="CommitChangelistDialog2" timestamp="1605844915638">
+    <state x="262" y="0" key="CommitChangelistDialog2" timestamp="1605845089770">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
-    <state x="262" y="0" key="CommitChangelistDialog2/0.0.1280.689@0.0.1280.689" timestamp="1605844915638" />
+    <state x="262" y="0" key="CommitChangelistDialog2/0.0.1280.689@0.0.1280.689" timestamp="1605845089770" />
     <state width="476" height="466" key="DebuggerActiveHint" timestamp="1605785019181">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
     <state width="476" height="466" key="DebuggerActiveHint/0.0.1280.689@0.0.1280.689" timestamp="1605785019181" />
-    <state x="443" y="95" key="FileChooserDialogImpl" timestamp="1605832265460">
+    <state x="443" y="95" key="FileChooserDialogImpl" timestamp="1605845500469">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
-    <state x="443" y="95" key="FileChooserDialogImpl/0.0.1280.689@0.0.1280.689" timestamp="1605832265460" />
+    <state x="443" y="95" key="FileChooserDialogImpl/0.0.1280.689@0.0.1280.689" timestamp="1605845500469" />
     <state x="517" y="244" width="270" height="202" key="Github.ShareDialog" timestamp="1605246956578">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
@@ -474,10 +504,10 @@
       <screen x="0" y="0" width="1280" height="689" />
     </state>
     <state x="418" y="58" key="RollbackChangesDialog/0.0.1280.689@0.0.1280.689" timestamp="1605182164647" />
-    <state x="158" y="0" key="SettingsEditor" timestamp="1605678296830">
+    <state x="158" y="0" key="SettingsEditor" timestamp="1605845408535">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
-    <state x="158" y="0" key="SettingsEditor/0.0.1280.689@0.0.1280.689" timestamp="1605678296829" />
+    <state x="158" y="0" key="SettingsEditor/0.0.1280.689@0.0.1280.689" timestamp="1605845408535" />
     <state width="647" height="352" key="XDebugger.FullValuePopup" timestamp="1605784771403">
       <screen x="0" y="0" width="1280" height="689" />
     </state>
