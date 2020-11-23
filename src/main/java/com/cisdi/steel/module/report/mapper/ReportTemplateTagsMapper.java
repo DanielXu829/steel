@@ -1,5 +1,6 @@
 package com.cisdi.steel.module.report.mapper;
 
+import com.cisdi.steel.module.report.entity.SysConfig;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import org.apache.ibatis.annotations.Mapper;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
@@ -18,9 +19,14 @@ import java.util.List;
  */
 @Mapper
 public interface ReportTemplateTagsMapper extends BaseMapper<ReportTemplateTags> {
-    @Cacheable()
+
     List<String> selectTagNameBySheetId(@Param("sheetId") String sheetId);
 
     List<String> test1(@Param("sheetId") String sheetId);
+
+    List<String> selectTagNameByCode(@Param("code")String code);
+
+
+    SysConfig selectUrlByCode(@Param("code") String code);
 
 }

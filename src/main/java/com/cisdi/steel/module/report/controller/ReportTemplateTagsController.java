@@ -117,6 +117,10 @@ public class ReportTemplateTagsController {
         JSONArray dataArray = resultjsonObject.getJSONArray("data");
         return ApiUtil.success(dataArray);
     }
+    public ApiResult selectTagNameByCode(String code , String starttime , String endtime){
+        //List<String> names = baseService
+        return null;
+    }
 
     /**
      * 将data中的val和clock根据name对dataMap中的target_formula进行分组，
@@ -150,6 +154,8 @@ public class ReportTemplateTagsController {
         titleJsonObject.put("dataList", dataList);
         titleJsonObject.put("clockList", clockList);
     }
-
-
+    @PostMapping("/selectUrlByCode")
+    public String selectUrlByCode(@RequestParam String code){
+        return baseService.selectUrlByCode(code);
+    }
 }

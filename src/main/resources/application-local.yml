@@ -3,7 +3,7 @@ server:
   port: 8181
 spring:
   datasource:
-    url: jdbc:mysql://119.84.70.208:3306/steel_wg_data?characterEncoding=utf8&useSSL=false
+    url: jdbc:mysql://10.21.41.9:3306/steel_mg_data?characterEncoding=utf8&useSSL=false
     username: root
     password: Cisdi@123
 

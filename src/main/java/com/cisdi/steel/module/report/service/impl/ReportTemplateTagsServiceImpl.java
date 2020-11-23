@@ -6,9 +6,12 @@ import com.cisdi.steel.common.base.service.impl.BaseServiceImpl;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
+import com.cisdi.steel.module.report.entity.SysConfig;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.ReportTemplateTagsMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
+import io.swagger.annotations.Api;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -64,5 +67,16 @@ public class ReportTemplateTagsServiceImpl extends BaseServiceImpl<ReportTemplat
     /** 通过sheetId查询出对应点的字段*/
     public List<String> test1(String sheetId) {
         return reportTemplateTagsMapper.test1(sheetId);
+    }
+
+    public ApiResult<List<String>> selectTagNameByCode(String code) {
+        List<String> names = reportTemplateTagsMapper.selectTagNameByCode(code);
+        return null;
+    }
+    public String selectUrlByCode(String code) {
+        SysConfig s1 = reportTemplateTagsMapper.selectUrlByCode(code);
+        String url = s1.getAction() + s1.getCode() + s1.getUrl();
+        System.out.println(url);
+        return url;
     }
 }

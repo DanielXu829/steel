@@ -27,4 +27,7 @@ public interface ReportTemplateTagsService extends IBaseService<ReportTemplateTa
 
     List<String> selectTagNameBySheetId(String sheetId);
     List<String> test1(String sheetId);
+    ApiResult<List<String>> selectTagNameByCode(String code);
+
+    String selectUrlByCode(String code);
 }
