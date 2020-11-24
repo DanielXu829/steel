@@ -7,6 +7,7 @@ import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.module.report.entity.SysConfig;
+import com.cisdi.steel.module.report.entity.TagsName;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import com.cisdi.steel.module.report.mapper.ReportTemplateTagsMapper;
 import com.cisdi.steel.module.report.service.ReportTemplateTagsService;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
+import springfox.documentation.service.Tags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,5 +80,21 @@ public class ReportTemplateTagsServiceImpl extends BaseServiceImpl<ReportTemplat
         String url = s1.getAction() + s1.getCode() + s1.getUrl();
         System.out.println(url);
         return url;
+    }
+
+    @Override
+    public List<String> tagName(String id,String code) {
+        List<TagsName> t1s  =  reportTemplateTagsMapper.tagName(id,code);
+        List<String> str = new ArrayList<>();
+        String s = "";
+        if (t1s != null && t1s.size() > 0) {
+            for (TagsName t1 : t1s) {
+                s = code.toUpperCase() + "_" + t1.getTargetName() + "_" + t1.getTagTimeSuffix() + "_" + t1.getTagCalSuffix();
+                str.add(s);
+            }
+        }
+        // String s = "BF2" + "_" + t1.getTargetName() + "_" + t1.getTagTimeSuffix() + "_" +t1.getTagCalSuffix();
+
+        return str;
     }
 }

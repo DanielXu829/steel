@@ -3,6 +3,7 @@ package com.cisdi.steel.module.report.service;
 import com.cisdi.steel.common.resp.ApiResult;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
 import com.cisdi.steel.common.base.service.IBaseService;
+import com.cisdi.steel.module.report.entity.TagsName;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 
 import java.util.List;
@@ -30,4 +31,6 @@ public interface ReportTemplateTagsService extends IBaseService<ReportTemplateTa
     ApiResult<List<String>> selectTagNameByCode(String code);
 
     String selectUrlByCode(String code);
+
+    List<String> tagName(String id,String code);
 }

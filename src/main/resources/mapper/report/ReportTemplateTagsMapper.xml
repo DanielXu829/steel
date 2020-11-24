@@ -24,17 +24,17 @@
         WHERE
 	t.id IN ( SELECT target_id FROM report_template_tags WHERE template_sheet_id = #{sheetId} ORDER BY sequence )
     </select>
-    <select id="selectTagNameByCode" resultType="List">
-        SELECT * FROM (
-SELECT A.target_name,m.target_formula, A.tag_time_suffix,A.tag_cal_suffix,A.decimal_scale , m.`code` FROM
+    <select id="tagName" resultType="com.cisdi.steel.module.report.entity.TagsName">
+      SELECT * FROM (
+SELECT A.target_name,m.target_formula, A.tag_time_suffix,A.tag_cal_suffix,A.scale , m.`code` FROM
 (SELECT
 	i.target_name,
 	t.tag_time_suffix,
 	t.tag_cal_suffix,
-	t.decimal_scale
+	t.scale
 FROM
 	report_template_tags t
-	INNER JOIN target_management_index i ON t.parent_id = i.id
+	INNER JOIN target_management_index i ON t.target_id = i.id
 WHERE
 	t.template_sheet_id in (
 	SELECT
@@ -42,10 +42,11 @@ WHERE
 	FROM
 		report_template_sheet
 WHERE
-	template_config_id = 52) ) A  INNER JOIN target_management m on A.target_name=m.target_name) B WHERE B.`code` LIKE #{code}
+	template_config_id = #{id}) ) A  INNER JOIN target_management m on A.target_name=m.target_name) B WHERE B.`code` LIKE CONCAT('%',#{code},'%')
     </select>
 
     <select id="selectUrlByCode" resultType="com.cisdi.steel.module.report.entity.SysConfig">
         SELECT * FROM `sys_config` where code = #{code}
     </select>
+
 </mapper>

@@ -1,6 +1,7 @@
 package com.cisdi.steel.module.report.mapper;
 
 import com.cisdi.steel.module.report.entity.SysConfig;
+import com.cisdi.steel.module.report.entity.TagsName;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import org.apache.ibatis.annotations.Mapper;
 import com.cisdi.steel.module.report.entity.ReportTemplateTags;
@@ -28,5 +29,7 @@ public interface ReportTemplateTagsMapper extends BaseMapper<ReportTemplateTags>
 
 
     SysConfig selectUrlByCode(@Param("code") String code);
+
+    List<TagsName> tagName(@Param("id") String id,@Param("code")String code);
 
 }

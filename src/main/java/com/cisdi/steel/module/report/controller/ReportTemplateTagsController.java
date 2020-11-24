@@ -8,10 +8,13 @@ import com.cisdi.steel.common.base.vo.BaseId;
 import com.cisdi.steel.common.base.vo.PageQuery;
 import com.cisdi.steel.common.resp.ApiUtil;
 import com.cisdi.steel.config.http.OkHttpUtil;
+import com.cisdi.steel.module.report.entity.TagsName;
 import com.cisdi.steel.module.report.entity.TargetManagement;
 import io.swagger.annotations.ResponseHeader;
 import jdk.nashorn.internal.runtime.linker.LinkerCallSite;
 import org.apache.ibatis.annotations.Param;
+import org.apache.xmlbeans.impl.xb.ltgfmt.Code;
+import org.hibernate.validator.constraints.pl.REGON;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
@@ -99,8 +102,8 @@ public class ReportTemplateTagsController {
         return baseService.test1(sheetId);
     }
     @PostMapping("/report")
-    public ApiResult selectTagNameBySheetId(@RequestParam String sheetId,@RequestParam String starttime,@RequestParam String endtime){
-        List<String> names = baseService.selectTagNameBySheetId(sheetId);
+    public ApiResult selectTagNameBySheetId(@RequestParam String sheetId,@RequestParam String starttime,@RequestParam String endtime,@RequestParam String code){
+        List<String> names = baseService.tagName(sheetId, code);
         HashMap<String,Object> map = new HashMap<String,Object>();
         String[] arr =  new String[names.size()];
         if(names !=null && names.size()>0){
@@ -158,4 +161,9 @@ public class ReportTemplateTagsController {
     public String selectUrlByCode(@RequestParam String code){
         return baseService.selectUrlByCode(code);
     }
+
+  /*  @PostMapping("/tag")
+    public List<String> tagName(@RequestParam String id, @){
+        return baseService.tagName(id);
+    }*/
 }
