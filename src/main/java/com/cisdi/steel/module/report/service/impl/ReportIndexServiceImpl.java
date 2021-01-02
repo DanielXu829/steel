@@ -160,6 +160,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
             case report_week:
                 report = getCurrentWeekReport(reportIndex);
                 break;
+            case report_year:
+                report = getCurrentYearReport(reportIndex);
+                break;
             default:
                 report = reportIndexMapper.selectIdByParamter(reportIndex);
                 break;
@@ -198,6 +201,47 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 this.updateById(reportIndex);
             }
         }
+    }
+
+    /**
+     * 获取本年的报表
+     * @param reportIndex
+     * @return
+     */
+    private ReportIndex getCurrentYearReport(ReportIndex reportIndex) {
+        Date currDate = reportIndex.getCurrDate();
+        int dayOfYear = DateUtil.getDayOfYear(currDate);
+        // CurrentDate是1号，则查找(创建时间在去年号到这个月1号之间)的报表
+        if (dayOfYear == 1) { // 1月1号
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.setTime(currDate);
+            calendar1.add(Calendar.YEAR, -1); // 去年1月1号
+            calendar1.set(Calendar.DAY_OF_MONTH, 2); // 去年1月2号
+            Date beginTime = calendar1.getTime();
+            beginTime = DateUtil.getDateBeginTime(beginTime);
+
+            Calendar calendar2 = Calendar.getInstance();
+            calendar2.setTime(currDate);
+            calendar2.set(Calendar.DAY_OF_MONTH, 1);
+            Date endTime = calendar2.getTime();
+            endTime = DateUtil.getDateEndTime59(endTime); // 今年1月1号23.59
+
+            List<ReportIndex> reportList = reportIndexMapper.queryReport(reportIndex.getReportCategoryCode(), beginTime.getTime()/1000, endTime.getTime()/1000);
+            if (CollectionUtils.isNotEmpty(reportList)) {
+                return reportList.get(0);
+            }
+        } else if (dayOfYear == 2) {
+            // currDate 是1月2号，则查找今天新生成的报表(为了排除1号，所以这样写)
+            Date dateBeginTime = DateUtil.getDateBeginTime(currDate);
+            Date dateEndTime59 = DateUtil.getDateEndTime59(currDate);
+            List<ReportIndex> reportList = reportIndexMapper.queryReport(reportIndex.getReportCategoryCode(), dateBeginTime.getTime()/1000, dateEndTime59.getTime()/1000);
+            if (CollectionUtils.isNotEmpty(reportList)) {
+                return reportList.get(0);
+            }
+        } else {
+            return reportIndexMapper.selectIdByParamter(reportIndex);
+        }
+        return null;
     }
 
     /**
@@ -395,6 +439,9 @@ public class ReportIndexServiceImpl extends BaseServiceImpl<ReportIndexMapper, R
                 break;
             case report_week:
                 report = getCurrentWeekReport(reportIndex);
+                break;
+            case report_year:
+                report = getCurrentYearReport(reportIndex);
                 break;
             default:
                 report = reportIndexMapper.selectIdByParamter(reportIndex);
